@@ -17,6 +17,7 @@ import {
   SettingsContentColumn,
   SettingTitle
 } from '@renderer/components/SettingsPrimitives'
+import { useCherryCloudModelFilter } from '@renderer/hooks/useCherryCloudModelAvailability'
 import { useTheme } from '@renderer/hooks/useTheme'
 import { useTimer } from '@renderer/hooks/useTimer'
 import { popup } from '@renderer/services/popup'
@@ -62,7 +63,8 @@ const GeneralSettings: FC = () => {
 
   const [proxyUrl, setProxyUrl] = useState<string>(storeProxyUrl)
   const [proxyBypassRules, setProxyBypassRules] = useState<string>(storeProxyBypassRules)
-  const chatModelFilter = useCallback<ModelSelectorFilter>((model) => !isNonChatModel(model), [])
+  const baseChatModelFilter = useCallback<ModelSelectorFilter>((model) => !isNonChatModel(model), [])
+  const chatModelFilter = useCherryCloudModelFilter('chat', baseChatModelFilter, retryEnabled)
 
   const proxyModeOptions: { value: 'system' | 'custom' | 'none'; label: string }[] = [
     { value: 'system', label: t('settings.proxy.mode.system') },
