@@ -21,7 +21,7 @@ import {
 import { usePreference } from '@data/hooks/usePreference'
 import { loggerService } from '@logger'
 import { AgentRuntimeSummary } from '@renderer/components/AgentRuntimeOption'
-import type { ModelSelectorFilter } from '@renderer/components/ModelSelector'
+import type { ModelSelectorDetailDescriptionResolver, ModelSelectorFilter } from '@renderer/components/ModelSelector'
 import { PermissionModeSelect } from '@renderer/components/PermissionModeOption'
 import PromptEditorField from '@renderer/components/PromptEditorField'
 import { SkillCatalogPicker } from '@renderer/components/resourceCatalog/dialogs/skill'
@@ -82,6 +82,7 @@ import { HeartbeatEditorDialog } from './HeartbeatEditorDialog'
 export type AgentEditDialogProps = EditDialogBaseProps & {
   resource: AgentDetail | null
   isModelDisabled?: ModelSelectorFilter
+  getModelDetailDescription?: ModelSelectorDetailDescriptionResolver
 }
 
 type AgentEditFormValues = {
@@ -242,6 +243,7 @@ export function AgentEditDialog({
   onOpenChange,
   modelFilter,
   isModelDisabled,
+  getModelDetailDescription,
   initialTab
 }: AgentEditDialogProps) {
   if (!resource) return null
@@ -253,6 +255,7 @@ export function AgentEditDialog({
       onOpenChange={onOpenChange}
       modelFilter={modelFilter}
       isModelDisabled={isModelDisabled}
+      getModelDetailDescription={getModelDetailDescription}
       initialTab={initialTab}
     />
   )
@@ -264,8 +267,13 @@ function AgentEditDialogContent({
   onOpenChange,
   modelFilter,
   isModelDisabled,
+  getModelDetailDescription,
   initialTab
-}: EditDialogBaseProps & { resource: AgentDetail; isModelDisabled?: ModelSelectorFilter }) {
+}: EditDialogBaseProps & {
+  resource: AgentDetail
+  isModelDisabled?: ModelSelectorFilter
+  getModelDetailDescription?: ModelSelectorDetailDescriptionResolver
+}) {
   const { t } = useTranslation()
   const caps = AGENT_RUNTIME_CAPABILITIES[resource.type]
   const [activeTab, setActiveTab] = useState(initialTab ?? 'basic')
@@ -524,6 +532,7 @@ function AgentEditDialogContent({
             form={form}
             modelFilter={modelFilter}
             isModelDisabled={isModelDisabled}
+            getModelDetailDescription={getModelDetailDescription}
             portalContainer={dialogContentElement}
             modelLabels={modelLabels}
             setModelLabels={setModelLabels}
@@ -580,6 +589,7 @@ function AgentBasicFields({
   form,
   modelFilter,
   isModelDisabled,
+  getModelDetailDescription,
   portalContainer,
   modelLabels,
   setModelLabels,
@@ -595,6 +605,7 @@ function AgentBasicFields({
   form: UseFormReturn<AgentEditFormValues>
   modelFilter?: ModelSelectorFilter
   isModelDisabled?: ModelSelectorFilter
+  getModelDetailDescription?: ModelSelectorDetailDescriptionResolver
   portalContainer: HTMLElement | null
   modelLabels: ModelLabels
   setModelLabels: (labels: ModelLabels) => void
@@ -634,6 +645,7 @@ function AgentBasicFields({
         label={t('library.config.agent.field.model.label')}
         filter={modelFilter}
         isModelDisabled={isModelDisabled}
+        getModelDetailDescription={getModelDetailDescription}
         portalContainer={portalContainer}
         modelLabels={modelLabels}
         setModelLabels={setModelLabels}
@@ -653,6 +665,7 @@ function AgentBasicFields({
             allowClear
             filter={modelFilter}
             isModelDisabled={isModelDisabled}
+            getModelDetailDescription={getModelDetailDescription}
             portalContainer={portalContainer}
             modelLabels={modelLabels}
             setModelLabels={setModelLabels}
@@ -670,6 +683,7 @@ function AgentBasicFields({
             allowClear
             filter={modelFilter}
             isModelDisabled={isModelDisabled}
+            getModelDetailDescription={getModelDetailDescription}
             portalContainer={portalContainer}
             modelLabels={modelLabels}
             setModelLabels={setModelLabels}
