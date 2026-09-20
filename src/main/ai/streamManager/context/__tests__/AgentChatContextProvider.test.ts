@@ -166,7 +166,8 @@ describe('AgentChatContextProvider', () => {
     const prepared = await provider.prepareDispatch(subscriber, openReq())
 
     expect(mocks.runtimeValidateSession).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'session-1', workspace: { path: '/tmp' } })
+      expect.objectContaining({ id: 'session-1', workspace: { path: '/tmp' } }),
+      { headless: false }
     )
     expect(mocks.saveMessagesTx).toHaveBeenCalledOnce()
     expect(mocks.saveMessage).not.toHaveBeenCalled()
@@ -437,6 +438,9 @@ describe('AgentChatContextProvider', () => {
 
     expect(prepared.models[0].modelId).toBe('anthropic::claude-opus')
     expect(mocks.runtimeBeginTurn).toHaveBeenCalledWith(expect.objectContaining({ modelId: 'anthropic::claude-opus' }))
+    expect(mocks.runtimeValidateSession).toHaveBeenCalledWith(expect.objectContaining({ id: 'session-1' }), {
+      headless: false
+    })
   })
 
   it('keeps headless scheduled runs on the agent default model', async () => {
@@ -453,6 +457,9 @@ describe('AgentChatContextProvider', () => {
     expect(mocks.runtimeBeginTurn).toHaveBeenCalledWith(
       expect.objectContaining({ modelId: 'anthropic::claude-sonnet' })
     )
+    expect(mocks.runtimeValidateSession).toHaveBeenCalledWith(expect.objectContaining({ id: 'session-1' }), {
+      headless: true
+    })
   })
 
   it('rejects agent sessions without a registered runtime driver', async () => {
