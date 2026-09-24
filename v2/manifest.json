@@ -1,11 +1,11 @@
 {
   "minAppVersion": "2.0.13",
-  "sourceAppVersion": "boss-tools-2.1.3-intel",
-  "revision": 4,
+  "sourceAppVersion": "2.2.0",
+  "revision": 5,
   "schemaVersion": 2,
   "files": {
-    "models.json": "ecb64236eab094c8",
+    "models.json": "b266093d9b453039",
     "providers.json": "2707d81b155c6c98",
-    "provider-models.json": "268f15c29341edb0"
+    "provider-models.json": "5948b27b1d472351"
   }
 }
