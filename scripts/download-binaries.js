@@ -132,7 +132,9 @@ function materialize(tools, platformKey, cacheRoot, bundleDir) {
 
 /** Where the shared cache keeps one immutable copy of one tool version. */
 function cachedVersionDir(cacheRoot, platformKey, tool) {
-  return path.join(cacheRoot, platformKey, tool.name, tool.version)
+  const packageHash = tool.packages[platformKey]?.sha256
+  const cacheVersion = packageHash ? `${tool.version}-${packageHash.slice(0, 16)}` : tool.version
+  return path.join(cacheRoot, platformKey, tool.name, cacheVersion)
 }
 
 /**
@@ -470,8 +472,16 @@ function chmodExec(filePath) {
   if (process.platform !== 'win32') fs.chmodSync(filePath, 0o755)
 }
 
-function isUpToDate(binaryPaths, versionPath, expectedVersion) {
+function isUpToDate(binaryPaths, versionPath, expectedVersion, outputDir, payloadIdentity) {
   if (binaryPaths.some((binaryPath) => !fs.existsSync(binaryPath))) return false
+  if (payloadIdentity) {
+    try {
+      const manifest = JSON.parse(fs.readFileSync(path.join(outputDir, payloadIdentity.file), 'utf8'))
+      if (manifest[payloadIdentity.field] !== payloadIdentity.value) return false
+    } catch {
+      return false
+    }
+  }
   // No marker path means the directory itself is version-scoped.
   if (!versionPath) return true
   if (!fs.existsSync(versionPath)) return false
@@ -580,7 +590,7 @@ function downloadTool(tool, platformKey, outputDir, { versionFile = null } = {})
   const binaryPaths = pkg.binaries.map((binary) => path.join(outputDir, binary))
   const versionPath = versionFile ? path.join(outputDir, versionFile) : null
 
-  if (isUpToDate(binaryPaths, versionPath, tool.version)) {
+  if (isUpToDate(binaryPaths, versionPath, tool.version, outputDir, tool.payloadIdentity)) {
     for (const binaryPath of binaryPaths) chmodExec(binaryPath)
     // A partial download of a version already installed has nothing left to
     // resume, and a cache hit is the one path that would otherwise never clear
