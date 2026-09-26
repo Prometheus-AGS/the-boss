@@ -57,6 +57,9 @@ const REQUIRED_CAPABILITIES = [
 
 export interface UarSidecarEndpoint {
   baseUrl: string
+  effectivePort: number
+  processId?: number
+  startedAt: number
   generation: number
   uarVersion: string
   capabilities: readonly string[]
@@ -110,6 +113,9 @@ export class UarSidecarService extends BaseService {
     const running = await this.ensureRunning()
     return {
       baseUrl: running.baseUrl,
+      effectivePort: running.effectivePort,
+      ...(running.processId ? { processId: running.processId } : {}),
+      startedAt: running.startedAt,
       generation: running.generation,
       uarVersion: running.uarVersion,
       capabilities: running.capabilities,
@@ -125,6 +131,9 @@ export class UarSidecarService extends BaseService {
     return {
       state: 'running',
       baseUrl: running.baseUrl,
+      effectivePort: running.effectivePort,
+      ...(running.processId ? { processId: running.processId } : {}),
+      startedAt: running.startedAt,
       generation: running.generation,
       uarVersion: running.uarVersion,
       capabilities: running.capabilities,
@@ -147,6 +156,9 @@ export class UarSidecarService extends BaseService {
     })
     return {
       baseUrl: running.baseUrl,
+      effectivePort: running.effectivePort,
+      ...(running.processId ? { processId: running.processId } : {}),
+      startedAt: running.startedAt,
       generation: running.generation,
       uarVersion: running.uarVersion,
       capabilities: running.capabilities,
@@ -179,6 +191,9 @@ export class UarSidecarService extends BaseService {
     })
     return {
       baseUrl: running.baseUrl,
+      effectivePort: running.effectivePort,
+      ...(running.processId ? { processId: running.processId } : {}),
+      startedAt: running.startedAt,
       generation: running.generation,
       uarVersion: running.uarVersion,
       capabilities: running.capabilities,
@@ -307,7 +322,7 @@ export class UarSidecarService extends BaseService {
       UAR_NATIVE_TOOLS__WEB_FETCH_ENABLED: 'false',
       UAR_NATIVE_TOOLS__TERMINAL_EXEC_ENABLED: 'false'
     }
-    const child = crossPlatformSpawn(executable, ['--config', configFile], {
+    const child = crossPlatformSpawn(executable, ['--config', configFile, '--port', String(storage.profile.port)], {
       cwd: dataRoot,
       env,
       detached: !isWin,
@@ -327,6 +342,9 @@ export class UarSidecarService extends BaseService {
         launchToken,
         adminKey,
         baseUrl,
+        effectivePort: port,
+        ...(child.pid ? { processId: child.pid } : {}),
+        startedAt: Date.now(),
         generation,
         uarVersion: capabilities.uarVersion,
         capabilities: capabilities.capabilities,
@@ -341,6 +359,8 @@ export class UarSidecarService extends BaseService {
       logger.info('UAR sidecar ready', {
         generation,
         version: running.uarVersion,
+        preferredPort: storage.profile.port,
+        effectivePort: running.effectivePort,
         storageBackend: storage.profile.backend,
         capabilities: running.capabilities
       })
