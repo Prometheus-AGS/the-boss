@@ -27,7 +27,20 @@ function loadIntegrationBinaries({ required = false } = {}) {
   }
   return manifest.tools
     .filter((tool) => requiredTools.includes(tool.name))
-    .map((tool) => ({ ...tool, required, versionFile: `.${tool.name}-version` }))
+    .map((tool) => ({
+      ...tool,
+      required,
+      versionFile: `.${tool.name}-version`,
+      ...(tool.name === 'uar-sidecar'
+        ? {
+            payloadIdentity: {
+              file: 'payload-manifest.json',
+              field: 'source',
+              value: manifest.sources.uar.revision
+            }
+          }
+        : {})
+    }))
 }
 
 module.exports = { loadIntegrationBinaries }

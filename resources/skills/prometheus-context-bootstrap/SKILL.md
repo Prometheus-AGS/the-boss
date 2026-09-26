@@ -25,8 +25,8 @@ Unit, mock-only, filtered-function, and per-edit test loops do not count as proo
 From a standalone mini checkout:
 
 ```text
-node scripts/prometheus-context-bootstrap.mjs --path <project> --stacks rust,typescript
-node scripts/prometheus-context-bootstrap.mjs --path <project> --stacks rust,typescript --check
+boss-mini prometheus-context-bootstrap.mjs --path <project> --stacks rust,typescript
+boss-mini prometheus-context-bootstrap.mjs --path <project> --stacks rust,typescript --check
 ```
 
 From the copy vendored inside `the-boss`:

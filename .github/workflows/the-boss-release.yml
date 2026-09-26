@@ -20,6 +20,11 @@ on:
         description: Optional comma-separated platforms to build from the published payload
         required: false
         type: string
+      replace_published_platforms:
+        description: Replace the selected platform artifacts already published for this version
+        required: false
+        default: false
+        type: boolean
       uar_win32_x64_record_url:
         description: Immutable win32-x64 UAR sidecar release record URL (required for uar-enabled)
         required: false
@@ -56,6 +61,7 @@ jobs:
           node-version-file: .node-version
       - name: Freeze release version, profile, and source
         env:
+          REPLACE_PUBLISHED_PLATFORMS: ${{ inputs.replace_published_platforms && '1' || '0' }}
           RELEASE_PLATFORMS: ${{ inputs.platforms }}
         run: node scripts/release-preflight.cjs
       - name: Import complete UAR sidecar payload
@@ -76,6 +82,7 @@ jobs:
       - name: Prepare versioned GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPLACE_PUBLISHED_PLATFORMS: ${{ inputs.replace_published_platforms && '1' || '0' }}
         run: node scripts/prepare-github-release.cjs
   build:
     if: github.event_name == 'workflow_dispatch'

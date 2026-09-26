@@ -225,7 +225,7 @@ artifacts locally with:
 
 ```bash
 npm ci --ignore-scripts
-node scripts/build-discovery-index.mjs https://example.com/skills
+boss-mini build-discovery-index.mjs https://example.com/skills
 ```
 
 ## Skill Structure

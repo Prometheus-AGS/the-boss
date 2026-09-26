@@ -5,6 +5,7 @@ const { resolveReleaseProfile } = require('./release-profile.cjs')
 const tag = `v${version}`
 const repository = process.env.GITHUB_REPOSITORY
 const profile = resolveReleaseProfile()
+const replacePublishedPlatforms = process.env.REPLACE_PUBLISHED_PLATFORMS === '1'
 const profileNote = profile.uarEnabled
   ? `Feature profile: ${profile.id}. Includes the complete pinned UAR sidecar payload for Windows x64 and Apple Silicon.`
   : `Feature profile: ${profile.id}. UAR is unavailable in this customer release while its sidecar packaging is corrected.`
@@ -19,9 +20,20 @@ if (existing.status === 0) {
     throw new Error(`GitHub Release ${tag} already belongs to feature profile ${existingProfile || 'unknown'}`)
   }
   if (release.targetCommitish !== process.env.GITHUB_SHA) {
-    throw new Error(
-      `GitHub Release ${tag} targets ${release.targetCommitish}, not frozen source ${process.env.GITHUB_SHA}`
+    if (!replacePublishedPlatforms) {
+      throw new Error(
+        `GitHub Release ${tag} targets ${release.targetCommitish}, not frozen source ${process.env.GITHUB_SHA}`
+      )
+    }
+    const retargeted = spawnSync(
+      'gh',
+      ['release', 'edit', tag, '--repo', repository, '--target', process.env.GITHUB_SHA],
+      { encoding: 'utf8' }
     )
+    process.stdout.write(retargeted.stdout || '')
+    process.stderr.write(retargeted.stderr || '')
+    if (retargeted.status !== 0) throw new Error(`Unable to retarget GitHub Release ${tag}`)
+    console.log(`Retargeted GitHub Release ${tag} from ${release.targetCommitish} to ${process.env.GITHUB_SHA}`)
   }
   console.log(`Using existing GitHub Release ${tag}`)
   process.exit(0)

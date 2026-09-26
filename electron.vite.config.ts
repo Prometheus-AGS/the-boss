@@ -243,6 +243,7 @@ export default defineConfig({
       ...sentrySourceMapPlugins('renderer')
     ],
     resolve: {
+      dedupe: ['react', 'react-dom'],
       alias: {
         '@renderer': resolve('src/renderer'),
         '@shared': resolve('src/shared'),

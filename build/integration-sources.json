@@ -20,11 +20,11 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "cbaa3128489ca19507369aae9da33e2cb3f69c26"
+      "revision": "2650b3d470373d822f9cfd2349229942c05c1566"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "0f2ea3d4a8111bea3a425bfb6596acbc9fb09d26"
+      "revision": "fd7567a95c4ed18da7fb7996fae3925c84d2e96e"
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
@@ -32,7 +32,7 @@
     },
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
-      "revision": "3392482a2a1e14d114ee1115db3684334aaaa2cb"
+      "revision": "4f25d39f0075656b70bf945880d6033beda6d663"
     }
   },
   "tools": {
@@ -67,7 +67,13 @@
     "liter-llm": {
       "source": "liter-llm",
       "package": "liter-llm-cli",
-      "version": "2.1.0"
+      "version": "2.1.1"
+    }
+  },
+  "catalogs": {
+    "liter-llm": {
+      "providers": "568d741ee4e4771b7fd4191cde974d743c834fc1db7bbf27fcde45d0521b67b4",
+      "models": "d6d57171617705eb9611cbfb62ff28a3d26fdaf85b4f38f4b2e4361fcfd153dd"
     }
   },
   "parser": {
