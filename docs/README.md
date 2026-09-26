@@ -9,6 +9,7 @@
 | [Contributing](../CONTRIBUTING.md) | How to contribute code |
 | [App Update Architecture](./contrib/app-upgrade.md) | How clients check for updates through the managed release service, with channels and the release history feed |
 | [🌿 Branching Strategy](./contrib/branching-strategy.md) | Branch model for contributions, pull request guidelines, and version tag management targeting main |
+| [Replacing Cherry services in The Boss with your own domains](./contrib/cherry-services-self-hosting.md) | Cherry-operated services retained by The Boss, their client contracts, and a migration plan for independently operated domains. |
 | [Develop The Boss](./contrib/development.md) | The Boss developer environment, pinned prerequisites, project setup, and UI team workflow |
 | [Feishu Notification Script](./contrib/feishu-notify.md) | CLI script that sends Feishu webhook card notifications from GitHub Actions workflows, with command reference |
 | [Linux Packaging](./contrib/linux-packaging.md) | Linux packaging flow using pinned better-sqlite3 prebuilds, with build commands and prebuild update steps |

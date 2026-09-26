@@ -10,3 +10,12 @@ cherry-pr-test
 cherry-electron-dev
 cherry-regression-test
 upstream-merge
+
+agent-team-creator
+agent-team-manage
+agent-team-handoff
+agent-team-models
+create-prd
+stakeholder-map
+a11y-gate
+vercel-composition-patterns
