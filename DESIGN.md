@@ -1,6 +1,6 @@
-# Cherry Studio Design System
+# The Boss Design System
 
-This document defines Cherry Studio's product-wide visual direction and the rules for choosing shared design
+This document defines The Boss's product-wide visual direction and the rules for choosing shared design
 semantics. It is intentionally not a component API reference, a copy of Tailwind classes, or a specification for
 individual feature pages.
 
@@ -21,7 +21,7 @@ only when the product-wide design intent has changed.
 
 ## 1. Design direction
 
-Cherry Studio is a content-first AI workspace. The interface should feel calm, precise, and utilitarian so that
+The Boss is a content-first AI workspace. The interface should feel calm, precise, and utilitarian so that
 conversation, code, documents, and user-created content remain the visual focus.
 
 The shared direction is:
