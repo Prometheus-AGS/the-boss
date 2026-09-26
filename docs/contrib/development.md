@@ -1,8 +1,8 @@
 ---
-description: Developer environment setup covering IDE configuration, Windows symlink support, and project install steps
+description: The Boss developer environment, pinned prerequisites, project setup, and UI team workflow
 ---
 
-# 🖥️ Develop
+# Develop The Boss
 
 ## IDE Setup
 
@@ -123,3 +123,11 @@ $ pnpm build:linux
 
 For architecture-specific commands and the pinned `better-sqlite3` prebuild workflow, see
 [Linux Packaging](./linux-packaging.md).
+
+## UI/UX and project teams
+
+Follow [UI/UX routing and team adoption](./ui-ux-routing.md) for the current portable catalog and existing boss-core role bindings. Its Node 22+ helpers do not relax The Boss application engine and package-manager pins. Preserve shared design tokens and use the tracked Electron workflow for visible changes. Native role files are configuration, not proof of harness invocation.
+
+## Documentation
+
+Documentation is repository Markdown. Edit source headings and frontmatter, run `pnpm docs:index` to generate the index, then run `pnpm docs:check` once the documentation phase is complete. See [The Boss release workflow](./the-boss-release.md) for source-versus-installer evidence; the upstream release workflow is a separate process.

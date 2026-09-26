@@ -12,7 +12,7 @@ sources:
   - scripts/release-preflight.cjs
   - scripts/release-profile.cjs
   - scripts/update-release-entry.cjs
-  - src/renderer/pages/settings/PrometheusSettings/IntegrationSettings.tsx
+  - src/renderer/pages/settings/PrometheusSettings/IntegrationPage.tsx
 ---
 
 # The Boss integration release
