@@ -152,9 +152,10 @@ async function main() {
 
   const tools = Array.isArray(manifest.tools) ? manifest.tools : []
   const matches = tools.filter((tool) => tool?.name === 'uar-sidecar')
-  if (matches.length !== 1) throw new Error('Integration artifact manifest must contain one uar-sidecar tool')
-  if (matches[0].version !== expectedVersion) {
-    throw new Error(`Integration artifact UAR version ${matches[0].version} does not match ${expectedVersion}`)
+  if (matches.length > 1) throw new Error('Integration artifact manifest contains duplicate uar-sidecar tools')
+  const existing = matches[0] ?? { name: 'uar-sidecar', version: expectedVersion, packages: {} }
+  if (existing.version !== expectedVersion) {
+    throw new Error(`Integration artifact UAR version ${existing.version} does not match ${expectedVersion}`)
   }
 
   const records = await Promise.all(recordUrls.map((recordUrl) => loadRecord(recordUrl, uarSource, expectedVersion)))
@@ -163,15 +164,14 @@ async function main() {
     if (!platforms.has(platform)) throw new Error(`Missing UAR sidecar release record for ${platform}`)
   }
 
-  const nextPackages = { ...matches[0].packages }
+  const nextPackages = { ...existing.packages }
   for (const record of records) nextPackages[record.platform] = record.package
 
+  const uarTool = { ...existing, version: expectedVersion, packages: nextPackages }
   const nextManifest = {
     ...manifest,
     sources: { ...manifest.sources, uar: { ...uarSource } },
-    tools: tools.map((tool) =>
-      tool === matches[0] ? { ...tool, version: expectedVersion, packages: nextPackages } : tool
-    )
+    tools: matches.length === 0 ? [...tools, uarTool] : tools.map((tool) => (tool === existing ? uarTool : tool))
   }
   fs.writeFileSync(manifestPath, `${JSON.stringify(nextManifest, null, 2)}\n`)
 
