@@ -197,6 +197,7 @@ export default defineConfig({
     define: { __UAR_ENABLED__: JSON.stringify(uarEnabled) },
     plugins: [...sentrySourceMapPlugins('preload')],
     resolve: {
+      dedupe: ['react', 'react-dom'],
       alias: {
         '@shared': resolve('src/shared')
       }
