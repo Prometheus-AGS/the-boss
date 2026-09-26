@@ -46,6 +46,7 @@ const manifest = {
   sources: pins.sources,
   tools: [...tools.values()],
   images,
+  catalogs: pins.catalogs,
   compassSkills: { url: url(skills.asset), sha256: skills.sha256 }
 }
 fs.writeFileSync(path.join(directory, 'integration-artifacts.json'), JSON.stringify(manifest, null, 2) + '\n')

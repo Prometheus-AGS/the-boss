@@ -7,6 +7,7 @@ const version = require('../package.json').version
 const profile = resolveReleaseProfile()
 const requestedVersion = process.env.RELEASE_VERSION || version
 const source = process.env.GITHUB_SHA
+const replacePublishedPlatforms = process.env.REPLACE_PUBLISHED_PLATFORMS === '1'
 const selectedPlatforms = (process.env.RELEASE_PLATFORMS || profile.supportedPlatforms.join(','))
   .split(',')
   .map((value) => value.trim())
@@ -34,12 +35,17 @@ if (fs.existsSync(previousPath)) {
     (artifact) => selectedPlatforms.includes(`${artifact.platform}-${artifact.arch}`) && artifact.source !== source
   )
   if (previous.version === version && conflictingArtifact) {
-    throw new Error(
-      `Platform ${conflictingArtifact.platform}-${conflictingArtifact.arch} is already published from ${conflictingArtifact.source}`
+    if (!replacePublishedPlatforms) {
+      throw new Error(
+        `Platform ${conflictingArtifact.platform}-${conflictingArtifact.arch} is already published from ${conflictingArtifact.source}`
+      )
+    }
+    console.log(
+      `Replacing published platform ${conflictingArtifact.platform}-${conflictingArtifact.arch} from ${conflictingArtifact.source}`
     )
   }
 }
 
 console.log(
-  `Frozen release inputs: ${JSON.stringify({ version, profile: profile.id, source, platforms: selectedPlatforms })}`
+  `Frozen release inputs: ${JSON.stringify({ version, profile: profile.id, source, platforms: selectedPlatforms, replacePublishedPlatforms })}`
 )

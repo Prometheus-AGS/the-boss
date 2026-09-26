@@ -70,6 +70,12 @@
       "version": "2.1.1"
     }
   },
+  "catalogs": {
+    "liter-llm": {
+      "providers": "568d741ee4e4771b7fd4191cde974d743c834fc1db7bbf27fcde45d0521b67b4",
+      "models": "d6d57171617705eb9611cbfb62ff28a3d26fdaf85b4f38f4b2e4361fcfd153dd"
+    }
+  },
   "parser": {
     "url": "https://github.com/xberg-io/tree-sitter-language-pack/releases/download/v1.13.1/parser-sources-1.13.1.tar.zst",
     "sha256": "411bc912ca9b6fa43f75aeff0ad9df419b2b425e99795c66ab253f2970e2afd3"

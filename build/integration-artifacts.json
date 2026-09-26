@@ -257,6 +257,12 @@
     "surreal-memory": "ghcr.io/prometheus-ags/the-boss-surreal-memory@sha256:b0414341e4e649a1ae68cbcbb2d98b8bd6d87e6f8c425f33947185ba1031c6a1",
     "liter-llm": "ghcr.io/prometheus-ags/the-boss-liter-llm@sha256:b69ec5456a5aaaf733e20c3c00f8cf237272ecdad6c844558fd0b832a5667a0b"
   },
+  "catalogs": {
+    "liter-llm": {
+      "providers": "568d741ee4e4771b7fd4191cde974d743c834fc1db7bbf27fcde45d0521b67b4",
+      "models": "d6d57171617705eb9611cbfb62ff28a3d26fdaf85b4f38f4b2e4361fcfd153dd"
+    }
+  },
   "compassSkills": {
     "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/compass-skills.tar.gz",
     "sha256": "8b13681910d532411300268c4ba2bab5712e1b7e5cba70f105e766cd89e2c7b0"
