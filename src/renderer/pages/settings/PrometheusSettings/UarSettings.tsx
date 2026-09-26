@@ -27,24 +27,55 @@ export default function UarSettings() {
   const { t } = useTranslation()
   const { theme } = useTheme()
   const [selectedStorage, setSelectedStorage] = useState<UarStorageSelection>()
+  const [portInput, setPortInput] = useState<string>()
+  const parsedPort = portInput === undefined || portInput === '' ? undefined : Number(portInput)
+  const portError =
+    portInput !== undefined && (!Number.isInteger(parsedPort) || parsedPort! < 1 || parsedPort! > 65_535)
+      ? integrationText(t, 'uarPortInvalid')
+      : undefined
   return (
-    <IntegrationPage>
+    <IntegrationPage innerClassName="max-w-6xl" saveBlocked={Boolean(portError)}>
       {(controller) => {
         const snapshot = controller.snapshot!
         const candidates = uarSurrealDbCandidates(snapshot.serviceDiscovery)
         const storageSelection = selectedStorage ?? selectedUarStorage(controller.draft.uar, candidates)
         return (
           <UarAdministrationWorkspace
+            onReady={() => void controller.load()}
             overview={
               <>
+                <UarIntegrationStatus
+                  snapshot={snapshot}
+                  busy={controller.busy}
+                  dirty={controller.dirty}
+                  theme={theme}
+                  text={(key, options) => integrationText(t, key, options)}
+                  activeAction={controller.startingAction ?? controller.activeOperation?.action ?? undefined}
+                  start={(action) => void controller.start(action)}
+                  id={getSettingDomId('/settings/uar', 'runtime-status')}
+                />
                 <SettingGroup
                   theme={theme}
                   id={getSettingDomId('/settings/uar', 'runtime-storage')}
                   className="scroll-mt-6">
-                  <SettingTitle>{integrationText(t, 'uar')}</SettingTitle>
-                  <SettingDescription>{integrationText(t, 'uarDescription')}</SettingDescription>
+                  <SettingTitle>{integrationText(t, 'uarConfiguration')}</SettingTitle>
+                  <SettingDescription>{integrationText(t, 'uarConfigurationDescription')}</SettingDescription>
                   <SettingDivider />
                   <div className="space-y-4">
+                    <IntegrationField
+                      label={integrationText(t, 'uarPreferredPort')}
+                      type="number"
+                      value={portInput ?? String(controller.draft.uar.port)}
+                      help={integrationText(t, 'uarPortHelp')}
+                      error={portError}
+                      onChange={(port) => {
+                        setPortInput(port)
+                        const value = Number(port)
+                        if (Number.isInteger(value) && value >= 1 && value <= 65_535) {
+                          controller.update('uar', { port: value })
+                        }
+                      }}
+                    />
                     <IntegrationChoice
                       label={integrationText(t, 'uarBackend')}
                       value={storageSelection}
@@ -52,25 +83,27 @@ export default function UarSettings() {
                         setSelectedStorage(selection)
                         controller.update('uar', uarStorageUpdate(selection))
                       }}
-                      options={[
-                        {
-                          value: 'embedded',
-                          label: integrationText(t, 'uarBackendLocal')
-                        },
-                        ...candidates.map((candidate) => ({
-                          value: uarCandidateValue(candidate),
-                          label: `${candidate.provenance
-                            .map(
-                              (provenance) =>
-                                `${provenance.label} · ${integrationText(t, `source.${provenance.source}`)}`
-                            )
-                            .join(' + ')} — ${candidate.endpoint}`
-                        })),
-                        {
-                          value: 'manual',
-                          label: `${integrationText(t, 'backends.remote')} · ${integrationText(t, 'source.manual')}`
-                        }
-                      ] satisfies { value: UarStorageSelection; label: string }[]}
+                      options={
+                        [
+                          {
+                            value: 'embedded',
+                            label: integrationText(t, 'uarBackendLocal')
+                          },
+                          ...candidates.map((candidate) => ({
+                            value: uarCandidateValue(candidate),
+                            label: `${candidate.provenance
+                              .map(
+                                (provenance) =>
+                                  `${provenance.label} · ${integrationText(t, `source.${provenance.source}`)}`
+                              )
+                              .join(' + ')} — ${candidate.endpoint}`
+                          })),
+                          {
+                            value: 'manual',
+                            label: `${integrationText(t, 'backends.remote')} · ${integrationText(t, 'source.manual')}`
+                          }
+                        ] satisfies { value: UarStorageSelection; label: string }[]
+                      }
                     />
                     {controller.draft.uar.backend === 'remote' && (
                       <div className="grid gap-4 sm:grid-cols-2">
@@ -110,15 +143,6 @@ export default function UarSettings() {
                     <SettingHelpText>{integrationText(t, 'uarStorageHelp')}</SettingHelpText>
                   </div>
                 </SettingGroup>
-                <UarIntegrationStatus
-                  snapshot={snapshot}
-                  busy={controller.busy}
-                  dirty={controller.dirty}
-                  theme={theme}
-                  text={(key) => integrationText(t, key)}
-                  start={(action) => void controller.start(action)}
-                  id={getSettingDomId('/settings/uar', 'runtime-status')}
-                />
               </>
             }
           />

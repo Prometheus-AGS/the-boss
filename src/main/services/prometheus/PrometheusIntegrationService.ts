@@ -145,8 +145,17 @@ export class PrometheusIntegrationService extends BaseService {
               ...(uarPayload?.version ? { binaryVersion: uarPayload.version } : {})
             }),
         ...(runningUar
-          ? { runtimeVersion: runningUar.uarVersion, capabilities: [...runningUar.capabilities] }
+          ? {
+              runtimeVersion: runningUar.uarVersion,
+              capabilities: [...runningUar.capabilities],
+              baseUrl: runningUar.baseUrl,
+              effectivePort: runningUar.effectivePort,
+              ...(runningUar.processId ? { processId: runningUar.processId } : {}),
+              startedAt: runningUar.startedAt
+            }
           : { capabilities: [] }),
+        requestedPort: document.config.uar.port,
+        appliedPort: appliedUar.profile.port,
         requestedBackend: document.config.uar.backend,
         effectiveBackend: appliedUar.profile.backend,
         requestedRevision: document.revisions.uar,
@@ -166,6 +175,8 @@ export class PrometheusIntegrationService extends BaseService {
       uar = {
         state: 'unavailable',
         capabilities: [],
+        requestedPort: document.config.uar.port,
+        appliedPort: document.config.uar.port,
         requestedBackend: document.config.uar.backend,
         effectiveBackend: document.config.uar.backend,
         requestedRevision: document.revisions.uar,
@@ -633,6 +644,7 @@ export class PrometheusIntegrationService extends BaseService {
           ) {
             throw new Error('prometheus.error.uarActiveRuns')
           }
+          const uarService = application.get('UarSidecarService')
           let sidecar: UarSidecarEndpoint
           if (action === 'uar-apply') {
             const document = readIntegrationDocument()
@@ -653,21 +665,29 @@ export class PrometheusIntegrationService extends BaseService {
                   signal
                 )
               }
-              sidecar = await application.get('UarSidecarService').applyStorage(candidate)
+              sidecar = await uarService.applyStorage(candidate)
               this.lastUarApplyError = undefined
             } catch (error) {
               this.lastUarApplyError = error instanceof Error ? error.message : String(error)
               throw error
             }
           } else {
-            sidecar =
-              action === 'uar-restart'
-                ? await application.get('UarSidecarService').restart()
-                : await application.get('UarSidecarService').ensureReady()
+            sidecar = action === 'uar-restart' ? await uarService.restart() : await uarService.ensureReady()
+          }
+          if (action === 'uar-check') {
+            const response = await uarService.adminRequest('/api/uar/capabilities', {}, sidecar.generation)
+            if (!response.ok) throw new Error(`UAR authenticated capability check failed with HTTP ${response.status}`)
+            await response.body?.cancel()
           }
           operation.diagnostics = [
             { id: 'uar.binary', state: 'operational' },
-            { id: 'uar.process', state: 'listening', detail: sidecar.uarVersion },
+            { id: 'uar.process', state: 'listening', detail: sidecar.baseUrl },
+            { id: 'uar.authentication', state: 'authenticated' },
+            {
+              id: 'uar.port',
+              state: 'operational',
+              detail: `${sidecar.storage.profile.port} -> ${sidecar.effectivePort}`
+            },
             { id: 'uar.capabilities', state: 'operational', detail: sidecar.capabilities.join(', ') },
             {
               id: 'uar.storage',
@@ -677,6 +697,9 @@ export class PrometheusIntegrationService extends BaseService {
           ]
           output(
             JSON.stringify({
+              baseUrl: sidecar.baseUrl,
+              preferredPort: sidecar.storage.profile.port,
+              effectivePort: sidecar.effectivePort,
               backend: sidecar.storage.profile.backend,
               revision: sidecar.storage.revision,
               ...(sidecar.storage.profile.backend === 'remote'

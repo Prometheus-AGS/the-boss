@@ -13,8 +13,8 @@ import { IntegrationOperations } from './IntegrationOperations'
 import type { IntegrationSettingsController } from './useIntegrationSettings'
 import { useIntegrationSettings } from './useIntegrationSettings'
 
-export const integrationText = (translate: TFunction, key: string) =>
-  translate(`settings.prometheus.integration.${key}`)
+export const integrationText = (translate: TFunction, key: string, options?: Record<string, unknown>) =>
+  translate(`settings.prometheus.integration.${key}`, options)
 
 export function IntegrationActionButton({
   controller,
@@ -64,7 +64,13 @@ export function IntegrationSecretField({
   )
 }
 
-function IntegrationSaveBar({ controller }: { controller: IntegrationSettingsController }) {
+function IntegrationSaveBar({
+  controller,
+  saveBlocked = false
+}: {
+  controller: IntegrationSettingsController
+  saveBlocked?: boolean
+}) {
   const { t } = useTranslation()
   const latest = controller.snapshot?.operations[0]
   const latestFailed = latest?.status === 'failed' || latest?.status === 'interrupted'
@@ -97,21 +103,29 @@ function IntegrationSaveBar({ controller }: { controller: IntegrationSettingsCon
           integrationText(t, 'saved')
         )}
       </div>
-      <Button disabled={!controller.dirty || controller.busy} onClick={() => void controller.save()}>
+      <Button disabled={!controller.dirty || controller.busy || saveBlocked} onClick={() => void controller.save()}>
         {controller.saving ? t('common.loading') : t('common.save')}
       </Button>
     </div>
   )
 }
 
-export function IntegrationPage({ children }: { children: (controller: IntegrationSettingsController) => ReactNode }) {
+export function IntegrationPage({
+  children,
+  innerClassName,
+  saveBlocked = false
+}: {
+  children: (controller: IntegrationSettingsController) => ReactNode
+  innerClassName?: string
+  saveBlocked?: boolean
+}) {
   const controller = useIntegrationSettings()
   const { t } = useTranslation()
   const { theme } = useTheme()
 
   if (!controller.snapshot) {
     return (
-      <SettingsContentColumn theme={theme}>
+      <SettingsContentColumn theme={theme} innerClassName={innerClassName}>
         <SettingGroup theme={theme}>
           <SettingSubtitle>{integrationText(t, 'loadingTitle')}</SettingSubtitle>
           <p role={controller.error ? 'alert' : 'status'} className="text-sm">
@@ -128,7 +142,7 @@ export function IntegrationPage({ children }: { children: (controller: Integrati
   }
 
   return (
-    <SettingsContentColumn theme={theme}>
+    <SettingsContentColumn theme={theme} innerClassName={innerClassName}>
       {children(controller)}
       <SettingGroup theme={theme}>
         <IntegrationOperations
@@ -136,7 +150,7 @@ export function IntegrationPage({ children }: { children: (controller: Integrati
           retry={(operation) => void controller.start(operation.action, operation.workspacePath)}
         />
       </SettingGroup>
-      <IntegrationSaveBar controller={controller} />
+      <IntegrationSaveBar controller={controller} saveBlocked={saveBlocked} />
     </SettingsContentColumn>
   )
 }

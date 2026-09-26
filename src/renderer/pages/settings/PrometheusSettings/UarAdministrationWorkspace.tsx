@@ -1,6 +1,6 @@
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { CheckCircle2, CircleSlash2, RefreshCw } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -126,19 +126,25 @@ function LoadingWorkspace() {
   )
 }
 
-export function UarAdministrationWorkspace({ overview }: { overview: ReactNode }) {
+export function UarAdministrationWorkspace({ overview, onReady }: { overview: ReactNode; onReady?: () => void }) {
   const { t } = useTranslation()
   const navigate = useNavigate({ from: '/settings/uar' })
   const search = useSearch({ from: '/settings/uar' })
   const [snapshot, setSnapshot] = useState<UarAdministrationSnapshot>()
   const [error, setError] = useState<string>()
   const [loading, setLoading] = useState(true)
+  const onReadyRef = useRef(onReady)
+
+  useEffect(() => {
+    onReadyRef.current = onReady
+  }, [onReady])
 
   const load = useCallback(async () => {
     setLoading(true)
     setError(undefined)
     try {
       setSnapshot(await ipcApi.request('prometheus.uar.admin.snapshot', {}))
+      onReadyRef.current?.()
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : String(loadError))
     } finally {
