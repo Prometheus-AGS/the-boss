@@ -82,6 +82,7 @@ jobs:
       - name: Prepare versioned GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPLACE_PUBLISHED_PLATFORMS: ${{ inputs.replace_published_platforms && '1' || '0' }}
         run: node scripts/prepare-github-release.cjs
   build:
     if: github.event_name == 'workflow_dispatch'
