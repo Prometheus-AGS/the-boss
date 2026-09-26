@@ -32,7 +32,7 @@ for (const name of Object.keys(pins.tools)) {
 }
 tools.set('node', JSON.parse(fs.readFileSync(path.join(root, 'build/node-artifacts.json'))))
 const images = {
-  surrealdb: 'surrealdb/surrealdb:v3.2.4@sha256:51baed8709f57f67dcf04b30e3177db846803fa9342dae2be58c6fa5f8d59843'
+  surrealdb: 'surrealdb/surrealdb:v3.3.0@sha256:681c6c22c287421b5c7d99e0fde79b6e0d32c36c1ddeaab2762a1661cb04cd20'
 }
 for (const service of ['surreal-memory', 'liter-llm']) {
   const record = JSON.parse(fs.readFileSync(path.join(directory, `${service}-image.json`)))
