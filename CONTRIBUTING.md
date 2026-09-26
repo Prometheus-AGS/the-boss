@@ -1,93 +1,43 @@
-# Cherry Studio Contributor Guide
+# The Boss Contributor Guide
 
-Welcome to the Cherry Studio contributor community! We are committed to making Cherry Studio a project that provides long-term value and hope to invite more developers to join us. Whether you are an experienced developer or a beginner just starting out, your contributions will help us better serve users and improve software quality.
+Contribute improvements to The Boss desktop workspace, documentation, or integrations through [this repository](https://github.com/Prometheus-AGS/the-boss). Start with an observed problem or explicit requirement, keep the change scoped, and preserve existing behavior outside that scope.
 
-## How to Contribute
+## Before you start
 
-Here are several ways you can participate:
+Read the [Code of Conduct](CODE_OF_CONDUCT.md), [LICENSE](LICENSE), and repository instructions in [CLAUDE.md](CLAUDE.md). Follow the [development guide](docs/contrib/development.md) for the pinned Node/pnpm environment and local setup. Active development targets this repository's `main` branch.
 
-1.  **Contribute Code**: Help us develop new features or optimize existing code. Please ensure your code adheres to our coding standards and passes all tests.
+Use [GitHub Issues](https://github.com/Prometheus-AGS/the-boss/issues) for reproducible defects or proposed work. Include the affected platform, version, steps, expected behavior, and relevant evidence without credentials or private user data.
 
-2.  **Fix Bugs**: If you find a bug, you are welcome to submit a fix. Please confirm the issue is resolved before submitting and include relevant tests.
+## UI/UX and team workflow
 
-3.  **Maintain Issues**: Help us manage issues on GitHub by assisting with tagging, classifying, and resolving problems.
+Read [UI/UX routing and team adoption](docs/contrib/ui-ux-routing.md) for the portable catalog, project installation, and evidence limits. The existing [boss-core team](.agent-team/boss-core/README.md) provides role instructions: `boss-ux` owns usability/design artifacts, `boss-renderer` implements renderer changes, and `boss-verifier` reviews completed acceptance independently where the harness supports it.
 
-4.  **Product Design**: Participate in product design discussions to help us improve user experience and interface design.
+Follow [DESIGN.md](DESIGN.md), the shared token system, and existing Electron tooling. Routing guidance does not authorize a new palette, framework, dependency, or redesign. Backend-only tasks use the relevant team role without loading UI guidance.
 
-5.  **Write Documentation**: Help us improve the user manual, API documentation, and developer guides.
+## Implementation and verification
 
-6.  **Community Maintenance**: Participate in community discussions, help answer user questions, and promote community activity.
+Finish the coherent production phase before its verification boundary. Exercise the promised behavior through the real UI, IPC, process, filesystem, database, or protocol path. Unit or mock-only results do not establish completion. Record the commands actually run, source boundary, evidence paths, failures, and unavailable platform checks.
 
-7.  **Promote Usage**: Promote Cherry Studio through blogs, social media, and other channels to attract more users and developers.
+For documentation changes, edit document headings and frontmatter, then run `pnpm docs:index` to regenerate [the index](docs/README.md). Run `pnpm docs:check` at the completed documentation boundary; it checks links, structure, frontmatter/source paths, and index freshness.
 
-## Before You Start
+UI acceptance also requires the applicable captures and interaction evidence plus independent review. The routing helper's `phase-boundary` result is an evidence request, not a test run or PASS.
 
-Please make sure you have read the [Code of Conduct](CODE_OF_CONDUCT.md) and the [LICENSE](LICENSE).
+## Pull requests
 
-## Setting Up Your Development Environment
+Use a focused branch and Conventional Commit messages. Explain the problem, resulting behavior, scope, and actual verification. Follow [.github/pull_request_template.md](.github/pull_request_template.md) and the repository's `gh-create-pr` workflow. Draft PRs may communicate incomplete work, but do not claim that draft status or a passing automated check proves acceptance.
 
-Please refer to the [Developer Guide](docs/contrib/development.md) for instructions on setting up your local development environment, including prerequisites, installation steps, and available commands.
+### Contributor certification
 
-For a comprehensive overview of the project architecture, tech stack, conventions, and available commands, see [`CLAUDE.md`](CLAUDE.md).
+The inherited contribution policy requires human contributors to certify their right to contribute under [LICENSE](LICENSE). Human certification uses the conventional trailer:
 
-## Getting Started
-
-To help you get familiar with the codebase, we recommend tackling issues tagged with one or more of the following labels: [good first issue](https://github.com/CherryHQ/cherry-studio/labels/good%20first%20issue), [help wanted](https://github.com/CherryHQ/cherry-studio/labels/help%20wanted), or [bug](https://github.com/CherryHQ/cherry-studio/labels/bug). Any help is welcome.
-
-### Testing
-
-Features without tests are considered non-existent. To ensure code is truly effective, relevant processes should be covered by unit tests and functional tests. Therefore, when considering contributions, please also consider testability. All tests can be run locally without dependency on CI. Please refer to the "Testing" section in the [Developer Guide](docs/contrib/development.md).
-
-### Automated Testing for Pull Requests
-
-Automated tests are triggered on pull requests (PRs) opened by members of the Cherry Studio organization, except for draft PRs. PRs opened by new contributors will initially be marked with the `needs-ok-to-test` label and will not be automatically tested. Once a Cherry Studio organization member adds `/ok-to-test` to the PR, the test pipeline will be created.
-
-### Consider Opening Your Pull Request as a Draft
-
-Not all pull requests are ready for review when created. This might be because the author wants to start a discussion, they are not entirely sure if the changes are heading in the right direction, or the changes are not yet complete. Please consider creating these PRs as [draft pull requests](https://github.blog/2019-02-14-introducing-draft-pull-requests/). Draft PRs are skipped by CI, thus saving CI resources. This also means reviewers will not be automatically assigned, and the community will understand that this PR is not yet ready for review.
-Reviewers will be assigned after you mark the draft pull request as ready for review.
-
-### Contributor Compliance with Project Terms
-
-We require every contributor to certify that they have the right to legally contribute to our project. Contributors express this by consciously signing their commits, thereby indicating their compliance with the [LICENSE](LICENSE).
-A signed commit is one where the commit message includes the following:
-
-```
+```text
 Signed-off-by: Your Name <your.email@example.com>
 ```
 
-You can generate a signed commit using the following command [git commit --signoff](https://git-scm.com/docs/git-commit#Documentation/git-commit.txt---signoff):
+This is a human certification, distinct from cryptographic commit signing. Agents must follow the active operator and repository instructions for generated-content attribution and must not manufacture a human certification.
 
-```
-git commit --signoff -m "Your commit message"
-```
+## Releases and upstream
 
-### Getting Code Reviewed/Merged
+Use [The Boss release workflow](docs/contrib/the-boss-release.md) for fork releases and installed acceptance. A source merge does not establish inclusion in an existing published installer.
 
-Maintainers are here to help you implement your use case within a reasonable timeframe. They will do their best to review your code and provide constructive feedback promptly. However, if you get stuck during the review process or feel your Pull Request is not receiving the attention it deserves, please contact us via comments in the Issue or through the [Community](README.md#-community).
-
-### Participating in the Test Plan
-
-The Test Plan aims to provide users with a more stable application experience and faster iteration speed. For details, please refer to the [Test Plan](docs/contrib/test-plan.md).
-
-### Other Suggestions
-
-- **Contact Developers**: Before submitting a PR, you can contact the developers first to discuss or get help.
-
-## Important Contribution Guidelines & Focus Areas
-
-Please review the following critical information before submitting your Pull Request:
-
-### Branch Strategy
-
-`main` is the default branch for active development — submit features, refactors, optimizations, and fixes here.
-
-
-## Contact Us
-
-If you have any questions or suggestions, feel free to contact us through the following ways:
-
-- WeChat: kangfenmao
-- [GitHub Issues](https://github.com/CherryHQ/cherry-studio/issues)
-
-Thank you for your support and contributions! We look forward to working with you to make Cherry Studio a better product.
+This project derives from Cherry Studio. Preserve upstream attribution, notices, and compatibility identifiers. Follow the [upstream merge policy](docs/contrib/upstream-merges.md); upstream service names and historical data identifiers are not cosmetic branding.
