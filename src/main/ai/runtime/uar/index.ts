@@ -46,3 +46,8 @@ export {
 export { UarRuntimeDriver } from './UarRuntimeDriver'
 export { UarSidecarService, type UarSidecarEndpoint } from './UarSidecarService'
 export { readAppliedUarStorage } from './uarStorageProfile'
+export {
+  decodeUarSessionPlacement,
+  encodeUarSessionPlacement,
+  isStructuredUarSessionPlacement
+} from './uarSessionPlacement'

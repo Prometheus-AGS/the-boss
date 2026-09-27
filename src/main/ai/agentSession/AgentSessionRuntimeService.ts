@@ -73,6 +73,7 @@ import type {
   AgentRuntimeUserInput,
   AgentSessionUsageCapture
 } from '../runtime/types'
+import { decodeUarSessionPlacement, isStructuredUarSessionPlacement } from '../runtime/uar'
 import {
   finalizeInterruptedParts,
   PersistenceListener,
@@ -1295,6 +1296,35 @@ export class AgentSessionRuntimeService extends BaseService {
       resumeToken: entry.lastResumeToken,
       activeToolCount: turn?.activeToolIds.size ?? 0
     }
+  }
+
+  listRuntimePlacements(agentType: string): Array<{ sessionId: string; instanceId: string; nativeSessionId: string }> {
+    const placements: Array<{ sessionId: string; instanceId: string; nativeSessionId: string }> = []
+    const claimedTokens = new Set<string>()
+    for (const entry of this.entries.values()) {
+      if (entry.agentType !== agentType || !entry.lastResumeToken) continue
+      if (agentType === 'uar') {
+        claimedTokens.add(entry.lastResumeToken)
+        const placement = decodeUarSessionPlacement(entry.lastResumeToken, entry.sessionId)
+        placements.push({
+          sessionId: entry.sessionId,
+          instanceId: placement.instanceId,
+          nativeSessionId: placement.nativeSessionId
+        })
+      }
+    }
+    if (agentType === 'uar') {
+      for (const token of agentSessionMessageService.listAllRuntimeResumeTokens()) {
+        if (claimedTokens.has(token) || !isStructuredUarSessionPlacement(token)) continue
+        const placement = decodeUarSessionPlacement(token, token)
+        placements.push({
+          sessionId: token,
+          instanceId: placement.instanceId,
+          nativeSessionId: placement.nativeSessionId
+        })
+      }
+    }
+    return placements
   }
 
   // ── Write quiesce (backup restore) ───────────────────────────────

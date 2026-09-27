@@ -29,7 +29,7 @@ export interface UarHostMcpBridge {
     headers: Record<string, string>
   }
   redactions: readonly string[]
-  recordHumanDecision(admissionId: string, approved: boolean): boolean
+  recordHumanDecision(admissionId: string, approved: boolean): Promise<boolean>
   cancelAdmission(
     admissionId: string,
     invocationId?: string,
@@ -136,7 +136,7 @@ async function handleRequest(
 
   const url = new URL(request.url ?? '/', `http://${expectedHost}`)
   const body = request.method === 'POST' ? await readJsonBody(request) : undefined
-  if (admissions.handleHttp(request.method, url.pathname, body, response)) return
+  if (await admissions.handleHttp(request.method, url.pathname, body, response)) return
   const mounted = !url.search && routes.get(url.pathname)
   if (!mounted) {
     response.writeHead(404)
