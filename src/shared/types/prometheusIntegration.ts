@@ -34,6 +34,10 @@ const uarEndpoint = z
     const url = new URL(value)
     return /^(https?|wss?):$/.test(url.protocol) && !url.username && !url.password
   }, 'HTTP(S) or WS(S) endpoint without embedded credentials required')
+const authorityEndpoint = endpoint.refine((value) => {
+  const url = new URL(value)
+  return url.protocol === 'https:' || ['127.0.0.1', '::1', 'localhost'].includes(url.hostname)
+}, 'HTTPS or a loopback HTTP endpoint is required for protected authority requests')
 const model = z.object({ name: z.string().default(''), baseUrl: z.string().default('') })
 const serviceOwnershipSchema = z.enum(['managed', 'external'])
 const serviceSourceSchema = z.enum(['application', 'full-pack', 'manual'])
@@ -90,7 +94,9 @@ export const uarStorageConfigSchema = z.object({
     .string()
     .regex(/^[a-zA-Z][a-zA-Z0-9_]*$/)
     .default('uar'),
-  authLevel: z.enum(['root', 'namespace', 'database']).default('namespace')
+  authLevel: z.enum(['root', 'namespace', 'database']).default('namespace'),
+  authorityProvider: z.enum(['local', 'flint']).default('local'),
+  authorityEndpoint: authorityEndpoint.default('http://127.0.0.1:4457')
 })
 export type UarStorageConfig = z.infer<typeof uarStorageConfigSchema>
 const servicesConfigSchema = z
@@ -216,6 +222,7 @@ export const secretNames = [
   'compassPassword',
   'uarPassword',
   'memoryToken',
+  'uarAuthorityToken',
   'literKey',
   'judgeKey',
   'criticKey'

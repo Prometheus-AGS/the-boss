@@ -35,6 +35,7 @@ import type {
 } from '../types'
 import { UarAguiAdapter } from './UarAguiAdapter'
 import { uarApprovalLifecycleStore } from './UarApprovalLifecycleStore'
+import { createUarAuthorityProvider } from './UarAuthorityProvider'
 import { buildUarHostHistory, type UarHistoryMessage } from './uarHostHistory'
 import { createUarHostMcpBridge, type UarHostMcpBridge } from './UarHostMcpBridge'
 import { resolveUarHostToolDisposition } from './uarHostToolPolicy'
@@ -306,7 +307,9 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
       {
         sessionId: session.id,
         ownerId: this.principal,
+        principalId: agent.id,
         workspace,
+        authorityProvider: await createUarAuthorityProvider(),
         persistLifecycle: (snapshot) => uarApprovalLifecycleStore.persist(snapshot),
         disposition: (toolName) => resolveUarHostToolDisposition(session.id, agent.id, toolName)
       },

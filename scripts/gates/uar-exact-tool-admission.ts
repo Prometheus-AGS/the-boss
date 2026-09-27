@@ -7,6 +7,7 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 
+import { createLocalUarAuthorityProvider } from '../../src/main/ai/runtime/uar/UarAuthorityProvider'
 import { createUarHostMcpBridge } from '../../src/main/ai/runtime/uar/UarHostMcpBridge'
 import {
   UAR_TOOL_ADMISSION_META_KEY,
@@ -18,6 +19,7 @@ type JsonRecord = Record<string, unknown>
 type MatrixResult = { host: UarHostToolDisposition; local: 'auto' | 'ask' | 'deny'; result: string }
 
 const ownerId = 'gate-a1-owner'
+const principalId = 'gate-a1-agent'
 const workspace = '/gate-a1/workspace'
 
 async function main(): Promise<void> {
@@ -28,7 +30,13 @@ async function main(): Promise<void> {
   })
   const bridge = await createUarHostMcpBridge(
     { filesystem: { name: 'filesystem', instance: filesystem } },
-    { ownerId, workspace, disposition: () => hostDisposition }
+    {
+      ownerId,
+      principalId,
+      workspace,
+      authorityProvider: createLocalUarAuthorityProvider(),
+      disposition: () => hostDisposition
+    }
   )
   const mounted = bridge.servers[0]
   assert(mounted)
@@ -150,9 +158,7 @@ async function main(): Promise<void> {
     const mismatchArguments = { path: '/gate-a1/workspace/mismatch.txt', content: 'original' }
     const mismatch = await prepare(invocation(mismatchArguments))
     assert.equal((await resolve(mismatch, 'allowed', true)).status, 200)
-    await assert.rejects(() =>
-      callManaged(mismatch, { path: '/gate-a1/workspace/mismatch.txt', content: 'changed' })
-    )
+    await assert.rejects(() => callManaged(mismatch, { path: '/gate-a1/workspace/mismatch.txt', content: 'changed' }))
     await assert.rejects(() => client.callTool({ name: 'write_file', arguments: {} }))
 
     const batch = await fetch(mounted.url, {

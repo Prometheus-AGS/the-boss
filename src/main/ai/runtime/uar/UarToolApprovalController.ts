@@ -122,7 +122,7 @@ export class UarToolApprovalController {
   }
 
   private async recordAndResolve(input: PendingApproval, approved: boolean): Promise<void> {
-    if (!this.options.bridge.recordHumanDecision(input.admissionId, approved)) {
+    if (!(await this.options.bridge.recordHumanDecision(input.admissionId, approved))) {
       throw new Error('uar_approval_stale')
     }
     await this.resolve(input.rawApprovalId, approved)
