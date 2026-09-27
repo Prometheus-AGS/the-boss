@@ -58,8 +58,8 @@ async function responseBody(response: Response): Promise<unknown> {
  * presence flags before the result crosses IPC. */
 export async function readUarModelSources(): Promise<UarModelSourceSnapshot> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
-  const uarResponse = await sidecar.adminRequest('/api/uar/providers', {}, endpoint.generation)
+  const endpoint = await sidecar.resolveSelected()
+  const uarResponse = await sidecar.modelRequestInstance(endpoint, '/api/uar/providers')
   const uar = providerResponseSchema.parse(await responseBody(uarResponse))
   const config = readIntegrationConfig()
   const secrets = await readSecrets()
@@ -128,7 +128,7 @@ export async function readUarModelSources(): Promise<UarModelSourceSnapshot> {
       },
       {
         source: 'uar',
-        instanceId: `uar:${endpoint.generation}`,
+        instanceId: endpoint.instanceId,
         instanceName: 'Universal Agent Runtime',
         connectedInstance: endpoint.baseUrl,
         operational: true,
@@ -227,40 +227,34 @@ function providerPayload(input: UarProviderMutation): Record<string, unknown> {
 
 export async function saveUarProvider(input: UarProviderMutation): Promise<UarModelSourceSnapshot> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
+  const endpoint = await sidecar.resolveSelected()
   const pathname = input.mode === 'create' ? '/api/uar/providers' : `/api/uar/providers/${encodeURIComponent(input.id)}`
-  const response = await sidecar.adminRequest(
-    pathname,
-    {
-      method: input.mode === 'create' ? 'POST' : 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(providerPayload(input))
-    },
-    endpoint.generation
-  )
+  const response = await sidecar.modelRequestInstance(endpoint, pathname, {
+    method: input.mode === 'create' ? 'POST' : 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(providerPayload(input))
+  })
   await responseBody(response)
   return readUarModelSources()
 }
 
 export async function deleteUarProvider(id: string): Promise<UarModelSourceSnapshot> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
-  const response = await sidecar.adminRequest(
-    `/api/uar/providers/${encodeURIComponent(id)}`,
-    { method: 'DELETE' },
-    endpoint.generation
-  )
+  const endpoint = await sidecar.resolveSelected()
+  const response = await sidecar.modelRequestInstance(endpoint, `/api/uar/providers/${encodeURIComponent(id)}`, {
+    method: 'DELETE'
+  })
   if (!response.ok) await responseBody(response)
   return readUarModelSources()
 }
 
 export async function setDefaultUarProvider(id: string): Promise<UarModelSourceSnapshot> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
-  const response = await sidecar.adminRequest(
+  const endpoint = await sidecar.resolveSelected()
+  const response = await sidecar.modelRequestInstance(
+    endpoint,
     `/api/uar/providers/${encodeURIComponent(id)}/default`,
-    { method: 'POST' },
-    endpoint.generation
+    { method: 'POST' }
   )
   if (!response.ok) await responseBody(response)
   return readUarModelSources()
@@ -271,16 +265,12 @@ export async function testUarProvider(
   modelId: string
 ): Promise<{ ok: boolean; providerId: string; modelId: string; latencyMs: number }> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
-  const response = await sidecar.adminRequest(
-    `/api/uar/providers/${encodeURIComponent(id)}/test`,
-    {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ model: modelId })
-    },
-    endpoint.generation
-  )
+  const endpoint = await sidecar.resolveSelected()
+  const response = await sidecar.modelRequestInstance(endpoint, `/api/uar/providers/${encodeURIComponent(id)}/test`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ model: modelId })
+  })
   const body = z
     .object({
       ok: z.boolean(),

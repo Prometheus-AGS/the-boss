@@ -34,14 +34,23 @@ import {
   type IntegrationUpdate,
   type WorkspaceIntegration
 } from '@shared/types/prometheusIntegration'
+import {
+  MANAGED_UAR_INSTANCE_ID,
+  managedUarRuntimeInstance,
+  type UarInstanceCredentialMutation,
+  type UarInstanceInventorySnapshot,
+  type UarRuntimeInstance
+} from '@shared/types/uarServiceInstance'
 
 import { commandPathInstalled, installCommandPath } from './commandPath'
 import {
   migrateIntegrationDocument,
   readIntegrationConfig,
   readIntegrationDocument,
-  stageLiterConnectionCredential,
   readSecrets,
+  readUarInstanceCredentialPresence,
+  stageLiterConnectionCredential,
+  stageUarInstanceCredentials,
   writeIntegrationDocument,
   writeSecrets
 } from './integrationConfig'
@@ -132,12 +141,15 @@ export class PrometheusIntegrationService extends BaseService {
     let uar: IntegrationSnapshot['uar']
     if (isUarEnabled()) {
       const uarService = application.get('UarSidecarService')
+      const instanceInventory = await this.readUarInstanceInventory()
+      const selectedInstance = instanceInventory.instances.find((instance) => instance.selected)
       const uarPayload = uarService.payload()
       const runningUar = uarService.status()
+      const selectedExternal = selectedInstance?.ownership === 'external' ? selectedInstance.observed : undefined
       const uarBinaryPath = uarPayload?.executable
       const appliedUar = runningUar?.storage ?? (await readAppliedUarStorage())
       uar = {
-        state: runningUar ? 'running' : uarBinaryPath ? 'stopped' : 'unavailable',
+        state: runningUar || selectedExternal ? 'running' : uarBinaryPath ? 'stopped' : 'unavailable',
         ...(!uarBinaryPath
           ? {}
           : {
@@ -153,7 +165,17 @@ export class PrometheusIntegrationService extends BaseService {
               ...(runningUar.processId ? { processId: runningUar.processId } : {}),
               startedAt: runningUar.startedAt
             }
-          : { capabilities: [] }),
+          : selectedExternal
+            ? {
+                runtimeVersion: selectedExternal.version,
+                capabilities: [...selectedExternal.capabilities],
+                baseUrl: selectedExternal.endpoints.runtime,
+                effectivePort: Number(
+                  new URL(selectedExternal.endpoints.runtime).port ||
+                    (new URL(selectedExternal.endpoints.runtime).protocol === 'https:' ? 443 : 80)
+                )
+              }
+            : { capabilities: [] }),
         requestedPort: document.config.uar.port,
         appliedPort: appliedUar.profile.port,
         requestedBackend: document.config.uar.backend,
@@ -169,7 +191,9 @@ export class PrometheusIntegrationService extends BaseService {
               authLevel: appliedUar.profile.authLevel
             }
           : {}),
-        ...(this.lastUarApplyError ? { lastApplyError: this.lastUarApplyError } : {})
+        ...(this.lastUarApplyError ? { lastApplyError: this.lastUarApplyError } : {}),
+        selectedInstanceId: instanceInventory.selectedInstanceId,
+        instances: instanceInventory.instances
       }
     } else {
       uar = {
@@ -182,7 +206,24 @@ export class PrometheusIntegrationService extends BaseService {
         requestedRevision: document.revisions.uar,
         effectiveRevision: document.revisions.uar,
         applyRequired: false,
-        lastApplyError: UAR_FEATURE_DISABLED_ERROR
+        lastApplyError: UAR_FEATURE_DISABLED_ERROR,
+        selectedInstanceId: document.config.uar.selectedInstanceId,
+        instances: document.config.uar.instances.map((instance) => ({
+          ...instance,
+          selected: instance.id === document.config.uar.selectedInstanceId,
+          credentialConfigured: instance.ownership === 'managed',
+          runtimeCredentialConfigured: instance.ownership === 'managed',
+          adminCredentialConfigured: instance.ownership === 'managed',
+          boundSessions: 0,
+          compatibility: 'configured',
+          checks: {
+            configured: true,
+            reachable: null,
+            authenticated: null,
+            compatible: null,
+            operational: false
+          }
+        }))
       }
     }
     return {
@@ -235,6 +276,183 @@ export class PrometheusIntegrationService extends BaseService {
       () => undefined
     )
     return result
+  }
+
+  async readUarInstanceInventory(): Promise<UarInstanceInventorySnapshot> {
+    assertUarEnabled()
+    await this.ensureInitialized()
+    const document = readIntegrationDocument()
+    const credentials = await readUarInstanceCredentialPresence()
+    const bindings = application.get('AgentSessionRuntimeService').listRuntimePlacements('uar')
+    const boundCounts = new Map<string, number>()
+    for (const binding of bindings) boundCounts.set(binding.instanceId, (boundCounts.get(binding.instanceId) ?? 0) + 1)
+    return {
+      schemaVersion: 1,
+      revision: document.revisions.uar,
+      selectedInstanceId: document.config.uar.selectedInstanceId,
+      instances: document.config.uar.instances.map((instance) => {
+        const diagnostic = application.get('UarSidecarService').inspectInstance(instance.id)
+        const credentialPresence = credentials.get(instance.id) ?? { runtime: false, admin: false }
+        const checks = {
+          configured: true as const,
+          reachable: diagnostic.compatibility === 'configured' ? null : diagnostic.compatibility !== 'unreachable',
+          authenticated:
+            diagnostic.compatibility === 'configured' || diagnostic.compatibility === 'unreachable'
+              ? null
+              : diagnostic.compatibility !== 'unauthenticated',
+          compatible: ['configured', 'unreachable', 'unauthenticated'].includes(diagnostic.compatibility)
+            ? null
+            : diagnostic.compatibility !== 'incompatible',
+          operational: diagnostic.compatibility === 'operational'
+        }
+        return {
+          ...instance,
+          selected: instance.id === document.config.uar.selectedInstanceId,
+          credentialConfigured:
+            instance.ownership === 'managed' || (credentialPresence.runtime && credentialPresence.admin),
+          runtimeCredentialConfigured: instance.ownership === 'managed' || credentialPresence.runtime,
+          adminCredentialConfigured: instance.ownership === 'managed' || credentialPresence.admin,
+          boundSessions: boundCounts.get(instance.id) ?? 0,
+          checks,
+          ...diagnostic
+        }
+      }),
+      migration: { supported: false, reason: 'Live UAR session migration is not implemented' }
+    }
+  }
+
+  async saveUarInstance(
+    expectedRevision: number,
+    instance: UarRuntimeInstance,
+    runtimeCredential: UarInstanceCredentialMutation,
+    adminCredential: UarInstanceCredentialMutation
+  ): Promise<UarInstanceInventorySnapshot> {
+    assertUarEnabled()
+    if (instance.id === MANAGED_UAR_INSTANCE_ID) {
+      throw new Error('The managed UAR instance is configured through the local runtime settings')
+    }
+    await this.ensureInitialized()
+    await this.serializeConfigurationMutation(async () => {
+      const document = readIntegrationDocument()
+      if (document.revisions.uar !== expectedRevision) {
+        throw new StaleIntegrationRevisionError('uar', expectedRevision, document.revisions.uar)
+      }
+      const index = document.config.uar.instances.findIndex((candidate) => candidate.id === instance.id)
+      const activeBindings = application
+        .get('AgentSessionRuntimeService')
+        .listRuntimePlacements('uar')
+        .filter((binding) => binding.instanceId === instance.id).length
+      const existing = index === -1 ? undefined : document.config.uar.instances[index]
+      if (activeBindings && existing && JSON.stringify(existing) !== JSON.stringify(instance)) {
+        throw new Error(
+          `UAR instance ${instance.id} has ${activeBindings} active session binding(s) and cannot be changed`
+        )
+      }
+      const instances = [...document.config.uar.instances]
+      if (index === -1) instances.push(instance)
+      else instances[index] = instance
+      const rollbackCredential = await stageUarInstanceCredentials(instance.id, {
+        runtime: runtimeCredential,
+        admin: adminCredential
+      })
+      try {
+        const config = integrationConfigSchema.parse({
+          ...document.config,
+          uar: { ...document.config.uar, instances }
+        })
+        await writeIntegrationDocument({
+          schemaVersion: 4,
+          revisions: { ...document.revisions, uar: document.revisions.uar + 1 },
+          config
+        })
+      } catch (error) {
+        await rollbackCredential()
+        throw error
+      }
+      if (instance.ownership === 'external') application.get('UarSidecarService').forgetExternal(instance.id)
+    })
+    return this.readUarInstanceInventory()
+  }
+
+  async deleteUarInstance(expectedRevision: number, instanceId: string): Promise<UarInstanceInventorySnapshot> {
+    assertUarEnabled()
+    if (instanceId === MANAGED_UAR_INSTANCE_ID) throw new Error('The managed UAR instance cannot be deleted')
+    await this.ensureInitialized()
+    await this.serializeConfigurationMutation(async () => {
+      const document = readIntegrationDocument()
+      if (document.revisions.uar !== expectedRevision) {
+        throw new StaleIntegrationRevisionError('uar', expectedRevision, document.revisions.uar)
+      }
+      if (document.config.uar.selectedInstanceId === instanceId) {
+        throw new Error('Select another default UAR instance before deleting this one')
+      }
+      const activeBindings = application
+        .get('AgentSessionRuntimeService')
+        .listRuntimePlacements('uar')
+        .filter((binding) => binding.instanceId === instanceId).length
+      if (activeBindings) {
+        throw new Error(
+          `UAR instance ${instanceId} has ${activeBindings} active session binding(s) and cannot be deleted`
+        )
+      }
+      const instances = document.config.uar.instances.filter((instance) => instance.id !== instanceId)
+      if (instances.length === document.config.uar.instances.length)
+        throw new Error(`UAR instance ${instanceId} is missing`)
+      const rollbackCredential = await stageUarInstanceCredentials(instanceId, {
+        runtime: { operation: 'clear' },
+        admin: { operation: 'clear' }
+      })
+      try {
+        const config = integrationConfigSchema.parse({
+          ...document.config,
+          uar: { ...document.config.uar, instances }
+        })
+        await writeIntegrationDocument({
+          schemaVersion: 4,
+          revisions: { ...document.revisions, uar: document.revisions.uar + 1 },
+          config
+        })
+      } catch (error) {
+        await rollbackCredential()
+        throw error
+      }
+      application.get('UarSidecarService').forgetExternal(instanceId)
+    })
+    return this.readUarInstanceInventory()
+  }
+
+  async selectUarInstance(expectedRevision: number, instanceId: string): Promise<UarInstanceInventorySnapshot> {
+    assertUarEnabled()
+    await this.ensureInitialized()
+    await this.serializeConfigurationMutation(async () => {
+      const document = readIntegrationDocument()
+      if (document.revisions.uar !== expectedRevision) {
+        throw new StaleIntegrationRevisionError('uar', expectedRevision, document.revisions.uar)
+      }
+      const selected = document.config.uar.instances.find((instance) => instance.id === instanceId)
+      if (!selected?.enabled) throw new Error(`UAR instance ${instanceId} is unavailable or disabled`)
+      const config = integrationConfigSchema.parse({
+        ...document.config,
+        uar: { ...document.config.uar, selectedInstanceId: instanceId }
+      })
+      await writeIntegrationDocument({
+        schemaVersion: 4,
+        revisions: { ...document.revisions, uar: document.revisions.uar + 1 },
+        config
+      })
+    })
+    return this.readUarInstanceInventory()
+  }
+
+  async testUarInstance(instanceId: string): Promise<UarInstanceInventorySnapshot> {
+    assertUarEnabled()
+    await this.ensureInitialized()
+    await application.get('UarSidecarService').resolveInstance(instanceId)
+    return this.readUarInstanceInventory()
+  }
+
+  uarMigrationUnsupported() {
+    return { supported: false as const, reason: 'Live UAR session migration is not implemented' }
   }
 
   async readLiterCatalog(refresh = false): Promise<LiterGatewayCatalogSnapshot> {
@@ -479,6 +697,13 @@ export class PrometheusIntegrationService extends BaseService {
       if (current !== update.expectedRevision) {
         throw new StaleIntegrationRevisionError(update.feature, update.expectedRevision, current)
       }
+      if (
+        update.feature === 'uar' &&
+        (update.value.selectedInstanceId !== document.config.uar.selectedInstanceId ||
+          JSON.stringify(update.value.instances) !== JSON.stringify(document.config.uar.instances))
+      ) {
+        throw new Error('UAR instance inventory changes require the dedicated revisioned instance API')
+      }
     }
     const candidate = { ...document.config }
     for (const update of updates) {
@@ -488,6 +713,10 @@ export class PrometheusIntegrationService extends BaseService {
       if (update.feature === 'services') candidate.services = update.value
     }
     const config = integrationConfigSchema.parse(candidate)
+    const managedUar = config.uar.instances.find((instance) => instance.id === MANAGED_UAR_INSTANCE_ID)
+    if (managedUar) {
+      managedUar.endpoints = managedUarRuntimeInstance(config.uar.port).endpoints
+    }
     for (const root of config.filesystem.additionalRoots) {
       if (!path.isAbsolute(root) || !(await fs.stat(root)).isDirectory())
         throw new Error('prometheus.error.workspaceDirectory')
@@ -648,6 +877,12 @@ export class PrometheusIntegrationService extends BaseService {
           let sidecar: UarSidecarEndpoint
           if (action === 'uar-apply') {
             const document = readIntegrationDocument()
+            const selected = document.config.uar.instances.find(
+              (instance) => instance.id === document.config.uar.selectedInstanceId
+            )
+            if (selected?.ownership !== 'managed') {
+              throw new Error('Managed storage can only be applied while the managed UAR instance is selected')
+            }
             const secrets = await readSecrets()
             const candidate = {
               revision: document.revisions.uar,
@@ -672,10 +907,10 @@ export class PrometheusIntegrationService extends BaseService {
               throw error
             }
           } else {
-            sidecar = action === 'uar-restart' ? await uarService.restart() : await uarService.ensureReady()
+            sidecar = action === 'uar-restart' ? await uarService.restart() : await uarService.resolveSelected()
           }
           if (action === 'uar-check') {
-            const response = await uarService.adminRequest('/api/uar/capabilities', {}, sidecar.generation)
+            const response = await uarService.adminRequestInstance(sidecar, '/api/uar/capabilities')
             if (!response.ok) throw new Error(`UAR authenticated capability check failed with HTTP ${response.status}`)
             await response.body?.cancel()
           }
@@ -683,26 +918,36 @@ export class PrometheusIntegrationService extends BaseService {
             { id: 'uar.binary', state: 'operational' },
             { id: 'uar.process', state: 'listening', detail: sidecar.baseUrl },
             { id: 'uar.authentication', state: 'authenticated' },
+            { id: 'uar.identity', state: 'operational', detail: sidecar.observed.id },
+            { id: 'uar.profile', state: 'operational', detail: sidecar.observed.profile },
+            { id: 'uar.workspace', state: 'operational', detail: sidecar.observed.workspaceLocation },
             {
               id: 'uar.port',
               state: 'operational',
-              detail: `${sidecar.storage.profile.port} -> ${sidecar.effectivePort}`
+              detail: sidecar.storage
+                ? `${sidecar.storage.profile.port} -> ${sidecar.effectivePort}`
+                : String(sidecar.effectivePort)
             },
             { id: 'uar.capabilities', state: 'operational', detail: sidecar.capabilities.join(', ') },
             {
               id: 'uar.storage',
               state: 'operational',
-              detail: sidecar.storage.profile.backend
+              detail: sidecar.storage?.profile.backend ?? 'externally managed'
             }
           ]
           output(
             JSON.stringify({
               baseUrl: sidecar.baseUrl,
-              preferredPort: sidecar.storage.profile.port,
+              instanceId: sidecar.instanceId,
+              ownership: sidecar.ownership,
+              profile: sidecar.observed.profile,
+              workspaceLocation: sidecar.observed.workspaceLocation,
+              endpoints: sidecar.observed.endpoints,
+              ...(sidecar.storage ? { preferredPort: sidecar.storage.profile.port } : {}),
               effectivePort: sidecar.effectivePort,
-              backend: sidecar.storage.profile.backend,
-              revision: sidecar.storage.revision,
-              ...(sidecar.storage.profile.backend === 'remote'
+              backend: sidecar.storage?.profile.backend ?? 'external',
+              ...(sidecar.storage ? { revision: sidecar.storage.revision } : {}),
+              ...(sidecar.storage?.profile.backend === 'remote'
                 ? {
                     endpoint: sidecar.storage.profile.endpoint,
                     namespace: sidecar.storage.profile.namespace,

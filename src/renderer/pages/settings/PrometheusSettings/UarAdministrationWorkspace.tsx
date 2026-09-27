@@ -21,6 +21,7 @@ import type { UarAdministrationSnapshot } from '@shared/types/prometheusIntegrat
 import { UarAgentsPanel } from './UarAgentsPanel'
 import { UarApprovalLifecyclePanel } from './UarApprovalLifecyclePanel'
 import { UarCompilerPanel } from './UarCompilerPanel'
+import { UarInstancesPanel } from './UarInstancesPanel'
 import { UarOperationalPanel } from './UarOperationalPanel'
 import { UarPresentationsPanel } from './UarPresentationsPanel'
 import { UarProvidersModelsPanel } from './UarProvidersModelsPanel'
@@ -31,6 +32,12 @@ const GROUPS = ['runtime', 'agents', 'experience', 'administration'] as const
 
 type SurfaceProjection = UarAdministrationSnapshot['surfaces'][number]
 const EMPTY_SURFACES: UarAdministrationSnapshot['surfaces'] = []
+const HOST_INSTANCE_SURFACE: SurfaceProjection = {
+  id: 'instances',
+  group: 'runtime',
+  availability: 'host_controlled',
+  methods: []
+}
 
 function navText(translate: ReturnType<typeof useTranslation>['t'], key: string) {
   return translate('settings.prometheus.integration.uarAdmin.' + key)
@@ -156,7 +163,14 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
     void load()
   }, [load])
 
-  const surfaces = snapshot?.surfaces ?? EMPTY_SURFACES
+  const advertisedSurfaces = snapshot?.surfaces ?? EMPTY_SURFACES
+  const surfaces = useMemo(
+    () =>
+      advertisedSurfaces.some((surface) => surface.id === HOST_INSTANCE_SURFACE.id)
+        ? advertisedSurfaces
+        : [HOST_INSTANCE_SURFACE, ...advertisedSurfaces],
+    [advertisedSurfaces]
+  )
   const requestedPanel = typeof search.panel === 'string' ? search.panel : undefined
   const selectedId = surfaces.some((surface) => surface.id === requestedPanel) ? requestedPanel! : 'overview'
   const selected = surfaces.find((surface) => surface.id === selectedId)
@@ -175,14 +189,17 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
   if (loading) return <LoadingWorkspace />
   if (error || !snapshot) {
     return (
-      <SettingGroup>
-        <SettingTitle>{navText(t, 'loadFailed')}</SettingTitle>
-        <SettingDescription>{error ?? navText(t, 'loadFailedDescription')}</SettingDescription>
-        <Button variant="outline" size="sm" className="mt-4" onClick={() => void load()}>
-          <RefreshCw size={14} aria-hidden="true" />
-          {navText(t, 'retry')}
-        </Button>
-      </SettingGroup>
+      <div className="space-y-5">
+        <SettingGroup>
+          <SettingTitle>{navText(t, 'loadFailed')}</SettingTitle>
+          <SettingDescription>{error ?? navText(t, 'loadFailedDescription')}</SettingDescription>
+          <Button variant="outline" size="sm" className="mt-4" onClick={() => void load()}>
+            <RefreshCw size={14} aria-hidden="true" />
+            {navText(t, 'retry')}
+          </Button>
+        </SettingGroup>
+        <UarInstancesPanel />
+      </div>
     )
   }
 
@@ -256,6 +273,8 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
             </>
           ) : selectedId === 'runtime-settings' ? (
             <UarRuntimeSettingsPanel />
+          ) : selectedId === 'instances' ? (
+            <UarInstancesPanel />
           ) : selectedId === 'providers-models' ? (
             <UarProvidersModelsPanel />
           ) : selectedId === 'agents' ? (

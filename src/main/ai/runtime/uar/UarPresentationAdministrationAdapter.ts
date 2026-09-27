@@ -87,8 +87,8 @@ async function responseBody(response: Response): Promise<unknown> {
 
 async function request(path: string, init: RequestInit = {}): Promise<void> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
-  await responseBody(await sidecar.adminRequest(path, init, endpoint.generation))
+  const endpoint = await sidecar.resolveSelected()
+  await responseBody(await sidecar.adminRequestInstance(endpoint, path, init))
 }
 
 function projectPresentation(input: z.infer<typeof rawPresentationSchema>): UarPresentation {
@@ -140,8 +140,8 @@ function projectComponent(input: z.infer<typeof rawComponentSchema>): UarA2uiCom
 
 export async function readUarPresentations(): Promise<UarPresentationAdministrationSnapshot> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
-  const read = async (path: string) => responseBody(await sidecar.adminRequest(path, {}, endpoint.generation))
+  const endpoint = await sidecar.resolveSelected()
+  const read = async (path: string) => responseBody(await sidecar.adminRequestInstance(endpoint, path))
   const [catalogBody, schemaBody, customSchemaBody, builtinBody, componentBody, policyBody] = await Promise.all([
     read('/api/uar/presentations'),
     read('/api/uar/a2ui/schemas'),

@@ -4,6 +4,7 @@ import { toolApprovalRegistry, type DispatchDecision } from '@main/ai/toolApprov
 
 import type { AgentRuntimeEvent } from '../types'
 import type { UarHostMcpBridge } from './UarHostMcpBridge'
+import type { UarSidecarEndpoint } from './UarSidecarService'
 
 const logger = loggerService.withContext('UarToolApprovalController')
 
@@ -21,6 +22,7 @@ interface UarToolApprovalOptions {
   agentId: string
   runId: string
   generation: number
+  endpoint: UarSidecarEndpoint
   principal: string
   signal: AbortSignal
   bridge: UarHostMcpBridge
@@ -129,16 +131,18 @@ export class UarToolApprovalController {
   }
 
   private async resolve(approvalId: string | undefined, approved: boolean): Promise<void> {
-    const response = await application.get('UarSidecarService').requestCurrent(
-      `/api/uar/runs/${encodeURIComponent(this.options.runId)}/tool-approval`,
-      this.options.principal,
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ approved, ...(approvalId ? { approval_id: approvalId } : {}) })
-      },
-      this.options.generation
-    )
+    const response = await application
+      .get('UarSidecarService')
+      .requestInstanceCurrent(
+        this.options.endpoint,
+        `/api/uar/runs/${encodeURIComponent(this.options.runId)}/tool-approval`,
+        this.options.principal,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ approved, ...(approvalId ? { approval_id: approvalId } : {}) })
+        }
+      )
     if (!response) throw new Error('UAR restarted before the tool approval was resolved')
     if (!response.ok) {
       const detail = (await response.text()).slice(0, 1_000).trim()

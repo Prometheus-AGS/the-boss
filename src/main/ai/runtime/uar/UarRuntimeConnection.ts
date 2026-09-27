@@ -19,10 +19,12 @@ import { warmMcpToolCatalogs } from '@main/ai/runtime/pi/piMcpToolAdapter'
 import { skillService } from '@main/ai/skills/SkillService'
 import { wrapSteerReminder } from '@main/ai/steerReminder'
 import { toolApprovalRegistry } from '@main/ai/toolApproval/ToolApprovalRegistry'
+import { readIntegrationConfig } from '@main/services/prometheus/integrationConfig'
 import type { AgentEntity } from '@shared/data/api/schemas/agents'
 import type { UarCatalogLink } from '@shared/data/api/schemas/agents'
 import type { AgentSessionMessageEntity } from '@shared/data/api/schemas/agentSessionMessages'
 import type { AgentSessionEntity } from '@shared/data/api/schemas/agentSessions'
+import type { UarSessionPlacement } from '@shared/types/uarServiceInstance'
 
 import { AsyncEventQueue } from '../AsyncEventQueue'
 import type {
@@ -41,6 +43,8 @@ import { createUarHostMcpBridge, type UarHostMcpBridge } from './UarHostMcpBridg
 import { resolveUarHostToolDisposition } from './uarHostToolPolicy'
 import { resolveUarModelAssignment, type ResolvedUarModelAssignment } from './uarModelAssignments'
 import { uarPrincipalForSession } from './uarPrincipal'
+import { decodeUarSessionPlacement, encodeUarSessionPlacement } from './uarSessionPlacement'
+import type { UarSidecarEndpoint } from './UarSidecarService'
 import { toUarToolName } from './uarToolNames'
 
 const logger = loggerService.withContext('UarRuntimeConnection')
@@ -82,7 +86,21 @@ type CatalogCandidate = {
   sourceRevision: string
 }
 
-type CreateRunResponse = { run_id?: unknown; stream_url?: unknown }
+type CreateRunResponse = {
+  run_id?: unknown
+  stream_url?: unknown
+  effective_service_binding?: {
+    bindingId?: unknown
+    bindingRevision?: unknown
+    instanceId?: unknown
+    profile?: unknown
+    workspaceLocation?: unknown
+    endpoints?: unknown
+    capabilities?: unknown
+    intent?: unknown
+    credentialRef?: unknown
+  }
+}
 
 export class UarRuntimeConnection implements AgentRuntimeConnection {
   private readonly eventQueue = new AsyncEventQueue<AgentRuntimeEvent>()
@@ -91,7 +109,10 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
   private runningTurn?: { runId: string; generation: number; abort: AbortController }
   private turnPromise: Promise<void> = Promise.resolve()
   private attachedGeneration?: number
-  private resumeTokenEmitted = false
+  private emittedResumeToken?: string
+  private placement?: UarSessionPlacement
+  private endpoint?: UarSidecarEndpoint
+  private reattaching = false
   private initialSignature = ''
   private _usageCapture?: AgentSessionUsageCapture
 
@@ -106,7 +127,15 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
   }
 
   async start(): Promise<this> {
-    await application.get('UarSidecarService').ensureReady()
+    const config = readIntegrationConfig().uar
+    const placement = decodeUarSessionPlacement(
+      this.input.resumeToken,
+      this.input.nativeSessionId ?? this.input.sessionId
+    )
+    if (!placement.instanceId) placement.instanceId = config.selectedInstanceId
+    this.reattaching = Boolean(this.input.resumeToken && placement.sourceRunId)
+    this.placement = placement
+    this.endpoint = await application.get('UarSidecarService').resolveInstance(placement.instanceId)
     const agent = agentService.getAgent(this.input.agentId)
     if (!agent) throw new Error(`UAR agent ${this.input.agentId} is unavailable`)
     this._usageCapture = (
@@ -153,14 +182,16 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
     const running = this.runningTurn
     if (running) {
       await (
-        application
-          .get('UarSidecarService')
-          .requestCurrent(
-            `/api/uar/runs/${encodeURIComponent(running.runId)}/cancel`,
-            this.principal,
-            { method: 'POST' },
-            running.generation
-          ) ?? Promise.resolve()
+        this.endpoint
+          ? (application
+              .get('UarSidecarService')
+              .requestInstanceCurrent(
+                this.endpoint,
+                `/api/uar/runs/${encodeURIComponent(running.runId)}/cancel`,
+                this.principal,
+                { method: 'POST' }
+              ) ?? Promise.resolve())
+          : Promise.resolve()
       ).catch(() => undefined)
       running.abort.abort()
     }
@@ -169,7 +200,14 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
   }
 
   private async runTurn(input: AgentRuntimeUserInput, admitted: () => void): Promise<void> {
-    const sidecar = await application.get('UarSidecarService').ensureReady()
+    const placement = this.placement
+    if (!placement) throw new Error('UAR session placement is unavailable')
+    const sidecar = await application.get('UarSidecarService').resolveInstance(placement.instanceId)
+    this.endpoint = sidecar
+    const configuredInstance = readIntegrationConfig().uar.instances.find(
+      (instance) => instance.id === placement.instanceId
+    )
+    if (!configuredInstance) throw new Error(`UAR instance ${placement.instanceId} is no longer configured`)
     const session = agentSessionService.getById(this.input.sessionId)
     const storedAgent = agentService.getAgent(this.input.agentId)
     if (!storedAgent || !storedAgent.model) {
@@ -190,31 +228,41 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
       const catalog = await this.ensureCatalogAgent(storedAgent, desiredAssignment, skillIds)
       const assignment = this.resolveCatalogAssignment(catalog, desiredAssignment)
       this._usageCapture = assignment.usageCapture
+      const placementIntent = this.reattaching ? 'reattach' : 'new'
       const body = {
         agent_id: catalog.id,
         input: this.buildInput(input),
-        session_id: this.input.sessionId,
+        session_id: placement.nativeSessionId,
         ...(assignment.credential ? { run_credentials: [assignment.credential] } : {}),
         working_directory: workspace,
         ...(bridge.servers.length > 0 ? { mcp_servers: bridge.servers } : {}),
         tool_admission: bridge.toolAdmission,
         presentation_mode: 'auto',
         client_rendering: { a2ui_profiles: [UAR_A2UI_PROFILE] },
+        service_placement: {
+          intent: placementIntent,
+          expectedInstanceId: configuredInstance.expectedRuntimeId,
+          expectedProfile: configuredInstance.profile,
+          expectedWorkspaceLocation: sidecar.observed.workspaceLocation,
+          requiredCapabilities: configuredInstance.requiredCapabilities,
+          expectedEndpoints: sidecar.observed.endpoints,
+          ...(placement.bindingId ? { bindingId: placement.bindingId } : {}),
+          ...(placement.bindingRevision === undefined ? {} : { bindingRevision: placement.bindingRevision }),
+          ...(configuredInstance.runtimeCredentialRef ? { credentialRef: configuredInstance.runtimeCredentialRef } : {})
+        },
         ...(this.mapReasoningEffort() ? { reasoning_effort: this.mapReasoningEffort() } : {}),
-        ...(coldSession
-          ? { history: { session_id: this.input.sessionId, messages: this.loadHistory(input.message.id) } }
+        ...(coldSession && placementIntent === 'new'
+          ? { history: { session_id: placement.nativeSessionId, messages: this.loadHistory(input.message.id) } }
           : {})
       }
-      const response = await application.get('UarSidecarService').request(
-        '/api/uar/runs',
-        this.principal,
-        {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(body)
-        },
-        sidecar.generation
-      )
+      const runPath = this.reattaching
+        ? `/api/uar/runs/${encodeURIComponent(placement.sourceRunId!)}/resume`
+        : '/api/uar/runs'
+      const response = await application.get('UarSidecarService').requestInstance(sidecar, runPath, this.principal, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body)
+      })
       const secrets = [
         ...(assignment.credential ? [assignment.credential.api_key, assignment.credential.base_url] : []),
         ...bridge.redactions
@@ -224,10 +272,52 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
       if (typeof created.run_id !== 'string' || typeof created.stream_url !== 'string') {
         throw new Error('UAR returned an invalid run response')
       }
+      const binding = created.effective_service_binding
+      if (!binding) throw new Error('UAR omitted the effective service binding for the admitted run')
+      if (binding.intent !== placementIntent) throw new Error('UAR admitted the run with a different placement intent')
+      if (
+        binding.instanceId !== configuredInstance.expectedRuntimeId ||
+        binding.profile !== configuredInstance.profile
+      ) {
+        throw new Error('UAR admitted the run on a different service instance or execution profile')
+      }
+      if (binding.workspaceLocation !== sidecar.observed.workspaceLocation) {
+        throw new Error('UAR admitted the run with a different workspace location')
+      }
+      const bindingEndpoints =
+        typeof binding.endpoints === 'object' && binding.endpoints !== null
+          ? (binding.endpoints as Record<string, unknown>)
+          : undefined
+      if (
+        !bindingEndpoints ||
+        (['runtime', 'administration', 'models', 'console'] as const).some(
+          (role) => bindingEndpoints[role] !== sidecar.observed.endpoints[role]
+        )
+      ) {
+        throw new Error('UAR admitted the run with different endpoint roles')
+      }
+      const bindingCapabilities = Array.isArray(binding.capabilities) ? binding.capabilities : undefined
+      if (
+        !bindingCapabilities ||
+        configuredInstance.requiredCapabilities.some((capability) => !bindingCapabilities.includes(capability))
+      ) {
+        throw new Error('UAR admitted the run without the configured capabilities')
+      }
+      if (
+        configuredInstance.runtimeCredentialRef &&
+        binding.credentialRef !== configuredInstance.runtimeCredentialRef
+      ) {
+        throw new Error('UAR admitted the run with a different credential reference')
+      }
+      if (typeof binding.bindingId === 'string') placement.bindingId = binding.bindingId
+      if (typeof binding.bindingRevision === 'number') placement.bindingRevision = binding.bindingRevision
+      placement.sourceRunId = created.run_id
+      this.reattaching = false
       this.attachedGeneration = sidecar.generation
-      if (!this.resumeTokenEmitted) {
-        this.resumeTokenEmitted = true
-        this.eventQueue.push({ type: 'resume-token', token: this.input.sessionId })
+      const resumeToken = encodeUarSessionPlacement(placement)
+      if (this.emittedResumeToken !== resumeToken) {
+        this.emittedResumeToken = resumeToken
+        this.eventQueue.push({ type: 'resume-token', token: resumeToken })
       }
       const abort = new AbortController()
       this.runningTurn = { runId: created.run_id, generation: sidecar.generation, abort }
@@ -238,6 +328,7 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
           agentId: this.input.agentId,
           runId: created.run_id,
           generation: sidecar.generation,
+          endpoint: sidecar,
           principal: this.principal,
           signal: abort.signal,
           bridge,
@@ -249,15 +340,12 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
           const replayCursor = adapter.replayCursor()
           if (attempt > 0) adapter.prepareReconnect()
           try {
-            const stream = await application.get('UarSidecarService').request(
-              `${created.stream_url}?stream_mode=agui_spec`,
-              this.principal,
-              {
+            const stream = await application
+              .get('UarSidecarService')
+              .requestInstance(sidecar, `${created.stream_url}?stream_mode=agui_spec`, this.principal, {
                 signal: abort.signal,
                 headers: { 'last-event-id': attempt > 0 ? replayCursor : '0' }
-              },
-              sidecar.generation
-            )
+              })
             if (!stream.ok) throw await this.responseError(stream, 'UAR stream failed', secrets)
             await adapter.consume(stream)
             streamError = new Error('UAR stream ended before a terminal event')
@@ -520,16 +608,14 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
   }
 
   private async fetchCatalogAgent(agentId: string): Promise<UarAgentArtifact | null> {
-    const response = await application
-      .get('UarSidecarService')
-      .request(`/api/agents/${encodeURIComponent(agentId)}`, this.principal)
+    const response = await this.runtimeRequest(`/api/agents/${encodeURIComponent(agentId)}`)
     if (response.status === 404) return null
     if (!response.ok) throw await this.responseError(response, 'UAR catalog lookup failed')
     return (await response.json()) as UarAgentArtifact
   }
 
   private async createCatalogAgent(artifact: UarAgentArtifact): Promise<UarAgentArtifact> {
-    const response = await application.get('UarSidecarService').request('/api/agents', this.principal, {
+    const response = await this.runtimeRequest('/api/agents', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(artifact)
@@ -543,13 +629,11 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
     artifact: UarAgentArtifact,
     expectedRevision: string
   ): Promise<UarAgentArtifact> {
-    const response = await application
-      .get('UarSidecarService')
-      .request(`/api/agents/${encodeURIComponent(agentId)}`, this.principal, {
-        method: 'PUT',
-        headers: { 'content-type': 'application/json', 'if-match': `"${expectedRevision}"` },
-        body: JSON.stringify(artifact)
-      })
+    const response = await this.runtimeRequest(`/api/agents/${encodeURIComponent(agentId)}`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json', 'if-match': `"${expectedRevision}"` },
+      body: JSON.stringify(artifact)
+    })
     if (response.status === 409) {
       throw new Error(
         `UAR catalog agent "${agentId}" changed while The Boss was updating it; reload and resolve the conflict`
@@ -657,10 +741,16 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
           skillIds,
           linkedChannel,
           application.get('PreferenceService').get('app.browser.agent_control.enabled'),
-          [...(this.input.knowledgeBaseIds ?? [])].sort()
+          [...(this.input.knowledgeBaseIds ?? [])].sort(),
+          this.placement?.instanceId
         ])
       )
       .digest('hex')
+  }
+
+  private runtimeRequest(pathname: string, init: RequestInit = {}): Promise<Response> {
+    if (!this.endpoint) return Promise.reject(new Error('UAR session placement is unavailable'))
+    return application.get('UarSidecarService').requestInstance(this.endpoint, pathname, this.principal, init)
   }
 
   private async responseError(response: Response, prefix: string, secrets: readonly string[] = []): Promise<Error> {

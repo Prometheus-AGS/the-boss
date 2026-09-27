@@ -67,6 +67,12 @@ import {
   type UarSettingsSnapshot,
   type UarSettingsUpdateResult
 } from '@shared/types/prometheusIntegration'
+import {
+  uarInstanceDeleteSchema,
+  uarInstanceSaveSchema,
+  uarInstanceSelectSchema,
+  type UarInstanceInventorySnapshot
+} from '@shared/types/uarServiceInstance'
 
 import { defineRoute } from '../define'
 
@@ -257,6 +263,30 @@ export const prometheusRequestSchemas = {
   'prometheus.uar.admin.diagnose_authority': defineRoute({
     input: z.object({}).strict(),
     output: z.custom<UarAuthorityDiagnosticResult>()
+  }),
+  'prometheus.uar.instances.read': defineRoute({
+    input: z.object({}).strict(),
+    output: z.custom<UarInstanceInventorySnapshot>()
+  }),
+  'prometheus.uar.instances.save': defineRoute({
+    input: uarInstanceSaveSchema,
+    output: z.custom<UarInstanceInventorySnapshot>()
+  }),
+  'prometheus.uar.instances.delete': defineRoute({
+    input: uarInstanceDeleteSchema,
+    output: z.custom<UarInstanceInventorySnapshot>()
+  }),
+  'prometheus.uar.instances.select': defineRoute({
+    input: uarInstanceSelectSchema,
+    output: z.custom<UarInstanceInventorySnapshot>()
+  }),
+  'prometheus.uar.instances.test': defineRoute({
+    input: z.object({ instanceId: z.string().min(1).max(128) }).strict(),
+    output: z.custom<UarInstanceInventorySnapshot>()
+  }),
+  'prometheus.uar.instances.migrate': defineRoute({
+    input: z.object({ sessionId: z.string().min(1).max(256), targetInstanceId: z.string().min(1).max(128) }).strict(),
+    output: z.object({ supported: z.literal(false), reason: z.string() })
   }),
   'prometheus.uar.operations.read': defineRoute({
     input: z.object({}).strict(),
