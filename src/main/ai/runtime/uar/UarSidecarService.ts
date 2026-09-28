@@ -1,5 +1,5 @@
 import type { ChildProcess } from 'node:child_process'
-import { createHash, randomBytes } from 'node:crypto'
+import { randomBytes } from 'node:crypto'
 import { constants } from 'node:fs'
 import { chmod, copyFile, mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -130,7 +130,7 @@ export class UarSidecarService extends BaseService {
     await this.operation.runExclusive(() => this.stopOwnedProcess())
   }
 
-  async ensureReady(): Promise<UarSidecarEndpoint> {
+  async ensureReady(): Promise<UarSidecarEndpoint & { storage: NonNullable<UarSidecarEndpoint['storage']> }> {
     assertUarEnabled()
     const running = await this.ensureRunning()
     return {
@@ -490,7 +490,6 @@ export class UarSidecarService extends BaseService {
       UAR_SERVICE_INSTANCE__WORKSPACE_LOCATION: managedInstance.workspaceLocation,
       UAR_SECURITY__SETTINGS_MUTATION_AUTH_REQUIRED: 'true',
       UAR_SECURITY__SETTINGS_ADMIN_KEY: adminKey,
-      UAR_SERVICE_INSTANCE__INSTANCE_ID: `urn:boss:uar:${createHash('sha256').update(adminKey).digest('hex')}`,
       CREDENTIAL_ENCRYPTION_KEY: credentialEncryptionKey,
       UAR_PERSISTENCE__PROVIDER: 'surreal',
       ...persistence,
@@ -752,7 +751,7 @@ export class UarSidecarService extends BaseService {
     return child.exitCode === null && child.signalCode === null
   }
 
-  private storageStatus(storage: AppliedUarStorage): UarSidecarEndpoint['storage'] {
+  private storageStatus(storage: AppliedUarStorage): NonNullable<UarSidecarEndpoint['storage']> {
     return { revision: storage.revision, profile: storage.profile }
   }
 }

@@ -90,6 +90,7 @@ const INSTANCE_TRANSLATION_KEYS = {
 } as const
 
 type InstanceTranslationKey = keyof typeof INSTANCE_TRANSLATION_KEYS
+const INSTANCE_CHECK_KEYS = ['configured', 'reachable', 'authenticated', 'compatible', 'operational'] as const
 
 export function UarInstancesPanel() {
   const { t } = useTranslation()
@@ -284,16 +285,19 @@ export function UarInstancesPanel() {
                 </div>
               ))}
               <div className="mt-3 flex flex-wrap gap-2" aria-label={tr('checks')}>
-                {Object.entries(instance.checks).map(([check, result]) => (
-                  <Badge
-                    key={check}
-                    variant="outline"
-                    className={
-                      result === true ? 'text-success' : result === false ? 'text-error' : 'text-muted-foreground'
-                    }>
-                    {result === true ? '✓' : result === false ? '×' : '—'} {tr(`check.${check}`)}
-                  </Badge>
-                ))}
+                {INSTANCE_CHECK_KEYS.map((check) => {
+                  const result = instance.checks[check]
+                  return (
+                    <Badge
+                      key={check}
+                      variant="outline"
+                      className={
+                        result === true ? 'text-success' : result === false ? 'text-error' : 'text-muted-foreground'
+                      }>
+                      {result === true ? '✓' : result === false ? '×' : '—'} {tr(`check.${check}`)}
+                    </Badge>
+                  )
+                })}
               </div>
               {instance.observed && (
                 <div className="mt-2 space-y-1 text-xs text-muted-foreground">
