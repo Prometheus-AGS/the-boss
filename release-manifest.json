@@ -1,5 +1,5 @@
 {
-  "version": "2.2.6",
+  "version": "2.2.7",
   "profile": "uar-enabled",
   "features": {
     "uar": true
@@ -10,44 +10,24 @@
     "darwin-arm64",
     "darwin-x64"
   ],
-  "source": "47e18cb9fdecb36b81eb29ae5af92e9d40c4ff77",
-  "publishedAt": "2026-09-28T16:28:40.793Z",
+  "source": "79b95a765a2bcd0000eb84178935ef1afd7227fb",
+  "publishedAt": "2026-09-28T22:33:51.270Z",
   "pendingPlatforms": [
+    "win32-arm64",
+    "darwin-arm64",
     "darwin-x64"
   ],
   "artifacts": [
     {
-      "name": "The-Boss-2.2.6-win-x64-setup.exe",
-      "size": 465482076,
-      "sha256": "21021f4146d2d413f74bffafd2d2cce084303fe098b55ca641fb8148f8d77d8d",
-      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.6/The-Boss-2.2.6-win-x64-setup.exe",
+      "name": "The-Boss-2.2.7-win-x64-setup.exe",
+      "size": 465677721,
+      "sha256": "f421b30df4b92484386b921f5d5b1730f4469d085441b0342708b663026c476f",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.7/The-Boss-2.2.7-win-x64-setup.exe",
       "signing": "unsigned",
       "profile": "uar-enabled",
       "platform": "win32",
       "arch": "x64",
-      "source": "47e18cb9fdecb36b81eb29ae5af92e9d40c4ff77"
-    },
-    {
-      "name": "The-Boss-2.2.6-mac-arm64.dmg",
-      "size": 622596071,
-      "sha256": "7947518cada169a7e5fb903f7c6d284e16dc5e3c3212fa737d8563c62b50b5ea",
-      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.6/The-Boss-2.2.6-mac-arm64.dmg",
-      "signing": "Developer ID (notarized)",
-      "profile": "uar-enabled",
-      "platform": "darwin",
-      "arch": "arm64",
-      "source": "47e18cb9fdecb36b81eb29ae5af92e9d40c4ff77"
-    },
-    {
-      "name": "The-Boss-2.2.6-win-arm64-setup.exe",
-      "size": 433471676,
-      "sha256": "1118bcc0e07753c445302aeeafa8fc7cadb059326f18a285979f4aec81a92b12",
-      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.6/The-Boss-2.2.6-win-arm64-setup.exe",
-      "signing": "unsigned",
-      "profile": "uar-enabled",
-      "platform": "win32",
-      "arch": "arm64",
-      "source": "47e18cb9fdecb36b81eb29ae5af92e9d40c4ff77"
+      "source": "79b95a765a2bcd0000eb84178935ef1afd7227fb"
     }
   ]
 }
