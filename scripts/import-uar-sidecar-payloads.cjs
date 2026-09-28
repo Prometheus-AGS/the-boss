@@ -165,6 +165,11 @@ async function main() {
   const expectedVersion = pins.tools?.['uar-sidecar']?.version
 
   if (!/^[a-f0-9]{40}$/.test(uarSource.revision ?? '')) throw new Error('Integration UAR source revision is not pinned')
+  for (const [platform, revision] of Object.entries(uarSource.platformRevisions ?? {})) {
+    if (!requiredPlatforms.has(platform) || !/^[a-f0-9]{40}$/.test(revision)) {
+      throw new Error(`Invalid integration UAR source revision for ${platform}`)
+    }
+  }
   if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(uarSource.repository ?? '')) {
     throw new Error('Integration UAR source repository is invalid')
   }
@@ -198,7 +203,9 @@ async function main() {
   }
   fs.writeFileSync(manifestPath, `${JSON.stringify(nextManifest, null, 2)}\n`)
 
-  console.log(`Imported UAR sidecar payloads for ${[...platforms].join(', ')} from ${uarSource.revision}`)
+  console.log(
+    `Imported UAR sidecar payloads: ${records.map(({ platform, package: asset }) => `${platform} from ${asset.source}`).join(', ')}`
+  )
 }
 
 main().catch((error) => {
