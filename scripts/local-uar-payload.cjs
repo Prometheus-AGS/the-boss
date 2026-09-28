@@ -169,9 +169,10 @@ function stageLocalUarPayload(binaryDirectory) {
       fs.mkdirSync(path.dirname(destination), { recursive: true })
       fs.copyFileSync(path.join(packageRoot, ...entry.path.split('/')), destination)
     }
-    fs.copyFileSync(
-      path.join(packageRoot, 'payload-manifest.json'),
-      path.join(binaryDirectory, 'payload-manifest.json')
+    const manifest = JSON.parse(fs.readFileSync(path.join(packageRoot, 'payload-manifest.json'), 'utf8'))
+    fs.writeFileSync(
+      path.join(binaryDirectory, 'payload-manifest.json'),
+      `${JSON.stringify({ ...manifest, archiveSha256: marker.archiveSha256 }, null, 2)}\n`
     )
     fs.chmodSync(path.join(binaryDirectory, 'uar-sidecar'), 0o755)
     fs.writeFileSync(path.join(binaryDirectory, '.uar-sidecar-version'), pin.version)
