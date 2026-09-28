@@ -6,7 +6,7 @@ on:
       release_version:
         description: Frozen application version (must match package.json)
         required: true
-        default: 2.2.5
+        default: 2.2.6
         type: string
       release_profile:
         description: Customer release profile
