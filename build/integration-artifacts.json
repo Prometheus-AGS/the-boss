@@ -1,8 +1,10 @@
 {
   "schema": 1,
   "platforms": [
+    "darwin-x64",
     "darwin-arm64",
-    "win32-x64"
+    "win32-x64",
+    "win32-arm64"
   ],
   "sources": {
     "compass": {
@@ -27,7 +29,7 @@
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "92620d40419d5b55af94e2aef0a0db886aa9aadc"
+      "revision": "ba7233875f8df3b2add68fc487d364428432c07d"
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
@@ -49,7 +51,7 @@
             "compass"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/compass-darwin-x64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/compass-darwin-x64"
         },
         "darwin-arm64": {
           "sha256": "706bda14f4867cf99e29c92c5c42c90b021e84c92f709ba96791e8c07c4d7e55",
@@ -57,7 +59,7 @@
             "compass"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/compass-darwin-arm64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/compass-darwin-arm64"
         },
         "win32-x64": {
           "sha256": "9c697e1fc4412fc462181559aa2b6af559f97508064ce03894abbbdcef732f33",
@@ -65,7 +67,7 @@
             "compass.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/compass-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/compass-win32-x64.exe"
         },
         "win32-arm64": {
           "sha256": "35f77fc4e8155ff3d3ab51155b9324d98b6b5cb8809492bd26ce6147b4ec60d9",
@@ -73,7 +75,7 @@
             "compass.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/compass-win32-arm64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/compass-win32-arm64.exe"
         }
       }
     },
@@ -87,7 +89,7 @@
             "rust-mcp-filesystem"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/rust-mcp-filesystem-darwin-x64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/rust-mcp-filesystem-darwin-x64"
         },
         "darwin-arm64": {
           "sha256": "8c473b7d8492967a1d043bd2d1efac9be5403d85b455928f23cb0ebd4c69f42c",
@@ -95,7 +97,7 @@
             "rust-mcp-filesystem"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/rust-mcp-filesystem-darwin-arm64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/rust-mcp-filesystem-darwin-arm64"
         },
         "win32-x64": {
           "sha256": "a4043ed6bc651d8d8d196a2bfb40b2266c1fffc86f73e1609d07217d2108756d",
@@ -103,7 +105,7 @@
             "rust-mcp-filesystem.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/rust-mcp-filesystem-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/rust-mcp-filesystem-win32-x64.exe"
         },
         "win32-arm64": {
           "sha256": "7703105ca9bd841f7bf607d2d19d26fb3c310a652137cdecdab6d048c0adea9a",
@@ -111,7 +113,7 @@
             "rust-mcp-filesystem.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/rust-mcp-filesystem-win32-arm64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/rust-mcp-filesystem-win32-arm64.exe"
         }
       }
     },
@@ -125,7 +127,7 @@
             "prometheus"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/prometheus-darwin-x64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/prometheus-darwin-x64"
         },
         "darwin-arm64": {
           "sha256": "ddf4df1252e1fd97da8b1be854f901292a3517075e2af65964c44ec4779262be",
@@ -133,7 +135,7 @@
             "prometheus"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/prometheus-darwin-arm64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/prometheus-darwin-arm64"
         },
         "win32-x64": {
           "sha256": "5d73625eee7765a4e3ce055ed3c1469ef43eb7745151a0048072e6e3c653ea10",
@@ -141,7 +143,7 @@
             "prometheus.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/prometheus-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/prometheus-win32-x64.exe"
         },
         "win32-arm64": {
           "sha256": "27c14ee09d44ca07dac3bf1bd574ffb3524255580e1a53ab9ce97512b2e5863f",
@@ -149,7 +151,7 @@
             "prometheus.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/prometheus-win32-arm64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/prometheus-win32-arm64.exe"
         }
       }
     },
@@ -163,7 +165,7 @@
             "pk"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/pk-darwin-x64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/pk-darwin-x64"
         },
         "darwin-arm64": {
           "sha256": "104561ba5c6c0c994405c1eb8da36a9e8ab8dff051c1140e3b06471345b93e73",
@@ -171,7 +173,7 @@
             "pk"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/pk-darwin-arm64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/pk-darwin-arm64"
         },
         "win32-x64": {
           "sha256": "0939602ff07bb53a5e4ebb57257c9f394570c543bbc33396fbb1d2679781bf97",
@@ -179,7 +181,7 @@
             "pk.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/pk-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/pk-win32-x64.exe"
         },
         "win32-arm64": {
           "sha256": "dc479d10f7eca5d1c2efe625fdfa86d6a641a7489d3ceab439edd5765a3d8d45",
@@ -187,7 +189,7 @@
             "pk.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/pk-win32-arm64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/pk-win32-arm64.exe"
         }
       }
     },
@@ -195,13 +197,21 @@
       "name": "liter-llm",
       "version": "2.1.1",
       "packages": {
+        "darwin-x64": {
+          "sha256": "a2f28aeb72b6d1c97557b50070c498f11442ebc008329341b79b578272747682",
+          "binaries": [
+            "liter-llm"
+          ],
+          "archive": "none",
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/liter-llm-darwin-x64"
+        },
         "darwin-arm64": {
           "sha256": "02b0433f91e0a964958d1441149f13bb4bb39efbc0c3193dc690cfe2191289ad",
           "binaries": [
             "liter-llm"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/liter-llm-darwin-arm64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/liter-llm-darwin-arm64"
         },
         "win32-x64": {
           "sha256": "253e18fa97190542ed505ce169b863cb65a818c2ac00255d5da7c9fcaa0ff6ce",
@@ -209,7 +219,15 @@
             "liter-llm.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/liter-llm-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/liter-llm-win32-x64.exe"
+        },
+        "win32-arm64": {
+          "sha256": "254bb2a5bcf97bf991434c3126a39a117c1015920bd5ebd028d097ef59ff70ca",
+          "binaries": [
+            "liter-llm.exe"
+          ],
+          "archive": "none",
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/liter-llm-win32-arm64.exe"
         }
       }
     },
@@ -328,7 +346,7 @@
     }
   },
   "compassSkills": {
-    "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/compass-skills.tar.gz",
+    "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/compass-skills.tar.gz",
     "sha256": "8b13681910d532411300268c4ba2bab5712e1b7e5cba70f105e766cd89e2c7b0"
   }
 }
