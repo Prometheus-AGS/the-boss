@@ -26,6 +26,10 @@ on:
         description: Optional comma-separated platforms to rebuild over reuse_native_run
         required: false
         type: string
+      native_artifacts_only:
+        description: Build native job artifacts without service images or publication
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
@@ -109,7 +113,7 @@ jobs:
           retention-days: 30
 
   images:
-    if: inputs.reuse_image_run == ''
+    if: inputs.reuse_image_run == '' && !inputs.native_artifacts_only
     name: Image (${{ matrix.service }}, ${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 180
@@ -165,7 +169,7 @@ jobs:
           path: ${{ matrix.service }}-${{ matrix.arch }}.json
 
   image-manifests:
-    if: inputs.reuse_image_run == ''
+    if: inputs.reuse_image_run == '' && !inputs.native_artifacts_only
     needs: images
     runs-on: ubuntu-24.04
     permissions:
@@ -198,7 +202,7 @@ jobs:
 
   publish:
     needs: [native, image-manifests]
-    if: always() && !inputs.images_only && (needs.native.result == 'success' || (inputs.reuse_native_run != '' && inputs.native_tools == '')) && (needs.image-manifests.result == 'success' || inputs.reuse_image_run != '')
+    if: always() && !inputs.images_only && !inputs.native_artifacts_only && (needs.native.result == 'success' || (inputs.reuse_native_run != '' && inputs.native_tools == '')) && (needs.image-manifests.result == 'success' || inputs.reuse_image_run != '')
     runs-on: ubuntu-24.04
     permissions:
       contents: write

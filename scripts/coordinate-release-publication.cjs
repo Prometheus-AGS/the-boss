@@ -2,7 +2,7 @@ const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
 const { execFileSync } = require('node:child_process')
-const { resolveReleaseProfile } = require('./release-profile.cjs')
+const { assertPublicReleaseProfile } = require('./public-release-profile.cjs')
 
 const root = path.resolve(__dirname, '..')
 const repository = process.env.GITHUB_REPOSITORY
@@ -43,7 +43,7 @@ if (!/^[A-Za-z0-9._-]+$/.test(manifestAsset)) throw new Error('Release manifest 
 if (!/^\d+\.\d+\.\d+$/.test(expectedVersion) || tag !== `v${expectedVersion}`) {
   throw new Error('Release tag and version are invalid')
 }
-if (expectedProfile !== resolveReleaseProfile().id) throw new Error('Release profile does not match the workflow')
+if (expectedProfile !== assertPublicReleaseProfile().id) throw new Error('Release profile does not match the workflow')
 const temporaryDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'the-boss-publication-'))
 const downloadedManifest = path.join(temporaryDirectory, manifestAsset)
 

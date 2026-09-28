@@ -117,6 +117,8 @@ win:
   executableName: The Boss
   artifactName: ${productName}-${version}-${arch}-setup.${ext}
   extraResources:
+    - from: "node_modules/@anthropic-ai/claude-agent-sdk-win32-${arch}/claude.exe"
+      to: "app.asar.unpacked/node_modules/@anthropic-ai/claude-agent-sdk-win32-${arch}/claude.exe"
     - from: "node_modules/@aiany/sqlite-vec-windows-${arch}/vec0.dll"
       to: "app.asar.unpacked/node_modules/@aiany/sqlite-vec-windows-${arch}/vec0.dll"
   target:
@@ -148,6 +150,9 @@ mac:
   entitlementsInherit: build/entitlements.mac.plist
   notarize: false
   artifactName: ${productName}-${version}-${arch}.${ext}
+  extraResources:
+    - from: "node_modules/@anthropic-ai/claude-agent-sdk-darwin-${arch}/claude"
+      to: "app.asar.unpacked/node_modules/@anthropic-ai/claude-agent-sdk-darwin-${arch}/claude"
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
@@ -191,7 +196,11 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.3 - Configurable UAR runtime and integration administration
+    The Boss 2.2.4 - Agent inference and integration reliability
+
+    - [Agents] Include the native Claude Code executable and verify its presence in each macOS and Windows installer.
+    - [Compass] Continue indexing very large projects without community clustering when its node limit is reached.
+    - [Settings] Show localized integration operation results and actionable secret-storage errors.
 
     - [UAR] Package the supervised Universal Agent Runtime sidecar for Windows x64 and Apple Silicon, with configurable port fallback, visible listening status, dedicated administration, restart recovery, and operational diagnostics.
     - [Storage] Let UAR use embedded storage or a configured SurrealDB service, including existing installations discovered outside The Boss.
@@ -201,7 +210,11 @@ releaseInfo:
     - [Skills] Bundle the complete pinned Prometheus mini runtime, Compass skills, OpenSpec, Prometheus, pk, Node.js, and their required assets.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.3 - 可配置的通用智能体运行时与集成管理
+    The Boss 2.2.4 - 智能体推理与集成可靠性
+
+    - [智能体] 在每个 macOS 和 Windows 安装包中包含 Claude Code 原生可执行文件，并验证其存在。
+    - [Compass] 当社区聚类达到节点上限时，继续为大型项目建立无聚类代码索引。
+    - [设置] 显示本地化的集成操作结果和可采取措施的凭据存储错误。
 
     - [UAR] 为 Windows x64 和 Apple 芯片打包受监管的通用智能体运行时辅助进程，并提供可配置端口回退、可见监听状态、独立管理、重启恢复和运行诊断。
     - [存储] UAR 可使用嵌入式存储或已配置的 SurrealDB 服务，包括在 The Boss 外部发现的现有安装。

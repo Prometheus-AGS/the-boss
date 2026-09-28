@@ -1,0 +1,9 @@
+# Design: D01 local Mac delivery
+
+The packaged app stages a checksummed Mac ARM64 UAR payload into physical resources outside ASAR. The exact local build command enables UAR and selects an explicit local-only payload record with architecture, source revision and per-file hashes. Public preflight refuses that record and retains the current two-platform same-source importer. The app's runtime resolver uses only packaged resources during acceptance; developer overrides are cleared.
+
+The renderer calls a typed IPC contract. Main validates the sender and workspace against Boss-owned state, then uses its authenticated sidecar adapter with `x-uar-workspace-id`; renderer data cannot grant a new UAR owner. The adapter exposes the actual C06 instance and C07 observer routes, a deployment-binding selector for first creation, capability-gated actions and structured operation errors. UAR persists instance and observer state; Boss persists only user configuration through its existing preference architecture. Two workspaces use separate UAR scopes.
+
+The settings page shows status, capability availability, existing instances/observers, create and lifecycle actions, cursor/backlog/recovery information, action progress and errors. It retains existing navigation and component patterns. All shipped locales receive the new strings.
+
+Complete payload, IPC, host adapter, settings, and locale code before the single production gate. The gate runs exact `pnpm build:mac:arm64`, opens the new packaged app without a binary override, exercises create/lifecycle/observer operations in two workspaces, restarts, and records source, binary/app hashes, elapsed time and actual result. A build or DMG hash alone is insufficient. Full four-platform publication is a separate operator decision after local success.

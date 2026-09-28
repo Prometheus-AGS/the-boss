@@ -154,7 +154,10 @@ export class PrometheusIntegrationService extends BaseService {
           ? {}
           : {
               binary: uarBinaryPath,
-              ...(uarPayload?.version ? { binaryVersion: uarPayload.version } : {})
+              ...(uarPayload?.version ? { binaryVersion: uarPayload.version } : {}),
+              ...(uarPayload ? { binarySource: uarPayload.source } : {}),
+              ...(uarPayload?.sourceCommit ? { binarySourceCommit: uarPayload.sourceCommit } : {}),
+              ...(uarPayload?.archiveSha256 ? { binaryArchiveSha256: uarPayload.archiveSha256 } : {})
             }),
         ...(runningUar
           ? {

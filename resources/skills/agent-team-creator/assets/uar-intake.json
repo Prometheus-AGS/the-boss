@@ -1,0 +1,37 @@
+{
+  "operation": "create",
+  "id": "checkout-team",
+  "outcome": "Implement an accessible checkout and produce one complete integration result",
+  "complexity": "complex",
+  "areas": ["code", "design", "security"],
+  "deliverables": ["Implementation", "Design artifact", "Integration evidence"],
+  "budget": "balanced",
+  "review": true,
+  "harness": "uar",
+  "scope": "uar",
+  "ownership": {
+    "implementer": ["src/checkout/**"],
+    "designer": ["docs/design/checkout/**"],
+    "security-reviewer": ["docs/security/checkout-review.md"],
+    "reviewer": ["docs/reviews/checkout-review.md"]
+  },
+  "packageId": "urn:example:checkout-team",
+  "packageVersion": "1.0.0",
+  "coordinatorRole": "implementer",
+  "workflowSummary": "Design and implementation finish before one integration task; external writes require current authority.",
+  "communicationPolicy": "Coordinator may queue or trigger members; members may queue replies to coordinator.",
+  "aggregateLimits": {
+    "concurrentTurns": 4,
+    "maxMembers": 8,
+    "maxDepth": 2,
+    "maxPendingTasks": 100
+  },
+  "aggregateBudget": {
+    "maxTokens": 200000,
+    "maxCostMicrounits": 10000000,
+    "currency": "USD",
+    "maxElapsedSeconds": 7200
+  },
+  "bindingIntent": "package-and-binding"
+}
+

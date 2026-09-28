@@ -2,12 +2,12 @@ const fs = require('node:fs')
 const path = require('node:path')
 const crypto = require('node:crypto')
 const { execFileSync, spawnSync } = require('node:child_process')
-const { resolveReleaseProfile } = require('./release-profile.cjs')
+const { assertPublicReleaseProfile } = require('./public-release-profile.cjs')
 
 async function main() {
   const root = path.resolve(__dirname, '..')
   const version = require('../package.json').version
-  const profile = resolveReleaseProfile()
+  const profile = assertPublicReleaseProfile()
   const platform = process.platform
   const arch = process.arch
   const platformKey = `${platform}-${arch}`

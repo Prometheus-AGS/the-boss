@@ -56,13 +56,13 @@ export function exportService(team, target, ctx) {
         ctx.diagnostics.push('BossFang team native options merge into HAND.toml; role overrides merge into each AgentManifest. Preserve local TOML because native GET returns a projection. Hand activation can start autonomous schedules.');
     }
     else {
-        ctx.instructions.push('Each uar/agents/*.json is a complete AgentArtifact body for POST /api/agents. UAR team native options supply artifact defaults, then role native overrides win.');
+        ctx.instructions.push('Legacy schema-v1 compatibility only: each uar/agents/*.json is an AgentArtifact body for POST /api/agents. Use uar-package-build and uar-package-install for canonical multi-agent/team definitions.');
         ctx.diagnostics.push('UAR skill policy prefer is a preference, not an enforced skill allowlist. Blank provider/model use service defaults; model IDs are not split to guess a provider.');
         ctx.instructions.push('Review native policy.tools.allow and tools.bundles before registration; generated defaults grant no explicit tool allowlist or bundles. Supply required native tool policy through team defaults or role overrides.');
-        ctx.diagnostics.push('UAR has no verified persistent team registration API. POST /api/uar/runs requires {artifact:<full AgentArtifact>,input:<task>}; registration does not run it.');
+        ctx.diagnostics.push('This compatibility export does not install a collaboration package or team. The dedicated catalog API is implemented by the uar-package-* and uar-binding-* commands; activation remains unavailable until I2.');
     }
     ctx.add(`${target}/registration-plan.json`, json({ schemaVersion: 1, format: 'agent-team-export-plan',
         execution: 'not-performed', requests: registrations }));
-    ctx.instructions.push('registration-plan.json is a local review plan, not a native API body. Supply an operator-approved base URL and credential reference; preserve each returned native ID/outcome because registration is not atomic.');
+    ctx.instructions.push('registration-plan.json is a local review plan, not a native API body. For UAR multi-agent definitions, use one atomic collaboration package instead of replaying this legacy per-agent sequence.');
     ctx.diagnostics.push('Native authentication and registration are unverified. UAR defaults to JWT-required; BossFang accepts Bearer or X-API-Key. Discovery success is not mutation authorization.');
 }

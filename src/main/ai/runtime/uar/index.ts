@@ -5,6 +5,15 @@ export {
   updateUarSettings
 } from './UarAdministrationAdapter'
 export {
+  acknowledgeUarDurableGap,
+  actOnUarDurableInstance,
+  actOnUarDurableObserver,
+  createUarDurableInstance,
+  createUarDurableObserver,
+  readUarDurableWorkspace
+} from './UarDurableAdministrationAdapter'
+export { setupUarStarterAgent } from './UarStarterAdministrationAdapter'
+export {
   deleteUarProvider,
   readUarModelSources,
   saveUarProvider,

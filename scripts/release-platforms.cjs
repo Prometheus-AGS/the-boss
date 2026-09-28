@@ -1,7 +1,7 @@
 const fs = require('node:fs')
-const { resolveReleaseProfile } = require('./release-profile.cjs')
+const { assertPublicReleaseProfile } = require('./public-release-profile.cjs')
 
-const profile = resolveReleaseProfile()
+const profile = assertPublicReleaseProfile()
 const targets = [
   {
     runner: 'windows-2025',
@@ -9,13 +9,23 @@ const targets = [
     arch: 'x64',
     script: profile.uarEnabled ? 'build:win:x64:release:uar' : 'build:win:x64:release'
   },
-  { runner: 'windows-11-arm', platform: 'win32', arch: 'arm64', script: 'build:win:arm64:release' },
-  { runner: 'macos-15-intel', platform: 'darwin', arch: 'x64', script: 'build:mac:x64' },
+  {
+    runner: 'windows-11-arm',
+    platform: 'win32',
+    arch: 'arm64',
+    script: profile.uarEnabled ? 'build:win:arm64:release:uar' : 'build:win:arm64:release'
+  },
+  {
+    runner: 'macos-15-intel',
+    platform: 'darwin',
+    arch: 'x64',
+    script: profile.uarEnabled ? 'build:mac:x64:release:uar' : 'build:mac:x64:release'
+  },
   {
     runner: 'macos-15',
     platform: 'darwin',
     arch: 'arm64',
-    script: profile.uarEnabled ? 'build:mac:arm64:release:uar' : 'build:mac:arm64'
+    script: profile.uarEnabled ? 'build:mac:arm64:release:uar' : 'build:mac:arm64:release'
   }
 ]
 const manifest = require('../build/integration-artifacts.json')
@@ -27,15 +37,15 @@ const platformsMatch = profile.uarEnabled
 if (!platformsMatch) {
   throw new Error(`Integration artifact platforms do not cover release profile ${profile.id}`)
 }
-for (const name of profile.nativeTools) {
-  const tool = manifest.tools.find((entry) => entry.name === name)
-  for (const platform of available) {
-    if (!tool?.packages?.[platform]) throw new Error(`No published ${name} payload for ${platform}`)
-  }
-}
 const selected = process.env.RELEASE_PLATFORMS
   ? process.env.RELEASE_PLATFORMS.split(',').map((value) => value.trim())
   : available
+for (const name of profile.nativeTools) {
+  const tool = manifest.tools.find((entry) => entry.name === name)
+  for (const platform of name === 'uar-sidecar' ? selected : available) {
+    if (!tool?.packages?.[platform]) throw new Error(`No published ${name} payload for ${platform}`)
+  }
+}
 for (const platform of selected) {
   if (!available.includes(platform) || !targets.some((value) => `${value.platform}-${value.arch}` === platform))
     throw new Error(`No published native payload for ${platform}`)

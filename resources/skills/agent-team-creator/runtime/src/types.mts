@@ -100,3 +100,21 @@ export interface ExportResult {
   diagnostics: string[];
   instructions: string[];
 }
+export type UarDefinitionKind = 'AgentDefinition' | 'TeamDefinition' | 'WorkflowDefinition';
+export interface UarAuthoringDefinition {
+  path: string;
+  document: ObjectValue;
+}
+export interface UarAuthoringPackage {
+  manifest: ObjectValue;
+  definitions: UarAuthoringDefinition[];
+}
+export interface UarCompiledPackage {
+  manifest: ObjectValue;
+  manifestUtf8: string;
+  files: { path: string; contentUtf8: string }[];
+}
+export interface UarConnection {
+  baseUrl: string;
+  credentialRef?: string;
+}

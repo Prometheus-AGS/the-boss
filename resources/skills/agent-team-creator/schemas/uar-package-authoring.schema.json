@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prometheus-ags.github.io/schemas/agent-team/uar-package-authoring/v1",
+  "title": "UAR collaboration package authoring request",
+  "description": "Authoring form for the official Draft 0.1.0-draft.1 documents. The compiler fills contentDigest, file inventory, byte digests, exact reference digests, and lock entries.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["manifest", "definitions"],
+  "properties": {
+    "manifest": {
+      "type": "object",
+      "description": "PackageManifest fields except computed contentDigest, files, and lock. Exact output is validated against schemas/uar/package-manifest.schema.json."
+    },
+    "definitions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "document"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"
+          },
+          "document": {
+            "type": "object",
+            "properties": {
+              "profile": { "const": "urn:prometheus:uar:collaboration:0.1.0-draft.1" },
+              "kind": { "enum": ["AgentDefinition", "TeamDefinition", "WorkflowDefinition"] }
+            },
+            "required": ["profile", "kind", "id", "version"],
+            "description": "Exact canonical definition fields with top-level contentDigest omitted. Immutable reference digests may be omitted and are resolved from this package."
+          }
+        }
+      }
+    }
+  }
+}
+

@@ -1,10 +1,10 @@
 ---
 name: agent-team-manage
-description: "Manage an existing agent team: assign tasks, dependencies and owners, update definitions, track evidence, cancel or reassign work, and reconcile KBD-linked completion. Use when managing team lifecycle requests; use agent-team-creator for initial team discovery and agent-team-handoff to transfer work across harnesses. Do not use for initial team creation (see agent-team-creator)."
+description: "Manage an existing agent team's active task state: assign dependencies and owners, track evidence, cancel or reassign work, and reconcile KBD-linked completion. Use agent-team-creator for definition creation, versioned maintenance, native export, and UAR catalog deployment."
 license: MIT
 compatibility: Requires Node.js 22 or newer. Git is optional for handoff snapshots. Model gateways, memory services and native harness CLIs are optional and separately configured.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   tags: "agents, teams, orchestration, coding"
 ---
 
@@ -38,11 +38,12 @@ node <agent-team-creator>/scripts/cli.mjs task --input task-request.json
 node <agent-team-creator>/scripts/cli.mjs team-update --input definition-request.json
 ```
 
-Use `team-update` for validated role, skill, model or native settings while
-preserving team identity and referenced historical roles. Re-export to a new
-proposal directory afterward; a local edit does not update a resident UAR or
-BossFang instance. Keep native IDs and registration receipts when applying such
-updates through those services’ documented APIs.
+Use `team-update` only for the schema-v1 local coordination manifest while
+preserving team identity and referenced historical roles. Use
+`$agent-team-creator` for an immutable AgentDefinition, TeamDefinition,
+WorkflowDefinition or PackageManifest revision, its semantic-version diff, native
+re-export, UAR package preflight/install, and DeploymentBinding maintenance. A
+local ledger edit never updates a resident UAR or BossFang instance.
 
 Use `$agent-team-handoff` for a context-bearing transfer. Ordinary reassignment
 is explicit administrative intervention and invalidates older handoffs. Cancel

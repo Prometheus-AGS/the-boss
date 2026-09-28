@@ -47,10 +47,22 @@ successful invocation.
 
 ## Service registration artifacts
 
-UAR 1.0.0 source commit `ba12845138104d3c8c3b8bca8bc7c5be24004e91`: `src/uar/domain/artifact.rs`, `api/discovery.rs`, `api/routes.rs`, `api/compiler.rs`, `security/middleware.rs`. Each `uar/agents/<role>.json` is a complete `AgentArtifact` for `POST /api/agents`. `runtime.entry=default`; policy provider defaults can inherit through empty strings. `policy.skills.prefer` is a preference, not a deny policy. UAR role overrides apply after team defaults. Explicit tool allowlists and bundles start empty; select required native tool permissions through overrides before registration. No persistent native team API is asserted. Execution uses a separate `POST /api/uar/runs` with full `artifact` and `input`; it is not attempted by export.
+Schema-v1 UAR export remains a legacy `AgentArtifact` compatibility projection
+for ordinary single-agent consumers. It is not a team registration protocol.
+New collaboration authoring uses the official Draft 0.1.0-draft.1 schemas copied
+under `schemas/uar/`, compiles all agent/team/workflow definitions into one
+immutable PackageManifest, and installs atomically through the versioned
+collaboration package API. A private DeploymentBinding follows package install.
+See `uar-deployment.md` for exact routes, request bodies, capability preflight,
+credential-reference rules, and the explicit I2 activation refusal.
 
 BossFang 2026.7.11 source commit `c719a4d683e4d3fb42e436f812e0193f865c9d2c`: `crates/librefang-types/src/agent.rs`, `crates/librefang-hands/src/lib.rs`, API routes `agents/lifecycle.rs`, `skills/hands.rs`, `workflows/workflow.rs`. Native agent TOML stores the prompt inside `model.system_prompt`. Standalone request JSON wraps it as `manifest_toml` for `POST /api/agents`. An empty portable skill list exports `skills_disabled=true`; native `skills=[]` with `skills_disabled=false` means all. Agent MCP `[]` means none and `["*"]` means all. Preserve the original manifest because native GET is a projection.
 
 The alternative multi-agent `HAND.toml` uses native `agents.<role>` entries and explicit coordinator, and `hand-install.json` targets `POST /api/hands/install`. `HandAgentManifest` flattens the native manifest (`librefang-hands/src/lib.rs:338–354`); `parse_multi_agent_entry` accepts nested model tables (`:441–531`). Hand-level allowlists retain their own native semantics. Team native options merge into this Hand definition. Activation is a separate action that may launch autonomous schedules. `workflow.json` uses native `agent_name`, `prompt` and `depends_on` fields and targets `POST /api/workflows` after standalone agents are registered. The route parses dependencies (`routes/workflows/workflow.rs:50–80`); nonempty edges select DAG execution and topological layers (`librefang-kernel/src/workflow.rs:3710–3712`, `:5182`). Choose the standalone workflow or Hand deployment deliberately to avoid duplicate agents.
 
-Each `registration-plan.json` is explicitly an exporter review plan, not an API body. An operator must supply base URL and credential reference and retain per-request returned IDs/outcomes. Registration is not atomic; UAR defaults JWT-required, while BossFang supports Bearer or X-API-Key. Discovery health does not grant mutation authority. No live service acceptance or authentication validation is claimed.
+Legacy `registration-plan.json` files and BossFang registration plans remain
+exporter review plans, not API bodies. UAR collaboration package install is atomic
+and uses the dedicated API; it must not replay a multi-agent sequence through
+`POST /api/agents`. An operator still supplies the instance URL and environment
+credential reference. Capability discovery and package installation do not grant
+activation or execution authority.

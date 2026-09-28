@@ -455,7 +455,13 @@ const TOOLS = [
       }
     }
   },
-  ...require('./integration-binaries').loadIntegrationBinaries({ required: process.argv.includes('--packaging') })
+  ...require('./integration-binaries').loadIntegrationBinaries({
+    required: process.argv.includes('--packaging'),
+    platform:
+      ['darwin', 'win32', 'linux'].includes(process.argv[2]) && ['arm64', 'x64'].includes(process.argv[3])
+        ? `${process.argv[2]}-${process.argv[3]}`
+        : process.env.THE_BOSS_PACKAGE_PLATFORM
+  })
 ]
 
 // ── Core logic ───────────────────────────────────────────────────────

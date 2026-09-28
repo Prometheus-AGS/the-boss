@@ -4,7 +4,7 @@ const path = require('node:path')
 const { resolveReleaseProfile } = require('./release-profile.cjs')
 
 /** Produced from successful native release jobs, then committed before installer packaging. */
-function loadIntegrationBinaries({ required = false } = {}) {
+function loadIntegrationBinaries({ required = false, platform: targetPlatform } = {}) {
   const filename = path.join(__dirname, '..', 'build', 'integration-artifacts.json')
   if (!fs.existsSync(filename)) {
     if (required)
@@ -15,11 +15,11 @@ function loadIntegrationBinaries({ required = false } = {}) {
   }
   const manifest = JSON.parse(fs.readFileSync(filename, 'utf8'))
   const profile = resolveReleaseProfile()
-  const requiredTools = profile.nativeTools
+  const requiredTools = profile.nativeTools.filter((name) => !(profile.localUar && name === 'uar-sidecar'))
   for (const name of requiredTools) {
     const tool = manifest.tools.find((entry) => entry.name === name)
     if (!tool) throw new Error(`Integration manifest is missing ${name}`)
-    for (const platform of profile.supportedPlatforms) {
+    for (const platform of targetPlatform ? [targetPlatform] : profile.supportedPlatforms) {
       const asset = tool.packages[platform]
       if (!asset || !asset.url.startsWith('https://') || !/^[a-f0-9]{64}$/.test(asset.sha256))
         throw new Error(`Unpinned integration artifact: ${name} ${platform}`)
@@ -36,7 +36,7 @@ function loadIntegrationBinaries({ required = false } = {}) {
             payloadIdentity: {
               file: 'payload-manifest.json',
               field: 'source',
-              value: manifest.sources.uar.revision
+              value: tool.packages[targetPlatform]?.source ?? manifest.sources.uar.revision
             }
           }
         : {})

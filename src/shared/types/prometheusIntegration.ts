@@ -288,7 +288,7 @@ const uarAdministrationSurfaceSchema = z.object({
   methods: z.array(uarAdministrationMethodSchema)
 })
 export const uarAdministrationCapabilitiesSchema = z.object({
-  schema_version: z.literal(3),
+  schema_version: z.literal(4),
   scopes: z.tuple([z.literal('public'), z.literal('admin'), z.literal('owner'), z.literal('host')]),
   surfaces: z.array(uarAdministrationSurfaceSchema)
 })
@@ -910,6 +910,9 @@ export type IntegrationSnapshot = {
     state: 'running' | 'stopped' | 'unavailable'
     binary?: string
     binaryVersion?: string
+    binarySource?: 'override' | 'packaged'
+    binarySourceCommit?: string
+    binaryArchiveSha256?: string
     runtimeVersion?: string
     capabilities: string[]
     requestedPort: number

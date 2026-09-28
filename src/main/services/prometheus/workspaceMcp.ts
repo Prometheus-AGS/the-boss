@@ -12,7 +12,7 @@ import type { CompassFreshness, IntegrationConfig, WorkspaceIntegration } from '
 
 import { detectFullPack } from './fullPackDetection'
 import { integrationDirectory, readIntegrationConfig, readSecrets } from './integrationConfig'
-import { runIntegrationProcess } from './integrationProcess'
+import { IntegrationProcessError, runIntegrationProcess } from './integrationProcess'
 import { renderMiniSkill } from './miniCommands'
 import { copyOwnedSkill } from './ownedSkillCopy'
 import { compassEnvironment, compassRemoteReady } from './surrealConnection'
@@ -250,12 +250,38 @@ export async function indexWorkspace(
   const binary = await getBinaryPath('compass')
   await fs.mkdir(local, { recursive: true })
   const secrets = await readSecrets()
-  const run = (out: string, store: string, env: Record<string, string> = {}, extra: string[] = []) =>
-    runIntegrationProcess(
-      binary,
-      ['update', workspace.path, '--code-only', '--out', out, '--store', store, '--no-viz', ...extra],
-      { cwd: workspace.path, signal, env, onOutput, secrets: Object.values(secrets) }
-    )
+  let withoutCommunities = false
+  const run = async (out: string, store: string, env: Record<string, string> = {}, extra: string[] = []) => {
+    const args = ['update', workspace.path, '--code-only', '--out', out, '--store', store, '--no-viz', ...extra]
+    if (withoutCommunities) args.push('--no-cluster')
+    try {
+      await runIntegrationProcess(binary, args, {
+        cwd: workspace.path,
+        signal,
+        env,
+        onOutput,
+        secrets: Object.values(secrets)
+      })
+    } catch (error) {
+      if (
+        withoutCommunities ||
+        signal.aborted ||
+        !(error instanceof IntegrationProcessError) ||
+        !/community topology nodes requires \d+ items, exceeds limit \d+/.test(error.message)
+      ) {
+        throw error
+      }
+      withoutCommunities = true
+      onOutput('Compass community analysis exceeded its node limit. Retrying the code graph without communities.\n')
+      await runIntegrationProcess(binary, [...args, '--no-cluster', '--force', '--reuse-cache-on-force'], {
+        cwd: workspace.path,
+        signal,
+        env,
+        onOutput,
+        secrets: Object.values(secrets)
+      })
+    }
+  }
   await run(local, workspace.backend === 'json' ? 'json' : 'sqlite', {
     COMPASS_STORE: workspace.backend === 'json' ? 'json' : 'sqlite'
   })

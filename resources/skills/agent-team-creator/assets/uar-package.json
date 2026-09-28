@@ -1,0 +1,402 @@
+{
+  "package": {
+    "manifest": {
+      "profile": "urn:prometheus:uar:collaboration:0.1.0-draft.1",
+      "kind": "PackageManifest",
+      "id": "urn:example:two-agent/package",
+      "version": "1.0.0",
+      "provenance": {
+        "source": "agent-team-creator bundled two-agent authoring example",
+        "authors": [
+          "Prometheus-AGS"
+        ]
+      },
+      "requiredCapabilities": [
+        "collaboration_definition_packages_v1"
+      ],
+      "extensions": {},
+      "entrypoints": [
+        {
+          "id": "urn:example:two-agent/team",
+          "version": "1.0.0"
+        }
+      ],
+      "capabilityDeclarations": [
+        {
+          "capability": "collaboration_definition_packages_v1",
+          "required": true
+        }
+      ],
+      "resolution": "exact-version-and-digest"
+    },
+    "definitions": [
+      {
+        "path": "coordinator.json",
+        "document": {
+          "profile": "urn:prometheus:uar:collaboration:0.1.0-draft.1",
+          "kind": "AgentDefinition",
+          "id": "urn:example:two-agent/coordinator",
+          "version": "1.0.0",
+          "provenance": {
+            "source": "agent-team-creator bundled two-agent authoring example",
+            "authors": [
+              "Prometheus-AGS"
+            ]
+          },
+          "requiredCapabilities": [],
+          "extensions": {},
+          "title": "Coordinator",
+          "role": "coordinator",
+          "whenToUse": "When the bound team assigns coordination.",
+          "instructions": "Assign bounded work to the worker and report after its artifact is available.",
+          "input": {
+            "type": "object",
+            "properties": {
+              "brief": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "brief"
+            ],
+            "additionalProperties": false
+          },
+          "output": {
+            "type": "object",
+            "properties": {
+              "brief": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "brief"
+            ],
+            "additionalProperties": false
+          },
+          "skills": [],
+          "models": [
+            {
+              "role": "primary",
+              "capabilities": [
+                "text",
+                "tool-calling"
+              ],
+              "preferredAliases": [
+                "team-default"
+              ]
+            }
+          ],
+          "permittedChildren": [
+            {
+              "id": "urn:example:two-agent/worker",
+              "version": "1.0.0"
+            }
+          ],
+          "context": {
+            "mode": "selected",
+            "artifacts": [
+              "task-input"
+            ],
+            "history": "authorized-summary",
+            "memoryScopes": []
+          },
+          "requestedLimits": {
+            "concurrentTurns": 2,
+            "maxMembers": 2,
+            "maxDepth": 1,
+            "maxPendingTasks": 100
+          }
+        }
+      },
+      {
+        "path": "worker.json",
+        "document": {
+          "profile": "urn:prometheus:uar:collaboration:0.1.0-draft.1",
+          "kind": "AgentDefinition",
+          "id": "urn:example:two-agent/worker",
+          "version": "1.0.0",
+          "provenance": {
+            "source": "agent-team-creator bundled two-agent authoring example",
+            "authors": [
+              "Prometheus-AGS"
+            ]
+          },
+          "requiredCapabilities": [],
+          "extensions": {},
+          "title": "Worker",
+          "role": "worker",
+          "whenToUse": "When the coordinator assigns the implementation step.",
+          "instructions": "Complete the assigned production work and return its artifact.",
+          "input": {
+            "type": "object",
+            "properties": {
+              "brief": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "brief"
+            ],
+            "additionalProperties": false
+          },
+          "output": {
+            "type": "object",
+            "properties": {
+              "brief": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "brief"
+            ],
+            "additionalProperties": false
+          },
+          "skills": [],
+          "models": [
+            {
+              "role": "primary",
+              "capabilities": [
+                "text",
+                "tool-calling"
+              ],
+              "preferredAliases": [
+                "team-default"
+              ]
+            }
+          ],
+          "permittedChildren": [],
+          "context": {
+            "mode": "selected",
+            "artifacts": [
+              "task-input"
+            ],
+            "history": "authorized-summary",
+            "memoryScopes": []
+          },
+          "requestedLimits": {
+            "concurrentTurns": 2,
+            "maxMembers": 2,
+            "maxDepth": 1,
+            "maxPendingTasks": 100
+          }
+        }
+      },
+      {
+        "path": "workflow.json",
+        "document": {
+          "profile": "urn:prometheus:uar:collaboration:0.1.0-draft.1",
+          "kind": "WorkflowDefinition",
+          "id": "urn:example:two-agent/workflow",
+          "version": "1.0.0",
+          "provenance": {
+            "source": "agent-team-creator bundled two-agent authoring example",
+            "authors": [
+              "Prometheus-AGS"
+            ]
+          },
+          "requiredCapabilities": [],
+          "extensions": {},
+          "title": "Worker then coordinator report",
+          "input": {
+            "type": "object",
+            "properties": {
+              "brief": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "brief"
+            ],
+            "additionalProperties": false
+          },
+          "output": {
+            "type": "object",
+            "properties": {
+              "brief": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "brief"
+            ],
+            "additionalProperties": false
+          },
+          "steps": [
+            {
+              "id": "work",
+              "role": "worker",
+              "dependsOn": [],
+              "inputMapping": {
+                "brief": "workflow-input:brief"
+              },
+              "output": {
+                "type": "object",
+                "properties": {
+                  "brief": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "brief"
+                ],
+                "additionalProperties": false
+              },
+              "effect": "idempotent-write",
+              "approval": "current-authority",
+              "retry": {
+                "maxAttempts": 1,
+                "onUnknownEffect": "reconcile-before-retry"
+              },
+              "completion": "artifact",
+              "instructions": "Complete the assigned work."
+            },
+            {
+              "id": "report",
+              "role": "coordinator",
+              "dependsOn": [
+                "work"
+              ],
+              "inputMapping": {
+                "brief": "artifact:work:brief"
+              },
+              "output": {
+                "type": "object",
+                "properties": {
+                  "brief": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "brief"
+                ],
+                "additionalProperties": false
+              },
+              "effect": "none",
+              "approval": "none",
+              "retry": {
+                "maxAttempts": 1,
+                "onUnknownEffect": "reconcile-before-retry"
+              },
+              "completion": "all-dependencies-and-artifact",
+              "instructions": "Report the completed artifact and observed evidence."
+            }
+          ],
+          "failurePolicy": "stop-dependent",
+          "maxActivations": 100
+        }
+      },
+      {
+        "path": "team.json",
+        "document": {
+          "profile": "urn:prometheus:uar:collaboration:0.1.0-draft.1",
+          "kind": "TeamDefinition",
+          "id": "urn:example:two-agent/team",
+          "version": "1.0.0",
+          "provenance": {
+            "source": "agent-team-creator bundled two-agent authoring example",
+            "authors": [
+              "Prometheus-AGS"
+            ]
+          },
+          "requiredCapabilities": [],
+          "extensions": {},
+          "title": "Two-agent team",
+          "purpose": "Demonstrate immutable multi-agent catalog authoring without activation.",
+          "members": [
+            {
+              "role": "coordinator",
+              "kind": "agent",
+              "definition": {
+                "id": "urn:example:two-agent/coordinator",
+                "version": "1.0.0"
+              },
+              "min": 1,
+              "max": 1,
+              "responsibility": "Coordinate the bounded workflow."
+            },
+            {
+              "role": "worker",
+              "kind": "agent",
+              "definition": {
+                "id": "urn:example:two-agent/worker",
+                "version": "1.0.0"
+              },
+              "min": 1,
+              "max": 1,
+              "responsibility": "Produce the assigned artifact."
+            }
+          ],
+          "coordinatorRole": "coordinator",
+          "communication": [
+            {
+              "fromRole": "coordinator",
+              "toRole": "worker",
+              "modes": [
+                "queue-only",
+                "trigger-turn"
+              ]
+            },
+            {
+              "fromRole": "worker",
+              "toRole": "coordinator",
+              "modes": [
+                "queue-only"
+              ]
+            }
+          ],
+          "taskAcceptance": {
+            "mode": "coordinator-within-binding",
+            "allowedWorkflows": [
+              {
+                "id": "urn:example:two-agent/workflow",
+                "version": "1.0.0"
+              }
+            ]
+          },
+          "routing": {
+            "eligibilityFirst": true,
+            "strategy": "operator-role-capacity-cost-stable-id",
+            "explain": true
+          },
+          "limits": {
+            "concurrentTurns": 2,
+            "maxMembers": 2,
+            "maxDepth": 1,
+            "maxPendingTasks": 100
+          },
+          "budget": {
+            "maxTokens": 100000,
+            "maxCostMicrounits": 5000000,
+            "currency": "USD",
+            "maxElapsedSeconds": 3600
+          },
+          "input": {
+            "type": "object",
+            "properties": {
+              "brief": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "brief"
+            ],
+            "additionalProperties": false
+          },
+          "output": {
+            "type": "object",
+            "properties": {
+              "brief": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "brief"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    ]
+  },
+  "out": ".agent-team/two-agent/uar-package-1.0.0"
+}

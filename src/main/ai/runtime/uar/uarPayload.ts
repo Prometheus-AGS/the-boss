@@ -8,8 +8,11 @@ import { toAsarUnpackedPath } from '@main/utils/asar'
 export type UarPayload = {
   executable: string
   modelsDirectory: string
+  policiesDirectory: string
   source: 'override' | 'packaged'
   version?: string
+  sourceCommit?: string
+  archiveSha256?: string
 }
 
 type UarPayloadManifest = {
@@ -17,6 +20,8 @@ type UarPayloadManifest = {
   name: string
   version: string
   platform: string
+  source?: string
+  archiveSha256?: string
   files: Array<{ path: string }>
 }
 
@@ -30,6 +35,8 @@ function readManifest(payloadDirectory: string): UarPayloadManifest | undefined 
       manifest.name !== 'uar-sidecar' ||
       !manifest.version?.trim() ||
       manifest.platform !== `${process.platform}-${process.arch}` ||
+      (manifest.source !== undefined && !/^[a-f0-9]{40}$/.test(manifest.source)) ||
+      (manifest.archiveSha256 !== undefined && !/^[a-f0-9]{64}$/.test(manifest.archiveSha256)) ||
       !Array.isArray(manifest.files)
     ) {
       return undefined
@@ -46,6 +53,12 @@ function readManifest(payloadDirectory: string): UarPayloadManifest | undefined 
     }
     const executable = isWin ? 'uar-sidecar.exe' : 'uar-sidecar'
     if (!declaredFiles.has(executable) || !declaredFiles.has('uar-models/config.json')) return undefined
+    if (
+      !['default.cedar', 'skill-mutation.cedar', 'tool-approval.cedar'].every((name) =>
+        declaredFiles.has(`policies/${name}`)
+      )
+    )
+      return undefined
     return manifest
   } catch {
     return undefined
@@ -55,9 +68,18 @@ function readManifest(payloadDirectory: string): UarPayloadManifest | undefined 
 function payloadAt(executable: string, source: UarPayload['source']): UarPayload | undefined {
   const payloadDirectory = path.dirname(executable)
   const modelsDirectory = path.join(payloadDirectory, 'uar-models')
+  const policiesDirectory = path.join(payloadDirectory, 'policies')
   const manifest = readManifest(payloadDirectory)
   if (!manifest || !existsSync(executable)) return undefined
-  return { executable, modelsDirectory, source, version: manifest.version.trim() }
+  return {
+    executable,
+    modelsDirectory,
+    policiesDirectory,
+    source,
+    version: manifest.version.trim(),
+    ...(manifest.source ? { sourceCommit: manifest.source } : {}),
+    ...(manifest.archiveSha256 ? { archiveSha256: manifest.archiveSha256 } : {})
+  }
 }
 
 export function inspectUarPayload(): UarPayload | undefined {

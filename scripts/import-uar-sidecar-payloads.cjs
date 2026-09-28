@@ -1,19 +1,33 @@
 const fs = require('node:fs')
 const path = require('node:path')
+const { UAR_RELEASE_PLATFORM_KEYS } = require('./release-profile.cjs')
 
 const root = path.resolve(__dirname, '..')
 const manifestPath = path.join(root, 'build', 'integration-artifacts.json')
 const sourcesPath = path.join(root, 'build', 'integration-sources.json')
-const requiredPlatforms = new Set(['win32-x64', 'darwin-arm64'])
+const requiredPlatforms = new Set(UAR_RELEASE_PLATFORM_KEYS)
+const selectedPlatforms = new Set(
+  process.env.RELEASE_PLATFORMS ? process.env.RELEASE_PLATFORMS.split(',').map((value) => value.trim()) : requiredPlatforms
+)
 const cliRecordUrls = process.argv.slice(2)
 const recordUrls =
   cliRecordUrls.length > 0
     ? cliRecordUrls
-    : [process.env.UAR_WIN32_X64_RECORD_URL, process.env.UAR_DARWIN_ARM64_RECORD_URL]
+    : [
+        process.env.UAR_WIN32_X64_RECORD_URL,
+        process.env.UAR_WIN32_ARM64_RECORD_URL,
+        process.env.UAR_DARWIN_ARM64_RECORD_URL,
+        process.env.UAR_DARWIN_X64_RECORD_URL
+      ].filter(Boolean)
 
-if (recordUrls.length !== requiredPlatforms.size || recordUrls.some((recordUrl) => !recordUrl)) {
+if (
+  selectedPlatforms.size === 0 ||
+  [...selectedPlatforms].some((platform) => !requiredPlatforms.has(platform)) ||
+  recordUrls.length === 0 ||
+  recordUrls.some((recordUrl) => !recordUrl)
+) {
   throw new Error(
-    'usage: node scripts/import-uar-sidecar-payloads.cjs <win32-x64-record-url> <darwin-arm64-record-url>, or set UAR_WIN32_X64_RECORD_URL and UAR_DARWIN_ARM64_RECORD_URL'
+    'usage: node scripts/import-uar-sidecar-payloads.cjs <selected-platform-record-url>..., or set selected UAR_*_RECORD_URL values and RELEASE_PLATFORMS'
   )
 }
 
@@ -88,8 +102,14 @@ function validateBinaries(value, platform) {
     throw new Error(`UAR sidecar ${platform} record contains duplicate packaged paths`)
   }
 
-  const executable = platform === 'win32-x64' ? 'uar-sidecar.exe' : 'uar-sidecar'
-  for (const required of [executable, 'payload-manifest.json']) {
+  const executable = platform.startsWith('win32-') ? 'uar-sidecar.exe' : 'uar-sidecar'
+  for (const required of [
+    executable,
+    'payload-manifest.json',
+    'policies/default.cedar',
+    'policies/skill-mutation.cedar',
+    'policies/tool-approval.cedar'
+  ]) {
     if (!binaries.includes(required)) throw new Error(`UAR sidecar ${platform} record is missing ${required}`)
   }
 
@@ -110,8 +130,9 @@ async function loadRecord(recordUrl, pins, expectedVersion) {
   if (record.version !== expectedVersion) {
     throw new Error(`UAR sidecar ${record.platform} version ${record.version} does not match ${expectedVersion}`)
   }
-  if (record.source !== pins.revision) {
-    throw new Error(`UAR sidecar ${record.platform} source ${record.source} does not match ${pins.revision}`)
+  const expectedSource = pins.platformRevisions?.[record.platform] ?? pins.revision
+  if (record.source !== expectedSource) {
+    throw new Error(`UAR sidecar ${record.platform} source ${record.source} does not match ${expectedSource}`)
   }
 
   const expectedAsset = `uar-sidecar-${record.platform}.tar.gz`
@@ -128,6 +149,7 @@ async function loadRecord(recordUrl, pins, expectedVersion) {
   return {
     platform: record.platform,
     package: {
+      source: record.source,
       url: `https://${url.host}/${pins.repository}/releases/download/${tag}/${expectedAsset}`,
       sha256: record.sha256,
       archive: record.archive,
@@ -160,7 +182,8 @@ async function main() {
 
   const records = await Promise.all(recordUrls.map((recordUrl) => loadRecord(recordUrl, uarSource, expectedVersion)))
   const platforms = new Set(records.map((record) => record.platform))
-  for (const platform of requiredPlatforms) {
+  if (platforms.size !== records.length) throw new Error('Duplicate UAR sidecar platform release records')
+  for (const platform of selectedPlatforms) {
     if (!platforms.has(platform)) throw new Error(`Missing UAR sidecar release record for ${platform}`)
   }
 
@@ -175,7 +198,7 @@ async function main() {
   }
   fs.writeFileSync(manifestPath, `${JSON.stringify(nextManifest, null, 2)}\n`)
 
-  console.log(`Imported UAR sidecar payloads for ${[...requiredPlatforms].join(', ')} from ${uarSource.revision}`)
+  console.log(`Imported UAR sidecar payloads for ${[...platforms].join(', ')} from ${uarSource.revision}`)
 }
 
 main().catch((error) => {

@@ -22,6 +22,12 @@ export const entries: SettingsSearchEntry[] = [
     ['providers-models', ['provider', 'model', 'routing', 'catalog', 'API key', 'default model', 'model source']],
     ['runtime-settings', ['configuration', 'namespace', 'drift', 'policy', 'saved value', 'effective value']],
     ['agents', ['agent catalog', 'agent definition', 'registry']],
+    ['collaboration-catalog', ['collaboration catalog', 'teams', 'subagents']],
+    [
+      'durable-agent-instances',
+      ['durable instance', 'deployment binding', 'activate', 'passivate', 'drain', 'restart']
+    ],
+    ['local-scoped-observers', ['local observer', 'subscription', 'backlog', 'retention gap', 'recovery']],
     ['compiler', ['UAR-AGENT-MD', 'compile', 'specification']],
     ['skills', ['skill pack', 'provenance', 'refresh']],
     ['presentations', ['A2UI', 'presentation', 'component']],
