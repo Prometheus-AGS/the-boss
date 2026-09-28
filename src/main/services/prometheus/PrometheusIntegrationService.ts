@@ -774,57 +774,75 @@ export class PrometheusIntegrationService extends BaseService {
   ): Promise<{ agent: AgentEntity; servers: McpServer[] }> {
     await this.ensureInitialized()
     const config = readIntegrationConfig()
-    const workspace = await describeWorkspace(session.workspace.path, config)
+    const described = await describeWorkspace(session.workspace.path, config)
+    const workspace = this.workspaceJobs.has(described.id)
+      ? (this.workspaces.get(described.id) ?? described)
+      : described
     this.workspaces.set(workspace.id, workspace)
-    if (config.compass.enabled && workspace.enabled && !workspace.error) {
-      try {
-        const { completion } = await this.runOperation(
-          'check-drift',
-          workspace.path,
-          async (signal, output, operation, controls) => {
-            controls.stage('checking')
-            workspace.freshness = { state: 'checking' }
-            workspace.latestOperationId = operation.id
-            await saveWorkspaceState(workspace)
-            workspace.freshness = await checkWorkspaceFreshness(workspace, config, signal, output)
-            workspace.indexed = workspace.freshness.state === 'current'
-            await saveWorkspaceState(workspace)
-          }
-        )
-        await completion
-        if (!workspace.indexed) await this.ensureIndex(workspace, config)
-      } catch (error) {
-        workspace.error = error instanceof Error ? error.message : String(error)
-      }
-    }
     const servers = await registerWorkspaceServers(workspace, config)
-    workspace.serverIds = servers.map((server) => server.id)
+    const serverIds = servers.map((server) => server.id)
+    workspace.serverIds = serverIds
     await saveWorkspaceState(workspace)
+    if (config.compass.enabled && workspace.enabled && !workspace.error) this.ensureWorkspaceFreshness(workspace, config)
     // Saved agent configuration never acquires a project-specific ID. Remove managed
     // rows accidentally selected in global settings before mounting this workspace's set.
     const manualIds = (sourceAgent.mcps ?? []).filter(
       (id) => !mcpServerService.findByIdOrName(id)?.tags?.includes(MANAGED_TAG)
     )
-    return { agent: { ...sourceAgent, mcps: [...manualIds, ...workspace.serverIds] }, servers }
+    return { agent: { ...sourceAgent, mcps: [...manualIds, ...serverIds] }, servers }
   }
 
-  private ensureIndex(workspace: WorkspaceIntegration, config: IntegrationConfig): Promise<void> {
-    const existing = this.workspaceJobs.get(workspace.id)
-    if (existing) return existing
-    const job = this.runOperation('index', workspace.path, async (signal, output, operation, controls) => {
-      controls.stage('indexing')
-      workspace.freshness = { state: 'checking' }
-      workspace.latestOperationId = operation.id
+  private ensureWorkspaceFreshness(workspace: WorkspaceIntegration, config: IntegrationConfig): void {
+    if (this.workspaceJobs.has(workspace.id)) return
+    const job = (async () => {
+      const { completion: driftCompletion } = await this.runOperation(
+        'check-drift',
+        workspace.path,
+        async (signal, output, operation, controls) => {
+          controls.stage('checking')
+          workspace.freshness = { state: 'checking' }
+          workspace.latestOperationId = operation.id
+          await saveWorkspaceState(workspace)
+          workspace.freshness = await checkWorkspaceFreshness(workspace, config, signal, output)
+          workspace.indexed = workspace.freshness.state === 'current'
+          await saveWorkspaceState(workspace)
+        }
+      )
+      await driftCompletion
+      if (!workspace.indexed) {
+        const { completion: indexCompletion } = await this.runOperation(
+          'index',
+          workspace.path,
+          async (signal, output, operation, controls) => {
+            controls.stage('indexing')
+            workspace.freshness = { state: 'checking' }
+            workspace.latestOperationId = operation.id
+            await saveWorkspaceState(workspace)
+            workspace.freshness = await indexWorkspace(workspace, config, signal, output)
+            workspace.indexed = workspace.freshness.state === 'current'
+            workspace.lastIndexedAt = Date.now()
+            await saveWorkspaceState(workspace)
+          }
+        )
+        await indexCompletion
+      }
+      const servers = await registerWorkspaceServers(workspace, config)
+      workspace.serverIds = servers.map((server) => server.id)
       await saveWorkspaceState(workspace)
-      workspace.freshness = await indexWorkspace(workspace, config, signal, output)
-      workspace.indexed = workspace.freshness.state === 'current'
-      workspace.lastIndexedAt = Date.now()
-      await saveWorkspaceState(workspace)
-    })
-      .then(({ completion }) => completion)
+      this.workspaces.set(workspace.id, workspace)
+    })()
+      .catch(async () => {
+        workspace.error ??= 'prometheus.error.operationFailed'
+        workspace.freshness = { state: 'error', detail: workspace.error }
+        workspace.indexed = false
+        const servers = await registerWorkspaceServers(workspace, config)
+        workspace.serverIds = servers.map((server) => server.id)
+        await saveWorkspaceState(workspace)
+        this.workspaces.set(workspace.id, workspace)
+      })
       .finally(() => this.workspaceJobs.delete(workspace.id))
     this.workspaceJobs.set(workspace.id, job)
-    return job
+    void job.catch((error) => logger.error('Failed to persist Compass workspace failure', error))
   }
 
   async setWorkspaceEnabled(workspacePath: string, enabled: boolean): Promise<WorkspaceIntegration> {
