@@ -44,7 +44,7 @@ on:
   repository_dispatch:
     types: [boss_release_platform_published]
 concurrency:
-  group: ${{ github.event_name == 'repository_dispatch' && 'the-boss-release-publication' || format('the-boss-release-{0}', github.ref) }}
+  group: ${{ github.event_name == 'repository_dispatch' && 'the-boss-release-publication' || format('the-boss-release-{0}-{1}', github.ref, inputs.platforms) }}
   cancel-in-progress: false
 env:
   NODE_OPTIONS: --max-old-space-size=8192
