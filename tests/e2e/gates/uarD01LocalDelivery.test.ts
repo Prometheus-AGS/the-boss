@@ -184,6 +184,14 @@ test('D01 packaged Mac: starter instances and local observer survive restart wit
   const root = mkdtempSync(join(tmpdir(), 'the-boss-d01-'))
   const home = join(root, 'home')
   mkdirSync(home, { recursive: true })
+  const isolatedData = join(root, 'app-data')
+  mkdirSync(isolatedData)
+  const bootConfigDirectory = join(home, '.the-boss')
+  mkdirSync(bootConfigDirectory)
+  writeFileSync(
+    join(bootConfigDirectory, 'boot-config.json'),
+    JSON.stringify({ 'app.user_data_path': { [executable]: isolatedData } })
+  )
   const workspaceAPath = join(root, 'workspace-a')
   const workspaceBPath = join(root, 'workspace-b')
   mkdirSync(workspaceAPath)
@@ -195,7 +203,7 @@ test('D01 packaged Mac: starter instances and local observer survive restart wit
     app = launched.app
     const info = await ipc<AppInfo>(launched.page, 'app.get_info')
     expect(info.isPackaged).toBe(true)
-    expect(info.appDataPath.startsWith(home + '/')).toBe(true)
+    expect(info.appDataPath).toBe(isolatedData)
     await launched.page.evaluate(() =>
       window.api.preference.setMultiple({
         'app.language': 'en-US',
