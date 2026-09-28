@@ -56,8 +56,12 @@ function verifyPackagedApplication(resourcesDir) {
     }
   }
 
-  if (profile.uarEnabled) verifyAndProbePackagedUarPayload(resourcesDir, platformKey, { allowPlatformSigning: true })
-  else assertPackagedUarPayloadAbsent(resourcesDir, platformKey)
+  if (profile.uarEnabled) {
+    verifyAndProbePackagedUarPayload(resourcesDir, platformKey, {
+      allowPlatformSigning: true,
+      localUar: profile.localUar
+    })
+  } else assertPackagedUarPayloadAbsent(resourcesDir, platformKey)
 }
 
 function verifyApplicationBundle(app) {

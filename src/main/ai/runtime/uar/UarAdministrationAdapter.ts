@@ -295,7 +295,23 @@ const UAR_ADMIN_METHOD_ALLOWLIST = new Set<string>([
   'settings.namespace.sycophancy.read\u0000GET\u0000/api/uar/settings/sycophancy\u0000admin\u0000read',
   'settings.namespace.sycophancy.update\u0000PUT\u0000/api/uar/settings/sycophancy\u0000admin\u0000next_turn',
   'settings.namespace.acp.read\u0000GET\u0000/api/uar/settings/acp\u0000admin\u0000read',
-  'settings.namespace.acp.update\u0000PUT\u0000/api/uar/settings/acp\u0000admin\u0000next_turn'
+  'settings.namespace.acp.update\u0000PUT\u0000/api/uar/settings/acp\u0000admin\u0000next_turn',
+  'collaboration.deployment_bindings.list\u0000GET\u0000/api/v1/collaboration/deployment-bindings\u0000owner\u0000read',
+  'agent-instances.list\u0000GET\u0000/api/uar/agent-instances/v1/\u0000owner\u0000read',
+  'agent-instances.read\u0000GET\u0000/api/uar/agent-instances/v1/{id}\u0000owner\u0000read',
+  'agent-instances.create\u0000POST\u0000/api/uar/agent-instances/v1/\u0000owner\u0000live',
+  'agent-instances.activate\u0000POST\u0000/api/uar/agent-instances/v1/{id}/activate\u0000owner\u0000live',
+  'agent-instances.passivate\u0000POST\u0000/api/uar/agent-instances/v1/{id}/passivate\u0000owner\u0000live',
+  'agent-instances.drain\u0000POST\u0000/api/uar/agent-instances/v1/{id}/drain\u0000owner\u0000live',
+  'agent-instances.disable\u0000POST\u0000/api/uar/agent-instances/v1/{id}/disable\u0000owner\u0000live',
+  'agent-instances.restart\u0000POST\u0000/api/uar/agent-instances/v1/{id}/restart\u0000owner\u0000live',
+  'agent-instances.cancel\u0000POST\u0000/api/uar/agent-instances/v1/{id}/cancel\u0000owner\u0000live',
+  'observers.list\u0000GET\u0000/api/uar/observers/v1/\u0000owner\u0000read',
+  'observers.read\u0000GET\u0000/api/uar/observers/v1/{id}\u0000owner\u0000read',
+  'observers.create\u0000POST\u0000/api/uar/observers/v1/\u0000owner\u0000live',
+  'observers.pause\u0000POST\u0000/api/uar/observers/v1/{id}/pause\u0000owner\u0000live',
+  'observers.resume\u0000POST\u0000/api/uar/observers/v1/{id}/resume\u0000owner\u0000live',
+  'observers.gap.acknowledge\u0000POST\u0000/api/uar/observers/v1/{id}/gaps/acknowledge\u0000admin\u0000live'
 ])
 
 function isAllowed(method: UarAdministrationMethod): boolean {

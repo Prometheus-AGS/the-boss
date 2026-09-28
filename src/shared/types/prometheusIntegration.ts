@@ -858,6 +858,9 @@ export type IntegrationSnapshot = {
     state: 'running' | 'stopped' | 'unavailable'
     binary?: string
     binaryVersion?: string
+    binarySource?: 'override' | 'packaged'
+    binarySourceCommit?: string
+    binaryArchiveSha256?: string
     runtimeVersion?: string
     capabilities: string[]
     requestedPort: number

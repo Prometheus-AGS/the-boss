@@ -1,7 +1,12 @@
 import { application } from '@application'
 import {
+  acknowledgeUarDurableGap,
+  actOnUarDurableInstance,
+  actOnUarDurableObserver,
   compileUarAgent,
   cancelUarRun,
+  createUarDurableInstance,
+  createUarDurableObserver,
   createUarKnowledgeBase,
   createUarMemory,
   deleteUarA2uiComponent,
@@ -14,6 +19,7 @@ import {
   deleteUarProvider,
   diagnoseUarAuthority,
   readUarAdministrationSnapshot,
+  readUarDurableWorkspace,
   readUarOperations,
   readUarRunDetail,
   readUarCatalog,
@@ -133,6 +139,12 @@ const prometheusHandlerImplementations: IpcHandlersFor<typeof prometheusRequestS
   'prometheus.integration.export_log': async ({ id }) =>
     application.get('PrometheusIntegrationService').exportOperationLog(id),
   'prometheus.uar.admin.snapshot': async () => readUarAdministrationSnapshot(),
+  'prometheus.uar.durable.read': async ({ workspaceId }) => readUarDurableWorkspace(workspaceId),
+  'prometheus.uar.durable.create_instance': async (input) => createUarDurableInstance(input),
+  'prometheus.uar.durable.instance_action': async (input) => actOnUarDurableInstance(input),
+  'prometheus.uar.durable.create_observer': async (input) => createUarDurableObserver(input),
+  'prometheus.uar.durable.observer_action': async (input) => actOnUarDurableObserver(input),
+  'prometheus.uar.durable.acknowledge_gap': async (input) => acknowledgeUarDurableGap(input),
   'prometheus.uar.admin.diagnose_authority': async () => diagnoseUarAuthority(),
   'prometheus.uar.operations.read': async () => readUarOperations(),
   'prometheus.uar.runs.read': async ({ runId }) => readUarRunDetail(runId),

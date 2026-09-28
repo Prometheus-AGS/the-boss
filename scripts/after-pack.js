@@ -17,8 +17,9 @@ function verifyPackagedUarSidecar(context, platform) {
     platform === 'mac'
       ? path.join(context.appOutDir, `${context.packager.appInfo.productFilename}.app`, 'Contents', 'Resources')
       : path.join(context.appOutDir, 'resources')
-  if (resolveReleaseProfile().uarEnabled) {
-    verifyAndProbePackagedUarPayload(resourcesDir, platformKey)
+  const profile = resolveReleaseProfile()
+  if (profile.uarEnabled) {
+    verifyAndProbePackagedUarPayload(resourcesDir, platformKey, { localUar: profile.localUar })
   } else {
     assertPackagedUarPayloadAbsent(resourcesDir, platformKey)
   }

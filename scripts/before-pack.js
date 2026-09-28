@@ -8,6 +8,7 @@ const { parse } = require('yaml')
 const { ensureLinuxNativeArtifact } = require('./linux-native/download')
 const { resolveReleaseProfile } = require('./release-profile.cjs')
 const { getUarPayloadInventory } = require('./uar-payload-integrity.cjs')
+const { assertNoLocalUarPayload, stageLocalUarPayload } = require('./local-uar-payload.cjs')
 
 // if you want to add new prebuild binaries packages with different architectures, you can add them here
 // please add to allX64 and allArm64 from pnpm-lock.yaml
@@ -184,6 +185,13 @@ exports.default = async function (context) {
   const arch = context.arch === Arch.arm64 ? 'arm64' : 'x64'
   const platformName = context.packager.platform.name
   const platform = platformToArch[platformName]
+  const profile = resolveReleaseProfile()
+  const platformKey = `${platform}-${arch}`
+  const binaryDirectory = path.join(__dirname, '..', 'resources', 'binaries', platformKey)
+  if (profile.localUar && platformKey !== 'darwin-arm64') {
+    throw new Error('Local UAR payloads can only be packaged for darwin-arm64')
+  }
+  if (!profile.localUar) assertNoLocalUarPayload(binaryDirectory)
 
   await prepareNativeModulesForElectron(context)
   assertPrebuiltPackages(platform, arch)
@@ -192,6 +200,7 @@ exports.default = async function (context) {
   execSync(`node "${path.join(__dirname, 'download-binaries.js')}" ${platform} ${arch} --packaging`, {
     stdio: 'inherit'
   })
+  if (profile.localUar) stageLocalUarPayload(binaryDirectory)
   // Fail the build rather than ship a half-empty resources/binaries/<platform>.
   require('./download-binaries').verifyBundledBinaries(platform, arch)
   require('./package-prometheus').packagePrometheus()
@@ -226,7 +235,6 @@ exports.default = async function (context) {
   const excludeBundledBinaryFilters = allBinaryPlatforms
     .filter((p) => p !== currentPlatformKey)
     .map((p) => '!resources/binaries/' + p + '/**')
-  const profile = resolveReleaseProfile()
   const excludeUarPayloadFilters = profile.uarEnabled
     ? []
     : getUarPayloadInventory(currentPlatformKey).map(

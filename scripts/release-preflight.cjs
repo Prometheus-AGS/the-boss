@@ -1,10 +1,10 @@
 const fs = require('node:fs')
 const path = require('node:path')
-const { resolveReleaseProfile } = require('./release-profile.cjs')
+const { assertPublicReleaseProfile } = require('./public-release-profile.cjs')
 
 const root = path.resolve(__dirname, '..')
 const version = require('../package.json').version
-const profile = resolveReleaseProfile()
+const profile = assertPublicReleaseProfile()
 const requestedVersion = process.env.RELEASE_VERSION || version
 const source = process.env.GITHUB_SHA
 const replacePublishedPlatforms = process.env.REPLACE_PUBLISHED_PLATFORMS === '1'

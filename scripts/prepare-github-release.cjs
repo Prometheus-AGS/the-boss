@@ -1,10 +1,10 @@
 const { spawnSync } = require('node:child_process')
 
 const version = require('../package.json').version
-const { resolveReleaseProfile } = require('./release-profile.cjs')
+const { assertPublicReleaseProfile } = require('./public-release-profile.cjs')
 const tag = `v${version}`
 const repository = process.env.GITHUB_REPOSITORY
-const profile = resolveReleaseProfile()
+const profile = assertPublicReleaseProfile()
 const replacePublishedPlatforms = process.env.REPLACE_PUBLISHED_PLATFORMS === '1'
 const profileNote = profile.uarEnabled
   ? `Feature profile: ${profile.id}. Includes the complete pinned UAR sidecar payload for Windows x64 and Apple Silicon.`

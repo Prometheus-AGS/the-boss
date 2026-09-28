@@ -5,6 +5,7 @@ const { spawnSync } = require('node:child_process')
 
 const PROJECT_ROOT = path.resolve(__dirname, '..')
 const UAR_VERSION_MARKER = '.uar-sidecar-version'
+const LOCAL_PAYLOAD_MARKER = '.uar-local-payload.json'
 
 function loadUarArtifactManifest() {
   const integration = require(path.join(PROJECT_ROOT, 'build', 'integration-artifacts.json'))
@@ -66,12 +67,38 @@ function verifyPlatformSignature(filename, platformKey) {
   }
 }
 
+function loadLocalPayloadMarker(payloadDir, platformKey) {
+  const pin = require(path.join(PROJECT_ROOT, 'build', 'local-uar-source.json'))
+  const markerFile = path.join(payloadDir, LOCAL_PAYLOAD_MARKER)
+  const marker = JSON.parse(fs.readFileSync(markerFile, 'utf8'))
+  if (
+    marker.schema !== 1 ||
+    marker.name !== 'uar-sidecar' ||
+    marker.version !== pin.version ||
+    pin.platform !== platformKey ||
+    marker.platform !== platformKey ||
+    marker.source !== pin.revision ||
+    !/^[a-f0-9]{64}$/.test(marker.archiveSha256) ||
+    !Array.isArray(marker.files)
+  ) {
+    throw new Error(`Local UAR payload identity does not match its source pin for ${platformKey}`)
+  }
+  return marker
+}
+
 function verifyPackagedUarPayload(resourcesDir, platformKey, options = {}) {
   const { integration, sidecar } = loadUarArtifactManifest()
-  const expected = sidecar?.packages?.[platformKey]
+  const payloadDir = getPackagedBinaryDirectory(resourcesDir, platformKey)
+  const localMarkerFile = path.join(payloadDir, LOCAL_PAYLOAD_MARKER)
+  if (!options.localUar && fs.existsSync(localMarkerFile)) {
+    throw new Error(`Local UAR payload cannot be used for a public release: ${platformKey}`)
+  }
+  const local = options.localUar ? loadLocalPayloadMarker(payloadDir, platformKey) : null
+  const expected = local
+    ? { binaries: [...local.files.map((entry) => entry.path), 'payload-manifest.json'] }
+    : sidecar?.packages?.[platformKey]
   if (!expected) throw new Error(`Integration artifact manifest is missing uar-sidecar ${platformKey}`)
 
-  const payloadDir = getPackagedBinaryDirectory(resourcesDir, platformKey)
   const manifestFile = path.join(payloadDir, 'payload-manifest.json')
   const manifestStat = fs.statSync(manifestFile, { throwIfNoEntry: false })
   if (!manifestStat?.isFile() || manifestStat.size === 0) {
@@ -82,9 +109,9 @@ function verifyPackagedUarPayload(resourcesDir, platformKey, options = {}) {
   if (
     manifest.schema !== 1 ||
     manifest.name !== 'uar-sidecar' ||
-    manifest.version !== sidecar.version ||
+    manifest.version !== (local?.version ?? sidecar.version) ||
     manifest.platform !== platformKey ||
-    manifest.source !== integration.sources.uar.revision ||
+    manifest.source !== (local?.source ?? integration.sources.uar.revision) ||
     !Array.isArray(manifest.files)
   ) {
     throw new Error(`Packaged UAR sidecar manifest identity does not match the release pins for ${platformKey}`)
@@ -94,6 +121,13 @@ function verifyPackagedUarPayload(resourcesDir, platformKey, options = {}) {
   const expectedFiles = expected.binaries.filter((filename) => filename !== 'payload-manifest.json').sort()
   if (JSON.stringify(declaredFiles) !== JSON.stringify(expectedFiles)) {
     throw new Error(`Packaged UAR sidecar file inventory does not match the release pins for ${platformKey}`)
+  }
+  if (local) {
+    const declared = [...manifest.files].sort((left, right) => left.path.localeCompare(right.path))
+    const pinned = [...local.files].sort((left, right) => left.path.localeCompare(right.path))
+    if (JSON.stringify(declared) !== JSON.stringify(pinned)) {
+      throw new Error(`Packaged local UAR sidecar file hashes do not match their payload record for ${platformKey}`)
+    }
   }
 
   for (const entry of manifest.files) {
@@ -130,7 +164,7 @@ function verifyPackagedUarPayload(resourcesDir, platformKey, options = {}) {
 
 function assertPackagedUarPayloadAbsent(resourcesDir, platformKey) {
   const payloadDir = getPackagedBinaryDirectory(resourcesDir, platformKey)
-  const present = getUarPayloadInventory(platformKey).filter((filename) =>
+  const present = [...getUarPayloadInventory(platformKey), LOCAL_PAYLOAD_MARKER].filter((filename) =>
     fs.existsSync(path.join(payloadDir, ...filename.split('/')))
   )
   if (present.length > 0) {

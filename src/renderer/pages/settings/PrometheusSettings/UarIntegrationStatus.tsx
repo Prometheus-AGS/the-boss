@@ -179,9 +179,32 @@ export function UarIntegrationStatus({
             <dt className="font-medium">{text('uarBinary')}</dt>
             <dd className="min-w-0 break-all text-foreground-secondary">
               {snapshot.uar.binary ?? text('uarUnavailable')}
-              {snapshot.uar.binaryVersion ? ` · ${snapshot.uar.binaryVersion}` : ''}
             </dd>
           </div>
+          {snapshot.uar.binarySource && (
+            <div className="grid gap-1 py-3 text-sm sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] sm:gap-4">
+              <dt className="font-medium">{text('uarBinarySource')}</dt>
+              <dd className="text-foreground-secondary">{text(`uarBinarySourceValue.${snapshot.uar.binarySource}`)}</dd>
+            </div>
+          )}
+          {snapshot.uar.binaryVersion && (
+            <div className="grid gap-1 py-3 text-sm sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] sm:gap-4">
+              <dt className="font-medium">{text('uarBinaryVersion')}</dt>
+              <dd className="break-all font-mono text-foreground-secondary">{snapshot.uar.binaryVersion}</dd>
+            </div>
+          )}
+          {snapshot.uar.binarySourceCommit && (
+            <div className="grid gap-1 py-3 text-sm sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] sm:gap-4">
+              <dt className="font-medium">{text('uarSourceCommit')}</dt>
+              <dd className="break-all font-mono text-foreground-secondary">{snapshot.uar.binarySourceCommit}</dd>
+            </div>
+          )}
+          {snapshot.uar.binaryArchiveSha256 && (
+            <div className="grid gap-1 py-3 text-sm sm:grid-cols-[minmax(0,12rem)_minmax(0,1fr)] sm:gap-4">
+              <dt className="font-medium">{text('uarArchiveSha256')}</dt>
+              <dd className="break-all font-mono text-foreground-secondary">{snapshot.uar.binaryArchiveSha256}</dd>
+            </div>
+          )}
         </dl>
       </details>
     </SettingGroup>

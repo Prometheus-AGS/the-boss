@@ -1,7 +1,7 @@
 const fs = require('node:fs')
-const { resolveReleaseProfile } = require('./release-profile.cjs')
+const { assertPublicReleaseProfile } = require('./public-release-profile.cjs')
 
-const profile = resolveReleaseProfile()
+const profile = assertPublicReleaseProfile()
 const targets = [
   {
     runner: 'windows-2025',
@@ -15,7 +15,7 @@ const targets = [
     runner: 'macos-15',
     platform: 'darwin',
     arch: 'arm64',
-    script: profile.uarEnabled ? 'build:mac:arm64:release:uar' : 'build:mac:arm64'
+    script: profile.uarEnabled ? 'build:mac:arm64:release:uar' : 'build:mac:arm64:release'
   }
 ]
 const manifest = require('../build/integration-artifacts.json')

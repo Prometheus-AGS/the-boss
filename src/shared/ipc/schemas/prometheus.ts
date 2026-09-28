@@ -67,6 +67,11 @@ import {
   type UarSettingsSnapshot,
   type UarSettingsUpdateResult
 } from '@shared/types/prometheusIntegration'
+import type {
+  UarDurableInstance,
+  UarDurableObserver,
+  UarDurableWorkspaceSnapshot
+} from '@shared/types/uarDurableAdministration'
 
 import { defineRoute } from '../define'
 
@@ -253,6 +258,66 @@ export const prometheusRequestSchemas = {
   'prometheus.uar.admin.snapshot': defineRoute({
     input: z.object({}).strict(),
     output: z.custom<UarAdministrationSnapshot>()
+  }),
+  'prometheus.uar.durable.read': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
+    output: z.custom<UarDurableWorkspaceSnapshot>()
+  }),
+  'prometheus.uar.durable.create_instance': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        deploymentBindingId: z.string().min(1).max(256),
+        profile: z.enum(['request', 'on_demand', 'resident'])
+      })
+      .strict(),
+    output: z.custom<UarDurableInstance>()
+  }),
+  'prometheus.uar.durable.instance_action': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        instanceId: z.string().min(1).max(256),
+        action: z.enum(['activate', 'passivate', 'drain', 'disable', 'restart', 'cancel']),
+        commandId: z.uuid()
+      })
+      .strict(),
+    output: z.custom<UarDurableInstance>()
+  }),
+  'prometheus.uar.durable.create_observer': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        observerInstanceId: z.string().min(1).max(256),
+        sourceInstanceIds: z.array(z.string().min(1).max(256)).min(1).max(64),
+        conversationIds: z.array(z.string().min(1).max(256)).max(64).optional()
+      })
+      .strict(),
+    output: z.custom<UarDurableObserver>()
+  }),
+  'prometheus.uar.durable.observer_action': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        subscriptionId: z.string().min(1).max(256),
+        action: z.enum(['pause', 'resume']),
+        expectedRevision: z.number().int().nonnegative()
+      })
+      .strict(),
+    output: z.custom<UarDurableObserver>()
+  }),
+  'prometheus.uar.durable.acknowledge_gap': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        subscriptionId: z.string().min(1).max(256),
+        expectedRevision: z.number().int().nonnegative(),
+        sourceInstanceId: z.string().min(1).max(256),
+        missingFrom: z.number().int().nonnegative(),
+        missingThrough: z.number().int().nonnegative()
+      })
+      .strict(),
+    output: z.custom<UarDurableObserver>()
   }),
   'prometheus.uar.admin.diagnose_authority': defineRoute({
     input: z.object({}).strict(),

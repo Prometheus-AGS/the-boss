@@ -10,6 +10,8 @@ export type UarPayload = {
   modelsDirectory: string
   source: 'override' | 'packaged'
   version?: string
+  sourceCommit?: string
+  archiveSha256?: string
 }
 
 type UarPayloadManifest = {
@@ -17,6 +19,8 @@ type UarPayloadManifest = {
   name: string
   version: string
   platform: string
+  source?: string
+  archiveSha256?: string
   files: Array<{ path: string }>
 }
 
@@ -30,6 +34,8 @@ function readManifest(payloadDirectory: string): UarPayloadManifest | undefined 
       manifest.name !== 'uar-sidecar' ||
       !manifest.version?.trim() ||
       manifest.platform !== `${process.platform}-${process.arch}` ||
+      (manifest.source !== undefined && !/^[a-f0-9]{40}$/.test(manifest.source)) ||
+      (manifest.archiveSha256 !== undefined && !/^[a-f0-9]{64}$/.test(manifest.archiveSha256)) ||
       !Array.isArray(manifest.files)
     ) {
       return undefined
@@ -57,7 +63,14 @@ function payloadAt(executable: string, source: UarPayload['source']): UarPayload
   const modelsDirectory = path.join(payloadDirectory, 'uar-models')
   const manifest = readManifest(payloadDirectory)
   if (!manifest || !existsSync(executable)) return undefined
-  return { executable, modelsDirectory, source, version: manifest.version.trim() }
+  return {
+    executable,
+    modelsDirectory,
+    source,
+    version: manifest.version.trim(),
+    ...(manifest.source ? { sourceCommit: manifest.source } : {}),
+    ...(manifest.archiveSha256 ? { archiveSha256: manifest.archiveSha256 } : {})
+  }
 }
 
 export function inspectUarPayload(): UarPayload | undefined {

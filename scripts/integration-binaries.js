@@ -15,7 +15,7 @@ function loadIntegrationBinaries({ required = false } = {}) {
   }
   const manifest = JSON.parse(fs.readFileSync(filename, 'utf8'))
   const profile = resolveReleaseProfile()
-  const requiredTools = profile.nativeTools
+  const requiredTools = profile.nativeTools.filter((name) => !(profile.localUar && name === 'uar-sidecar'))
   for (const name of requiredTools) {
     const tool = manifest.tools.find((entry) => entry.name === name)
     if (!tool) throw new Error(`Integration manifest is missing ${name}`)

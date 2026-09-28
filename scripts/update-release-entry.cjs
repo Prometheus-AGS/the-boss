@@ -1,6 +1,6 @@
 const fs = require('node:fs')
 const path = require('node:path')
-const { resolveReleaseProfile } = require('./release-profile.cjs')
+const { assertPublicReleaseProfile } = require('./public-release-profile.cjs')
 const root = path.resolve(__dirname, '..')
 const directory = path.join(root, 'manifests')
 const selectedManifest = process.env.RELEASE_MANIFEST_FILE
@@ -9,7 +9,7 @@ const entries = fs
   .filter((name) => (selectedManifest ? name === selectedManifest : /^installers-.*\.json$/.test(name)))
   .map((name) => JSON.parse(fs.readFileSync(path.join(directory, name))))
 const version = require('../package.json').version
-const profile = resolveReleaseProfile()
+const profile = assertPublicReleaseProfile()
 const platforms = profile.supportedPlatforms
 const selected = (process.env.RELEASE_PLATFORMS || platforms.join(',')).split(',')
 const releaseSource = process.env.RELEASE_SOURCE_SHA || process.env.GITHUB_SHA

@@ -14,6 +14,7 @@ import {
   Skeleton
 } from '@cherrystudio/ui'
 import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/components/SettingsPrimitives'
+import { useQuery } from '@renderer/data/hooks/useDataApi'
 import { ipcApi } from '@renderer/ipc'
 import { getSettingDomId } from '@renderer/pages/settings/settingsSearch/types'
 import type { UarAdministrationSnapshot } from '@shared/types/prometheusIntegration'
@@ -21,6 +22,8 @@ import type { UarAdministrationSnapshot } from '@shared/types/prometheusIntegrat
 import { UarAgentsPanel } from './UarAgentsPanel'
 import { UarApprovalLifecyclePanel } from './UarApprovalLifecyclePanel'
 import { UarCompilerPanel } from './UarCompilerPanel'
+import { UarInstancesPanel } from './UarInstancesPanel'
+import { UarObserversPanel } from './UarObserversPanel'
 import { UarOperationalPanel } from './UarOperationalPanel'
 import { UarPresentationsPanel } from './UarPresentationsPanel'
 import { UarProvidersModelsPanel } from './UarProvidersModelsPanel'
@@ -30,7 +33,14 @@ import { UarSkillsPanel } from './UarSkillsPanel'
 const GROUPS = ['runtime', 'agents', 'experience', 'administration'] as const
 
 type SurfaceProjection = UarAdministrationSnapshot['surfaces'][number]
+type NavigationSurface = Pick<SurfaceProjection, 'id' | 'group'> & {
+  availability?: SurfaceProjection['availability']
+}
 const EMPTY_SURFACES: UarAdministrationSnapshot['surfaces'] = []
+const BOSS_DURABLE_SURFACES: NavigationSurface[] = [
+  { id: 'durable-agent-instances', group: 'agents' },
+  { id: 'local-scoped-observers', group: 'agents' }
+]
 
 function navText(translate: ReturnType<typeof useTranslation>['t'], key: string) {
   return translate('settings.prometheus.integration.uarAdmin.' + key)
@@ -133,6 +143,13 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
   const [snapshot, setSnapshot] = useState<UarAdministrationSnapshot>()
   const [error, setError] = useState<string>()
   const [loading, setLoading] = useState(true)
+  const [workspaceId, setWorkspaceId] = useState<string>()
+  const {
+    data: workspaces,
+    error: workspaceError,
+    isLoading: workspacesLoading,
+    refetch: refetchWorkspaces
+  } = useQuery('/agent-workspaces')
   const onReadyRef = useRef(onReady)
 
   useEffect(() => {
@@ -157,16 +174,22 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
   }, [load])
 
   const surfaces = snapshot?.surfaces ?? EMPTY_SURFACES
+  const navigationSurfaces = useMemo(
+    () => [...surfaces, ...BOSS_DURABLE_SURFACES.filter((item) => !surfaces.some((surface) => surface.id === item.id))],
+    [surfaces]
+  )
+  const userWorkspaces = workspaces?.filter((workspace) => workspace.type === 'user') ?? []
+  const selectedWorkspaceId = userWorkspaces.some((workspace) => workspace.id === workspaceId) ? workspaceId : undefined
   const requestedPanel = typeof search.panel === 'string' ? search.panel : undefined
-  const selectedId = surfaces.some((surface) => surface.id === requestedPanel) ? requestedPanel! : 'overview'
+  const selectedId = navigationSurfaces.some((surface) => surface.id === requestedPanel) ? requestedPanel! : 'overview'
   const selected = surfaces.find((surface) => surface.id === selectedId)
   const grouped = useMemo(
     () =>
       GROUPS.map((group) => ({
         group,
-        surfaces: surfaces.filter((surface) => surface.group === group && surface.id !== 'overview')
+        surfaces: navigationSurfaces.filter((surface) => surface.group === group && surface.id !== 'overview')
       })),
-    [surfaces]
+    [navigationSurfaces]
   )
   const selectSurface = (panel: string) => {
     void navigate({ search: (previous) => ({ ...previous, panel }), replace: false })
@@ -238,7 +261,7 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
                           : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                       }`}>
                       <span className="min-w-0 truncate">{navText(t, `surface.${surface.id}`)}</span>
-                      {surface.availability !== 'available' && (
+                      {surface.availability && surface.availability !== 'available' && (
                         <CircleSlash2 size={14} className="shrink-0" aria-hidden="true" />
                       )}
                     </button>
@@ -268,6 +291,48 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
             <UarPresentationsPanel />
           ) : selectedId === 'approvals' ? (
             <UarApprovalLifecyclePanel />
+          ) : selectedId === 'durable-agent-instances' || selectedId === 'local-scoped-observers' ? (
+            <div id={getSettingDomId('/settings/uar', selectedId)} className="scroll-mt-6">
+              <SettingGroup className="mb-4">
+                <SettingTitle>{navText(t, 'durable.workspaceTitle')}</SettingTitle>
+                <SettingDescription>{navText(t, 'durable.workspaceDescription')}</SettingDescription>
+                <Select value={selectedWorkspaceId} onValueChange={setWorkspaceId} disabled={workspacesLoading}>
+                  <SelectTrigger className="mt-4" aria-label={navText(t, 'durable.workspaceTitle')}>
+                    <SelectValue placeholder={navText(t, 'durable.workspacePlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {userWorkspaces.map((workspace) => (
+                      <SelectItem key={workspace.id} value={workspace.id}>
+                        {workspace.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {workspaceError && (
+                  <div className="mt-3 text-sm text-error" role="alert">
+                    {workspaceError.message}
+                    <Button variant="outline" size="sm" className="ml-2" onClick={() => void refetchWorkspaces()}>
+                      {navText(t, 'retry')}
+                    </Button>
+                  </div>
+                )}
+                {!workspacesLoading && !workspaceError && userWorkspaces.length === 0 && (
+                  <p className="mt-3 text-sm text-muted-foreground">{navText(t, 'durable.noWorkspaces')}</p>
+                )}
+                {workspacesLoading && (
+                  <p className="mt-3 text-sm text-muted-foreground" role="status">
+                    {t('common.loading')}
+                  </p>
+                )}
+              </SettingGroup>
+              {selectedWorkspaceId &&
+                (selectedId === 'durable-agent-instances' ? (
+                  <UarInstancesPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
+                ) : (
+                  <UarObserversPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
+                ))}
+              {selected && <MethodCoverage surface={selected} />}
+            </div>
           ) : ['runs', 'knowledge', 'tools', 'security', 'protocols'].includes(selectedId) ? (
             <>
               <UarOperationalPanel surface={selectedId as 'runs' | 'knowledge' | 'tools' | 'security' | 'protocols'} />
