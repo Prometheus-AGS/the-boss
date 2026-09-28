@@ -111,7 +111,12 @@ export function integrationDirectory(): string {
 export async function readSecrets(): Promise<Partial<Record<ManagedIntegrationSecret, string>>> {
   try {
     const data = await fs.readFile(path.join(integrationDirectory(), 'secrets.enc'))
-    const decrypted = await safeStorage.decryptStringAsync(data)
+    let decrypted: Awaited<ReturnType<typeof safeStorage.decryptStringAsync>>
+    try {
+      decrypted = await safeStorage.decryptStringAsync(data)
+    } catch {
+      throw new Error('prometheus.error.secretDecryption')
+    }
     return JSON.parse(decrypted.result)
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return {}

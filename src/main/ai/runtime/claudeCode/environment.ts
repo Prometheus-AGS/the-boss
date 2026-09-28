@@ -4,6 +4,7 @@
  * derives the auto-compact window and per-request output cap from the model catalog.
  */
 
+import fs from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 
@@ -115,7 +116,9 @@ export function resolveClaudeExecutablePath(): string {
 
   for (const packageName of nativePackages) {
     try {
-      return toAsarUnpackedPath(sdkRequire.resolve(`${packageName}/claude${extension}`))
+      const packageDirectory = path.dirname(sdkRequire.resolve(`${packageName}/package.json`))
+      const executable = path.join(toAsarUnpackedPath(packageDirectory), `claude${extension}`)
+      if (fs.existsSync(executable)) return executable
     } catch {
       // Optional native packages are platform-specific; try the next candidate.
     }

@@ -25,8 +25,32 @@ function verifyPackagedUarSidecar(context, platform) {
   }
 }
 
+function verifyPackagedClaudeCli(context, platform) {
+  if (platform !== 'mac' && platform !== 'windows') return
+  const arch = context.arch === Arch.arm64 ? 'arm64' : context.arch === Arch.x64 ? 'x64' : null
+  if (!arch) throw new Error(`Unsupported Claude Code packaging architecture: ${context.arch}`)
+  const platformKey = platform === 'mac' ? 'darwin' : 'win32'
+  const resourcesDir =
+    platform === 'mac'
+      ? path.join(context.appOutDir, `${context.packager.appInfo.productFilename}.app`, 'Contents', 'Resources')
+      : path.join(context.appOutDir, 'resources')
+  const executable = path.join(
+    resourcesDir,
+    'app.asar.unpacked',
+    'node_modules',
+    '@anthropic-ai',
+    `claude-agent-sdk-${platformKey}-${arch}`,
+    platform === 'mac' ? 'claude' : 'claude.exe'
+  )
+  if (!fs.existsSync(executable) || !fs.statSync(executable).isFile()) {
+    throw new Error(`Packaged Claude Code native executable is missing: ${executable}`)
+  }
+  if (platform === 'mac') fs.accessSync(executable, fs.constants.X_OK)
+}
+
 exports.default = async function (context) {
   const platform = context.packager.platform.name
+  verifyPackagedClaudeCli(context, platform)
   verifyPackagedUarSidecar(context, platform)
   if (platform === 'windows') {
     fs.rmSync(path.join(context.appOutDir, 'LICENSE.electron.txt'), { force: true })
