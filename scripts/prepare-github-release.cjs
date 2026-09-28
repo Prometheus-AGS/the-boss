@@ -7,7 +7,7 @@ const repository = process.env.GITHUB_REPOSITORY
 const profile = assertPublicReleaseProfile()
 const replacePublishedPlatforms = process.env.REPLACE_PUBLISHED_PLATFORMS === '1'
 const profileNote = profile.uarEnabled
-  ? `Feature profile: ${profile.id}. Includes the complete pinned UAR sidecar payload for Windows x64 and Apple Silicon.`
+  ? `Feature profile: ${profile.id}. Includes complete pinned UAR sidecar payloads for Windows x64 and ARM64, and macOS Apple Silicon and Intel.`
   : `Feature profile: ${profile.id}. UAR is unavailable in this customer release while its sidecar packaging is corrected.`
 
 const existing = spawnSync('gh', ['release', 'view', tag, '--repo', repository, '--json', 'body,targetCommitish'], {
@@ -43,7 +43,7 @@ const notes = [
   `The Boss ${version} — workspace-bound tools, managed services, and the complete Prometheus skill payload.`,
   '',
   profileNote,
-  `Installers are published for ${profile.supportedPlatforms.join(', ')}. See RELEASES.md for checksums and signing status.`
+  `Platform targets: ${profile.supportedPlatforms.join(', ')}. Completed installers and their checksums and signing status appear in RELEASES.md as each platform is published.`
 ].join('\n')
 const created = spawnSync(
   'gh',

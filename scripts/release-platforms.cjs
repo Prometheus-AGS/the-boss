@@ -9,8 +9,18 @@ const targets = [
     arch: 'x64',
     script: profile.uarEnabled ? 'build:win:x64:release:uar' : 'build:win:x64:release'
   },
-  { runner: 'windows-11-arm', platform: 'win32', arch: 'arm64', script: 'build:win:arm64:release' },
-  { runner: 'macos-15-intel', platform: 'darwin', arch: 'x64', script: 'build:mac:x64' },
+  {
+    runner: 'windows-11-arm',
+    platform: 'win32',
+    arch: 'arm64',
+    script: profile.uarEnabled ? 'build:win:arm64:release:uar' : 'build:win:arm64:release'
+  },
+  {
+    runner: 'macos-15-intel',
+    platform: 'darwin',
+    arch: 'x64',
+    script: profile.uarEnabled ? 'build:mac:x64:release:uar' : 'build:mac:x64:release'
+  },
   {
     runner: 'macos-15',
     platform: 'darwin',

@@ -1,19 +1,25 @@
 const fs = require('node:fs')
 const path = require('node:path')
+const { UAR_RELEASE_PLATFORM_KEYS } = require('./release-profile.cjs')
 
 const root = path.resolve(__dirname, '..')
 const manifestPath = path.join(root, 'build', 'integration-artifacts.json')
 const sourcesPath = path.join(root, 'build', 'integration-sources.json')
-const requiredPlatforms = new Set(['win32-x64', 'darwin-arm64'])
+const requiredPlatforms = new Set(UAR_RELEASE_PLATFORM_KEYS)
 const cliRecordUrls = process.argv.slice(2)
 const recordUrls =
   cliRecordUrls.length > 0
     ? cliRecordUrls
-    : [process.env.UAR_WIN32_X64_RECORD_URL, process.env.UAR_DARWIN_ARM64_RECORD_URL]
+    : [
+        process.env.UAR_WIN32_X64_RECORD_URL,
+        process.env.UAR_WIN32_ARM64_RECORD_URL,
+        process.env.UAR_DARWIN_ARM64_RECORD_URL,
+        process.env.UAR_DARWIN_X64_RECORD_URL
+      ]
 
 if (recordUrls.length !== requiredPlatforms.size || recordUrls.some((recordUrl) => !recordUrl)) {
   throw new Error(
-    'usage: node scripts/import-uar-sidecar-payloads.cjs <win32-x64-record-url> <darwin-arm64-record-url>, or set UAR_WIN32_X64_RECORD_URL and UAR_DARWIN_ARM64_RECORD_URL'
+    'usage: node scripts/import-uar-sidecar-payloads.cjs <win32-x64-record-url> <win32-arm64-record-url> <darwin-arm64-record-url> <darwin-x64-record-url>, or set all four UAR_*_RECORD_URL values'
   )
 }
 
@@ -88,8 +94,14 @@ function validateBinaries(value, platform) {
     throw new Error(`UAR sidecar ${platform} record contains duplicate packaged paths`)
   }
 
-  const executable = platform === 'win32-x64' ? 'uar-sidecar.exe' : 'uar-sidecar'
-  for (const required of [executable, 'payload-manifest.json']) {
+  const executable = platform.startsWith('win32-') ? 'uar-sidecar.exe' : 'uar-sidecar'
+  for (const required of [
+    executable,
+    'payload-manifest.json',
+    'policies/default.cedar',
+    'policies/skill-mutation.cedar',
+    'policies/tool-approval.cedar'
+  ]) {
     if (!binaries.includes(required)) throw new Error(`UAR sidecar ${platform} record is missing ${required}`)
   }
 
@@ -160,6 +172,7 @@ async function main() {
 
   const records = await Promise.all(recordUrls.map((recordUrl) => loadRecord(recordUrl, uarSource, expectedVersion)))
   const platforms = new Set(records.map((record) => record.platform))
+  if (platforms.size !== records.length) throw new Error('Duplicate UAR sidecar platform release records')
   for (const platform of requiredPlatforms) {
     if (!platforms.has(platform)) throw new Error(`Missing UAR sidecar release record for ${platform}`)
   }
