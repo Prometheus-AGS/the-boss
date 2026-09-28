@@ -1,6 +1,7 @@
 import type { ChildProcess } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
-import { chmod, mkdir, writeFile } from 'node:fs/promises'
+import { constants } from 'node:fs'
+import { chmod, copyFile, mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import readline from 'node:readline'
 
@@ -289,6 +290,19 @@ export class UarSidecarService extends BaseService {
     const configFile = path.join(dataRoot, 'sidecar.yaml')
     const dotenvFile = path.join(dataRoot, '.env')
     await mkdir(dataRoot, { recursive: true, mode: 0o700 })
+    const policiesDirectory = path.join(dataRoot, 'policies')
+    await mkdir(policiesDirectory, { recursive: true, mode: 0o700 })
+    for (const policy of ['default.cedar', 'skill-mutation.cedar', 'tool-approval.cedar']) {
+      try {
+        await copyFile(
+          path.join(payload.policiesDirectory, policy),
+          path.join(policiesDirectory, policy),
+          constants.COPYFILE_EXCL
+        )
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
+      }
+    }
     await Promise.all([
       writeFile(configFile, '{}\n', { encoding: 'utf8', mode: 0o600 }),
       writeFile(dotenvFile, '', { encoding: 'utf8', mode: 0o600 })

@@ -8,6 +8,7 @@ import { toAsarUnpackedPath } from '@main/utils/asar'
 export type UarPayload = {
   executable: string
   modelsDirectory: string
+  policiesDirectory: string
   source: 'override' | 'packaged'
   version?: string
   sourceCommit?: string
@@ -52,6 +53,12 @@ function readManifest(payloadDirectory: string): UarPayloadManifest | undefined 
     }
     const executable = isWin ? 'uar-sidecar.exe' : 'uar-sidecar'
     if (!declaredFiles.has(executable) || !declaredFiles.has('uar-models/config.json')) return undefined
+    if (
+      !['default.cedar', 'skill-mutation.cedar', 'tool-approval.cedar'].every((name) =>
+        declaredFiles.has(`policies/${name}`)
+      )
+    )
+      return undefined
     return manifest
   } catch {
     return undefined
@@ -61,11 +68,13 @@ function readManifest(payloadDirectory: string): UarPayloadManifest | undefined 
 function payloadAt(executable: string, source: UarPayload['source']): UarPayload | undefined {
   const payloadDirectory = path.dirname(executable)
   const modelsDirectory = path.join(payloadDirectory, 'uar-models')
+  const policiesDirectory = path.join(payloadDirectory, 'policies')
   const manifest = readManifest(payloadDirectory)
   if (!manifest || !existsSync(executable)) return undefined
   return {
     executable,
     modelsDirectory,
+    policiesDirectory,
     source,
     version: manifest.version.trim(),
     ...(manifest.source ? { sourceCommit: manifest.source } : {}),
