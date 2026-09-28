@@ -11,10 +11,9 @@
     "darwin-x64"
   ],
   "source": "79b95a765a2bcd0000eb84178935ef1afd7227fb",
-  "publishedAt": "2026-09-28T22:33:51.270Z",
+  "publishedAt": "2026-09-28T22:41:11.817Z",
   "pendingPlatforms": [
     "win32-arm64",
-    "darwin-arm64",
     "darwin-x64"
   ],
   "artifacts": [
@@ -27,6 +26,17 @@
       "profile": "uar-enabled",
       "platform": "win32",
       "arch": "x64",
+      "source": "79b95a765a2bcd0000eb84178935ef1afd7227fb"
+    },
+    {
+      "name": "The-Boss-2.2.7-mac-arm64.dmg",
+      "size": 622949441,
+      "sha256": "1dba1ce4fb063e3796ef16d93a29256f149cc4a6af7cd1cc583b32a95046ed23",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.7/The-Boss-2.2.7-mac-arm64.dmg",
+      "signing": "Developer ID (notarized)",
+      "profile": "uar-enabled",
+      "platform": "darwin",
+      "arch": "arm64",
       "source": "79b95a765a2bcd0000eb84178935ef1afd7227fb"
     }
   ]
