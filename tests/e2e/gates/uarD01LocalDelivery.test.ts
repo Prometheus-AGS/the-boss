@@ -129,8 +129,9 @@ async function runOperation(page: Page, action: 'uar-check' | 'uar-restart'): Pr
       },
       { timeout: 2 * 60_000 }
     )
-    .not.toBe('running')
-  if (result?.status !== 'done') throw new Error(`${action} failed: ${result?.error ?? result?.output ?? 'no result'}`)
+    .toMatch(/^(succeeded|failed|cancelled|interrupted)$/)
+  if (result?.status !== 'succeeded')
+    throw new Error(`${action} failed: ${result?.error ?? result?.output ?? 'no result'}`)
   return result
 }
 
