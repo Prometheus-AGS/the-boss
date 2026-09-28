@@ -1,5 +1,5 @@
 import type { ChildProcess } from 'node:child_process'
-import { randomBytes } from 'node:crypto'
+import { createHash, randomBytes } from 'node:crypto'
 import { constants } from 'node:fs'
 import { chmod, copyFile, mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -326,6 +326,7 @@ export class UarSidecarService extends BaseService {
       UAR_SIDECAR: '1',
       UAR_SECURITY__SETTINGS_MUTATION_AUTH_REQUIRED: 'true',
       UAR_SECURITY__SETTINGS_ADMIN_KEY: adminKey,
+      UAR_SERVICE_INSTANCE__INSTANCE_ID: `urn:boss:uar:${createHash('sha256').update(adminKey).digest('hex')}`,
       CREDENTIAL_ENCRYPTION_KEY: credentialEncryptionKey,
       UAR_PERSISTENCE__PROVIDER: 'surreal',
       ...persistence,
