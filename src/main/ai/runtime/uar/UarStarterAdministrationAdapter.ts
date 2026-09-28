@@ -207,8 +207,8 @@ export async function setupUarStarterTeam(workspaceId: string): Promise<UarTeamB
     runtimeInstanceId: capabilities.instance.id,
     storageBackend: endpoint.storage.profile.backend,
     packageIdentity: starter.identity,
-    bindingId: `urn:boss:starter:team-binding:${resolved}`,
-    effectiveLimits: { concurrentTurns: 1, maxMembers: 2, maxDepth: 0, maxPendingTasks: 8 }
+    bindingId: `urn:boss:starter:team-binding:v2:${resolved}`,
+    effectiveLimits: { concurrentTurns: 1, maxMembers: 3, maxDepth: 0, maxPendingTasks: 8 }
   })
   const existingBindings = z.array(rawBinding).parse(await scopedRequest(resolved, bindingPath, state.generation))
   if (existingBindings.some((candidate) => candidate.workspaceId !== resolved)) {

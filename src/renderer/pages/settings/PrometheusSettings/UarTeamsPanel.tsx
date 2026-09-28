@@ -16,6 +16,7 @@ import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/compon
 import { ipcApi } from '@renderer/ipc'
 import type { UarTeamsSnapshot } from '@shared/types/uarTeams'
 
+import { UarTeamMailbox } from './UarTeamMailbox'
 import { UarTeamTaskBoard } from './UarTeamTaskBoard'
 import { UarTeamTaskForm } from './UarTeamTaskForm'
 
@@ -33,6 +34,7 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
   const [selectedDefinitionKey, setSelectedDefinitionKey] = useState<string>()
   const [selectedBindingId, setSelectedBindingId] = useState<string>()
   const [selectedInstanceId, setSelectedInstanceId] = useState<string>()
+  const [memberCounts, setMemberCounts] = useState<Record<string, number>>({})
   const [teamInput, setTeamInput] = useState('{}')
   const createIntent = useRef<{ fingerprint: string; commandId: string } | undefined>(undefined)
 
@@ -40,7 +42,8 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
     setLoading(true)
     setError(undefined)
     try {
-      setSnapshot(await ipcApi.request('prometheus.uar.teams.snapshot', { workspaceId }))
+      const next = await ipcApi.request('prometheus.uar.teams.snapshot', { workspaceId })
+      setSnapshot(next)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
     } finally {
@@ -70,9 +73,21 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
     setError(undefined)
     setStatus(undefined)
     try {
-      await ipcApi.request('prometheus.uar.teams.setup_starter', { workspaceId })
+      const binding = await ipcApi.request('prometheus.uar.teams.setup_starter', { workspaceId })
       setStatus(tr('starterReady'))
-      await refresh()
+      const next = await ipcApi.request('prometheus.uar.teams.snapshot', { workspaceId })
+      setSnapshot(next)
+      const installed = next.definitions.find(
+        (definition) =>
+          definition.id === 'urn:boss:starter:team' &&
+          definition.package.id === binding.package.id &&
+          definition.package.digest === binding.package.digest
+      )
+      if (installed) {
+        setSelectedDefinitionKey(definitionKey(installed))
+        setSelectedBindingId(binding.id)
+        setMemberCounts(Object.fromEntries(installed.members.map((member) => [member.role, member.min])))
+      }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
     } finally {
@@ -95,7 +110,11 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
       selectedDefinition.id,
       selectedDefinition.version,
       selectedDefinition.digest,
-      input
+      input,
+      selectedDefinition.members.map((member) => ({
+        role: member.role,
+        count: memberCounts[member.role] ?? member.min
+      }))
     ])
     const intent =
       createIntent.current?.fingerprint === fingerprint
@@ -115,7 +134,11 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
           version: selectedDefinition.version,
           digest: selectedDefinition.digest
         },
-        input
+        input,
+        memberSlots: selectedDefinition.members.map((member) => ({
+          role: member.role,
+          count: memberCounts[member.role] ?? member.min
+        }))
       })
       setSelectedInstanceId(instance.id)
       createIntent.current = undefined
@@ -178,6 +201,10 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                   onValueChange={(value) => {
                     setSelectedDefinitionKey(value)
                     setSelectedBindingId(undefined)
+                    const definition = snapshot.definitions.find((item) => definitionKey(item) === value)
+                    setMemberCounts(
+                      Object.fromEntries(definition?.members.map((member) => [member.role, member.min]) ?? [])
+                    )
                   }}>
                   <SelectTrigger id="uar-team-definition">
                     <SelectValue placeholder={tr('chooseDefinition')} />
@@ -196,18 +223,19 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                   </p>
                 )}
                 {snapshot.definitions.length === 0 && (
-                  <div className="mt-2">
-                    <p className="text-sm text-muted-foreground">{tr('noDefinitions')}</p>
-                    <Button
-                      className="mt-3"
-                      variant="outline"
-                      size="sm"
-                      disabled={!snapshot.capabilities.planning || Boolean(busy)}
-                      onClick={() => void setupStarter()}>
-                      {busy === 'setup' ? tr('settingUpStarter') : tr('setupStarter')}
-                    </Button>
-                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">{tr('noDefinitions')}</p>
                 )}
+                <Button
+                  className="mt-3"
+                  variant="outline"
+                  size="sm"
+                  disabled={!snapshot.capabilities.planning || Boolean(busy)}
+                  onClick={() => void setupStarter()}>
+                  {busy === 'setup'
+                    ? tr('settingUpStarter')
+                    : tr(snapshot.definitions.length === 0 ? 'setupStarter' : 'installCurrentStarter')}
+                </Button>
+                <p className="mt-1 text-xs text-muted-foreground">{tr('starterVersionHelp')}</p>
               </div>
               <div>
                 <label htmlFor="uar-team-binding" className="mb-1.5 block text-sm font-medium">
@@ -230,6 +258,40 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                 )}
               </div>
             </div>
+            {selectedDefinition && (
+              <fieldset className="mt-4">
+                <legend className="text-sm font-medium">{tr('memberSlots')}</legend>
+                <p className="mt-1 text-xs text-muted-foreground">{tr('memberSlotsDescription')}</p>
+                <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                  {selectedDefinition.members.map((member, index) => (
+                    <div key={member.role}>
+                      <label htmlFor={`uar-team-member-count-${index}`} className="mb-1.5 block text-sm font-medium">
+                        {tr('memberSlotCount', { role: member.role })}
+                      </label>
+                      <Select
+                        value={String(memberCounts[member.role] ?? member.min)}
+                        onValueChange={(value) =>
+                          setMemberCounts((current) => ({ ...current, [member.role]: Number(value) }))
+                        }
+                        disabled={Boolean(busy)}>
+                        <SelectTrigger id={`uar-team-member-count-${index}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: member.max - member.min + 1 }, (_, offset) => member.min + offset).map(
+                            (count) => (
+                              <SelectItem key={count} value={String(count)}>
+                                {count}
+                              </SelectItem>
+                            )
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              </fieldset>
+            )}
             <div className="mt-4">
               <label htmlFor="uar-team-input" className="mb-1.5 block text-sm font-medium">
                 {tr('teamInput')}
@@ -312,7 +374,18 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                 planning={snapshot.capabilities.planning}
                 onAdded={refresh}
               />
-              <UarTeamTaskBoard instance={selectedInstance} />
+              <UarTeamTaskBoard
+                workspaceId={workspaceId}
+                instance={selectedInstance}
+                ownership={snapshot.capabilities.ownership}
+                onChanged={refresh}
+              />
+              <UarTeamMailbox
+                key={selectedInstance.id}
+                workspaceId={workspaceId}
+                instance={selectedInstance}
+                available={snapshot.capabilities.mailbox}
+              />
             </>
           )}
         </>
