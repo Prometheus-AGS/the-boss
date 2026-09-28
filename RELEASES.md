@@ -5,7 +5,7 @@ Each entry records the exact source commit, artifact checksum, size, and signing
 
 <!-- releases:newest-first -->
 
-## v2.2.6 — 2026-09-28T16:24:28.006Z
+## v2.2.6 — 2026-09-28T16:28:40.793Z
 
 Profile: uar-enabled
 
@@ -13,6 +13,7 @@ Profile: uar-enabled
 |---|---|---|---|---|---|
 | `The-Boss-2.2.6-win-x64-setup.exe` | 443.9 MB | [Download](https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.6/The-Boss-2.2.6-win-x64-setup.exe) | `21021f4146d2d413f74bffafd2d2cce084303fe098b55ca641fb8148f8d77d8d` | unsigned | [`47e18cb9f`](https://github.com/Prometheus-AGS/the-boss/commit/47e18cb9fdecb36b81eb29ae5af92e9d40c4ff77) |
 | `The-Boss-2.2.6-mac-arm64.dmg` | 593.8 MB | [Download](https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.6/The-Boss-2.2.6-mac-arm64.dmg) | `7947518cada169a7e5fb903f7c6d284e16dc5e3c3212fa737d8563c62b50b5ea` | Developer ID (notarized) | [`47e18cb9f`](https://github.com/Prometheus-AGS/the-boss/commit/47e18cb9fdecb36b81eb29ae5af92e9d40c4ff77) |
+| `The-Boss-2.2.6-win-arm64-setup.exe` | 413.4 MB | [Download](https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.6/The-Boss-2.2.6-win-arm64-setup.exe) | `1118bcc0e07753c445302aeeafa8fc7cadb059326f18a285979f4aec81a92b12` | unsigned | [`47e18cb9f`](https://github.com/Prometheus-AGS/the-boss/commit/47e18cb9fdecb36b81eb29ae5af92e9d40c4ff77) |
 
 ## v2.2.5 — 2026-09-28T15:02:18.569Z
 
