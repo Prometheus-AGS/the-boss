@@ -79,6 +79,7 @@ import {
   uarInstanceSelectSchema,
   type UarInstanceInventorySnapshot
 } from '@shared/types/uarServiceInstance'
+import type { UarTeamBinding, UarTeamInstance, UarTeamsSnapshot } from '@shared/types/uarTeams'
 
 import { defineRoute } from '../define'
 
@@ -269,6 +270,48 @@ export const prometheusRequestSchemas = {
   'prometheus.uar.durable.read': defineRoute({
     input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
     output: z.custom<UarDurableWorkspaceSnapshot>()
+  }),
+  'prometheus.uar.teams.snapshot': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
+    output: z.custom<UarTeamsSnapshot>()
+  }),
+  'prometheus.uar.teams.setup_starter': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
+    output: z.custom<UarTeamBinding>()
+  }),
+  'prometheus.uar.teams.create': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        commandId: z.uuid(),
+        deploymentBindingId: z.string().min(1).max(256),
+        teamDefinition: z
+          .object({ id: z.string().min(1), version: z.string().min(1), digest: z.string().min(1) })
+          .strict(),
+        input: z.unknown(),
+        memberSlots: z
+          .array(z.object({ role: z.string().min(1), count: z.number().int().positive() }).strict())
+          .optional()
+      })
+      .strict(),
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.add_task': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        teamInstanceId: z.string().min(1).max(256),
+        commandId: z.uuid(),
+        taskId: z.string().min(1).max(256),
+        expectedTeamRevision: z.number().int().nonnegative(),
+        title: z.string().min(1).max(512),
+        role: z.string().min(1).max(256),
+        input: z.unknown(),
+        outputContract: z.unknown(),
+        dependsOn: z.array(z.string().min(1).max(256)).max(128)
+      })
+      .strict(),
+    output: z.custom<UarTeamInstance>()
   }),
   'prometheus.uar.durable.setup_starter': defineRoute({
     input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),

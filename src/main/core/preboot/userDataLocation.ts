@@ -59,6 +59,15 @@ export function resolveUserDataLocation(): void {
     return
   }
 
+  const explicitDirectory = process.argv.find((argument) => argument.startsWith('--user-data-dir='))
+  if (explicitDirectory) {
+    const selected = canonicalizeUserDataPath(explicitDirectory.slice('--user-data-dir='.length))
+    if (!isUsableDataDir(selected)) throw new Error(`userData directory is unavailable: ${selected}`)
+    app.setPath('userData', selected)
+    logger.info('userData set from explicit launch directory', { selected })
+    return
+  }
+
   const exe = getNormalizedExecutablePath()
   const resolved = bootConfigService.get('app.user_data_path')?.[exe]
   if (resolved && isUsableDataDir(resolved)) {

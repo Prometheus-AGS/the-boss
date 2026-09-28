@@ -91,19 +91,121 @@ export function starterPackage() {
   }
 }
 
+/** A separate immutable planning package; installing it never changes the existing starter agent binding. */
+export function starterTeamPackage() {
+  const starter = starterPackage()
+  const agentSource = starter.files[agentPath]
+  const agent = JSON.parse(agentSource) as { id: string; version: string; contentDigest: string }
+  const agentRef = { id: agent.id, version: agent.version, digest: agent.contentDigest }
+  const teamId = 'urn:boss:starter:team'
+  const teamPath = 'team-definition.json'
+  const workflowPath = 'workflow-definition.json'
+  const workflow = document({
+    profile,
+    kind: 'WorkflowDefinition',
+    id: 'urn:boss:starter:workflow',
+    version,
+    provenance: { source: 'The Boss built-in starter team', authors: ['The Boss'] },
+    requiredCapabilities: [],
+    extensions: {},
+    title: 'Plan a workspace task',
+    input: { type: 'object' },
+    output: { type: 'object' },
+    steps: [
+      {
+        id: 'plan',
+        role: 'coordinator',
+        dependsOn: [],
+        inputMapping: {},
+        output: { type: 'object' },
+        effect: 'none',
+        approval: 'none',
+        retry: { maxAttempts: 1, onUnknownEffect: 'reconcile-before-retry' },
+        completion: 'artifact',
+        instructions: 'Produce a plan for the workspace task.'
+      }
+    ],
+    failurePolicy: 'stop-dependent',
+    maxActivations: 1
+  })
+  const workflowSource = JSON.stringify(workflow)
+  const workflowRef = { id: workflow.id, version: workflow.version, digest: workflow.contentDigest }
+  const team = document({
+    profile,
+    kind: 'TeamDefinition',
+    id: teamId,
+    version,
+    provenance: { source: 'The Boss built-in starter team', authors: ['The Boss'] },
+    requiredCapabilities: [],
+    extensions: {},
+    title: 'Starter planning team',
+    purpose: 'Plan a workspace task with a coordinator and a worker.',
+    members: [
+      { role: 'coordinator', kind: 'agent', definition: agentRef, min: 1, max: 1, responsibility: 'Define the plan.' },
+      {
+        role: 'worker',
+        kind: 'agent',
+        definition: agentRef,
+        min: 1,
+        max: 1,
+        responsibility: 'Prepare the assigned work.'
+      }
+    ],
+    coordinatorRole: 'coordinator',
+    communication: [],
+    taskAcceptance: { mode: 'operator', allowedWorkflows: [workflowRef] },
+    routing: { eligibilityFirst: true, strategy: 'operator-role-capacity-cost-stable-id', explain: true },
+    limits: { concurrentTurns: 1, maxMembers: 2, maxDepth: 0, maxPendingTasks: 8 },
+    budget: { maxTokens: 10000, maxCostMicrounits: 1000000, currency: 'USD', maxElapsedSeconds: 300 },
+    input: { type: 'object' },
+    output: { type: 'object' }
+  })
+  const teamSource = JSON.stringify(team)
+  const teamRef = { id: team.id, version: team.version, digest: team.contentDigest }
+  const manifest = document({
+    profile,
+    kind: 'PackageManifest',
+    id: 'urn:boss:starter:team-package',
+    version,
+    provenance: { source: 'The Boss built-in starter team', authors: ['The Boss'] },
+    requiredCapabilities: ['collaboration_definition_packages_v2'],
+    extensions: {},
+    entrypoints: [teamRef],
+    files: [
+      { path: agentPath, kind: 'AgentDefinition', definition: agentRef, byteDigest: digest(agentSource) },
+      { path: teamPath, kind: 'TeamDefinition', definition: teamRef, byteDigest: digest(teamSource) },
+      { path: workflowPath, kind: 'WorkflowDefinition', definition: workflowRef, byteDigest: digest(workflowSource) }
+    ],
+    lock: [
+      { requestedBy: teamId, reference: agentRef, resolvedPath: agentPath },
+      { requestedBy: teamId, reference: workflowRef, resolvedPath: workflowPath }
+    ],
+    capabilityDeclarations: [{ capability: 'collaboration_definition_packages_v2', required: true }],
+    resolution: 'exact-version-and-digest'
+  })
+  return {
+    identity: { id: manifest.id, version: manifest.version, digest: manifest.contentDigest },
+    definition: teamRef,
+    manifest: JSON.stringify(manifest),
+    files: { [agentPath]: agentSource, [teamPath]: teamSource, [workflowPath]: workflowSource }
+  }
+}
+
 export function starterBinding(input: {
   ownerId: string
   workspaceId: string
   runtimeInstanceId: string
-  providerId: string
-  modelId: string
+  providerId?: string
+  modelId?: string
   storageBackend: 'embedded' | 'remote'
   packageIdentity: { id: string; version: string; digest: string }
+  bindingId?: string
+  effectiveLimits?: typeof limits
 }) {
   return document({
     profile,
     kind: 'DeploymentBinding',
-    id: `urn:boss:starter:binding:${input.workspaceId}`,
+    id: input.bindingId ?? `urn:boss:starter:binding:${input.workspaceId}`,
     version,
     provenance,
     requiredCapabilities: ['collaboration_deployment_bindings_v2'],
@@ -114,14 +216,17 @@ export function starterBinding(input: {
     workspaceId: input.workspaceId,
     runtimeInstanceId: input.runtimeInstanceId,
     revision: 1,
-    modelBindings: [
-      {
-        requestedAlias: 'local-default',
-        providerId: input.providerId,
-        modelId: input.modelId,
-        credentialRef: `protected-credential://uar/provider/${input.providerId}`
-      }
-    ],
+    modelBindings:
+      input.providerId && input.modelId
+        ? [
+            {
+              requestedAlias: 'local-default',
+              providerId: input.providerId,
+              modelId: input.modelId,
+              credentialRef: `protected-credential://uar/provider/${input.providerId}`
+            }
+          ]
+        : [],
     skillBindings: [],
     storage: {
       backend: input.storageBackend === 'embedded' ? 'surrealkv' : 'surrealdb',
@@ -129,7 +234,7 @@ export function starterBinding(input: {
       durableTransactions: true
     },
     policyRevision: 'boss-starter-v1',
-    effectiveLimits: limits,
+    effectiveLimits: input.effectiveLimits ?? limits,
     effectiveBudget: { maxTokens: 4096, maxCostMicrounits: 100000, currency: 'USD', maxElapsedSeconds: 120 },
     contextGrants: [],
     representationGrantRefs: [],

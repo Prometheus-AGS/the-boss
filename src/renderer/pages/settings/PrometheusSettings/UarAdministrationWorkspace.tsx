@@ -30,6 +30,7 @@ import { UarPresentationsPanel } from './UarPresentationsPanel'
 import { UarProvidersModelsPanel } from './UarProvidersModelsPanel'
 import { UarRuntimeSettingsPanel } from './UarRuntimeSettingsPanel'
 import { UarSkillsPanel } from './UarSkillsPanel'
+import { UarTeamsPanel } from './UarTeamsPanel'
 
 const GROUPS = ['runtime', 'agents', 'experience', 'administration'] as const
 
@@ -39,6 +40,7 @@ type NavigationSurface = Pick<SurfaceProjection, 'id' | 'group'> & {
 }
 const EMPTY_SURFACES: UarAdministrationSnapshot['surfaces'] = []
 const BOSS_DURABLE_SURFACES: NavigationSurface[] = [
+  { id: 'teams', group: 'agents' },
   { id: 'durable-agent-instances', group: 'agents' },
   { id: 'local-scoped-observers', group: 'agents' }
 ]
@@ -310,7 +312,7 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
             <UarPresentationsPanel />
           ) : selectedId === 'approvals' ? (
             <UarApprovalLifecyclePanel />
-          ) : selectedId === 'durable-agent-instances' || selectedId === 'local-scoped-observers' ? (
+          ) : ['teams', 'durable-agent-instances', 'local-scoped-observers'].includes(selectedId) ? (
             <div id={getSettingDomId('/settings/uar', selectedId)} className="scroll-mt-6">
               <SettingGroup className="mb-4">
                 <SettingTitle>{navText(t, 'durable.workspaceTitle')}</SettingTitle>
@@ -345,7 +347,9 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
                 )}
               </SettingGroup>
               {selectedWorkspaceId &&
-                (selectedId === 'durable-agent-instances' ? (
+                (selectedId === 'teams' ? (
+                  <UarTeamsPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
+                ) : selectedId === 'durable-agent-instances' ? (
                   <UarDurableInstancesPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
                 ) : (
                   <UarObserversPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />

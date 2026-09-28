@@ -12,7 +12,8 @@ export {
   createUarDurableObserver,
   readUarDurableWorkspace
 } from './UarDurableAdministrationAdapter'
-export { setupUarStarterAgent } from './UarStarterAdministrationAdapter'
+export { addUarTeamTask, createUarTeam, readUarTeams } from './UarTeamsAdministrationAdapter'
+export { setupUarStarterAgent, setupUarStarterTeam } from './UarStarterAdministrationAdapter'
 export {
   deleteUarProvider,
   readUarModelSources,
