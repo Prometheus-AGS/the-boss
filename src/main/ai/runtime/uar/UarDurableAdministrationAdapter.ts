@@ -16,8 +16,8 @@ import type {
 import { readUarAdministrationSnapshot } from './UarAdministrationAdapter'
 import { uarPrincipalForSession } from './uarPrincipal'
 
-const instancePath = '/api/uar/agent-instances/v1/'
-const observerPath = '/api/uar/observers/v1/'
+const instancePath = '/api/uar/agent-instances/v1'
+const observerPath = '/api/uar/observers/v1'
 const bindingPath = '/api/v1/collaboration/deployment-bindings'
 
 const operations = [
@@ -188,7 +188,7 @@ export async function scopedRequest(
   if (!response.ok) {
     const error = z.object({ error: z.object({ code: z.string() }) }).safeParse(await response.json().catch(() => null))
     throw new Error(
-      `UAR request failed with HTTP ${response.status}${error.success ? ` (${error.data.error.code})` : ''}`
+      `UAR request ${method} ${pathname} failed with HTTP ${response.status}${error.success ? ` (${error.data.error.code})` : ''}`
     )
   }
   return response.json()
@@ -304,7 +304,7 @@ export async function actOnUarDurableInstance(input: {
   const state = await capabilityState()
   requireOperation(state, `agent-instances.${input.action}`)
   requireOperation(state, 'agent-instances.read')
-  const path = `${instancePath}${encodeURIComponent(input.instanceId)}`
+  const path = `${instancePath}/${encodeURIComponent(input.instanceId)}`
   projectInstance(await scopedRequest(resolved, path, state.generation), resolved)
   return projectInstance(
     await scopedRequest(resolved, `${path}/${input.action}`, state.generation, 'POST', {
@@ -348,7 +348,7 @@ export async function actOnUarDurableObserver(input: {
   const state = await capabilityState()
   requireOperation(state, `observers.${input.action}`)
   requireOperation(state, 'observers.read')
-  const path = `${observerPath}${encodeURIComponent(input.subscriptionId)}`
+  const path = `${observerPath}/${encodeURIComponent(input.subscriptionId)}`
   projectObserver(await scopedRequest(resolved, path, state.generation), resolved)
   return projectObserver(
     await scopedRequest(resolved, `${path}/${input.action}`, state.generation, 'POST', {
@@ -370,7 +370,7 @@ export async function acknowledgeUarDurableGap(input: {
   const state = await capabilityState()
   requireOperation(state, 'observers.gap.acknowledge')
   requireOperation(state, 'observers.read')
-  const path = `${observerPath}${encodeURIComponent(input.subscriptionId)}`
+  const path = `${observerPath}/${encodeURIComponent(input.subscriptionId)}`
   projectObserver(await scopedRequest(resolved, path, state.generation), resolved)
   return projectObserver(
     await scopedRequest(resolved, `${path}/gaps/acknowledge`, state.generation, 'POST', {
