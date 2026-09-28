@@ -111,7 +111,7 @@ function verifyPackagedUarPayload(resourcesDir, platformKey, options = {}) {
     manifest.name !== 'uar-sidecar' ||
     manifest.version !== (local?.version ?? sidecar.version) ||
     manifest.platform !== platformKey ||
-    manifest.source !== (local?.source ?? integration.sources.uar.revision) ||
+    manifest.source !== (local?.source ?? sidecar.packages?.[platformKey]?.source ?? integration.sources.uar.revision) ||
     !Array.isArray(manifest.files)
   ) {
     throw new Error(`Packaged UAR sidecar manifest identity does not match the release pins for ${platformKey}`)

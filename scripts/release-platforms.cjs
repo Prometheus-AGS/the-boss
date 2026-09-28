@@ -37,15 +37,15 @@ const platformsMatch = profile.uarEnabled
 if (!platformsMatch) {
   throw new Error(`Integration artifact platforms do not cover release profile ${profile.id}`)
 }
-for (const name of profile.nativeTools) {
-  const tool = manifest.tools.find((entry) => entry.name === name)
-  for (const platform of available) {
-    if (!tool?.packages?.[platform]) throw new Error(`No published ${name} payload for ${platform}`)
-  }
-}
 const selected = process.env.RELEASE_PLATFORMS
   ? process.env.RELEASE_PLATFORMS.split(',').map((value) => value.trim())
   : available
+for (const name of profile.nativeTools) {
+  const tool = manifest.tools.find((entry) => entry.name === name)
+  for (const platform of name === 'uar-sidecar' ? selected : available) {
+    if (!tool?.packages?.[platform]) throw new Error(`No published ${name} payload for ${platform}`)
+  }
+}
 for (const platform of selected) {
   if (!available.includes(platform) || !targets.some((value) => `${value.platform}-${value.arch}` === platform))
     throw new Error(`No published native payload for ${platform}`)
