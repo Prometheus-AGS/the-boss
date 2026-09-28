@@ -18,7 +18,7 @@ function OperationRow({
   initialOperation: IntegrationOperation
   retry: (operation: IntegrationOperation) => void
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const {
     operation,
     error: replayError,
@@ -110,11 +110,20 @@ function OperationRow({
       })
     : undefined
   const resultText = operation.result
-    ? t(operation.result, { defaultValue: operation.result })
+    ? i18n.exists(operation.result)
+      ? t(operation.result)
+      : operation.result
     : operation.status === 'succeeded'
       ? t('settings.prometheus.integration.operation.succeeded')
       : undefined
-  const operationError = operation.error ? t(operation.error, { defaultValue: operation.error }) : replayError
+  const operationError =
+    operation.status === 'cancelled' && operation.error === 'Operation cancelled'
+      ? undefined
+      : operation.error
+        ? i18n.exists(operation.error)
+          ? t(operation.error)
+          : operation.error
+        : replayError
 
   return (
     <div className="space-y-3 py-3">
@@ -181,7 +190,7 @@ function OperationRow({
           />
           {logError && (
             <p className="mt-2 break-words text-error text-sm" role="alert">
-              {t(logError, { defaultValue: logError })}
+              {i18n.exists(logError) ? t(logError) : logError}
             </p>
           )}
         </div>

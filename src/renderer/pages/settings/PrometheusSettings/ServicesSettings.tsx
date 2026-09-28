@@ -81,7 +81,7 @@ function ServicesOperationStatus({
   controller: IntegrationSettingsController
   initialOperation: IntegrationOperation
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { operation, error, cancel } = useIntegrationOperation(initialOperation.id, initialOperation)
   const active = operation?.status === 'queued' || operation?.status === 'running'
   const [now, setNow] = useState(Date.now())
@@ -104,7 +104,15 @@ function ServicesOperationStatus({
         progressLabel={integrationText(t, 'operationInProgress')}
         progressText={operation.progress ? `${operation.progress.current}/${operation.progress.total}` : undefined}
         elapsedLabel={t(elapsed.key, elapsed.values)}
-        errorText={operation.error ? t(operation.error, { defaultValue: operation.error }) : error}
+        errorText={
+          operation.status === 'cancelled' && operation.error === 'Operation cancelled'
+            ? undefined
+            : operation.error
+              ? i18n.exists(operation.error)
+                ? t(operation.error)
+                : operation.error
+              : error
+        }
         resultText={operation.status === 'succeeded' ? integrationText(t, 'states.done') : undefined}
         recoveryText={operation.recoveryAction ? integrationText(t, 'actions.retry') : undefined}
         labels={{
