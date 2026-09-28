@@ -30,14 +30,15 @@ export function useUarDurableWorkspace(workspaceId: string) {
     void refresh()
   }, [refresh])
 
-  const run = async (operation: () => Promise<unknown>, successMessage: string) => {
+  const run = async <T>(operation: () => Promise<T>, successMessage: string, onSuccess?: (result: T) => void) => {
     setBusy(true)
     setError(undefined)
     setStatus(undefined)
     try {
-      await operation()
+      const result = await operation()
       const next = await ipcApi.request('prometheus.uar.durable.read', { workspaceId })
       setSnapshot(next)
+      onSuccess?.(result)
       setStatus(successMessage)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))

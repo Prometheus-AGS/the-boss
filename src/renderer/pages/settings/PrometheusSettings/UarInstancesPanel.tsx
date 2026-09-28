@@ -18,10 +18,21 @@ export function UarInstancesPanel({ workspaceId }: { workspaceId: string }) {
   const { snapshot, loading, busy, error, status, refreshRequired, refresh, run } = useUarDurableWorkspace(workspaceId)
   const [bindingId, setBindingId] = useState<string>()
   const [profile, setProfile] = useState<UarInstanceProfile>('on_demand')
+  const [setupBusy, setSetupBusy] = useState(false)
   const canUse = (operation: UarDurableOperation) =>
     Boolean(snapshot?.capabilities.instances && snapshot.operations[operation]?.available)
   const reason = (operation: UarDurableOperation) => snapshot?.operations[operation]?.reason
   const selectedBinding = snapshot?.bindings.find((binding) => binding.id === bindingId)
+  const needsStarter = snapshot && !snapshot.bindings.some((binding) => binding.activationSupported)
+
+  const setupStarter = () => {
+    setSetupBusy(true)
+    void run(
+      () => ipcApi.request('prometheus.uar.durable.setup_starter', { workspaceId }),
+      tr('setupStarterSucceeded'),
+      (binding) => setBindingId(binding.id)
+    ).finally(() => setSetupBusy(false))
+  }
 
   const create = () => {
     if (!bindingId) return
@@ -128,6 +139,28 @@ export function UarInstancesPanel({ workspaceId }: { workspaceId: string }) {
               </div>
             </div>
             {snapshot.bindings.length === 0 && <p className="mt-3 text-sm text-muted-foreground">{tr('noBindings')}</p>}
+            {needsStarter && (
+              <div className="mt-4 rounded-lg border border-border bg-background/40 p-4">
+                <p className="text-sm text-muted-foreground">{tr('setupStarterDescription')}</p>
+                {!snapshot.operations['starter.setup']?.available && (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {tr('setupStarterUnavailable')} {snapshot.operations['starter.setup']?.reason}
+                  </p>
+                )}
+                <Button
+                  variant="outline"
+                  className="mt-3"
+                  disabled={busy || refreshRequired || !snapshot.operations['starter.setup']?.available}
+                  onClick={setupStarter}>
+                  {tr('setupStarter')}
+                </Button>
+                {setupBusy && (
+                  <p className="mt-2 text-sm text-muted-foreground" role="status">
+                    {tr('setupStarterProgress')}
+                  </p>
+                )}
+              </div>
+            )}
             {selectedBinding && !selectedBinding.activationSupported && (
               <p className="mt-3 text-sm text-warning-subtle-foreground">{tr('bindingActivationUnavailable')}</p>
             )}

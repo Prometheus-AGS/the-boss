@@ -21,6 +21,12 @@ const observerPath = '/api/uar/observers/v1/'
 const bindingPath = '/api/v1/collaboration/deployment-bindings'
 
 const operations = [
+  'collaboration.capabilities',
+  'collaboration.packages.list',
+  'collaboration.packages.preflight',
+  'collaboration.packages.install',
+  'collaboration.deployment_bindings.preflight',
+  'collaboration.deployment_bindings.install',
   'collaboration.deployment_bindings.list',
   'agent-instances.list',
   'agent-instances.read',
@@ -39,11 +45,12 @@ const operations = [
   'observers.gap.acknowledge'
 ] as const satisfies readonly UarDurableOperation[]
 
-const rawBinding = z.object({
+export const rawBinding = z.object({
   id: z.string(),
   workspaceId: z.string(),
   revision: z.number().int().nonnegative(),
-  activationSupported: z.boolean()
+  activationSupported: z.boolean(),
+  package: z.object({ id: z.string(), version: z.string(), digest: z.string() })
 })
 
 const rawInstance = z.object({
@@ -106,12 +113,12 @@ const rawObserver = z.object({
   recoveryActions: z.array(z.string())
 })
 
-function workspace(workspaceId: string): string {
+export function workspace(workspaceId: string): string {
   // The renderer supplies a selector. Main resolves it against Boss's user-workspace store.
   return agentWorkspaceService.getById(workspaceId).id
 }
 
-async function capabilityState() {
+export async function capabilityState() {
   const snapshot = await readUarAdministrationSnapshot()
   const entries = operations.map((id) => {
     const surface = snapshot.surfaces.find((candidate) => candidate.methods.some((method) => method.id === id))
@@ -130,9 +137,27 @@ async function capabilityState() {
       }
     ] as const
   })
+  const advertised = Object.fromEntries(entries) as UarDurableWorkspaceSnapshot['operations']
+  const starterRequired: UarDurableOperation[] = [
+    'collaboration.capabilities',
+    'collaboration.packages.list',
+    'collaboration.packages.preflight',
+    'collaboration.packages.install',
+    'collaboration.deployment_bindings.preflight',
+    'collaboration.deployment_bindings.install',
+    'collaboration.deployment_bindings.list',
+    'agent-instances.create'
+  ]
+  const starterAvailable = starterRequired.every((id) => advertised[id].available)
   return {
     generation: snapshot.generation,
-    operations: Object.fromEntries(entries) as UarDurableWorkspaceSnapshot['operations']
+    operations: {
+      ...advertised,
+      'starter.setup': {
+        available: starterAvailable,
+        ...(starterAvailable ? {} : { reason: 'method_unavailable' })
+      }
+    }
   }
 }
 
@@ -140,7 +165,7 @@ function requireOperation(state: Awaited<ReturnType<typeof capabilityState>>, id
   if (!state.operations[id].available) throw new Error(`UAR operation ${id} is unavailable`)
 }
 
-async function scopedRequest(
+export async function scopedRequest(
   workspaceId: string,
   pathname: string,
   generation: number,

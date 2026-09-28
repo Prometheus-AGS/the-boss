@@ -12,6 +12,7 @@ export {
   createUarDurableObserver,
   readUarDurableWorkspace
 } from './UarDurableAdministrationAdapter'
+export { setupUarStarterAgent } from './UarStarterAdministrationAdapter'
 export {
   deleteUarProvider,
   readUarModelSources,

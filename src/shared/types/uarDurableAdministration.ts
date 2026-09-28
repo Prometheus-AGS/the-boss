@@ -61,6 +61,13 @@ export interface UarDurableObserver {
 }
 
 export type UarDurableOperation =
+  | 'starter.setup'
+  | 'collaboration.capabilities'
+  | 'collaboration.packages.list'
+  | 'collaboration.packages.preflight'
+  | 'collaboration.packages.install'
+  | 'collaboration.deployment_bindings.preflight'
+  | 'collaboration.deployment_bindings.install'
   | 'collaboration.deployment_bindings.list'
   | 'agent-instances.list'
   | 'agent-instances.read'

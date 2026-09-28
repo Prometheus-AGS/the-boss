@@ -20,6 +20,13 @@ The Boss SHALL expose supported durable-instance and local-observer actions from
 - **WHEN** an operator creates and controls instances and observers in two workspaces
 - **THEN** each workspace sees only its own instances, subscriptions and recovery state, including after an application restart.
 
+#### Scenario: A fresh workspace has no deployment binding
+
+- **WHEN** an operator chooses to set up a starter agent after configuring a usable UAR model
+- **THEN** the trusted host preflights and installs a package and workspace-bound activation-capable binding, and the settings UI selects that binding for instance creation.
+- **WHEN** the configured model is unavailable
+- **THEN** setup reports the provider configuration needed without installing an unusable binding.
+
 ### Requirement: Complete operational feedback
 
 The settings UI SHALL show supported actions, progress, success, failures and recovery information in every shipped locale. Unsupported actions SHALL be clearly unavailable.

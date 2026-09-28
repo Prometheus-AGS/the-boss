@@ -68,6 +68,7 @@ import {
   type UarSettingsUpdateResult
 } from '@shared/types/prometheusIntegration'
 import type {
+  UarDurableBinding,
   UarDurableInstance,
   UarDurableObserver,
   UarDurableWorkspaceSnapshot
@@ -262,6 +263,10 @@ export const prometheusRequestSchemas = {
   'prometheus.uar.durable.read': defineRoute({
     input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
     output: z.custom<UarDurableWorkspaceSnapshot>()
+  }),
+  'prometheus.uar.durable.setup_starter': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
+    output: z.custom<UarDurableBinding>()
   }),
   'prometheus.uar.durable.create_instance': defineRoute({
     input: z
