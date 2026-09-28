@@ -148,6 +148,26 @@ const prometheusHandlerImplementations: IpcHandlersFor<typeof prometheusRequestS
   'prometheus.uar.durable.observer_action': async (input) => actOnUarDurableObserver(input),
   'prometheus.uar.durable.acknowledge_gap': async (input) => acknowledgeUarDurableGap(input),
   'prometheus.uar.admin.diagnose_authority': async () => diagnoseUarAuthority(),
+  'prometheus.uar.instances.read': async () =>
+    application.get('PrometheusIntegrationService').readUarInstanceInventory(),
+  'prometheus.uar.instances.save': async ({ expectedRevision, instance, runtimeCredential, adminCredential }) =>
+    withIntegrationRevision(() =>
+      application
+        .get('PrometheusIntegrationService')
+        .saveUarInstance(expectedRevision, instance, runtimeCredential, adminCredential)
+    ),
+  'prometheus.uar.instances.delete': async ({ expectedRevision, instanceId }) =>
+    withIntegrationRevision(() =>
+      application.get('PrometheusIntegrationService').deleteUarInstance(expectedRevision, instanceId)
+    ),
+  'prometheus.uar.instances.select': async ({ expectedRevision, instanceId }) =>
+    withIntegrationRevision(() =>
+      application.get('PrometheusIntegrationService').selectUarInstance(expectedRevision, instanceId)
+    ),
+  'prometheus.uar.instances.test': async ({ instanceId }) =>
+    application.get('PrometheusIntegrationService').testUarInstance(instanceId),
+  'prometheus.uar.instances.migrate': async () =>
+    application.get('PrometheusIntegrationService').uarMigrationUnsupported(),
   'prometheus.uar.operations.read': async () => readUarOperations(),
   'prometheus.uar.runs.read': async ({ runId }) => readUarRunDetail(runId),
   'prometheus.uar.runs.cancel': async ({ runId }) => cancelUarRun(runId),

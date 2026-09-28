@@ -2,6 +2,7 @@ import { loggerService } from '@logger'
 
 import type { AgentRuntimeEvent } from '../types'
 import type { UarHostMcpBridge } from './UarHostMcpBridge'
+import type { UarSidecarEndpoint } from './UarSidecarService'
 import { UarToolApprovalController } from './UarToolApprovalController'
 
 const logger = loggerService.withContext('UarAguiAdapter')
@@ -34,6 +35,7 @@ interface UarAguiAdapterOptions {
   agentId: string
   runId: string
   generation: number
+  endpoint: UarSidecarEndpoint
   principal: string
   signal: AbortSignal
   bridge: UarHostMcpBridge

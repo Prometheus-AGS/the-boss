@@ -18,6 +18,7 @@ export const entries: SettingsSearchEntry[] = [
   },
   ...[
     ['overview', ['health', 'readiness', 'metrics', 'capabilities']],
+    ['instances', ['runtime instance', 'external UAR', 'endpoint', 'placement', 'binding', 'credential']],
     ['providers-models', ['provider', 'model', 'routing', 'catalog', 'API key', 'default model', 'model source']],
     ['runtime-settings', ['configuration', 'namespace', 'drift', 'policy', 'saved value', 'effective value']],
     ['agents', ['agent catalog', 'agent definition', 'registry']],

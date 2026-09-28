@@ -331,7 +331,7 @@ function isAllowed(method: UarAdministrationMethod): boolean {
  * Renderer code receives operation metadata, never an arbitrary fetch surface.
  */
 export async function readUarAdministrationSnapshot(): Promise<UarAdministrationSnapshot> {
-  const endpoint = await application.get('UarSidecarService').ensureReady()
+  const endpoint = await application.get('UarSidecarService').resolveSelected()
   return {
     schemaVersion: 1,
     uarVersion: endpoint.uarVersion,
@@ -360,7 +360,7 @@ async function readOwnerSettings(response: Response): Promise<z.infer<typeof own
  * protected authority or owner tokens to the renderer. */
 export async function diagnoseUarAuthority(): Promise<UarAuthorityDiagnosticResult> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
+  const endpoint = await sidecar.resolveSelected()
   const suffix = randomUUID()
   const ownerA = `diagnostics.owner.a-${suffix}`
   const ownerB = `diagnostics.owner.b-${suffix}`
@@ -375,14 +375,14 @@ export async function diagnoseUarAuthority(): Promise<UarAuthorityDiagnosticResu
     body: JSON.stringify({ prompt_caching_enabled: null })
   }
 
-  const unprivilegedAdmin = await sidecar.request('/api/uar/providers', ownerA, {}, endpoint.generation)
-  const privilegedAdmin = await sidecar.adminRequest('/api/uar/providers', {}, endpoint.generation)
-  const writeOwnerA = await sidecar.request('/api/uar/user/settings', ownerA, ownerUpdate, endpoint.generation)
-  const readOwnerAResponse = await sidecar.request('/api/uar/user/settings', ownerA, {}, endpoint.generation)
+  const unprivilegedAdmin = await sidecar.requestInstance(endpoint, '/api/uar/providers', ownerA)
+  const privilegedAdmin = await sidecar.adminRequestInstance(endpoint, '/api/uar/providers')
+  const writeOwnerA = await sidecar.requestInstance(endpoint, '/api/uar/user/settings', ownerA, ownerUpdate)
+  const readOwnerAResponse = await sidecar.requestInstance(endpoint, '/api/uar/user/settings', ownerA)
   const readOwnerA = await readOwnerSettings(readOwnerAResponse)
-  const readOwnerBResponse = await sidecar.request('/api/uar/user/settings', ownerB, {}, endpoint.generation)
+  const readOwnerBResponse = await sidecar.requestInstance(endpoint, '/api/uar/user/settings', ownerB)
   const readOwnerB = await readOwnerSettings(readOwnerBResponse)
-  await sidecar.request('/api/uar/user/settings', ownerA, ownerReset, endpoint.generation).catch(() => undefined)
+  await sidecar.requestInstance(endpoint, '/api/uar/user/settings', ownerA, ownerReset).catch(() => undefined)
 
   const adminBoundary = unprivilegedAdmin.status === 401 && privilegedAdmin.ok
   const ownerIsolation =
@@ -440,8 +440,8 @@ async function parseResponse(response: Response): Promise<unknown> {
 
 export async function readUarSettings(namespace: UarSettingsNamespace): Promise<UarSettingsSnapshot> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
-  const response = await sidecar.adminRequest(`/api/uar/settings/${namespace}`, {}, endpoint.generation)
+  const endpoint = await sidecar.resolveSelected()
+  const response = await sidecar.adminRequestInstance(endpoint, `/api/uar/settings/${namespace}`)
   const settings = z
     .array(rawSettingSchema)
     .parse(await parseResponse(response))
@@ -457,18 +457,14 @@ export async function updateUarSettings(
     throw new Error('A UAR setting field may only appear once per update')
   }
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
+  const endpoint = await sidecar.resolveSelected()
   const data = Object.fromEntries(changes.map((change) => [change.field, change.value]))
   const expected_revisions = Object.fromEntries(changes.map((change) => [change.field, change.expectedRevision]))
-  const response = await sidecar.adminRequest(
-    `/api/uar/settings/${namespace}`,
-    {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ data, expected_revisions })
-    },
-    endpoint.generation
-  )
+  const response = await sidecar.adminRequestInstance(endpoint, `/api/uar/settings/${namespace}`, {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ data, expected_revisions })
+  })
   const body = await parseResponse(response)
   if (namespace === 'governance') {
     const result = rawGovernanceUpdateSchema.parse(body)

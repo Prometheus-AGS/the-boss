@@ -17,18 +17,13 @@ export async function createUarKnowledgeBase(input: {
   name: string
   description?: string
 }): Promise<UarOperationalSnapshot> {
-  const endpoint = await application.get('UarSidecarService').ensureReady()
+  const endpoint = await application.get('UarSidecarService').resolveSelected()
   await body(
-    await ownerRequest(
-      input.sessionId,
-      '/api/uar/knowledge-bases',
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ name: input.name, description: input.description })
-      },
-      endpoint.generation
-    ),
+    await ownerRequest(endpoint, input.sessionId, '/api/uar/knowledge-bases', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: input.name, description: input.description })
+    }),
     'Knowledge base creation'
   )
   return readUarOperations()
@@ -38,14 +33,11 @@ export async function deleteUarKnowledgeBase(
   sessionId: string,
   knowledgeBaseId: string
 ): Promise<UarOperationalSnapshot> {
-  const endpoint = await application.get('UarSidecarService').ensureReady()
+  const endpoint = await application.get('UarSidecarService').resolveSelected()
   await body(
-    await ownerRequest(
-      sessionId,
-      `/api/uar/knowledge-bases/${encodeURIComponent(knowledgeBaseId)}`,
-      { method: 'DELETE' },
-      endpoint.generation
-    ),
+    await ownerRequest(endpoint, sessionId, `/api/uar/knowledge-bases/${encodeURIComponent(knowledgeBaseId)}`, {
+      method: 'DELETE'
+    }),
     'Knowledge base deletion'
   )
   return readUarOperations()
@@ -56,7 +48,7 @@ export async function searchUarKnowledge(input: {
   knowledgeBaseId: string
   query: string
 }): Promise<UarKnowledgeSearchResult[]> {
-  const endpoint = await application.get('UarSidecarService').ensureReady()
+  const endpoint = await application.get('UarSidecarService').resolveSelected()
   const response = z
     .object({
       results: z.array(
@@ -70,14 +62,14 @@ export async function searchUarKnowledge(input: {
     .parse(
       await body(
         await ownerRequest(
+          endpoint,
           input.sessionId,
           `/api/uar/knowledge-bases/${encodeURIComponent(input.knowledgeBaseId)}/search`,
           {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ query: input.query })
-          },
-          endpoint.generation
+          }
         ),
         'Knowledge search'
       )
@@ -102,13 +94,13 @@ export async function uploadUarKnowledgeDocument(
   const bytes = await readFile(filePath)
   const form = new FormData()
   form.append('file', new Blob([bytes]), filename)
-  const endpoint = await application.get('UarSidecarService').ensureReady()
+  const endpoint = await application.get('UarSidecarService').resolveSelected()
   await body(
     await ownerRequest(
+      endpoint,
       sessionId,
       `/api/uar/knowledge-bases/${encodeURIComponent(knowledgeBaseId)}/documents`,
-      { method: 'POST', body: form },
-      endpoint.generation
+      { method: 'POST', body: form }
     ),
     'Knowledge document upload'
   )
@@ -120,13 +112,13 @@ export async function deleteUarKnowledgeDocument(
   knowledgeBaseId: string,
   documentId: string
 ): Promise<UarOperationalSnapshot> {
-  const endpoint = await application.get('UarSidecarService').ensureReady()
+  const endpoint = await application.get('UarSidecarService').resolveSelected()
   await body(
     await ownerRequest(
+      endpoint,
       sessionId,
       `/api/uar/knowledge-bases/${encodeURIComponent(knowledgeBaseId)}/documents/${encodeURIComponent(documentId)}`,
-      { method: 'DELETE' },
-      endpoint.generation
+      { method: 'DELETE' }
     ),
     'Knowledge document deletion'
   )
@@ -134,28 +126,24 @@ export async function deleteUarKnowledgeDocument(
 }
 
 export async function createUarMemory(content: string, userId?: string): Promise<UarOperationalSnapshot> {
-  const endpoint = await application.get('UarSidecarService').ensureReady()
+  const endpoint = await application.get('UarSidecarService').resolveSelected()
   await body(
-    await application.get('UarSidecarService').adminRequest(
-      '/api/admin/memories',
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ content, user_id: userId })
-      },
-      endpoint.generation
-    ),
+    await application.get('UarSidecarService').adminRequestInstance(endpoint, '/api/admin/memories', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ content, user_id: userId })
+    }),
     'Memory creation'
   )
   return readUarOperations()
 }
 
 export async function deleteUarMemory(id: string): Promise<UarOperationalSnapshot> {
-  const endpoint = await application.get('UarSidecarService').ensureReady()
+  const endpoint = await application.get('UarSidecarService').resolveSelected()
   await body(
     await application
       .get('UarSidecarService')
-      .adminRequest(`/api/admin/memories/${encodeURIComponent(id)}`, { method: 'DELETE' }, endpoint.generation),
+      .adminRequestInstance(endpoint, `/api/admin/memories/${encodeURIComponent(id)}`, { method: 'DELETE' }),
     'Memory deletion'
   )
   return readUarOperations()

@@ -10,19 +10,20 @@ import {
   rawCheckpointResponse,
   rawRun
 } from './UarOperationalAdministrationAdapter'
+import type { UarSidecarEndpoint } from './UarSidecarService'
 
 async function resolveRun(
-  runId: string,
-  generation: number
+  endpoint: UarSidecarEndpoint,
+  runId: string
 ): Promise<{ requestSessionId: string; run: UarRunInspection }> {
   const availableOwners = owners()
   const requestOwner = availableOwners[0]
   if (!requestOwner) throw new Error('No UAR conversation is available for the shared installation owner')
   const response = await ownerRequest(
+    endpoint,
     requestOwner.sessionId,
     `/api/uar/runs/${encodeURIComponent(runId)}`,
-    {},
-    generation
+    {}
   )
   if (response.status === 404) throw new Error('The selected run is no longer available to the UAR installation owner')
   const raw = rawRun.parse(await body(response, 'Run detail'))
@@ -33,15 +34,15 @@ async function resolveRun(
 }
 
 export async function readUarRunDetail(runId: string): Promise<UarRunDetailSnapshot> {
-  const endpoint = await application.get('UarSidecarService').ensureReady()
-  const resolved = await resolveRun(runId, endpoint.generation)
+  const endpoint = await application.get('UarSidecarService').resolveSelected()
+  const resolved = await resolveRun(endpoint, runId)
   const checkpoints = rawCheckpointResponse.parse(
     await body(
       await ownerRequest(
+        endpoint,
         resolved.requestSessionId,
         `/api/uar/runs/${encodeURIComponent(runId)}/checkpoints`,
-        {},
-        endpoint.generation
+        {}
       ),
       'Run checkpoints'
     )
@@ -49,7 +50,7 @@ export async function readUarRunDetail(runId: string): Promise<UarRunDetailSnaps
   const sessionId = resolved.run.conversationId
   const inspect = async (path: string) => {
     if (!sessionId) return undefined
-    const response = await ownerRequest(resolved.requestSessionId, path, {}, endpoint.generation)
+    const response = await ownerRequest(endpoint, resolved.requestSessionId, path)
     if (response.status === 404) return undefined
     return body(response, 'Run context')
   }
@@ -82,15 +83,12 @@ export async function readUarRunDetail(runId: string): Promise<UarRunDetailSnaps
 }
 
 export async function cancelUarRun(runId: string): Promise<UarRunDetailSnapshot> {
-  const endpoint = await application.get('UarSidecarService').ensureReady()
-  const resolved = await resolveRun(runId, endpoint.generation)
+  const endpoint = await application.get('UarSidecarService').resolveSelected()
+  const resolved = await resolveRun(endpoint, runId)
   await body(
-    await ownerRequest(
-      resolved.requestSessionId,
-      `/api/uar/runs/${encodeURIComponent(runId)}/cancel`,
-      { method: 'POST' },
-      endpoint.generation
-    ),
+    await ownerRequest(endpoint, resolved.requestSessionId, `/api/uar/runs/${encodeURIComponent(runId)}/cancel`, {
+      method: 'POST'
+    }),
     'Run cancellation'
   )
   return readUarRunDetail(runId)
@@ -100,12 +98,13 @@ export async function saveUarConversationPolicy(
   runId: string,
   policy?: Record<string, unknown>
 ): Promise<UarRunDetailSnapshot> {
-  const endpoint = await application.get('UarSidecarService').ensureReady()
-  const resolved = await resolveRun(runId, endpoint.generation)
+  const endpoint = await application.get('UarSidecarService').resolveSelected()
+  const resolved = await resolveRun(endpoint, runId)
   const conversationId = resolved.run.conversationId
   if (!conversationId) throw new Error('The selected run has no conversation policy scope')
   await body(
     await ownerRequest(
+      endpoint,
       resolved.requestSessionId,
       `/api/uar/conversations/${encodeURIComponent(conversationId)}/policy`,
       policy
@@ -114,8 +113,7 @@ export async function saveUarConversationPolicy(
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify(policy)
           }
-        : { method: 'DELETE' },
-      endpoint.generation
+        : { method: 'DELETE' }
     ),
     policy ? 'Conversation policy update' : 'Conversation policy reset'
   )

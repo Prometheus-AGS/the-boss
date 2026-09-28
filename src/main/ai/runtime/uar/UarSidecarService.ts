@@ -12,10 +12,16 @@ import { loggerService } from '@logger'
 import { BaseService, Injectable, Phase, ServicePhase } from '@main/core/lifecycle'
 import { isWin } from '@main/core/platform'
 import { ensureManagedSecrets } from '@main/services/prometheus/integrationConfig'
+import { readIntegrationConfig, readUarInstanceCredentials } from '@main/services/prometheus/integrationConfig'
 import { crossPlatformSpawn, terminateProcessTree, waitForProcessExit } from '@main/utils/processRunner'
 import { getRawShellEnv } from '@main/utils/shellEnv'
 import { assertUarEnabled, isUarEnabled } from '@shared/ai/agentRuntimeCapabilities'
 import { uarCapabilitiesResponseSchema, type UarAdministrationCapabilities } from '@shared/types/prometheusIntegration'
+import {
+  MANAGED_UAR_INSTANCE_ID,
+  type UarObservedInstance,
+  type UarRuntimeInstance
+} from '@shared/types/uarServiceInstance'
 import { redactSecretText } from '@shared/utils/redaction'
 
 import { inspectUarPayload, requireUarPayload, type UarPayload } from './uarPayload'
@@ -57,6 +63,8 @@ const REQUIRED_CAPABILITIES = [
 ] as const
 
 export interface UarSidecarEndpoint {
+  instanceId: string
+  ownership: 'managed' | 'external'
   baseUrl: string
   effectivePort: number
   processId?: number
@@ -65,7 +73,8 @@ export interface UarSidecarEndpoint {
   uarVersion: string
   capabilities: readonly string[]
   administration: UarAdministrationCapabilities
-  storage: Omit<AppliedUarStorage, 'password'>
+  observed: UarObservedInstance
+  storage?: Omit<AppliedUarStorage, 'password'>
 }
 
 export type UarSidecarStatus = UarSidecarEndpoint & { state: 'running' }
@@ -73,9 +82,12 @@ export type UarSidecarStatus = UarSidecarEndpoint & { state: 'running' }
 type RunningSidecar = Omit<UarSidecarEndpoint, 'storage'> & {
   child: ChildProcess
   launchToken: string
+  authToken: string
   adminKey: string
   storage: AppliedUarStorage
 }
+
+type VerifiedEndpoint = UarSidecarEndpoint & { authToken: string; adminKey?: string }
 
 function isolatedSidecarEnvironment(raw: Record<string, string>): Record<string, string> {
   return Object.fromEntries(
@@ -99,6 +111,15 @@ export class UarSidecarService extends BaseService {
   private startPromise?: Promise<RunningSidecar>
   private generation = 0
   private stopping = false
+  private readonly verifiedEndpoints = new Map<number, VerifiedEndpoint>()
+  private readonly instanceDiagnostics = new Map<
+    string,
+    {
+      compatibility: 'configured' | 'unreachable' | 'unauthenticated' | 'incompatible' | 'operational'
+      observed?: UarObservedInstance
+      diagnostic?: string
+    }
+  >()
 
   protected onInit(): void {
     this.stopping = false
@@ -113,6 +134,8 @@ export class UarSidecarService extends BaseService {
     assertUarEnabled()
     const running = await this.ensureRunning()
     return {
+      instanceId: running.instanceId,
+      ownership: running.ownership,
       baseUrl: running.baseUrl,
       effectivePort: running.effectivePort,
       ...(running.processId ? { processId: running.processId } : {}),
@@ -121,8 +144,49 @@ export class UarSidecarService extends BaseService {
       uarVersion: running.uarVersion,
       capabilities: running.capabilities,
       administration: running.administration,
+      observed: running.observed,
       storage: this.storageStatus(running.storage)
     }
+  }
+
+  async resolveSelected(): Promise<UarSidecarEndpoint> {
+    const config = readIntegrationConfig().uar
+    return this.resolveInstance(config.selectedInstanceId)
+  }
+
+  async resolveInstance(instanceId: string): Promise<UarSidecarEndpoint> {
+    assertUarEnabled()
+    const config = readIntegrationConfig().uar
+    const instance = config.instances.find((candidate) => candidate.id === instanceId)
+    if (!instance?.enabled) throw new Error(`UAR instance ${instanceId} is unavailable or disabled`)
+    try {
+      const endpoint =
+        instance.ownership === 'managed' ? await this.ensureReady() : await this.connectExternal(instance)
+      this.instanceDiagnostics.set(instance.id, { compatibility: 'operational', observed: endpoint.observed })
+      return endpoint
+    } catch (error) {
+      const diagnostic = error instanceof Error ? error.message : String(error)
+      const compatibility = /credential|HTTP 401|HTTP 403|authentication/i.test(diagnostic)
+        ? 'unauthenticated'
+        : /mismatch|missing required|older than required|invalid|HTTP \d+/i.test(diagnostic)
+          ? 'incompatible'
+          : 'unreachable'
+      this.instanceDiagnostics.set(instance.id, { compatibility, diagnostic })
+      throw error
+    }
+  }
+
+  inspectInstance(instanceId: string) {
+    return this.instanceDiagnostics.get(instanceId) ?? { compatibility: 'configured' as const }
+  }
+
+  forgetExternal(instanceId: string): void {
+    for (const [generation, endpoint] of this.verifiedEndpoints) {
+      if (endpoint.instanceId === instanceId && endpoint.ownership === 'external') {
+        this.verifiedEndpoints.delete(generation)
+      }
+    }
+    this.instanceDiagnostics.delete(instanceId)
   }
 
   status(): UarSidecarStatus | undefined {
@@ -131,6 +195,8 @@ export class UarSidecarService extends BaseService {
     if (!running || !this.isAlive(running.child)) return undefined
     return {
       state: 'running',
+      instanceId: running.instanceId,
+      ownership: running.ownership,
       baseUrl: running.baseUrl,
       effectivePort: running.effectivePort,
       ...(running.processId ? { processId: running.processId } : {}),
@@ -139,6 +205,7 @@ export class UarSidecarService extends BaseService {
       uarVersion: running.uarVersion,
       capabilities: running.capabilities,
       administration: running.administration,
+      observed: running.observed,
       storage: this.storageStatus(running.storage)
     }
   }
@@ -149,6 +216,10 @@ export class UarSidecarService extends BaseService {
 
   async restart(): Promise<UarSidecarEndpoint> {
     assertUarEnabled()
+    const selected = readIntegrationConfig().uar.instances.find(
+      (instance) => instance.id === readIntegrationConfig().uar.selectedInstanceId
+    )
+    if (selected?.ownership === 'external') throw new Error('External UAR lifecycle is owned outside The Boss')
     const running = await this.operation.runExclusive(async () => {
       await this.stopOwnedProcess()
       const next = await this.startOwnedProcess(await readAppliedUarStorage())
@@ -156,6 +227,8 @@ export class UarSidecarService extends BaseService {
       return next
     })
     return {
+      instanceId: running.instanceId,
+      ownership: running.ownership,
       baseUrl: running.baseUrl,
       effectivePort: running.effectivePort,
       ...(running.processId ? { processId: running.processId } : {}),
@@ -164,12 +237,18 @@ export class UarSidecarService extends BaseService {
       uarVersion: running.uarVersion,
       capabilities: running.capabilities,
       administration: running.administration,
+      observed: running.observed,
       storage: this.storageStatus(running.storage)
     }
   }
 
   async applyStorage(candidate: AppliedUarStorage): Promise<UarSidecarEndpoint> {
     assertUarEnabled()
+    const configured = readIntegrationConfig().uar
+    const selected = configured.instances.find((instance) => instance.id === configured.selectedInstanceId)
+    if (selected?.ownership !== 'managed') {
+      throw new Error('External UAR lifecycle is owned outside The Boss')
+    }
     const running = await this.operation.runExclusive(async () => {
       const previous = this.running?.storage ?? (await readAppliedUarStorage())
       await this.stopOwnedProcess()
@@ -191,6 +270,8 @@ export class UarSidecarService extends BaseService {
       }
     })
     return {
+      instanceId: running.instanceId,
+      ownership: running.ownership,
       baseUrl: running.baseUrl,
       effectivePort: running.effectivePort,
       ...(running.processId ? { processId: running.processId } : {}),
@@ -199,6 +280,7 @@ export class UarSidecarService extends BaseService {
       uarVersion: running.uarVersion,
       capabilities: running.capabilities,
       administration: running.administration,
+      observed: running.observed,
       storage: this.storageStatus(running.storage)
     }
   }
@@ -210,11 +292,24 @@ export class UarSidecarService extends BaseService {
     expectedGeneration?: number
   ): Promise<Response> {
     assertUarEnabled()
-    const running = await this.ensureRunning()
-    if (expectedGeneration !== undefined && running.generation !== expectedGeneration) {
+    const endpoint = await this.resolveSelected()
+    if (expectedGeneration !== undefined && endpoint.generation !== expectedGeneration) {
       throw new Error('UAR sidecar restarted before the request was admitted')
     }
-    return this.authenticatedFetch(running, pathname, principal, init)
+    return this.requestInstance(endpoint, pathname, principal, init)
+  }
+
+  async requestInstance(
+    endpoint: UarSidecarEndpoint,
+    pathname: string,
+    principal: string,
+    init: RequestInit = {}
+  ): Promise<Response> {
+    const verified = this.verifiedEndpoints.get(endpoint.generation)
+    if (!verified || verified.instanceId !== endpoint.instanceId) {
+      throw new Error(`UAR instance ${endpoint.instanceId} binding expired before the request was admitted`)
+    }
+    return this.authenticatedFetch(verified, pathname, principal, init)
   }
 
   requestCurrent(
@@ -230,30 +325,93 @@ export class UarSidecarService extends BaseService {
     return this.authenticatedFetch(running, pathname, principal, init)
   }
 
+  requestInstanceCurrent(
+    endpoint: UarSidecarEndpoint,
+    pathname: string,
+    principal: string,
+    init: RequestInit = {}
+  ): Promise<Response> | undefined {
+    const verified = this.verifiedEndpoints.get(endpoint.generation)
+    if (!verified || verified.instanceId !== endpoint.instanceId) return undefined
+    return this.authenticatedFetch(verified, pathname, principal, init)
+  }
+
   /** Main-process-only administration request. The protected authority never
    * crosses IPC or appears in endpoint/status snapshots. */
   async adminRequest(pathname: string, init: RequestInit = {}, expectedGeneration?: number): Promise<Response> {
+    return this.roleRequest('administration', pathname, init, expectedGeneration)
+  }
+
+  async adminRequestInstance(
+    endpoint: UarSidecarEndpoint,
+    pathname: string,
+    init: RequestInit = {}
+  ): Promise<Response> {
+    return this.roleRequestInstance(endpoint, 'administration', pathname, init)
+  }
+
+  async modelRequest(pathname: string, init: RequestInit = {}, expectedGeneration?: number): Promise<Response> {
+    return this.roleRequest('models', pathname, init, expectedGeneration)
+  }
+
+  async modelRequestInstance(
+    endpoint: UarSidecarEndpoint,
+    pathname: string,
+    init: RequestInit = {}
+  ): Promise<Response> {
+    return this.roleRequestInstance(endpoint, 'models', pathname, init)
+  }
+
+  private async roleRequest(
+    role: 'administration' | 'models' | 'console',
+    pathname: string,
+    init: RequestInit,
+    expectedGeneration?: number
+  ): Promise<Response> {
     assertUarEnabled()
-    const running = await this.ensureRunning()
-    if (expectedGeneration !== undefined && running.generation !== expectedGeneration) {
+    const endpoint = await this.resolveSelected()
+    if (expectedGeneration !== undefined && endpoint.generation !== expectedGeneration) {
       throw new Error('UAR sidecar restarted before the administration request was admitted')
     }
+    return this.roleRequestInstance(endpoint, role, pathname, init)
+  }
+
+  private async roleRequestInstance(
+    endpoint: UarSidecarEndpoint,
+    role: 'administration' | 'models' | 'console',
+    pathname: string,
+    init: RequestInit
+  ): Promise<Response> {
+    const verified = this.verifiedEndpoints.get(endpoint.generation)
+    if (!verified || verified.instanceId !== endpoint.instanceId) {
+      throw new Error(`UAR instance ${endpoint.instanceId} binding expired before the request was admitted`)
+    }
     const headers = new Headers(init.headers)
-    headers.set('x-uar-admin-key', running.adminKey)
-    return this.authenticatedFetch(running, pathname, uarPrincipalForSession('admin'), { ...init, headers })
+    if (verified.adminKey) headers.set('x-uar-admin-key', verified.adminKey)
+    else throw new Error(`UAR ${role} request requires a separately configured administration key`)
+    const roleEndpoint = verified.observed.endpoints[role]
+    if (!roleEndpoint) throw new Error(`UAR ${role} endpoint is unavailable for instance ${verified.instanceId}`)
+    return this.authenticatedFetch(
+      verified,
+      pathname,
+      uarPrincipalForSession('admin'),
+      { ...init, headers },
+      roleEndpoint
+    )
   }
 
   private async authenticatedFetch(
-    running: RunningSidecar,
+    running: Pick<VerifiedEndpoint, 'baseUrl' | 'authToken'>,
     pathname: string,
     principal: string,
-    init: RequestInit
+    init: RequestInit,
+    baseUrl = running.baseUrl
   ): Promise<Response> {
     const headers = new Headers(init.headers)
-    headers.set('authorization', `Bearer ${running.launchToken}`)
+    headers.set('authorization', `Bearer ${running.authToken}`)
     headers.set('x-uar-principal', principal)
     for (let attempt = 0; attempt < 6; attempt += 1) {
-      const response = await fetch(new URL(pathname, running.baseUrl), { ...init, headers })
+      const response = await fetch(new URL(pathname, baseUrl), { ...init, headers })
       if (response.status !== 429 || attempt === 5) return response
       await response.body?.cancel()
       await new Promise((resolve) => setTimeout(resolve, 250))
@@ -287,6 +445,10 @@ export class UarSidecarService extends BaseService {
     const credentialEncryptionKey = managedSecrets.uarCredentialEncryptionKey
     if (!adminKey || !credentialEncryptionKey) throw new Error('UAR protected authority could not be provisioned')
     const dataRoot = application.getPath('feature.agents.uar.data')
+    const managedInstance = readIntegrationConfig().uar.instances.find(
+      (instance) => instance.id === MANAGED_UAR_INSTANCE_ID && instance.ownership === 'managed'
+    )
+    if (!managedInstance) throw new Error('The managed UAR instance definition is missing')
     const configFile = path.join(dataRoot, 'sidecar.yaml')
     const dotenvFile = path.join(dataRoot, '.env')
     await mkdir(dataRoot, { recursive: true, mode: 0o700 })
@@ -324,6 +486,8 @@ export class UarSidecarService extends BaseService {
     const env = {
       ...isolatedSidecarEnvironment(await getRawShellEnv()),
       UAR_SIDECAR: '1',
+      UAR_SERVICE_INSTANCE__INSTANCE_ID: managedInstance.expectedRuntimeId,
+      UAR_SERVICE_INSTANCE__WORKSPACE_LOCATION: managedInstance.workspaceLocation,
       UAR_SECURITY__SETTINGS_MUTATION_AUTH_REQUIRED: 'true',
       UAR_SECURITY__SETTINGS_ADMIN_KEY: adminKey,
       UAR_SERVICE_INSTANCE__INSTANCE_ID: `urn:boss:uar:${createHash('sha256').update(adminKey).digest('hex')}`,
@@ -349,12 +513,15 @@ export class UarSidecarService extends BaseService {
     try {
       const port = await this.waitForReady(child)
       const baseUrl = `http://127.0.0.1:${port}`
-      const capabilities = await this.readCapabilities(baseUrl, launchToken)
+      const capabilities = await this.readCapabilities(managedInstance, baseUrl, launchToken)
       if (!this.isAlive(child)) throw new Error('UAR sidecar exited immediately after becoming ready')
       const generation = ++this.generation
       const running: RunningSidecar = {
+        instanceId: managedInstance.id,
+        ownership: 'managed',
         child,
         launchToken,
+        authToken: launchToken,
         adminKey,
         baseUrl,
         effectivePort: port,
@@ -364,8 +531,15 @@ export class UarSidecarService extends BaseService {
         uarVersion: capabilities.uarVersion,
         capabilities: capabilities.capabilities,
         administration: capabilities.administration,
+        observed: capabilities.observed,
         storage
       }
+      this.verifiedEndpoints.set(generation, {
+        ...running,
+        authToken: launchToken,
+        adminKey,
+        storage: this.storageStatus(storage)
+      })
       child.once('exit', (code, signal) => {
         if (this.running?.child === child) this.running = undefined
         if (!this.stopping) logger.warn('UAR sidecar exited', { code, signal, generation })
@@ -433,9 +607,9 @@ export class UarSidecarService extends BaseService {
     })
   }
 
-  private async readCapabilities(baseUrl: string, launchToken: string) {
+  private async readCapabilities(instance: UarRuntimeInstance, baseUrl: string, authToken: string) {
     const response = await fetch(new URL('/api/uar/capabilities', baseUrl), {
-      headers: { authorization: `Bearer ${launchToken}` },
+      headers: { authorization: `Bearer ${authToken}` },
       signal: AbortSignal.timeout(5_000)
     })
     if (!response.ok) throw new Error(`UAR sidecar capability check failed with HTTP ${response.status}`)
@@ -444,15 +618,125 @@ export class UarSidecarService extends BaseService {
     if (!Array.isArray(capabilities) || !capabilities.every((value) => typeof value === 'string')) {
       throw new Error('UAR sidecar capability response is invalid')
     }
-    const missing = REQUIRED_CAPABILITIES.filter((capability) => !capabilities.includes(capability))
+    const missing = [...REQUIRED_CAPABILITIES, ...instance.requiredCapabilities].filter(
+      (capability) => !capabilities.includes(capability)
+    )
     if (missing.length) throw new Error(`UAR sidecar is missing required capabilities: ${missing.join(', ')}`)
-    return { uarVersion: body.uar_version, capabilities, administration: body.administration }
+    if (body.instance.id !== instance.expectedRuntimeId) {
+      throw new Error(
+        `UAR instance identity mismatch: expected ${instance.expectedRuntimeId}, received ${body.instance.id}`
+      )
+    }
+    if (body.instance.profile !== instance.profile) {
+      throw new Error(`UAR profile mismatch: expected ${instance.profile}, received ${body.instance.profile}`)
+    }
+    if (body.instance.workspace_location !== instance.workspaceLocation) {
+      throw new Error(
+        `UAR workspace location mismatch: expected ${instance.workspaceLocation}, received ${body.instance.workspace_location}`
+      )
+    }
+    if (instance.minimumVersion && this.compareVersions(body.uar_version, instance.minimumVersion) < 0) {
+      throw new Error(`UAR version ${body.uar_version} is older than required ${instance.minimumVersion}`)
+    }
+    const observed: UarObservedInstance = {
+      id: body.instance.id,
+      profile: body.instance.profile,
+      version: body.uar_version,
+      workspaceLocation: body.instance.workspace_location,
+      capabilities: [...capabilities],
+      endpoints: body.endpoints,
+      ownership: body.ownership,
+      references: {
+        lifecycleOwner: body.references.lifecycle_owner,
+        credential: body.references.credential,
+        workspace: body.references.workspace
+      },
+      placement: body.placement
+    }
+    if (body.ownership !== instance.ownership) {
+      throw new Error(`UAR ownership mismatch: expected ${instance.ownership}, received ${body.ownership}`)
+    }
+    if (instance.runtimeCredentialRef && body.references.credential !== instance.runtimeCredentialRef) {
+      throw new Error('UAR runtime credential reference mismatch')
+    }
+    if (instance.ownership === 'external') {
+      for (const role of ['runtime', 'administration', 'models', 'console'] as const) {
+        if (this.normalizedEndpoint(body.endpoints[role]) !== this.normalizedEndpoint(instance.endpoints[role])) {
+          throw new Error(`UAR ${role} endpoint mismatch for ${instance.id}`)
+        }
+      }
+    }
+    return { uarVersion: body.uar_version, capabilities, administration: body.administration, observed }
+  }
+
+  private async connectExternal(instance: UarRuntimeInstance): Promise<UarSidecarEndpoint> {
+    const credentials = await readUarInstanceCredentials(instance.id)
+    if (!credentials.runtimeBearer) {
+      throw new Error(`UAR instance ${instance.id} is missing its protected runtime bearer`)
+    }
+    if (!credentials.adminKey) {
+      throw new Error(`UAR instance ${instance.id} is missing its protected administration key`)
+    }
+    const capabilities = await this.readCapabilities(
+      instance,
+      instance.endpoints.administration,
+      credentials.runtimeBearer
+    )
+    const previous = [...this.verifiedEndpoints.values()].find(
+      (candidate) =>
+        candidate.instanceId === instance.id &&
+        candidate.ownership === 'external' &&
+        JSON.stringify(candidate.observed) === JSON.stringify(capabilities.observed)
+    )
+    const generation = previous?.generation ?? ++this.generation
+    for (const [candidateGeneration, candidate] of this.verifiedEndpoints) {
+      if (candidate.instanceId === instance.id && candidateGeneration !== generation) {
+        this.verifiedEndpoints.delete(candidateGeneration)
+      }
+    }
+    const runtimeUrl = new URL(capabilities.observed.endpoints.runtime)
+    const endpoint: VerifiedEndpoint = {
+      instanceId: instance.id,
+      ownership: 'external',
+      baseUrl: capabilities.observed.endpoints.runtime,
+      effectivePort: Number(runtimeUrl.port || (runtimeUrl.protocol === 'https:' ? 443 : 80)),
+      startedAt: previous?.startedAt ?? Date.now(),
+      generation,
+      uarVersion: capabilities.uarVersion,
+      capabilities: capabilities.capabilities,
+      administration: capabilities.administration,
+      observed: capabilities.observed,
+      authToken: credentials.runtimeBearer,
+      adminKey: credentials.adminKey
+    }
+    this.verifiedEndpoints.set(generation, endpoint)
+    return endpoint
+  }
+
+  private normalizedEndpoint(value: string | null): string | null {
+    return value?.replace(/\/$/, '') ?? null
+  }
+
+  private compareVersions(actual: string, minimum: string): number {
+    const parse = (value: string) =>
+      value
+        .replace(/^v/, '')
+        .split(/[.-]/)
+        .slice(0, 3)
+        .map((part) => Number(part) || 0)
+    const left = parse(actual)
+    const right = parse(minimum)
+    for (let index = 0; index < 3; index += 1) {
+      if (left[index] !== right[index]) return (left[index] ?? 0) - (right[index] ?? 0)
+    }
+    return 0
   }
 
   private async stopOwnedProcess(): Promise<void> {
     const running = this.running
     this.running = undefined
     if (!running) return
+    this.verifiedEndpoints.delete(running.generation)
     await this.terminate(running.child)
   }
 
