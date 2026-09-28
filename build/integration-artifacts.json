@@ -43,6 +43,14 @@
       "name": "compass",
       "version": "0.3.28",
       "packages": {
+        "darwin-x64": {
+          "sha256": "25fa207a660263261647d207a2b2ea1c58c65047c42d5f9a120d3cd6af421bf3",
+          "binaries": [
+            "compass"
+          ],
+          "archive": "none",
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/compass-darwin-x64"
+        },
         "darwin-arm64": {
           "sha256": "706bda14f4867cf99e29c92c5c42c90b021e84c92f709ba96791e8c07c4d7e55",
           "binaries": [
@@ -58,6 +66,14 @@
           ],
           "archive": "none",
           "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/compass-win32-x64.exe"
+        },
+        "win32-arm64": {
+          "sha256": "35f77fc4e8155ff3d3ab51155b9324d98b6b5cb8809492bd26ce6147b4ec60d9",
+          "binaries": [
+            "compass.exe"
+          ],
+          "archive": "none",
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/compass-win32-arm64.exe"
         }
       }
     },
