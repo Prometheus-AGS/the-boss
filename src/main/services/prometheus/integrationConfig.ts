@@ -111,7 +111,8 @@ export function integrationDirectory(): string {
 export async function readSecrets(): Promise<Partial<Record<ManagedIntegrationSecret, string>>> {
   try {
     const data = await fs.readFile(path.join(integrationDirectory(), 'secrets.enc'))
-    return JSON.parse(safeStorage.decryptString(data))
+    const decrypted = await safeStorage.decryptStringAsync(data)
+    return JSON.parse(decrypted.result)
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return {}
     throw error
@@ -120,14 +121,14 @@ export async function readSecrets(): Promise<Partial<Record<ManagedIntegrationSe
 
 async function replaceSecrets(secrets: Partial<Record<ManagedIntegrationSecret, string>>): Promise<void> {
   if (
-    !safeStorage.isEncryptionAvailable() ||
+    !(await safeStorage.isAsyncEncryptionAvailable()) ||
     (process.platform === 'linux' && safeStorage.getSelectedStorageBackend() === 'basic_text')
   ) {
     throw new Error('prometheus.error.secretStorage')
   }
   await fs.mkdir(integrationDirectory(), { recursive: true, mode: 0o700 })
   const filename = path.join(integrationDirectory(), 'secrets.enc')
-  await fs.writeFile(`${filename}.tmp`, safeStorage.encryptString(JSON.stringify(secrets)), { mode: 0o600 })
+  await fs.writeFile(`${filename}.tmp`, await safeStorage.encryptStringAsync(JSON.stringify(secrets)), { mode: 0o600 })
   await fs.rename(`${filename}.tmp`, filename)
 }
 

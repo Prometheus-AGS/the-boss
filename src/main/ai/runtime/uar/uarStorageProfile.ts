@@ -15,7 +15,9 @@ const filename = () => application.getPath('feature.agents.uar.data', 'storage-p
 
 export async function readAppliedUarStorage(): Promise<AppliedUarStorage> {
   try {
-    const value = JSON.parse(safeStorage.decryptString(await fs.readFile(filename()))) as Partial<AppliedUarStorage>
+    const encrypted = await fs.readFile(filename())
+    const decrypted = await safeStorage.decryptStringAsync(encrypted)
+    const value = JSON.parse(decrypted.result) as Partial<AppliedUarStorage>
     return {
       revision: Number.isSafeInteger(value.revision) && value.revision! >= 0 ? value.revision! : 0,
       profile: uarStorageConfigSchema.parse(value.profile),
@@ -31,12 +33,12 @@ export async function readAppliedUarStorage(): Promise<AppliedUarStorage> {
 
 export async function writeAppliedUarStorage(storage: AppliedUarStorage): Promise<void> {
   if (
-    !safeStorage.isEncryptionAvailable() ||
+    !(await safeStorage.isAsyncEncryptionAvailable()) ||
     (process.platform === 'linux' && safeStorage.getSelectedStorageBackend() === 'basic_text')
   ) {
     throw new Error('prometheus.error.secretStorage')
   }
   const target = filename()
-  await fs.writeFile(`${target}.tmp`, safeStorage.encryptString(JSON.stringify(storage)), { mode: 0o600 })
+  await fs.writeFile(`${target}.tmp`, await safeStorage.encryptStringAsync(JSON.stringify(storage)), { mode: 0o600 })
   await fs.rename(`${target}.tmp`, target)
 }
