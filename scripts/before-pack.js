@@ -210,6 +210,7 @@ exports.default = async function (context) {
   assertPrebuiltPackages(platform, arch)
 
   console.log(`Downloading bundled binaries for ${platform}-${arch}...`)
+  process.env.THE_BOSS_PACKAGE_PLATFORM = platformKey
   execSync(`node "${path.join(__dirname, 'download-binaries.js')}" ${platform} ${arch} --packaging`, {
     stdio: 'inherit'
   })
