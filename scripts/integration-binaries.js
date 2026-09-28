@@ -36,7 +36,7 @@ function loadIntegrationBinaries({ required = false, platform: targetPlatform } 
             payloadIdentity: {
               file: 'payload-manifest.json',
               field: 'source',
-              value: tool.packages[targetPlatform]?.source ?? manifest.sources.uar.revision
+              value: manifest.sources.uar.platformRevisions?.[targetPlatform] ?? manifest.sources.uar.revision
             }
           }
         : {})

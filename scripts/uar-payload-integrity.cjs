@@ -98,6 +98,11 @@ function verifyPackagedUarPayload(resourcesDir, platformKey, options = {}) {
     ? { binaries: [...local.files.map((entry) => entry.path), 'payload-manifest.json'] }
     : sidecar?.packages?.[platformKey]
   if (!expected) throw new Error(`Integration artifact manifest is missing uar-sidecar ${platformKey}`)
+  const expectedSource =
+    local?.source ?? integration.sources.uar.platformRevisions?.[platformKey] ?? integration.sources.uar.revision
+  if (!local && expected.source !== expectedSource) {
+    throw new Error(`Integration artifact UAR source does not match the release pin for ${platformKey}`)
+  }
 
   const manifestFile = path.join(payloadDir, 'payload-manifest.json')
   const manifestStat = fs.statSync(manifestFile, { throwIfNoEntry: false })
@@ -111,7 +116,7 @@ function verifyPackagedUarPayload(resourcesDir, platformKey, options = {}) {
     manifest.name !== 'uar-sidecar' ||
     manifest.version !== (local?.version ?? sidecar.version) ||
     manifest.platform !== platformKey ||
-    manifest.source !== (local?.source ?? sidecar.packages?.[platformKey]?.source ?? integration.sources.uar.revision) ||
+    manifest.source !== expectedSource ||
     !Array.isArray(manifest.files)
   ) {
     throw new Error(`Packaged UAR sidecar manifest identity does not match the release pins for ${platformKey}`)
