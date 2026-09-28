@@ -455,7 +455,10 @@ const TOOLS = [
       }
     }
   },
-  ...require('./integration-binaries').loadIntegrationBinaries({ required: process.argv.includes('--packaging') })
+  ...require('./integration-binaries').loadIntegrationBinaries({
+    required: process.argv.includes('--packaging'),
+    platform: process.argv[2] && process.argv[3] ? `${process.argv[2]}-${process.argv[3]}` : undefined
+  })
 ]
 
 // ── Core logic ───────────────────────────────────────────────────────

@@ -4,7 +4,7 @@ const path = require('node:path')
 const { resolveReleaseProfile } = require('./release-profile.cjs')
 
 /** Produced from successful native release jobs, then committed before installer packaging. */
-function loadIntegrationBinaries({ required = false } = {}) {
+function loadIntegrationBinaries({ required = false, platform: targetPlatform } = {}) {
   const filename = path.join(__dirname, '..', 'build', 'integration-artifacts.json')
   if (!fs.existsSync(filename)) {
     if (required)
@@ -19,7 +19,7 @@ function loadIntegrationBinaries({ required = false } = {}) {
   for (const name of requiredTools) {
     const tool = manifest.tools.find((entry) => entry.name === name)
     if (!tool) throw new Error(`Integration manifest is missing ${name}`)
-    for (const platform of profile.supportedPlatforms) {
+    for (const platform of targetPlatform ? [targetPlatform] : profile.supportedPlatforms) {
       const asset = tool.packages[platform]
       if (!asset || !asset.url.startsWith('https://') || !/^[a-f0-9]{64}$/.test(asset.sha256))
         throw new Error(`Unpinned integration artifact: ${name} ${platform}`)
