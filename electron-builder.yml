@@ -196,7 +196,9 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.5 - Agent inference and integration reliability
+    The Boss 2.2.6 - Codex conversation reliability
+
+    - [Codex] Complete conversation titles and other non-streaming requests through the streaming-only Codex backend.
 
     - [Agents] Include the native Claude Code executable and verify its presence in each macOS and Windows installer.
     - [Compass] Continue indexing very large projects without community clustering when its node limit is reached.
@@ -211,7 +213,9 @@ releaseInfo:
     - [Skills] Bundle the complete pinned Prometheus mini runtime, Compass skills, OpenSpec, Prometheus, pk, Node.js, and their required assets.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.5 - 智能体推理与集成可靠性
+    The Boss 2.2.6 - Codex 会话可靠性
+
+    - [Codex] 通过仅支持流式请求的 Codex 后端完成会话标题及其他非流式请求。
 
     - [智能体] 在每个 macOS 和 Windows 安装包中包含 Claude Code 原生可执行文件，并验证其存在。
     - [Compass] 当社区聚类达到节点上限时，继续为大型项目建立无聚类代码索引。
