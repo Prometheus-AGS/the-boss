@@ -1,0 +1,8 @@
+{
+  "operation": "deploy",
+  "baseUrl": "http://127.0.0.1:1906",
+  "credentialRef": "env:UAR_TOKEN",
+  "packageDirectory": ".agent-team/checkout-team/uar-package-1.1.0",
+  "bindingIntent": "package-and-binding"
+}
+

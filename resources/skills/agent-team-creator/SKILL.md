@@ -1,10 +1,10 @@
 ---
 name: agent-team-creator
-description: "Create the smallest useful coding agent team for a task, with guided role discovery and native exports for UAR, Codex, Claude Code, Copilot, Kimi Code, MiniMax CLI, OpenCode and DeepSeek. Use when a user asks to create, configure or choose an agent team; use agent-team-manage for existing task state. Do not use for existing task updates (see agent-team-manage)."
+description: "Create, revise, package, and deploy agent-team definitions with staged questions and native exports for UAR, Codex, Claude Code, Copilot, Kimi Code, MiniMax CLI, OpenCode and DeepSeek. Use for team definition and catalog lifecycle; use agent-team-manage for active runtime task state."
 license: MIT
 compatibility: Requires Node.js 22 or newer. Git is optional for handoff snapshots. Model gateways, memory services and native harness CLIs are optional and separately configured.
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   tags: "agents, teams, orchestration, coding"
 ---
 
@@ -18,12 +18,15 @@ concept or start a second agent loop.
 ## Start with the task
 
 Read project instructions and any active KBD work first. Reuse answers already
-given. Ask only for missing outcome, scope, deliverables, budget preference and
-review needs. Use ordinary language: “Is this one isolated change, or does it
-span design, implementation and verification?” The user need not know agent
-terminology. Choose a short team ID and explain it rather than requiring jargon.
+given. Start by distinguishing **create**, **revise**, and **deploy**. Creation
+asks only for missing outcome, scope, deliverables, budget preference and review
+needs. Revision asks for the current definition/package, desired change, next
+semantic version and deployment intent. Deployment asks for the reviewed package,
+UAR instance, environment credential reference and whether a private binding is
+also required. The user need not know agent terminology.
 
-Use [assets/intake.json](assets/intake.json) as the JSON request shape. `guide`
+Use [assets/intake.json](assets/intake.json) as the creation JSON request shape.
+Set `operation` to `revise` or `deploy` for the other staged paths. `guide`
 returns missing intake fields when answers are incomplete, or a proposed team
 with role explanations and a single-agent alternative. Once task details are known,
 the guide returns `proposedRoles` and ownership questions until every proposed role
@@ -123,17 +126,31 @@ native reference for supported project agents or plugin/marketplace installation
 Do not invent plugin agent fields where a harness has none. A plugin installation
 does not start an agent team.
 
-For UAR or BossFang, keep registry registration, activation and execution separate.
-Use the exported native payload and verified route, operator-selected instance
-URL and environment credential reference. Record each returned native ID and
-outcome; multi-agent registration is not atomic. BossFang Hands and standalone
-agent/workflow registration are alternative native deployment paths. Choose one.
-Do not auto-activate a Hand or run a workflow merely because definitions exist.
+For UAR, use the canonical package and private binding path in
+[UAR deployment](references/uar-deployment.md). It preserves complete
+AgentDefinition, TeamDefinition, WorkflowDefinition, PackageManifest and
+DeploymentBinding fields, resolves immutable references, and installs the whole
+package atomically through the collaboration catalog API. Use an operator-selected
+instance URL and `env:VARIABLE` credential reference. Run capability discovery,
+package preflight, install and exact status before an optional binding preflight
+and install. Catalog installation is not activation: the `uar-activate` command
+refuses until the durable I2 team runtime exists.
+
+Schema-v1 `export --target uar` remains a compatibility projection for existing
+single-agent consumers. It cannot represent a UAR team and must not be used to
+claim collaboration-package deployment. Create new UAR teams through
+`uar-package-build` and `uar-package-install`.
+
+For BossFang, keep registry registration, activation and execution separate.
+BossFang Hands and standalone agent/workflow registration are alternative native
+deployment paths. Choose one. Do not auto-activate a Hand or run a workflow merely
+because definitions exist.
 
 For actual work, the chosen harness owns native spawning, permissions, sessions,
 subagent depth and model overrides. Use its available tools/current CLI contract;
 the team ledger does not schedule processes or enforce Cedar. Resolve missing
-native capabilities explicitly. Use `$agent-team-manage` for tasks and
+native capabilities explicitly. Use this creator for immutable definition
+maintenance and UAR catalog deployment. Use `$agent-team-manage` for runtime tasks and
 `$agent-team-handoff` when changing owners/harnesses.
 
 ## Evidence and recovery

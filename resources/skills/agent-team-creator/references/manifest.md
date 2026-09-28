@@ -114,7 +114,7 @@ node <skill>/scripts/cli.mjs <command> --input request.json
 
 | Command | Request |
 |---|---|
-| `guide` | Intake fields from `assets/intake.json`, followed by `ownership` mapping role IDs to nonempty arrays of project-relative output paths/globs. Missing scope returns questions and `proposedRoles`; only `ready: true` returns `team` |
+| `guide` | `operation=create|revise|deploy` plus the staged intake fields returned for that operation. Create remains the default for schema-v1 callers. |
 | `validate` | `team` manifest |
 | `init` | `team`, new `state` filename |
 | `status` | `state` |
@@ -124,12 +124,22 @@ node <skill>/scripts/cli.mjs <command> --input request.json
 | `handoff-create`, `handoff-accept` | See `task-handoff.md` |
 | `models-discover`, `models-select` | See `models-memory.md` |
 | `memory-queue`, `memory-publish` | See `models-memory.md` |
+| `uar-package-validate` | `package` authoring envelope from `schemas/uar-package-authoring.schema.json` |
+| `uar-package-build` | `package`, new `out` directory |
+| `uar-package-diff` | `before` and `after` authoring packages with the same package ID |
+| `uar-capabilities` | `connection` with base URL and optional `env:VARIABLE` credential reference |
+| `uar-package-preflight`, `uar-package-install` | `connection`, `packageDirectory`, `commandId`, optional `expectedCatalogRevision` |
+| `uar-package-status` | `connection`, `packageId`, `version` |
+| `uar-binding-preflight`, `uar-binding-install` | `connection`, `commandId`, complete `binding`, optional `expectedRevision` |
+| `uar-binding-status` | `connection`, `bindingId`, explicit `workspaceId` |
+| `uar-activate` | Always refuses until durable local-team execution is implemented in I2 |
 
-Exports are proposals, never in-place installation. If a write fails partway,
+Native harness exports are proposals, never in-place installation. If a write fails partway,
 the incomplete directory remains inspectable and lacks its final receipt. Choose
-a new output directory for a retry. No global tool installation or remote agent
-registration occurs through this CLI. Skills guide native installation and
-execution using the user's authorized target and the actual harness contract.
+a new output directory for a retry. UAR collaboration commands are the deliberate
+exception: after capability and package preflight they install an atomic immutable
+catalog package and optional private deployment binding through the routes in
+`uar-deployment.md`. They never activate or execute a team.
 
 ## Building and distributing
 

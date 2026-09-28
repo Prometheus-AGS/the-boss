@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometheus-ags.dev/uar/collaboration/0.1.0-draft.1/workflow-definition.schema.json",
+  "title": "UAR collaboration workflow-definition — official draft, no runtime conformance claim",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "urn:prometheus:uar:collaboration:0.1.0-draft.1"
+    },
+    "kind": {
+      "const": "WorkflowDefinition"
+    },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "version": {
+      "$ref": "common.schema.json#/$defs/semver"
+    },
+    "contentDigest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "provenance": {
+      "$ref": "common.schema.json#/$defs/provenance"
+    },
+    "requiredCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "extensions": {
+      "$ref": "common.schema.json#/$defs/extensions"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input": {
+      "$ref": "common.schema.json#/$defs/contract"
+    },
+    "output": {
+      "$ref": "common.schema.json#/$defs/contract"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dependsOn": {
+            "type": "array",
+            "items": {
+              "$ref": "common.schema.json#/$defs/id"
+            },
+            "minItems": 0
+          },
+          "inputMapping": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "output": {
+            "$ref": "common.schema.json#/$defs/contract"
+          },
+          "effect": {
+            "enum": [
+              "none",
+              "read",
+              "idempotent-write",
+              "non-idempotent-write"
+            ]
+          },
+          "approval": {
+            "enum": [
+              "none",
+              "current-authority",
+              "operator-exact-effect"
+            ]
+          },
+          "retry": {
+            "type": "object",
+            "properties": {
+              "maxAttempts": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "onUnknownEffect": {
+                "const": "reconcile-before-retry"
+              }
+            },
+            "required": [
+              "maxAttempts",
+              "onUnknownEffect"
+            ],
+            "additionalProperties": false
+          },
+          "completion": {
+            "enum": [
+              "artifact",
+              "all-dependencies-and-artifact"
+            ]
+          },
+          "instructions": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "dependsOn",
+          "inputMapping",
+          "output",
+          "effect",
+          "approval",
+          "retry",
+          "completion",
+          "instructions"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "failurePolicy": {
+      "enum": [
+        "stop-dependent",
+        "cancel-all"
+      ]
+    },
+    "maxActivations": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000
+    }
+  },
+  "required": [
+    "profile",
+    "kind",
+    "id",
+    "version",
+    "contentDigest",
+    "provenance",
+    "requiredCapabilities",
+    "extensions",
+    "title",
+    "input",
+    "output",
+    "steps",
+    "failurePolicy",
+    "maxActivations"
+  ],
+  "additionalProperties": false
+}
+

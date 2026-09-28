@@ -1,4 +1,5 @@
 {
+  "operation": "create",
   "id": "checkout-team",
   "outcome": "Implement an accessible checkout with verified payment error handling",
   "complexity": "complex",

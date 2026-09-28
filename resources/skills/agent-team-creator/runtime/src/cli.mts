@@ -10,6 +10,11 @@ import { readState, initState, mutateState, mutateStateAsync, taskAction, comple
 import { createHandoff, acceptHandoff } from './handoff.mjs';
 import { discoverModels, selectModel } from './models.mjs';
 import { queueMemory, publishMemory } from './memory.mjs';
+import { compileUarPackage, diffUarPackages, writeUarPackage } from './uar-package.mjs';
+import {
+  refuseUarActivation, uarBindingInstall, uarBindingPreflight, uarBindingStatus,
+  uarCapabilities, uarPackageInstall, uarPackagePreflight, uarPackageStatus,
+} from './uar-client.mjs';
 import type { ObjectValue, ModelPolicy, Json } from './types.mjs';
 
 function revision(input: ObjectValue): number {
@@ -59,16 +64,27 @@ async function dispatch(command: string, input: ObjectValue): Promise<unknown> {
       const state = await mutateStateAsync(stateFile(input), revision(input), async state => { receipt = await publishMemory(state, object(input.publication, 'publication')); });
       return { state, publication: receipt };
     }
+    case 'uar-package-validate': return { valid: true, package: compileUarPackage(input.package) };
+    case 'uar-package-build': return writeUarPackage(input.out, input.package);
+    case 'uar-package-diff': return diffUarPackages(input.before, input.after);
+    case 'uar-capabilities': return uarCapabilities(input);
+    case 'uar-package-preflight': return uarPackagePreflight(input);
+    case 'uar-package-install': return uarPackageInstall(input);
+    case 'uar-package-status': return uarPackageStatus(input);
+    case 'uar-binding-preflight': return uarBindingPreflight(input);
+    case 'uar-binding-install': return uarBindingInstall(input);
+    case 'uar-binding-status': return uarBindingStatus(input);
+    case 'uar-activate': return refuseUarActivation();
     default: throw Error(`Unknown command: ${command}`);
   }
 }
 
-const commands = ['guide','validate','init','status','team-update','export','install-project','task','complete-kbd','handoff-create','handoff-accept','models-discover','models-select','memory-queue','memory-publish'];
+const commands = ['guide','validate','init','status','team-update','export','install-project','task','complete-kbd','handoff-create','handoff-accept','models-discover','models-select','memory-queue','memory-publish','uar-package-validate','uar-package-build','uar-package-diff','uar-capabilities','uar-package-preflight','uar-package-install','uar-package-status','uar-binding-preflight','uar-binding-install','uar-binding-status','uar-activate'];
 async function main(): Promise<void> {
   if (Number(process.versions.node.split('.')[0]) < 22) throw Error('Node.js 22 or newer is required');
   const [command, ...args] = process.argv.slice(2);
   if (!command || command === '--help') {
-    process.stdout.write(JSON.stringify({ usage: 'node <skill>/scripts/cli.mjs <command> --input <request.json>', commands, note: 'JSON requests preserve spaces and native configuration. Export stages files; it does not install or execute agents.' }, null, 2) + '\n');
+    process.stdout.write(JSON.stringify({ usage: 'node <skill>/scripts/cli.mjs <command> --input <request.json>', commands, note: 'JSON requests preserve spaces and native configuration. UAR package installation is catalog-only; team activation is refused until I2.' }, null, 2) + '\n');
     return;
   }
   let input: ObjectValue = {};

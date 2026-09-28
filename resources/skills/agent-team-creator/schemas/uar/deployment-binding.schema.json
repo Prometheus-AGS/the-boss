@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometheus-ags.dev/uar/collaboration/0.1.0-draft.1/deployment-binding.schema.json",
+  "title": "UAR collaboration deployment-binding — official draft, no runtime conformance claim",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "urn:prometheus:uar:collaboration:0.1.0-draft.1"
+    },
+    "kind": {
+      "const": "DeploymentBinding"
+    },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "version": {
+      "$ref": "common.schema.json#/$defs/semver"
+    },
+    "contentDigest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "provenance": {
+      "$ref": "common.schema.json#/$defs/provenance"
+    },
+    "requiredCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "extensions": {
+      "$ref": "common.schema.json#/$defs/extensions"
+    },
+    "exportClass": {
+      "const": "private-installed-state"
+    },
+    "package": {
+      "$ref": "common.schema.json#/$defs/immutableRef"
+    },
+    "ownerId": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "workspaceId": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "runtimeInstanceId": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "revision": {
+      "$ref": "common.schema.json#/$defs/revision"
+    },
+    "modelBindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "requestedAlias": {
+            "type": "string",
+            "minLength": 1
+          },
+          "providerId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "modelId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "credentialRef": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "requestedAlias",
+          "providerId",
+          "modelId",
+          "credentialRef"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "skillBindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "version": {
+            "$ref": "common.schema.json#/$defs/semver"
+          },
+          "digest": {
+            "$ref": "common.schema.json#/$defs/digest"
+          },
+          "installedLocation": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "digest",
+          "installedLocation"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "storage": {
+      "type": "object",
+      "properties": {
+        "backend": {
+          "type": "string",
+          "minLength": 1
+        },
+        "connectionRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "durableTransactions": {
+          "const": true
+        }
+      },
+      "required": [
+        "backend",
+        "connectionRef",
+        "durableTransactions"
+      ],
+      "additionalProperties": false
+    },
+    "policyRevision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "effectiveLimits": {
+      "$ref": "common.schema.json#/$defs/limits"
+    },
+    "effectiveBudget": {
+      "$ref": "common.schema.json#/$defs/budget"
+    },
+    "contextGrants": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "representationGrantRefs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "status": {
+      "enum": [
+        "inactive",
+        "ready",
+        "suspended"
+      ]
+    }
+  },
+  "required": [
+    "profile",
+    "kind",
+    "id",
+    "version",
+    "contentDigest",
+    "provenance",
+    "requiredCapabilities",
+    "extensions",
+    "exportClass",
+    "package",
+    "ownerId",
+    "workspaceId",
+    "runtimeInstanceId",
+    "revision",
+    "modelBindings",
+    "skillBindings",
+    "storage",
+    "policyRevision",
+    "effectiveLimits",
+    "effectiveBudget",
+    "contextGrants",
+    "representationGrantRefs",
+    "status"
+  ],
+  "additionalProperties": false
+}
+

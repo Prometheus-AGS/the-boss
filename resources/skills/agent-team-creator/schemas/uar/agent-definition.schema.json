@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometheus-ags.dev/uar/collaboration/0.1.0-draft.1/agent-definition.schema.json",
+  "title": "UAR collaboration agent-definition — official draft, no runtime conformance claim",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "urn:prometheus:uar:collaboration:0.1.0-draft.1"
+    },
+    "kind": {
+      "const": "AgentDefinition"
+    },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "version": {
+      "$ref": "common.schema.json#/$defs/semver"
+    },
+    "contentDigest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "provenance": {
+      "$ref": "common.schema.json#/$defs/provenance"
+    },
+    "requiredCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "extensions": {
+      "$ref": "common.schema.json#/$defs/extensions"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "whenToUse": {
+      "type": "string",
+      "minLength": 1
+    },
+    "instructions": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input": {
+      "$ref": "common.schema.json#/$defs/contract"
+    },
+    "output": {
+      "$ref": "common.schema.json#/$defs/contract"
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/skill"
+      },
+      "minItems": 0
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/model"
+      },
+      "minItems": 1
+    },
+    "permittedChildren": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/immutableRef"
+      },
+      "minItems": 0
+    },
+    "context": {
+      "$ref": "common.schema.json#/$defs/context"
+    },
+    "requestedLimits": {
+      "$ref": "common.schema.json#/$defs/limits"
+    },
+    "legacySections": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Losslessly retained original legacy sections; not executable authority."
+    },
+    "sourceDescriptor": {
+      "type": "object",
+      "description": "Complete immutable original compiler IR for migrated definitions. Preserve every key including model_requirements, prompt_dialect, rag_configuration, context_strategy, api_harness, and full SkillRef values. Preservation does not imply runtime support."
+    }
+  },
+  "required": [
+    "profile",
+    "kind",
+    "id",
+    "version",
+    "contentDigest",
+    "provenance",
+    "requiredCapabilities",
+    "extensions",
+    "title",
+    "role",
+    "whenToUse",
+    "instructions",
+    "input",
+    "output",
+    "skills",
+    "models",
+    "permittedChildren",
+    "context",
+    "requestedLimits"
+  ],
+  "additionalProperties": false
+}
+
