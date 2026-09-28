@@ -12,7 +12,17 @@ export {
   createUarDurableObserver,
   readUarDurableWorkspace
 } from './UarDurableAdministrationAdapter'
-export { addUarTeamTask, createUarTeam, readUarTeams } from './UarTeamsAdministrationAdapter'
+export {
+  addUarTeamTask,
+  assignUarTeamReviewer,
+  claimUarTeamTask,
+  createUarTeam,
+  readUarTeamMailbox,
+  readUarTeams,
+  reassignUarTeamTask,
+  sendUarTeamMailboxMessage,
+  updateUarTeamTaskState
+} from './UarTeamsAdministrationAdapter'
 export { setupUarStarterAgent, setupUarStarterTeam } from './UarStarterAdministrationAdapter'
 export {
   deleteUarProvider,

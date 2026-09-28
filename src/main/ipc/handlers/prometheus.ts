@@ -1,11 +1,13 @@
 import { application } from '@application'
 import {
   addUarTeamTask,
+  assignUarTeamReviewer,
   acknowledgeUarDurableGap,
   actOnUarDurableInstance,
   actOnUarDurableObserver,
   compileUarAgent,
   cancelUarRun,
+  claimUarTeamTask,
   createUarDurableInstance,
   createUarDurableObserver,
   createUarTeam,
@@ -23,6 +25,7 @@ import {
   readUarAdministrationSnapshot,
   readUarDurableWorkspace,
   readUarTeams,
+  readUarTeamMailbox,
   readUarOperations,
   readUarRunDetail,
   readUarCatalog,
@@ -31,6 +34,7 @@ import {
   readUarPresentations,
   readUarSettings,
   refreshUarSkills,
+  reassignUarTeamTask,
   saveUarA2uiComponent,
   saveUarAgent,
   saveUarAgentSkills,
@@ -43,11 +47,13 @@ import {
   setupUarStarterAgent,
   setupUarStarterTeam,
   searchUarKnowledge,
+  sendUarTeamMailboxMessage,
   uploadUarKnowledgeDocument,
   setDefaultUarProvider,
   testUarProvider,
   toggleUarSkill,
-  updateUarSettings
+  updateUarSettings,
+  updateUarTeamTaskState
 } from '@main/ai/runtime/uar'
 import { StaleIntegrationRevisionError } from '@main/services/prometheus/integrationErrors'
 import {
@@ -149,6 +155,12 @@ const prometheusHandlerImplementations: IpcHandlersFor<typeof prometheusRequestS
   'prometheus.uar.teams.setup_starter': async ({ workspaceId }) => setupUarStarterTeam(workspaceId),
   'prometheus.uar.teams.create': async (input) => createUarTeam(input),
   'prometheus.uar.teams.add_task': async (input) => addUarTeamTask(input),
+  'prometheus.uar.teams.claim_task': async (input) => claimUarTeamTask(input),
+  'prometheus.uar.teams.reassign_task': async (input) => reassignUarTeamTask(input),
+  'prometheus.uar.teams.assign_reviewer': async (input) => assignUarTeamReviewer(input),
+  'prometheus.uar.teams.update_task_state': async (input) => updateUarTeamTaskState(input),
+  'prometheus.uar.teams.mailbox_list': async (input) => readUarTeamMailbox(input),
+  'prometheus.uar.teams.mailbox_send': async (input) => sendUarTeamMailboxMessage(input),
   'prometheus.uar.durable.setup_starter': async ({ workspaceId }) => setupUarStarterAgent(workspaceId),
   'prometheus.uar.durable.create_instance': async (input) => createUarDurableInstance(input),
   'prometheus.uar.durable.instance_action': async (input) => actOnUarDurableInstance(input),

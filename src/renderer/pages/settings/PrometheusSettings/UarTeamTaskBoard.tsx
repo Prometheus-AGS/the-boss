@@ -4,13 +4,33 @@ import { Badge } from '@cherrystudio/ui'
 import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/components/SettingsPrimitives'
 import type { UarTeamInstance } from '@shared/types/uarTeams'
 
-export function UarTeamTaskBoard({ instance }: { instance: UarTeamInstance }) {
+import { UarTeamTaskActions } from './UarTeamTaskActions'
+
+interface Props {
+  workspaceId: string
+  instance: UarTeamInstance
+  ownership: boolean
+  onChanged: () => Promise<void>
+}
+
+export function UarTeamTaskBoard({ workspaceId, instance, ownership, onChanged }: Props) {
   const { t: tr } = useTranslation(undefined, { keyPrefix: 'settings.prometheus.integration.uarAdmin.teams' })
+  const memberName = (id: string | null | undefined) => {
+    if (!id) return tr('unassigned')
+    const member = instance.members.find((candidate) => candidate.id === id)
+    return member ? `${member.role} · ${member.ordinal}` : id
+  }
 
   return (
     <SettingGroup>
       <SettingTitle>{tr('taskBoardTitle')}</SettingTitle>
       <SettingDescription>{tr('taskBoardDescription')}</SettingDescription>
+      <p className="mt-2 text-xs text-muted-foreground">{tr('planningOnly')}</p>
+      {!ownership && (
+        <p className="mt-2 text-xs text-muted-foreground" role="status">
+          {tr('ownershipUnavailable')}
+        </p>
+      )}
       {instance.tasks.length === 0 ? (
         <p className="mt-3 text-sm text-muted-foreground">{tr('noTasks')}</p>
       ) : (
@@ -26,6 +46,25 @@ export function UarTeamTaskBoard({ instance }: { instance: UarTeamInstance }) {
                 </div>
                 <Badge variant="outline">{tr(`taskStatus.${task.status}`)}</Badge>
               </div>
+              <dl className="mt-2 grid gap-x-4 gap-y-1 text-xs sm:grid-cols-2">
+                <div className="flex gap-1">
+                  <dt className="text-muted-foreground">{tr('assignee')}:</dt>
+                  <dd className="break-all">{memberName(task.assigneeMemberId)}</dd>
+                </div>
+                <div className="flex gap-1">
+                  <dt className="text-muted-foreground">{tr('ownershipEpoch')}:</dt>
+                  <dd>{task.ownershipEpoch}</dd>
+                </div>
+                <div className="flex gap-1">
+                  <dt className="text-muted-foreground">{tr('reviewer')}:</dt>
+                  <dd className="break-all">{memberName(task.reviewerMemberId)}</dd>
+                </div>
+                <div className="flex gap-1">
+                  <dt className="text-muted-foreground">{tr('reviewerEpoch')}:</dt>
+                  <dd>{task.reviewerEpoch}</dd>
+                </div>
+              </dl>
+              {task.stateReason && <p className="mt-2 text-xs text-muted-foreground">{task.stateReason}</p>}
               <p className="mt-2 text-xs text-muted-foreground">
                 {tr('dependencies')}:{' '}
                 {task.dependsOn.length
@@ -53,6 +92,13 @@ export function UarTeamTaskBoard({ instance }: { instance: UarTeamInstance }) {
                   </div>
                 </div>
               </details>
+              <UarTeamTaskActions
+                workspaceId={workspaceId}
+                instance={instance}
+                task={task}
+                ownership={ownership}
+                onChanged={onChanged}
+              />
             </li>
           ))}
         </ol>

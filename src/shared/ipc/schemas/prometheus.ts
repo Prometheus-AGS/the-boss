@@ -79,7 +79,13 @@ import {
   uarInstanceSelectSchema,
   type UarInstanceInventorySnapshot
 } from '@shared/types/uarServiceInstance'
-import type { UarTeamBinding, UarTeamInstance, UarTeamsSnapshot } from '@shared/types/uarTeams'
+import type {
+  UarTeamBinding,
+  UarTeamInstance,
+  UarTeamMailboxMessage,
+  UarTeamMailboxPage,
+  UarTeamsSnapshot
+} from '@shared/types/uarTeams'
 
 import { defineRoute } from '../define'
 
@@ -87,6 +93,18 @@ const literRemoteEndpointSchema = z.url().refine((value) => {
   const endpoint = new URL(value)
   return /^https?:$/.test(endpoint.protocol) && !endpoint.username && !endpoint.password
 })
+
+const teamTaskCommandSchema = z
+  .object({
+    workspaceId: z.string().min(1).max(256),
+    teamInstanceId: z.string().min(1).max(256),
+    taskId: z.string().min(1).max(256),
+    commandId: z.uuid(),
+    expectedTeamRevision: z.number().int().nonnegative(),
+    expectedTaskRevision: z.number().int().nonnegative(),
+    memberId: z.string().min(1).max(256)
+  })
+  .strict()
 
 /**
  * The Prometheus settings section's commands.
@@ -312,6 +330,42 @@ export const prometheusRequestSchemas = {
       })
       .strict(),
     output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.claim_task': defineRoute({
+    input: teamTaskCommandSchema,
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.reassign_task': defineRoute({
+    input: teamTaskCommandSchema,
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.assign_reviewer': defineRoute({
+    input: teamTaskCommandSchema,
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.update_task_state': defineRoute({
+    input: teamTaskCommandSchema.omit({ memberId: true }).extend({
+      status: z.literal('ready'),
+      reason: z.string().min(1).max(512)
+    }),
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.mailbox_list': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256), teamInstanceId: z.string().min(1).max(256) }).strict(),
+    output: z.custom<UarTeamMailboxPage>()
+  }),
+  'prometheus.uar.teams.mailbox_send': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        teamInstanceId: z.string().min(1).max(256),
+        commandId: z.uuid(),
+        recipientMemberId: z.string().min(1).max(256),
+        mode: z.enum(['queue-only', 'trigger-turn']),
+        content: z.string().min(1).max(16000)
+      })
+      .strict(),
+    output: z.custom<UarTeamMailboxMessage>()
   }),
   'prometheus.uar.durable.setup_starter': defineRoute({
     input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),

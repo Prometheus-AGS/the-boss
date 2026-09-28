@@ -93,6 +93,7 @@ export function starterPackage() {
 
 /** A separate immutable planning package; installing it never changes the existing starter agent binding. */
 export function starterTeamPackage() {
+  const teamVersion = '1.0.1'
   const starter = starterPackage()
   const agentSource = starter.files[agentPath]
   const agent = JSON.parse(agentSource) as { id: string; version: string; contentDigest: string }
@@ -134,12 +135,12 @@ export function starterTeamPackage() {
     profile,
     kind: 'TeamDefinition',
     id: teamId,
-    version,
+    version: teamVersion,
     provenance: { source: 'The Boss built-in starter team', authors: ['The Boss'] },
     requiredCapabilities: [],
     extensions: {},
     title: 'Starter planning team',
-    purpose: 'Plan a workspace task with a coordinator and a worker.',
+    purpose: 'Plan a workspace task with a coordinator and up to two workers.',
     members: [
       { role: 'coordinator', kind: 'agent', definition: agentRef, min: 1, max: 1, responsibility: 'Define the plan.' },
       {
@@ -147,7 +148,7 @@ export function starterTeamPackage() {
         kind: 'agent',
         definition: agentRef,
         min: 1,
-        max: 1,
+        max: 2,
         responsibility: 'Prepare the assigned work.'
       }
     ],
@@ -155,7 +156,7 @@ export function starterTeamPackage() {
     communication: [],
     taskAcceptance: { mode: 'operator', allowedWorkflows: [workflowRef] },
     routing: { eligibilityFirst: true, strategy: 'operator-role-capacity-cost-stable-id', explain: true },
-    limits: { concurrentTurns: 1, maxMembers: 2, maxDepth: 0, maxPendingTasks: 8 },
+    limits: { concurrentTurns: 1, maxMembers: 3, maxDepth: 0, maxPendingTasks: 8 },
     budget: { maxTokens: 10000, maxCostMicrounits: 1000000, currency: 'USD', maxElapsedSeconds: 300 },
     input: { type: 'object' },
     output: { type: 'object' }
@@ -166,7 +167,7 @@ export function starterTeamPackage() {
     profile,
     kind: 'PackageManifest',
     id: 'urn:boss:starter:team-package',
-    version,
+    version: teamVersion,
     provenance: { source: 'The Boss built-in starter team', authors: ['The Boss'] },
     requiredCapabilities: ['collaboration_definition_packages_v2'],
     extensions: {},
