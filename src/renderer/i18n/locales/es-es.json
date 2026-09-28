@@ -5049,6 +5049,8 @@
   "settings.prometheus.integration.literAdmin.connections.provider": "Proveedor",
   "settings.prometheus.integration.literAdmin.connections.timeout": "Solicitar tiempo de espera (ms)",
   "settings.prometheus.integration.literAdmin.connections.title": "Conexiones de proveedores",
+  "settings.prometheus.integration.literAdmin.credentials.description": "Configura la clave de acceso de la pasarela liter-llm. The Boss la guarda de forma segura.",
+  "settings.prometheus.integration.literAdmin.credentials.title": "Clave de acceso a la pasarela",
   "settings.prometheus.integration.literAdmin.description": "Elija una puerta de enlace, configure las conexiones del proveedor y los alias de los modelos servidos, administre la configuración y verifique el funcionamiento.",
   "settings.prometheus.integration.literAdmin.diagnostics.chooseWorkspace": "Elige un espacio de trabajo",
   "settings.prometheus.integration.literAdmin.diagnostics.description": "Ejercite la puerta de enlace configurada y la ruta del modelo desde un espacio de trabajo real.",

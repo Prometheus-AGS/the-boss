@@ -5049,6 +5049,8 @@
   "settings.prometheus.integration.literAdmin.connections.provider": "プロバイダー",
   "settings.prometheus.integration.literAdmin.connections.timeout": "リクエストのタイムアウト (ミリ秒)",
   "settings.prometheus.integration.literAdmin.connections.title": "プロバイダー接続",
+  "settings.prometheus.integration.literAdmin.credentials.description": "liter-llm ゲートウェイのアクセスキーを設定します。The Boss が安全に保存します。",
+  "settings.prometheus.integration.literAdmin.credentials.title": "ゲートウェイのアクセスキー",
   "settings.prometheus.integration.literAdmin.description": "ゲートウェイを選択し、プロバイダー接続と提供されるモデルのエイリアスを構成し、構成を管理し、動作を確認します。",
   "settings.prometheus.integration.literAdmin.diagnostics.chooseWorkspace": "ワークスペースを選択してください",
   "settings.prometheus.integration.literAdmin.diagnostics.description": "構成されたゲートウェイとモデル パスを実際のワークスペースから実行します。",

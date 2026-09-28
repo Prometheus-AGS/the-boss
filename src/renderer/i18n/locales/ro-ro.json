@@ -5049,6 +5049,8 @@
   "settings.prometheus.integration.literAdmin.connections.provider": "Furnizor",
   "settings.prometheus.integration.literAdmin.connections.timeout": "Solicitare timeout (ms)",
   "settings.prometheus.integration.literAdmin.connections.title": "Conexiuni cu furnizorul",
+  "settings.prometheus.integration.literAdmin.credentials.description": "Setați cheia de acces pentru gateway-ul liter-llm. The Boss o stochează în siguranță.",
+  "settings.prometheus.integration.literAdmin.credentials.title": "Cheie de acces gateway",
   "settings.prometheus.integration.literAdmin.description": "Alegeți un gateway, configurați conexiunile furnizorilor și aliasurile modelului deservit, gestionați configurația și verificați funcționarea.",
   "settings.prometheus.integration.literAdmin.diagnostics.chooseWorkspace": "Alegeți un spațiu de lucru",
   "settings.prometheus.integration.literAdmin.diagnostics.description": "Exersați gateway-ul configurat și calea modelului dintr-un spațiu de lucru real.",

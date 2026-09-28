@@ -5049,6 +5049,8 @@
   "settings.prometheus.integration.literAdmin.connections.provider": "Προμηθευτής",
   "settings.prometheus.integration.literAdmin.connections.timeout": "Λήξη χρονικού ορίου αιτήματος (ms)",
   "settings.prometheus.integration.literAdmin.connections.title": "Συνδέσεις παρόχου",
+  "settings.prometheus.integration.literAdmin.credentials.description": "Ορίστε το κλειδί πρόσβασης για την πύλη liter-llm. Το The Boss το αποθηκεύει με ασφάλεια.",
+  "settings.prometheus.integration.literAdmin.credentials.title": "Κλειδί πρόσβασης πύλης",
   "settings.prometheus.integration.literAdmin.description": "Επιλέξτε μια πύλη, διαμορφώστε τις συνδέσεις παρόχου και τα ψευδώνυμα μοντέλων που εξυπηρετούνται, διαχειριστείτε τη διαμόρφωση και επαληθεύστε τη λειτουργία.",
   "settings.prometheus.integration.literAdmin.diagnostics.chooseWorkspace": "Επιλέξτε έναν χώρο εργασίας",
   "settings.prometheus.integration.literAdmin.diagnostics.description": "Ασκήστε τη διαμορφωμένη πύλη και τη διαδρομή μοντέλου από έναν πραγματικό χώρο εργασίας.",

@@ -5049,6 +5049,8 @@
   "settings.prometheus.integration.literAdmin.connections.provider": "Поставщик",
   "settings.prometheus.integration.literAdmin.connections.timeout": "Таймаут запроса (мс)",
   "settings.prometheus.integration.literAdmin.connections.title": "Подключения к провайдеру",
+  "settings.prometheus.integration.literAdmin.credentials.description": "Укажите ключ доступа к шлюзу liter-llm. The Boss сохранит его в защищённом хранилище.",
+  "settings.prometheus.integration.literAdmin.credentials.title": "Ключ доступа к шлюзу",
   "settings.prometheus.integration.literAdmin.description": "Выберите шлюз, настройте соединения провайдера и псевдонимы обслуживаемых моделей, управляйте конфигурацией и проверяйте работу.",
   "settings.prometheus.integration.literAdmin.diagnostics.chooseWorkspace": "Выберите рабочее место",
   "settings.prometheus.integration.literAdmin.diagnostics.description": "Испытайте настроенный шлюз и путь к модели из реальной рабочей области.",

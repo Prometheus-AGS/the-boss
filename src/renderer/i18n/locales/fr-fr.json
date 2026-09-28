@@ -5049,6 +5049,8 @@
   "settings.prometheus.integration.literAdmin.connections.provider": "Fournisseur",
   "settings.prometheus.integration.literAdmin.connections.timeout": "Délai d'expiration de la demande (ms)",
   "settings.prometheus.integration.literAdmin.connections.title": "Connexions des fournisseurs",
+  "settings.prometheus.integration.literAdmin.credentials.description": "Définissez la clé d’accès à la passerelle liter-llm. The Boss la stocke de façon sécurisée.",
+  "settings.prometheus.integration.literAdmin.credentials.title": "Clé d’accès à la passerelle",
   "settings.prometheus.integration.literAdmin.description": "Choisissez une passerelle, configurez les connexions du fournisseur et les alias de modèle servis, gérez la configuration et vérifiez le fonctionnement.",
   "settings.prometheus.integration.literAdmin.diagnostics.chooseWorkspace": "Choisissez un espace de travail",
   "settings.prometheus.integration.literAdmin.diagnostics.description": "Exercez la passerelle configurée et le chemin du modèle à partir d’un espace de travail réel.",

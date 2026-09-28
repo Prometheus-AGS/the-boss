@@ -5049,6 +5049,8 @@
   "settings.prometheus.integration.literAdmin.connections.provider": "sağlayıcı",
   "settings.prometheus.integration.literAdmin.connections.timeout": "Zaman aşımı isteği (ms)",
   "settings.prometheus.integration.literAdmin.connections.title": "Sağlayıcı bağlantıları",
+  "settings.prometheus.integration.literAdmin.credentials.description": "liter-llm ağ geçidi için erişim anahtarını ayarlayın. The Boss bunu güvenli biçimde saklar.",
+  "settings.prometheus.integration.literAdmin.credentials.title": "Ağ geçidi erişim anahtarı",
   "settings.prometheus.integration.literAdmin.description": "Bir ağ geçidi seçin, sağlayıcı bağlantılarını ve sunulan model takma adlarını yapılandırın, yapılandırmayı yönetin ve işlemi doğrulayın.",
   "settings.prometheus.integration.literAdmin.diagnostics.chooseWorkspace": "Bir çalışma alanı seçin",
   "settings.prometheus.integration.literAdmin.diagnostics.description": "Yapılandırılmış ağ geçidini ve model yolunu gerçek bir çalışma alanından kullanın.",

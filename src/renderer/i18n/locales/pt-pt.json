@@ -5049,6 +5049,8 @@
   "settings.prometheus.integration.literAdmin.connections.provider": "Provedor",
   "settings.prometheus.integration.literAdmin.connections.timeout": "Tempo limite da solicitação (ms)",
   "settings.prometheus.integration.literAdmin.connections.title": "Conexões de provedor",
+  "settings.prometheus.integration.literAdmin.credentials.description": "Defina a chave de acesso do gateway liter-llm. O The Boss armazena-a com segurança.",
+  "settings.prometheus.integration.literAdmin.credentials.title": "Chave de acesso ao gateway",
   "settings.prometheus.integration.literAdmin.description": "Escolha um gateway, configure conexões de provedor e aliases de modelo servido, gerencie a configuração e verifique a operação.",
   "settings.prometheus.integration.literAdmin.diagnostics.chooseWorkspace": "Escolha um espaço de trabalho",
   "settings.prometheus.integration.literAdmin.diagnostics.description": "Exercite o gateway configurado e o caminho do modelo em um espaço de trabalho real.",

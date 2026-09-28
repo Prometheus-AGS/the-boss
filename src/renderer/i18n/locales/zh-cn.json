@@ -5049,6 +5049,8 @@
   "settings.prometheus.integration.literAdmin.connections.provider": "提供者",
   "settings.prometheus.integration.literAdmin.connections.timeout": "请求超时（毫秒）",
   "settings.prometheus.integration.literAdmin.connections.title": "提供商连接",
+  "settings.prometheus.integration.literAdmin.credentials.description": "设置 liter-llm 网关的访问密钥。The Boss 会安全地保存该密钥。",
+  "settings.prometheus.integration.literAdmin.credentials.title": "网关访问密钥",
   "settings.prometheus.integration.literAdmin.description": "选择网关、配置提供商连接和服务模型别名、管理配置并验证操作。",
   "settings.prometheus.integration.literAdmin.diagnostics.chooseWorkspace": "选择一个工作空间",
   "settings.prometheus.integration.literAdmin.diagnostics.description": "从真实的工作空间中练习配置的网关和模型路径。",

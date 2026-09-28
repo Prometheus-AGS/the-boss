@@ -5049,6 +5049,8 @@
   "settings.prometheus.integration.literAdmin.connections.provider": "提供者",
   "settings.prometheus.integration.literAdmin.connections.timeout": "請求超時（毫秒）",
   "settings.prometheus.integration.literAdmin.connections.title": "提供者連接",
+  "settings.prometheus.integration.literAdmin.credentials.description": "設定 liter-llm 閘道的存取金鑰。The Boss 會安全地儲存該金鑰。",
+  "settings.prometheus.integration.literAdmin.credentials.title": "閘道存取金鑰",
   "settings.prometheus.integration.literAdmin.description": "選擇網關、設定提供者連線和服務模型別名、管理配置並驗證操作。",
   "settings.prometheus.integration.literAdmin.diagnostics.chooseWorkspace": "選擇一個工作空間",
   "settings.prometheus.integration.literAdmin.diagnostics.description": "從真實的工作空間中練習已配置的網關和模型路徑。",

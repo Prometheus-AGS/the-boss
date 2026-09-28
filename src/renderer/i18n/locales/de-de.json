@@ -5049,6 +5049,8 @@
   "settings.prometheus.integration.literAdmin.connections.provider": "Anbieter",
   "settings.prometheus.integration.literAdmin.connections.timeout": "Anforderungszeitüberschreitung (ms)",
   "settings.prometheus.integration.literAdmin.connections.title": "Anbieterverbindungen",
+  "settings.prometheus.integration.literAdmin.credentials.description": "Legen Sie den Zugangsschlüssel für das liter-llm-Gateway fest. The Boss speichert ihn sicher.",
+  "settings.prometheus.integration.literAdmin.credentials.title": "Gateway-Zugriffsschlüssel",
   "settings.prometheus.integration.literAdmin.description": "Wählen Sie ein Gateway, konfigurieren Sie Anbieterverbindungen und bereitgestellte Modellaliase, verwalten Sie die Konfiguration und überprüfen Sie den Betrieb.",
   "settings.prometheus.integration.literAdmin.diagnostics.chooseWorkspace": "Wählen Sie einen Arbeitsbereich",
   "settings.prometheus.integration.literAdmin.diagnostics.description": "Üben Sie das konfigurierte Gateway und den Modellpfad von einem realen Arbeitsbereich aus.",

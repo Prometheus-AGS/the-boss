@@ -5049,6 +5049,8 @@
   "settings.prometheus.integration.literAdmin.connections.provider": "nhà cung cấp",
   "settings.prometheus.integration.literAdmin.connections.timeout": "Yêu cầu hết thời gian (ms)",
   "settings.prometheus.integration.literAdmin.connections.title": "Kết nối nhà cung cấp",
+  "settings.prometheus.integration.literAdmin.credentials.description": "Thiết lập khóa truy cập cho cổng liter-llm. The Boss lưu khóa an toàn.",
+  "settings.prometheus.integration.literAdmin.credentials.title": "Khóa truy cập gateway",
   "settings.prometheus.integration.literAdmin.description": "Chọn một cổng, định cấu hình các kết nối của nhà cung cấp và bí danh mô hình được cung cấp, quản lý cấu hình và xác minh hoạt động.",
   "settings.prometheus.integration.literAdmin.diagnostics.chooseWorkspace": "Chọn không gian làm việc",
   "settings.prometheus.integration.literAdmin.diagnostics.description": "Thực hiện cổng đã định cấu hình và đường dẫn mô hình từ không gian làm việc thực.",
