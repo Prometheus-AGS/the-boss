@@ -66,6 +66,8 @@ async function mainWindow(app: ElectronApplication): Promise<Page> {
 }
 
 async function launch(executablePath: string, home: string): Promise<{ app: ElectronApplication; page: Page }> {
+  const keychainHome = process.env.HOME
+  if (!keychainHome) throw new Error('The macOS Keychain home is unavailable')
   const env = {
     ...process.env,
     HOME: home,
@@ -76,7 +78,23 @@ async function launch(executablePath: string, home: string): Promise<{ app: Elec
     THE_BOSS_UAR_SIDECAR_PATH: ''
   }
   const app = await electron.launch({ executablePath, args: [], env, timeout: 60_000 })
-  return { app, page: await mainWindow(app) }
+  try {
+    await app.evaluate(async ({ safeStorage }, userHome) => {
+      const isolatedHome = process.env.HOME
+      process.env.HOME = userHome
+      try {
+        const probe = await safeStorage.encryptStringAsync('D01 macOS Keychain readiness')
+        const decrypted = await safeStorage.decryptStringAsync(probe)
+        if (decrypted.result !== 'D01 macOS Keychain readiness') throw new Error('macOS Keychain round-trip failed')
+      } finally {
+        process.env.HOME = isolatedHome
+      }
+    }, keychainHome)
+    return { app, page: await mainWindow(app) }
+  } catch (error) {
+    await closeApp(app)
+    throw error
+  }
 }
 
 async function closeApp(app: ElectronApplication): Promise<void> {
