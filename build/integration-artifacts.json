@@ -65,6 +65,14 @@
       "name": "rust-mcp-filesystem",
       "version": "0.4.5",
       "packages": {
+        "darwin-x64": {
+          "sha256": "edb0d0e76e95d86cbaf4b37ef55a85b2c70c03848cf310f32a5bc32b80b4da8f",
+          "binaries": [
+            "rust-mcp-filesystem"
+          ],
+          "archive": "none",
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/rust-mcp-filesystem-darwin-x64"
+        },
         "darwin-arm64": {
           "sha256": "8c473b7d8492967a1d043bd2d1efac9be5403d85b455928f23cb0ebd4c69f42c",
           "binaries": [
@@ -80,6 +88,14 @@
           ],
           "archive": "none",
           "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/rust-mcp-filesystem-win32-x64.exe"
+        },
+        "win32-arm64": {
+          "sha256": "7703105ca9bd841f7bf607d2d19d26fb3c310a652137cdecdab6d048c0adea9a",
+          "binaries": [
+            "rust-mcp-filesystem.exe"
+          ],
+          "archive": "none",
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/rust-mcp-filesystem-win32-arm64.exe"
         }
       }
     },
@@ -87,6 +103,14 @@
       "name": "prometheus",
       "version": "1.10.0",
       "packages": {
+        "darwin-x64": {
+          "sha256": "760fb9497701fc7d350c5f397f4090009e8c42232680d99a16793a969d0e4886",
+          "binaries": [
+            "prometheus"
+          ],
+          "archive": "none",
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/prometheus-darwin-x64"
+        },
         "darwin-arm64": {
           "sha256": "ddf4df1252e1fd97da8b1be854f901292a3517075e2af65964c44ec4779262be",
           "binaries": [
@@ -102,6 +126,14 @@
           ],
           "archive": "none",
           "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/prometheus-win32-x64.exe"
+        },
+        "win32-arm64": {
+          "sha256": "27c14ee09d44ca07dac3bf1bd574ffb3524255580e1a53ab9ce97512b2e5863f",
+          "binaries": [
+            "prometheus.exe"
+          ],
+          "archive": "none",
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/prometheus-win32-arm64.exe"
         }
       }
     },
@@ -109,6 +141,14 @@
       "name": "pk",
       "version": "1.9.0",
       "packages": {
+        "darwin-x64": {
+          "sha256": "feb531661f1b08e4466fd3bc72e7a8fae03cdbbcdb79afaf60ac4f7c928180ed",
+          "binaries": [
+            "pk"
+          ],
+          "archive": "none",
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/pk-darwin-x64"
+        },
         "darwin-arm64": {
           "sha256": "104561ba5c6c0c994405c1eb8da36a9e8ab8dff051c1140e3b06471345b93e73",
           "binaries": [
@@ -124,6 +164,14 @@
           ],
           "archive": "none",
           "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/pk-win32-x64.exe"
+        },
+        "win32-arm64": {
+          "sha256": "dc479d10f7eca5d1c2efe625fdfa86d6a641a7489d3ceab439edd5765a3d8d45",
+          "binaries": [
+            "pk.exe"
+          ],
+          "archive": "none",
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.2-uar-p1.17/pk-win32-arm64.exe"
         }
       }
     },
