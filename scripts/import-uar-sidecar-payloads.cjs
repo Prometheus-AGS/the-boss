@@ -7,7 +7,9 @@ const manifestPath = path.join(root, 'build', 'integration-artifacts.json')
 const sourcesPath = path.join(root, 'build', 'integration-sources.json')
 const requiredPlatforms = new Set(UAR_RELEASE_PLATFORM_KEYS)
 const selectedPlatforms = new Set(
-  process.env.RELEASE_PLATFORMS ? process.env.RELEASE_PLATFORMS.split(',').map((value) => value.trim()) : requiredPlatforms
+  process.env.RELEASE_PLATFORMS
+    ? process.env.RELEASE_PLATFORMS.split(',').map((value) => value.trim())
+    : requiredPlatforms
 )
 const cliRecordUrls = process.argv.slice(2)
 const recordUrls =
