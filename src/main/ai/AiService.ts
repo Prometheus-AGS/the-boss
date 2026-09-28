@@ -41,6 +41,7 @@ import { installPrometheusPack } from '@main/utils/prometheusPack'
 import type { CompactionSink } from '@shared/ai/compaction'
 import type { AiToolApprovalRespondRequest, AiToolApprovalRespondResponse } from '@shared/ai/transport'
 import { isDataApiNotFoundError } from '@shared/data/api/errors'
+import { OPENAI_CODEX_PROVIDER_ID } from '@shared/data/presets/codex'
 import type { JobSnapshot } from '@shared/data/api/schemas/jobs'
 import { type Assistant } from '@shared/data/types/assistant'
 import type { CleanupPolicy, FileEntry } from '@shared/data/types/file'
@@ -175,8 +176,21 @@ function sourceSnapshotForAssistant(assistant: Assistant | undefined): SourceSna
 function resolveTextRetryPolicy(
   configured: ReturnType<typeof readRetryPolicy>,
   requestMaxRetries: number | undefined,
-  hasApiKeyFallbacks: boolean
+  hasApiKeyFallbacks: boolean,
+  providerId: string
 ): ReturnType<typeof readRetryPolicy> {
+  // Codex's ChatGPT endpoint can return a transient 503 before streaming starts.
+  // Keep a bounded same-model retry even when generic model retry is off, as the
+  // Codex CLI does. An explicit per-request zero still disables every retry.
+  if (!configured.enabled && providerId === OPENAI_CODEX_PROVIDER_ID && requestMaxRetries !== 0) {
+    return {
+      ...configured,
+      enabled: true,
+      maxAttempts:
+        requestMaxRetries === undefined ? Math.min(configured.maxAttempts, 2) : Math.max(1, Math.trunc(requestMaxRetries)),
+      fallbackModelIds: []
+    }
+  }
   if (configured.enabled || !hasApiKeyFallbacks || requestMaxRetries === undefined || requestMaxRetries <= 0) {
     return configured
   }
@@ -665,7 +679,8 @@ export class AiService extends BaseService {
       const retryPolicy = resolveTextRetryPolicy(
         readRetryPolicy(),
         request.requestOptions?.maxRetries,
-        apiKeyFallbacks.length > 0
+        apiKeyFallbacks.length > 0,
+        provider.id
       )
       wrapModel = createRetryableWrap({
         apiKeyFallbacks,
@@ -828,7 +843,8 @@ export class AiService extends BaseService {
       const retryPolicy = resolveTextRetryPolicy(
         readRetryPolicy(),
         request.requestOptions?.maxRetries,
-        apiKeyFallbacks.length > 0
+        apiKeyFallbacks.length > 0,
+        provider.id
       )
       wrapModel = createRetryableWrap({
         apiKeyFallbacks,
