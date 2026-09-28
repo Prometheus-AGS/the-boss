@@ -23,6 +23,7 @@ export const entries: SettingsSearchEntry[] = [
     ['runtime-settings', ['configuration', 'namespace', 'drift', 'policy', 'saved value', 'effective value']],
     ['agents', ['agent catalog', 'agent definition', 'registry']],
     ['collaboration-catalog', ['collaboration catalog', 'teams', 'subagents']],
+    ['teams', ['team instances', 'team planning', 'members', 'task dependencies', 'task board']],
     [
       'durable-agent-instances',
       ['durable instance', 'deployment binding', 'activate', 'passivate', 'drain', 'restart']
