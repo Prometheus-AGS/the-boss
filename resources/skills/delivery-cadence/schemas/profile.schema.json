@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prometheusags.ai/schemas/delivery-cadence/profile-v1.json",
+  "title": "Delivery Cadence profile v1",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "name",
+    "mode",
+    "iterationMinutes",
+    "reviewEvery",
+    "publication",
+    "budgets",
+    "checkpoints",
+    "team",
+    "optimization"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "enum": [
+        "standalone",
+        "kbd",
+        "goal"
+      ]
+    },
+    "iterationMinutes": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "reviewEvery": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "publication": {
+      "type": "object",
+      "required": [
+        "mode",
+        "every"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "manual",
+            "every"
+          ]
+        },
+        "every": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "platforms": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "websiteUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "requireMetadata": {
+          "type": "boolean"
+        },
+        "acceptancePlatforms": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "required": [
+        "maxIterations",
+        "maxRunMinutes"
+      ],
+      "properties": {
+        "maxIterations": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "maxRunMinutes": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "checkpoints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/checkpoint"
+      }
+    },
+    "binding": {
+      "type": "object",
+      "properties": {
+        "phaseId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "projectRoot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "goalId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "canonicalCommand": {
+          "$ref": "#/$defs/command"
+        }
+      }
+    },
+    "team": {
+      "type": "object",
+      "required": [
+        "maxImplementers",
+        "maxBuildWriters"
+      ],
+      "properties": {
+        "maxImplementers": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxBuildWriters": {
+          "const": 1
+        }
+      }
+    },
+    "optimization": {
+      "type": "object",
+      "required": [
+        "mode",
+        "minimumSamples",
+        "bounds"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "recommend",
+            "automatic",
+            "off"
+          ]
+        },
+        "minimumSamples": {
+          "type": "integer",
+          "minimum": 3
+        },
+        "bounds": {
+          "type": "object",
+          "properties": {
+            "iterationMinutes": {
+              "$ref": "#/$defs/bounds"
+            },
+            "publicationEvery": {
+              "$ref": "#/$defs/bounds"
+            },
+            "maxImplementers": {
+              "$ref": "#/$defs/bounds"
+            }
+          }
+        }
+      }
+    },
+    "learning": {
+      "$ref": "#/$defs/command"
+    }
+  },
+  "$defs": {
+    "bounds": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      }
+    },
+    "checkpoint": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "command",
+        "args",
+        "cwd"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "build",
+            "run"
+          ]
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cwd": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required": {
+          "type": "boolean",
+          "default": true
+        },
+        "timeoutMs": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "secretEnv": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "purpose": {
+          "enum": [
+            "launch",
+            "feature"
+          ]
+        }
+      }
+    },
+    "command": {
+      "type": "object",
+      "required": [
+        "command",
+        "args",
+        "cwd"
+      ],
+      "properties": {
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cwd": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

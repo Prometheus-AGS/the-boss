@@ -57,3 +57,7 @@ target project remain authoritative.
 
 ## Shared UI and team defaults
 Bootstrap also installs the offline UI catalog, shared protocol (preserving a project override), short UI pointers in both entrypoints and recovery data. It adopts a sole or explicitly selected existing project team using creator install-project; ambiguous teams require selection. UI roles use prometheus-ui-ux, reviewers prometheus-ui-review, backend-only work no UI context. New helpers use TypeScript 7 compiled to Node .mjs.
+
+## Delivery cadence context
+
+When `.prometheus/cadence-binding.json` exists, read that small binding and carry its profile/root into the execution dispatch. Load delivery-cadence only for cadence-enabled work. Its configured build-and-run boundary, publication frequency and pending failure obligations survive compaction; do not substitute test suites or silently reset the run. No profile means no additional cadence context.

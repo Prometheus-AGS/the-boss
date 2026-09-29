@@ -1,5 +1,9 @@
 [
   {
+    "version": "2.2.8",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.8 - UAR inference and delivery recovery\n\n- [UAR] Route UAR agent model assignments through the configured liter-llm gateway without requiring a separate OpenAI Codex API key.\n- [Skills] Include the latest mini skill payload with Delivery Cadence child-phase recovery and reporting.\n- [Teams] Preserve the durable task boards and recovery controls introduced in 2.2.7.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.8 - UAR 推理与交付恢复\n\n- [UAR] 通过已配置的 liter-llm 网关路由 UAR 智能体的模型分配，无需单独配置 OpenAI Codex API 密钥。\n- [技能] 包含最新的 mini 技能包，支持 Delivery Cadence 子阶段恢复与进度报告。\n- [团队] 保留 2.2.7 引入的持久任务看板和恢复控制。\n<!--LANG:END-->"
+  },
+  {
     "version": "2.2.7",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.7 - UAR team planning and ownership\n\n- [Teams] Create durable supervisor/worker, bounded map/reduce, and peer task boards from a versioned starter team in UAR settings.\n- [Teams] Claim or reassign ready tasks with fenced ownership, assign an independent reviewer, and inspect an accepted team mailbox message.\n- [Recovery] Restore team plans, task ownership, and mailbox receipts after the UAR sidecar restarts.\n- [Safety] Team execution remains unavailable until aggregate admission and protected-effect checks are delivered.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.7 - UAR 团队规划与任务归属\n\n- [团队] 在 UAR 设置中通过版本化的初始团队创建持久的主管/工作者、受限映射归约和对等任务板。\n- [团队] 以带防护的归属版本认领或重新分配待办任务，指定独立审核员，并查看已接受的团队消息。\n- [恢复] UAR 辅助进程重启后恢复团队计划、任务归属和消息回执。\n- [安全] 在完成总量准入和受保护操作检查之前，团队执行仍不可用。\n<!--LANG:END-->\n"
   },
