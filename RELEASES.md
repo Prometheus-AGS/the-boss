@@ -5,15 +5,14 @@ Each entry records the exact source commit, artifact checksum, size, and signing
 
 <!-- releases:newest-first -->
 
-## v2.2.8 — 2026-09-29T11:30:14.647Z
+## v2.2.8 — 2026-09-29T11:33:08.134Z
 
 Profile: uar-enabled
 
 | Installer | Size | Download | SHA-256 | Signing | Source |
 |---|---|---|---|---|---|
 | `The-Boss-2.2.8-mac-arm64.dmg` | 594.2 MB | [Download](https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.8/The-Boss-2.2.8-mac-arm64.dmg) | `88350d4e7b0c72d2cd97478197ecfd1a196c0a9638196265291d7a6513933d93` | Developer ID (notarized) | [`13d037325`](https://github.com/Prometheus-AGS/the-boss/commit/13d037325624c500ddc6fde1268f3c53937bf6b2) |
-
-
+| `The-Boss-2.2.8-win-x64-setup.exe` | 444.1 MB | [Download](https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.8/The-Boss-2.2.8-win-x64-setup.exe) | `f54914d46f3d71b38d808ae41d3682b2a39ea5d5381c5c183b0900d13c4d9480` | unsigned | [`13d037325`](https://github.com/Prometheus-AGS/the-boss/commit/13d037325624c500ddc6fde1268f3c53937bf6b2) |
 
 ## v2.2.7 — 2026-09-29T00:51:17.349Z
 
