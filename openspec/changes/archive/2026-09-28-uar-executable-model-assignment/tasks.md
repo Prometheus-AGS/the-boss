@@ -11,4 +11,4 @@
 ## 3. Completed integration boundary
 
 - [x] 3.1 Run the exact Apple Silicon installer build, launch it, execute one real liter-llm-backed UAR prompt, check legacy compatible and OAuth-only repair paths, and record separate build/launch/inference receipts. Fix only observed failures and rerun only the failed boundary.
-- [ ] 3.2 Perform one cumulative artifact and adversarial review, verify/archive this OpenSpec change, reconcile KBD, commit and push the focused implementation, and hand off the next cadence publication decision with exact source/artifact revisions.
+- [x] 3.2 Perform one cumulative artifact and adversarial review, verify/archive this OpenSpec change, reconcile KBD, commit and push the focused implementation, and hand off the next cadence publication decision with exact source/artifact revisions.
