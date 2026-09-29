@@ -12,6 +12,8 @@ For The Boss: retain 120 minutes; run `pnpm build:mac:arm64` at every completed 
 
 `publication` also accepts `platforms`, `websiteUrl`, `requireMetadata`, and `acceptancePlatforms`. These define required receipts; do not add acceptance platforms without corresponding actual acceptance arrangements.
 
+Publication uses the current explicitly configured policy, including for an outstanding delivery, and records its profile revision and publication policy. Changing policy never clears publication debt by itself: the matching artifact, metadata and website receipts must still be recorded. Historical delivery profiles and build/run receipts remain frozen. If the operator separates installed acceptance from publication scheduling, retain pending acceptance in the release receipt and owning phase; removing it from the publication gate does not certify it.
+
 ## Start a usable increment
 
 ```json
