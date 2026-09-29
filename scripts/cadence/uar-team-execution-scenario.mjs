@@ -347,7 +347,18 @@ export default async function run({ evaluate, signal }) {
   )
   const outcome = completed.attempt.executionOutcome ?? completed.attempt.status
   if (outcome !== 'succeeded' || completed.attempt.output !== marker) {
-    throw new Error('The selected team model did not return the exact output contract marker')
+    const reason = completed.attempt.stateReason
+    const evidence = {
+      attemptId: completed.attempt.id,
+      runId: completed.attempt.runId,
+      status: completed.attempt.status,
+      executionOutcome: outcome,
+      reasonCode: typeof reason === 'string' && /^[a-z][a-z0-9_-]{0,127}$/.test(reason) ? reason : null,
+      reasonAvailable: Boolean(reason),
+      outputPresent: completed.attempt.output != null,
+      markerMatched: completed.attempt.output === marker
+    }
+    throw new Error('The member attempt did not satisfy the exact output contract: ' + JSON.stringify(evidence))
   }
   if (
     completed.state.attempts.length !== 1 ||
