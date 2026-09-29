@@ -5694,6 +5694,8 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.assignmentHelp": "Η ανάθεση δεν εξουσιοδοτεί εκτέλεση. Ξεκινήστε έτοιμη εργασία στην Εκτέλεση ομάδας.",
   "settings.prometheus.integration.uarAdmin.teams.execution.attempts": "Απόπειρες εκτέλεσης",
   "settings.prometheus.integration.uarAdmin.teams.execution.budgetDefaults": "Οι προεπιλογές χρησιμοποιούν τον υπόλοιπο προϋπολογισμό της ομάδας. Προσαρμόστε τις για αυτή την εργασία πριν την έναρξη.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingMismatch": "Η αρχική ρύθμιση δεν μπόρεσε να επαληθεύσει αυτήν τη σύνδεση. Ανανεώστε τη λίστα ομάδων και ελέγξτε τον χώρο εργασίας και το εγκατεστημένο πακέτο πριν δοκιμάσετε ξανά.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingUnavailable": "Αυτό το περιβάλλον εκτέλεσης δεν μπορεί να ενεργοποιήσει τη σύνδεση της αρχικής ομάδας. Ελέγξτε τη συμβατότητα και το επιλεγμένο μοντέλο και επαναλάβετε τη ρύθμιση.",
   "settings.prometheus.integration.uarAdmin.teams.execution.cancel": "Ακύρωση εκτέλεσης",
   "settings.prometheus.integration.uarAdmin.teams.execution.committed": "Πραγματική χρήση",
   "settings.prometheus.integration.uarAdmin.teams.execution.context": "Κοινό πλαίσιο",

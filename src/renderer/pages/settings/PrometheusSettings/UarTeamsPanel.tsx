@@ -103,7 +103,15 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
       }
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : String(cause)
-      setError(message.includes('UAR_TEAM_MODEL_PRICING_UNAVAILABLE') ? tr('execution.priceUnavailable') : message)
+      if (message.includes('UAR_TEAM_MODEL_PRICING_UNAVAILABLE')) setError(tr('execution.priceUnavailable'))
+      else if (message.includes('UAR_TEAM_BINDING_ACTIVATION_UNAVAILABLE')) setError(tr('execution.bindingUnavailable'))
+      else if (
+        ['UAR_TEAM_BINDING_SCOPE_MISMATCH', 'UAR_TEAM_BINDING_PACKAGE_MISMATCH', 'UAR_TEAM_BINDING_RESULT_MISMATCH'].some(
+          (code) => message.includes(code)
+        )
+      ) {
+        setError(tr('execution.bindingMismatch'))
+      } else setError(message)
     } finally {
       setBusy(undefined)
     }

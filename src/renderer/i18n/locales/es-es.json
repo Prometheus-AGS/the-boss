@@ -5694,6 +5694,8 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.assignmentHelp": "Una asignación no autoriza la ejecución. Inicia una tarea lista en Ejecución del equipo.",
   "settings.prometheus.integration.uarAdmin.teams.execution.attempts": "Intentos de ejecución",
   "settings.prometheus.integration.uarAdmin.teams.execution.budgetDefaults": "Los valores iniciales usan el presupuesto restante del equipo. Ajústalos para esta tarea antes de empezar.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingMismatch": "La configuración inicial no pudo verificar esta vinculación. Actualiza la lista de equipos y comprueba su espacio de trabajo y el paquete instalado antes de reintentarlo.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingUnavailable": "Este entorno de ejecución no puede activar la vinculación del equipo inicial. Comprueba su compatibilidad y el modelo seleccionado, y vuelve a configurarlo.",
   "settings.prometheus.integration.uarAdmin.teams.execution.cancel": "Cancelar ejecución",
   "settings.prometheus.integration.uarAdmin.teams.execution.committed": "Uso real",
   "settings.prometheus.integration.uarAdmin.teams.execution.context": "Contexto compartido",

@@ -5694,6 +5694,8 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.assignmentHelp": "分配不授予执行权限。请在团队执行中开始就绪任务。",
   "settings.prometheus.integration.uarAdmin.teams.execution.attempts": "运行尝试",
   "settings.prometheus.integration.uarAdmin.teams.execution.budgetDefaults": "默认值使用团队剩余预算。开始前请根据此任务调整。",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingMismatch": "入门设置无法验证此绑定。请刷新团队列表，检查其工作区和已安装的包，然后重试。",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingUnavailable": "此运行时无法激活入门团队绑定。请检查运行时兼容性和所选模型，然后重试设置。",
   "settings.prometheus.integration.uarAdmin.teams.execution.cancel": "取消运行",
   "settings.prometheus.integration.uarAdmin.teams.execution.committed": "实际用量",
   "settings.prometheus.integration.uarAdmin.teams.execution.context": "共享上下文",

@@ -5694,6 +5694,8 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.assignmentHelp": "Phân công không cấp quyền thực thi. Bắt đầu tác vụ sẵn sàng trong Thực thi nhóm.",
   "settings.prometheus.integration.uarAdmin.teams.execution.attempts": "Các lần thử chạy",
   "settings.prometheus.integration.uarAdmin.teams.execution.budgetDefaults": "Giá trị ban đầu dùng ngân sách còn lại của nhóm. Điều chỉnh cho tác vụ này trước khi bắt đầu.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingMismatch": "Thiết lập ban đầu không thể xác minh liên kết này. Làm mới danh sách nhóm và kiểm tra không gian làm việc cùng gói đã cài đặt trước khi thử lại.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingUnavailable": "Môi trường chạy này không thể kích hoạt liên kết của nhóm khởi đầu. Kiểm tra tính tương thích và mô hình đã chọn, rồi thử thiết lập lại.",
   "settings.prometheus.integration.uarAdmin.teams.execution.cancel": "Hủy lần chạy",
   "settings.prometheus.integration.uarAdmin.teams.execution.committed": "Mức dùng thực tế",
   "settings.prometheus.integration.uarAdmin.teams.execution.context": "Ngữ cảnh chia sẻ",

@@ -86,7 +86,7 @@ const instance = z.object({
       ordinal: z.number().int().nonnegative(),
       definition: identity,
       revision: z.number().int().nonnegative(),
-      status: z.literal('inactive')
+      status: z.enum(['inactive', 'running', 'revoked', 'stopped', 'cancelled'])
     })
   ),
   tasks: z.array(task),

@@ -5694,6 +5694,8 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.assignmentHelp": "Назначение не даёт права на выполнение. Запустите готовую задачу в разделе выполнения команды.",
   "settings.prometheus.integration.uarAdmin.teams.execution.attempts": "Попытки запуска",
   "settings.prometheus.integration.uarAdmin.teams.execution.budgetDefaults": "Начальные значения используют оставшийся бюджет команды. Измените их для этой задачи перед запуском.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingMismatch": "При начальной настройке не удалось проверить эту привязку. Обновите список команд и проверьте рабочую область и установленный пакет перед повторной попыткой.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingUnavailable": "Эта среда выполнения не может активировать привязку стартовой команды. Проверьте совместимость среды и выбранную модель, затем повторите настройку.",
   "settings.prometheus.integration.uarAdmin.teams.execution.cancel": "Отменить запуск",
   "settings.prometheus.integration.uarAdmin.teams.execution.committed": "Фактический расход",
   "settings.prometheus.integration.uarAdmin.teams.execution.context": "Общий контекст",

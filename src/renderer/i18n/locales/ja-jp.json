@@ -5694,6 +5694,8 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.assignmentHelp": "割り当ては実行権限を与えません。チーム実行で準備完了タスクを開始してください。",
   "settings.prometheus.integration.uarAdmin.teams.execution.attempts": "実行試行",
   "settings.prometheus.integration.uarAdmin.teams.execution.budgetDefaults": "初期値はチームの残り予算を使用します。開始前にこのタスクに合わせて調整してください。",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingMismatch": "初期設定でこのバインディングを確認できませんでした。チーム一覧を更新し、ワークスペースとインストール済みパッケージを確認してから再試行してください。",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingUnavailable": "このランタイムでは初期チームのバインディングを有効化できません。ランタイムの互換性と選択したモデルを確認し、設定を再試行してください。",
   "settings.prometheus.integration.uarAdmin.teams.execution.cancel": "実行をキャンセル",
   "settings.prometheus.integration.uarAdmin.teams.execution.committed": "実際の使用量",
   "settings.prometheus.integration.uarAdmin.teams.execution.context": "共有コンテキスト",

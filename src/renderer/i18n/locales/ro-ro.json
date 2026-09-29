@@ -5694,6 +5694,8 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.assignmentHelp": "O atribuire nu autorizează execuția. Porniți o sarcină pregătită în Execuția echipei.",
   "settings.prometheus.integration.uarAdmin.teams.execution.attempts": "Încercări de execuție",
   "settings.prometheus.integration.uarAdmin.teams.execution.budgetDefaults": "Valorile inițiale folosesc bugetul rămas al echipei. Ajustați-le pentru această sarcină înainte de pornire.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingMismatch": "Configurarea inițială nu a putut verifica această asociere. Actualizați lista echipelor și verificați spațiul de lucru și pachetul instalat înainte de a reîncerca.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingUnavailable": "Acest mediu de execuție nu poate activa asocierea echipei inițiale. Verificați compatibilitatea și modelul selectat, apoi repetați configurarea.",
   "settings.prometheus.integration.uarAdmin.teams.execution.cancel": "Anulează execuția",
   "settings.prometheus.integration.uarAdmin.teams.execution.committed": "Utilizare reală",
   "settings.prometheus.integration.uarAdmin.teams.execution.context": "Context partajat",

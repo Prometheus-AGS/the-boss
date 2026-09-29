@@ -5694,6 +5694,8 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.assignmentHelp": "Eine Zuweisung berechtigt nicht zur Ausführung. Eine bereite Aufgabe unter Teamausführung starten.",
   "settings.prometheus.integration.uarAdmin.teams.execution.attempts": "Laufversuche",
   "settings.prometheus.integration.uarAdmin.teams.execution.budgetDefaults": "Die Vorgaben nutzen das verbleibende Teambudget. Vor dem Start für diese Aufgabe anpassen.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingMismatch": "Die Einrichtung konnte diese Bindung nicht bestätigen. Aktualisieren Sie die Teamliste und prüfen Sie den Arbeitsbereich und das installierte Paket, bevor Sie es erneut versuchen.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingUnavailable": "Diese Laufzeit kann die Bindung des Starter-Teams nicht aktivieren. Prüfen Sie die Laufzeitkompatibilität und das ausgewählte Modell und wiederholen Sie die Einrichtung.",
   "settings.prometheus.integration.uarAdmin.teams.execution.cancel": "Lauf abbrechen",
   "settings.prometheus.integration.uarAdmin.teams.execution.committed": "Tatsächlicher Verbrauch",
   "settings.prometheus.integration.uarAdmin.teams.execution.context": "Geteilter Kontext",

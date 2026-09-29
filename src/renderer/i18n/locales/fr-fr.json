@@ -5694,6 +5694,8 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.assignmentHelp": "Une attribution n’autorise pas l’exécution. Démarrez une tâche prête dans Exécution de l’équipe.",
   "settings.prometheus.integration.uarAdmin.teams.execution.attempts": "Tentatives d’exécution",
   "settings.prometheus.integration.uarAdmin.teams.execution.budgetDefaults": "Les valeurs initiales utilisent le budget restant de l’équipe. Ajustez-les pour cette tâche avant de démarrer.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingMismatch": "La configuration initiale n’a pas pu vérifier cette liaison. Actualisez la liste des équipes et vérifiez son espace de travail et le paquet installé avant de réessayer.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingUnavailable": "Cet environnement d’exécution ne peut pas activer la liaison de l’équipe de départ. Vérifiez sa compatibilité et le modèle sélectionné, puis relancez la configuration.",
   "settings.prometheus.integration.uarAdmin.teams.execution.cancel": "Annuler l’exécution",
   "settings.prometheus.integration.uarAdmin.teams.execution.committed": "Utilisation réelle",
   "settings.prometheus.integration.uarAdmin.teams.execution.context": "Contexte partagé",

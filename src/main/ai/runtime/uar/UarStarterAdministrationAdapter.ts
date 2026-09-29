@@ -7,7 +7,7 @@ import type { UarDurableBinding } from '@shared/types/uarDurableAdministration'
 import type { UarTeamBinding, UarTeamModelSelection } from '@shared/types/uarTeams'
 
 import { capabilityState, rawBinding, scopedRequest, workspace } from './UarDurableAdministrationAdapter'
-import { starterBinding, starterPackage, starterTeamPackage } from './uarStarterDocuments'
+import { revisedStarterBinding, starterBinding, starterPackage, starterTeamPackage } from './uarStarterDocuments'
 import { configureTeamModel } from './uarTeamModelSetup'
 
 const bindingPath = '/api/v1/collaboration/deployment-bindings'
@@ -33,6 +33,7 @@ const rawCollaborationCapabilities = z.object({
 
 const rawPackage = z.object({ identity: z.object({ id: z.string(), version: z.string(), digest: z.string() }) })
 const rawPreflight = z.object({ activationSupported: z.boolean() })
+const rawStarterTeamBinding = rawBinding.extend({ document: z.record(z.string(), z.json()) })
 
 async function configuredStarterModel(generation: number): Promise<{ providerId: string; modelId: string }> {
   const sidecar = application.get('UarSidecarService')
@@ -160,7 +161,7 @@ export async function setupUarStarterAgent(workspaceId: string): Promise<UarDura
   }
 }
 
-/** Install the fixed team package and a distinct private binding for the selected model, preserving planning bindings. */
+/** Explicitly install or revalidate the fixed team binding, preserving active bindings and historical revisions. */
 export async function setupUarStarterTeam(workspaceId: string, model?: UarTeamModelSelection): Promise<UarTeamBinding> {
   const resolved = workspace(workspaceId)
   const state = await capabilityState()
@@ -221,30 +222,78 @@ export async function setupUarStarterTeam(workspaceId: string, model?: UarTeamMo
       : `urn:boss:starter:team-binding:v2:${resolved}`,
     effectiveLimits: { concurrentTurns: 1, maxMembers: 3, maxDepth: 0, maxPendingTasks: 8 }
   })
-  const existingBindings = z.array(rawBinding).parse(await scopedRequest(resolved, bindingPath, state.generation))
+  const existingBindings = z
+    .array(rawStarterTeamBinding)
+    .parse(await scopedRequest(resolved, bindingPath, state.generation))
   if (existingBindings.some((candidate) => candidate.workspaceId !== resolved)) {
     throw new Error('UAR binding workspace scope mismatch')
   }
   const existingBinding = existingBindings.find((candidate) => candidate.id === binding.id)
   if (existingBinding) {
-    if (existingBinding.package.digest !== starter.identity.digest) {
-      throw new Error('The existing starter team binding points to another package')
+    if (
+      existingBinding.package.id !== starter.identity.id ||
+      existingBinding.package.version !== starter.identity.version ||
+      existingBinding.package.digest !== starter.identity.digest
+    ) {
+      throw new Error('UAR_TEAM_BINDING_PACKAGE_MISMATCH')
     }
-    return existingBinding
+    if (existingBinding.activationSupported) return rawBinding.parse(existingBinding)
+    if (
+      existingBinding.document.id !== binding.id ||
+      existingBinding.document.ownerId !== capabilities.bindingOwnerId ||
+      existingBinding.document.workspaceId !== resolved ||
+      existingBinding.document.revision !== existingBinding.revision
+    ) {
+      throw new Error('UAR_TEAM_BINDING_SCOPE_MISMATCH')
+    }
+    const savedPackage = rawPackage.shape.identity.safeParse(existingBinding.document.package)
+    if (
+      !savedPackage.success ||
+      savedPackage.data.id !== starter.identity.id ||
+      savedPackage.data.version !== starter.identity.version ||
+      savedPackage.data.digest !== starter.identity.digest
+    ) {
+      throw new Error('UAR_TEAM_BINDING_PACKAGE_MISMATCH')
+    }
   }
-  const request = { commandId: randomUUID(), expectedRevision: 0, binding }
-  await scopedRequest(
-    resolved,
-    '/api/v1/collaboration/deployment-bindings:preflight',
-    state.generation,
-    'POST',
-    request
+  const expectedRevision = existingBinding?.revision ?? 0
+  const request = {
+    commandId: randomUUID(),
+    expectedRevision,
+    binding: existingBinding
+      ? revisedStarterBinding(existingBinding.document, expectedRevision + 1, capabilities.instance.id)
+      : binding
+  }
+  const preflight = rawPreflight.parse(
+    await scopedRequest(
+      resolved,
+      '/api/v1/collaboration/deployment-bindings:preflight',
+      state.generation,
+      'POST',
+      request
+    )
   )
+  if ((existingBinding || selectedModel) && !preflight.activationSupported) {
+    throw new Error('UAR_TEAM_BINDING_ACTIVATION_UNAVAILABLE')
+  }
   const installed = z
-    .object({ binding: rawBinding })
+    .object({ binding: rawBinding, preflight: rawPreflight })
     .parse(await scopedRequest(resolved, bindingPath, state.generation, 'POST', request))
-  if (installed.binding.workspaceId !== resolved || installed.binding.package.digest !== starter.identity.digest) {
-    throw new Error('UAR returned a starter team binding for another workspace or package')
+  if (
+    installed.binding.id !== binding.id ||
+    installed.binding.workspaceId !== resolved ||
+    installed.binding.revision !== expectedRevision + 1 ||
+    installed.binding.package.id !== starter.identity.id ||
+    installed.binding.package.version !== starter.identity.version ||
+    installed.binding.package.digest !== starter.identity.digest
+  ) {
+    throw new Error('UAR_TEAM_BINDING_RESULT_MISMATCH')
+  }
+  if (
+    (existingBinding || selectedModel) &&
+    (!installed.binding.activationSupported || !installed.preflight.activationSupported)
+  ) {
+    throw new Error('UAR_TEAM_BINDING_ACTIVATION_UNAVAILABLE')
   }
   return installed.binding
 }

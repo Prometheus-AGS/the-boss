@@ -5694,6 +5694,8 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.assignmentHelp": "An assignment does not authorize execution. Start a ready task in Team execution.",
   "settings.prometheus.integration.uarAdmin.teams.execution.attempts": "Run attempts",
   "settings.prometheus.integration.uarAdmin.teams.execution.budgetDefaults": "Defaults use the remaining team budget. Adjust for this task before starting.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingMismatch": "Starter setup could not verify this binding. Refresh the team list and check its workspace and installed package before retrying.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingUnavailable": "This runtime cannot activate the starter team binding. Check runtime compatibility and the selected model, then retry setup.",
   "settings.prometheus.integration.uarAdmin.teams.execution.cancel": "Cancel run",
   "settings.prometheus.integration.uarAdmin.teams.execution.committed": "Actual usage",
   "settings.prometheus.integration.uarAdmin.teams.execution.context": "Shared context",

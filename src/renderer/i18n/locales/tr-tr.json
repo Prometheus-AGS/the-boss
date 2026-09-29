@@ -5694,6 +5694,8 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.assignmentHelp": "Atama yürütme yetkisi vermez. Takım yürütmesinde hazır bir görevi başlatın.",
   "settings.prometheus.integration.uarAdmin.teams.execution.attempts": "Çalıştırma denemeleri",
   "settings.prometheus.integration.uarAdmin.teams.execution.budgetDefaults": "Başlangıç değerleri takımın kalan bütçesini kullanır. Başlamadan önce bu görev için ayarlayın.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingMismatch": "Başlangıç kurulumu bu bağlamayı doğrulayamadı. Yeniden denemeden önce ekip listesini yenileyin, çalışma alanını ve yüklü paketi kontrol edin.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.bindingUnavailable": "Bu çalışma zamanı başlangıç ekibi bağlamasını etkinleştiremiyor. Çalışma zamanı uyumluluğunu ve seçilen modeli kontrol edip kurulumu yeniden deneyin.",
   "settings.prometheus.integration.uarAdmin.teams.execution.cancel": "Çalıştırmayı iptal et",
   "settings.prometheus.integration.uarAdmin.teams.execution.committed": "Gerçek kullanım",
   "settings.prometheus.integration.uarAdmin.teams.execution.context": "Paylaşılan bağlam",
