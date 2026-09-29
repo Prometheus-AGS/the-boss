@@ -163,6 +163,24 @@ function readLiterCatalogBundle(): Promise<CatalogBundle> {
   return catalogBundle
 }
 
+/** Resolve only the selected gateway's explicitly configured, enabled alias target. Never infer identity from an alias name. */
+export function configuredModelForLiterAlias(
+  config: IntegrationConfig,
+  alias: string
+): { providerId: string; modelId: string } | undefined {
+  const configured = config.services.literAliases.find(
+    (entry) => entry.gatewayConnectionId === selectedGatewayId(config) && entry.alias === alias && entry.enabled
+  )
+  if (!configured) return undefined
+  const connection = config.services.literConnections.find(
+    (entry) =>
+      entry.providerConnectionId === configured.target.providerConnectionId &&
+      entry.providerId === configured.target.providerId &&
+      entry.enabled
+  )
+  return connection ? { providerId: configured.target.providerId, modelId: configured.target.modelId } : undefined
+}
+
 /** Return a catalog window only when the selected alias has an exact configured
  * target or every exact-name catalog match agrees on the same limit. */
 export async function contextWindowForLiterAlias(

@@ -23,6 +23,14 @@ export {
   sendUarTeamMailboxMessage,
   updateUarTeamTaskState
 } from './UarTeamsAdministrationAdapter'
+export {
+  admitUarTeamTask,
+  cancelUarTeamAttempt,
+  readUarTeamArtifacts,
+  readUarTeamExecution,
+  recoverUarTeamExecution,
+  revokeUarTeamMember
+} from './UarTeamExecutionAdapter'
 export { setupUarStarterAgent, setupUarStarterTeam } from './UarStarterAdministrationAdapter'
 export {
   deleteUarProvider,

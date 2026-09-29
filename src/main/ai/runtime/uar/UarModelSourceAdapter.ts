@@ -22,6 +22,7 @@ export const providerResponseSchema = z.object({
       models: z.array(
         z.object({
           id: z.string(),
+          pricing_identity: z.object({ provider_id: z.string(), model_id: z.string() }).nullish(),
           display_name: z.string().nullable().optional(),
           context_window: z.number().nullable().optional(),
           supports_vision: z.boolean(),

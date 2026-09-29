@@ -14,9 +14,11 @@ import {
 } from '@cherrystudio/ui'
 import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/components/SettingsPrimitives'
 import { ipcApi } from '@renderer/ipc'
-import type { UarTeamsSnapshot } from '@shared/types/uarTeams'
+import type { UarTeamModelSelection, UarTeamsSnapshot } from '@shared/types/uarTeams'
 
+import { UarTeamExecutionPanel } from './UarTeamExecutionPanel'
 import { UarTeamMailbox } from './UarTeamMailbox'
+import { UarTeamModelPicker } from './UarTeamModelPicker'
 import { UarTeamTaskBoard } from './UarTeamTaskBoard'
 import { UarTeamTaskForm } from './UarTeamTaskForm'
 
@@ -36,24 +38,32 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
   const [selectedInstanceId, setSelectedInstanceId] = useState<string>()
   const [memberCounts, setMemberCounts] = useState<Record<string, number>>({})
   const [teamInput, setTeamInput] = useState('{}')
+  const [teamModel, setTeamModel] = useState<UarTeamModelSelection>()
   const createIntent = useRef<{ fingerprint: string; commandId: string } | undefined>(undefined)
 
-  const refresh = useCallback(async () => {
-    setLoading(true)
-    setError(undefined)
-    try {
-      const next = await ipcApi.request('prometheus.uar.teams.snapshot', { workspaceId })
-      setSnapshot(next)
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
-    } finally {
-      setLoading(false)
-    }
-  }, [workspaceId])
+  const refresh = useCallback(
+    async (quiet = false) => {
+      if (!quiet) {
+        setLoading(true)
+        setError(undefined)
+      }
+      try {
+        const next = await ipcApi.request('prometheus.uar.teams.snapshot', { workspaceId })
+        setSnapshot(next)
+      } catch (cause) {
+        setError(cause instanceof Error ? cause.message : String(cause))
+      } finally {
+        if (!quiet) setLoading(false)
+      }
+    },
+    [workspaceId]
+  )
 
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  const refreshQuietly = useCallback(() => refresh(true), [refresh])
 
   const selectedDefinition = snapshot?.definitions.find(
     (definition) => definitionKey(definition) === selectedDefinitionKey
@@ -73,7 +83,10 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
     setError(undefined)
     setStatus(undefined)
     try {
-      const binding = await ipcApi.request('prometheus.uar.teams.setup_starter', { workspaceId })
+      const binding = await ipcApi.request('prometheus.uar.teams.setup_starter', {
+        workspaceId,
+        ...(teamModel ? { model: teamModel } : {})
+      })
       setStatus(tr('starterReady'))
       const next = await ipcApi.request('prometheus.uar.teams.snapshot', { workspaceId })
       setSnapshot(next)
@@ -89,7 +102,8 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
         setMemberCounts(Object.fromEntries(installed.members.map((member) => [member.role, member.min])))
       }
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
+      const message = cause instanceof Error ? cause.message : String(cause)
+      setError(message.includes('UAR_TEAM_MODEL_PRICING_UNAVAILABLE') ? tr('execution.priceUnavailable') : message)
     } finally {
       setBusy(undefined)
     }
@@ -225,6 +239,7 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                 {snapshot.definitions.length === 0 && (
                   <p className="mt-2 text-sm text-muted-foreground">{tr('noDefinitions')}</p>
                 )}
+                <UarTeamModelPicker value={teamModel} disabled={Boolean(busy)} onChange={setTeamModel} />
                 <Button
                   className="mt-3"
                   variant="outline"
@@ -379,6 +394,13 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                 instance={selectedInstance}
                 ownership={snapshot.capabilities.ownership}
                 onChanged={refresh}
+              />
+              <UarTeamExecutionPanel
+                key={selectedInstance.id + ':execution'}
+                workspaceId={workspaceId}
+                instance={selectedInstance}
+                available={snapshot.capabilities.execution}
+                onChanged={refreshQuietly}
               />
               <UarTeamMailbox
                 key={selectedInstance.id}

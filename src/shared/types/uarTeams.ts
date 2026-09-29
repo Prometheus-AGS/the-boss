@@ -8,6 +8,7 @@ export interface UarTeamDefinition extends UarTeamIdentity {
   title: string
   purpose: string
   package: UarTeamIdentity
+  budget?: UarTeamBudget
   members: Array<{
     role: string
     kind: 'agent' | 'team'
@@ -31,9 +32,9 @@ export interface UarTeamTask {
   role: string
   input: unknown
   outputContract: unknown
-  output: null
+  output: unknown | null
   dependsOn: string[]
-  status: 'queued' | 'ready' | 'succeeded' | 'failed' | 'cancelled'
+  status: 'queued' | 'ready' | 'running' | 'blocked' | 'succeeded' | 'failed' | 'cancelled'
   revision: number
   assigneeMemberId: string | null
   ownershipEpoch: number
@@ -59,7 +60,7 @@ export interface UarTeamInstance {
   ownerId: string
   workspaceId: string
   revision: number
-  status: 'inactive'
+  status: 'inactive' | 'running' | 'revoked' | 'stopped' | 'cancelled'
   definition: UarTeamIdentity
   package: UarTeamIdentity
   binding: { id: string; revision: number }
@@ -70,7 +71,7 @@ export interface UarTeamInstance {
     ordinal: number
     definition: UarTeamIdentity
     revision: number
-    status: 'inactive'
+    status: 'inactive' | 'running' | 'revoked' | 'stopped' | 'cancelled'
   }>
   tasks: UarTeamTask[]
   createdAt: string
@@ -81,7 +82,7 @@ export interface UarTeamsSnapshot {
   schemaVersion: 1
   workspaceId: string
   generation: number
-  capabilities: { planning: boolean; ownership: boolean; mailbox: boolean }
+  capabilities: { planning: boolean; ownership: boolean; mailbox: boolean; execution: boolean }
   unavailableReason?: string
   definitions: UarTeamDefinition[]
   bindings: UarTeamBinding[]
@@ -155,4 +156,84 @@ export interface UarTeamMailboxSendInput {
   recipientMemberId: string
   mode: 'queue-only' | 'trigger-turn'
   content: string
+}
+
+export interface UarTeamBudget {
+  maxTokens: number
+  maxCostMicrounits: number
+  currency: string
+  maxElapsedSeconds: number
+}
+
+export interface UarTeamReservation {
+  tokens: number
+  costMicrounits: number
+  elapsedSeconds: number
+}
+
+export interface UarTeamExecutionAttempt {
+  id: string
+  runId: string
+  ownerId: string
+  workspaceId: string
+  teamId: string
+  taskId: string
+  memberId: string
+  memberRevision: number
+  ownershipEpoch: number
+  bindingRevision: number
+  executionEpoch: number
+  status: 'queued' | 'running' | 'cancellation_requested' | 'uncertain' | 'succeeded' | 'failed' | 'cancelled'
+  executionOutcome?: 'succeeded' | 'failed' | 'cancelled' | 'uncertain' | null
+  reservation: UarTeamReservation
+  contextArtifactIds: string[]
+  usage: UarTeamReservation | null
+  usageRevision: number
+  output: unknown | null
+  stateReason: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface UarTeamArtifact {
+  id: string
+  ownerId: string
+  workspaceId: string
+  teamId: string
+  taskId: string
+  memberId: string
+  attemptId: string
+  content: unknown
+  createdAt: string
+}
+
+export interface UarTeamExecutionSummary {
+  attempts: UarTeamExecutionAttempt[]
+  committed: UarTeamReservation
+  reserved: UarTeamReservation
+  uncertainAttempts: string[]
+  budget: UarTeamBudget
+  limits: { concurrentTurns: number; maxMembers: number; maxDepth: number; maxPendingTasks: number }
+}
+
+export interface UarTeamExecutionSelector {
+  workspaceId: string
+  teamInstanceId: string
+}
+
+export interface UarAdmitTeamTaskInput extends UarTeamTaskCommandInput {
+  reservation: UarTeamReservation
+  contextArtifactIds: string[]
+}
+
+export interface UarTeamControlInput extends UarTeamExecutionSelector {
+  commandId: string
+  expectedTeamRevision: number
+  reason: string
+}
+
+export interface UarTeamModelSelection {
+  source: 'uar' | 'gateway'
+  providerId: string
+  modelId: string
 }

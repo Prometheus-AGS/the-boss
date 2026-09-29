@@ -80,6 +80,9 @@ import {
   type UarInstanceInventorySnapshot
 } from '@shared/types/uarServiceInstance'
 import type {
+  UarTeamArtifact,
+  UarTeamExecutionAttempt,
+  UarTeamExecutionSummary,
   UarTeamBinding,
   UarTeamInstance,
   UarTeamMailboxMessage,
@@ -105,6 +108,18 @@ const teamTaskCommandSchema = z
     memberId: z.string().min(1).max(256)
   })
   .strict()
+
+const teamExecutionSelectorSchema = z
+  .object({
+    workspaceId: z.string().min(1).max(256),
+    teamInstanceId: z.string().min(1).max(256)
+  })
+  .strict()
+const teamControlSchema = teamExecutionSelectorSchema.extend({
+  commandId: z.uuid(),
+  expectedTeamRevision: z.number().int().nonnegative(),
+  reason: z.string().min(1).max(512)
+})
 
 /**
  * The Prometheus settings section's commands.
@@ -294,7 +309,19 @@ export const prometheusRequestSchemas = {
     output: z.custom<UarTeamsSnapshot>()
   }),
   'prometheus.uar.teams.setup_starter': defineRoute({
-    input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        model: z
+          .object({
+            source: z.enum(['uar', 'gateway']),
+            providerId: z.string().min(1).max(128),
+            modelId: z.string().min(1).max(256)
+          })
+          .strict()
+          .optional()
+      })
+      .strict(),
     output: z.custom<UarTeamBinding>()
   }),
   'prometheus.uar.teams.create': defineRoute({
@@ -348,6 +375,39 @@ export const prometheusRequestSchemas = {
       status: z.literal('ready'),
       reason: z.string().min(1).max(512)
     }),
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.execution': defineRoute({
+    input: teamExecutionSelectorSchema,
+    output: z.custom<UarTeamExecutionSummary>()
+  }),
+  'prometheus.uar.teams.artifacts': defineRoute({
+    input: teamExecutionSelectorSchema,
+    output: z.custom<{ artifacts: UarTeamArtifact[] }>()
+  }),
+  'prometheus.uar.teams.admit_task': defineRoute({
+    input: teamTaskCommandSchema.extend({
+      reservation: z
+        .object({
+          tokens: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+          costMicrounits: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+          elapsedSeconds: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER)
+        })
+        .strict(),
+      contextArtifactIds: z.array(z.string().min(1).max(256)).max(128)
+    }),
+    output: z.custom<UarTeamExecutionAttempt>()
+  }),
+  'prometheus.uar.teams.cancel_attempt': defineRoute({
+    input: teamControlSchema.extend({ attemptId: z.string().min(1).max(256) }),
+    output: z.custom<UarTeamExecutionAttempt>()
+  }),
+  'prometheus.uar.teams.recover': defineRoute({
+    input: teamControlSchema,
+    output: z.custom<UarTeamExecutionAttempt[]>()
+  }),
+  'prometheus.uar.teams.revoke_member': defineRoute({
+    input: teamControlSchema.extend({ memberId: z.string().min(1).max(256) }),
     output: z.custom<UarTeamInstance>()
   }),
   'prometheus.uar.teams.mailbox_list': defineRoute({

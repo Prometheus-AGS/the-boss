@@ -25,7 +25,7 @@ export function UarTeamTaskBoard({ workspaceId, instance, ownership, onChanged }
     <SettingGroup>
       <SettingTitle>{tr('taskBoardTitle')}</SettingTitle>
       <SettingDescription>{tr('taskBoardDescription')}</SettingDescription>
-      <p className="mt-2 text-xs text-muted-foreground">{tr('planningOnly')}</p>
+      <p className="mt-2 text-xs text-muted-foreground">{tr('execution.assignmentHelp')}</p>
       {!ownership && (
         <p className="mt-2 text-xs text-muted-foreground" role="status">
           {tr('ownershipUnavailable')}

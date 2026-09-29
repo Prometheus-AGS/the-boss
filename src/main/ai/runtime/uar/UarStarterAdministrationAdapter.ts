@@ -1,13 +1,14 @@
-import { randomUUID } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 
 import * as z from 'zod'
 
 import { application } from '@application'
 import type { UarDurableBinding } from '@shared/types/uarDurableAdministration'
-import type { UarTeamBinding } from '@shared/types/uarTeams'
+import type { UarTeamBinding, UarTeamModelSelection } from '@shared/types/uarTeams'
 
 import { capabilityState, rawBinding, scopedRequest, workspace } from './UarDurableAdministrationAdapter'
 import { starterBinding, starterPackage, starterTeamPackage } from './uarStarterDocuments'
+import { configureTeamModel } from './uarTeamModelSetup'
 
 const bindingPath = '/api/v1/collaboration/deployment-bindings'
 
@@ -159,8 +160,8 @@ export async function setupUarStarterAgent(workspaceId: string): Promise<UarDura
   }
 }
 
-/** Install The Boss's fixed planning team and its private workspace binding. Execution is not enabled by this setup. */
-export async function setupUarStarterTeam(workspaceId: string): Promise<UarTeamBinding> {
+/** Install the fixed team package and a distinct private binding for the selected model, preserving planning bindings. */
+export async function setupUarStarterTeam(workspaceId: string, model?: UarTeamModelSelection): Promise<UarTeamBinding> {
   const resolved = workspace(workspaceId)
   const state = await capabilityState()
   const required = [
@@ -178,6 +179,13 @@ export async function setupUarStarterTeam(workspaceId: string): Promise<UarTeamB
   const capabilities = rawCollaborationCapabilities.parse(
     await scopedRequest(resolved, '/api/v1/collaboration/capabilities', state.generation)
   )
+  const selectedModel = model ? await configureTeamModel(model, state.generation) : undefined
+  const modelKey = selectedModel
+    ? createHash('sha256')
+        .update(selectedModel.providerId + '\0' + selectedModel.modelId)
+        .digest('hex')
+        .slice(0, 16)
+    : undefined
   const starter = starterTeamPackage()
   const packages = z
     .array(rawPackage)
@@ -207,7 +215,10 @@ export async function setupUarStarterTeam(workspaceId: string): Promise<UarTeamB
     runtimeInstanceId: capabilities.instance.id,
     storageBackend: endpoint.storage.profile.backend,
     packageIdentity: starter.identity,
-    bindingId: `urn:boss:starter:team-binding:v2:${resolved}`,
+    ...(selectedModel ?? {}),
+    bindingId: modelKey
+      ? `urn:boss:starter:team-binding:v3:${resolved}:${modelKey}`
+      : `urn:boss:starter:team-binding:v2:${resolved}`,
     effectiveLimits: { concurrentTurns: 1, maxMembers: 3, maxDepth: 0, maxPendingTasks: 8 }
   })
   const existingBindings = z.array(rawBinding).parse(await scopedRequest(resolved, bindingPath, state.generation))
