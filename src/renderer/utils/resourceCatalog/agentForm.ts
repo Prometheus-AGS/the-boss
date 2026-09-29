@@ -2,7 +2,7 @@ import type { AgentDetail } from '@renderer/types/resourceCatalog'
 import { type AgentLanguageMode, normalizeAgentLanguageInput } from '@renderer/utils/agent/agentLanguage'
 import { normalizePermissionMode } from '@renderer/utils/agent/permissionMode'
 import { clampHeartbeatIntervalMinutes, isHeartbeatEnabled } from '@shared/ai/agentHeartbeat'
-import type { AgentSkillUpdateDto, UpdateAgentDto } from '@shared/data/api/schemas/agents'
+import type { AgentSkillUpdateDto, UarModelAssignment, UpdateAgentDto } from '@shared/data/api/schemas/agents'
 import type { AgentConfiguration } from '@shared/data/types/agent'
 import type { UniqueModelId } from '@shared/data/types/model'
 
@@ -23,6 +23,7 @@ export interface AgentFormState {
   description: string
   /** `''` is the explicit "no model selected yet" draft sentinel; once chosen it is always a valid UniqueModelId. */
   model: UniqueModelId | ''
+  uarModelAssignment?: UarModelAssignment
   planModel: UniqueModelId | ''
   smallModel: UniqueModelId | ''
   instructions: string
@@ -96,6 +97,7 @@ export function buildInitialAgentFormState(agent?: AgentDetail | null, skillIds:
     name: agent?.name ?? '',
     description: agent?.description ?? '',
     model: agent?.model ?? '',
+    uarModelAssignment: cfg.uar_model_assignment,
     planModel: agent?.planModel ?? '',
     smallModel: agent?.smallModel ?? '',
     instructions: agent?.instructions ?? '',
@@ -205,6 +207,12 @@ export function diffAgentUpdate(baseline: AgentFormState, next: AgentFormState):
   if (baseline.envVarsText !== next.envVarsText) {
     cfgPatch.env_vars = envVarsFromText(next.envVarsText)
     cfgDirty = true
+  }
+  if (JSON.stringify(baseline.uarModelAssignment) !== JSON.stringify(next.uarModelAssignment)) {
+    if (next.uarModelAssignment) {
+      cfgPatch.uar_model_assignment = next.uarModelAssignment
+      cfgDirty = true
+    }
   }
   if (baseline.heartbeatEnabled !== next.heartbeatEnabled) {
     cfgPatch.heartbeat_enabled = next.heartbeatEnabled

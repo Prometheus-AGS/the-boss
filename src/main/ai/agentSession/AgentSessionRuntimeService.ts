@@ -13,6 +13,7 @@ import { loggerService } from '@logger'
 import { AgentSessionForkOperations } from '@main/ai/agentSession/fork'
 import type { NotifyChannel } from '@main/ai/runtime/agentMcpServers'
 import type { RuntimeForkAnchor } from '@main/ai/runtime/fork'
+import { modelSnapshotForUarAssignment } from '@main/ai/runtime/uar'
 import { resolveKnowledgeBaseScope } from '@main/ai/utils/knowledgeScope'
 import { serializeError } from '@main/ai/utils/serializeError'
 import { createAiUsageCaptureContext } from '@main/ai/utils/usageCapture'
@@ -2831,7 +2832,17 @@ export class AgentSessionRuntimeService extends BaseService {
     // actually runs — otherwise a mid-queue model switch leaves `messageSnapshot.model` disagreeing with the
     // row's `modelId`, and the header/exports (which prefer the snapshot model) would show the wrong model.
     const frozenSnapshot = pendingTurn.messageSnapshot ?? entry.messageSnapshot
-    const messageSnapshot = reconcileSnapshotModel(frozenSnapshot, entry.modelId, liveAgent.modelName)
+    const bossSnapshot = reconcileSnapshotModel(frozenSnapshot, entry.modelId, liveAgent.modelName)
+    const messageSnapshot =
+      liveAgent.type === 'uar' &&
+      liveAgent.configuration?.uar_catalog_link?.authority !== 'catalog' &&
+      liveAgent.configuration?.uar_model_assignment &&
+      bossSnapshot
+        ? {
+            ...bossSnapshot,
+            model: modelSnapshotForUarAssignment(liveAgent.configuration.uar_model_assignment, bossSnapshot.model)
+          }
+        : bossSnapshot
     let assistantMessage: Awaited<ReturnType<typeof agentSessionMessageService.saveMessage>>
     try {
       assistantMessage = agentSessionMessageService.saveMessage({

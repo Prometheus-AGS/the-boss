@@ -3,11 +3,14 @@ import * as z from 'zod'
 import { application } from '@application'
 import { modelService } from '@data/services/ModelService'
 import { providerService } from '@data/services/ProviderService'
+import { resolveEffectiveEndpoint } from '@main/ai/provider/endpoint'
 import { readIntegrationConfig, readSecrets } from '@main/services/prometheus/integrationConfig'
+import { ENDPOINT_TYPE, type Model } from '@shared/data/types/model'
+import type { Provider } from '@shared/data/types/provider'
 import type { UarModelSourceSnapshot, UarProviderMutation } from '@shared/types/prometheusIntegration'
 import { getRawModelId } from '@shared/utils/model'
 
-const providerResponseSchema = z.object({
+export const providerResponseSchema = z.object({
   default_id: z.string().nullable().optional(),
   providers: z.array(
     z.object({
@@ -35,7 +38,19 @@ const providerResponseSchema = z.object({
     })
   )
 })
-const gatewayResponseSchema = z.object({ data: z.array(z.object({ id: z.string().min(1) })).default([]) })
+export const gatewayResponseSchema = z.object({ data: z.array(z.object({ id: z.string().min(1) })).default([]) })
+
+function isExecutableBossModel(provider: Provider, model: Model): boolean {
+  if (!model.isEnabled) return false
+  const endpoint = resolveEffectiveEndpoint(provider, model)
+  return (
+    Boolean(endpoint.baseUrl) &&
+    (endpoint.endpointType === ENDPOINT_TYPE.ANTHROPIC_MESSAGES ||
+      endpoint.endpointType === ENDPOINT_TYPE.OPENAI_CHAT_COMPLETIONS ||
+      endpoint.endpointType === ENDPOINT_TYPE.OPENAI_RESPONSES ||
+      endpoint.endpointType === ENDPOINT_TYPE.OLLAMA_CHAT)
+  )
+}
 
 function gatewayModelsEndpoint(endpoint: string): string {
   const url = new URL(endpoint)
@@ -92,14 +107,16 @@ export async function readUarModelSources(): Promise<UarModelSourceSnapshot> {
         providers: bossProviders.map((provider) => ({
           id: provider.id,
           name: provider.name ?? provider.id,
-          credentialConfigured: provider.apiKeys.length > 0 || Boolean(provider.authOptional),
-          enabled: provider.isEnabled,
+          credentialConfigured:
+            provider.authType === 'api-key' &&
+            (provider.apiKeys.some((key) => key.isEnabled) || Boolean(provider.authOptional)),
+          enabled: provider.isEnabled && provider.authType === 'api-key',
           models: bossModels
             .filter((model) => model.providerId === provider.id)
             .map((model) => ({
               id: model.id,
               name: model.name ?? model.id,
-              enabled: model.isEnabled,
+              enabled: isExecutableBossModel(provider, model),
               effectiveIdentity: `${provider.id}/${getRawModelId(model)}`
             }))
         }))

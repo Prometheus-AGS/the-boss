@@ -64,6 +64,7 @@ export {
   toggleUarSkill
 } from './UarCatalogAdministrationAdapter'
 export { UarRuntimeDriver } from './UarRuntimeDriver'
+export { modelSnapshotForUarAssignment } from './uarModelAssignments'
 export { UarSidecarService, type UarSidecarEndpoint } from './UarSidecarService'
 export { readAppliedUarStorage } from './uarStorageProfile'
 export {

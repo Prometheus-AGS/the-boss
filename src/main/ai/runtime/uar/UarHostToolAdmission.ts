@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto'
 import type { ServerResponse } from 'node:http'
 
 import type { UarAuthorityDecision, UarAuthorityEffect, UarAuthorityProvider } from './UarAuthorityProvider'
+import { sanitizeUarProviderToolName } from './uarToolNames'
 
 export const UAR_TOOL_ADMISSION_VERSION = 1
 export const UAR_TOOL_ADMISSION_PATH = '/uar/admission/v1'
@@ -157,7 +158,7 @@ export class UarHostToolAdmission {
     const record = typeof admissionId === 'string' ? this.records.get(admissionId) : undefined
     if (!record || typeof invocationId !== 'string') return { call, error: 'Managed tool admission is unknown' }
     const invocation = record.invocation
-    const providerName = sanitizeToolName(`${serverName}__${name}`)
+    const providerName = sanitizeUarProviderToolName(`${serverName}__${name}`)
     const matches =
       meta.version === UAR_TOOL_ADMISSION_VERSION &&
       meta.runtimeEpoch === invocation.runtimeEpoch &&
@@ -716,10 +717,6 @@ function canonicalize(value: unknown): unknown {
       .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
       .map(([key, entry]) => [key, canonicalize(entry)])
   )
-}
-
-function sanitizeToolName(name: string): string {
-  return name.replace(/[^A-Za-z0-9_-]/g, '_')
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
