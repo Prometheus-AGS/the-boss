@@ -51,6 +51,7 @@ function getDefaultValues(kind: ResourceCreateWizardKind, initialName = ''): Res
     agentType: 'claude-code',
     permissionMode: AGENT_RUNTIME_CAPABILITIES['claude-code'].createDefaults.permissionMode,
     modelId: null,
+    uarModelAssignment: undefined,
     prompt: '',
     knowledgeBaseIds: [],
     skillIds: []
@@ -81,10 +82,14 @@ function WizardFooter({
   onCreate: () => void
 }) {
   const { t } = useTranslation()
-  const [name, modelId] = useWatch({ control: form.control, name: ['name', 'modelId'] })
+  const [name, modelId, agentType, uarModelAssignment] = useWatch({
+    control: form.control,
+    name: ['name', 'modelId', 'agentType', 'uarModelAssignment']
+  })
   const submitting = isSubmitting || form.formState.isSubmitting
   const rootError = form.formState.errors.root?.message
-  const basicValid = (name?.trim().length ?? 0) > 0 && Boolean(modelId)
+  const basicValid =
+    (name?.trim().length ?? 0) > 0 && Boolean(modelId) && (agentType !== 'uar' || Boolean(uarModelAssignment))
   const canProceed = stepIndex !== 0 || basicValid
 
   return (
@@ -232,8 +237,8 @@ export function ResourceCreateWizard({
 
   const goNext = () => {
     if (stepIndex === 0) {
-      const { name, modelId } = form.getValues()
-      if (!(name.trim().length > 0 && modelId)) return
+      const { name, modelId, agentType: selectedRuntime, uarModelAssignment } = form.getValues()
+      if (!(name.trim().length > 0 && modelId && (selectedRuntime !== 'uar' || uarModelAssignment))) return
     }
     setStepIndex((index) => Math.min(index + 1, steps.length - 1))
   }
@@ -271,7 +276,7 @@ export function ResourceCreateWizard({
   }, [open, runPendingCloseAction])
 
   const handleCreate = form.handleSubmit(async (values) => {
-    if (!values.modelId) return
+    if (!values.modelId || (kind === 'agent' && values.agentType === 'uar' && !values.uarModelAssignment)) return
     form.clearErrors('root')
     try {
       await onSubmit({
@@ -280,6 +285,9 @@ export function ResourceCreateWizard({
         permissionMode: values.permissionMode,
         name: values.name.trim(),
         modelId: values.modelId,
+        ...(values.agentType === 'uar' && values.uarModelAssignment
+          ? { uarModelAssignment: values.uarModelAssignment }
+          : {}),
         description: values.description.trim(),
         prompt: values.prompt.trim(),
         knowledgeBaseIds: values.knowledgeBaseIds,

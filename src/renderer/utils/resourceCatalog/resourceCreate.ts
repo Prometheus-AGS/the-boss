@@ -32,7 +32,10 @@ export function buildCreateAgentCommand(values: ResourceCreateValues): CreateAge
     ...(caps.skills ? { skillIds: values.skillIds } : {}),
     configuration: {
       avatar: values.avatar,
-      permission_mode: permissionMode
+      permission_mode: permissionMode,
+      ...(values.agentType === 'uar' && values.uarModelAssignment
+        ? { uar_model_assignment: values.uarModelAssignment }
+        : {})
     }
   }
 }

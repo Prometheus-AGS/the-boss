@@ -1,5 +1,5 @@
 import { Bot, ChevronDown, CircleSlash, Folder, Sparkles, TriangleAlert, X } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button, NormalTooltip, Tooltip } from '@cherrystudio/ui'
@@ -8,12 +8,14 @@ import { ModelSelector, type ModelSelectorFilter } from '@renderer/components/Mo
 import { OpenTargetButton } from '@renderer/components/OpenTarget'
 import { type ResourceEditDialogTarget } from '@renderer/components/resourceCatalog/dialogs/edit'
 import { AgentSelector, WorkspaceSelector } from '@renderer/components/resourceCatalog/selectors'
-import { useProviderDisplayName } from '@renderer/hooks/useProvider'
+import { useProviderById, useProviderDisplayName } from '@renderer/hooks/useProvider'
+import { ipcApi } from '@renderer/ipc'
 import { getProviderDisplayNameById } from '@renderer/utils/naming'
 import { cn } from '@renderer/utils/style'
 import type { AgentWorkspaceEntity } from '@shared/data/api/schemas/agentWorkspaces'
 import type { AgentEntity } from '@shared/data/types/agent'
 import type { Model } from '@shared/data/types/model'
+import { parseUniqueModelId } from '@shared/data/types/model'
 
 import {
   COMPOSER_BELOW_SELECTOR_BUTTON_CLASS,
@@ -150,6 +152,7 @@ function AgentControl({
 }
 
 function ModelControl({
+  agent,
   model,
   selectModelLabel,
   canChangeModel,
@@ -160,6 +163,7 @@ function ModelControl({
   isModelDisabled
 }: Pick<
   AgentConversationControlsProps,
+  | 'agent'
   | 'model'
   | 'selectModelLabel'
   | 'canChangeModel'
@@ -169,15 +173,58 @@ function ModelControl({
   | 'modelFilter'
   | 'isModelDisabled'
 >) {
+  const { t } = useTranslation()
+  const catalogId =
+    agent?.type === 'uar' && agent.configuration?.uar_catalog_link?.authority === 'catalog'
+      ? agent.configuration.uar_catalog_link.agentId
+      : undefined
+  const [catalogModel, setCatalogModel] = useState<string>()
+  useEffect(() => {
+    if (!catalogId) return
+    let active = true
+    void ipcApi
+      .request('prometheus.uar.catalog.read', {})
+      .then((catalog) => {
+        if (!active) return
+        const selected = catalog.agents.find((item) => item.id === catalogId)
+        setCatalogModel(selected ? `${selected.model} | ${selected.provider}` : undefined)
+      })
+      .catch(() => {
+        if (active) setCatalogModel(undefined)
+      })
+    return () => {
+      active = false
+    }
+  }, [catalogId])
   const baseTriggerClassName = side === 'bottom' ? COMPOSER_BELOW_SELECTOR_BUTTON_CLASS : COMPOSER_SELECTOR_BUTTON_CLASS
   const triggerClassName = cn(baseTriggerClassName, iconOnly && model && COMPOSER_ICON_ONLY_SELECTOR_BUTTON_CLASS)
   const labelClassName = cn('truncate', iconOnly && model && COMPOSER_ICON_ONLY_LABEL_CLASS)
   const loadedProviderName = useProviderDisplayName(model?.providerId)
+  const { provider: activeProvider } = useProviderById(agent?.type === 'uar' ? model?.providerId : undefined)
   const providerName = model ? loadedProviderName || getProviderDisplayNameById(model.providerId) : undefined
-  const modelLabel = model ? `${model.name} | ${providerName}` : selectModelLabel
+  const assignment = agent?.type === 'uar' ? agent.configuration?.uar_model_assignment : undefined
+  const uarModelLabel = catalogId
+    ? (catalogModel ?? t('agent.uar.model.catalog'))
+    : assignment?.source === 'gateway'
+      ? `${assignment.modelId} | liter-llm`
+      : assignment?.source === 'uar'
+        ? `${assignment.modelId} | ${assignment.providerId}`
+        : assignment?.source === 'boss' && assignment.modelId
+          ? (() => {
+              const selected = parseUniqueModelId(assignment.modelId)
+              return `${selected.modelId} | ${selected.providerId}`
+            })()
+          : agent?.type === 'uar' &&
+              activeProvider &&
+              (activeProvider.authType !== 'api-key' ||
+                (!activeProvider.authOptional && !activeProvider.apiKeys.some((key) => key.isEnabled)))
+            ? t('agent.uar.model.configure')
+            : undefined
+  const modelLabel = uarModelLabel ?? (model ? `${model.name} | ${providerName}` : selectModelLabel)
+  const modelCanChange = canChangeModel && agent?.type !== 'uar'
   const trigger = (
-    <Button variant="ghost" size="sm" className={triggerClassName} disabled={!canChangeModel}>
-      {model ? (
+    <Button variant="ghost" size="sm" className={triggerClassName} disabled={!modelCanChange}>
+      {model && agent?.type !== 'uar' ? (
         <ModelAvatar model={model} size={20} className="shrink-0" />
       ) : (
         <Sparkles size={20} aria-hidden className="text-muted-foreground" />
@@ -186,14 +233,17 @@ function ModelControl({
         title={modelLabel}
         className={cn(
           'max-w-40 text-xs',
-          canChangeModel ? (model ? 'text-foreground' : 'text-muted-foreground') : undefined,
+          modelCanChange ? (model ? 'text-foreground' : 'text-muted-foreground') : undefined,
           labelClassName
         )}>
         {modelLabel}
       </span>
-      <ChevronDown size={14} aria-hidden className={cn('text-muted-foreground', iconOnly && model && 'hidden')} />
+      {modelCanChange ? (
+        <ChevronDown size={14} aria-hidden className={cn('text-muted-foreground', iconOnly && model && 'hidden')} />
+      ) : null}
     </Button>
   )
+  if (agent?.type === 'uar') return trigger
   return (
     <ModelSelector
       multiple={false}
@@ -202,7 +252,7 @@ function ModelControl({
       onSelect={onModelSelect}
       filter={modelFilter}
       isModelDisabled={isModelDisabled}
-      shortcut={canChangeModel ? 'chat.model.select' : undefined}
+      shortcut={modelCanChange ? 'chat.model.select' : undefined}
       side={side}
       align="start"
       mountStrategy="lazy-keep"

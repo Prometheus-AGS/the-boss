@@ -26,6 +26,7 @@ import type { ModelSelectorFilter } from '@renderer/components/ModelSelector'
 import { PermissionModeSelect } from '@renderer/components/PermissionModeOption'
 import PromptEditorField from '@renderer/components/PromptEditorField'
 import { AgentLanguageField } from '@renderer/components/resourceCatalog/dialogs/components/AgentLanguageField'
+import { UarModelAssignmentField } from '@renderer/components/resourceCatalog/dialogs/components/UarModelAssignmentField'
 import { SkillCatalogPicker } from '@renderer/components/resourceCatalog/dialogs/skill'
 import { useAgentMutationsById } from '@renderer/hooks/resourceCatalog'
 import { useCloseBeforeAction } from '@renderer/hooks/useCloseBeforeAction'
@@ -54,7 +55,7 @@ import {
   type ClaudeToolCategory
 } from '@shared/ai/claudecode/toolRegistry'
 import { AGENT_PROMPT } from '@shared/ai/prompts'
-import type { UpdateAgentDto } from '@shared/data/api/schemas/agents'
+import type { UarModelAssignment, UpdateAgentDto } from '@shared/data/api/schemas/agents'
 import type { AgentType } from '@shared/data/types/agent'
 import type { UniqueModelId } from '@shared/data/types/model'
 import type { InstalledSkill } from '@shared/types/skill'
@@ -92,6 +93,7 @@ type AgentEditFormValues = {
   name: string
   description: string
   modelId: UniqueModelId | null
+  uarModelAssignment?: UarModelAssignment
   planModelId: UniqueModelId | ''
   smallModelId: UniqueModelId | ''
   instructions: string
@@ -149,6 +151,7 @@ function defaultValuesForAgent(resource: AgentDetail): AgentEditFormValues {
     name: form.name,
     description: form.description,
     modelId: form.model || null,
+    uarModelAssignment: form.uarModelAssignment,
     planModelId: form.planModel,
     smallModelId: form.smallModel,
     instructions: form.instructions,
@@ -181,6 +184,7 @@ function buildAgentFormState(baseline: AgentFormState, values: AgentEditFormValu
     name: values.name,
     description: values.description,
     model: values.modelId ?? '',
+    uarModelAssignment: values.uarModelAssignment,
     planModel: values.planModelId || '',
     smallModel: values.smallModelId || '',
     instructions: values.instructions,
@@ -231,6 +235,7 @@ function advanceAgentFormBaseline(
       next.languageMode = submitted.languageMode
       next.languageCustom = submitted.languageCustom
     }
+    if (hasOwn(configuration, 'uar_model_assignment')) next.uarModelAssignment = submitted.uarModelAssignment
   }
 
   return next
@@ -238,6 +243,7 @@ function advanceAgentFormBaseline(
 
 function syncAgentFormState(form: UseFormReturn<AgentEditFormValues>, next: AgentFormState) {
   form.setValue('modelId', next.model || null, { shouldDirty: true })
+  form.setValue('uarModelAssignment', next.uarModelAssignment, { shouldDirty: true })
   form.setValue('planModelId', next.planModel, { shouldDirty: true })
   form.setValue('smallModelId', next.smallModel, { shouldDirty: true })
   form.setValue('mcps', next.mcps, { shouldDirty: true })
@@ -549,6 +555,12 @@ function AgentEditDialogContent({
             caps={caps}
             agentType={resource.type}
             agentId={resource.id}
+            catalogAgentId={
+              resource.configuration?.uar_catalog_link?.authority === 'catalog'
+                ? resource.configuration.uar_catalog_link.agentId
+                : undefined
+            }
+            legacyModelName={modelLabels.modelId ?? resource.modelName ?? resource.model ?? ''}
             beforeHeartbeatOpen={async () => {
               await flush()
               return failedSaveKeyRef.current === null
@@ -605,6 +617,8 @@ function AgentBasicFields({
   caps,
   agentType,
   agentId,
+  catalogAgentId,
+  legacyModelName,
   beforeHeartbeatOpen
 }: {
   form: UseFormReturn<AgentEditFormValues>
@@ -620,6 +634,8 @@ function AgentBasicFields({
   caps: AgentRuntimeCapabilities
   agentType: AgentType
   agentId: string
+  catalogAgentId?: string
+  legacyModelName: string
   beforeHeartbeatOpen: () => Promise<boolean>
 }) {
   const { t } = useTranslation()
@@ -642,21 +658,52 @@ function AgentBasicFields({
         layout="row"
       />
       <RuntimeField agentType={agentType} />
-      <CompactModelField
-        form={form}
-        name="modelId"
-        includeAgentOnlyModels
-        label={t('library.config.agent.field.model.label')}
-        filter={modelFilter}
-        isModelDisabled={isModelDisabled}
-        portalContainer={portalContainer}
-        modelLabels={modelLabels}
-        setModelLabels={setModelLabels}
-        onModelChange={(modelId) => patchAgentForm({ model: modelId ?? '' })}
-        onSettingsNavigate={onSettingsNavigate}
-        layout="row"
-        triggerClassName="h-9 rounded-md border border-input bg-transparent px-3 hover:bg-accent/50"
-      />
+      {agentType === 'uar' && catalogAgentId ? (
+        <div className="flex min-w-0 items-center justify-between gap-3 py-3 text-sm">
+          <span className="font-medium">{t('library.config.agent.uar_model.boss_catalog_label')}</span>
+          <span className="min-w-0 truncate text-muted-foreground" title={legacyModelName}>
+            {legacyModelName}
+          </span>
+        </div>
+      ) : (
+        <CompactModelField
+          form={form}
+          name="modelId"
+          includeAgentOnlyModels
+          label={
+            agentType === 'uar'
+              ? t('library.config.agent.uar_model.boss_catalog_label')
+              : t('library.config.agent.field.model.label')
+          }
+          filter={modelFilter}
+          isModelDisabled={isModelDisabled}
+          portalContainer={portalContainer}
+          modelLabels={modelLabels}
+          setModelLabels={setModelLabels}
+          onModelChange={(modelId) => patchAgentForm({ model: modelId ?? '' })}
+          onSettingsNavigate={onSettingsNavigate}
+          layout="row"
+          triggerClassName="h-9 rounded-md border border-input bg-transparent px-3 hover:bg-accent/50"
+        />
+      )}
+      {agentType === 'uar' ? (
+        <div className="min-w-0">
+          {!catalogAgentId ? (
+            <p className="pt-2 text-xs text-muted-foreground">
+              {t('library.config.agent.uar_model.boss_catalog_help')}
+            </p>
+          ) : null}
+          <UarModelAssignmentField
+            value={form.watch('uarModelAssignment')}
+            onChange={(assignment) => form.setValue('uarModelAssignment', assignment, { shouldDirty: true })}
+            portalContainer={portalContainer}
+            catalogAgentId={catalogAgentId}
+            legacyModelId={form.watch('modelId') ?? undefined}
+            legacyModelName={legacyModelName}
+            onSettingsNavigate={onSettingsNavigate}
+          />
+        </div>
+      ) : null}
       {caps.modelTiers ? (
         <>
           <CompactModelField

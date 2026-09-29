@@ -41,7 +41,11 @@ import { createUarAuthorityProvider } from './UarAuthorityProvider'
 import { buildUarHostHistory, type UarHistoryMessage } from './uarHostHistory'
 import { createUarHostMcpBridge, type UarHostMcpBridge } from './UarHostMcpBridge'
 import { resolveUarHostToolDisposition } from './uarHostToolPolicy'
-import { resolveUarModelAssignment, type ResolvedUarModelAssignment } from './uarModelAssignments'
+import {
+  assertUarModelAvailable,
+  resolveUarModelAssignment,
+  type ResolvedUarModelAssignment
+} from './uarModelAssignments'
 import { uarPrincipalForSession } from './uarPrincipal'
 import { decodeUarSessionPlacement, encodeUarSessionPlacement } from './uarSessionPlacement'
 import type { UarSidecarEndpoint } from './UarSidecarService'
@@ -138,9 +142,10 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
     this.endpoint = await application.get('UarSidecarService').resolveInstance(placement.instanceId)
     const agent = agentService.getAgent(this.input.agentId)
     if (!agent) throw new Error(`UAR agent ${this.input.agentId} is unavailable`)
-    this._usageCapture = (
-      await resolveUarModelAssignment(agent.configuration?.uar_model_assignment, this.input.modelId)
-    ).usageCapture
+    this._usageCapture =
+      agent.configuration?.uar_catalog_link?.authority === 'catalog'
+        ? undefined
+        : (await resolveUarModelAssignment(agent.configuration?.uar_model_assignment, this.input.modelId)).usageCapture
     this.initialSignature = await this.signature()
     return this
   }
@@ -221,12 +226,15 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
       this.resolveSkillIds(agent.id)
     ])
     try {
-      const desiredAssignment = await resolveUarModelAssignment(
-        storedAgent.configuration?.uar_model_assignment,
-        this.input.modelId
-      )
+      const desiredAssignment =
+        storedAgent.configuration?.uar_catalog_link?.authority === 'catalog'
+          ? undefined
+          : await resolveUarModelAssignment(storedAgent.configuration?.uar_model_assignment, this.input.modelId)
       const catalog = await this.ensureCatalogAgent(storedAgent, desiredAssignment, skillIds)
-      const assignment = this.resolveCatalogAssignment(catalog, desiredAssignment)
+      const assignment = desiredAssignment
+        ? this.resolveCatalogAssignment(catalog, desiredAssignment)
+        : this.catalogOwnedAssignment(catalog)
+      await assertUarModelAvailable(assignment, sidecar)
       this._usageCapture = assignment.usageCapture
       const placementIntent = this.reattaching ? 'reattach' : 'new'
       const body = {
@@ -479,12 +487,11 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
 
   private async ensureCatalogAgent(
     agent: NonNullable<ReturnType<typeof agentService.getAgent>>,
-    assignment: ResolvedUarModelAssignment,
+    assignment: ResolvedUarModelAssignment | undefined,
     skillIds: readonly string[]
   ): Promise<UarAgentArtifact> {
     const linked = agent.configuration?.uar_catalog_link
     const catalogId = linked?.agentId ?? `the-boss:${agent.id}`
-    const desired = this.catalogCandidate(agent, catalogId, assignment, skillIds)
     let current = await this.fetchCatalogAgent(catalogId)
 
     if (linked?.authority === 'catalog') {
@@ -498,6 +505,9 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
       }
       return current
     }
+
+    if (!assignment) throw new Error(`UAR model assignment is required for The Boss agent "${agent.id}"`)
+    const desired = this.catalogCandidate(agent, catalogId, assignment, skillIds)
 
     if (!current) {
       current = await this.createCatalogAgent(desired.artifact)
@@ -654,6 +664,19 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
   ): ResolvedUarModelAssignment {
     const selection = artifact.policy.provider.default
     if (selection.provider === desired.providerId && selection.model === desired.modelId) return desired
+    return {
+      source: 'uar',
+      providerId: selection.provider,
+      modelId: selection.model,
+      providerName: selection.provider,
+      modelName: selection.model,
+      effectiveIdentity: `${selection.provider}/${selection.model}`,
+      connectedInstance: 'Universal Agent Runtime'
+    }
+  }
+
+  private catalogOwnedAssignment(artifact: UarAgentArtifact): ResolvedUarModelAssignment {
+    const selection = artifact.policy.provider.default
     return {
       source: 'uar',
       providerId: selection.provider,
