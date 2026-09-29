@@ -115,11 +115,11 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, onChan
     }
   }
 
-  const counters = summary
-    ? ([
+  const counters: ReadonlyArray<readonly ['reserved' | 'committed', UarTeamExecutionSummary['reserved']]> = summary
+    ? [
         ['reserved', summary.reserved],
         ['committed', summary.committed]
-      ] as const)
+      ]
     : []
 
   return (
@@ -173,7 +173,9 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, onChan
           <dl className="grid gap-3 sm:grid-cols-2">
             {counters.map(([label, usage]) => (
               <div key={label} className="rounded-lg border border-border p-3">
-                <dt className="text-sm font-medium">{tr('execution.' + label)}</dt>
+                <dt className="text-sm font-medium">
+                  {label === 'reserved' ? tr('execution.reserved') : tr('execution.committed')}
+                </dt>
                 <dd className="mt-1 text-xs text-muted-foreground">
                   {tr('execution.usage', { ...usage })} · {summary.budget.currency}
                 </dd>
