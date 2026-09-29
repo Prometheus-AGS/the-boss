@@ -29,7 +29,10 @@
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "d3d768636b46bd7b7cea29fba4987aa1754f8352"
+      "revision": "d3d768636b46bd7b7cea29fba4987aa1754f8352",
+      "platformRevisions": {
+        "darwin-x64": "94545d52e6d574b88f8b7cdc91276b4b4b6b8c97"
+      }
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
@@ -358,6 +361,28 @@
             "uar-models/tokenizer_config.json",
             "uar-models/tokenizer.json",
             "uar-sidecar.exe",
+            "payload-manifest.json"
+          ]
+        },
+        "darwin-x64": {
+          "source": "94545d52e6d574b88f8b7cdc91276b4b4b6b8c97",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.0.0-p1.23/uar-sidecar-darwin-x64.tar.gz",
+          "sha256": "a2c04ecbbb34d673df4e039442cc6a5efef842af9123958f33a0c324464d0c15",
+          "archive": "tar.gz",
+          "binaries": [
+            "libcrc_fast-83ccf4684c30d646.dylib",
+            "libsevenz_rust2-1192d4db71fe5529.dylib",
+            "LICENSE",
+            "policies/default.cedar",
+            "policies/skill-mutation.cedar",
+            "policies/tool-approval.cedar",
+            "uar-models/bg-small-en-v1.5.onnx",
+            "uar-models/config.json",
+            "uar-models/MODEL-NOTICE.txt",
+            "uar-models/special_tokens_map.json",
+            "uar-models/tokenizer_config.json",
+            "uar-models/tokenizer.json",
+            "uar-sidecar",
             "payload-manifest.json"
           ]
         }
