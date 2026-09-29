@@ -1,0 +1,1100 @@
+{
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "runId",
+    "startedAt",
+    "profile",
+    "profileRevision",
+    "eventsSeq",
+    "iterations",
+    "activeIterationId",
+    "commandResults",
+    "publications",
+    "finalizedAttempts",
+    "successfulDeliveries",
+    "reviewDue",
+    "publicationDue",
+    "nextPublicationDelivery"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prometheusags.ai/schemas/delivery-cadence/state-v2.json",
+  "title": "Delivery Cadence state v2 (legacy iterations preserved)",
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "profile": {
+      "$ref": "https://prometheusags.ai/schemas/delivery-cadence/profile-v1.json"
+    },
+    "profileRevision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "eventsSeq": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "activeIterationId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "commandResults": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "commandSignatures": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    },
+    "iterations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/iteration"
+      }
+    },
+    "publications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "iterationId",
+          "outcome",
+          "recordedAt",
+          "artifacts"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "commandId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "iterationId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "outcome": {
+            "enum": [
+              "success",
+              "failed",
+              "cancelled"
+            ]
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "artifacts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/artifact"
+            }
+          },
+          "receipt": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sourceRefs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/source"
+                }
+              },
+              "artifacts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "sha256",
+                    "size",
+                    "url",
+                    "platform"
+                  ],
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "sha256": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "size": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "url": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "platform": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "signingStatus": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "kind": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "startedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "finishedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "verifiedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              },
+              "startedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "finishedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "hookBlocked": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "finalizedAttempts": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "successfulDeliveries": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reviewDue": {
+      "type": "boolean"
+    },
+    "publicationDue": {
+      "type": "boolean"
+    },
+    "nextPublicationDelivery": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "historicalChildren": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "phaseId",
+          "evidence",
+          "recordedAt",
+          "countedAsDelivery",
+          "countedCompletions"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "phaseId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "$ref": "#/$defs/evidence"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timing": {
+            "const": "unknown"
+          },
+          "countedAsDelivery": {
+            "const": false
+          },
+          "countedCompletions": {
+            "const": false
+          },
+          "sourceRefs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "repository",
+                "revision",
+                "fingerprint"
+              ],
+              "properties": {
+                "repository": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "revision": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "fingerprint": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "migration": {
+      "type": "object",
+      "required": [
+        "from",
+        "to",
+        "backup",
+        "previousSeq",
+        "at"
+      ],
+      "properties": {
+        "from": {
+          "const": 1
+        },
+        "to": {
+          "const": 2
+        },
+        "backup": {
+          "type": "string",
+          "minLength": 1
+        },
+        "previousSeq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "required": [
+        "repository",
+        "revision",
+        "fingerprint"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "required": [
+        "path",
+        "sha256",
+        "size"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "platform": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signingStatus": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "tasks",
+        "changes",
+        "phases",
+        "outcomes"
+      ],
+      "properties": {
+        "tasks": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "changes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "phases": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "outcomes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "deliveryClass": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owners": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "owns": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "inputs": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "outputs": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "span": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "startedAt"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "planning",
+            "implementation",
+            "build",
+            "run",
+            "feature-operation",
+            "rework",
+            "coordination",
+            "resource-wait",
+            "publication",
+            "human-wait",
+            "hook"
+          ]
+        },
+        "actor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "childId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "canonicalRevision": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      }
+    },
+    "completion": {
+      "type": "object",
+      "required": [
+        "tasks",
+        "changes",
+        "phases"
+      ],
+      "properties": {
+        "tasks": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "changes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "phases": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "completionEvent": {
+      "type": "object",
+      "required": [
+        "kind",
+        "id",
+        "action",
+        "occurredAt"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "tasks",
+            "changes",
+            "phases"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "action": {
+          "enum": [
+            "complete",
+            "reopen"
+          ]
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "childId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "checkpoint": {
+      "type": "object",
+      "required": [
+        "id",
+        "attemptId",
+        "kind",
+        "status",
+        "startedAt"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attemptId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commandId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "build",
+            "run"
+          ]
+        },
+        "purpose": {
+          "enum": [
+            "build",
+            "launch",
+            "feature"
+          ]
+        },
+        "featureOperationId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": [
+            "running",
+            "success",
+            "failed",
+            "cancelled",
+            "unknown",
+            "timeout"
+          ]
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source"
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/artifact"
+          }
+        },
+        "invalidatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "invalidatedReason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pid": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hostname": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "child": {
+      "type": "object",
+      "required": [
+        "id",
+        "phaseId",
+        "parentPhaseId",
+        "enteredAt",
+        "status",
+        "scope",
+        "completion"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "phaseId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parentPhaseId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parentChildId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "enteredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "returnedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "enum": [
+            "needs-context",
+            "active",
+            "blocked",
+            "returned",
+            "waived"
+          ]
+        },
+        "outcome": {
+          "enum": [
+            null,
+            "success",
+            "failed",
+            "cancelled",
+            "waived"
+          ]
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "completion": {
+          "$ref": "#/$defs/completion"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1
+        },
+        "returnCriteria": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "requiresApproval": {
+          "type": "boolean"
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source"
+          }
+        },
+        "evidence": {
+          "$ref": "#/$defs/evidence"
+        },
+        "timingProvenance": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approvalEvidence": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "approved": {
+              "type": "boolean"
+            },
+            "reference": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "featureOperation": {
+      "type": "object",
+      "required": [
+        "id",
+        "outcome",
+        "procedure",
+        "checkpointId"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome": {
+          "type": "string",
+          "minLength": 1
+        },
+        "procedure": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checkpointId": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "iteration": {
+      "type": "object",
+      "required": [
+        "id",
+        "index",
+        "status",
+        "startedAt",
+        "profile",
+        "scope",
+        "sourceRefs",
+        "checkpoints",
+        "spans",
+        "completion"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "enum": [
+            "implementing",
+            "ready",
+            "checkpoint-running",
+            "checkpoint-failed",
+            "hooks-pending",
+            "finished"
+          ]
+        },
+        "contractVersion": {
+          "enum": [
+            1,
+            2
+          ]
+        },
+        "phaseId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "profile": {
+          "$ref": "https://prometheusags.ai/schemas/delivery-cadence/profile-v1.json"
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source"
+          }
+        },
+        "baselineRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source"
+          }
+        },
+        "checkpoints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/checkpoint"
+          }
+        },
+        "spans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/span"
+          }
+        },
+        "activities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/span"
+          }
+        },
+        "completion": {
+          "$ref": "#/$defs/completion"
+        },
+        "completionEvents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/completionEvent"
+          }
+        },
+        "featureOperation": {
+          "$ref": "#/$defs/featureOperation"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/child"
+          }
+        },
+        "childStack": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "scopeRevisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "reason",
+              "authority",
+              "before",
+              "after"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "childId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "authority": {
+                "type": "string",
+                "minLength": 1
+              },
+              "at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "before": {
+                "$ref": "#/$defs/scope"
+              },
+              "after": {
+                "$ref": "#/$defs/scope"
+              }
+            }
+          }
+        },
+        "childReconciliation": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "blocked": {
+              "type": "boolean"
+            },
+            "reason": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "canonicalPhaseId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "workOutcome": {
+          "enum": [
+            "success",
+            "failed",
+            "cancelled"
+          ]
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/artifact"
+          }
+        },
+        "learningReceipt": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            },
+            "reportPath": {
+              "type": "string"
+            },
+            "receiptPath": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "status",
+            "reportPath"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "contractVersion": {
+                "const": 2
+              }
+            },
+            "required": [
+              "contractVersion"
+            ]
+          },
+          "then": {
+            "required": [
+              "phaseId",
+              "featureOperation",
+              "children",
+              "childStack",
+              "completionEvents"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

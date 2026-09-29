@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prometheusags.ai/schemas/delivery-cadence/event-v1.json",
+  "title": "Delivery Cadence public hook event v1",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "id",
+    "type",
+    "runId",
+    "iterationId",
+    "iterationIndex",
+    "outcome",
+    "occurredAt",
+    "sourceRefs",
+    "scope",
+    "completion",
+    "artifacts",
+    "metrics"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "type": "string"
+    },
+    "type": {
+      "enum": [
+        "iteration:after",
+        "publication:after"
+      ]
+    },
+    "runId": {
+      "type": "string"
+    },
+    "iterationId": {
+      "type": "string"
+    },
+    "iterationIndex": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "outcome": {
+      "enum": [
+        "success",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sourceRefs": {
+      "type": "array",
+      "items": {
+        "$ref": "state.schema.json#/$defs/source"
+      }
+    },
+    "scope": {
+      "$ref": "state.schema.json#/$defs/scope"
+    },
+    "completion": {
+      "$ref": "state.schema.json#/$defs/completion"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "state.schema.json#/$defs/artifact"
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "elapsedMs"
+      ],
+      "properties": {
+        "elapsedMs": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    }
+  },
+  "$defs": {
+    "ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "description": "Compatible v1 public hook envelope. Child events do not finalize deliveries. State/report contracts are v2."
+}
