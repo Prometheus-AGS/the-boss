@@ -20,14 +20,11 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "f38a98a6ed064f9e5b8b9837e8b91781af570d22"
+      "revision": "f07d8bbf33de9f57775b45a409afcd8a512e2fdc"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "d3d768636b46bd7b7cea29fba4987aa1754f8352",
-      "platformRevisions": {
-        "darwin-x64": "94545d52e6d574b88f8b7cdc91276b4b4b6b8c97"
-      }
+      "revision": "853490db3a9862312c6013b28c13557ba31bd1c6"
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",

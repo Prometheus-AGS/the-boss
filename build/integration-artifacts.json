@@ -25,14 +25,11 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "f38a98a6ed064f9e5b8b9837e8b91781af570d22"
+      "revision": "f07d8bbf33de9f57775b45a409afcd8a512e2fdc"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "d3d768636b46bd7b7cea29fba4987aa1754f8352",
-      "platformRevisions": {
-        "darwin-x64": "94545d52e6d574b88f8b7cdc91276b4b4b6b8c97"
-      }
+      "revision": "853490db3a9862312c6013b28c13557ba31bd1c6"
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
@@ -299,9 +296,9 @@
       "version": "1.0.0",
       "packages": {
         "win32-x64": {
-          "source": "d3d768636b46bd7b7cea29fba4987aa1754f8352",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-p1.22/uar-sidecar-win32-x64.tar.gz",
-          "sha256": "b725e8cf4f3fdc9be2fce0142120df4ef74d0c060fed62c2e89b0ea5a42c2737",
+          "source": "853490db3a9862312c6013b28c13557ba31bd1c6",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-p1.24/uar-sidecar-win32-x64.tar.gz",
+          "sha256": "23a9ad1fc2b208bc8ad3909117edf3f806b1a196bd2c4f6360d696996c07255a",
           "archive": "tar.gz",
           "binaries": [
             "crc_fast-c45996daf34d96b5.dll",
@@ -321,9 +318,9 @@
           ]
         },
         "darwin-arm64": {
-          "source": "d3d768636b46bd7b7cea29fba4987aa1754f8352",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-p1.22/uar-sidecar-darwin-arm64.tar.gz",
-          "sha256": "3d8f9e760ae341fd3a3801e8f1559e75f19c38c03cf628501cbe51dff5d89d48",
+          "source": "853490db3a9862312c6013b28c13557ba31bd1c6",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-p1.24/uar-sidecar-darwin-arm64.tar.gz",
+          "sha256": "6a8dc4d1a6f5dbe9e9df8089142766c8f7d2a0aa33d20fc255048a4b0b7cbede",
           "archive": "tar.gz",
           "binaries": [
             "libcrc_fast-c9544bfaf069c5bc.dylib",
@@ -343,9 +340,9 @@
           ]
         },
         "win32-arm64": {
-          "source": "ba7233875f8df3b2add68fc487d364428432c07d",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-arm64-v1.0.0-p1.19/uar-sidecar-win32-arm64.tar.gz",
-          "sha256": "5456db09f0c990ddb43fcbc26f7daaeffae54ead0005e15e1b145c875bd68110",
+          "source": "853490db3a9862312c6013b28c13557ba31bd1c6",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-arm64-v1.0.0-p1.24/uar-sidecar-win32-arm64.tar.gz",
+          "sha256": "6105a86a9e21e76beb4c79cb19a7d28108b6614cc468d879eced79afb3992c3a",
           "archive": "tar.gz",
           "binaries": [
             "crc_fast-ec816f13e81631da.dll",
@@ -361,28 +358,6 @@
             "uar-models/tokenizer_config.json",
             "uar-models/tokenizer.json",
             "uar-sidecar.exe",
-            "payload-manifest.json"
-          ]
-        },
-        "darwin-x64": {
-          "source": "94545d52e6d574b88f8b7cdc91276b4b4b6b8c97",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.0.0-p1.23/uar-sidecar-darwin-x64.tar.gz",
-          "sha256": "a2c04ecbbb34d673df4e039442cc6a5efef842af9123958f33a0c324464d0c15",
-          "archive": "tar.gz",
-          "binaries": [
-            "libcrc_fast-83ccf4684c30d646.dylib",
-            "libsevenz_rust2-1192d4db71fe5529.dylib",
-            "LICENSE",
-            "policies/default.cedar",
-            "policies/skill-mutation.cedar",
-            "policies/tool-approval.cedar",
-            "uar-models/bg-small-en-v1.5.onnx",
-            "uar-models/config.json",
-            "uar-models/MODEL-NOTICE.txt",
-            "uar-models/special_tokens_map.json",
-            "uar-models/tokenizer_config.json",
-            "uar-models/tokenizer.json",
-            "uar-sidecar",
             "payload-manifest.json"
           ]
         }
