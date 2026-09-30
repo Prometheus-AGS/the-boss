@@ -143,18 +143,18 @@ export async function readUarTeamExecution(input: UarTeamExecutionSelector): Pro
 
 export async function readUarTeamArtifacts(input: UarTeamExecutionSelector): Promise<{ artifacts: UarTeamArtifact[] }> {
   const state = await executionTarget(input)
-  const page = z
-    .object({ artifacts: z.array(artifact) })
+  const artifacts = z
+    .array(artifact)
     .parse(await scopedRequest(state.workspaceId, state.path + '/artifacts', state.generation))
   if (
-    page.artifacts.some(
+    artifacts.some(
       (item) =>
         item.ownerId !== state.team.ownerId || item.workspaceId !== state.workspaceId || item.teamId !== state.team.id
     )
   ) {
     throw new Error('UAR team artifact scope mismatch')
   }
-  return page
+  return { artifacts }
 }
 
 export async function admitUarTeamTask(input: UarAdmitTeamTaskInput): Promise<UarTeamExecutionAttempt> {
