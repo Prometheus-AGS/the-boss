@@ -72,8 +72,8 @@ export async function launchBoss(args) {
   const executable = path.join(app, 'Contents', 'MacOS', 'The Boss');
   const executableStat = fs.statSync(executable);
   if (!executableStat.isFile()) throw new Error('The Boss executable is missing.');
-  const timeoutMs = Number(args['timeout-ms'] ?? 60_000);
-  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error('--timeout-ms must be positive.');
+  const timeoutMs = Number(args['timeout-ms'] ?? process.env.BOSS_CADENCE_LAUNCH_TIMEOUT_MS ?? 60_000);
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error('Launch timeout must be positive.');
   const scenario = args.scenario ? fs.realpathSync(path.resolve(args.scenario)) : null;
   if (scenario && path.extname(scenario) !== '.mjs') throw new Error('Scenario must be a trusted .mjs file.');
   const scenarioDigest = scenario ? createHash('sha256').update(fs.readFileSync(scenario)).digest('hex') : null;

@@ -43,6 +43,10 @@ Before emitting changes, detect the change management backend:
 If any of these exist, emit changes as OpenSpec structures. Otherwise, use
 native KBD change files.
 
+When the KBD runtime is authoritative, register each change's tasks with the
+backend task ID (the ordinal that `kbd-apply list <change>` prints), so
+`/kbd-apply` transitions the same records instead of mapping or refusing.
+
 ```
 OpenSpec detected?
   YES → emit /opsx:new <change-id> commands
@@ -93,7 +97,7 @@ Use the canonical phase name from the argument or `current-waypoint.json`. Emit 
    findings → carry into the stage handoff summary. Vet **before** emitting
    change structures, so a corrected plan never leaves stale changes behind.
 8. **Emit change structures** via OpenSpec or native KBD
-9. **Refresh waypoint** files (`current-waypoint.md` and `current-waypoint.json`)
+9. **Record plan state** through typed KBD stage/change/task commands; the runtime regenerates progress and waypoint projections
 
 ## Examples
 
@@ -141,6 +145,8 @@ stageHandoffWrite(
 );
 ```
 
-Phases without a `handoffs/` directory are legacy: `stageGate` warns and still
-passes. A deliberate stage skip is recorded with
+A missing `handoffs/` directory does not bypass required predecessors.
+A missing required handoff fails with remediation: complete the predecessor
+stage, or record an explicit skip with its reason under project policy.
+A deliberate stage skip is recorded with
 `stageHandoffSkip('plan', '<reason>', { cwd })`.

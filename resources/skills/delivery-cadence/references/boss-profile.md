@@ -19,8 +19,10 @@ page target, and uses CDP to observe a complete, nonempty rendered UI. It closes
 its owned application process tree after recording the receipt. `--keep-open`
 retains the launched instance and reports its PID for manual inspection.
 
-Options include `--timeout-ms 60000` and `--receipt <absolute-path.json>`. The default
-receipt is written under the repository's `.prometheus/cadence/receipts/`. The isolated
+Options include `--timeout-ms 60000` and `--receipt <absolute-path.json>`. Set
+`BOSS_CADENCE_LAUNCH_TIMEOUT_MS` for a checkpoint-level default; an explicit
+`--timeout-ms` takes precedence. Without either, the launcher allows 60 seconds.
+The default receipt is written under the repository's `.prometheus/cadence/receipts/`. The isolated
 profile is preserved for inspection and its path is recorded. Installed user data
 is not copied or changed. No application secrets are inherited by default; features
 requiring credentials need explicit setup inside the isolated app or a suitably
