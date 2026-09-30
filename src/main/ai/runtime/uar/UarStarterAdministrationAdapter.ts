@@ -32,6 +32,10 @@ const rawCollaborationCapabilities = z.object({
   instance: z.object({ id: z.string().min(1) })
 })
 
+const rawTeamCollaborationCapabilities = rawCollaborationCapabilities.extend({
+  catalogStorage: z.object({ backend: z.enum(['surrealdb', 'surrealkv', 'postgresql', 'memory']) })
+})
+
 const rawPackage = z.object({ identity: z.object({ id: z.string(), version: z.string(), digest: z.string() }) })
 const rawPreflight = z.object({ activationSupported: z.boolean() })
 const rawStarterTeamBinding = rawBinding.extend({ document: z.record(z.string(), z.json()) })
@@ -178,7 +182,7 @@ export async function setupUarStarterTeam(workspaceId: string, model?: UarTeamMo
   if (required.some((operation) => !state.operations[operation].available)) {
     throw new Error('UAR team setup is unavailable')
   }
-  const capabilities = rawCollaborationCapabilities.parse(
+  const capabilities = rawTeamCollaborationCapabilities.parse(
     await scopedRequest(resolved, '/api/v1/collaboration/capabilities', state.generation)
   )
   if (!(await planningState(resolved)).cooperation) throw new Error('TEAM_CAPABILITY_UNSUPPORTED')
@@ -210,13 +214,13 @@ export async function setupUarStarterTeam(workspaceId: string, model?: UarTeamMo
     }
   }
 
-  const endpoint = await application.get('UarSidecarService').ensureReady()
+  const endpoint = await application.get('UarSidecarService').resolveSelected()
   if (endpoint.generation !== state.generation) throw new Error('UAR sidecar restarted during starter team setup')
   const binding = starterBinding({
     ownerId: capabilities.bindingOwnerId,
     workspaceId: resolved,
     runtimeInstanceId: capabilities.instance.id,
-    storageBackend: endpoint.storage.profile.backend,
+    storageBackend: capabilities.catalogStorage.backend,
     packageIdentity: starter.identity,
     ...(selectedModel ?? {}),
     bindingId: modelKey

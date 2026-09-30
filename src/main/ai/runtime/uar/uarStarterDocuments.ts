@@ -210,7 +210,7 @@ export function starterBinding(input: {
   modelId?: string
   profile?: { id: string; revision: number }
   settingsRevision?: number
-  storageBackend: 'embedded' | 'remote'
+  storageBackend: 'embedded' | 'remote' | 'surrealdb' | 'surrealkv' | 'postgresql' | 'memory'
   packageIdentity: { id: string; version: string; digest: string }
   bindingId?: string
   effectiveLimits?: typeof limits
@@ -245,7 +245,12 @@ export function starterBinding(input: {
         : [],
     skillBindings: [],
     storage: {
-      backend: input.storageBackend === 'embedded' ? 'surrealkv' : 'surrealdb',
+      backend:
+        input.storageBackend === 'embedded'
+          ? 'surrealkv'
+          : input.storageBackend === 'remote'
+            ? 'surrealdb'
+            : input.storageBackend,
       connectionRef: 'protected-connection://uar/runtime',
       durableTransactions: true
     },
