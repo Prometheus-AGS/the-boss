@@ -6,6 +6,7 @@ import path from 'node:path'
 import readline from 'node:readline'
 
 import { Mutex } from 'async-mutex'
+import * as z from 'zod'
 
 import { application } from '@application'
 import { loggerService } from '@logger'
@@ -29,6 +30,26 @@ import { uarPrincipalForSession } from './uarPrincipal'
 import { type AppliedUarStorage, readAppliedUarStorage, writeAppliedUarStorage } from './uarStorageProfile'
 
 const logger = loggerService.withContext('UarSidecarService')
+const safeTeamProviderDiagnostic = z.object({
+  fields: z.object({
+    message: z.literal('Captured safe team provider failure'),
+    code: z.enum(['TEAM_PROVIDER_REQUEST_REJECTED', 'TEAM_PROVIDER_STREAM_FAILED']),
+    diagnostic_reference: z.uuid(),
+    provider_error_kind: z.enum([
+      'provider_error',
+      'provider_authentication_failed',
+      'provider_invalid_request',
+      'provider_rate_limited',
+      'provider_overloaded',
+      'provider_timeout',
+      'provider_transport_failed',
+      'provider_stream_failed',
+      'provider_budget_exceeded',
+      'provider_external_error',
+      'provider_internal_error'
+    ])
+  })
+})
 const START_TIMEOUT_MS = 30_000
 const STOP_TIMEOUT_MS = 5_000
 const PROVIDER_CREDENTIAL_ENV_PATTERNS = [/_API_KEY$/i, /_API_TOKEN$/i, /_ACCESS_TOKEN$/i, /_SECRET_KEY$/i]
@@ -507,6 +528,7 @@ export class UarSidecarService extends BaseService {
       stdio: ['pipe', 'pipe', 'pipe']
     })
     child.on('error', (error) => logger.warn('UAR sidecar process error', { error }))
+    this.retainSafeProviderDiagnostics(child)
     child.stdin?.write(`${launchToken}\n`)
 
     try {
@@ -543,7 +565,6 @@ export class UarSidecarService extends BaseService {
         if (this.running?.child === child) this.running = undefined
         if (!this.stopping) logger.warn('UAR sidecar exited', { code, signal, generation })
       })
-      child.stderr?.resume()
       logger.info('UAR sidecar ready', {
         generation,
         version: running.uarVersion,
@@ -557,6 +578,28 @@ export class UarSidecarService extends BaseService {
       await this.terminate(child)
       throw error
     }
+  }
+
+  /** Sidecar output is untrusted: retain only the named event's safe machine fields. */
+  private retainSafeProviderDiagnostics(child: ChildProcess): void {
+    const outputs = [child.stdout, child.stderr].flatMap((input) => {
+      if (!input) return []
+      const output = readline.createInterface({ input })
+      output.on('line', (line) => {
+        let value: unknown
+        try {
+          value = JSON.parse(line)
+        } catch {
+          return
+        }
+        const result = safeTeamProviderDiagnostic.safeParse(value)
+        if (!result.success) return
+        const { code, diagnostic_reference, provider_error_kind } = result.data.fields
+        logger.warn('UAR team provider diagnostic', { code, diagnostic_reference, provider_error_kind })
+      })
+      return [output]
+    })
+    child.once('close', () => outputs.forEach((output) => output.close()))
   }
 
   private waitForReady(child: ChildProcess): Promise<number> {
