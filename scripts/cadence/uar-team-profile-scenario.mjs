@@ -130,7 +130,7 @@ export default async function run(context) {
 
   const before = await current(evaluate, primary)
   const state = await ipc(evaluate, route('snapshot'), { workspaceId: primary.workspaceId })
-  const binding = state.bindings.find((item) => item.id === before.deploymentBindingId)
+  const binding = state.bindings.find((item) => item.id === before.binding.id)
   if (!binding) throw new Error('The original starter binding cannot be inspected for explicit rebind')
   const rebindInput = {
     workspaceId: primary.workspaceId,

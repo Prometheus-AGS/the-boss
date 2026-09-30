@@ -137,6 +137,10 @@ async function assignedTeam(server) {
       {
         id: alias,
         enabled: true,
+        pricing_identity: {
+          providerId: process.env.BOSS_CADENCE_LITER_SOURCE_PROVIDER ?? 'kimi-code-plan-cn',
+          modelId: process.env.BOSS_CADENCE_LITER_SOURCE_MODEL ?? 'kimi-for-coding'
+        },
         execution_profile: {
           profile: { id: 'uar.openai-compatible-chat.settings-v1', revision: 1 },
           settingsRevision: 1,
@@ -286,12 +290,21 @@ export async function operateRemoteOwnership({ signal }) {
       expectedTeamRevision: assignment.team.revision,
       reason: 'Exercise excluded executor'
     }
+    const budget = await accepted(owner, `/team-instances/${assignment.team.id}/execution`)
     const admission = {
       commandId: randomUUID(),
       expectedTeamRevision: assignment.team.revision,
       expectedTaskRevision: assignment.team.tasks.find((item) => item.id === assignment.taskId).revision,
       memberId: assignment.memberId,
-      reservation: { tokens: 512, costMicrounits: 1000, elapsedSeconds: 30 },
+      reservation: {
+        tokens: budget.budget.maxTokens - budget.committed.tokens - budget.reserved.tokens,
+        costMicrounits:
+          budget.budget.maxCostMicrounits - budget.committed.costMicrounits - budget.reserved.costMicrounits,
+        elapsedSeconds: Math.min(
+          60,
+          budget.budget.maxElapsedSeconds - budget.committed.elapsedSeconds - budget.reserved.elapsedSeconds
+        )
+      },
       contextArtifactIds: []
     }
     const excludedAdmission = await denied(

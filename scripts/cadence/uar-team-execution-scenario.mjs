@@ -360,6 +360,14 @@ export default async function run({ evaluate, signal, onPrimaryCompleted, onRest
   ) {
     throw new Error('Cancellation changed the original worker epoch or hid its pending outcome')
   }
+  await waitFor(
+    signal,
+    async () => {
+      const value = await summary(evaluate, controls)
+      return value.attempts.some((item) => item.id === active.id && terminal(item))
+    },
+    'Cancellation joins the original execution before a separate membership command'
+  )
   const beforeRevoke = await current(evaluate, controls)
   const revoked = await ipc(evaluate, route('revoke_member'), {
     ...controls,
