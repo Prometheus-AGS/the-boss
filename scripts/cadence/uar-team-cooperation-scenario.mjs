@@ -1,102 +1,13 @@
 import { randomUUID } from 'node:crypto'
 
+import { commandConflict, directedAuthority, invalidatedWait, foreignWait } from './c094-cooperation-authority.mjs'
+import { controls } from './c094-cooperation-controls.mjs'
 import { cancel, drive, end, safeAttempt, selector, teamPath } from './c094-cooperation-driver.mjs'
 import { createFixture, selectLiveGateway } from './c094-cooperation-fixtures.mjs'
 import { completeFlow, completeDenied, failure, recover, startFlow } from './c094-cooperation-flows.mjs'
 import { cooperationPlan, deniedPlan } from './c094-cooperation-prompts.mjs'
 import { startCooperationHost } from './uar-team-cooperation-host.mjs'
-import { ipc, route, current, summary, response, waitFor } from './uar-team-operation-tools.mjs'
-
-async function controls(evaluate, signal, fixture, completed) {
-  await waitFor(
-    signal,
-    () =>
-      evaluate(`(() => {
-    const later=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Set up later');
-    if(later)later.click();return Boolean(document.querySelector('#app-sidebar'));
-  })()`),
-    'C094 packaged onboarding'
-  )
-  await ipc(evaluate, 'navigation.open_route_in_main', { path: '/settings/uar?panel=teams' })
-  await waitFor(
-    signal,
-    () =>
-      evaluate(`(() => {
-    const button=document.querySelector('button[aria-label="Workspace"]');
-    if(!button)return false;button.click();return true;
-  })()`),
-    'C094 workspace selector'
-  )
-  await waitFor(
-    signal,
-    () =>
-      evaluate(`(() => {
-    const option=[...document.querySelectorAll('[role="option"]')].find(e=>e.innerText.includes('Cadence C094 success'));
-    if(!option)return false;option.click();return true;
-  })()`),
-    'C094 operated workspace'
-  )
-  await waitFor(
-    signal,
-    () =>
-      evaluate(`(() => {
-    const button=document.querySelector('button[aria-label="Choose a team instance"]');
-    if(!button)return false;button.click();return true;
-  })()`),
-    'C094 team selector'
-  )
-  await waitFor(
-    signal,
-    () =>
-      evaluate(`(() => {
-    const option=[...document.querySelectorAll('[role="option"]')].find(e=>e.innerText.includes(${JSON.stringify(fixture.teamInstanceId)}));
-    if(!option)return false;option.click();return true;
-  })()`),
-    'C094 operated team'
-  )
-  await waitFor(
-    signal,
-    () =>
-      evaluate(`['uar-team-context','uar-team-peer-messages','uar-team-waits']
-    .every(id=>Boolean(document.querySelector('[data-ui="'+id+'"]')))`),
-    'C094 context, messages and waits controls'
-  )
-  await waitFor(
-    signal,
-    () =>
-      evaluate(`(() => {
-    const context=[...document.querySelectorAll('[data-ui="uar-team-context"]')]
-      .find(node=>node.closest('li')?.innerText.includes(${JSON.stringify(completed.exact.resumed.runId)}));
-    const button=context?.querySelector('button');
-    if(!button||button.disabled)return false;button.click();return true;
-  })()`),
-    'C094 inspect actual resumed context'
-  )
-  await waitFor(
-    signal,
-    () =>
-      evaluate(`(() => {
-    const context=[...document.querySelectorAll('[data-ui="uar-team-context"]')]
-      .find(node=>node.closest('li')?.innerText.includes(${JSON.stringify(completed.exact.resumed.runId)}));
-    return context?.innerText.includes(${JSON.stringify(completed.exact.resumed.rootId)}) &&
-      context.innerText.includes(${JSON.stringify(fixture.instructions.digest)}) &&
-      context.innerText.includes(${JSON.stringify(fixture.coordinatorId)});
-  })()`),
-    'C094 rendered immutable context provenance'
-  )
-  await waitFor(
-    signal,
-    () =>
-      evaluate(`(() => {
-    const messages=document.querySelector('[data-ui="uar-team-peer-messages"]');
-    const waits=document.querySelector('[data-ui="uar-team-waits"]');
-    return messages?.innerText.includes('Consumed') &&
-      waits?.innerText.includes(${JSON.stringify(completed.exact.wait.waitId)}) &&
-      waits.innerText.includes(${JSON.stringify(completed.exact.resumed.rootId)});
-  })()`),
-    'C094 consumed messages and linked fresh continuation in UI'
-  )
-}
+import { ipc, route, current, summary, response } from './uar-team-operation-tools.mjs'
 
 /** Operate only completed B functionality against the exact packaged UAR and live gateway. */
 export default async function run({ evaluate, signal, onObservation, cases }) {
@@ -107,6 +18,9 @@ export default async function run({ evaluate, signal, onObservation, cases }) {
     'edge',
     'isolation',
     'revocation',
+    'directed-authority',
+    'wait-invalidation',
+    'command-conflict',
     'cycle',
     'restart',
     'crash'
@@ -275,6 +189,31 @@ export default async function run({ evaluate, signal, onObservation, cases }) {
         })
         if (lookup?.ok || !lookup?.error) throw new Error('C094_FOREIGN_WORKSPACE_READ_NOT_REFUSED')
       }
+      await observe(await foreignWait({ evaluate, signal, host, source: success, foreign: isolated, completed }))
+    }
+
+    if (selected('directed-authority')) {
+      stage = 'same-team-current-directed-authority'
+      await observe(
+        await directedAuthority({
+          evaluate,
+          signal,
+          host,
+          fixture: await fixture(model, 'same-team directed authority', { workers: 2 })
+        })
+      )
+    }
+    if (selected('command-conflict')) {
+      stage = 'same-command-id-different-payload'
+      await observe(
+        await commandConflict({ evaluate, signal, host, fixture: await fixture(model, 'command payload conflict') })
+      )
+    }
+    if (selected('wait-invalidation')) {
+      stage = 'accepted-old-wait-authority-invalidated'
+      await observe(
+        await invalidatedWait({ evaluate, signal, host, fixture: await fixture(model, 'old wait authority') })
+      )
     }
 
     if (selected('revocation')) {
