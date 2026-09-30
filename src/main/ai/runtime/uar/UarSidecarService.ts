@@ -431,8 +431,12 @@ export class UarSidecarService extends BaseService {
     const headers = new Headers(init.headers)
     headers.set('authorization', `Bearer ${running.authToken}`)
     headers.set('x-uar-principal', principal)
+    return this.fetchWithRateLimitRetries(new URL(pathname, baseUrl), { ...init, headers })
+  }
+
+  private async fetchWithRateLimitRetries(url: URL, init: RequestInit): Promise<Response> {
     for (let attempt = 0; attempt < 6; attempt += 1) {
-      const response = await fetch(new URL(pathname, baseUrl), { ...init, headers })
+      const response = await fetch(url, init)
       if (response.status !== 429 || attempt === 5) return response
       await response.body?.cancel()
       await new Promise((resolve) => setTimeout(resolve, 250))
@@ -654,7 +658,7 @@ export class UarSidecarService extends BaseService {
   }
 
   private async readCapabilities(instance: UarRuntimeInstance, baseUrl: string, authToken: string) {
-    const response = await fetch(new URL('/api/uar/capabilities', baseUrl), {
+    const response = await this.fetchWithRateLimitRetries(new URL('/api/uar/capabilities', baseUrl), {
       headers: { authorization: `Bearer ${authToken}` },
       signal: AbortSignal.timeout(5_000)
     })
