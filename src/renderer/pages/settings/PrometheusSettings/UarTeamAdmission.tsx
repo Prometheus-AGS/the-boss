@@ -144,8 +144,9 @@ export function UarTeamAdmission({ workspaceId, instance, task, summary, artifac
           <ul className="mt-2 max-h-48 space-y-2 overflow-auto">
             {artifacts.map((artifact) => (
               <li key={artifact.id}>
-                <label className="flex min-w-0 items-start gap-2 text-xs">
+                <label htmlFor={id + 'artifact-' + artifact.id} className="flex min-w-0 items-start gap-2 text-xs">
                   <Checkbox
+                    id={id + 'artifact-' + artifact.id}
                     checked={selected.includes(artifact.id)}
                     disabled={disabled || busy}
                     onCheckedChange={(checked) =>
@@ -178,8 +179,9 @@ export function UarTeamAdmission({ workspaceId, instance, task, summary, artifac
           {tr(denial)}
         </p>
       )}
-      <label className="mt-3 flex items-center gap-2 text-xs">
+      <label htmlFor={id + 'queueOnly'} className="mt-3 flex items-center gap-2 text-xs">
         <Checkbox
+          id={id + 'queueOnly'}
           checked={queueOnly}
           disabled={disabled || busy}
           onCheckedChange={(checked) => setQueueOnly(checked === true)}

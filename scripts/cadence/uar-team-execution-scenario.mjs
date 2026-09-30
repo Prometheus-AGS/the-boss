@@ -121,7 +121,7 @@ export default async function run({ evaluate, signal, onPrimaryCompleted, onRest
   // This default identity was observed in the operator's gateway source configuration, not inferred from its alias.
   const target = {
     providerConnectionId: 'cadence-c09-model',
-    providerId: sourceProvider ?? 'kimi-for-coding',
+    providerId: sourceProvider ?? 'kimi-code-plan-cn',
     modelId: sourceModel ?? 'kimi-for-coding'
   }
   const sourceBaseUrl =
