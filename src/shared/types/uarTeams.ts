@@ -1,3 +1,10 @@
+import type {
+  UarTeamCommandReceipt,
+  UarTeamContextReceipt,
+  UarTeamInstructions,
+  UarTeamContinuationReceipt,
+  UarTeamWait
+} from './uarTeamContext'
 import type { UarEffectiveModelReceipt, UarExecutionFence, UarTeamDiagnostic } from './uarTeamProfiles'
 export interface UarTeamIdentity {
   id: string
@@ -8,6 +15,7 @@ export interface UarTeamIdentity {
 export interface UarTeamDefinition extends UarTeamIdentity {
   title: string
   purpose: string
+  instructions?: UarTeamInstructions
   package: UarTeamIdentity
   budget?: UarTeamBudget
   members: Array<{
@@ -35,7 +43,7 @@ export interface UarTeamTask {
   outputContract: unknown
   output: unknown | null
   dependsOn: string[]
-  status: 'queued' | 'ready' | 'running' | 'blocked' | 'succeeded' | 'failed' | 'cancelled'
+  status: 'queued' | 'ready' | 'running' | 'waiting' | 'blocked' | 'succeeded' | 'failed' | 'cancelled'
   revision: number
   assigneeMemberId: string | null
   ownershipEpoch: number
@@ -83,7 +91,10 @@ export interface UarTeamsSnapshot {
   schemaVersion: 1
   workspaceId: string
   generation: number
-  capabilities: { planning: boolean; ownership: boolean; mailbox: boolean; execution: boolean }
+  capabilities: { planning: boolean; ownership: boolean; mailbox: boolean; execution: boolean; cooperation?: boolean }
+  executionProfileStage?: 'unqualified' | 'operation' | 'qualified'
+  executionProfile?: string
+  executionCapabilities?: string[]
   unavailableReason?: string
   definitions: UarTeamDefinition[]
   bindings: UarTeamBinding[]
@@ -139,7 +150,13 @@ export interface UarTeamMailboxMessage {
   taskEpoch?: number | null
   mode: 'queue-only' | 'trigger-turn'
   content: string
-  status: 'accepted' | 'delivered' | 'processed'
+  status: 'accepted' | 'delivered' | 'processed' | 'consumed' | 'rejected'
+  senderMemberId?: string | null
+  senderAttemptId?: string | null
+  senderTaskId?: string | null
+  consumedAt?: string | null
+  selectedAttemptId?: string | null
+  rejectionCode?: string | null
   acceptedAt: string
   deliveredAt?: string | null
   processedAt?: string | null
@@ -184,13 +201,25 @@ export interface UarTeamExecutionAttempt {
   ownershipEpoch: number
   bindingRevision: number
   executionEpoch: number
-  status: 'queued' | 'running' | 'cancellation_requested' | 'uncertain' | 'succeeded' | 'failed' | 'cancelled'
+  status:
+    | 'queued'
+    | 'running'
+    | 'cancellation_requested'
+    | 'uncertain'
+    | 'yielded'
+    | 'succeeded'
+    | 'failed'
+    | 'cancelled'
   executionFence?: UarExecutionFence | null
   effectiveModels?: UarEffectiveModelReceipt[]
   effectDisposition?: 'confirmed' | 'uncertain'
   accountingState?: 'settled' | 'reserved-unknown'
   diagnostic?: UarTeamDiagnostic | null
-  executionOutcome?: 'succeeded' | 'failed' | 'cancelled' | 'uncertain' | null
+  rootId?: string
+  approvalScopeId?: string
+  queueSequence?: number
+  continuationOfWaitId?: string | null
+  executionOutcome?: 'yielded' | 'succeeded' | 'failed' | 'cancelled' | 'uncertain' | null
   reservation: UarTeamReservation
   contextArtifactIds: string[]
   usage: UarTeamReservation | null
@@ -215,6 +244,10 @@ export interface UarTeamArtifact {
 
 export interface UarTeamExecutionSummary {
   attempts: UarTeamExecutionAttempt[]
+  commandReceipts?: UarTeamCommandReceipt[]
+  waits?: UarTeamWait[]
+  continuations?: UarTeamContinuationReceipt[]
+  contextReceipts?: UarTeamContextReceipt[]
   committed: UarTeamReservation
   reserved: UarTeamReservation
   uncertainAttempts: string[]

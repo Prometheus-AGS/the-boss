@@ -79,6 +79,7 @@ import {
   uarInstanceSelectSchema,
   type UarInstanceInventorySnapshot
 } from '@shared/types/uarServiceInstance'
+import { uarTeamContextSchema, uarTeamPeerMessagesSchema } from '@shared/types/uarTeamContext'
 import type { UarExecutionOwnerSnapshot, UarExecutionReclaimReceipt } from '@shared/types/uarTeamProfiles'
 import type {
   UarTeamArtifact,
@@ -418,6 +419,20 @@ export const prometheusRequestSchemas = {
       })
       .strict(),
     output: z.custom<UarExecutionReclaimReceipt>()
+  }),
+  'prometheus.uar.teams.peer_messages': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256), teamInstanceId: z.string().min(1).max(256) }).strict(),
+    output: uarTeamPeerMessagesSchema
+  }),
+  'prometheus.uar.teams.context': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        teamInstanceId: z.string().min(1).max(256),
+        attemptId: z.string().min(1).max(256)
+      })
+      .strict(),
+    output: uarTeamContextSchema
   }),
   'prometheus.uar.teams.execution': defineRoute({
     input: teamExecutionSelectorSchema,

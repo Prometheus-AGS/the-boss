@@ -9,16 +9,19 @@ import type { UarTeamArtifact, UarTeamExecutionSummary, UarTeamInstance } from '
 
 import { UarEffectiveModel } from './UarEffectiveModel'
 import { UarTeamAdmission } from './UarTeamAdmission'
+import { UarTeamContextView } from './UarTeamContextView'
 import { uarTeamError } from './uarTeamError'
+import { UarTeamWaits } from './UarTeamWaits'
 
 interface Props {
   workspaceId: string
   instance: UarTeamInstance
   available: boolean
+  cooperation: boolean
   onChanged: () => Promise<void>
 }
 
-export function UarTeamExecutionPanel({ workspaceId, instance, available, onChanged }: Props) {
+export function UarTeamExecutionPanel({ workspaceId, instance, available, cooperation, onChanged }: Props) {
   const { t, i18n } = useTranslation()
   const { t: tr } = useTranslation(undefined, { keyPrefix: 'settings.prometheus.integration.uarAdmin.teams' })
   const id = useId()
@@ -199,6 +202,10 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, onChan
               {tr('execution.uncertainty')}
             </p>
           )}
+          <p className="text-xs text-muted-foreground" role="status">
+            {tr(cooperation ? 'cooperation.available' : 'cooperation.unavailable')}
+          </p>
+          {cooperation && <UarTeamWaits summary={summary} instance={instance} />}
           {instance.tasks.length === 0 ? (
             <p className="text-sm text-muted-foreground">{tr('noTasks')}</p>
           ) : (
@@ -301,6 +308,18 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, onChan
                         {uarTeamError(attempt.stateReason, (key) => tr('execution.' + key))}
                       </p>
                     )}
+                    {attempt.continuationOfWaitId && (
+                      <p className="mt-2 break-all text-xs text-muted-foreground">
+                        {tr('cooperation.continuationOf')}: {attempt.continuationOfWaitId}
+                      </p>
+                    )}
+                    {cooperation && (
+                      <UarTeamContextView
+                        workspaceId={workspaceId}
+                        teamInstanceId={instance.id}
+                        attemptId={attempt.id}
+                      />
+                    )}
                     {attempt.output != null && (
                       <details className="mt-2 text-xs">
                         <summary className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -320,7 +339,13 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, onChan
                         {tr('execution.dispatchQueued')}
                       </Button>
                     )}
-                    {['queued', 'running'].includes(attempt.status) && (
+                    {(['queued', 'running'].includes(attempt.status) ||
+                      (cooperation &&
+                        attempt.status === 'yielded' &&
+                        summary.waits?.some(
+                          (wait) =>
+                            wait.authority.attemptId === attempt.id && ['waiting', 'blocked'].includes(wait.state)
+                        ))) && (
                       <Button
                         className="mt-3"
                         variant="outline"

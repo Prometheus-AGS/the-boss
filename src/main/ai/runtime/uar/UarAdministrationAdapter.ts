@@ -317,6 +317,8 @@ const UAR_ADMIN_METHOD_ALLOWLIST = new Set<string>([
   'team-execution.owner.quiesce\u0000POST\u0000/api/v1/collaboration/execution-owner/quiesce\u0000admin\u0000live',
   'team-execution.owner.reclaim\u0000POST\u0000/api/v1/collaboration/execution-owner/reclaim\u0000admin\u0000live',
   'team-instances.execution\u0000GET\u0000/api/v1/collaboration/team-instances/{id}/execution\u0000owner\u0000read',
+  'team-instances.attempts.context\u0000GET\u0000/api/v1/collaboration/team-instances/{id}/attempts/{attemptId}/context\u0000owner\u0000read',
+  'team-instances.peer-messages\u0000GET\u0000/api/v1/collaboration/team-instances/{id}/peer-messages\u0000owner\u0000read',
   'team-instances.attempts.cancel\u0000POST\u0000/api/v1/collaboration/team-instances/{id}/attempts/{attemptId}/cancel\u0000owner\u0000live',
   'team-instances.recover\u0000POST\u0000/api/v1/collaboration/team-instances/{id}/recover\u0000owner\u0000live',
   'team-instances.members.revoke\u0000POST\u0000/api/v1/collaboration/team-instances/{id}/members/{memberId}/revoke\u0000owner\u0000live',

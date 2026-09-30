@@ -21,6 +21,7 @@ import { uarTeamError } from './uarTeamError'
 import { UarTeamExecutionPanel } from './UarTeamExecutionPanel'
 import { UarTeamMailbox } from './UarTeamMailbox'
 import { UarTeamModelPicker } from './UarTeamModelPicker'
+import { UarTeamPeerMessages } from './UarTeamPeerMessages'
 import { UarTeamTaskBoard } from './UarTeamTaskBoard'
 import { UarTeamTaskForm } from './UarTeamTaskForm'
 
@@ -278,13 +279,18 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                   className="mt-3"
                   variant="outline"
                   size="sm"
-                  disabled={!snapshot.capabilities.planning || Boolean(busy)}
+                  disabled={!snapshot.capabilities.planning || !snapshot.capabilities.cooperation || Boolean(busy)}
                   onClick={() => void setupStarter()}>
                   {busy === 'setup'
                     ? tr('settingUpStarter')
                     : tr(snapshot.definitions.length === 0 ? 'setupStarter' : 'installCurrentStarter')}
                 </Button>
                 <p className="mt-1 text-xs text-muted-foreground">{tr('starterVersionHelp')}</p>
+                {!snapshot.capabilities.cooperation && (
+                  <p className="mt-1 text-xs text-muted-foreground" role="status">
+                    {tr('cooperation.unavailable')}
+                  </p>
+                )}
               </div>
               <div>
                 <label htmlFor="uar-team-binding" className="mb-1.5 block text-sm font-medium">
@@ -349,6 +355,20 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                 </div>
               </fieldset>
             )}
+            {selectedDefinition?.instructions && (
+              <details className="mt-4 text-xs" data-ui="uar-team-shared-guidance">
+                <summary className="cursor-pointer font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+                  {tr('cooperation.guidance')}
+                </summary>
+                <p className="mt-1 text-muted-foreground">{tr('cooperation.precedence')}</p>
+                <p className="mt-2 break-all text-muted-foreground">
+                  {tr('revision')} {selectedDefinition.instructions.revision} · {selectedDefinition.instructions.digest}
+                </p>
+                <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-md bg-background-subtle p-2">
+                  {selectedDefinition.instructions.text}
+                </pre>
+              </details>
+            )}
             <div className="mt-4">
               <label htmlFor="uar-team-input" className="mb-1.5 block text-sm font-medium">
                 {tr('teamInput')}
@@ -388,6 +408,11 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                   ))}
                 </SelectContent>
               </Select>
+            )}
+            {snapshot.executionProfileStage === 'operation' && (
+              <p className="text-sm text-warning-subtle-foreground" role="status">
+                {tr('cooperation.operationStage')}
+              </p>
             )}
             {selectedInstance && (
               <div className="mt-4 space-y-4">
@@ -442,7 +467,14 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                 workspaceId={workspaceId}
                 instance={selectedInstance}
                 available={snapshot.capabilities.execution}
+                cooperation={Boolean(snapshot.capabilities.cooperation)}
                 onChanged={refreshQuietly}
+              />
+              <UarTeamPeerMessages
+                key={selectedInstance.id + ':peers'}
+                workspaceId={workspaceId}
+                instance={selectedInstance}
+                available={Boolean(snapshot.capabilities.cooperation)}
               />
               <UarTeamMailbox
                 key={selectedInstance.id}

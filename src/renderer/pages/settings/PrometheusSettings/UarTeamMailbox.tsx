@@ -198,6 +198,11 @@ export function UarTeamMailbox({ workspaceId, instance, available }: Props) {
                 <span className="font-medium">{tr('toMember', { member: memberName(message.recipientMemberId) })}</span>
                 <Badge variant="outline">{messageStatus(message)}</Badge>
               </div>
+              <p className="mt-1 break-all text-xs text-muted-foreground">
+                {message.senderMemberId
+                  ? tr('cooperation.fromMember', { member: memberName(message.senderMemberId) })
+                  : tr('cooperation.fromOperator', { owner: message.senderOwnerId })}
+              </p>
               <p className="mt-1 whitespace-pre-wrap break-words">{message.content}</p>
               <p className="mt-2 break-all text-xs text-muted-foreground">
                 {tr(message.mode === 'trigger-turn' ? 'deliveryMode.triggerTurn' : 'deliveryMode.queueOnly')} ·{' '}

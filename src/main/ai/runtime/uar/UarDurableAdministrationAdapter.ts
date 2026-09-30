@@ -151,6 +151,7 @@ export async function capabilityState() {
   const starterAvailable = starterRequired.every((id) => advertised[id].available)
   return {
     generation: snapshot.generation,
+    surfaces: snapshot.surfaces,
     operations: {
       ...advertised,
       'starter.setup': {

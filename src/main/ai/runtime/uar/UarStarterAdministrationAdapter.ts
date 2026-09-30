@@ -9,6 +9,7 @@ import type { UarTeamBinding, UarTeamModelSelection } from '@shared/types/uarTea
 import { capabilityState, rawBinding, scopedRequest, workspace } from './UarDurableAdministrationAdapter'
 import { revisedStarterBinding, starterBinding, starterPackage, starterTeamPackage } from './uarStarterDocuments'
 import { configureTeamModel } from './uarTeamModelSetup'
+import { planningState } from './UarTeamsAdministrationAdapter'
 
 const bindingPath = '/api/v1/collaboration/deployment-bindings'
 
@@ -180,6 +181,7 @@ export async function setupUarStarterTeam(workspaceId: string, model?: UarTeamMo
   const capabilities = rawCollaborationCapabilities.parse(
     await scopedRequest(resolved, '/api/v1/collaboration/capabilities', state.generation)
   )
+  if (!(await planningState(resolved)).cooperation) throw new Error('TEAM_CAPABILITY_UNSUPPORTED')
   const selectedModel = model ? await configureTeamModel(model, state.generation) : undefined
   const modelKey = selectedModel
     ? createHash('sha256')
@@ -218,8 +220,8 @@ export async function setupUarStarterTeam(workspaceId: string, model?: UarTeamMo
     packageIdentity: starter.identity,
     ...(selectedModel ?? {}),
     bindingId: modelKey
-      ? `urn:boss:starter:team-binding:v3:${resolved}:${modelKey}`
-      : `urn:boss:starter:team-binding:v2:${resolved}`,
+      ? `urn:boss:starter:team-binding:v4:${resolved}:${modelKey}`
+      : `urn:boss:starter:team-binding:v3:${resolved}`,
     effectiveLimits: { concurrentTurns: 1, maxMembers: 3, maxDepth: 0, maxPendingTasks: 8 }
   })
   const existingBindings = z

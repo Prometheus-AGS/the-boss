@@ -17,7 +17,10 @@ const reasons: Record<string, string> = {
   TEAM_PENDING_LIMIT: 'budget',
   TEAM_CONTEXT_REQUIRED_UNSUPPORTED: 'context',
   TEAM_CONTEXT_REQUIRED_TOO_LARGE: 'context',
-  TEAM_FIT_UNQUALIFIED: 'context'
+  TEAM_FIT_UNQUALIFIED: 'context',
+  TEAM_WAIT_CYCLE: 'wait',
+  TEAM_WAIT_INVALIDATED: 'wait',
+  TEAM_COMMAND_CONFLICT: 'revision'
 }
 
 export function uarTeamError(message: string, translate: (key: string) => string): string {

@@ -1,5 +1,10 @@
 import * as z from 'zod'
 
+import {
+  UAR_TEAM_COOPERATION_CAPABILITIES,
+  UAR_TEAM_EXECUTION_PROFILE,
+  uarTeamInstructionsSchema
+} from '@shared/types/uarTeamContext'
 import type {
   UarAddTeamTaskInput,
   UarCreateTeamInput,
@@ -19,6 +24,7 @@ const identity = z.object({ id: z.string(), version: z.string(), digest: z.strin
 const definition = identity.extend({
   title: z.string(),
   purpose: z.string(),
+  instructions: uarTeamInstructionsSchema.optional(),
   package: identity,
   budget: z
     .object({
@@ -46,7 +52,7 @@ const task = z.object({
   outputContract: z.unknown(),
   output: z.unknown().nullable(),
   dependsOn: z.array(z.string()),
-  status: z.enum(['queued', 'ready', 'running', 'blocked', 'succeeded', 'failed', 'cancelled']),
+  status: z.enum(['queued', 'ready', 'running', 'waiting', 'blocked', 'succeeded', 'failed', 'cancelled']),
   revision: z.number().int().nonnegative(),
   assigneeMemberId: z.string().nullable().default(null),
   ownershipEpoch: z.number().int().nonnegative().default(0),
@@ -105,7 +111,13 @@ const mailboxMessage = z.object({
   taskEpoch: z.number().int().nonnegative().nullish(),
   mode: z.enum(['queue-only', 'trigger-turn']),
   content: z.string(),
-  status: z.enum(['accepted', 'delivered', 'processed']),
+  status: z.enum(['accepted', 'delivered', 'processed', 'consumed', 'rejected']),
+  senderMemberId: z.string().nullish(),
+  senderAttemptId: z.string().nullish(),
+  senderTaskId: z.string().nullish(),
+  consumedAt: z.string().nullish(),
+  selectedAttemptId: z.string().nullish(),
+  rejectionCode: z.string().nullish(),
   acceptedAt: z.string(),
   deliveredAt: z.string().nullish(),
   processedAt: z.string().nullish(),
@@ -123,6 +135,9 @@ export async function planningState(workspaceId: string) {
   const state = await capabilityState()
   const capabilities = z
     .object({
+      executionProfile: z.string().optional(),
+      executionProfileStage: z.enum(['unqualified', 'operation', 'qualified']).optional(),
+      capabilities: z.array(z.string()).default([]),
       collaboration: z.object({
         activation: z.object({
           teamPlanning: z.boolean().default(false),
@@ -139,7 +154,22 @@ export async function planningState(workspaceId: string) {
     planning: capabilities.collaboration.activation.teamPlanning,
     ownership: capabilities.collaboration.activation.taskOwnership,
     mailbox: capabilities.collaboration.activation.teamMailbox,
-    execution: capabilities.collaboration.activation.teamExecution
+    execution: capabilities.collaboration.activation.teamExecution,
+    executionProfile: capabilities.executionProfile,
+    executionProfileStage: capabilities.executionProfileStage,
+    executionCapabilities: capabilities.capabilities,
+    cooperation:
+      capabilities.executionProfile === UAR_TEAM_EXECUTION_PROFILE &&
+      UAR_TEAM_COOPERATION_CAPABILITIES.every((id) => capabilities.capabilities.includes(id)) &&
+      ['team-instances.attempts.context', 'team-instances.peer-messages'].every((id) =>
+        state.surfaces.some(
+          (surface) =>
+            surface.availability === 'available' &&
+            surface.methods.some(
+              (method) => method.id === id && method.adapter === 'available' && method.apply !== 'unavailable'
+            )
+        )
+      )
   }
 }
 
@@ -170,7 +200,16 @@ export async function readUarTeams(workspaceId: string): Promise<UarTeamsSnapsho
     schemaVersion: 1,
     workspaceId: state.workspaceId,
     generation: state.generation,
-    capabilities: { planning: true, ownership: state.ownership, mailbox: state.mailbox, execution: state.execution },
+    capabilities: {
+      planning: true,
+      ownership: state.ownership,
+      mailbox: state.mailbox,
+      execution: state.execution,
+      cooperation: state.cooperation
+    },
+    executionProfile: state.executionProfile,
+    executionProfileStage: state.executionProfileStage,
+    executionCapabilities: state.executionCapabilities,
     definitions: z.array(definition).parse(definitions),
     bindings: scopedBindings,
     instances: z

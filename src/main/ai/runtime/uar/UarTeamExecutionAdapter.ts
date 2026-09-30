@@ -1,6 +1,12 @@
 import * as z from 'zod'
 
 import { application } from '@application'
+import {
+  uarTeamCommandReceiptSchema,
+  uarTeamContextSchema,
+  uarTeamContinuationSchema,
+  uarTeamWaitSchema
+} from '@shared/types/uarTeamContext'
 import { uarReasoningSchema } from '@shared/types/uarTeamProfiles'
 import type {
   UarAdmitTeamTaskInput,
@@ -32,7 +38,16 @@ const attempt = z.object({
   ownershipEpoch: z.number().int().nonnegative(),
   bindingRevision: z.number().int().nonnegative(),
   executionEpoch: z.number().int().nonnegative(),
-  status: z.enum(['queued', 'running', 'cancellation_requested', 'uncertain', 'succeeded', 'failed', 'cancelled']),
+  status: z.enum([
+    'queued',
+    'running',
+    'cancellation_requested',
+    'uncertain',
+    'yielded',
+    'succeeded',
+    'failed',
+    'cancelled'
+  ]),
   executionFence: z
     .object({
       catalogId: z.string(),
@@ -77,7 +92,11 @@ const attempt = z.object({
       protectedDiagnosticRef: z.string().optional()
     })
     .nullish(),
-  executionOutcome: z.enum(['succeeded', 'failed', 'cancelled', 'uncertain']).nullish(),
+  rootId: z.string().optional(),
+  approvalScopeId: z.string().optional(),
+  queueSequence: z.number().int().nonnegative().optional(),
+  continuationOfWaitId: z.string().nullish(),
+  executionOutcome: z.enum(['yielded', 'succeeded', 'failed', 'cancelled', 'uncertain']).nullish(),
   reservation,
   contextArtifactIds: z.array(z.string()),
   usage: reservation.nullable(),
@@ -121,6 +140,10 @@ export async function readUarTeamExecution(input: UarTeamExecutionSelector): Pro
   const summary = z
     .object({
       attempts: z.array(z.unknown()),
+      commandReceipts: z.array(uarTeamCommandReceiptSchema).optional(),
+      waits: z.array(uarTeamWaitSchema).optional(),
+      continuations: z.array(uarTeamContinuationSchema).optional(),
+      contextReceipts: z.array(uarTeamContextSchema).optional(),
       committed: reservation,
       reserved: reservation,
       uncertainAttempts: z.array(z.string()),
@@ -138,6 +161,28 @@ export async function readUarTeamExecution(input: UarTeamExecutionSelector): Pro
       })
     })
     .parse(await scopedRequest(state.workspaceId, state.path + '/execution', state.generation))
+  for (const receipt of summary.commandReceipts ?? []) {
+    if (
+      receipt.scope.ownerId !== state.team.ownerId ||
+      receipt.scope.workspaceId !== state.workspaceId ||
+      receipt.scope.teamId !== state.team.id
+    ) {
+      throw new Error('TEAM_SCOPE_DENIED')
+    }
+  }
+  for (const record of [
+    ...(summary.waits ?? []),
+    ...(summary.continuations ?? []),
+    ...(summary.contextReceipts ?? [])
+  ]) {
+    if (
+      record.authority.ownerId !== state.team.ownerId ||
+      record.authority.workspaceId !== state.workspaceId ||
+      record.authority.teamId !== state.team.id
+    ) {
+      throw new Error('TEAM_SCOPE_DENIED')
+    }
+  }
   return { ...summary, attempts: summary.attempts.map((value) => scopedAttempt(value, state.team)) }
 }
 

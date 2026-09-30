@@ -4,6 +4,7 @@ import { Badge } from '@cherrystudio/ui'
 import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/components/SettingsPrimitives'
 import type { UarTeamInstance } from '@shared/types/uarTeams'
 
+import { uarTeamError } from './uarTeamError'
 import { UarTeamTaskActions } from './UarTeamTaskActions'
 
 interface Props {
@@ -64,7 +65,11 @@ export function UarTeamTaskBoard({ workspaceId, instance, ownership, onChanged }
                   <dd>{task.reviewerEpoch}</dd>
                 </div>
               </dl>
-              {task.stateReason && <p className="mt-2 text-xs text-muted-foreground">{task.stateReason}</p>}
+              {task.stateReason && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {uarTeamError(task.stateReason, (key) => tr('execution.' + key))}
+                </p>
+              )}
               <p className="mt-2 text-xs text-muted-foreground">
                 {tr('dependencies')}:{' '}
                 {task.dependsOn.length
