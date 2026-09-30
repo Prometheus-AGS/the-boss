@@ -20,11 +20,11 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "7e65d26d25b9f08dc67467b4478ff421ef9761b6"
+      "revision": "c347043dc046f6da88b7e938f273e5152c43e76f"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "4c3e8de33a4b301b83e5810a5bafbf734b610dec"
+      "revision": "49765c56a9c60d3ecdac5a3f1227eeba25b7cf2c"
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
@@ -32,7 +32,7 @@
     },
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
-      "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
+      "revision": "0617979022aea621dd13541dee07ad84ffcf7d21"
     }
   },
   "tools": {
