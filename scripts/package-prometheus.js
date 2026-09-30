@@ -42,6 +42,13 @@ function inventory(directory, prefix = '') {
   })
 }
 
+/** Preserve skill-local helpers while routing pack-level helpers through the installed CLI. */
+function renderPackSkillText(text, skillDirectory) {
+  return text.replace(/\bnode scripts\/([a-zA-Z0-9_./-]+\.mjs)\b/g, (command, helper) =>
+    fs.existsSync(path.join(skillDirectory, 'scripts', helper)) ? command : `boss-mini ${helper}`
+  )
+}
+
 function renderPackSkills(payload) {
   const skillRoot = path.join(payload, 'skills')
   if (!fs.existsSync(skillRoot)) return
@@ -49,11 +56,7 @@ function renderPackSkills(payload) {
     if (!file.path.endsWith('.md')) continue
     const filename = path.join(skillRoot, file.path)
     const skill = file.path.split('/')[0]
-    const text = fs
-      .readFileSync(filename, 'utf8')
-      .replace(/\bnode scripts\/([a-zA-Z0-9_./-]+\.mjs)\b/g, (command, helper) =>
-        fs.existsSync(path.join(skillRoot, skill, 'scripts', helper)) ? command : `boss-mini ${helper}`
-      )
+    const text = renderPackSkillText(fs.readFileSync(filename, 'utf8'), path.join(skillRoot, skill))
     fs.writeFileSync(filename, text)
   }
 }
@@ -183,5 +186,5 @@ function packagePrometheus() {
   console.log(`Packaged mini ${revision}: ${skills.length} skills and ${manifest.files.length} runtime files`)
 }
 
-module.exports = { packagePrometheus, copyPrometheusPayload }
+module.exports = { packagePrometheus, copyPrometheusPayload, renderPackSkillText }
 if (require.main === module) packagePrometheus()
