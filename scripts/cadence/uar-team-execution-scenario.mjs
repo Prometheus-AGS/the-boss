@@ -261,7 +261,14 @@ export default async function run({ evaluate, signal, onPrimaryCompleted, onRest
     'Read only the selected shared artifact',
     `Reply with exactly the string content of the selected artifact whose id is ${artifact.id}. No quotes or markup. Do not infer its content from team input.`
   )
-  const contextInput = await admission(evaluate, primary, contextTask, reservation, [artifact.id])
+  // The selected artifact adds context tokens to the live provider request. Allocate
+  // the remaining existing team grant instead of reusing the smaller first turn.
+  const contextLimits = await summary(evaluate, primary)
+  const contextReservation = {
+    ...reservation,
+    tokens: contextLimits.budget.maxTokens - contextLimits.committed.tokens - contextLimits.reserved.tokens
+  }
+  const contextInput = await admission(evaluate, primary, contextTask, contextReservation, [artifact.id])
   const contextAttempt = await ipc(evaluate, route('admit_task'), contextInput)
   const contextResult = await waitFor(
     signal,

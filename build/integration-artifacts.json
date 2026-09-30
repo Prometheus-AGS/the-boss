@@ -25,7 +25,7 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "068c2484ddfa29f74449991f46324861911dc7a1"
+      "revision": "7e65d26d25b9f08dc67467b4478ff421ef9761b6"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
@@ -37,7 +37,7 @@
     },
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
-      "revision": "4f25d39f0075656b70bf945880d6033beda6d663"
+      "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
     }
   },
   "tools": [
@@ -203,7 +203,8 @@
             "liter-llm"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/liter-llm-darwin-x64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/liter-llm-darwin-x64",
+          "source": "4f25d39f0075656b70bf945880d6033beda6d663"
         },
         "darwin-arm64": {
           "sha256": "02b0433f91e0a964958d1441149f13bb4bb39efbc0c3193dc690cfe2191289ad",
@@ -211,7 +212,8 @@
             "liter-llm"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/liter-llm-darwin-arm64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/liter-llm-darwin-arm64",
+          "source": "4f25d39f0075656b70bf945880d6033beda6d663"
         },
         "win32-x64": {
           "sha256": "253e18fa97190542ed505ce169b863cb65a818c2ac00255d5da7c9fcaa0ff6ce",
@@ -219,7 +221,8 @@
             "liter-llm.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/liter-llm-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/liter-llm-win32-x64.exe",
+          "source": "4f25d39f0075656b70bf945880d6033beda6d663"
         },
         "win32-arm64": {
           "sha256": "254bb2a5bcf97bf991434c3126a39a117c1015920bd5ebd028d097ef59ff70ca",
@@ -227,7 +230,8 @@
             "liter-llm.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/liter-llm-win32-arm64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/liter-llm-win32-arm64.exe",
+          "source": "4f25d39f0075656b70bf945880d6033beda6d663"
         }
       }
     },
@@ -394,7 +398,7 @@
   "catalogs": {
     "liter-llm": {
       "providers": "568d741ee4e4771b7fd4191cde974d743c834fc1db7bbf27fcde45d0521b67b4",
-      "models": "d6d57171617705eb9611cbfb62ff28a3d26fdaf85b4f38f4b2e4361fcfd153dd"
+      "models": "05fb5c701bf1a27c371b83224fb188154e873fd6aad5cb9f8222ac1518656963"
     }
   },
   "compassSkills": {
