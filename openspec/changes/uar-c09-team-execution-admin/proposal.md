@@ -24,3 +24,7 @@ None.
 ## Impact
 
 Shared IPC contracts, UAR main adapters, Teams settings components and renderer catalogs. UAR owns persistence, permission checks, reservations, artifacts and ordinary-agent dispatch; The Boss adds no persisted team state, database migration or new dependency.
+
+## Documentation-approved parent repair amendment — 2026-09-30
+
+[Parent execution amendment](parent-execution-amendment.md) adds pending A4/A5 persisted exact settings, profile/ownership diagnostics and localized recovery UI, consuming UAR A1–A3. It also records approved C09.4 planning scope for B4 cooperating-pair views after Gate A. Existing checked authoring/translation items remain history; this amendment does not reopen them, certify failed operation or authorize product dispatch.

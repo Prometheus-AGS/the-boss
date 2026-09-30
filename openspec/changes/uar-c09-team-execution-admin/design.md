@@ -21,3 +21,7 @@ Implementation finishes before any tests, lint, build or review. The lead owns o
 ## Instruction precedence
 
 The older OpenSpec config suggests Signed-off-by and broad/per-file test loops. Current project A-9/A-15 and the explicit task instructions supersede those examples. The openspec-propose skill's generic planning-only stop does not override this session's explicit authorized implementation. No publication, human certification or independent review is claimed here.
+
+## Approved documentation contract and pending repair — 2026-09-30
+
+Follow [parent execution amendment](parent-execution-amendment.md) for the additive pending repair. Preserve exact route/served alias/price/profile/settings separately, typed trusted profile selection, protected credentials, lossless provider edits and explicit expected-revision rebind. Show settings-only no-fit disposition, field-specific migration/refusal, safe diagnostic/reference and catalog-owner/reclaim state; UAR enforces privileged recovery, never the model or renderer. B4 later consumes durable directed communication/wait/continuation DTOs after Gate A. All new A/B strings ship in all 13 locales and no task/wait truth is persisted in Boss. Earlier completed authoring remains intact; acceptance still requires actual packaged operation.
