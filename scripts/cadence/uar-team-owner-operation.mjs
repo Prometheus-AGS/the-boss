@@ -138,8 +138,8 @@ async function assignedTeam(server) {
         id: alias,
         enabled: true,
         pricing_identity: {
-          providerId: process.env.BOSS_CADENCE_LITER_SOURCE_PROVIDER ?? 'kimi-code-plan-cn',
-          modelId: process.env.BOSS_CADENCE_LITER_SOURCE_MODEL ?? 'kimi-for-coding'
+          provider_id: process.env.BOSS_CADENCE_LITER_SOURCE_PROVIDER ?? 'kimi-code-plan-cn',
+          model_id: process.env.BOSS_CADENCE_LITER_SOURCE_MODEL ?? 'kimi-for-coding'
         },
         execution_profile: {
           profile: { id: 'uar.openai-compatible-chat.settings-v1', revision: 1 },
