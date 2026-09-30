@@ -5,6 +5,8 @@ import { Button, Checkbox, Input } from '@cherrystudio/ui'
 import { ipcApi } from '@renderer/ipc'
 import type { UarTeamArtifact, UarTeamExecutionSummary, UarTeamInstance, UarTeamTask } from '@shared/types/uarTeams'
 
+import { uarTeamError } from './uarTeamError'
+
 interface Props {
   workspaceId: string
   instance: UarTeamInstance
@@ -36,6 +38,7 @@ export function UarTeamAdmission({ workspaceId, instance, task, summary, artifac
     elapsedSeconds: String(defaults.elapsedSeconds)
   })
   const [selected, setSelected] = useState<string[]>([])
+  const [queueOnly, setQueueOnly] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
   const [status, setStatus] = useState<string>()
@@ -81,7 +84,7 @@ export function UarTeamAdmission({ workspaceId, instance, task, summary, artifac
       },
       contextArtifactIds: selected
     }
-    const fingerprint = JSON.stringify(payload)
+    const fingerprint = JSON.stringify([payload, queueOnly])
     const nextIntent =
       intent.current?.fingerprint === fingerprint ? intent.current : { fingerprint, commandId: crypto.randomUUID() }
     intent.current = nextIntent
@@ -89,9 +92,12 @@ export function UarTeamAdmission({ workspaceId, instance, task, summary, artifac
     setError(undefined)
     setStatus(undefined)
     try {
-      await ipcApi.request('prometheus.uar.teams.admit_task', { ...payload, commandId: nextIntent.commandId })
+      await ipcApi.request(queueOnly ? 'prometheus.uar.teams.queue_task' : 'prometheus.uar.teams.admit_task', {
+        ...payload,
+        commandId: nextIntent.commandId
+      })
       intent.current = undefined
-      setStatus(tr('execution.admitted'))
+      setStatus(tr(queueOnly ? 'execution.queuedOnly' : 'execution.admitted'))
       await onChanged()
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
@@ -172,6 +178,15 @@ export function UarTeamAdmission({ workspaceId, instance, task, summary, artifac
           {tr(denial)}
         </p>
       )}
+      <label className="mt-3 flex items-center gap-2 text-xs">
+        <Checkbox
+          checked={queueOnly}
+          disabled={disabled || busy}
+          onCheckedChange={(checked) => setQueueOnly(checked === true)}
+        />
+        <span>{tr('execution.queueOnly')}</span>
+      </label>
+      <p className="mt-1 text-xs text-muted-foreground">{tr('execution.queueOnlyHelp')}</p>
       <Button
         className="mt-3"
         size="sm"
@@ -182,7 +197,7 @@ export function UarTeamAdmission({ workspaceId, instance, task, summary, artifac
       </Button>
       {error && (
         <p className="mt-2 break-words text-sm text-error" role="alert">
-          {error} {tr('execution.denialHelp')}
+          {uarTeamError(error, (key) => tr('execution.' + key))} {tr('execution.denialHelp')}
         </p>
       )}
       {status && (

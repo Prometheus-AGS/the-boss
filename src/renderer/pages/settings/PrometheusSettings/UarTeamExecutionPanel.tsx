@@ -7,7 +7,9 @@ import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/compon
 import { ipcApi } from '@renderer/ipc'
 import type { UarTeamArtifact, UarTeamExecutionSummary, UarTeamInstance } from '@shared/types/uarTeams'
 
+import { UarEffectiveModel } from './UarEffectiveModel'
 import { UarTeamAdmission } from './UarTeamAdmission'
+import { uarTeamError } from './uarTeamError'
 
 interface Props {
   workspaceId: string
@@ -80,8 +82,8 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, onChan
     await refresh(true)
   }
 
-  const control = async (action: 'cancel' | 'recover' | 'revoke', target: string) => {
-    if (busy || !available || !reason.trim()) return
+  const control = async (action: 'cancel' | 'recover' | 'revoke' | 'dispatch', target: string) => {
+    if (busy || !available || (action !== 'dispatch' && !reason.trim())) return
     const input = {
       workspaceId,
       teamInstanceId: instance.id,
@@ -100,7 +102,15 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, onChan
     setStatus(undefined)
     try {
       const payload = { ...input, commandId: intent.commandId }
-      if (action === 'cancel')
+      if (action === 'dispatch')
+        await ipcApi.request('prometheus.uar.teams.dispatch_attempt', {
+          workspaceId,
+          teamInstanceId: instance.id,
+          commandId: intent.commandId,
+          expectedTeamRevision: instance.revision,
+          attemptId: target
+        })
+      else if (action === 'cancel')
         await ipcApi.request('prometheus.uar.teams.cancel_attempt', { ...payload, attemptId: target })
       else if (action === 'revoke')
         await ipcApi.request('prometheus.uar.teams.revoke_member', { ...payload, memberId: target })
@@ -150,12 +160,12 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, onChan
       )}
       {error && (
         <p className="mt-3 break-words text-sm text-error" role="alert">
-          {error} {tr('execution.denialHelp')}
+          {uarTeamError(error, (key) => tr('execution.' + key))} {tr('execution.denialHelp')}
         </p>
       )}
       {commandError && (
         <p className="mt-3 break-words text-sm text-error" role="alert">
-          {commandError} {tr('execution.denialHelp')}
+          {uarTeamError(commandError, (key) => tr('execution.' + key))} {tr('execution.denialHelp')}
         </p>
       )}
       {busy && (
@@ -259,8 +269,37 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, onChan
                         </dd>
                       </div>
                     </dl>
+                    {attempt.accountingState === 'reserved-unknown' && (
+                      <p className="mt-2 text-xs text-warning-subtle-foreground">
+                        {tr(
+                          attempt.executionOutcome === 'succeeded' && attempt.output != null
+                            ? 'execution.knownOutputUnknownUsage'
+                            : 'execution.usagePending'
+                        )}
+                      </p>
+                    )}
+                    {attempt.effectDisposition === 'uncertain' && (
+                      <p className="mt-2 text-xs text-warning-subtle-foreground">{tr('execution.effectsUncertain')}</p>
+                    )}
+                    {attempt.effectiveModels?.map((model, index) => (
+                      <UarEffectiveModel key={index} model={model} />
+                    ))}
+                    {attempt.diagnostic && (
+                      <p className="mt-2 break-words text-xs text-error" role="alert">
+                        {uarTeamError(attempt.diagnostic.code, (key) => tr('execution.' + key))}
+                        {attempt.diagnostic.field ? ' · ' + attempt.diagnostic.field : ''}
+                        {attempt.diagnostic.protectedDiagnosticRef
+                          ? ' · ' +
+                            tr('execution.diagnosticReference') +
+                            ': ' +
+                            attempt.diagnostic.protectedDiagnosticRef
+                          : ''}
+                      </p>
+                    )}
                     {attempt.stateReason && (
-                      <p className="mt-2 break-words text-xs text-muted-foreground">{attempt.stateReason}</p>
+                      <p className="mt-2 break-words text-xs text-muted-foreground">
+                        {uarTeamError(attempt.stateReason, (key) => tr('execution.' + key))}
+                      </p>
                     )}
                     {attempt.output != null && (
                       <details className="mt-2 text-xs">
@@ -271,6 +310,15 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, onChan
                           {JSON.stringify(attempt.output, null, 2)}
                         </pre>
                       </details>
+                    )}
+                    {attempt.status === 'queued' && (
+                      <Button
+                        className="mt-3 mr-2"
+                        size="sm"
+                        disabled={Boolean(busy)}
+                        onClick={() => void control('dispatch', attempt.id)}>
+                        {tr('execution.dispatchQueued')}
+                      </Button>
                     )}
                     {['queued', 'running'].includes(attempt.status) && (
                       <Button

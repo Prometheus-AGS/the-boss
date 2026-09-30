@@ -24,8 +24,8 @@ as completion proof.
 From a standalone mini checkout:
 
 ```text
-boss-mini prometheus-context-bootstrap.mjs --path <project> --stacks rust,typescript
-boss-mini prometheus-context-bootstrap.mjs --path <project> --stacks rust,typescript --check
+node scripts/prometheus-context-bootstrap.mjs --path <project> --stacks rust,typescript
+node scripts/prometheus-context-bootstrap.mjs --path <project> --stacks rust,typescript --check
 ```
 
 From the copy vendored inside `the-boss`:

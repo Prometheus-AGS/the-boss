@@ -16,6 +16,8 @@ import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/compon
 import { ipcApi } from '@renderer/ipc'
 import type { UarTeamModelSelection, UarTeamsSnapshot } from '@shared/types/uarTeams'
 
+import { UarExecutionOwnerPanel } from './UarExecutionOwnerPanel'
+import { uarTeamError } from './uarTeamError'
 import { UarTeamExecutionPanel } from './UarTeamExecutionPanel'
 import { UarTeamMailbox } from './UarTeamMailbox'
 import { UarTeamModelPicker } from './UarTeamModelPicker'
@@ -30,7 +32,7 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
   const { t: tr } = useTranslation(undefined, { keyPrefix: 'settings.prometheus.integration.uarAdmin.teams' })
   const [snapshot, setSnapshot] = useState<UarTeamsSnapshot>()
   const [loading, setLoading] = useState(true)
-  const [busy, setBusy] = useState<'setup' | 'create'>()
+  const [busy, setBusy] = useState<'setup' | 'create' | 'rebind'>()
   const [error, setError] = useState<string>()
   const [status, setStatus] = useState<string>()
   const [selectedDefinitionKey, setSelectedDefinitionKey] = useState<string>()
@@ -106,12 +108,35 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
       if (message.includes('UAR_TEAM_MODEL_PRICING_UNAVAILABLE')) setError(tr('execution.priceUnavailable'))
       else if (message.includes('UAR_TEAM_BINDING_ACTIVATION_UNAVAILABLE')) setError(tr('execution.bindingUnavailable'))
       else if (
-        ['UAR_TEAM_BINDING_SCOPE_MISMATCH', 'UAR_TEAM_BINDING_PACKAGE_MISMATCH', 'UAR_TEAM_BINDING_RESULT_MISMATCH'].some(
-          (code) => message.includes(code)
-        )
+        [
+          'UAR_TEAM_BINDING_SCOPE_MISMATCH',
+          'UAR_TEAM_BINDING_PACKAGE_MISMATCH',
+          'UAR_TEAM_BINDING_RESULT_MISMATCH'
+        ].some((code) => message.includes(code))
       ) {
         setError(tr('execution.bindingMismatch'))
-      } else setError(message)
+      } else setError(uarTeamError(message, (key) => tr('execution.' + key)))
+    } finally {
+      setBusy(undefined)
+    }
+  }
+
+  const rebindStarter = async () => {
+    if (!selectedBinding || !teamModel) return
+    setBusy('rebind')
+    setError(undefined)
+    setStatus(undefined)
+    try {
+      await ipcApi.request('prometheus.uar.teams.rebind_starter', {
+        workspaceId,
+        bindingId: selectedBinding.id,
+        expectedBindingRevision: selectedBinding.revision,
+        model: teamModel
+      })
+      setStatus(tr('execution.rebindSucceeded'))
+      await refresh()
+    } catch (cause) {
+      setError(uarTeamError(cause instanceof Error ? cause.message : String(cause), (key) => tr('execution.' + key)))
     } finally {
       setBusy(undefined)
     }
@@ -208,6 +233,7 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
         )}
       </SettingGroup>
 
+      <UarExecutionOwnerPanel />
       {snapshot && (
         <>
           <SettingGroup>
@@ -276,6 +302,14 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedBinding && teamModel && (
+                  <div className="mt-3">
+                    <Button size="sm" variant="outline" disabled={Boolean(busy)} onClick={() => void rebindStarter()}>
+                      {tr('execution.rebind')}
+                    </Button>
+                    <p className="mt-1 text-xs text-muted-foreground">{tr('execution.rebindHelp')}</p>
+                  </div>
+                )}
                 {selectedDefinition && eligibleBindings?.length === 0 && (
                   <p className="mt-2 text-sm text-muted-foreground">{tr('noBindings')}</p>
                 )}

@@ -5,6 +5,7 @@ import * as z from 'zod'
 import { application } from '@application'
 import { readIntegrationConfig, readSecrets } from '@main/services/prometheus/integrationConfig'
 import { configuredModelForLiterAlias } from '@main/services/prometheus/literGatewayCatalog'
+import type { UarExecutionProfile } from '@shared/types/uarTeamProfiles'
 import type { UarTeamModelSelection } from '@shared/types/uarTeams'
 
 import { providerResponseSchema, readUarModelSources } from './UarModelSourceAdapter'
@@ -29,7 +30,13 @@ export async function configureTeamModel(selection: UarTeamModelSelection, gener
     ) {
       throw new Error('Configure credentials for the selected UAR provider before setting up the team')
     }
-    return { providerId: provider.id, modelId: model.id }
+    if (!model.executionProfile) throw new Error('TEAM_PROFILE_UNSUPPORTED')
+    return {
+      providerId: provider.id,
+      modelId: model.id,
+      profile: model.executionProfile.profile,
+      settingsRevision: model.executionProfile.settingsRevision
+    }
   }
   const config = readIntegrationConfig()
   const pricingIdentity = configuredModelForLiterAlias(config, model.id)
@@ -82,12 +89,17 @@ export async function configureTeamModel(selection: UarTeamModelSelection, gener
         id: providerId,
         display_name: 'liter-llm · ' + model.id,
         base_url: baseUrl,
-        protocol: 'auto',
+        protocol: 'chat',
         default_model: model.id,
         models: [
           {
             id: model.id,
             enabled: true,
+            execution_profile: {
+              profile: { id: 'uar.openai-compatible-chat.settings-v1', revision: 1 },
+              settingsRevision: 1,
+              reasoning: { mode: 'off' }
+            } satisfies UarExecutionProfile,
             pricing_identity: { provider_id: pricingIdentity.providerId, model_id: pricingIdentity.modelId }
           }
         ],
@@ -110,5 +122,12 @@ export async function configureTeamModel(selection: UarTeamModelSelection, gener
   }
   const currentEndpoint = await sidecar.resolveSelected()
   if (currentEndpoint.generation !== generation) throw new Error('UAR instance changed during team gateway setup')
-  return { providerId, modelId: model.id }
+  const saved = existing?.models.find((item) => item.id === model.id)?.executionProfile
+  if (existing && !saved) throw new Error('TEAM_PROFILE_UNSUPPORTED')
+  return {
+    providerId,
+    modelId: model.id,
+    profile: saved?.profile ?? { id: 'uar.openai-compatible-chat.settings-v1', revision: 1 },
+    settingsRevision: saved?.settingsRevision ?? 1
+  }
 }

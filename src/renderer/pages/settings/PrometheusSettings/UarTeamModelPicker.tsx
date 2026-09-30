@@ -2,7 +2,7 @@ import { RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cherrystudio/ui'
+import { Badge, Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cherrystudio/ui'
 import { ipcApi } from '@renderer/ipc'
 import type { UarModelSourceSnapshot } from '@shared/types/prometheusIntegration'
 import type { UarTeamModelSelection } from '@shared/types/uarTeams'
@@ -53,6 +53,10 @@ export function UarTeamModelPicker({ value, disabled, onChange }: Props) {
             }))
         )
     }) ?? []
+  const selectedModel = snapshot?.sources
+    .find((source) => source.source === value?.source)
+    ?.providers.find((provider) => provider.id === value?.providerId)
+    ?.models.find((model) => model.id === value?.modelId)
   const key = (model: UarTeamModelSelection) => JSON.stringify(model)
   return (
     <div className="mt-3 space-y-2" data-ui="uar-team-model-picker">
@@ -90,6 +94,25 @@ export function UarTeamModelPicker({ value, disabled, onChange }: Props) {
       <p id={id + 'help'} className="text-xs text-muted-foreground">
         {tr('modelHelp')}
       </p>
+      {value && (
+        <div className="space-y-1 text-xs">
+          <p className="break-all">
+            {tr('route')}: {value.providerId} / {value.modelId}
+          </p>
+          {selectedModel?.executionProfile && (
+            <p className="break-all">
+              {tr('profile')}: {selectedModel.executionProfile.profile.id} · {tr('settingsRevision')}{' '}
+              {selectedModel.executionProfile.settingsRevision}
+            </p>
+          )}
+          <Badge variant="outline">
+            {selectedModel?.executionProfile?.reasoning.mode === 'explicit'
+              ? tr('reasoningExplicit')
+              : tr('reasoningOff')}
+          </Badge>
+          <p className="text-warning-subtle-foreground">{tr('noGuaranteedFit')}</p>
+        </div>
+      )}
       {loading && (
         <p className="text-xs text-muted-foreground" role="status">
           {t('common.loading')}

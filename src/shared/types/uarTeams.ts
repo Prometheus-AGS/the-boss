@@ -1,3 +1,4 @@
+import type { UarEffectiveModelReceipt, UarExecutionFence, UarTeamDiagnostic } from './uarTeamProfiles'
 export interface UarTeamIdentity {
   id: string
   version: string
@@ -184,6 +185,11 @@ export interface UarTeamExecutionAttempt {
   bindingRevision: number
   executionEpoch: number
   status: 'queued' | 'running' | 'cancellation_requested' | 'uncertain' | 'succeeded' | 'failed' | 'cancelled'
+  executionFence?: UarExecutionFence | null
+  effectiveModels?: UarEffectiveModelReceipt[]
+  effectDisposition?: 'confirmed' | 'uncertain'
+  accountingState?: 'settled' | 'reserved-unknown'
+  diagnostic?: UarTeamDiagnostic | null
   executionOutcome?: 'succeeded' | 'failed' | 'cancelled' | 'uncertain' | null
   reservation: UarTeamReservation
   contextArtifactIds: string[]

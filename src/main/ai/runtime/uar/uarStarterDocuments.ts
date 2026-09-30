@@ -198,6 +198,8 @@ export function starterBinding(input: {
   runtimeInstanceId: string
   providerId?: string
   modelId?: string
+  profile?: { id: string; revision: number }
+  settingsRevision?: number
   storageBackend: 'embedded' | 'remote'
   packageIdentity: { id: string; version: string; digest: string }
   bindingId?: string
@@ -224,6 +226,9 @@ export function starterBinding(input: {
               requestedAlias: 'local-default',
               providerId: input.providerId,
               modelId: input.modelId,
+              ...(input.profile && input.settingsRevision
+                ? { profile: input.profile, settingsRevision: input.settingsRevision }
+                : {}),
               credentialRef: `protected-credential://uar/provider/${input.providerId}`
             }
           ]

@@ -237,7 +237,32 @@ export async function setupUarStarterTeam(workspaceId: string, model?: UarTeamMo
     ) {
       throw new Error('UAR_TEAM_BINDING_PACKAGE_MISMATCH')
     }
-    if (existingBinding.activationSupported) return rawBinding.parse(existingBinding)
+    if (existingBinding.activationSupported) {
+      if (selectedModel) {
+        const savedModels = z
+          .array(
+            z.object({
+              providerId: z.string(),
+              modelId: z.string(),
+              profile: z.object({ id: z.string(), revision: z.number() }).optional(),
+              settingsRevision: z.number().optional()
+            })
+          )
+          .parse(existingBinding.document.modelBindings)
+        const saved = savedModels.find(
+          (item) => item.providerId === selectedModel.providerId && item.modelId === selectedModel.modelId
+        )
+        if (
+          !saved ||
+          saved.profile?.id !== selectedModel.profile.id ||
+          saved.profile.revision !== selectedModel.profile.revision ||
+          saved.settingsRevision !== selectedModel.settingsRevision
+        ) {
+          throw new Error('TEAM_REVISION_CONFLICT')
+        }
+      }
+      return rawBinding.parse(existingBinding)
+    }
     if (
       existingBinding.document.id !== binding.id ||
       existingBinding.document.ownerId !== capabilities.bindingOwnerId ||
@@ -296,4 +321,49 @@ export async function setupUarStarterTeam(workspaceId: string, model?: UarTeamMo
     throw new Error('UAR_TEAM_BINDING_ACTIVATION_UNAVAILABLE')
   }
   return installed.binding
+}
+
+/** Explicitly revise the selected starter binding; existing instances keep their captured revisions. */
+export async function rebindUarStarterTeam(input: {
+  workspaceId: string
+  bindingId: string
+  expectedBindingRevision: number
+  model: UarTeamModelSelection
+}): Promise<UarTeamBinding> {
+  const resolved = workspace(input.workspaceId)
+  const state = await capabilityState()
+  const selected = await configureTeamModel(input.model, state.generation)
+  const bindings = z.array(rawStarterTeamBinding).parse(await scopedRequest(resolved, bindingPath, state.generation))
+  const saved = bindings.find((item) => item.id === input.bindingId && item.workspaceId === resolved)
+  if (!saved || saved.package.id !== starterTeamPackage().identity.id) throw new Error('TEAM_SCOPE_DENIED')
+  if (saved.revision !== input.expectedBindingRevision) throw new Error('TEAM_REVISION_CONFLICT')
+  const binding = revisedStarterBinding(
+    {
+      ...saved.document,
+      modelBindings: [
+        {
+          requestedAlias: 'local-default',
+          ...selected,
+          credentialRef: 'protected-credential://uar/provider/' + selected.providerId
+        }
+      ]
+    },
+    saved.revision + 1,
+    String(saved.document.runtimeInstanceId)
+  )
+  const request = { commandId: randomUUID(), expectedRevision: saved.revision, binding }
+  const preflight = rawPreflight.parse(
+    await scopedRequest(resolved, bindingPath + ':preflight', state.generation, 'POST', request)
+  )
+  if (!preflight.activationSupported) throw new Error('UAR_TEAM_BINDING_ACTIVATION_UNAVAILABLE')
+  const result = z
+    .object({ binding: rawBinding })
+    .parse(await scopedRequest(resolved, bindingPath, state.generation, 'POST', request))
+  if (
+    result.binding.id !== saved.id ||
+    result.binding.workspaceId !== resolved ||
+    result.binding.revision !== saved.revision + 1
+  )
+    throw new Error('UAR_TEAM_BINDING_RESULT_MISMATCH')
+  return result.binding
 }

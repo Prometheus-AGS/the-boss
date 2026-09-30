@@ -79,6 +79,7 @@ import {
   uarInstanceSelectSchema,
   type UarInstanceInventorySnapshot
 } from '@shared/types/uarServiceInstance'
+import type { UarExecutionOwnerSnapshot, UarExecutionReclaimReceipt } from '@shared/types/uarTeamProfiles'
 import type {
   UarTeamArtifact,
   UarTeamExecutionAttempt,
@@ -324,6 +325,23 @@ export const prometheusRequestSchemas = {
       .strict(),
     output: z.custom<UarTeamBinding>()
   }),
+  'prometheus.uar.teams.rebind_starter': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        bindingId: z.string().min(1).max(512),
+        expectedBindingRevision: z.number().int().positive(),
+        model: z
+          .object({
+            source: z.enum(['uar', 'gateway']),
+            providerId: z.string().min(1).max(128),
+            modelId: z.string().min(1).max(256)
+          })
+          .strict()
+      })
+      .strict(),
+    output: z.custom<UarTeamBinding>()
+  }),
   'prometheus.uar.teams.create': defineRoute({
     input: z
       .object({
@@ -377,6 +395,30 @@ export const prometheusRequestSchemas = {
     }),
     output: z.custom<UarTeamInstance>()
   }),
+  'prometheus.uar.teams.execution_owner': defineRoute({
+    input: z.object({}).strict(),
+    output: z.custom<UarExecutionOwnerSnapshot>()
+  }),
+  'prometheus.uar.teams.quiesce_owner': defineRoute({
+    input: z.object({}).strict(),
+    output: z.custom<{ fencingEvidenceRef: string; claim: NonNullable<UarExecutionOwnerSnapshot['claim']> }>()
+  }),
+  'prometheus.uar.teams.reclaim_owner': defineRoute({
+    input: z
+      .object({
+        commandId: z.uuid(),
+        catalogId: z.string().min(1).max(128),
+        expectedEpoch: z.number().int().positive(),
+        replacementServiceInstanceId: z.string().min(1).max(128),
+        reason: z.string().min(1).max(2048),
+        fencingEvidenceRef: z
+          .string()
+          .regex(/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/)
+          .max(128)
+      })
+      .strict(),
+    output: z.custom<UarExecutionReclaimReceipt>()
+  }),
   'prometheus.uar.teams.execution': defineRoute({
     input: teamExecutionSelectorSchema,
     output: z.custom<UarTeamExecutionSummary>()
@@ -395,6 +437,27 @@ export const prometheusRequestSchemas = {
         })
         .strict(),
       contextArtifactIds: z.array(z.string().min(1).max(256)).max(128)
+    }),
+    output: z.custom<UarTeamExecutionAttempt>()
+  }),
+  'prometheus.uar.teams.queue_task': defineRoute({
+    input: teamTaskCommandSchema.extend({
+      reservation: z
+        .object({
+          tokens: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+          costMicrounits: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+          elapsedSeconds: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER)
+        })
+        .strict(),
+      contextArtifactIds: z.array(z.string().min(1).max(256)).max(128)
+    }),
+    output: z.custom<UarTeamExecutionAttempt>()
+  }),
+  'prometheus.uar.teams.dispatch_attempt': defineRoute({
+    input: teamExecutionSelectorSchema.extend({
+      commandId: z.uuid(),
+      expectedTeamRevision: z.number().int().nonnegative(),
+      attemptId: z.string().min(1).max(256)
     }),
     output: z.custom<UarTeamExecutionAttempt>()
   }),

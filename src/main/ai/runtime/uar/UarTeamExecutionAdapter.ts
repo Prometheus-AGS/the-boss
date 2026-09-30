@@ -1,5 +1,7 @@
 import * as z from 'zod'
 
+import { application } from '@application'
+import { uarReasoningSchema } from '@shared/types/uarTeamProfiles'
 import type {
   UarAdmitTeamTaskInput,
   UarTeamArtifact,
@@ -31,6 +33,50 @@ const attempt = z.object({
   bindingRevision: z.number().int().nonnegative(),
   executionEpoch: z.number().int().nonnegative(),
   status: z.enum(['queued', 'running', 'cancellation_requested', 'uncertain', 'succeeded', 'failed', 'cancelled']),
+  executionFence: z
+    .object({
+      catalogId: z.string(),
+      serviceInstanceId: z.string(),
+      incarnationId: z.string(),
+      epoch: z.number().int().positive()
+    })
+    .nullish(),
+  effectDisposition: z.enum(['confirmed', 'uncertain']).optional(),
+  accountingState: z.enum(['settled', 'reserved-unknown']).optional(),
+  effectiveModels: z
+    .array(
+      z.object({
+        route: z.object({ providerId: z.string(), modelId: z.string() }),
+        wireModelAlias: z.string(),
+        pricingIdentity: z
+          .object({ providerId: z.string(), modelId: z.string(), catalogRevision: z.string() })
+          .optional(),
+        endpointKind: z.string(),
+        profile: z.object({ id: z.string(), revision: z.number().int().positive() }),
+        settingsRevision: z.number().int().positive(),
+        requestedReasoning: uarReasoningSchema,
+        effectiveReasoning: uarReasoningSchema,
+        support: z.literal('validated'),
+        supportEvidenceRef: z.string(),
+        limits: z.object({
+          contextTokens: z.number().optional(),
+          outputTokens: z.number().optional(),
+          source: z.string(),
+          sourceRevision: z.string().optional()
+        }),
+        fit: z.object({ mode: z.literal('settings-only'), guaranteedFit: z.literal(false), reason: z.string() })
+      })
+    )
+    .optional(),
+  diagnostic: z
+    .object({
+      code: z.string(),
+      field: z.string().optional(),
+      retryable: z.boolean(),
+      action: z.enum(['rebind', 'change-settings', 'reconcile', 'contact-operator', 'none']),
+      protectedDiagnosticRef: z.string().optional()
+    })
+    .nullish(),
   executionOutcome: z.enum(['succeeded', 'failed', 'cancelled', 'uncertain']).nullish(),
   reservation,
   contextArtifactIds: z.array(z.string()),
@@ -173,5 +219,58 @@ export async function revokeUarTeamMember(input: UarTeamControlInput & { memberI
       controlBody(input)
     ),
     state.workspaceId
+  )
+}
+
+async function privilegedTeamRequest(
+  state: Awaited<ReturnType<typeof executionTarget>>,
+  suffix: string,
+  payload: object
+): Promise<unknown> {
+  const sidecar = application.get('UarSidecarService')
+  const response = await sidecar.adminRequest(
+    state.path + suffix,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-uar-workspace-id': state.workspaceId },
+      body: JSON.stringify(payload)
+    },
+    state.generation
+  )
+  const body: unknown = await response.json()
+  if (!response.ok) {
+    const error = z.object({ error: z.object({ code: z.string() }) }).safeParse(body)
+    throw new Error(
+      error.success && /^TEAM_[A-Z_]+$/.test(error.data.error.code) ? error.data.error.code : 'TEAM_SCOPE_DENIED'
+    )
+  }
+  return body
+}
+
+export async function queueUarTeamTask(input: UarAdmitTeamTaskInput): Promise<UarTeamExecutionAttempt> {
+  const state = await executionTarget(input)
+  return scopedAttempt(
+    await privilegedTeamRequest(state, '/tasks/' + encodeURIComponent(input.taskId) + '/admit-queued', {
+      commandId: input.commandId,
+      expectedTeamRevision: input.expectedTeamRevision,
+      expectedTaskRevision: input.expectedTaskRevision,
+      memberId: input.memberId,
+      reservation: input.reservation,
+      contextArtifactIds: input.contextArtifactIds
+    }),
+    state.team
+  )
+}
+
+export async function dispatchUarTeamAttempt(
+  input: UarTeamExecutionSelector & { commandId: string; expectedTeamRevision: number; attemptId: string }
+): Promise<UarTeamExecutionAttempt> {
+  const state = await executionTarget(input)
+  return scopedAttempt(
+    await privilegedTeamRequest(state, '/attempts/' + encodeURIComponent(input.attemptId) + '/dispatch', {
+      commandId: input.commandId,
+      expectedTeamRevision: input.expectedTeamRevision
+    }),
+    state.team
   )
 }
