@@ -413,7 +413,7 @@
   "images": {
     "surrealdb": "surrealdb/surrealdb:v3.3.0@sha256:681c6c22c287421b5c7d99e0fde79b6e0d32c36c1ddeaab2762a1661cb04cd20",
     "surreal-memory": "ghcr.io/prometheus-ags/the-boss-surreal-memory@sha256:b0414341e4e649a1ae68cbcbb2d98b8bd6d87e6f8c425f33947185ba1031c6a1",
-    "liter-llm": "ghcr.io/prometheus-ags/the-boss-liter-llm@sha256:b69ec5456a5aaaf733e20c3c00f8cf237272ecdad6c844558fd0b832a5667a0b"
+    "liter-llm": "ghcr.io/prometheus-ags/the-boss-liter-llm@sha256:9e04e66097c6161e3b699b485b2708d9378de772125bfd7020373eefc75cace3"
   },
   "catalogs": {
     "liter-llm": {
@@ -424,5 +424,21 @@
   "compassSkills": {
     "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/compass-skills.tar.gz",
     "sha256": "8b13681910d532411300268c4ba2bab5712e1b7e5cba70f105e766cd89e2c7b0"
+  },
+  "imageProvenance": {
+    "liter-llm": {
+      "image": "ghcr.io/prometheus-ags/the-boss-liter-llm",
+      "digest": "sha256:9e04e66097c6161e3b699b485b2708d9378de772125bfd7020373eefc75cace3",
+      "source": {
+        "repository": "GQAdonis/liter-llm",
+        "revision": "0617979022aea621dd13541dee07ad84ffcf7d21"
+      },
+      "recipeSource": {
+        "repository": "Prometheus-AGS/prometheus-skills-mini",
+        "revision": "3d54f210dd87c9e25d300079d973c12b046e80aa"
+      },
+      "workflowRun": 36709025506,
+      "manifestPublisher": "root existing buildx publication recipe"
+    }
   }
 }
