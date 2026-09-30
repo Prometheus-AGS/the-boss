@@ -95,6 +95,10 @@ export async function runCheckpoint(root, state, iteration, input, commandId) {
   if (!step) throw new Error(`No configured checkpoint ${input.id}`);
   const previous = iteration.checkpoints.find((item) => item.commandId === commandId);
   if (previous) return previous;
+  if (input.timeoutMs !== undefined && (!Number.isSafeInteger(input.timeoutMs) || input.timeoutMs <= 0 || typeof input.reason !== 'string' || !input.reason.trim())) {
+    throw new Error('A checkpoint timeout adjustment requires positive integer milliseconds and a recorded reason');
+  }
+  const requestedTimeoutMs = input.timeoutMs ?? step.timeoutMs ?? 14_400_000;
   const repeated = iteration.checkpoints.some((item) => item.id === step.id);
   if (step.kind === 'build' && repeated && (iteration.contractVersion ?? 1) >= 2 && (typeof input.reason !== 'string' || !input.reason.trim())) {
     throw new Error('Repeated builds require a reason identifying the repair or changed release input');
@@ -127,6 +131,7 @@ export async function runCheckpoint(root, state, iteration, input, commandId) {
   const attempt = { id: step.id, attemptId: randomUUID(), commandId, kind: step.kind, purpose, status: 'running', startedAt,
     ...(purpose === 'feature' ? { featureOperationId: iteration.featureOperation.id } : {}),
     reason: input.reason ?? (repeated ? 'Unspecified legacy retry' : 'Initial delivery checkpoint'),
+    configuredTimeoutMs: step.timeoutMs ?? 14_400_000, requestedTimeoutMs,
     sourceRefs: iteration.sourceRefs, command: step.command, args: step.args, cwd: path.resolve(step.cwd), hostname: os.hostname() };
   iteration.checkpoints.push(attempt); iteration.status = 'checkpoint-running';
   await saveEvent(root, state, 'checkpoint.started', { iterationId: iteration.id, attemptId: attempt.attemptId });
@@ -144,7 +149,7 @@ export async function runCheckpoint(root, state, iteration, input, commandId) {
     ? Date.parse(state.startedAt) + state.profile.budgets.maxRunMinutes * 60_000 - Date.now() : Infinity;
   try {
     if (remaining <= 0) throw new Error('Run budget exhausted before checkpoint dispatch');
-    const result = await runCommand({ ...step, timeoutMs: Math.min(step.timeoutMs ?? 14_400_000, remaining) }, {
+    const result = await runCommand({ ...step, timeoutMs: Math.min(requestedTimeoutMs, remaining) }, {
       cwd: step.cwd, signal: controller.signal,
       onSpawn(pid) { attempt.pid = pid; spawnSave = saveEvent(root, state, 'checkpoint.process', { attemptId: attempt.attemptId, pid }); },
       onOutput(stream, text) {

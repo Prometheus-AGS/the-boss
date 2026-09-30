@@ -272,9 +272,9 @@ async function execute(root, state, command, input, args) {
       if (!['success', 'failed', 'cancelled'].includes(input.outcome)) fail('publication requires an outcome');
       const artifacts = await artifactReceipts(input.artifacts ?? []);
       if (input.outcome === 'success' && (!artifacts.length || !input.receipt)) fail('Successful publication needs artifact files and a publication/site receipt');
-      const receipt = input.outcome === 'success' ? await publicationReceipt(input.receipt, artifacts, iteration.sourceRefs, iteration.profile) : null;
+      const receipt = input.outcome === 'success' ? await publicationReceipt(input.receipt, artifacts, iteration.sourceRefs, state.profile) : null;
       const event = envelope(state, iteration, 'publication:after', input.outcome); event.artifacts = artifacts;
-      const publication = { id: randomUUID(), commandId: args.commandId, iterationId: iteration.id, outcome: input.outcome, event, artifacts, receipt, recordedAt: now() };
+      const publication = { id: randomUUID(), commandId: args.commandId, iterationId: iteration.id, outcome: input.outcome, event, artifacts, receipt, profileRevision: state.profileRevision, publicationPolicy: structuredClone(state.profile.publication), recordedAt: now() };
       state.publications.push(publication);
       await saveEvent(root, state, 'publication.recorded', { publicationId: publication.id });
       const result = await runHooks(root, event); publication.hookResults = result.results; publication.hookBlocked = result.blocked;

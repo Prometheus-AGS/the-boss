@@ -75,7 +75,7 @@ export function publicationRequirements(receipt, artifacts, sourceRefs, profile)
 
 export function publicationStatus(state) {
   const latest = [...(state.iterations ?? [])].reverse().find((item) => item.workOutcome === 'success');
-  const policy = latest?.profile ?? state.profile;
+  const policy = state.profile;
   const publication = [...(state.publications ?? [])].reverse().find((item) => item.iterationId === latest?.id && item.outcome === 'success' && !item.hookBlocked && item.hookResults);
   const missing = latest ? publicationRequirements(publication?.receipt, publication?.artifacts ?? [], latest.sourceRefs, policy) : ['successful-local-delivery'];
   const latestAttempt = [...(state.publications ?? [])].reverse().find((item) => item.iterationId === latest?.id);

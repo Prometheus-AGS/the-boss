@@ -235,4 +235,5 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PAYLOAD_TAG: ${{ inputs.payload_tag }}
           PAYLOAD_PLATFORMS: ${{ inputs.native_platforms }}
+          IMAGE_RUN: ${{ inputs.reuse_image_run || github.run_id }}
         run: node scripts/publish-integration-payload.cjs

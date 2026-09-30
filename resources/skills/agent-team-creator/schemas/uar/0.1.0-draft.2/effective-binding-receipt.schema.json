@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometheus-ags.dev/uar/collaboration/0.1.0-draft.2/effective-binding-receipt.schema.json",
+  "title": "UAR private EffectiveBindingReceipt — requested versus enforced semantics",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "urn:prometheus:uar:collaboration:0.1.0-draft.2"
+    },
+    "kind": {
+      "const": "EffectiveBindingReceipt"
+    },
+    "exportClass": {
+      "const": "private-binding-evidence"
+    },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "revision": {
+      "$ref": "common.schema.json#/$defs/revision"
+    },
+    "contentDigest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "bindingRef": {
+      "$ref": "common.schema.json#/$defs/privateRevisionRef"
+    },
+    "package": {
+      "$ref": "common.schema.json#/$defs/immutableRef"
+    },
+    "requested": {
+      "type": "object"
+    },
+    "effective": {
+      "type": "object"
+    },
+    "resolvedSkills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "skill": {
+            "$ref": "common.schema.json#/$defs/skill"
+          },
+          "installedLocation": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "skill",
+          "installedLocation"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "resolvedModels": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "policyRevision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "representationGrants": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/representationGrantRef"
+      },
+      "uniqueItems": true
+    },
+    "runtimeCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "serviceBinding": {
+      "type": "object",
+      "properties": {
+        "instanceId": { "type": "string", "minLength": 1 },
+        "profile": { "const": "uar.service-instance/1" },
+        "workspaceLocation": { "enum": ["local", "remote"] },
+        "endpoints": {
+          "type": "object",
+          "properties": {
+            "runtime": { "type": "string", "format": "uri" },
+            "administration": { "type": "string", "format": "uri" },
+            "models": { "type": "string", "format": "uri" },
+            "console": { "type": ["string", "null"], "format": "uri" }
+          },
+          "required": ["runtime", "administration", "models", "console"],
+          "additionalProperties": false
+        },
+        "capabilities": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "intent": { "enum": ["new", "reattach", "migrate"] },
+        "bindingId": { "type": "string", "minLength": 1 },
+        "bindingRevision": { "$ref": "common.schema.json#/$defs/revision" },
+        "credentialRef": { "type": "string", "minLength": 1 }
+      },
+      "required": [
+        "instanceId",
+        "profile",
+        "workspaceLocation",
+        "endpoints",
+        "capabilities",
+        "intent"
+      ],
+      "additionalProperties": false
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/diagnostic"
+      }
+    },
+    "admitted": {
+      "type": "boolean"
+    },
+    "createdAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    }
+  },
+  "required": [
+    "profile",
+    "kind",
+    "exportClass",
+    "id",
+    "revision",
+    "contentDigest",
+    "bindingRef",
+    "package",
+    "requested",
+    "effective",
+    "resolvedSkills",
+    "resolvedModels",
+    "policyRevision",
+    "representationGrants",
+    "runtimeCapabilities",
+    "diagnostics",
+    "admitted",
+    "createdAt"
+  ],
+  "additionalProperties": false
+}

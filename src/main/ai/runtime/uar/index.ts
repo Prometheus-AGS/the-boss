@@ -23,7 +23,17 @@ export {
   sendUarTeamMailboxMessage,
   updateUarTeamTaskState
 } from './UarTeamsAdministrationAdapter'
-export { setupUarStarterAgent, setupUarStarterTeam } from './UarStarterAdministrationAdapter'
+export {
+  admitUarTeamTask,
+  queueUarTeamTask,
+  dispatchUarTeamAttempt,
+  cancelUarTeamAttempt,
+  readUarTeamArtifacts,
+  readUarTeamExecution,
+  recoverUarTeamExecution,
+  revokeUarTeamMember
+} from './UarTeamExecutionAdapter'
+export { setupUarStarterAgent, setupUarStarterTeam, rebindUarStarterTeam } from './UarStarterAdministrationAdapter'
 export {
   deleteUarProvider,
   readUarModelSources,
@@ -72,3 +82,11 @@ export {
   encodeUarSessionPlacement,
   isStructuredUarSessionPlacement
 } from './uarSessionPlacement'
+
+export {
+  readUarExecutionOwner,
+  reclaimUarExecutionOwner,
+  quiesceUarExecutionOwner
+} from './UarExecutionOwnershipAdapter'
+
+export { readUarTeamContext, readUarTeamPeerMessages } from './UarTeamContextAdapter'

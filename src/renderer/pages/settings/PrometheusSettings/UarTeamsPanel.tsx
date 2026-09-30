@@ -14,9 +14,14 @@ import {
 } from '@cherrystudio/ui'
 import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/components/SettingsPrimitives'
 import { ipcApi } from '@renderer/ipc'
-import type { UarTeamsSnapshot } from '@shared/types/uarTeams'
+import type { UarTeamModelSelection, UarTeamsSnapshot } from '@shared/types/uarTeams'
 
+import { UarExecutionOwnerPanel } from './UarExecutionOwnerPanel'
+import { uarTeamError } from './uarTeamError'
+import { UarTeamExecutionPanel } from './UarTeamExecutionPanel'
 import { UarTeamMailbox } from './UarTeamMailbox'
+import { UarTeamModelPicker } from './UarTeamModelPicker'
+import { UarTeamPeerMessages } from './UarTeamPeerMessages'
 import { UarTeamTaskBoard } from './UarTeamTaskBoard'
 import { UarTeamTaskForm } from './UarTeamTaskForm'
 
@@ -28,7 +33,7 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
   const { t: tr } = useTranslation(undefined, { keyPrefix: 'settings.prometheus.integration.uarAdmin.teams' })
   const [snapshot, setSnapshot] = useState<UarTeamsSnapshot>()
   const [loading, setLoading] = useState(true)
-  const [busy, setBusy] = useState<'setup' | 'create'>()
+  const [busy, setBusy] = useState<'setup' | 'create' | 'rebind'>()
   const [error, setError] = useState<string>()
   const [status, setStatus] = useState<string>()
   const [selectedDefinitionKey, setSelectedDefinitionKey] = useState<string>()
@@ -36,24 +41,32 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
   const [selectedInstanceId, setSelectedInstanceId] = useState<string>()
   const [memberCounts, setMemberCounts] = useState<Record<string, number>>({})
   const [teamInput, setTeamInput] = useState('{}')
+  const [teamModel, setTeamModel] = useState<UarTeamModelSelection>()
   const createIntent = useRef<{ fingerprint: string; commandId: string } | undefined>(undefined)
 
-  const refresh = useCallback(async () => {
-    setLoading(true)
-    setError(undefined)
-    try {
-      const next = await ipcApi.request('prometheus.uar.teams.snapshot', { workspaceId })
-      setSnapshot(next)
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
-    } finally {
-      setLoading(false)
-    }
-  }, [workspaceId])
+  const refresh = useCallback(
+    async (quiet = false) => {
+      if (!quiet) {
+        setLoading(true)
+        setError(undefined)
+      }
+      try {
+        const next = await ipcApi.request('prometheus.uar.teams.snapshot', { workspaceId })
+        setSnapshot(next)
+      } catch (cause) {
+        setError(cause instanceof Error ? cause.message : String(cause))
+      } finally {
+        if (!quiet) setLoading(false)
+      }
+    },
+    [workspaceId]
+  )
 
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  const refreshQuietly = useCallback(() => refresh(true), [refresh])
 
   const selectedDefinition = snapshot?.definitions.find(
     (definition) => definitionKey(definition) === selectedDefinitionKey
@@ -73,7 +86,10 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
     setError(undefined)
     setStatus(undefined)
     try {
-      const binding = await ipcApi.request('prometheus.uar.teams.setup_starter', { workspaceId })
+      const binding = await ipcApi.request('prometheus.uar.teams.setup_starter', {
+        workspaceId,
+        ...(teamModel ? { model: teamModel } : {})
+      })
       setStatus(tr('starterReady'))
       const next = await ipcApi.request('prometheus.uar.teams.snapshot', { workspaceId })
       setSnapshot(next)
@@ -89,7 +105,39 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
         setMemberCounts(Object.fromEntries(installed.members.map((member) => [member.role, member.min])))
       }
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
+      const message = cause instanceof Error ? cause.message : String(cause)
+      if (message.includes('UAR_TEAM_MODEL_PRICING_UNAVAILABLE')) setError(tr('execution.priceUnavailable'))
+      else if (message.includes('UAR_TEAM_BINDING_ACTIVATION_UNAVAILABLE')) setError(tr('execution.bindingUnavailable'))
+      else if (
+        [
+          'UAR_TEAM_BINDING_SCOPE_MISMATCH',
+          'UAR_TEAM_BINDING_PACKAGE_MISMATCH',
+          'UAR_TEAM_BINDING_RESULT_MISMATCH'
+        ].some((code) => message.includes(code))
+      ) {
+        setError(tr('execution.bindingMismatch'))
+      } else setError(uarTeamError(message, (key) => tr('execution.' + key)))
+    } finally {
+      setBusy(undefined)
+    }
+  }
+
+  const rebindStarter = async () => {
+    if (!selectedBinding || !teamModel) return
+    setBusy('rebind')
+    setError(undefined)
+    setStatus(undefined)
+    try {
+      await ipcApi.request('prometheus.uar.teams.rebind_starter', {
+        workspaceId,
+        bindingId: selectedBinding.id,
+        expectedBindingRevision: selectedBinding.revision,
+        model: teamModel
+      })
+      setStatus(tr('execution.rebindSucceeded'))
+      await refresh()
+    } catch (cause) {
+      setError(uarTeamError(cause instanceof Error ? cause.message : String(cause), (key) => tr('execution.' + key)))
     } finally {
       setBusy(undefined)
     }
@@ -186,6 +234,7 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
         )}
       </SettingGroup>
 
+      <UarExecutionOwnerPanel />
       {snapshot && (
         <>
           <SettingGroup>
@@ -225,17 +274,23 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                 {snapshot.definitions.length === 0 && (
                   <p className="mt-2 text-sm text-muted-foreground">{tr('noDefinitions')}</p>
                 )}
+                <UarTeamModelPicker value={teamModel} disabled={Boolean(busy)} onChange={setTeamModel} />
                 <Button
                   className="mt-3"
                   variant="outline"
                   size="sm"
-                  disabled={!snapshot.capabilities.planning || Boolean(busy)}
+                  disabled={!snapshot.capabilities.planning || !snapshot.capabilities.cooperation || Boolean(busy)}
                   onClick={() => void setupStarter()}>
                   {busy === 'setup'
                     ? tr('settingUpStarter')
                     : tr(snapshot.definitions.length === 0 ? 'setupStarter' : 'installCurrentStarter')}
                 </Button>
                 <p className="mt-1 text-xs text-muted-foreground">{tr('starterVersionHelp')}</p>
+                {!snapshot.capabilities.cooperation && (
+                  <p className="mt-1 text-xs text-muted-foreground" role="status">
+                    {tr('cooperation.unavailable')}
+                  </p>
+                )}
               </div>
               <div>
                 <label htmlFor="uar-team-binding" className="mb-1.5 block text-sm font-medium">
@@ -253,6 +308,14 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedBinding && teamModel && (
+                  <div className="mt-3">
+                    <Button size="sm" variant="outline" disabled={Boolean(busy)} onClick={() => void rebindStarter()}>
+                      {tr('execution.rebind')}
+                    </Button>
+                    <p className="mt-1 text-xs text-muted-foreground">{tr('execution.rebindHelp')}</p>
+                  </div>
+                )}
                 {selectedDefinition && eligibleBindings?.length === 0 && (
                   <p className="mt-2 text-sm text-muted-foreground">{tr('noBindings')}</p>
                 )}
@@ -291,6 +354,20 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                   ))}
                 </div>
               </fieldset>
+            )}
+            {selectedDefinition?.instructions && (
+              <details className="mt-4 text-xs" data-ui="uar-team-shared-guidance">
+                <summary className="cursor-pointer font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+                  {tr('cooperation.guidance')}
+                </summary>
+                <p className="mt-1 text-muted-foreground">{tr('cooperation.precedence')}</p>
+                <p className="mt-2 break-all text-muted-foreground">
+                  {tr('revision')} {selectedDefinition.instructions.revision} · {selectedDefinition.instructions.digest}
+                </p>
+                <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-md bg-background-subtle p-2">
+                  {selectedDefinition.instructions.text}
+                </pre>
+              </details>
             )}
             <div className="mt-4">
               <label htmlFor="uar-team-input" className="mb-1.5 block text-sm font-medium">
@@ -331,6 +408,11 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                   ))}
                 </SelectContent>
               </Select>
+            )}
+            {snapshot.executionProfileStage === 'operation' && (
+              <p className="text-sm text-warning-subtle-foreground" role="status">
+                {tr('cooperation.operationStage')}
+              </p>
             )}
             {selectedInstance && (
               <div className="mt-4 space-y-4">
@@ -379,6 +461,20 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
                 instance={selectedInstance}
                 ownership={snapshot.capabilities.ownership}
                 onChanged={refresh}
+              />
+              <UarTeamExecutionPanel
+                key={selectedInstance.id + ':execution'}
+                workspaceId={workspaceId}
+                instance={selectedInstance}
+                available={snapshot.capabilities.execution}
+                cooperation={Boolean(snapshot.capabilities.cooperation)}
+                onChanged={refreshQuietly}
+              />
+              <UarTeamPeerMessages
+                key={selectedInstance.id + ':peers'}
+                workspaceId={workspaceId}
+                instance={selectedInstance}
+                available={Boolean(snapshot.capabilities.cooperation)}
               />
               <UarTeamMailbox
                 key={selectedInstance.id}

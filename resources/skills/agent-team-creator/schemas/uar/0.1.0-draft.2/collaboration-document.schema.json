@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometheus-ags.dev/uar/collaboration/0.1.0-draft.2/collaboration-document.schema.json",
+  "title": "UAR collaboration draft.2 document discriminator",
+  "oneOf": [
+    {
+      "$ref": "agent-definition.schema.json"
+    },
+    {
+      "$ref": "team-definition.schema.json"
+    },
+    {
+      "$ref": "workflow-definition.schema.json"
+    },
+    {
+      "$ref": "package-manifest.schema.json"
+    },
+    {
+      "$ref": "deployment-binding.schema.json"
+    },
+    {
+      "$ref": "representation-grant.schema.json"
+    },
+    {
+      "$ref": "conversion-report.schema.json"
+    },
+    {
+      "$ref": "effective-binding-receipt.schema.json"
+    },
+    {
+      "$ref": "deployment-binding-template.schema.json"
+    }
+  ]
+}

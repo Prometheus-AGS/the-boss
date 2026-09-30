@@ -27,3 +27,9 @@ Use the configured worktree explicitly. Preserve unrelated changes, freeze sourc
 `learning` config invokes the existing recorder with command/argument-array/cwd and `{report}` substitution. The durable local report remains available if optional memory services fail. Cadence does not write an invented canonical store or fabricate completion records.
 
 Refresh Compass for changed repositories approximately hourly when resource capacity permits. Record revision, observed operation and deferred reason. A handshake is not a graph refresh. Do not compete with an active heavy build.
+
+## Installing across tools
+
+From the full skill system, run `node <full-pack>/scripts/distribute-delivery-cadence.mjs --targets all`. The selective installer copies this entire skill for Codex, Claude Code, Kimi Code, MiniMax, Zed and OpenCode and records separate KBD/Karpathy support paths. It preserves unrelated skills; conflicts require deliberate resolution. Restart or reload existing harness sessions to discover new files. Installation and CLI operation do not prove a native harness has loaded the skill.
+
+Use the mini copy inside The Boss when a full pack is already installed; never install mini globally over a full-pack installation. For detailed ownership, dry-run and target options, see the full pack documentation at https://github.com/Prometheus-AGS/prometheus-skill-system/blob/main/docs/delivery-cadence-distribution.md.

@@ -1,5 +1,6 @@
 const fs = require('node:fs')
 const path = require('node:path')
+const crypto = require('node:crypto')
 const { execFileSync } = require('node:child_process')
 const root = path.resolve(__dirname, '..')
 const directory = path.join(root, 'build/integration-output')
@@ -21,7 +22,21 @@ for (const filename of fs
   )) {
     if (!platforms.includes(platform)) continue
     if (!tools.has(name)) tools.set(name, { name, version, packages: {} })
-    tools.get(name).packages[platform] = { ...record, url: url(asset) }
+    tools.get(name).packages[platform] = { ...record, asset, url: url(asset) }
+  }
+}
+// Fresh records supersede reused records before checking the selected bytes.
+for (const tool of tools.values()) {
+  for (const [platform, record] of Object.entries(tool.packages)) {
+    const bytes = fs.readFileSync(path.join(directory, record.asset))
+    if (crypto.createHash('sha256').update(bytes).digest('hex') !== record.sha256)
+      throw new Error(`Native checksum mismatch: ${tool.name} ${platform}`)
+    if (record.size !== undefined && record.size !== bytes.length)
+      throw new Error(`Native size mismatch: ${tool.name} ${platform}`)
+    if (!record.source?.repository || !/^[a-f0-9]{40}$/.test(record.source?.revision || ''))
+      throw new Error(`Missing actual native source: ${tool.name} ${platform}`)
+    record.size = bytes.length
+    delete record.asset
   }
 }
 for (const name of Object.keys(pins.tools)) {
@@ -34,10 +49,39 @@ tools.set('node', JSON.parse(fs.readFileSync(path.join(root, 'build/node-artifac
 const images = {
   surrealdb: 'surrealdb/surrealdb:v3.3.0@sha256:681c6c22c287421b5c7d99e0fde79b6e0d32c36c1ddeaab2762a1661cb04cd20'
 }
+const imageProvenance = {}
+let reusedImagePins
 for (const service of ['surreal-memory', 'liter-llm']) {
   const record = JSON.parse(fs.readFileSync(path.join(directory, `${service}-image.json`)))
   if (!/^sha256:[a-f0-9]{64}$/.test(record.digest)) throw new Error(`Missing image digest: ${service}`)
+  if (!record.source) {
+    const originalRun = process.env.IMAGE_RUN
+    if (!/^\d+$/.test(originalRun || '')) throw new Error(`Missing original image source: ${service}`)
+    if (!reusedImagePins) {
+      const run = JSON.parse(
+        execFileSync('gh', ['api', `repos/${repository}/actions/runs/${originalRun}`], { encoding: 'utf8' })
+      )
+      reusedImagePins = JSON.parse(
+        execFileSync(
+          'gh',
+          [
+            'api',
+            `repos/${repository}/contents/build/integration-sources.json?ref=${run.head_sha}`,
+            '-H',
+            'Accept: application/vnd.github.raw+json'
+          ],
+          { encoding: 'utf8' }
+        )
+      )
+    }
+    record.source = reusedImagePins.sources[service]
+    record.recipeSource = service === 'liter-llm' ? reusedImagePins.sources.mini : record.source
+    record.workflowRun = originalRun
+  }
+  if (!record.source?.repository || !/^[a-f0-9]{40}$/.test(record.source?.revision || ''))
+    throw new Error(`Missing actual image source: ${service}`)
   images[service] = `${record.image}@${record.digest}`
+  imageProvenance[service] = record
 }
 const skills = JSON.parse(fs.readFileSync(path.join(directory, 'compass-skills.json')))
 const manifest = {
@@ -46,6 +90,7 @@ const manifest = {
   sources: pins.sources,
   tools: [...tools.values()],
   images,
+  imageProvenance,
   catalogs: pins.catalogs,
   compassSkills: { url: url(skills.asset), sha256: skills.sha256 }
 }

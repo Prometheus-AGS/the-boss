@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometheus-ags.dev/uar/collaboration/0.1.0-draft.2/representation-grant.schema.json",
+  "title": "UAR private RepresentationGrant — authority reference contract, not C17 behavior",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "urn:prometheus:uar:collaboration:0.1.0-draft.2"
+    },
+    "kind": {
+      "const": "RepresentationGrant"
+    },
+    "exportClass": {
+      "const": "private-authority-state"
+    },
+    "grantId": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "issuerPrincipalId": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "subjectPrincipalId": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "granteeAgentInstanceId": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "organizationId": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "office": {
+      "type": "string",
+      "minLength": 1
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 1
+    },
+    "audienceScopes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "actionScopes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "resourceScopes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "dataScopes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "approvalRequirements": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "disclosureRequirements": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "consentEvidenceRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "organizationalAuthorityEvidenceRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "$ref": "common.schema.json#/$defs/revision"
+    },
+    "status": {
+      "enum": [
+        "pending",
+        "active",
+        "suspended",
+        "revoked",
+        "expired"
+      ]
+    },
+    "notBefore": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "expiresAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "constraintDigest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "revocation": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "revision": {
+              "$ref": "common.schema.json#/$defs/revision"
+            },
+            "revokedAt": {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "revision",
+            "revokedAt",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "retention": {
+      "type": "object",
+      "properties": {
+        "policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "deleteAfter": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "policy",
+        "deleteAfter"
+      ],
+      "additionalProperties": false
+    },
+    "offboarding": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "revoke-immediately",
+            "expire-only"
+          ]
+        },
+        "requiredActions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "mode",
+        "requiredActions"
+      ],
+      "additionalProperties": false
+    },
+    "restrictions": {
+      "type": "object",
+      "properties": {
+        "forbiddenClaims": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "forbiddenClaims",
+        "notes"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "profile",
+    "kind",
+    "exportClass",
+    "grantId",
+    "issuerPrincipalId",
+    "subjectPrincipalId",
+    "granteeAgentInstanceId",
+    "organizationId",
+    "office",
+    "purpose",
+    "audienceScopes",
+    "actionScopes",
+    "resourceScopes",
+    "dataScopes",
+    "approvalRequirements",
+    "disclosureRequirements",
+    "consentEvidenceRef",
+    "organizationalAuthorityEvidenceRef",
+    "revision",
+    "status",
+    "notBefore",
+    "expiresAt",
+    "constraintDigest",
+    "revocation",
+    "retention",
+    "offboarding",
+    "restrictions"
+  ],
+  "additionalProperties": false
+}

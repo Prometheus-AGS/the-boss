@@ -12,6 +12,7 @@ import {
   type UarInstanceCompatibilityState,
   type UarObservedInstance
 } from './uarServiceInstance'
+import { uarExecutionProfileSchema, type UarExecutionProfile } from './uarTeamProfiles'
 
 export {
   integrationActionSchema,
@@ -288,7 +289,7 @@ const uarAdministrationSurfaceSchema = z.object({
   methods: z.array(uarAdministrationMethodSchema)
 })
 export const uarAdministrationCapabilitiesSchema = z.object({
-  schema_version: z.literal(4),
+  schema_version: z.union([z.literal(4), z.literal(5)]),
   scopes: z.tuple([z.literal('public'), z.literal('admin'), z.literal('owner'), z.literal('host')]),
   surfaces: z.array(uarAdministrationSurfaceSchema)
 })
@@ -811,6 +812,8 @@ export type UarModelSourceSnapshot = {
         supportsStructuredOutput?: boolean
         supportsStreaming?: boolean
         maxOutputTokens?: number
+        pricingIdentity?: { providerId: string; modelId: string }
+        executionProfile?: UarExecutionProfile
       }>
     }>
   }>
@@ -833,6 +836,11 @@ export const uarProviderModelInputSchema = z
     supportsStructuredOutput: z.boolean().optional(),
     supportsStreaming: z.boolean().optional(),
     maxOutputTokens: z.number().int().positive().optional(),
+    pricingIdentity: z
+      .object({ providerId: z.string().min(1), modelId: z.string().min(1) })
+      .strict()
+      .optional(),
+    executionProfile: uarExecutionProfileSchema.optional(),
     enabled: z.boolean().default(true)
   })
   .strict()

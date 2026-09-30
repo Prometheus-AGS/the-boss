@@ -29,8 +29,10 @@ export function UarTeamTaskActions({ workspaceId, instance, task, ownership, onC
   const [readyBusy, setReadyBusy] = useState(false)
   const intents = useRef<Partial<Record<Action, { fingerprint: string; commandId: string }>>>({})
   const readyIntent = useRef<{ fingerprint: string; commandId: string } | undefined>(undefined)
-  const assignees = instance.members.filter((member) => member.role === task.role)
-  const reviewers = instance.members.filter((member) => member.id !== task.assigneeMemberId)
+  const assignees = instance.members.filter((member) => member.role === task.role && member.status !== 'revoked')
+  const reviewers = instance.members.filter(
+    (member) => member.id !== task.assigneeMemberId && member.status !== 'revoked'
+  )
   const assigned = Boolean(task.assigneeMemberId)
   const canMarkReady =
     task.status === 'queued' &&

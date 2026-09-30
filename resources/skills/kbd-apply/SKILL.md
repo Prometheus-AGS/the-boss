@@ -53,6 +53,18 @@ The plain-text "Starting/Completed task i of n" lines are the **user-facing
 guarantee**; the fired hooks are the extensibility layer (memory mirror,
 custom reporters, overrides).
 
+## Task identity
+
+The runtime keys tasks by ID. `begin-task` and `end-task` pass the backend
+task ID (the OpenSpec ordinal from `list`, e.g. `1`). When `/kbd-plan` already
+registered the change's tasks under other IDs (e.g. `<change>-t1`), the driver
+**reuses** them: an exact ID wins, then the task with the same normalized
+title (a leading `1.2 ` is ignored), then the unique task with the same
+sequence. If the change has registered tasks and none matches, the driver
+refuses instead of registering a duplicate. Duplicates would leave the planned
+tasks pending forever, so the change could never complete. To avoid mapping
+entirely, register plan tasks with the backend IDs.
+
 ## Which change am I on
 
 In this order:

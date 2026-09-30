@@ -1,5 +1,10 @@
 import * as z from 'zod'
 
+import {
+  UAR_TEAM_COOPERATION_CAPABILITIES,
+  UAR_TEAM_EXECUTION_PROFILE,
+  uarTeamInstructionsSchema
+} from '@shared/types/uarTeamContext'
 import type {
   UarAddTeamTaskInput,
   UarCreateTeamInput,
@@ -19,7 +24,16 @@ const identity = z.object({ id: z.string(), version: z.string(), digest: z.strin
 const definition = identity.extend({
   title: z.string(),
   purpose: z.string(),
+  instructions: uarTeamInstructionsSchema.optional(),
   package: identity,
+  budget: z
+    .object({
+      maxTokens: z.number(),
+      maxCostMicrounits: z.number(),
+      currency: z.string(),
+      maxElapsedSeconds: z.number()
+    })
+    .optional(),
   members: z.array(
     z.object({
       role: z.string(),
@@ -36,9 +50,9 @@ const task = z.object({
   role: z.string(),
   input: z.unknown(),
   outputContract: z.unknown(),
-  output: z.null(),
+  output: z.unknown().nullable(),
   dependsOn: z.array(z.string()),
-  status: z.enum(['queued', 'ready', 'succeeded', 'failed', 'cancelled']),
+  status: z.enum(['queued', 'ready', 'running', 'waiting', 'blocked', 'succeeded', 'failed', 'cancelled']),
   revision: z.number().int().nonnegative(),
   assigneeMemberId: z.string().nullable().default(null),
   ownershipEpoch: z.number().int().nonnegative().default(0),
@@ -66,7 +80,7 @@ const instance = z.object({
   ownerId: z.string(),
   workspaceId: z.string(),
   revision: z.number().int().nonnegative(),
-  status: z.literal('inactive'),
+  status: z.enum(['inactive', 'running', 'revoked', 'stopped', 'cancelled']),
   definition: identity,
   package: identity,
   binding: z.object({ id: z.string(), revision: z.number().int().nonnegative() }),
@@ -78,7 +92,7 @@ const instance = z.object({
       ordinal: z.number().int().nonnegative(),
       definition: identity,
       revision: z.number().int().nonnegative(),
-      status: z.literal('inactive')
+      status: z.enum(['inactive', 'running', 'revoked', 'stopped', 'cancelled'])
     })
   ),
   tasks: z.array(task),
@@ -97,29 +111,39 @@ const mailboxMessage = z.object({
   taskEpoch: z.number().int().nonnegative().nullish(),
   mode: z.enum(['queue-only', 'trigger-turn']),
   content: z.string(),
-  status: z.enum(['accepted', 'delivered', 'processed']),
+  status: z.enum(['accepted', 'delivered', 'processed', 'consumed', 'rejected']),
+  senderMemberId: z.string().nullish(),
+  senderAttemptId: z.string().nullish(),
+  senderTaskId: z.string().nullish(),
+  consumedAt: z.string().nullish(),
+  selectedAttemptId: z.string().nullish(),
+  rejectionCode: z.string().nullish(),
   acceptedAt: z.string(),
   deliveredAt: z.string().nullish(),
   processedAt: z.string().nullish(),
   processedTurnId: z.string().nullish()
 })
 
-function scopedTeam(value: unknown, workspaceId: string): UarTeamInstance {
+export function scopedTeam(value: unknown, workspaceId: string): UarTeamInstance {
   const team = instance.parse(value)
   if (team.workspaceId !== workspaceId) throw new Error('UAR team workspace scope mismatch')
   return team
 }
 
-async function planningState(workspaceId: string) {
+export async function planningState(workspaceId: string) {
   const resolved = workspace(workspaceId)
   const state = await capabilityState()
   const capabilities = z
     .object({
+      executionProfile: z.string().optional(),
+      executionProfileStage: z.enum(['unqualified', 'operation', 'qualified']).optional(),
+      capabilities: z.array(z.string()).default([]),
       collaboration: z.object({
         activation: z.object({
           teamPlanning: z.boolean().default(false),
           taskOwnership: z.boolean().default(false),
-          teamMailbox: z.boolean().default(false)
+          teamMailbox: z.boolean().default(false),
+          teamExecution: z.boolean().default(false)
         })
       })
     })
@@ -129,7 +153,23 @@ async function planningState(workspaceId: string) {
     generation: state.generation,
     planning: capabilities.collaboration.activation.teamPlanning,
     ownership: capabilities.collaboration.activation.taskOwnership,
-    mailbox: capabilities.collaboration.activation.teamMailbox
+    mailbox: capabilities.collaboration.activation.teamMailbox,
+    execution: capabilities.collaboration.activation.teamExecution,
+    executionProfile: capabilities.executionProfile,
+    executionProfileStage: capabilities.executionProfileStage,
+    executionCapabilities: capabilities.capabilities,
+    cooperation:
+      capabilities.executionProfile === UAR_TEAM_EXECUTION_PROFILE &&
+      UAR_TEAM_COOPERATION_CAPABILITIES.every((id) => capabilities.capabilities.includes(id)) &&
+      ['team-instances.attempts.context', 'team-instances.peer-messages'].every((id) =>
+        state.surfaces.some(
+          (surface) =>
+            surface.availability === 'available' &&
+            surface.methods.some(
+              (method) => method.id === id && method.adapter === 'available' && method.apply !== 'unavailable'
+            )
+        )
+      )
   }
 }
 
@@ -140,7 +180,7 @@ export async function readUarTeams(workspaceId: string): Promise<UarTeamsSnapsho
       schemaVersion: 1,
       workspaceId: state.workspaceId,
       generation: state.generation,
-      capabilities: { planning: false, ownership: false, mailbox: false },
+      capabilities: { planning: false, ownership: false, mailbox: false, execution: false },
       unavailableReason: 'team_planning_unsupported',
       definitions: [],
       bindings: [],
@@ -160,7 +200,16 @@ export async function readUarTeams(workspaceId: string): Promise<UarTeamsSnapsho
     schemaVersion: 1,
     workspaceId: state.workspaceId,
     generation: state.generation,
-    capabilities: { planning: true, ownership: state.ownership, mailbox: state.mailbox },
+    capabilities: {
+      planning: true,
+      ownership: state.ownership,
+      mailbox: state.mailbox,
+      execution: state.execution,
+      cooperation: state.cooperation
+    },
+    executionProfile: state.executionProfile,
+    executionProfileStage: state.executionProfileStage,
+    executionCapabilities: state.executionCapabilities,
     definitions: z.array(definition).parse(definitions),
     bindings: scopedBindings,
     instances: z
@@ -263,10 +312,12 @@ export async function readUarTeamMailbox(input: {
   if (!state.mailbox) throw new Error('UAR team mailbox is unavailable')
   const target = `${basePath}/${encodeURIComponent(input.teamInstanceId)}`
   scopedTeam(await scopedRequest(state.workspaceId, target, state.generation), state.workspaceId)
-  const page = z.object({ messages: z.array(z.unknown()) }).parse(
-    await scopedRequest(state.workspaceId, `${target}/messages`, state.generation)
-  )
-  return { messages: page.messages.map((value) => scopedMailboxMessage(value, state.workspaceId, input.teamInstanceId)) }
+  const page = z
+    .object({ messages: z.array(z.unknown()) })
+    .parse(await scopedRequest(state.workspaceId, `${target}/messages`, state.generation))
+  return {
+    messages: page.messages.map((value) => scopedMailboxMessage(value, state.workspaceId, input.teamInstanceId))
+  }
 }
 
 export async function sendUarTeamMailboxMessage(input: UarTeamMailboxSendInput): Promise<UarTeamMailboxMessage> {

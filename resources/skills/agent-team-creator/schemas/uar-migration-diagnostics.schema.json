@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prometheus-ags.github.io/schemas/agent-team/uar-migration-diagnostics/v1",
+  "title": "UAR authoring migration receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "sourceProfile", "targetProfile", "diagnostics", "activationBlocked"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "sourceProfile": { "type": "string", "minLength": 1 },
+    "targetProfile": { "const": "urn:prometheus:uar:collaboration:0.1.0-draft.2" },
+    "activationBlocked": { "type": "boolean" },
+    "preservedSource": {},
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sourceDocument", "sourcePointer", "disposition", "reason"],
+        "properties": {
+          "sourceDocument": { "type": "string", "minLength": 1 },
+          "sourcePointer": { "type": "string", "pattern": "^(?:/(?:[^~/]|~[01])*)*$" },
+          "disposition": { "enum": ["exact", "translated", "optional-unsupported", "required-unsupported"] },
+          "targetDocument": { "type": "string", "minLength": 1 },
+          "targetPointer": { "type": "string", "pattern": "^(?:/(?:[^~/]|~[01])*)*$" },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

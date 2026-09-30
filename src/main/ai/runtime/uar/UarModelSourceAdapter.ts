@@ -8,6 +8,7 @@ import { readIntegrationConfig, readSecrets } from '@main/services/prometheus/in
 import { ENDPOINT_TYPE, type Model } from '@shared/data/types/model'
 import type { Provider } from '@shared/data/types/provider'
 import type { UarModelSourceSnapshot, UarProviderMutation } from '@shared/types/prometheusIntegration'
+import { uarExecutionProfileSchema } from '@shared/types/uarTeamProfiles'
 import { getRawModelId } from '@shared/utils/model'
 
 export const providerResponseSchema = z.object({
@@ -22,6 +23,7 @@ export const providerResponseSchema = z.object({
       models: z.array(
         z.object({
           id: z.string(),
+          pricing_identity: z.object({ provider_id: z.string(), model_id: z.string() }).nullish(),
           display_name: z.string().nullable().optional(),
           context_window: z.number().nullable().optional(),
           supports_vision: z.boolean(),
@@ -30,6 +32,7 @@ export const providerResponseSchema = z.object({
           supports_structured_output: z.boolean(),
           supports_streaming: z.boolean(),
           max_output_tokens: z.number().nullable().optional(),
+          execution_profile: uarExecutionProfileSchema.nullish(),
           enabled: z.boolean()
         })
       ),
@@ -163,6 +166,15 @@ export async function readUarModelSources(): Promise<UarModelSourceSnapshot> {
             name: model.display_name || model.id,
             enabled: model.enabled,
             effectiveIdentity: `${provider.id}/${model.id}`,
+            ...(model.pricing_identity
+              ? {
+                  pricingIdentity: {
+                    providerId: model.pricing_identity.provider_id,
+                    modelId: model.pricing_identity.model_id
+                  }
+                }
+              : {}),
+            ...(model.execution_profile ? { executionProfile: model.execution_profile } : {}),
             ...(model.context_window ? { contextWindow: model.context_window } : {}),
             supportsVision: model.supports_vision,
             supportsTools: model.supports_tools,
@@ -234,6 +246,12 @@ function providerPayload(input: UarProviderMutation): Record<string, unknown> {
       supports_structured_output: model.supportsStructuredOutput,
       supports_streaming: model.supportsStreaming,
       max_output_tokens: model.maxOutputTokens,
+      ...(model.pricingIdentity
+        ? {
+            pricing_identity: { provider_id: model.pricingIdentity.providerId, model_id: model.pricingIdentity.modelId }
+          }
+        : {}),
+      ...(model.executionProfile ? { execution_profile: model.executionProfile } : {}),
       enabled: model.enabled
     })),
     enabled: input.enabled,

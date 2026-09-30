@@ -196,16 +196,16 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.8 - UAR inference and delivery recovery
+    The Boss 2.2.9 - Bounded UAR team execution
 
-    - [UAR] Route UAR agent model assignments through the configured liter-llm gateway without requiring a separate OpenAI Codex API key.
-    - [Skills] Include the latest mini skill payload with Delivery Cadence child-phase recovery and reporting.
-    - [Teams] Preserve the durable task boards and recovery controls introduced in 2.2.7.
+    - [Teams] Select a configured model, admit claimed tasks with bounded reservations, and retain scoped output artifacts.
+    - [UAR] Cancel attempts, revoke membership, and recover durable execution state without replaying uncertain effects.
+    - [Skills] Include the updated mini payload with installed acceptance tracked separately from publication scheduling.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.8 - UAR 推理与交付恢复
+    The Boss 2.2.9 - 有界 UAR 团队执行
 
-    - [UAR] 通过已配置的 liter-llm 网关路由 UAR 智能体的模型分配，无需单独配置 OpenAI Codex API 密钥。
-    - [技能] 包含最新的 mini 技能包，支持 Delivery Cadence 子阶段恢复与进度报告。
-    - [团队] 保留 2.2.7 引入的持久任务看板和恢复控制。
+    - [团队] 选择已配置的模型，按资源预留额度执行已认领任务，并保留隔离的输出工件。
+    - [UAR] 取消执行、撤销成员资格并恢复持久执行状态，不重复执行结果不确定的操作。
+    - [技能] 包含更新的 mini 技能包，分别跟踪安装验收和发布计划。
     <!--LANG:END-->

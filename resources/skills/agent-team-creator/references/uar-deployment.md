@@ -1,88 +1,121 @@
-# UAR collaboration packages and deployment
+# UAR draft.2 authoring and deployment
 
-This skill implements the catalog portion of the official UAR collaboration Draft
-0.1.0-draft.1. The canonical schemas are copied under `schemas/uar/`; the
-authoring envelope is `schemas/uar-package-authoring.schema.json`. Catalog
-installation does **not** create a TeamInstance, schedule a task, start a run, or
-grant authority. Durable team activation belongs to implementation phase I2.
+This skill consumes the UAR collaboration profile
+`urn:prometheus:uar:collaboration:0.1.0-draft.2` from the immutable provider commit
+recorded in `schemas/uar/0.1.0-draft.2/consumer-source-receipt.json`. The versioned schemas under
+`schemas/uar/0.1.0-draft.2/` are byte-identical provider data. Draft.1 schemas
+and inline authoring remain available for explicit migration and are never
+rewritten or relabeled.
 
-## Authoring an immutable package
+Schema validity establishes document shape. It does not establish durable team
+execution, current policy, a current representation grant, private credential
+validity, or activation.
 
-An authoring request contains `manifest` and `definitions`. Definitions are
-complete AgentDefinition, TeamDefinition, or WorkflowDefinition documents with
-their top-level `contentDigest` omitted. Immutable references may omit `digest`
-while authoring, but must include exact `id` and `version`. The compiler:
+## File-backed authoring
 
-1. resolves every permitted child, team member, and allowed workflow inside the
-   same package;
-2. rejects dependency cycles, unresolved identities, and conflicting supplied
-   digests;
-3. computes each definition digest from RFC 8785 canonical JSON with only the
-   top-level self digest omitted;
-4. writes exact UTF-8 definition files with byte digests;
-5. builds the PackageManifest file inventory and complete dependency lock; and
-6. computes the package content digest.
-
-The author supplies every required semantic field from the canonical schemas.
-That includes complete skill ID/version/digest/required/config values, model
-capability requirements, context selection and requested limits. A copied skill
-name or a preferred model string is not an immutable UAR dependency.
+Initialize a contained project workspace from `assets/uar-intake.json`:
 
 ```text
-node <skill>/scripts/cli.mjs uar-package-validate --input package-request.json
-node <skill>/scripts/cli.mjs uar-package-build --input package-request.json
+node <skill>/scripts/cli.mjs uar-workspace-init --input uar-intake.json
 ```
 
-`uar-package-build` also requires `"out": "<new-directory>"`. It writes
-`manifest.json` last. Existing output directories are refused. Live preflight
-and install preserve that exact manifest UTF-8 string and send definition files
-as an exact `{path: contentUtf8}` map; they never reserialize reviewed bytes.
+The `workspace` request field is a portable team ID. The creator owns only
+`.agent-team/<team-id>/authoring`, and initialization requires
+`expectedRevision: 0`. The resulting `workspace.json` persists a monotonic
+revision, stable guided-question nodes and accepted answers, and identifies one
+`manifest.source.json` plus separate
+files such as `agents/coordinator.json`, `teams/root.json`,
+`teams/review-subteam.json`, and `workflows/checkout.json`. Paths are relative,
+case-insensitively unique, and confined beneath the selected project. Source
+writes use same-directory atomic replacement and the existing
+`.agent-team/recovery/` receipts.
 
-## Versioned maintenance
-
-Treat an installed package version as immutable. Create a replacement authoring
-request with the same package ID and a new semantic version, then compare it
-before building:
+Use one answer or document per update. Both require the current
+`expectedRevision`; stale revisions fail before any file is written. The response
+identifies the prior and current revision plus the changed question or document:
 
 ```text
-node <skill>/scripts/cli.mjs guide --input revise-intake.json
-node <skill>/scripts/cli.mjs uar-package-diff --input package-diff.json
+node <skill>/scripts/cli.mjs uar-workspace-update --input update-one-document.json
+node <skill>/scripts/cli.mjs uar-workspace-answer --input answer-one-question.json
+node <skill>/scripts/cli.mjs uar-workspace-status --input workspace-status.json
 ```
 
-The diff request is `{"before": <authoring-package>, "after":
-<authoring-package>}`. It reports added, removed, and JSON-pointer changed fields.
-Changed content under the same package version is refused. Removing or changing a
-member does not rewrite runtime history; active membership drain/cancel decisions
-belong to I2 administration.
+Status returns fixed counts, one dependency-ordered question, and at most 50
+field diagnostics. Supply its numeric continuation cursor to read the next page.
+It does not embed the complete definition graph. The bundled
+`assets/uar-workspace/` directory demonstrates a root team, several agents, a
+permitted child, a nested subteam, and a workflow.
 
-## Connection and authentication
+## Migration and validation
 
-Every live command accepts:
+`uar-workspace-migrate` accepts the existing inline envelope, a schema-v1 flat
+team, a legacy UAR AgentArtifact, or draft.1 package source. It preserves the
+source as non-executable migration material after private-content checks and emits
+field diagnostics with one of these dispositions:
 
-```json
-{
-  "connection": {
-    "baseUrl": "http://127.0.0.1:1906",
-    "credentialRef": "env:UAR_TOKEN"
-  }
-}
-```
+- `exact`: the field retained its meaning and target value;
+- `translated`: an explicit profile or carrier translation retained it;
+- `optional-unsupported`: the original value remains inspectable but is not
+  effective runtime behavior;
+- `required-unsupported`: the requested semantics cannot be enforced, so build
+  and deployment preflight refuse.
 
-Only `env:VARIABLE` credential references are accepted. The secret is read for
-the current request, sent as a Bearer token, and never included in request JSON,
-receipts, package files, bindings, errors, or command output. A base URL cannot
-contain user information, query parameters, or fragments.
+Skill `id`, `version`, `digest`, `required`, `config`, `entrypoint`, and
+`requiredTools` are independent fields. Draft.2 validation applies provider
+schemas first, graph checks second, and support diagnostics last. A valid package
+has exactly one TeamDefinition entrypoint; member kinds match referenced document
+kinds; coordinators name agent roles; child references name agents; workflow
+roles exist in each accepting team; dependency graphs are acyclic; and every
+reference resolves the exact version and digest.
 
-## Capability, package, and binding lifecycle
+Inline callers continue to use `uar-package-validate` and `uar-package-build`
+with `package`. Workspace callers use the same commands with `project` and
+`workspace`. Builds write a new immutable directory only.
 
-Use the operations in order:
+## Immutable maintenance
 
-I1 advertises `collaboration_definition_packages_v1` and
-`collaboration_deployment_bindings_v1`. Require only the capability used by
-the requested operation. Neither capability implies durable team execution.
-The authenticated capability response also returns `bindingOwnerId`; copy that
-opaque value into `DeploymentBinding.ownerId`. Do not derive an owner ID from a
-token subject or from the runtime's private persistence-key format.
+Use `uar-workspace-revise` with `assets/revise-intake.json` to copy source into a
+distinct, strictly greater semantic-version workspace. Supply explicitly edited
+definition documents in `edits`; unchanged definitions retain their exact source
+bytes and immutable tuples, while a changed dependency tuple propagates only
+through definitions that reference it. The old workspace and compiled package do
+not change. `uar-package-diff` compares two workspaces, two compiled directories,
+or two inline envelopes by definition identity and JSON Pointer. Changed content
+under the same package version is refused.
+
+Rollback selects an already installed earlier package through a new private
+binding revision. It does not rewrite package bytes or reverse external effects.
+
+## Private authority boundary
+
+Portable source, migration receipts, and compiled packages contain no credential
+value, credential reference, RepresentationGrant record, consent evidence,
+EffectiveBindingReceipt, or installed authority. Recognized private material
+produces a field-level refusal before package files are written.
+
+DeploymentBinding is separate private installed state. Its model credential,
+storage connection, representation grant, and effective receipt fields contain
+opaque host references only. UAR resolves current credentials, policy, grants,
+and authority independently. Successful package installation alone confers none
+of them.
+
+## Live package and binding sequence
+
+Every live command accepts an HTTP(S) base URL and optional
+`env:VARIABLE` credential reference. The secret is read only for that request and
+is never written into request JSON, source, package, binding output, or receipts.
+
+Use this order:
+
+1. `uar-capabilities`
+2. `uar-package-preflight`
+3. `uar-package-install`
+4. `uar-package-status`
+5. optional `uar-binding-preflight`
+6. optional compare-and-swap `uar-binding-install`
+7. `uar-binding-status`
+
+The accepted provider checkpoint does not change the existing versioned routes:
 
 | Command | UAR operation |
 |---|---|
@@ -94,23 +127,16 @@ token subject or from the runtime's private persistence-key format.
 | `uar-binding-install` | `POST /api/v1/collaboration/deployment-bindings` |
 | `uar-binding-status` | `GET /api/v1/collaboration/deployment-bindings/{id}` with explicit workspace ID |
 
-Package preflight/install requests name `packageDirectory`, `commandId`, and
-optionally `expectedCatalogRevision`. The client re-verifies file and canonical
-digests before sending `{commandId, expectedCatalogRevision?, manifest:
-<exact UTF-8 string>, files: {<path>: <exact UTF-8 string>}}`.
-Install all package definitions atomically; do not fall back to a sequence of
-legacy `POST /api/agents` calls.
+Package requests send the exact reviewed manifest string and definition byte map.
+Binding requests send `x-uar-workspace-id` and an optional expected revision for
+compare-and-swap. `uar-activate` always refuses because this authoring client owns
+definitions and deployment rather than execution. Use The Boss or another
+authorized host supporting the selected runtime's negotiated execution profile.
 
-Binding preflight/install requests carry `commandId`, optional
-`expectedRevision`, and the complete approved DeploymentBinding. The compiler
-fills or verifies its content digest and sends `binding.workspaceId` as
-`x-uar-workspace-id`. Binding status requires an explicit `workspaceId` input
-and sends the same header. Model credentials, storage connections, and other
-private resources appear only as protected host references. A binding authorizes
-nothing by itself; UAR derives the authenticated owner and evaluates current
-policy. Structured failures read `error.messageKey`, `error.code`, and
-`error.detail` so operator recovery information is not discarded.
+## Shared team instructions and cooperating-pair deployment
 
-All successful command results include `catalogOnly: true` and an activation
-refusal. `uar-activate` always fails with the I2 boundary. This prevents a
-catalog receipt from being mistaken for a running team.
+TeamDefinition may carry `instructions: {revision, digest, text}`. The revision is a positive safe integer, digest is SHA-256 of the exact UTF-8 text, and text is nonempty and at most 16384 UTF-8 bytes. Omit the object when no shared guidance is desired; null is not an omission. Shared guidance is below immutable host policy and above member specialization/task instructions. It cannot expand policy, credentials or resource grants. Peer messages, task input and artifacts remain attributed untrusted data.
+
+Changing guidance requires a new immutable definition/package version and a revisioned private binding. Existing attempts retain captured evidence; do not rewrite history. Preserve exact member skill ID/version/digest/config/required/entrypoint/tool requirements through authoring, maintenance and export. Required unsupported context/history/memory/child declarations refuse runtime admission with field diagnostics; optional exclusions must remain visible. A nested definition graph is not proof of nested team execution.
+
+For cooperation, explicitly install coordinator-to-worker trigger-turn and worker-to-coordinator queue-only result-disclosure edges. Sending queues a message; delegation explicitly requests work; waiting yields the live turn and creates a separate governed continuation. Do not infer reverse permission or automatic activation from a package receipt. Discover the execution profile and its peer-tools/shared-instructions/continuations capabilities before offering those runtime actions. Package/binding installation remains separate from activation, and this creator does not schedule agents.

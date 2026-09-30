@@ -43,6 +43,10 @@ Before emitting changes, detect the change management backend:
 If any of these exist, emit changes as OpenSpec structures. Otherwise, use
 native KBD change files.
 
+When the KBD runtime is authoritative, register each change's tasks with the
+backend task ID (the ordinal that `kbd-apply list <change>` prints), so
+`/kbd-apply` transitions the same records instead of mapping or refusing.
+
 ```
 OpenSpec detected?
   YES → emit /opsx:new <change-id> commands

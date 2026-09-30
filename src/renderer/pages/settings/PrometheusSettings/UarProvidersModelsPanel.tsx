@@ -17,6 +17,8 @@ import { ipcApi } from '@renderer/ipc'
 import type { UarModelSourceSnapshot, UarProviderMutation } from '@shared/types/prometheusIntegration'
 
 import { IntegrationChoice, IntegrationField, IntegrationToggle } from './IntegrationFields'
+import { UarProviderExecutionSettings } from './UarProviderExecutionSettings'
+import { uarTeamError } from './uarTeamError'
 
 type ProviderProjection = UarModelSourceSnapshot['sources'][number]['providers'][number]
 type ProviderDraft = Omit<UarProviderMutation, 'models' | 'credential'> & {
@@ -61,6 +63,8 @@ function providerDraft(provider: ProviderProjection): ProviderDraft {
           : { supportsStructuredOutput: model.supportsStructuredOutput }),
         ...(model.supportsStreaming === undefined ? {} : { supportsStreaming: model.supportsStreaming }),
         ...(model.maxOutputTokens ? { maxOutputTokens: model.maxOutputTokens } : {}),
+        ...(model.pricingIdentity ? { pricingIdentity: model.pricingIdentity } : {}),
+        ...(model.executionProfile ? { executionProfile: model.executionProfile } : {}),
         enabled: model.enabled
       })),
       null,
@@ -94,6 +98,13 @@ export function UarProvidersModelsPanel() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
   const [status, setStatus] = useState<string>()
+  const profileModels = useMemo(() => {
+    try {
+      return modelsFromJson(draft.modelsJson)
+    } catch {
+      return []
+    }
+  }, [draft.modelsJson])
 
   const load = useCallback(async () => {
     setBusy(true)
@@ -340,14 +351,23 @@ export function UarProvidersModelsPanel() {
             />
             <div className="text-xs text-muted-foreground">{tr('modelsHelp')}</div>
           </div>
+          <UarProviderExecutionSettings
+            models={profileModels}
+            disabled={busy}
+            onChange={(models) => setDraft({ ...draft, modelsJson: JSON.stringify(models, null, 2) })}
+          />
           {selectedProvider?.credentialConfigured && (
             <div className="text-xs text-muted-foreground">{tr('credentialConfigured')}</div>
           )}
           {error && (
-            <div className="rounded-lg border border-error-border bg-error-subtle p-3 text-sm text-error">{error}</div>
+            <div className="rounded-lg border border-error-border bg-error-subtle p-3 text-sm text-error" role="alert">
+              {uarTeamError(error, (key) => t('settings.prometheus.integration.uarAdmin.teams.execution.' + key))}
+            </div>
           )}
           {status && (
-            <div className="rounded-lg border border-success/30 bg-success/10 p-3 text-sm text-success">{status}</div>
+            <div className="rounded-lg border border-success/30 bg-success/10 p-3 text-sm text-success" role="status">
+              {status}
+            </div>
           )}
           <div className="flex flex-wrap justify-end gap-2">
             {selectedProvider && (

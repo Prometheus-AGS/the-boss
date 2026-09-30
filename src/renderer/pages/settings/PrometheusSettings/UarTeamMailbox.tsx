@@ -136,11 +136,13 @@ export function UarTeamMailbox({ workspaceId, instance, available }: Props) {
               <SelectValue placeholder={tr('chooseRecipient')} />
             </SelectTrigger>
             <SelectContent>
-              {instance.members.map((member) => (
-                <SelectItem key={member.id} value={member.id}>
-                  {memberName(member.id)}
-                </SelectItem>
-              ))}
+              {instance.members
+                .filter((member) => member.status !== 'revoked')
+                .map((member) => (
+                  <SelectItem key={member.id} value={member.id}>
+                    {memberName(member.id)}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
@@ -159,7 +161,7 @@ export function UarTeamMailbox({ workspaceId, instance, available }: Props) {
           </Select>
         </div>
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">{tr('mailboxPlanningOnly')}</p>
+      <p className="mt-2 text-xs text-muted-foreground">{tr('execution.mailboxHelp')}</p>
       <div className="mt-3">
         <label htmlFor={contentInputId} className="mb-1.5 block text-sm font-medium">
           {tr('messageContent')}
@@ -196,6 +198,11 @@ export function UarTeamMailbox({ workspaceId, instance, available }: Props) {
                 <span className="font-medium">{tr('toMember', { member: memberName(message.recipientMemberId) })}</span>
                 <Badge variant="outline">{messageStatus(message)}</Badge>
               </div>
+              <p className="mt-1 break-all text-xs text-muted-foreground">
+                {message.senderMemberId
+                  ? tr('cooperation.fromMember', { member: memberName(message.senderMemberId) })
+                  : tr('cooperation.fromOperator', { owner: message.senderOwnerId })}
+              </p>
               <p className="mt-1 whitespace-pre-wrap break-words">{message.content}</p>
               <p className="mt-2 break-all text-xs text-muted-foreground">
                 {tr(message.mode === 'trigger-turn' ? 'deliveryMode.triggerTurn' : 'deliveryMode.queueOnly')} ·{' '}

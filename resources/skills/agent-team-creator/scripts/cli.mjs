@@ -10,7 +10,7 @@ import { readState, initState, mutateState, mutateStateAsync, taskAction, comple
 import { createHandoff, acceptHandoff } from './handoff.mjs';
 import { discoverModels, selectModel } from './models.mjs';
 import { queueMemory, publishMemory } from './memory.mjs';
-import { compileUarPackage, diffUarPackages, writeUarPackage } from './uar-package.mjs';
+import { dispatchUarAuthoring, isUarAuthoringCommand, uarAuthoringCommands } from './uar-package/commands.mjs';
 import { refuseUarActivation, uarBindingInstall, uarBindingPreflight, uarBindingStatus, uarCapabilities, uarPackageInstall, uarPackagePreflight, uarPackageStatus, } from './uar-client.mjs';
 function revision(input) {
     const r = input.expectedRevision;
@@ -20,6 +20,8 @@ function revision(input) {
 }
 const stateFile = (input) => path.resolve(text(input.state, 'state'));
 async function dispatch(command, input) {
+    if (isUarAuthoringCommand(command))
+        return dispatchUarAuthoring(command, input);
     switch (command) {
         case 'guide': return guide(input);
         case 'validate': return { valid: true, team: validateTeam(input.team) };
@@ -64,9 +66,6 @@ async function dispatch(command, input) {
             const state = await mutateStateAsync(stateFile(input), revision(input), async (state) => { receipt = await publishMemory(state, object(input.publication, 'publication')); });
             return { state, publication: receipt };
         }
-        case 'uar-package-validate': return { valid: true, package: compileUarPackage(input.package) };
-        case 'uar-package-build': return writeUarPackage(input.out, input.package);
-        case 'uar-package-diff': return diffUarPackages(input.before, input.after);
         case 'uar-capabilities': return uarCapabilities(input);
         case 'uar-package-preflight': return uarPackagePreflight(input);
         case 'uar-package-install': return uarPackageInstall(input);
@@ -78,7 +77,7 @@ async function dispatch(command, input) {
         default: throw Error(`Unknown command: ${command}`);
     }
 }
-const commands = ['guide', 'validate', 'init', 'status', 'team-update', 'export', 'install-project', 'task', 'complete-kbd', 'handoff-create', 'handoff-accept', 'models-discover', 'models-select', 'memory-queue', 'memory-publish', 'uar-package-validate', 'uar-package-build', 'uar-package-diff', 'uar-capabilities', 'uar-package-preflight', 'uar-package-install', 'uar-package-status', 'uar-binding-preflight', 'uar-binding-install', 'uar-binding-status', 'uar-activate'];
+const commands = ['guide', 'validate', 'init', 'status', 'team-update', 'export', 'install-project', 'task', 'complete-kbd', 'handoff-create', 'handoff-accept', 'models-discover', 'models-select', 'memory-queue', 'memory-publish', ...uarAuthoringCommands, 'uar-capabilities', 'uar-package-preflight', 'uar-package-install', 'uar-package-status', 'uar-binding-preflight', 'uar-binding-install', 'uar-binding-status', 'uar-activate'];
 async function main() {
     if (Number(process.versions.node.split('.')[0]) < 22)
         throw Error('Node.js 22 or newer is required');

@@ -2,6 +2,7 @@ const fs = require('node:fs')
 const path = require('node:path')
 const { execFileSync } = require('node:child_process')
 const directory = path.resolve(__dirname, '../build/integration-output')
+const pins = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../build/integration-sources.json')))
 for (const service of ['surreal-memory', 'liter-llm']) {
   const image = `ghcr.io/prometheus-ags/the-boss-${service}`
   const references = ['amd64', 'arm64'].map((arch) => {
@@ -14,5 +15,18 @@ for (const service of ['surreal-memory', 'liter-llm']) {
   const description = execFileSync('docker', ['buildx', 'imagetools', 'inspect', tag], { encoding: 'utf8' })
   const digest = /^Digest:\s+(sha256:[a-f0-9]{64})\s*$/m.exec(description)?.[1]
   if (!digest) throw new Error(`Registry returned no manifest digest for ${tag}`)
-  fs.writeFileSync(path.join(directory, `${service}-image.json`), JSON.stringify({ image, digest }, null, 2))
+  fs.writeFileSync(
+    path.join(directory, `${service}-image.json`),
+    JSON.stringify(
+      {
+        image,
+        digest,
+        source: pins.sources[service],
+        recipeSource: service === 'liter-llm' ? pins.sources.mini : pins.sources[service],
+        workflowRun: process.env.GITHUB_RUN_ID
+      },
+      null,
+      2
+    )
+  )
 }

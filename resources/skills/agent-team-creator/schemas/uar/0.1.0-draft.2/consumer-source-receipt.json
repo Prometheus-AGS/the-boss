@@ -1,0 +1,70 @@
+{
+  "schema": "prometheus-mini.uar-schema-source-receipt/1",
+  "initiative": {
+    "change": "afc-c03-lossless-definitions-and-collaboration-document-profile",
+    "requirements": [
+      "C03.1",
+      "C03.2",
+      "C03.3",
+      "C09.4"
+    ]
+  },
+  "provider": {
+    "repository": "Prometheus-AGS/universal-agent-runtime",
+    "commit": "0db89a46db5bd590e5d9a9732389f41e3785bdb1",
+    "profile": "urn:prometheus:uar:collaboration:0.1.0-draft.2",
+    "sourceDirectory": "docs/agents/collaboration/v0.1.0-draft.2/schemas"
+  },
+  "consumer": {
+    "repository": "prometheus-skills-mini",
+    "baseline": "c347043dc046f6da88b7e938f273e5152c43e76f",
+    "snapshotDirectory": "skills/agent-team-creator/schemas/uar/0.1.0-draft.2"
+  },
+  "schemas": [
+    {
+      "path": "agent-definition.schema.json",
+      "sha256": "a5e0573b5323accec7e25766287af897cee34f689d77a2b6eb9d9367d41f179c"
+    },
+    {
+      "path": "collaboration-document.schema.json",
+      "sha256": "e7f8215d6e177f3ab00374df0ab34d0f19e24552af34c69aaf5b049260ccc2d1"
+    },
+    {
+      "path": "common.schema.json",
+      "sha256": "a832c0018f11abf564b341cc0ba9ed6d87172968fe2f43bdbcb0b4fb6fcfc2ef"
+    },
+    {
+      "path": "conversion-report.schema.json",
+      "sha256": "4a013291e1768a5f0b98f6c99d3ec746f6a863cfd55d50d73863161943fb82cb"
+    },
+    {
+      "path": "deployment-binding-template.schema.json",
+      "sha256": "73432b4f73217b166d13013cfdda63f0b139dd191196f009fc7e629886a2c22b"
+    },
+    {
+      "path": "deployment-binding.schema.json",
+      "sha256": "44f91ff1ebd6f6b31bd4d60dd1a928f5969033f2e218dec5d3eb36d111ad15f9"
+    },
+    {
+      "path": "effective-binding-receipt.schema.json",
+      "sha256": "b19661c1f662e2133cd884b0104dfe0e8330f132ced8064b5c6ff89bf8aa01da"
+    },
+    {
+      "path": "package-manifest.schema.json",
+      "sha256": "bb96cd181790f391f9a543799f93369f8c53125ba9b3f70355f5f4c06fc1bd71"
+    },
+    {
+      "path": "representation-grant.schema.json",
+      "sha256": "b856385bb5d1ab40fdb1e7e28d62ee0c9a0843e2fe46dd9162224d70c7ed8b01"
+    },
+    {
+      "path": "team-definition.schema.json",
+      "sha256": "3b7f1102c5d822b654dc562689b7fa6316c80c01b63d3bb3fe808d4ee30673ef"
+    },
+    {
+      "path": "workflow-definition.schema.json",
+      "sha256": "6129578c9c54d5fd7134ea11ef149ba1d629841b205856f6b151be6ff03a9abb"
+    }
+  ],
+  "status": "source-contract-checkpoint-not-runtime-conformance"
+}
