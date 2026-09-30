@@ -4,7 +4,7 @@ description: Operate timed usable deliveries with child-phase recovery, build-an
 license: MIT
 compatibility: Node.js 22 or newer. Build tools belong to the selected project. Optional KBD, Compass, memory and native goal capabilities are detected, never assumed.
 metadata:
-  version: "1.1.1"
+  version: "1.1.2"
   tags: "delivery, cadence, kbd, recovery"
 ---
 

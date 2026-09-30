@@ -1,8 +1,8 @@
 {
-  "operation": "revise",
-  "state": ".agent-team/checkout-team/state.json",
-  "changeSummary": "Add a release coordinator and bind a new workflow revision",
+  "project": ".",
+  "workspace": "checkout-team",
+  "expectedRevision": 1,
+  "out": "checkout-team-v2",
   "nextVersion": "1.1.0",
-  "deploymentIntent": "stage"
+  "edits": []
 }
-

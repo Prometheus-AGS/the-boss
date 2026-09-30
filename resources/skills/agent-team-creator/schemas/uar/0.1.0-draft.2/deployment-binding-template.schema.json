@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometheus-ags.dev/uar/collaboration/0.1.0-draft.2/deployment-binding-template.schema.json",
+  "title": "UAR DeploymentBindingTemplate — sanitized non-executable export",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "urn:prometheus:uar:collaboration:0.1.0-draft.2"
+    },
+    "kind": {
+      "const": "DeploymentBindingTemplate"
+    },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "version": {
+      "$ref": "common.schema.json#/$defs/semver"
+    },
+    "contentDigest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "provenance": {
+      "$ref": "common.schema.json#/$defs/provenance"
+    },
+    "requiredCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "extensions": {
+      "$ref": "common.schema.json#/$defs/extensions"
+    },
+    "exportClass": {
+      "const": "non-executable-template"
+    },
+    "package": {
+      "$ref": "common.schema.json#/$defs/immutableRef"
+    },
+    "requestedModelBindings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "requestedAlias": {
+            "type": "string",
+            "minLength": 1
+          },
+          "modelRequirements": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "requestedAlias",
+          "modelRequirements"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "skillRequirements": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/skill"
+      }
+    },
+    "storageRequirements": {
+      "type": "object",
+      "properties": {
+        "backendClass": {
+          "type": "string",
+          "minLength": 1
+        },
+        "durableTransactions": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "backendClass",
+        "durableTransactions"
+      ],
+      "additionalProperties": false
+    },
+    "effectiveLimits": {
+      "$ref": "common.schema.json#/$defs/limits"
+    },
+    "effectiveBudget": {
+      "$ref": "common.schema.json#/$defs/budget"
+    },
+    "rebindFields": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/jsonPointer"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "status": {
+      "const": "needs-private-binding"
+    }
+  },
+  "required": [
+    "profile",
+    "kind",
+    "id",
+    "version",
+    "contentDigest",
+    "provenance",
+    "requiredCapabilities",
+    "extensions",
+    "exportClass",
+    "package",
+    "requestedModelBindings",
+    "skillRequirements",
+    "storageRequirements",
+    "effectiveLimits",
+    "effectiveBudget",
+    "rebindFields",
+    "status"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometheus-ags.dev/uar/collaboration/0.1.0-draft.2/team-definition.schema.json",
+  "title": "UAR collaboration team-definition — official draft.2 contract checkpoint",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "urn:prometheus:uar:collaboration:0.1.0-draft.2"
+    },
+    "kind": {
+      "const": "TeamDefinition"
+    },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "version": {
+      "$ref": "common.schema.json#/$defs/semver"
+    },
+    "contentDigest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "provenance": {
+      "$ref": "common.schema.json#/$defs/provenance"
+    },
+    "requiredCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "extensions": {
+      "$ref": "common.schema.json#/$defs/extensions"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 1
+    },
+    "instructions": {
+      "description": "Optional immutable approved team guidance. Digest is SHA-256 of the exact UTF-8 text bytes; runtime enforces the 16,384-byte limit.",
+      "type": "object",
+      "properties": {
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "digest": {
+          "$ref": "common.schema.json#/$defs/digest"
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 16384
+        }
+      },
+      "required": ["revision", "digest", "text"],
+      "additionalProperties": false
+    },
+    "members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "agent",
+              "team"
+            ]
+          },
+          "definition": {
+            "$ref": "common.schema.json#/$defs/immutableRef"
+          },
+          "min": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 16
+          },
+          "max": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          "responsibility": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "role",
+          "kind",
+          "definition",
+          "min",
+          "max",
+          "responsibility"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "coordinatorRole": {
+      "type": "string",
+      "minLength": 1
+    },
+    "communication": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fromRole": {
+            "type": "string",
+            "minLength": 1
+          },
+          "toRole": {
+            "type": "string",
+            "minLength": 1
+          },
+          "modes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "queue-only",
+                "trigger-turn"
+              ]
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "fromRole",
+          "toRole",
+          "modes"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "taskAcceptance": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "operator",
+            "coordinator-within-binding"
+          ]
+        },
+        "allowedWorkflows": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/immutableRef"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "mode",
+        "allowedWorkflows"
+      ],
+      "additionalProperties": false
+    },
+    "routing": {
+      "type": "object",
+      "properties": {
+        "eligibilityFirst": {
+          "const": true
+        },
+        "strategy": {
+          "const": "operator-role-capacity-cost-stable-id"
+        },
+        "explain": {
+          "const": true
+        }
+      },
+      "required": [
+        "eligibilityFirst",
+        "strategy",
+        "explain"
+      ],
+      "additionalProperties": false
+    },
+    "limits": {
+      "$ref": "common.schema.json#/$defs/limits"
+    },
+    "budget": {
+      "$ref": "common.schema.json#/$defs/budget"
+    },
+    "input": {
+      "$ref": "common.schema.json#/$defs/contract"
+    },
+    "output": {
+      "$ref": "common.schema.json#/$defs/contract"
+    }
+  },
+  "required": [
+    "profile",
+    "kind",
+    "id",
+    "version",
+    "contentDigest",
+    "provenance",
+    "requiredCapabilities",
+    "extensions",
+    "title",
+    "purpose",
+    "members",
+    "coordinatorRole",
+    "communication",
+    "taskAcceptance",
+    "routing",
+    "limits",
+    "budget",
+    "input",
+    "output"
+  ],
+  "additionalProperties": false
+}

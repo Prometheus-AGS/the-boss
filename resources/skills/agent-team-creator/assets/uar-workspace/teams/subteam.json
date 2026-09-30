@@ -1,0 +1,81 @@
+{
+  "profile": "urn:prometheus:uar:collaboration:0.1.0-draft.2",
+  "kind": "TeamDefinition",
+  "id": "urn:prometheus:mini:example:team:subteam",
+  "version": "1.0.0",
+  "provenance": {
+    "source": "UAR collaboration draft.2 contract checkpoint fixtures",
+    "authors": [
+      "Prometheus-AGS"
+    ]
+  },
+  "requiredCapabilities": [],
+  "extensions": {},
+  "title": "Nested specialist team",
+  "purpose": "Demonstrate a kind-correct nested team.",
+  "members": [
+    {
+      "role": "specialist",
+      "kind": "agent",
+      "definition": {
+        "id": "urn:prometheus:mini:example:agent:specialist",
+        "version": "1.0.0"
+      },
+      "min": 1,
+      "max": 1,
+      "responsibility": "Produce a bounded specialist artifact."
+    }
+  ],
+  "coordinatorRole": "specialist",
+  "communication": [],
+  "taskAcceptance": {
+    "mode": "operator",
+    "allowedWorkflows": [
+      {
+        "id": "urn:prometheus:mini:example:workflow:specialist",
+        "version": "1.0.0"
+      }
+    ]
+  },
+  "routing": {
+    "eligibilityFirst": true,
+    "strategy": "operator-role-capacity-cost-stable-id",
+    "explain": true
+  },
+  "limits": {
+    "concurrentTurns": 1,
+    "maxMembers": 2,
+    "maxDepth": 1,
+    "maxPendingTasks": 8
+  },
+  "budget": {
+    "maxTokens": 10000,
+    "maxCostMicrounits": 1000000,
+    "currency": "USD",
+    "maxElapsedSeconds": 300
+  },
+  "input": {
+    "type": "object",
+    "properties": {
+      "brief": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "brief"
+    ],
+    "additionalProperties": false
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "artifact": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "artifact"
+    ],
+    "additionalProperties": false
+  }
+}

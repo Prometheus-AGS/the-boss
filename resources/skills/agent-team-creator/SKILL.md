@@ -4,7 +4,7 @@ description: "Create, revise, package, and deploy agent-team definitions with st
 license: MIT
 compatibility: Requires Node.js 22 or newer. Git is optional for handoff snapshots. Model gateways, memory services and native harness CLIs are optional and separately configured.
 metadata:
-  version: "1.2.0"
+  version: "1.3.0"
   tags: "agents, teams, orchestration, coding"
 ---
 
@@ -18,9 +18,12 @@ concept or start a second agent loop.
 ## Start with the task
 
 Read project instructions and any active KBD work first. Reuse answers already
-given. Start by distinguishing **create**, **revise**, and **deploy**. Creation
+given. Start by distinguishing local **create**, persisted UAR **author**,
+immutable **revise**, and **deploy**. Creation
 asks only for missing outcome, scope, deliverables, budget preference and review
-needs. Revision asks for the current definition/package, desired change, next
+needs. UAR authoring reads the selected `.agent-team/<team-id>/authoring`
+workspace and returns one persisted missing document field or graph relationship
+at a time. Revision asks for the current workspace revision, desired change, next
 semantic version and deployment intent. Deployment asks for the reviewed package,
 UAR instance, environment credential reference and whether a private binding is
 also required. The user need not know agent terminology.
@@ -126,20 +129,33 @@ native reference for supported project agents or plugin/marketplace installation
 Do not invent plugin agent fields where a harness has none. A plugin installation
 does not start an agent team.
 
-For UAR, use the canonical package and private binding path in
+For UAR, first clarify shared behavioral guidance (or explicitly none), exact member skills/tools, required versus optional context resources, and manual versus cooperating-pair execution. Reuse known answers. Directed delegation requires a trigger-turn edge, and worker results need a separately permitted return edge. Catalog validity alone does not certify a runnable execution profile.
+
+Use the draft.2 file-backed workspace, canonical package, and private binding path in
 [UAR deployment](references/uar-deployment.md). It preserves complete
 AgentDefinition, TeamDefinition, WorkflowDefinition, PackageManifest and
 DeploymentBinding fields, resolves immutable references, and installs the whole
-package atomically through the collaboration catalog API. Use an operator-selected
+package atomically through the collaboration catalog API. `workspace.json` names
+one manifest source and separate agent, team, subteam, and workflow documents.
+Use `uar-workspace-status` or `guide` with `operation=author`; each response gives
+the monotonic revision, fixed counts, one stable next-question ID, saved-answer
+progress, and a bounded diagnostic page without returning the graph. Apply an
+answer with `uar-workspace-answer`, or update one declared file with
+`uar-workspace-update`; every mutation requires the last observed
+`expectedRevision` and refuses stale state before writing. Use an operator-selected
 instance URL and `env:VARIABLE` credential reference. Run capability discovery,
 package preflight, install and exact status before an optional binding preflight
-and install. Catalog installation is not activation: the `uar-activate` command
-refuses until the durable I2 team runtime exists.
+and install. Package installation confers no credential, representation grant,
+consent, authority, or activation. The `uar-activate` command refuses because
+this authoring client does not own execution. Operate through The Boss or another
+authorized host after negotiating the selected UAR instance's execution profile.
 
 Schema-v1 `export --target uar` remains a compatibility projection for existing
 single-agent consumers. It cannot represent a UAR team and must not be used to
 claim collaboration-package deployment. Create new UAR teams through
-`uar-package-build` and `uar-package-install`.
+`uar-workspace-init`, document updates, `uar-package-build`, and
+`uar-package-install`. Existing draft.1 inline packages remain readable and
+migrate explicitly; they are never rewritten or relabeled.
 
 For BossFang, keep registry registration, activation and execution separate.
 BossFang Hands and standalone agent/workflow registration are alternative native
