@@ -1,5 +1,9 @@
 [
   {
+    "version": "2.2.10",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.10 - Grok subscription compatibility\n\n- [Grok] Update subscription authentication and streaming compatibility; support browser authorization-code entry.\n- [Desktop] Incorporate current Cherry Studio improvements while preserving The Boss integrations.\n- [Teams] Select a configured model, admit claimed tasks with bounded reservations, and retain scoped output artifacts.\n- [UAR] Cancel attempts, revoke membership, and recover durable execution state without replaying uncertain effects.\n- [Skills] Include the updated mini payload with installed acceptance tracked separately from publication scheduling.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.10 - Grok 订阅兼容性\n\n- [Grok] 更新订阅身份验证与流式响应兼容性，支持输入浏览器授权码。\n- [桌面] 集成 Cherry Studio 最新改进，同时保留 The Boss 集成功能。\n- [团队] 选择已配置的模型，按资源预留额度执行已认领任务，并保留隔离的输出工件。\n- [UAR] 取消执行、撤销成员资格并恢复持久执行状态，不重复执行结果不确定的操作。\n- [技能] 包含更新的 mini 技能包，分别跟踪安装验收和发布计划。\n<!--LANG:END-->"
+  },
+  {
     "version": "2.2.9",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.9 - Bounded UAR team execution\n\n- [Teams] Select a configured model, admit claimed tasks with bounded reservations, and retain scoped output artifacts.\n- [UAR] Cancel attempts, revoke membership, and recover durable execution state without replaying uncertain effects.\n- [Skills] Include the updated mini payload with installed acceptance tracked separately from publication scheduling.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.9 - 有界 UAR 团队执行\n\n- [团队] 选择已配置的模型，按资源预留额度执行已认领任务，并保留隔离的输出工件。\n- [UAR] 取消执行、撤销成员资格并恢复持久执行状态，不重复执行结果不确定的操作。\n- [技能] 包含更新的 mini 技能包，分别跟踪安装验收和发布计划。\n<!--LANG:END-->"
   },
