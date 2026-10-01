@@ -58,6 +58,7 @@ export const grokOAuthProvider = {
   clientId: GROK_CONFIG.CLIENT_ID,
   // OAuth is the only credential; logout/token loss disables the provider.
   clearDisablesProvider: true,
+  supportsManualCode: true,
   transport: {
     hosts: [GROK_CONFIG.CALLBACK_HOST],
     port: GROK_CONFIG.CALLBACK_PORT,

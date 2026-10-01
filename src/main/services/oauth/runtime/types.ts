@@ -81,6 +81,8 @@ export interface OAuthRuntimeProviderDefinition<
    * manual API key (CherryIN), so logout never strips that key's enablement.
    */
   clearDisablesProvider?: boolean
+  /** Allow an initiating window to submit a code shown by the provider. */
+  supportsManualCode?: boolean
   transport: LoopbackCallbackConfig
   createClient(context?: TContext): PkceOAuthClient | Promise<PkceOAuthClient>
   extractAccountId?(accessToken: string): string | null

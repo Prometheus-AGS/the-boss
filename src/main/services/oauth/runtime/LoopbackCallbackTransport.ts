@@ -6,6 +6,7 @@ import type { LoopbackCallbackConfig } from './types'
 export class LoopbackCallbackTransport {
   private activeServers: Server[] = []
   private busy = false
+  private submitPendingCode: ((input: string) => void) | null = null
   ready: Promise<void> = Promise.resolve()
 
   constructor(private readonly config: LoopbackCallbackConfig) {}
@@ -28,7 +29,13 @@ export class LoopbackCallbackTransport {
     return true
   }
 
+  submitAuthorizationCode(input: string): void {
+    if (!this.submitPendingCode) throw new OAuthServiceError('No authorization code is pending')
+    this.submitPendingCode(input)
+  }
+
   close(): void {
+    this.submitPendingCode = null
     for (const server of this.activeServers) {
       server.close()
     }
@@ -47,6 +54,7 @@ export class LoopbackCallbackTransport {
       const settleResolve = (code: string) => {
         if (settled) return
         settled = true
+        this.submitPendingCode = null
         resolve(code)
       }
       const settleReject = (error: unknown) => {
@@ -54,6 +62,34 @@ export class LoopbackCallbackTransport {
         settled = true
         this.close()
         reject(error)
+      }
+
+      this.submitPendingCode = (input) => {
+        if (settled || signal.aborted) throw new OAuthServiceError('The sign-in is no longer awaiting a code')
+        const value = input.trim()
+        let code = value
+        if (/^https?:\/\//i.test(value)) {
+          let url: URL
+          try {
+            url = new URL(value)
+          } catch {
+            throw new OAuthServiceError('Invalid authorization callback')
+          }
+          const redirect = new URL(this.config.redirectUri)
+          if (
+            url.origin !== redirect.origin ||
+            url.pathname !== redirect.pathname ||
+            url.searchParams.get('state') !== expectedState ||
+            url.searchParams.has('error')
+          ) {
+            throw new OAuthServiceError('Authorization callback does not match this sign-in')
+          }
+          code = url.searchParams.get('code') ?? ''
+        }
+        if (!code || code.length > 4096 || /\s/.test(code) || code.includes('://')) {
+          throw new OAuthServiceError('Invalid authorization code')
+        }
+        settleResolve(code)
       }
 
       const handleRequest = (req: IncomingMessage, res: ServerResponse) => {
