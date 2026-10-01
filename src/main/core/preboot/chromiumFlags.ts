@@ -1,6 +1,6 @@
 import { app } from 'electron'
 
-import { isLinux, isWin } from '@main/core/platform'
+import { isLinux, isLinuxWayland, isWin } from '@main/core/platform'
 import { bootConfigService } from '@main/data/bootConfig'
 import { PRODUCT_DIRNAME } from '@shared/utils/branding'
 
@@ -39,7 +39,7 @@ export function configureChromiumFlags(): void {
   // Linux Wayland: enable the xdg-desktop-portal global-shortcut backend so
   // globalShortcut.register() actually works under Wayland compositors.
   // https://www.electronjs.org/docs/latest/api/global-shortcut
-  if (isLinux && process.env.XDG_SESSION_TYPE === 'wayland') {
+  if (isLinuxWayland) {
     app.commandLine.appendSwitch('enable-features', 'GlobalShortcutsPortal')
   }
 

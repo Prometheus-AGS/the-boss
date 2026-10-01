@@ -11,6 +11,18 @@ What each merge actually hit. Rules belong in [the playbook](./upstream-merges.m
 this page is history and carry-over. Newest entry first. The `upstream-merge` skill
 appends here as its last step.
 
+## 2026-10-01 — Cherry Studio main (upstream Grok compatibility)
+
+- **Baseline:** Boss `7653c6a3e22a778f202b1d8a1f8a1edca36f47a1`; upstream `e2f53146eb6944718b091661df0854c75a4d933a` (94 incoming commits).
+- **Version:** retain The Boss 2.2.9; upstream 2.1.4 must not downgrade the fork.
+- **Conflicts:** combine upstream native-module filters with UAR payload exclusions; preserve Boss home directory with upstream isolated developer profiles; retain UAR enablement while adopting upstream removal of DSH from new-agent choices; retain both channel imports.
+- **Persistence:** all shipped Boss migrations through 0025 are unchanged. Generate a fresh 0026 from the merged schemas for remote commands, diagnostics and paired-device identity/grants. Do not reuse upstream snapshot identities.
+- **Preferences:** regenerate from merged source definitions; restore timestamp-only generated changes.
+- **Locales:** per-key three-way merge of 26 catalogs; preserve Boss keys and branding. Adopt current network and invitation descriptions. Preserve distinct Boss/upstream 2.1.3 release notes in source-labelled sections within the existing unique-version schema. Regenerate built-in product knowledge from resolved sources.
+- **Dependencies:** regenerate lockfile from upstream baseline with fork dependencies and patches; use Node 24. The first install under Node 26 left missing native bindings; a forced installation under Node 24 completed.
+- **Retained worktrees:** no unmerged commits on the primary local branch. Convergence docs commit 480703469a remains separate. Older UAR branch commits f045e9636b, bae9d0aaf4, d40c2f2cd4 and launch-isolation e11fedb1ef remain ancestry-unmerged and are not silently imported; 51c231efe7 and 996f8d0460 have patch equivalents in main. Local modifications and untracked files remain in their original checkouts.
+- **Gate:** pending the combined Grok repair and completed delivery build/operation. No intermediate test suites run.
+
 ## Open items
 
 Branding work known to be outstanding. Close an item by moving it into the entry of

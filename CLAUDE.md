@@ -75,7 +75,7 @@ Run `pnpm install` first (Node and pnpm versions are pinned in `package.json` â€
 
 ### Testing
 
-- Integration scenarios use Vitest 3 where the real application boundary can be driven through its project configuration.
+- Integration scenarios use Vitest 5 where the real application boundary can be driven through its project configuration.
 - **No unit-test delivery loops**: do not add or run unit, component-only, snapshot, filtered-function, or mock-only tests as delivery evidence. Existing legacy tests may remain, but their results do not prove a feature complete.
 - **No behavior-pinning tests**: a scenario whose assertion merely records current output, mock calls, or an expected value re-derived from the implementation has zero value. Exercise real input through the production boundary and assert the promised outcome. Before adding an integration scenario, state the production defect it would catch; if none, do not add it.
 - **Frontend integration**: use the relevant production-flow guidance from [Frontend Testing Guidelines](docs/references/testing/frontend-testing.md); component-only guidance is not a completion gate.
