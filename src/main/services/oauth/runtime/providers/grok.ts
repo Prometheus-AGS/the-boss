@@ -3,7 +3,7 @@ import { randomBytes } from 'node:crypto'
 import { net } from 'electron'
 import * as z from 'zod'
 
-import { GROK_CLI_PROVIDER_ID } from '@shared/data/presets/grokCli'
+import { GROK_CLI_COMPATIBILITY_VERSION, GROK_CLI_PROVIDER_ID } from '@shared/data/presets/grokCli'
 
 import { OAuthServiceError } from '../../errors'
 import { PkceOAuthClient } from '../PkceOAuthClient'
@@ -73,6 +73,7 @@ export const grokOAuthProvider = {
       tokenUrl: discovery.token_endpoint,
       redirectUri: GROK_CONFIG.REDIRECT_URI,
       scope: GROK_CONFIG.SCOPE,
+      tokenHeaders: { 'x-grok-client-version': GROK_CLI_COMPATIBILITY_VERSION },
       extraAuthParams: { nonce }
     })
   }
