@@ -209,15 +209,19 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.9 - Bounded UAR team execution
+    The Boss 2.2.10 - Grok subscription compatibility
 
+    - [Grok] Update subscription authentication and streaming compatibility; support browser authorization-code entry.
+    - [Desktop] Incorporate current Cherry Studio improvements while preserving The Boss integrations.
     - [Teams] Select a configured model, admit claimed tasks with bounded reservations, and retain scoped output artifacts.
     - [UAR] Cancel attempts, revoke membership, and recover durable execution state without replaying uncertain effects.
     - [Skills] Include the updated mini payload with installed acceptance tracked separately from publication scheduling.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.9 - 有界 UAR 团队执行
+    The Boss 2.2.10 - Grok 订阅兼容性
 
+    - [Grok] 更新订阅身份验证与流式响应兼容性，支持输入浏览器授权码。
+    - [桌面] 集成 Cherry Studio 最新改进，同时保留 The Boss 集成功能。
     - [团队] 选择已配置的模型，按资源预留额度执行已认领任务，并保留隔离的输出工件。
     - [UAR] 取消执行、撤销成员资格并恢复持久执行状态，不重复执行结果不确定的操作。
     - [技能] 包含更新的 mini 技能包，分别跟踪安装验收和发布计划。
