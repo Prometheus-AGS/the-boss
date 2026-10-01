@@ -40,6 +40,10 @@ const signInObservationInput = providerInput.extend({ requestId: z.string().min(
 export const oauthRequestSchemas = {
   'oauth.sign_in': defineRoute({ input: signInObservationInput, output: oauthAccountSchema }),
   'oauth.sign_in.attach': defineRoute({ input: signInObservationInput, output: signInAttachResultSchema }),
+  'oauth.sign_in.submit_code': defineRoute({
+    input: signInObservationInput.extend({ code: z.string().min(1).max(8192) }),
+    output: z.void()
+  }),
   'oauth.cancel_sign_in': defineRoute({ input: signInObservationInput, output: z.void() }),
   'oauth.has_token': defineRoute({ input: providerInput, output: z.boolean() }),
   'oauth.get_account': defineRoute({ input: providerInput, output: oauthAccountSchema }),

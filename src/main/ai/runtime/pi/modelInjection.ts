@@ -20,6 +20,7 @@ import { getExtraHeaders } from '@main/ai/utils/provider'
 import { createAiUsagePricingSnapshot } from '@main/ai/utils/usageCapture'
 import { mapEndpointToPiApi, type PiApi } from '@shared/ai/piModelCompatibility'
 import { isCodexProviderId } from '@shared/data/presets/codex'
+import { GROK_CLI_PROVIDER_ID } from '@shared/data/presets/grokCli'
 import { hasRuntimeTransportAdapter } from '@shared/data/presets/runtimeTransport'
 import {
   ENDPOINT_TYPE,
@@ -383,7 +384,15 @@ export async function assertPiProviderUsable(uniqueModelId: UniqueModelId): Prom
   // not app-side keys; a signed-out provider is surfaced as a missing credential.
   if (getProviderTransportAdapter(providerId)) {
     const signedIn = await application.get('OAuthRuntimeService').hasToken(providerId)
-    if (!signedIn) throw new PiMissingApiKeyError(providerId)
+    if (!signedIn) {
+      if (providerId === GROK_CLI_PROVIDER_ID) {
+        throw Object.assign(new Error('Grok is not signed in. Sign in with xAI in provider settings.'), {
+          providerId,
+          providerErrorCategory: 'auth'
+        })
+      }
+      throw new PiMissingApiKeyError(providerId)
+    }
     return
   }
 

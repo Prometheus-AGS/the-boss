@@ -1,14 +1,15 @@
 import { CheckCircle2, CircleAlert, LogIn, RefreshCw } from 'lucide-react'
 import type { FC } from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Button } from '@cherrystudio/ui'
+import { Button, Input } from '@cherrystudio/ui'
 import { useInvalidateCache } from '@data/hooks/useDataApi'
 import { loggerService } from '@logger'
 import { ipcApi } from '@renderer/ipc'
 import { popup } from '@renderer/services/popup'
 import { toast } from '@renderer/services/toast'
+import { GROK_CLI_PROVIDER_ID } from '@shared/data/presets/grokCli'
 import { IpcError } from '@shared/ipc/errors/IpcError'
 import { oauthErrorCodes } from '@shared/ipc/errors/oauth'
 
@@ -39,6 +40,11 @@ const LoginOauthPanel: FC<LoginOauthPanelProps> = ({ providerId, i18nNs, showAcc
   const [signingIn, setSigningIn] = useState(false)
   const [cancellingSignIn, setCancellingSignIn] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
+  const [manualCode, setManualCode] = useState('')
+  const [submittingCode, setSubmittingCode] = useState(false)
+  const [codeAccepted, setCodeAccepted] = useState(false)
+  const [codeFailed, setCodeFailed] = useState(false)
+  const manualCodeId = useId()
   const mountedRef = useRef(false)
   const signInRequestRef = useRef<Promise<void> | null>(null)
   const signInRequestIdRef = useRef<string | null>(null)
@@ -73,6 +79,9 @@ const LoginOauthPanel: FC<LoginOauthPanelProps> = ({ providerId, i18nNs, showAcc
     if (existing) return existing
 
     setSigningIn(true)
+    setManualCode('')
+    setCodeAccepted(false)
+    setCodeFailed(false)
     const requestId = crypto.randomUUID()
     signInRequestIdRef.current = requestId
     const request = Promise.resolve().then(async () => {
@@ -88,7 +97,10 @@ const LoginOauthPanel: FC<LoginOauthPanelProps> = ({ providerId, i18nNs, showAcc
         if (signInRequestRef.current === request) {
           signInRequestRef.current = null
           if (signInRequestIdRef.current === requestId) signInRequestIdRef.current = null
-          if (mountedRef.current) setSigningIn(false)
+          if (mountedRef.current) {
+            setSigningIn(false)
+            setManualCode('')
+          }
         }
       }
     })
@@ -125,7 +137,10 @@ const LoginOauthPanel: FC<LoginOauthPanelProps> = ({ providerId, i18nNs, showAcc
     } finally {
       if (signInRequestIdRef.current === requestId) {
         signInRequestIdRef.current = null
-        if (mountedRef.current) setSigningIn(false)
+        if (mountedRef.current) {
+          setSigningIn(false)
+          setManualCode('')
+        }
       }
     }
   }, [applySignInSuccess, ns, providerId, showAccountId, t])
@@ -166,6 +181,25 @@ const LoginOauthPanel: FC<LoginOauthPanelProps> = ({ providerId, i18nNs, showAcc
       if (mountedRef.current) setCancellingSignIn(false)
     }
   }, [ns, providerId, t])
+
+  const handleSubmitCode = useCallback(async () => {
+    const requestId = signInRequestIdRef.current
+    if (!requestId || !manualCode.trim() || submittingCode || codeAccepted) return
+    setSubmittingCode(true)
+    setCodeFailed(false)
+    try {
+      await ipcApi.request('oauth.sign_in.submit_code', { providerId, requestId, code: manualCode.trim() })
+      if (mountedRef.current) {
+        setManualCode('')
+        setCodeAccepted(true)
+      }
+    } catch {
+      // Authorization codes and callback URLs must never reach the logger.
+      if (mountedRef.current) setCodeFailed(true)
+    } finally {
+      if (mountedRef.current) setSubmittingCode(false)
+    }
+  }, [providerId, manualCode, submittingCode, codeAccepted])
 
   const handleLogout = useCallback(async () => {
     const confirmed = await popup.confirm({
@@ -229,11 +263,58 @@ const LoginOauthPanel: FC<LoginOauthPanelProps> = ({ providerId, i18nNs, showAcc
               {signingIn ? t(`${ns}.signing_in`) : t(`${ns}.sign_in_button`)}
             </Button>
             {signingIn ? (
-              <Button variant="outline" disabled={cancellingSignIn} onClick={() => void handleCancelSignIn()}>
+              <Button
+                variant="outline"
+                disabled={cancellingSignIn || submittingCode || codeAccepted}
+                onClick={() => void handleCancelSignIn()}>
                 {t('common.cancel')}
               </Button>
             ) : null}
           </div>
+          {providerId === GROK_CLI_PROVIDER_ID && signingIn ? (
+            <form
+              className="flex flex-col gap-2"
+              onSubmit={(event) => {
+                event.preventDefault()
+                void handleSubmitCode()
+              }}>
+              <label htmlFor={manualCodeId} className="text-sm">
+                {t(`${ns}.manual_code_label`)}
+              </label>
+              <p id={`${manualCodeId}-help`} className="text-xs">
+                {t(`${ns}.manual_code_help`)}
+              </p>
+              <Input
+                id={manualCodeId}
+                type="password"
+                autoComplete="off"
+                spellCheck={false}
+                value={manualCode}
+                maxLength={8192}
+                onChange={(event) => {
+                  setManualCode(event.target.value)
+                  setCodeFailed(false)
+                }}
+                disabled={submittingCode || codeAccepted || cancellingSignIn}
+                aria-describedby={`${manualCodeId}-help ${manualCodeId}-status`}
+                aria-invalid={codeFailed}
+              />
+              <Button
+                type="submit"
+                variant="outline"
+                disabled={!manualCode.trim() || submittingCode || codeAccepted || cancellingSignIn}>
+                {submittingCode ? <RefreshCw className="size-4 animate-spin" aria-hidden /> : null}
+                {t(`${ns}.${submittingCode ? 'manual_code_submitting' : 'manual_code_submit'}`)}
+              </Button>
+              <p
+                id={`${manualCodeId}-status`}
+                role="status"
+                aria-live="polite"
+                className={codeFailed ? 'text-error text-xs' : 'text-xs'}>
+                {codeFailed ? t(`${ns}.manual_code_failed`) : codeAccepted ? t(`${ns}.manual_code_accepted`) : null}
+              </p>
+            </form>
+          ) : null}
         </div>
       )}
     </div>

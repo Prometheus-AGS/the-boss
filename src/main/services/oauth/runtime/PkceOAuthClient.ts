@@ -32,6 +32,8 @@ export interface PkceOAuthClientConfig {
   scope: string
   /** Provider-specific flags appended to the authorization URL query. */
   extraAuthParams?: Record<string, string>
+  /** Provider protocol headers required during token exchange and refresh. */
+  tokenHeaders?: Record<string, string>
 }
 
 export interface AuthorizationRequest {
@@ -127,7 +129,7 @@ export class PkceOAuthClient {
   private async postToken(params: Record<string, string>, errorPrefix: string): Promise<OAuthTokenResponse> {
     const response = await net.fetch(this.config.tokenUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: { ...this.config.tokenHeaders, 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams(params).toString(),
       signal: AbortSignal.timeout(TOKEN_HTTP_TIMEOUT_MS)
     })
