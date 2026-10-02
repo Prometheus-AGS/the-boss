@@ -5721,6 +5721,7 @@
   "settings.prometheus.integration.uarAdmin.skills.updated": "技能可用性已更新。",
   "settings.prometheus.integration.uarAdmin.surface.agents": "代理程式",
   "settings.prometheus.integration.uarAdmin.surface.approvals": "審批",
+  "settings.prometheus.integration.uarAdmin.surface.channel-source-observers": "頻道觀察",
   "settings.prometheus.integration.uarAdmin.surface.collaboration-catalog": "協作目錄",
   "settings.prometheus.integration.uarAdmin.surface.compiler": "編譯器",
   "settings.prometheus.integration.uarAdmin.surface.diagnostics": "診斷",

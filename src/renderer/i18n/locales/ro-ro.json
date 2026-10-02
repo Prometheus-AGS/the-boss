@@ -5721,6 +5721,7 @@
   "settings.prometheus.integration.uarAdmin.skills.updated": "Disponibilitatea a fost actualizată.",
   "settings.prometheus.integration.uarAdmin.surface.agents": "Agenți",
   "settings.prometheus.integration.uarAdmin.surface.approvals": "Aprobări",
+  "settings.prometheus.integration.uarAdmin.surface.channel-source-observers": "Observarea canalelor",
   "settings.prometheus.integration.uarAdmin.surface.collaboration-catalog": "Catalog de colaborare",
   "settings.prometheus.integration.uarAdmin.surface.compiler": "Compilator",
   "settings.prometheus.integration.uarAdmin.surface.diagnostics": "Diagnosticare",

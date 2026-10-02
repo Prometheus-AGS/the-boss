@@ -5721,6 +5721,7 @@
   "settings.prometheus.integration.uarAdmin.skills.updated": "Đã cập nhật khả dụng kỹ năng.",
   "settings.prometheus.integration.uarAdmin.surface.agents": "Tác tử",
   "settings.prometheus.integration.uarAdmin.surface.approvals": "Phê duyệt",
+  "settings.prometheus.integration.uarAdmin.surface.channel-source-observers": "Quan sát kênh",
   "settings.prometheus.integration.uarAdmin.surface.collaboration-catalog": "Danh mục cộng tác",
   "settings.prometheus.integration.uarAdmin.surface.compiler": "Trình biên dịch",
   "settings.prometheus.integration.uarAdmin.surface.diagnostics": "Chẩn đoán",

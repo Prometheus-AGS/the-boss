@@ -5721,6 +5721,7 @@
   "settings.prometheus.integration.uarAdmin.skills.updated": "Beceri kullanılabilirliği güncellendi.",
   "settings.prometheus.integration.uarAdmin.surface.agents": "Aracılar",
   "settings.prometheus.integration.uarAdmin.surface.approvals": "Onaylar",
+  "settings.prometheus.integration.uarAdmin.surface.channel-source-observers": "Kanal gözlemleri",
   "settings.prometheus.integration.uarAdmin.surface.collaboration-catalog": "İş birliği kataloğu",
   "settings.prometheus.integration.uarAdmin.surface.compiler": "Derleyici",
   "settings.prometheus.integration.uarAdmin.surface.diagnostics": "Tanılama",

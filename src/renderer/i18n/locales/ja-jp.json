@@ -5721,6 +5721,7 @@
   "settings.prometheus.integration.uarAdmin.skills.updated": "スキルの利用可否を更新しました。",
   "settings.prometheus.integration.uarAdmin.surface.agents": "エージェント",
   "settings.prometheus.integration.uarAdmin.surface.approvals": "承認",
+  "settings.prometheus.integration.uarAdmin.surface.channel-source-observers": "チャネルの監視",
   "settings.prometheus.integration.uarAdmin.surface.collaboration-catalog": "コラボレーションカタログ",
   "settings.prometheus.integration.uarAdmin.surface.compiler": "コンパイラー",
   "settings.prometheus.integration.uarAdmin.surface.diagnostics": "診断",

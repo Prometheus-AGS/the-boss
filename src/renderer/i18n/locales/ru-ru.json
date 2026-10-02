@@ -5721,6 +5721,7 @@
   "settings.prometheus.integration.uarAdmin.skills.updated": "Доступность навыка обновлена.",
   "settings.prometheus.integration.uarAdmin.surface.agents": "Агенты",
   "settings.prometheus.integration.uarAdmin.surface.approvals": "Разрешения",
+  "settings.prometheus.integration.uarAdmin.surface.channel-source-observers": "Наблюдение за каналами",
   "settings.prometheus.integration.uarAdmin.surface.collaboration-catalog": "Каталог совместной работы",
   "settings.prometheus.integration.uarAdmin.surface.compiler": "Компилятор",
   "settings.prometheus.integration.uarAdmin.surface.diagnostics": "Диагностика",

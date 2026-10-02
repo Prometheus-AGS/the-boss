@@ -5721,6 +5721,7 @@
   "settings.prometheus.integration.uarAdmin.skills.updated": "Skill-Verfügbarkeit aktualisiert.",
   "settings.prometheus.integration.uarAdmin.surface.agents": "Agenten",
   "settings.prometheus.integration.uarAdmin.surface.approvals": "Genehmigungen",
+  "settings.prometheus.integration.uarAdmin.surface.channel-source-observers": "Kanalbeobachtungen",
   "settings.prometheus.integration.uarAdmin.surface.collaboration-catalog": "Katalog für Zusammenarbeit",
   "settings.prometheus.integration.uarAdmin.surface.compiler": "Compiler",
   "settings.prometheus.integration.uarAdmin.surface.diagnostics": "Diagnose",

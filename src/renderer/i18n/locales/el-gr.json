@@ -5721,6 +5721,7 @@
   "settings.prometheus.integration.uarAdmin.skills.updated": "Η διαθεσιμότητα δεξιότητας ενημερώθηκε.",
   "settings.prometheus.integration.uarAdmin.surface.agents": "Πράκτορες",
   "settings.prometheus.integration.uarAdmin.surface.approvals": "Εγκρίσεις",
+  "settings.prometheus.integration.uarAdmin.surface.channel-source-observers": "Παρατήρηση καναλιών",
   "settings.prometheus.integration.uarAdmin.surface.collaboration-catalog": "Κατάλογος συνεργασίας",
   "settings.prometheus.integration.uarAdmin.surface.compiler": "Μεταγλωττιστής",
   "settings.prometheus.integration.uarAdmin.surface.diagnostics": "Διαγνωστικά",

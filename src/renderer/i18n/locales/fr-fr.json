@@ -5721,6 +5721,7 @@
   "settings.prometheus.integration.uarAdmin.skills.updated": "Disponibilité mise à jour.",
   "settings.prometheus.integration.uarAdmin.surface.agents": "Agents",
   "settings.prometheus.integration.uarAdmin.surface.approvals": "Approbations",
+  "settings.prometheus.integration.uarAdmin.surface.channel-source-observers": "Observations de canaux",
   "settings.prometheus.integration.uarAdmin.surface.collaboration-catalog": "Catalogue de collaboration",
   "settings.prometheus.integration.uarAdmin.surface.compiler": "Compilateur",
   "settings.prometheus.integration.uarAdmin.surface.diagnostics": "Diagnostics",
