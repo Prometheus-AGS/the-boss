@@ -24,9 +24,9 @@ export function selectedUarStorage(
 }
 
 export function uarStorageUpdate(selection: UarStorageSelection): Partial<UarStorageConfig> {
-  if (selection === 'embedded') return { backend: 'embedded' }
-  if (selection === 'manual') return { backend: 'remote' }
-  return { backend: 'remote', endpoint: selection.slice('candidate:'.length) }
+  if (selection === 'embedded') return { backend: 'embedded', remoteDurabilityAttested: false }
+  if (selection === 'manual') return { backend: 'remote', remoteDurabilityAttested: false }
+  return { backend: 'remote', endpoint: selection.slice('candidate:'.length), remoteDurabilityAttested: false }
 }
 
 export function uarCandidateValue(candidate: ServiceCandidate): UarStorageSelection {

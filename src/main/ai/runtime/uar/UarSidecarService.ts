@@ -503,7 +503,8 @@ export class UarSidecarService extends BaseService {
             UAR_PERSISTENCE__SURREAL_PASS: storage.password ?? '',
             UAR_PERSISTENCE__SURREAL_AUTH_LEVEL: storage.profile.authLevel,
             UAR_PERSISTENCE__SURREAL_NS: storage.profile.namespace,
-            UAR_PERSISTENCE__SURREAL_DB: storage.profile.database
+            UAR_PERSISTENCE__SURREAL_DB: storage.profile.database,
+            ...(storage.profile.remoteDurabilityAttested ? { UAR_REMOTE_SURREAL_DURABILITY_ATTESTED: '1' } : {})
           }
         : {
             UAR_PERSISTENCE__DATABASE_URL: `surrealkv://${path.resolve(dataRoot, 'runtime.db').replaceAll('\\', '/')}`
