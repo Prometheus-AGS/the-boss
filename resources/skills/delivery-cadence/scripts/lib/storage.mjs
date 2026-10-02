@@ -23,19 +23,31 @@ export async function withLock(root, action) {
   const lockPath = path.join(root, 'run.lock');
   const owner = { id: randomUUID(), pid: process.pid, hostname: os.hostname(), startedAt: new Date().toISOString() };
   let handle;
-  for (let attempt = 0; attempt < 2; attempt++) {
+  for (let attempt = 0; attempt < 100; attempt++) {
     try { handle = await fs.open(lockPath, 'wx', 0o600); break; }
     catch (error) {
       if (error.code !== 'EEXIST') throw error;
       let previous;
       try { previous = JSON.parse(await fs.readFile(lockPath, 'utf8')); }
-      catch { throw new Error(`Incomplete cadence lock at ${lockPath}; confirm its owner has exited before recovery`); }
+      catch { if (attempt < 99) { await new Promise(resolve => setTimeout(resolve, 20)); continue; } throw new Error(`Incomplete cadence lock at ${lockPath}; confirm its owner has exited before recovery`); }
       let alive = true;
       if (previous.hostname === os.hostname()) {
         try { process.kill(previous.pid, 0); } catch (check) { if (check.code === 'ESRCH') alive = false; }
       }
-      if (alive) throw new Error(`Cadence is owned by ${previous.hostname} process ${previous.pid}; do not start another writer`);
-      await fs.rename(lockPath, `${lockPath}.recovered.${randomUUID()}`);
+      if (alive) {
+        if (attempt === 99) throw new Error(`Cadence transaction owned by ${previous.hostname} process ${previous.pid}; retry after it finishes`);
+        await new Promise(resolve => setTimeout(resolve, 20)); continue;
+      }
+      const recoveryPath = path.join(root, 'lock-recovery');
+      let recovery;
+      try { recovery = await fs.open(recoveryPath, 'wx', 0o600); }
+      catch (claim) { if (claim.code !== 'EEXIST') throw claim; throw new Error('Interrupted/concurrent lock recovery; inspect lock-recovery before resuming'); }
+      try {
+        let current;
+        try { current = JSON.parse(await fs.readFile(lockPath, 'utf8')); } catch (read) { if (read.code !== 'ENOENT') throw read; }
+        if (current?.id === previous.id) await fs.rename(lockPath, `${lockPath}.recovered.${randomUUID()}`);
+      } finally { await recovery.close(); await fs.unlink(recoveryPath); }
+
     }
   }
   if (!handle) throw new Error('Could not acquire cadence ownership');

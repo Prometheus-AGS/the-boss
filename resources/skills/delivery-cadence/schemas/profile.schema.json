@@ -48,7 +48,10 @@
         "mode": {
           "enum": [
             "manual",
-            "every"
+            "every",
+            "count",
+            "interval",
+            "either"
           ]
         },
         "every": {
@@ -76,6 +79,20 @@
           "items": {
             "type": "string",
             "minLength": 1
+          }
+        },
+        "intervalMinutes": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "anchorUtc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "adapters": {
+          "type": "array",
+          "items": {
+            "type": "object"
           }
         }
       }

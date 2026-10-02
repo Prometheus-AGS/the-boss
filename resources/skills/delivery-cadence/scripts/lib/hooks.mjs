@@ -1,5 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
+import { randomUUID } from 'node:crypto';
+import { withLock } from './storage.mjs';
+import { immutableJson } from './jobs.mjs';
 import { fileURLToPath } from 'node:url';
 import { digest, readRegistry, register, mutateRegistration, scriptDigest, writeJson } from './hook-registry.mjs';
 import { minimalEnvironment, runCommand } from './process.mjs';
@@ -16,28 +20,50 @@ async function dispatch(root, event, handler, { retry = false } = {}) {
   const id = identity(event, handler);
   const file = path.join(receiptDir(root), `${id}.json`);
   fs.mkdirSync(receiptDir(root), { recursive: true });
-  let prior = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
-  if (prior?.status === 'succeeded') return result(prior);
-  if (prior?.status === 'running') {
-    prior = { ...prior, status: 'unknown', reason: 'interrupted-external-effects-unknown', finishedAt: new Date().toISOString() };
-    writeJson(file, prior);
-  }
-  if (prior && !retry) return result(prior);
-  if (prior?.status === 'unknown' && !handler.idempotency) throw new Error('Unknown external effects require a configured idempotency contract before retry.');
-  let current = {
-    schemaVersion: 1, id, eventId: event.id, event, handlerId: handler.id, revision: handler.revision,
-    scriptDigest: handler.digest, status: 'scheduled', attempt: (prior?.attempt ?? 0) + 1,
-    scheduledAt: new Date().toISOString(), idempotencyKey: id,
-  };
-  if (!prior) {
-    try { fs.writeFileSync(file, `${JSON.stringify(current, null, 2)}\n`, { flag: 'wx', mode: 0o600 }); }
-    catch (error) { if (error.code !== 'EEXIST') throw error; return result(JSON.parse(fs.readFileSync(file, 'utf8'))); }
-  } else writeJson(file, current);
-  const finish = (status, reason) => {
-    current = { ...current, status, reason, finishedAt: new Date().toISOString() };
-    writeJson(file, current);
-    return result(current);
-  };
+  let current;
+  const claim = await withLock(path.join(root, 'hooks', 'claims', id), async () => {
+    let prior = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
+    if (!prior && fs.existsSync(path.join(receiptDir(root), id))) {
+      const attempts = fs.readdirSync(path.join(receiptDir(root), id)).filter(name => /^\d+$/.test(name)).map(Number).sort((a, b) => b - a);
+      if (attempts.length) prior = JSON.parse(fs.readFileSync(path.join(receiptDir(root), id, String(attempts[0]), 'claim.json'), 'utf8'));
+    }
+    if (prior?.attempt) {
+      const resultFile = path.join(receiptDir(root), id, String(prior.attempt), 'result.json');
+      if (fs.existsSync(resultFile)) {
+        const terminal = JSON.parse(fs.readFileSync(resultFile, 'utf8'));
+        if (terminal.operationToken !== prior.operationToken) throw new Error('Hook result ownership mismatch');
+        prior = terminal; writeJson(file, terminal);
+      }
+    }
+    if (prior?.status === 'succeeded') return { prior };
+    if (prior && ['scheduled', 'running'].includes(prior.status)) {
+      let ownerAlive = Boolean(prior.owner && prior.owner.hostname !== os.hostname());
+      if (!ownerAlive && prior.owner?.pid) {
+        try { process.kill(prior.owner.pid, 0); ownerAlive = true; } catch (e) { ownerAlive = e.code !== 'ESRCH'; }
+      }
+      if (ownerAlive) return { prior };
+      prior = { ...prior, status: 'unknown', reason: 'interrupted-external-effects-unknown', finishedAt: new Date().toISOString() };
+      writeJson(file, prior);
+    }
+    if (prior && !retry) return { prior };
+    if (prior?.status === 'unknown' && !handler.idempotency) throw new Error('Unknown external effects require configured receiver idempotency or explicit reconciliation; do not replay');
+    current = {
+      schemaVersion: 1, id, eventId: event.id, event, handlerId: handler.id, revision: handler.revision,
+      scriptDigest: handler.digest, status: 'scheduled', attempt: (prior?.attempt ?? 0) + 1,
+      scheduledAt: new Date().toISOString(), idempotencyKey: id, operationToken: randomUUID(),
+      owner: { pid: process.pid, hostname: os.hostname() },
+    };
+    await immutableJson(path.join(receiptDir(root), id, String(current.attempt), 'claim.json'), current);
+    writeJson(file, current); return {};
+  });
+  if (claim.prior) return result(claim.prior);
+  const finish = async (status, reason) => withLock(path.join(root, 'hooks', 'claims', id), async () => {
+    const fresh = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (fresh.operationToken !== current.operationToken) throw new Error('Hook execution ownership changed');
+    current = { ...fresh, status, reason, finishedAt: new Date().toISOString() };
+    await immutableJson(path.join(receiptDir(root), id, String(current.attempt), 'result.json'), current);
+    writeJson(file, current); return result(current);
+  });
   let actualDigest;
   try { actualDigest = scriptDigest(handler.script); } catch { return finish('failed', 'script-unavailable'); }
   if (actualDigest !== handler.digest) return finish('failed', 'script-digest-changed-reregister-required');
@@ -93,4 +119,12 @@ export async function handleHooksCommand(root, args) {
     return { result: await dispatch(root, receipt.event, handler, { retry: true }) };
   }
   throw new Error('Use hooks scaffold|add|list|enable|disable|remove|retry.');
+}
+
+/** Called only after the work event is persisted and outside the run mutex. */
+export async function dispatchEventHooks(root, event, ownerRef) {
+  if (ownerRef?.eventId && ownerRef.eventId !== event.id) throw new Error('Hook owner event mismatch');
+  const results = await runHooks(root, event);
+  if (results.results.some(r => ['scheduled', 'running'].includes(r.status))) throw new Error('Hook effect is still owned by another execution session; resume when its receipt is available');
+  return results;
 }

@@ -5,6 +5,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { normalizedScope } from './profile.mjs';
 import { captureSources } from './checkpoints.mjs';
+import { validateFeatureOperation } from './delivery-contract.mjs';
 
 const exec = promisify(execFile);
 const now = () => new Date().toISOString();
@@ -90,6 +91,9 @@ export async function handleChild(state, iteration, action, input) {
     if (existing?.phaseId === phaseId && !recovered) return existing;
     const scope = normalizedScope(input.scope);
     const authority = text(input.authority, 'scope authority');
+    const featureOperation = input.featureOperation
+      ? validateFeatureOperation(input.featureOperation, scope, { contractVersion: iteration.contractVersion, stage: 'start' })
+      : structuredClone(iteration.featureOperation);
     const returnCriteria = input.returnCriteria;
     if (!Array.isArray(returnCriteria) || !returnCriteria.length || returnCriteria.some(c => typeof c !== 'string' || !c.trim())) fail('Explicit returnCriteria required');
     if (input.sourceRefs) {
@@ -99,7 +103,9 @@ export async function handleChild(state, iteration, action, input) {
     const child = { ...(recovered ?? {}), id: recovered?.id ?? randomUUID(), phaseId, parentPhaseId: parentPhaseId ?? text(input.parentPhaseId, 'parentPhaseId'),
       parentChildId: parent?.id ?? null, enteredAt: recovered?.enteredAt ?? now(), status: 'active', outcome: null,
       reason: text(input.reason, 'child reason'), owner: text(input.owner, 'child owner'), authority,
-      scope, returnCriteria, sourceRefs: structuredClone(iteration.sourceRefs), requiresApproval: input.requiresApproval === true,
+      scope, returnCriteria, featureOperation, inheritedFeatureOperation: !input.featureOperation,
+      parentFeatureOperation: structuredClone(iteration.featureOperation),
+      sourceRefs: structuredClone(iteration.sourceRefs), requiresApproval: input.requiresApproval === true,
       approvalEvidence: null, entryRevision: canonical?.revision ?? null, completion: { tasks: [], changes: [], phases: [] } };
     if (recovered) Object.assign(recovered, child); else { iteration.children.push(child); iteration.childStack.push(child.id); }
     addScope(iteration, child, authority);
@@ -117,7 +123,7 @@ export async function handleChild(state, iteration, action, input) {
   }
   const evidence = await evidenceFile(input.evidencePath);
   const doc = evidence.document;
-  if (doc.childId !== child.id && doc.phaseId !== child.phaseId) fail('Return evidence must identify the child');
+  if (doc.childId !== child.id || doc.phaseId !== child.phaseId) fail('Return evidence must identify the child');
   if (canonical && canonical.phaseId !== child.parentPhaseId) fail('KBD must restore the canonical parent before cadence return');
   if (input.outcome === 'waived') {
     if (doc.operatorScopeChange?.approved !== true || !doc.operatorScopeChange.reference || !doc.operatorScopeChange.reason) fail('Waiver requires explicit operator scope-change evidence');

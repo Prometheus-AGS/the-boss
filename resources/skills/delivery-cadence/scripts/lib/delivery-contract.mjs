@@ -1,15 +1,13 @@
 // Delivery evidence stays separate from canonical work completion.
+import { normalizeOperation } from './operation-readiness.mjs';
+export { assertOperationReady } from './operation-readiness.mjs';
+import { pipelinePublicationStatus } from './publication.mjs';
 const same = (left, right) => JSON.stringify(left) === JSON.stringify(right);
 const text = (value) => typeof value === 'string' && value.trim().length > 0;
 const time = (value) => typeof value === 'string' && Number.isFinite(Date.parse(value));
 
-export function validateFeatureOperation(value, scope) {
-  if (!value || typeof value !== 'object') throw new Error('start requires a featureOperation describing the delivered function');
-  for (const key of ['id', 'outcome', 'procedure', 'checkpointId']) {
-    if (!text(value[key])) throw new Error(`featureOperation.${key} must be a nonempty string`);
-  }
-  if (!scope?.outcomes?.includes(value.outcome)) throw new Error('featureOperation.outcome must identify one selected user-visible outcome');
-  return Object.fromEntries(['id', 'outcome', 'procedure', 'checkpointId'].map((key) => [key, value[key]]));
+export function validateFeatureOperation(value, scope, options = {}) {
+  return normalizeOperation(value, scope, options);
 }
 
 export function checkpointPurpose(iteration, step) {
@@ -26,7 +24,7 @@ export function validateDelivery(iteration) {
   const missing = steps.filter((step) => step.required !== false && !applicable(step));
   if (missing.length) throw new Error(`Required build/run receipts missing: ${missing.map((step) => step.id).join(', ')}`);
   if ((iteration.contractVersion ?? 1) < 2) return { contractVersion: 1, featureOperation: 'unknown' };
-  const feature = validateFeatureOperation(iteration.featureOperation, iteration.scope);
+  const feature = validateFeatureOperation(iteration.featureOperation, iteration.scope, { contractVersion: iteration.contractVersion ?? 2 });
   const featureStep = steps.find((step) => step.id === feature.checkpointId && step.kind === 'run');
   if (!featureStep) throw new Error('The selected feature operation requires its own configured run checkpoint');
   const launch = steps.filter((step) => step.kind === 'run' && step.id !== feature.checkpointId && checkpointPurpose(iteration, step) === 'launch');
@@ -35,7 +33,7 @@ export function validateDelivery(iteration) {
   if (!receipt || receipt.purpose !== 'feature' || receipt.featureOperationId !== feature.id) {
     throw new Error('Baseline launch does not prove the delivered function; execute its feature-operation checkpoint');
   }
-  return { contractVersion: 2, launch: 'passed', featureOperation: 'passed', featureOperationId: feature.id };
+  return { contractVersion: iteration.contractVersion ?? 2, launch: 'passed', featureOperation: 'passed', featureOperationId: feature.id };
 }
 
 // Imported timing is evidence only when the receipt explicitly identifies an interval.
@@ -74,6 +72,7 @@ export function publicationRequirements(receipt, artifacts, sourceRefs, profile)
 }
 
 export function publicationStatus(state) {
+  if (state.schemaVersion >= 3) return pipelinePublicationStatus(state);
   const latest = [...(state.iterations ?? [])].reverse().find((item) => item.workOutcome === 'success');
   const policy = state.profile;
   const publication = [...(state.publications ?? [])].reverse().find((item) => item.iterationId === latest?.id && item.outcome === 'success' && !item.hookBlocked && item.hookResults);
