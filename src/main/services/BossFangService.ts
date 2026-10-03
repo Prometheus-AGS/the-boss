@@ -48,13 +48,16 @@ export class BossFangService extends BaseService {
 
   async configureCredentials(credentials: Credentials): Promise<void> {
     await this.mutex.runExclusive(async () => {
+      const directory = application.getPath('feature.agents.bossfang.data')
+      const target = application.getPath('feature.agents.bossfang.data', 'credentials.enc')
+      if (existsSync(target)) {
+        throw new Error('BossFang credentials are already configured; update them in the native dashboard')
+      }
       if (this.child) await this.stopOwnedProcess()
       if (!(await safeStorage.isAsyncEncryptionAvailable())) {
         throw new Error('Secure credential storage is unavailable')
       }
-      const directory = application.getPath('feature.agents.bossfang.data')
       await fs.mkdir(directory, { recursive: true, mode: 0o700 })
-      const target = application.getPath('feature.agents.bossfang.data', 'credentials.enc')
       await fs.writeFile(`${target}.tmp`, await safeStorage.encryptStringAsync(JSON.stringify(credentials)), {
         mode: 0o600
       })
@@ -96,11 +99,13 @@ export class BossFangService extends BaseService {
         const directory = application.getPath('feature.agents.bossfang.data')
         await fs.mkdir(directory, { recursive: true, mode: 0o700 })
         const configFile = application.getPath('feature.agents.bossfang.data', 'config.toml')
-        await fs.writeFile(
-          configFile,
-          `home_dir = ${JSON.stringify(directory)}\napi_listen = ${JSON.stringify(`${HOST}:${port}`)}\ndashboard_user = ${JSON.stringify(credentials.username)}\n`,
-          { mode: 0o600 }
-        )
+        if (!existsSync(configFile)) {
+          await fs.writeFile(
+            configFile,
+            `home_dir = ${JSON.stringify(directory)}\napi_listen = ${JSON.stringify(`${HOST}:${port}`)}\ndashboard_user = ${JSON.stringify(credentials.username)}\n`,
+            { mode: 0o600 }
+          )
+        }
         const child = crossPlatformSpawn(
           binary,
           ['--config', configFile, 'start', '--foreground', '--bind', `${HOST}:${port}`],

@@ -73,20 +73,24 @@ export function BossFangSettingsPanel() {
     <SettingGroup id={getSettingDomId('/settings/uar', 'bossfang-console')} className="scroll-mt-6">
       <SettingTitle>{t('bossfang.title')}</SettingTitle>
       <SettingDescription>{t('bossfang.description')}</SettingDescription>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <IntegrationField label={t('bossfang.username')} value={username} onChange={setUsername} />
-        <IntegrationField
-          label={t('bossfang.password')}
-          value={password}
-          type="password"
-          onChange={setPassword}
-          help={t('bossfang.passwordHelp')}
-        />
-      </div>
+      {!configured && (
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <IntegrationField label={t('bossfang.username')} value={username} onChange={setUsername} />
+          <IntegrationField
+            label={t('bossfang.password')}
+            value={password}
+            type="password"
+            onChange={setPassword}
+            help={t('bossfang.passwordHelp')}
+          />
+        </div>
+      )}
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <Button variant="outline" disabled={saving || !username.trim() || password.length < 16} onClick={() => void save()}>
-          {saving ? t('common.loading') : t('bossfang.saveCredentials')}
-        </Button>
+        {!configured && (
+          <Button variant="outline" disabled={saving || !username.trim() || password.length < 16} onClick={() => void save()}>
+            {saving ? t('common.loading') : t('bossfang.saveCredentials')}
+          </Button>
+        )}
         <Button disabled={!configured || opening} onClick={() => void openDashboard()}>
           {opening ? t('common.loading') : t('bossfang.open')}
         </Button>

@@ -5,3 +5,5 @@ The managed executable resolves from `resources/binaries/<platform>/bossfang[.ex
 The Boss waits for BossFang's operational `/api/health` response, then returns the live `/dashboard/` URL through a typed IPC route. The renderer uses the existing transient site MiniApp host. Its dedicated Chromium partition accepts network requests only to the current managed origin and carries no MiniApp capability bridge or general site preload. The sidecar owns authentication and its own UI. A settings button can open the same URL in the system browser.
 
 The initial product surface is one managed local instance. External service mode and multiple account partitions require a later contract and are not claimed here.
+
+The Boss writes the initial config only once. Subsequent BossFang dashboard changes and its own persisted configuration remain authoritative. Initial credential setup is a bootstrap action; later credential changes happen in the BossFang dashboard.
