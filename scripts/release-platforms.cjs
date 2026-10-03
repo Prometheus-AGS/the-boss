@@ -46,6 +46,10 @@ for (const name of profile.nativeTools) {
     if (!tool?.packages?.[platform]) throw new Error(`No published ${name} payload for ${platform}`)
   }
 }
+const bossfang = manifest.tools.find((entry) => entry.name === 'bossfang')
+for (const platform of selected.filter((entry) => profile.bossfangPlatforms.includes(entry))) {
+  if (!bossfang?.packages?.[platform]) throw new Error(`No published bossfang payload for ${platform}`)
+}
 for (const platform of selected) {
   if (!available.includes(platform) || !targets.some((value) => `${value.platform}-${value.arch}` === platform))
     throw new Error(`No published native payload for ${platform}`)

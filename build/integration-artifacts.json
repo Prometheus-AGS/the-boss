@@ -38,6 +38,10 @@
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
       "revision": "0617979022aea621dd13541dee07ad84ffcf7d21"
+    },
+    "bossfang": {
+      "repository": "GQAdonis/librefang",
+      "revision": "2d7167f49a24de95cf5028606f54a951df0fdcc7"
     }
   },
   "tools": [
@@ -408,6 +412,11 @@
           ]
         }
       }
+    },
+    {
+      "name": "bossfang",
+      "version": "2026.9.19+2d7167f49",
+      "packages": {}
     }
   ],
   "images": {

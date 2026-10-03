@@ -56,6 +56,20 @@ function verifyPackagedApplication(resourcesDir) {
     }
   }
 
+  if (profile.bossfangPlatforms.includes(platformKey)) {
+    const tool = integration.tools.find((candidate) => candidate.name === 'bossfang')
+    const artifact = tool?.packages?.[platformKey]
+    if (!tool || !artifact) throw new Error(`Release manifest is missing bossfang for ${platformKey}`)
+    const executable = platformKey.startsWith('win32') ? 'bossfang.exe' : 'bossfang'
+    const packaged = path.join(binaryDirectory, executable)
+    const stat = fs.statSync(packaged, { throwIfNoEntry: false })
+    if (!stat?.isFile() || stat.size === 0) throw new Error(`Packaged bossfang payload is missing: ${executable}`)
+    const marker = path.join(binaryDirectory, '.bossfang-version')
+    if (fs.readFileSync(marker, 'utf8').trim() !== tool.version) {
+      throw new Error(`Packaged bossfang version marker does not match ${tool.version}`)
+    }
+  }
+
   if (profile.uarEnabled) {
     verifyAndProbePackagedUarPayload(resourcesDir, platformKey, {
       allowPlatformSigning: true,

@@ -478,8 +478,10 @@ function chmodExec(filePath) {
   if (process.platform !== 'win32') fs.chmodSync(filePath, 0o755)
 }
 
-function isUpToDate(binaryPaths, versionPath, expectedVersion, outputDir, payloadIdentity) {
+function isUpToDate(binaryPaths, versionPath, expectedVersion, outputDir, payloadIdentity, contentSha256) {
   if (binaryPaths.some((binaryPath) => !fs.existsSync(binaryPath))) return false
+  if (contentSha256 && crypto.createHash('sha256').update(fs.readFileSync(binaryPaths[0])).digest('hex') !== contentSha256)
+    return false
   if (payloadIdentity) {
     try {
       const manifest = JSON.parse(fs.readFileSync(path.join(outputDir, payloadIdentity.file), 'utf8'))
@@ -596,7 +598,7 @@ function downloadTool(tool, platformKey, outputDir, { versionFile = null } = {})
   const binaryPaths = pkg.binaries.map((binary) => path.join(outputDir, binary))
   const versionPath = versionFile ? path.join(outputDir, versionFile) : null
 
-  if (isUpToDate(binaryPaths, versionPath, tool.version, outputDir, tool.payloadIdentity)) {
+  if (isUpToDate(binaryPaths, versionPath, tool.version, outputDir, tool.payloadIdentity, tool.contentSha256)) {
     for (const binaryPath of binaryPaths) chmodExec(binaryPath)
     // A partial download of a version already installed has nothing left to
     // resume, and a cache hit is the one path that would otherwise never clear
@@ -791,6 +793,10 @@ function verifyBundledBinaries(platform, arch, options = {}) {
     }
     for (const binary of pkg.binaries) {
       if (!fs.existsSync(path.join(outputDir, binary))) problems.push(path.join(platformKey, binary))
+    }
+    if (tool.contentSha256 && fs.existsSync(path.join(outputDir, pkg.binaries[0]))) {
+      const digest = crypto.createHash('sha256').update(fs.readFileSync(path.join(outputDir, pkg.binaries[0]))).digest('hex')
+      if (digest !== tool.contentSha256) problems.push(`${path.join(platformKey, pkg.binaries[0])} (checksum mismatch)`)
     }
     // BinaryManager refuses to extract a tool whose marker is missing, so a
     // bundle without one ships a dead toolchain and no error until runtime.

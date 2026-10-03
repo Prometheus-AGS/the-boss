@@ -1,5 +1,6 @@
 const RELEASE_PLATFORM_KEYS = Object.freeze(['win32-x64', 'win32-arm64', 'darwin-arm64', 'darwin-x64'])
 const UAR_RELEASE_PLATFORM_KEYS = RELEASE_PLATFORM_KEYS
+const BOSSFANG_RELEASE_PLATFORM_KEYS = Object.freeze(['darwin-arm64', 'win32-x64'])
 const RETAINED_NATIVE_TOOLS = Object.freeze(['compass', 'rust-mcp-filesystem', 'prometheus', 'pk', 'node'])
 
 function resolveReleaseProfile(env = process.env) {
@@ -25,8 +26,15 @@ function resolveReleaseProfile(env = process.env) {
     nativeTools: Object.freeze(
       uarEnabled ? [...RETAINED_NATIVE_TOOLS, 'uar-sidecar', 'liter-llm'] : [...RETAINED_NATIVE_TOOLS]
     ),
+    bossfangPlatforms: BOSSFANG_RELEASE_PLATFORM_KEYS,
     supportedPlatforms: uarEnabled ? UAR_RELEASE_PLATFORM_KEYS : RELEASE_PLATFORM_KEYS
   })
 }
 
-module.exports = { RELEASE_PLATFORM_KEYS, RETAINED_NATIVE_TOOLS, UAR_RELEASE_PLATFORM_KEYS, resolveReleaseProfile }
+module.exports = {
+  BOSSFANG_RELEASE_PLATFORM_KEYS,
+  RELEASE_PLATFORM_KEYS,
+  RETAINED_NATIVE_TOOLS,
+  UAR_RELEASE_PLATFORM_KEYS,
+  resolveReleaseProfile
+}

@@ -26,7 +26,10 @@ if (!profile.supportedPlatforms.includes(platform)) {
   throw new Error(`Release profile ${profile.id} does not support ${platform}`)
 }
 const integrationArtifacts = require('../build/integration-artifacts.json')
-const nativePayloads = profile.nativeTools.map((name) => {
+const nativePayloads = [
+  ...profile.nativeTools,
+  ...(profile.bossfangPlatforms.includes(platform) ? ['bossfang'] : [])
+].map((name) => {
   const payload = integrationArtifacts.tools.find((tool) => tool.name === name)?.packages?.[platform]
   if (!payload) throw new Error(`Release payload is missing ${name} for ${platform}`)
   return { name, sha256: payload.sha256, url: payload.url }

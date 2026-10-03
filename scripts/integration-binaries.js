@@ -15,11 +15,16 @@ function loadIntegrationBinaries({ required = false, platform: targetPlatform } 
   }
   const manifest = JSON.parse(fs.readFileSync(filename, 'utf8'))
   const profile = resolveReleaseProfile()
-  const requiredTools = profile.nativeTools.filter((name) => !(profile.localUar && name === 'uar-sidecar'))
+  const bossfangPlatform = targetPlatform ?? `${process.platform}-${process.arch}`
+  const requiredTools = [
+    ...profile.nativeTools.filter((name) => !(profile.localUar && name === 'uar-sidecar')),
+    ...(profile.bossfangPlatforms.includes(bossfangPlatform) ? ['bossfang'] : [])
+  ]
   for (const name of requiredTools) {
     const tool = manifest.tools.find((entry) => entry.name === name)
     if (!tool) throw new Error(`Integration manifest is missing ${name}`)
-    for (const platform of targetPlatform ? [targetPlatform] : profile.supportedPlatforms) {
+    const platforms = name === 'bossfang' ? [bossfangPlatform] : targetPlatform ? [targetPlatform] : profile.supportedPlatforms
+    for (const platform of platforms) {
       const asset = tool.packages[platform]
       if (!asset || !asset.url.startsWith('https://') || !/^[a-f0-9]{64}$/.test(asset.sha256))
         throw new Error(`Unpinned integration artifact: ${name} ${platform}`)
@@ -31,6 +36,7 @@ function loadIntegrationBinaries({ required = false, platform: targetPlatform } 
       ...tool,
       required,
       versionFile: `.${tool.name}-version`,
+      ...(tool.name === 'bossfang' ? { contentSha256: tool.packages[bossfangPlatform].sha256 } : {}),
       ...(tool.name === 'uar-sidecar'
         ? {
             payloadIdentity: {
