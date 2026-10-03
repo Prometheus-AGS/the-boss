@@ -1,9 +1,7 @@
-import { promises as fs } from 'node:fs';
+import { createReadStream, promises as fs } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { randomUUID } from 'node:crypto';
-
-const TAIL_CHUNK_BYTES = 64 * 1024;
 
 export async function atomicJson(file, value) {
   await fs.mkdir(path.dirname(file), { recursive: true });
@@ -67,80 +65,32 @@ export async function withLock(root, action) {
 
 export async function loadState(root, { optional = false, recover = false } = {}) {
   const file = path.join(root, 'events.jsonl');
-  let handle;
-  try { handle = await fs.open(file, 'r'); }
-  catch (error) { if (error.code === 'ENOENT' && optional) return null; throw error; }
-  let event = null, boundary = 0, incomplete = false;
+  let state = null, seq = 0, incomplete = '', boundary = 0;
   try {
-    const { size } = await handle.stat();
-    boundary = size;
-    let eventEnd = size;
-    if (size) {
-      const last = Buffer.allocUnsafe(1);
-      await handle.read(last, 0, 1, size - 1);
-      if (last[0] === 0x0a) eventEnd--;
-      else {
-        incomplete = true;
-        boundary = (await previousNewline(handle, size)) + 1;
-        eventEnd = boundary - 1;
+    let pending = '';
+    for await (const chunk of createReadStream(file, { encoding: 'utf8' })) {
+      pending += chunk;
+      for (let newline = pending.indexOf('\n'); newline !== -1; newline = pending.indexOf('\n')) {
+        const line = pending.slice(0, newline);
+        pending = pending.slice(newline + 1);
+        boundary += Buffer.byteLength(line) + 1;
+        if (!line) continue;
+        const event = JSON.parse(line);
+        if (event.seq !== seq + 1 || event.state?.eventsSeq !== event.seq) throw new Error(`Cadence event sequence broken at ${seq + 1}`);
+        seq = event.seq; state = event.state;
       }
     }
-    while (eventEnd >= 0 && !event) {
-      const previous = await previousNewline(handle, eventEnd);
-      const length = eventEnd - previous - 1;
-      if (length) {
-        const line = Buffer.allocUnsafe(length);
-        await handle.read(line, 0, length, previous + 1);
-        event = JSON.parse(line.toString('utf8'));
-      }
-      eventEnd = previous;
-    }
-    if (incomplete && !recover) throw new Error('Interrupted event append; use resume to preserve and recover the incomplete tail');
-    if (incomplete) await preserveIncompleteTail(root, file, boundary, size);
-  } finally { await handle.close(); }
+    incomplete = pending;
+  } catch (error) { if (error.code === 'ENOENT' && optional) return null; throw error; }
   if (incomplete) {
-    const writable = await fs.open(file, 'r+');
-    try { await writable.truncate(boundary); await writable.sync(); }
-    finally { await writable.close(); }
+    if (!recover) throw new Error('Interrupted event append; use resume to preserve and recover the incomplete tail');
+    await fs.writeFile(path.join(root, `interrupted-tail-${randomUUID()}.jsonl`), incomplete, { flag: 'wx', mode: 0o600 });
+    const handle = await fs.open(file, 'r+');
+    try { await handle.truncate(boundary); await handle.sync(); }
+    finally { await handle.close(); }
   }
-  if (event && (!Number.isSafeInteger(event.seq) || event.seq < 1 || event.state?.eventsSeq !== event.seq)) {
-    throw new Error(`Cadence final event sequence is invalid at ${event?.seq ?? 'unknown'}`);
-  }
-  if (!event) {
-    if (optional) return null;
-    throw new Error('Cadence run has no committed state');
-  }
-  let snapshot = null;
-  try { snapshot = JSON.parse(await fs.readFile(path.join(root, 'state.json'), 'utf8')); }
-  catch (error) { if (error.code !== 'ENOENT') throw error; }
-  if (snapshot && snapshot.eventsSeq > event.seq) throw new Error(`Cadence snapshot sequence ${snapshot.eventsSeq} is ahead of event log ${event.seq}`);
-  return snapshot?.eventsSeq === event.seq ? snapshot : event.state;
-}
-
-async function previousNewline(handle, before) {
-  for (let cursor = before; cursor > 0;) {
-    const length = Math.min(TAIL_CHUNK_BYTES, cursor), start = cursor - length;
-    const chunk = Buffer.allocUnsafe(length);
-    const { bytesRead } = await handle.read(chunk, 0, length, start);
-    for (let index = bytesRead - 1; index >= 0; index--) if (chunk[index] === 0x0a) return start + index;
-    cursor = start;
-  }
-  return -1;
-}
-
-async function preserveIncompleteTail(root, file, start, end) {
-  const recovered = await fs.open(path.join(root, `interrupted-tail-${randomUUID()}.jsonl`), 'wx', 0o600);
-  const source = await fs.open(file, 'r');
-  try {
-    const chunk = Buffer.allocUnsafe(TAIL_CHUNK_BYTES);
-    for (let position = start; position < end;) {
-      const { bytesRead } = await source.read(chunk, 0, Math.min(chunk.length, end - position), position);
-      if (!bytesRead) throw new Error('Interrupted event tail changed during recovery');
-      await recovered.write(chunk, 0, bytesRead);
-      position += bytesRead;
-    }
-    await recovered.sync();
-  } finally { await source.close(); await recovered.close(); }
+  if (!state && !optional) throw new Error('Cadence run has no committed state');
+  return state;
 }
 
 export async function saveEvent(root, state, type, detail = {}) {

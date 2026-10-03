@@ -15,6 +15,24 @@ explicit prompt arguments). Do not hard-code project names into this skill.
 
 ---
 
+## OpenSpec lifecycle preflight
+
+At session startup, resume, and before creating or entering a phase, run
+
+```text
+node "<mini-pack-root>/lib/platform/openspec/cli.mjs" refresh --project "<project-root>"
+```
+
+The pack standard is the latest stable upstream OpenSpec (release baseline **1.14.0**, checked 2026-10-03). The managed Node runner checks the official npm registry, installs that exact version in the user's cache, and runs upstream `update` for existing KBD/OpenSpec projects. It refreshes generated skills/commands with a backup and receipt; it preserves authored specs, changes, configuration, task completion, and KBD state. OpenSpec does not give all authored Markdown a common version field: report compatibility problems instead of relabeling or rewriting their meaning. Read the helper [lifecycle contract](../../lib/platform/openspec/README.md) for overrides, offline status, backups, and recovery.
+
+Use the same selected CLI for subsequent OpenSpec operations:
+
+```text
+node "<mini-pack-root>/lib/platform/openspec/cli.mjs" run --project "<project-root>" -- <OpenSpec arguments>
+```
+
+SessionStart and phase scripts automate this preflight. Harnesses without hooks and direct `prometheus kbd phase` invocations must perform it explicitly before phase work. A failed startup refresh is a visible pending prerequisite; retry at the phase boundary before OpenSpec work. Offline cached operation reports latest-unverified rather than current. Native-only KBD projects remain usable without OpenSpec. Explicit operator overrides remain visible. Project testing/authorization rules take precedence over generated upstream suggestions.
+
 ## Progress Signals (MANDATORY)
 
 Every KBD skill emits signals at the start and end of its work. This
