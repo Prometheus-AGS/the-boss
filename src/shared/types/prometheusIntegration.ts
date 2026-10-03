@@ -296,6 +296,7 @@ export const uarAdministrationCapabilitiesSchema = z.object({
 })
 export const uarCapabilitiesResponseSchema = z.object({
   uar_version: z.string().min(1),
+  authentication: z.object({ principalMode: z.enum(['host-asserted', 'token-subject']) }).optional(),
   agui: z.object({ profile: z.literal('uar.agui/1'), profile_revision: z.literal(1) }),
   capabilities: z.array(z.string()),
   administration: uarAdministrationCapabilitiesSchema,
