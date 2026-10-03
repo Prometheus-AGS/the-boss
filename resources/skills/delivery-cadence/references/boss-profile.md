@@ -90,3 +90,9 @@ serialized metadata/site publication path. A workflow-dispatch acknowledgement i
 therefore not evidence that all four installers or the download site are published.
 No workflow dispatch or email is performed by generating this profile or launching
 the local application.
+
+## Frozen releases and independent work
+
+Freeze complete source/runtime/skill payloads before building. One approved future scope may be edited in an isolated worktree/output directory while the frozen delivery builds or publishes. Do not mutate the checkout consumed by the active build. Preserve 120 minutes and every-two successful-delivery publication; no per-delivery question is required when that recurring policy is already authorized. Installed acceptance remains separate.
+
+Before dispatch, record whether the consumer enforces immutable source checkout, external correlation/recovery, artifact provenance, target-wide serialization, expected-predecessor promotion and site receipts. The observed Boss publisher reads a release branch and compares package versions: do not advance that version while its release is running. Independent editing and PR preparation can continue. A local Cadence reservation does not fence GitHub jobs. Missing capabilities remain blocked with an owning follow-up; dispatch acknowledgement never substitutes for them.

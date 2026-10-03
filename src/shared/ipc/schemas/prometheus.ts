@@ -67,6 +67,12 @@ import {
   type UarSettingsSnapshot,
   type UarSettingsUpdateResult
 } from '@shared/types/prometheusIntegration'
+import {
+  uarChannelObserverActionSchema,
+  uarChannelSubscriptionSchema,
+  uarChannelDeliveriesSchema,
+  uarChannelObserversSnapshotSchema
+} from '@shared/types/uarChannelObservers'
 import type {
   UarDurableBinding,
   UarDurableInstance,
@@ -301,6 +307,32 @@ export const prometheusRequestSchemas = {
   'prometheus.uar.admin.snapshot': defineRoute({
     input: z.object({}).strict(),
     output: z.custom<UarAdministrationSnapshot>()
+  }),
+  'prometheus.uar.channel_observers.read': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
+    output: uarChannelObserversSnapshotSchema
+  }),
+  'prometheus.uar.channel_observers.deliveries': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        subscriptionId: z.string().min(1).max(256),
+        generation: z.number().int().nonnegative()
+      })
+      .strict(),
+    output: uarChannelDeliveriesSchema
+  }),
+  'prometheus.uar.channel_observers.action': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        subscriptionId: z.string().min(1).max(256),
+        generation: z.number().int().nonnegative(),
+        expectedRevision: z.number().int().nonnegative(),
+        action: uarChannelObserverActionSchema
+      })
+      .strict(),
+    output: uarChannelSubscriptionSchema
   }),
   'prometheus.uar.durable.read': defineRoute({
     input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),

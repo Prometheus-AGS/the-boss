@@ -1,5 +1,6 @@
 // Reports derive only from persisted observations. Missing coverage is not active work.
 import { publicationStatus } from './delivery-contract.mjs';
+import { pipelineReport } from './pipeline-report.mjs';
 const dimensions = ['tasks', 'changes', 'phases'];
 const timingKinds = ['planning', 'implementation', 'build', 'run', 'feature-operation', 'rework', 'coordination', 'resource-wait', 'publication', 'human-wait', 'hook'];
 const workKinds = timingKinds.filter(kind => !['human-wait', 'resource-wait'].includes(kind));
@@ -20,7 +21,7 @@ function union(intervals) {
 }
 
 function clipped(spans, iteration, kinds = null) {
-  const start = numericTime(iteration.startedAt), end = numericTime(iteration.finishedAt);
+  const start = numericTime(iteration.firstWorkAt ?? iteration.startedAt), end = numericTime(iteration.finishedAt);
   if (!Number.isFinite(start) || !Number.isFinite(end)) return [];
   return spans.filter(span => !kinds || kinds.includes(span.kind)).map(span => [
     Math.max(start, numericTime(span.startedAt)), Math.min(end, numericTime(span.finishedAt))
@@ -83,7 +84,7 @@ function accounting(events) {
 
 export function iterationReport(iteration, context = {}) {
   const spans = observations(iteration, context.publications);
-  const start = numericTime(iteration.startedAt), end = numericTime(iteration.finishedAt);
+  const start = numericTime(iteration.firstWorkAt ?? iteration.startedAt), end = numericTime(iteration.finishedAt);
   const elapsed = Number.isFinite(start) && Number.isFinite(end) && end >= start ? (end - start) / 60000 : null;
   const observed = elapsed === null ? null : union(clipped(spans, iteration));
   const coverage = elapsed > 0 ? Math.min(1, observed / elapsed) : null;
@@ -110,13 +111,14 @@ export function iterationReport(iteration, context = {}) {
     id: item.id, attemptId: item.attemptId, status: item.status, reason: item.repeatReason ?? item.reason ?? null,
   })));
   return {
-    schemaVersion: 2, id: iteration.id, index: iteration.index, status: iteration.status, workOutcome: iteration.workOutcome,
+    schemaVersion: iteration.contractVersion >= 3 ? 3 : 2, id: iteration.id, index: iteration.index, status: iteration.status, workOutcome: iteration.workOutcome,
     selected, completed: progress.net, carryover, counts: progress.counts.net, grossCompleted: progress.gross,
     grossCounts: progress.counts.gross, reopenedCounts: progress.counts.reopened, netCounts: progress.counts.net,
     unresolvedReopened: progress.unresolved, uncertainCompletionOrder: progress.uncertain, completionTimeline: timeline,
     evidenceSource: iteration.canonicalEvidence ? 'referenced-canonical-receipts' : 'operator-recorded',
     canonicalReceipts: [iteration.canonicalEvidence, ...(iteration.children ?? []).map(child => child.evidence)].filter(Boolean),
     outcomes: iteration.scope?.outcomes ?? [], deliveryClass: iteration.scope?.deliveryClass ?? null, owners: iteration.scope?.owners ?? null,
+    firstWorkAt: iteration.firstWorkAt ?? iteration.startedAt, promotedAt: iteration.promotedAt ?? null, workAheadId: iteration.workAheadId ?? null,
     sourceRefs: iteration.sourceRefs, artifacts: iteration.artifacts ?? [], hookResults: iteration.hookResults ?? [],
     minutes: { elapsed, active, observed, observedWork, observedWaiting: duration(['human-wait', 'resource-wait']),
       unattributed: elapsed === null ? null : Math.max(0, elapsed - observed), ...durations,
@@ -131,7 +133,7 @@ export function iterationReport(iteration, context = {}) {
       outcome: child.outcome, status: child.status, reason: child.reason, enteredAt: child.enteredAt, returnedAt: child.returnedAt,
       completion: child.completion ?? null, parentChildId: child.parentChildId ?? null })),
     learning: { delivered: iteration.workOutcome === 'success' ? iteration.scope?.outcomes ?? [] : [], carryover,
-      repeatedBuilds, concurrencyEnforcement: 'Harness instruction; no machine-wide resource scheduler',
+      repeatedBuilds, concurrencyEnforcement: 'Agent limits are harness instructions; physical build/output reservations protect cooperating runs only',
       recommendation: context.recommendation ?? null,
       evidenceStatement: context.recommendation ? 'Heuristic recommendation; evaluate subsequent comparable deliveries.' : 'Insufficient comparable evidence or no supported change within approved bounds.' },
     costs: iteration.costs ?? null, reopened: iteration.reopened ?? [],
@@ -144,10 +146,18 @@ function signature(iteration, omitSetting = null) {
   return JSON.stringify({ repositories: (iteration.sourceRefs ?? []).map(ref => ref.repository).sort(),
     checks: (profile.checkpoints ?? []).map(step => ({ id: step.id, kind: step.kind, command: step.command, args: step.args, cwd: step.cwd, required: step.required !== false })).sort((a, b) => a.id.localeCompare(b.id)),
     featureProcedure: iteration.featureOperation?.procedureId ?? iteration.featureOperation?.id ?? null,
+    featureEvidence: iteration.featureOperation?.evidenceLevel ?? null, featureTarget: iteration.featureOperation?.target ?? null,
     deliveryClass: iteration.scope.deliveryClass, iterationMinutes: omitSetting === 'iterationMinutes' ? null : profile.iterationMinutes,
     maxImplementers: omitSetting === 'maxImplementers' ? null : profile.team?.maxImplementers,
     publicationEvery: omitSetting === 'publicationEvery' ? null : profile.publication?.every,
   });
+}
+
+function publicationObservations(state) {
+  return [...(state.publications ?? []), ...(state.releaseAttempts ?? []).map(attempt => ({
+    iterationId: (state.candidates ?? []).find(candidate => (candidate.id ?? candidate.candidateId) === attempt.candidateId)?.iterationId,
+    startedAt: attempt.startedAt, finishedAt: attempt.finishedAt,
+  }))];
 }
 
 function samples(state) {
@@ -155,7 +165,7 @@ function samples(state) {
   const finished = (state.iterations ?? []).filter(iteration => iteration.finishedAt && iteration.workOutcome === 'success');
   const last = finished.at(-1), contract = last ? signature(last) : null;
   if (!contract) return [];
-  const matching = finished.filter(iteration => signature(iteration) === contract && iterationReport(iteration, { publications: state.publications }).timing.optimizationEligible);
+  const matching = finished.filter(iteration => signature(iteration) === contract && iterationReport(iteration, { publications: publicationObservations(state) }).timing.optimizationEligible);
   if (matching.length < minimum || matching.at(-1)?.id !== last.id) return [];
   return matching.slice(-minimum);
 }
@@ -165,7 +175,7 @@ export function optimize(state) {
   if (!profile || profile.optimization?.mode === 'off') return null;
   const done = samples(state);
   if (!done.length) return null;
-  const recent = done.map(iteration => iterationReport(iteration, { publications: state.publications }));
+  const recent = done.map(iteration => iterationReport(iteration, { publications: publicationObservations(state) }));
   const bounds = profile.optimization?.bounds ?? {};
   const basisIterationIds = done.map(iteration => iteration.id);
   const requiredHits = Math.ceil(done.length * 2 / 3);
@@ -181,10 +191,10 @@ export function optimize(state) {
   if (recent.filter(item => item.resourceWaitShare > 0.2).length >= requiredHits && profile.team.maxImplementers > (bounds.maxImplementers?.[0] ?? 1)) {
     return suggest('maxImplementers', profile.team.maxImplementers - 1, `Resource blocking exceeded 20% in ${requiredHits} of ${done.length} comparable deliveries.`, 'Reduce measured resource waiting without reducing usable delivered scope.', 'resourceWaitShare');
   }
-  if (recent.filter(item => item.buildRunShare > 0.35).length >= requiredHits && profile.iterationMinutes + 30 <= (bounds.iterationMinutes?.[1] ?? profile.iterationMinutes)) {
+  if (profile.optimization.mode !== 'automatic' && recent.filter(item => item.buildRunShare > 0.35).length >= requiredHits && profile.iterationMinutes + 30 <= (bounds.iterationMinutes?.[1] ?? profile.iterationMinutes)) {
     return suggest('iterationMinutes', profile.iterationMinutes + 30, `Build and operation exceeded 35% in ${requiredHits} of ${done.length} comparable deliveries.`, 'Amortize required build costs across a larger independently usable increment.', 'buildRunShare');
   }
-  if (profile.publication.mode === 'every' && recent.filter(item => item.publicationShare > 0.35).length >= requiredHits && profile.publication.every < (bounds.publicationEvery?.[1] ?? profile.publication.every)) {
+  if (profile.optimization.mode !== 'automatic' && ['every', 'count'].includes(profile.publication.mode) && recent.filter(item => item.publicationShare > 0.35).length >= requiredHits && profile.publication.every < (bounds.publicationEvery?.[1] ?? profile.publication.every)) {
     return suggest('publicationEvery', profile.publication.every + 1, `Publication exceeded 35% in ${requiredHits} of ${done.length} comparable deliveries.`, 'Reduce blocking publication overhead while preserving required local gates and existing publication debt.', 'publicationShare');
   }
   return null;
@@ -197,7 +207,7 @@ function followups(state) {
     const later = (state.iterations ?? []).filter(iteration => recommendation.applied && Date.parse(iteration.startedAt) > Date.parse(recommendation.recordedAt) && iteration.workOutcome === 'success');
     const basis = (state.iterations ?? []).find(iteration => recommendation.basisIterationIds?.includes(iteration.id));
     const contract = basis ? signature(basis, recommendation.setting) : null;
-    const eligible = later.filter(iteration => contract && signature(iteration, recommendation.setting) === contract).map(iteration => iterationReport(iteration, { publications: state.publications }))
+    const eligible = later.filter(iteration => contract && signature(iteration, recommendation.setting) === contract).map(iteration => iterationReport(iteration, { publications: publicationObservations(state) }))
       .filter(report => report.timing.optimizationEligible && Number.isFinite(report[metric])).slice(0, minimum);
     const observed = eligible.length === minimum ? eligible.reduce((sum, report) => sum + report[metric], 0) / minimum : null;
     const baseline = recommendation.evidence?.baseline;
@@ -211,12 +221,13 @@ function followups(state) {
 export function makeReport(state) {
   const recommendation = optimize(state);
   const iterations = (state.iterations ?? []).map(iteration => iterationReport(iteration, {
-    publications: state.publications, recommendation: iteration.id === state.iterations.at(-1)?.id ? recommendation : null,
+    publications: publicationObservations(state), recommendation: iteration.id === state.iterations.at(-1)?.id ? recommendation : null,
   }));
   const progress = accounting(iterations.flatMap(iteration => iteration.completionTimeline));
   return {
-    schemaVersion: 2, runId: state.runId, profile: state.profile?.name,
+    schemaVersion: state.schemaVersion >= 3 ? 3 : 2, runId: state.runId, profile: state.profile?.name,
     iterationMinutes: state.profile?.iterationMinutes, iterations,
+    pipeline: pipelineReport(state),
     uniqueCompleted: progress.counts.net, grossCompleted: progress.counts.gross, reopened: progress.counts.reopened,
     netCompleted: progress.counts.net, canonicalIds: { gross: progress.gross, reopened: progress.reopened, net: progress.net },
     uncertainCompletionOrder: progress.uncertain, historicalChildren: state.historicalChildren ?? [],
@@ -227,6 +238,7 @@ export function makeReport(state) {
       'Unknown timing remains unattributed; observed work is not inferred from elapsed time.',
       'Timing shares use iteration wall time and require at least 99% observed coverage; parallel effort is not wall-clock duration.',
       'Publication time includes trustworthy attached intervals outside iteration bounds; publicationWithinIteration alone contributes to wall-time shares.',
-      'Historical child links are provenance only and contribute no duplicate completion credit.'],
+      'Historical child links are provenance only and contribute no duplicate completion credit.',
+      'Parallel work-ahead and delivery intervals are unioned; task counts and overlap alone do not establish increased velocity.'],
   };
 }

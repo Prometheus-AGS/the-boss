@@ -1,5 +1,9 @@
 [
   {
+    "version": "2.2.11",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.11 - Scoped channel routing\n\n- [Channels] Add workspace-scoped channel observer settings with source scope, delivery status, cursor details, and pause/resume controls.\n- [UAR] Keep channel observation controls separate from execution cancellation and report unsupported cancellation explicitly.\n- [Models] Update the bundled LiterLLM 2.1.1 gateway, model catalog, and native payloads to the latest pinned source.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.11 - 范围限定的频道路由\n\n- [频道] 添加按工作区隔离的频道观察者设置，显示来源范围、投递状态和游标详情，并提供暂停与恢复控制。\n- [UAR] 将频道观察控制与执行取消分开，并明确报告不支持的取消操作。\n- [模型] 将内置 LiterLLM 2.1.1 网关、模型目录和原生程序更新到最新固定源码版本。\n<!--LANG:END-->"
+  },
+  {
     "version": "2.2.10",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.10 - Grok subscription compatibility\n\n- [Grok] Update subscription authentication and streaming compatibility; support browser authorization-code entry.\n- [Desktop] Incorporate current Cherry Studio improvements while preserving The Boss integrations.\n- [Teams] Select a configured model, admit claimed tasks with bounded reservations, and retain scoped output artifacts.\n- [UAR] Cancel attempts, revoke membership, and recover durable execution state without replaying uncertain effects.\n- [Skills] Include the updated mini payload with installed acceptance tracked separately from publication scheduling.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.10 - Grok 订阅兼容性\n\n- [Grok] 更新订阅身份验证与流式响应兼容性，支持输入浏览器授权码。\n- [桌面] 集成 Cherry Studio 最新改进，同时保留 The Boss 集成功能。\n- [团队] 选择已配置的模型，按资源预留额度执行已认领任务，并保留隔离的输出工件。\n- [UAR] 取消执行、撤销成员资格并恢复持久执行状态，不重复执行结果不确定的操作。\n- [技能] 包含更新的 mini 技能包，分别跟踪安装验收和发布计划。\n<!--LANG:END-->"
   },

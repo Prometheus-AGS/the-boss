@@ -17,6 +17,7 @@ import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/compon
 import { ipcApi } from '@renderer/ipc'
 import type { UarDurableObserver, UarDurableOperation, UarObserverAction } from '@shared/types/uarDurableAdministration'
 
+import { UarChannelObserversPanel } from './UarChannelObserversPanel'
 import { useUarDurableWorkspace } from './useUarDurableWorkspace'
 
 export function UarObserversPanel({ workspaceId }: { workspaceId: string }) {
@@ -302,6 +303,7 @@ export function UarObserversPanel({ workspaceId }: { workspaceId: string }) {
           </SettingGroup>
         </>
       )}
+      <UarChannelObserversPanel key={workspaceId} workspaceId={workspaceId} />
     </div>
   )
 }

@@ -422,7 +422,7 @@ export class UarSidecarService extends BaseService {
   }
 
   private async authenticatedFetch(
-    running: Pick<VerifiedEndpoint, 'baseUrl' | 'authToken'>,
+    running: Pick<VerifiedEndpoint, 'baseUrl' | 'authToken' | 'ownership'>,
     pathname: string,
     principal: string,
     init: RequestInit,
@@ -430,7 +430,7 @@ export class UarSidecarService extends BaseService {
   ): Promise<Response> {
     const headers = new Headers(init.headers)
     headers.set('authorization', `Bearer ${running.authToken}`)
-    headers.set('x-uar-principal', principal)
+    if (running.ownership === 'managed') headers.set('x-uar-principal', principal)
     return this.fetchWithRateLimitRetries(new URL(pathname, baseUrl), { ...init, headers })
   }
 
@@ -503,7 +503,8 @@ export class UarSidecarService extends BaseService {
             UAR_PERSISTENCE__SURREAL_PASS: storage.password ?? '',
             UAR_PERSISTENCE__SURREAL_AUTH_LEVEL: storage.profile.authLevel,
             UAR_PERSISTENCE__SURREAL_NS: storage.profile.namespace,
-            UAR_PERSISTENCE__SURREAL_DB: storage.profile.database
+            UAR_PERSISTENCE__SURREAL_DB: storage.profile.database,
+            ...(storage.profile.remoteDurabilityAttested ? { UAR_REMOTE_SURREAL_DURABILITY_ATTESTED: '1' } : {})
           }
         : {
             UAR_PERSISTENCE__DATABASE_URL: `surrealkv://${path.resolve(dataRoot, 'runtime.db').replaceAll('\\', '/')}`
@@ -705,9 +706,6 @@ export class UarSidecarService extends BaseService {
     }
     if (body.ownership !== instance.ownership) {
       throw new Error(`UAR ownership mismatch: expected ${instance.ownership}, received ${body.ownership}`)
-    }
-    if (instance.runtimeCredentialRef && body.references.credential !== instance.runtimeCredentialRef) {
-      throw new Error('UAR runtime credential reference mismatch')
     }
     if (instance.ownership === 'external') {
       for (const role of ['runtime', 'administration', 'models', 'console'] as const) {
