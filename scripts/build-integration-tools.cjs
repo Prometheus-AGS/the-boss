@@ -5,6 +5,7 @@ const zlib = require('node:zlib')
 const { pipeline } = require('node:stream/promises')
 const { Readable } = require('node:stream')
 const { execFileSync } = require('node:child_process')
+const { checkoutIntegrationSource } = require('./integration-source.cjs')
 
 const root = path.resolve(__dirname, '..')
 const pins = JSON.parse(fs.readFileSync(path.join(root, 'build/integration-sources.json')))
@@ -15,16 +16,6 @@ const output = path.join(root, 'build/integration-output')
 const run = (command, args, cwd, env = {}) =>
   execFileSync(command, args, { cwd, env: { ...process.env, ...env }, stdio: 'inherit' })
 const hash = (file) => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')
-
-function checkout(name) {
-  const pin = pins.sources[name]
-  const directory = path.join(workspace, name)
-  fs.mkdirSync(directory, { recursive: true })
-  run('git', ['init'], directory)
-  run('git', ['fetch', '--depth=1', `https://github.com/${pin.repository}.git`, pin.revision], directory)
-  run('git', ['checkout', '--detach', 'FETCH_HEAD'], directory)
-  return directory
-}
 
 async function parserSources() {
   const directory = path.join(workspace, 'parsers')
@@ -60,7 +51,7 @@ async function main() {
   for (const name of selected) {
     const recipe = pins.tools[name]
     if (!recipe) throw new Error(`Unknown native tool: ${name}`)
-    const source = checkout(recipe.source)
+    const source = checkoutIntegrationSource(recipe.source)
     const cwd = path.join(source, recipe.directory || '')
     const env = {
       RUSTC_WRAPPER: '',

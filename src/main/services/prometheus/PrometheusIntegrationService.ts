@@ -730,6 +730,7 @@ export class PrometheusIntegrationService extends BaseService {
       config.services.surrealdb.endpoint = `http://127.0.0.1:${config.services.surrealPort}`
       config.compass.authLevel = 'namespace'
       if (isUarEnabled() && config.uar.backend === 'remote') {
+        if (config.uar.endpoint !== config.services.surrealdb.endpoint) config.uar.remoteDurabilityAttested = false
         config.uar.endpoint = config.services.surrealdb.endpoint
         config.uar.authLevel = 'namespace'
       }
@@ -783,7 +784,8 @@ export class PrometheusIntegrationService extends BaseService {
     const serverIds = servers.map((server) => server.id)
     workspace.serverIds = serverIds
     await saveWorkspaceState(workspace)
-    if (config.compass.enabled && workspace.enabled && !workspace.error) this.ensureWorkspaceFreshness(workspace, config)
+    if (config.compass.enabled && workspace.enabled && !workspace.error)
+      this.ensureWorkspaceFreshness(workspace, config)
     // Saved agent configuration never acquires a project-specific ID. Remove managed
     // rows accidentally selected in global settings before mounting this workspace's set.
     const manualIds = (sourceAgent.mcps ?? []).filter(

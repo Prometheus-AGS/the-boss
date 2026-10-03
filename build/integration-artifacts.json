@@ -25,7 +25,7 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "3d54f210dd87c9e25d300079d973c12b046e80aa"
+      "revision": "f6b765c4d80fb872f932250a19f2752bbcdeb4bd"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
@@ -201,61 +201,57 @@
       "name": "liter-llm",
       "version": "2.1.1",
       "packages": {
-        "darwin-x64": {
-          "sha256": "4ecc520e7d4b6b1d76efd8ab526c3a6b45b02e988d35882052f368cf0dfb31de",
-          "size": 29472144,
-          "binaries": [
-            "liter-llm"
-          ],
-          "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.9-c094-liter-native-1/liter-llm-darwin-x64",
-          "source": {
-            "repository": "GQAdonis/liter-llm",
-            "revision": "0617979022aea621dd13541dee07ad84ffcf7d21"
-          },
-          "sourceRun": 36707958884
-        },
         "darwin-arm64": {
-          "sha256": "0d0a1b7027f4ca5a974d9f4e9a570864a83a4d4d29457260d4e00efe8b77157e",
+          "source": {
+            "repository": "GQAdonis/liter-llm",
+            "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
+          },
           "size": 27877144,
+          "sha256": "41402e5dda2ec2ebd4c2adf5df14a241d95e057b2b3d776e0141f90bd0a7c029",
           "binaries": [
             "liter-llm"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.9-c094-liter-native-1/liter-llm-darwin-arm64",
-          "source": {
-            "repository": "GQAdonis/liter-llm",
-            "revision": "0617979022aea621dd13541dee07ad84ffcf7d21"
-          },
-          "sourceRun": 36707958884
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.11-c08-liter-12a2fae/liter-llm-darwin-arm64"
         },
         "win32-x64": {
-          "sha256": "ec5dd01cccc5db26d68afabc6a2a9e2892bfbea5f7d4be4b655d2a90b68c8c65",
-          "size": 30827008,
+          "source": {
+            "repository": "GQAdonis/liter-llm",
+            "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
+          },
+          "size": 30825984,
+          "sha256": "0d8ec4a1d3144c6d9f9f110d008529516cafe01ace79844b600d31172cd7f9b8",
           "binaries": [
             "liter-llm.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.9-c094-liter-native-1/liter-llm-win32-x64.exe",
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.11-c08-liter-12a2fae/liter-llm-win32-x64.exe"
+        },
+        "darwin-x64": {
           "source": {
             "repository": "GQAdonis/liter-llm",
-            "revision": "0617979022aea621dd13541dee07ad84ffcf7d21"
+            "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
           },
-          "sourceRun": 36707958884
+          "size": 29472144,
+          "sha256": "95c0dcd15818e9728967a8b0fb0f866d7ad5cbafb9e6b45967f3a4a4ea79537c",
+          "binaries": [
+            "liter-llm"
+          ],
+          "archive": "none",
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.11-c08-liter-12a2fae/liter-llm-darwin-x64"
         },
         "win32-arm64": {
-          "sha256": "263f75b426b64b6419a92fd7da995e9c81c192f218944479ad7d5ddd6f29b95d",
-          "size": 27495424,
+          "source": {
+            "repository": "GQAdonis/liter-llm",
+            "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
+          },
+          "size": 27494400,
+          "sha256": "68d2cdf4d33edcdc0953478b7630c310dceffe14305b28c3c483a7994c6f2258",
           "binaries": [
             "liter-llm.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.9-c094-liter-native-1/liter-llm-win32-arm64.exe",
-          "source": {
-            "repository": "GQAdonis/liter-llm",
-            "revision": "0617979022aea621dd13541dee07ad84ffcf7d21"
-          },
-          "sourceRun": 36707958884
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.11-c08-liter-12a2fae/liter-llm-win32-arm64.exe"
         }
       }
     },
@@ -421,8 +417,8 @@
   ],
   "images": {
     "surrealdb": "surrealdb/surrealdb:v3.3.0@sha256:681c6c22c287421b5c7d99e0fde79b6e0d32c36c1ddeaab2762a1661cb04cd20",
-    "surreal-memory": "ghcr.io/prometheus-ags/the-boss-surreal-memory@sha256:b0414341e4e649a1ae68cbcbb2d98b8bd6d87e6f8c425f33947185ba1031c6a1",
-    "liter-llm": "ghcr.io/prometheus-ags/the-boss-liter-llm@sha256:9e04e66097c6161e3b699b485b2708d9378de772125bfd7020373eefc75cace3"
+    "surreal-memory": "ghcr.io/prometheus-ags/the-boss-surreal-memory@sha256:e4e31dc855d67a1d2bf0757780a75266301d10d5abba1ba16038699287055c84",
+    "liter-llm": "ghcr.io/prometheus-ags/the-boss-liter-llm@sha256:e9a63ecea97da39d9c43c46a4559f080770b01b87ed957d2f9686e382ba95c27"
   },
   "catalogs": {
     "liter-llm": {
@@ -437,17 +433,29 @@
   "imageProvenance": {
     "liter-llm": {
       "image": "ghcr.io/prometheus-ags/the-boss-liter-llm",
-      "digest": "sha256:9e04e66097c6161e3b699b485b2708d9378de772125bfd7020373eefc75cace3",
+      "digest": "sha256:e9a63ecea97da39d9c43c46a4559f080770b01b87ed957d2f9686e382ba95c27",
       "source": {
         "repository": "GQAdonis/liter-llm",
-        "revision": "0617979022aea621dd13541dee07ad84ffcf7d21"
+        "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
       },
       "recipeSource": {
         "repository": "Prometheus-AGS/prometheus-skills-mini",
-        "revision": "3d54f210dd87c9e25d300079d973c12b046e80aa"
+        "revision": "f63617c24031960a99769d12c5f0b60065a95cee"
       },
-      "workflowRun": 36709025506,
-      "manifestPublisher": "root existing buildx publication recipe"
+      "workflowRun": "37005519137"
+    },
+    "surreal-memory": {
+      "image": "ghcr.io/prometheus-ags/the-boss-surreal-memory",
+      "digest": "sha256:e4e31dc855d67a1d2bf0757780a75266301d10d5abba1ba16038699287055c84",
+      "source": {
+        "repository": "Prometheus-AGS/surreal-memory-server",
+        "revision": "6acb60565949334beda22f52bcd36b33895b1db6"
+      },
+      "recipeSource": {
+        "repository": "Prometheus-AGS/surreal-memory-server",
+        "revision": "6acb60565949334beda22f52bcd36b33895b1db6"
+      },
+      "workflowRun": "37005519137"
     }
   }
 }

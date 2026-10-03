@@ -67,6 +67,12 @@ import {
   type UarSettingsSnapshot,
   type UarSettingsUpdateResult
 } from '@shared/types/prometheusIntegration'
+import {
+  uarChannelObserverActionSchema,
+  uarChannelSubscriptionSchema,
+  uarChannelDeliveriesSchema,
+  uarChannelObserversSnapshotSchema
+} from '@shared/types/uarChannelObservers'
 import type {
   UarDurableBinding,
   UarDurableInstance,
@@ -91,6 +97,15 @@ import type {
   UarTeamMailboxPage,
   UarTeamsSnapshot
 } from '@shared/types/uarTeams'
+import {
+  uarWorkflowWorkspaceSchema,
+  uarWorkflowSelectorSchema,
+  uarWorkflowStartSchema,
+  uarWorkflowDecisionSchema,
+  uarWorkflowControlSchema,
+  uarWorkflowRunSchema,
+  uarWorkflowsSnapshotSchema
+} from '@shared/types/uarWorkflows'
 
 import { defineRoute } from '../define'
 
@@ -132,6 +147,15 @@ const teamControlSchema = teamExecutionSelectorSchema.extend({
  * process cannot report.
  */
 export const prometheusRequestSchemas = {
+  'prometheus.uar.workflows.snapshot': defineRoute({
+    input: uarWorkflowWorkspaceSchema,
+    output: uarWorkflowsSnapshotSchema
+  }),
+  'prometheus.uar.workflows.read': defineRoute({ input: uarWorkflowSelectorSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.start': defineRoute({ input: uarWorkflowStartSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.decide': defineRoute({ input: uarWorkflowDecisionSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.cancel': defineRoute({ input: uarWorkflowControlSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.recover': defineRoute({ input: uarWorkflowControlSchema, output: uarWorkflowRunSchema }),
   'prometheus.liter_config.select_local': defineRoute({
     input: z.object({}).strict(),
     output: z.custom<LiterConfigSourceSelection>()
@@ -301,6 +325,32 @@ export const prometheusRequestSchemas = {
   'prometheus.uar.admin.snapshot': defineRoute({
     input: z.object({}).strict(),
     output: z.custom<UarAdministrationSnapshot>()
+  }),
+  'prometheus.uar.channel_observers.read': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
+    output: uarChannelObserversSnapshotSchema
+  }),
+  'prometheus.uar.channel_observers.deliveries': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        subscriptionId: z.string().min(1).max(256),
+        generation: z.number().int().nonnegative()
+      })
+      .strict(),
+    output: uarChannelDeliveriesSchema
+  }),
+  'prometheus.uar.channel_observers.action': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        subscriptionId: z.string().min(1).max(256),
+        generation: z.number().int().nonnegative(),
+        expectedRevision: z.number().int().nonnegative(),
+        action: uarChannelObserverActionSchema
+      })
+      .strict(),
+    output: uarChannelSubscriptionSchema
   }),
   'prometheus.uar.durable.read': defineRoute({
     input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),

@@ -14,10 +14,13 @@ function loadIntegrationBinaries({ required = false, platform: targetPlatform } 
     return []
   }
   const manifest = JSON.parse(fs.readFileSync(filename, 'utf8'))
+  const pins = require('../build/integration-sources.json')
   const profile = resolveReleaseProfile()
   const bossfangPlatform = targetPlatform ?? `${process.platform}-${process.arch}`
   const requiredTools = [
-    ...profile.nativeTools.filter((name) => !(profile.localUar && name === 'uar-sidecar')),
+    ...profile.nativeTools.filter(
+      (name) => !(profile.localUar && ['uar-sidecar', 'liter-llm'].includes(name))
+    ),
     ...(profile.bossfangPlatforms.includes(bossfangPlatform) ? ['bossfang'] : [])
   ]
   for (const name of requiredTools) {
@@ -28,6 +31,12 @@ function loadIntegrationBinaries({ required = false, platform: targetPlatform } 
       const asset = tool.packages[platform]
       if (!asset || !asset.url.startsWith('https://') || !/^[a-f0-9]{64}$/.test(asset.sha256))
         throw new Error(`Unpinned integration artifact: ${name} ${platform}`)
+      if (required && ['uar-sidecar', 'liter-llm'].includes(name)) {
+        const source = typeof asset.source === 'string' ? asset.source : asset.source?.revision
+        const expected = pins.sources[name === 'uar-sidecar' ? 'uar' : name].revision
+        if (source !== expected)
+          throw new Error(`Publish and import ${name} ${platform} from pinned source ${expected} before packaging`)
+      }
     }
   }
   return manifest.tools

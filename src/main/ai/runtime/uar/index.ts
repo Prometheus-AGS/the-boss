@@ -90,3 +90,18 @@ export {
 } from './UarExecutionOwnershipAdapter'
 
 export { readUarTeamContext, readUarTeamPeerMessages } from './UarTeamContextAdapter'
+
+export {
+  readUarChannelObservers,
+  actOnUarChannelObserver,
+  readUarChannelDeliveries
+} from './uarChannelObserverAdministration'
+
+export {
+  readUarWorkflows,
+  readUarWorkflow,
+  startUarWorkflow,
+  decideUarWorkflow,
+  cancelUarWorkflow,
+  recoverUarWorkflow
+} from './UarWorkflowExecutionAdapter'

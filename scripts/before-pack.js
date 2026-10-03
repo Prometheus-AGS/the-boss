@@ -9,6 +9,7 @@ const { ensureLinuxNativeArtifact } = require('./linux-native/download')
 const { resolveReleaseProfile } = require('./release-profile.cjs')
 const { getUarPayloadInventory } = require('./uar-payload-integrity.cjs')
 const { assertNoLocalUarPayload, stageLocalUarPayload } = require('./local-uar-payload.cjs')
+const { assertNoLocalLiterPayload, stageLocalLiterPayload } = require('./local-liter-payload.cjs')
 
 // if you want to add new prebuild binaries packages with different architectures, you can add them here
 // please add to allX64 and allArm64 from pnpm-lock.yaml
@@ -219,7 +220,10 @@ exports.default = async function (context) {
   if (profile.localUar && platformKey !== 'darwin-arm64') {
     throw new Error('Local UAR payloads can only be packaged for darwin-arm64')
   }
-  if (!profile.localUar) assertNoLocalUarPayload(binaryDirectory)
+  if (!profile.localUar) {
+    assertNoLocalUarPayload(binaryDirectory)
+    assertNoLocalLiterPayload(binaryDirectory)
+  }
 
   await prepareNativeModulesForElectron(context)
   assertPrebuiltPackages(platform, arch)
@@ -229,7 +233,10 @@ exports.default = async function (context) {
   execSync(`node "${path.join(__dirname, 'download-binaries.js')}" ${platform} ${arch} --packaging`, {
     stdio: 'inherit'
   })
-  if (profile.localUar) stageLocalUarPayload(binaryDirectory)
+  if (profile.localUar) {
+    stageLocalUarPayload(binaryDirectory)
+    stageLocalLiterPayload(binaryDirectory, platformKey)
+  }
   // Fail the build rather than ship a half-empty resources/binaries/<platform>.
   require('./download-binaries').verifyBundledBinaries(platform, arch)
   require('./package-prometheus').packagePrometheus()

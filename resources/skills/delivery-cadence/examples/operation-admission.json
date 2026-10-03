@@ -1,0 +1,60 @@
+{
+  "scope": {
+    "tasks": [
+      "mvp-07a-operation"
+    ],
+    "changes": [
+      "mvp-07a"
+    ],
+    "phases": [],
+    "outcomes": [
+      "An empty second vault retrieves the published fixture"
+    ],
+    "owners": [
+      "vault-owner"
+    ],
+    "deliveryClass": "vault-transfer"
+  },
+  "sourceRefs": [
+    {
+      "repository": "/absolute/vault-sync"
+    }
+  ],
+  "featureOperation": {
+    "id": "pull-second-vault",
+    "outcome": "An empty second vault retrieves the published fixture",
+    "promisedCapability": "Built CLI publishes fixture A and pulls into empty fixture B",
+    "procedure": "Use the built CLI against the authorized node; compare recovered plaintext hashes and capture the observed pull requests.",
+    "checkpointId": "operate-vault-pull",
+    "creationTaskRef": "mvp-07a-operation",
+    "target": {
+      "kind": "real",
+      "description": "Authorized Kubo endpoint with isolated demo resources"
+    },
+    "evidenceLevel": "real-service",
+    "expectedResult": "Vault B contains the same plaintext fixture hashes; pull requests do not mutate the node",
+    "prerequisites": [
+      {
+        "id": "node-authorized",
+        "description": "Endpoint and demo key/pins explicitly authorized"
+      }
+    ],
+    "isolatedResources": [
+      "/absolute/fixture-A",
+      "/absolute/fixture-B"
+    ],
+    "externalEffects": [
+      {
+        "description": "Publish the fixture through the approved demo key and pins",
+        "authorityRef": "operator-approved-demo-resources"
+      }
+    ],
+    "authorityRefs": [
+      "operator-approved-demo-resources"
+    ],
+    "limitations": [
+      "Does not establish installed Obsidian plugin, mobile behavior, ranged reads or real-node tamper/replay behavior"
+    ]
+  },
+  "operationContractSource": "approved-plan-revision-reference"
+}

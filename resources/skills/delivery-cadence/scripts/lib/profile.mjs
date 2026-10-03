@@ -3,6 +3,7 @@ export const DEFAULT_PROFILE = {
   schemaVersion: 1, name: 'delivery-cadence', mode: 'standalone',
   iterationMinutes: 60, reviewEvery: 1,
   publication: { mode: 'manual', every: 2 },
+  pipeline: { workAheadLimit: 1, maxInFlightReleases: 1, maxPendingReleases: 1 },
   budgets: { maxIterations: null, maxRunMinutes: null },
   checkpoints: [], binding: {},
   team: { maxImplementers: 3, maxBuildWriters: 1 },
@@ -12,7 +13,7 @@ export const DEFAULT_PROFILE = {
 
 export function mergeProfile(base, patch) {
   const result = { ...base, ...patch };
-  for (const key of ['publication', 'budgets', 'team', 'binding', 'optimization']) {
+  for (const key of ['publication', 'pipeline', 'budgets', 'team', 'binding', 'optimization']) {
     result[key] = { ...base[key], ...patch[key] };
   }
   result.optimization.bounds = { ...base.optimization.bounds, ...patch.optimization?.bounds };
@@ -26,7 +27,14 @@ export function validateProfile(profile) {
   if (typeof profile.name !== 'string' || !profile.name.trim()) fail('name is required');
   if (!Number.isFinite(profile.iterationMinutes) || profile.iterationMinutes <= 0) fail('iterationMinutes must be positive');
   if (!Number.isInteger(profile.reviewEvery) || profile.reviewEvery < 0) fail('reviewEvery must be a nonnegative integer');
-  if (!['manual', 'every'].includes(profile.publication.mode)) fail('publication.mode must be manual or every');
+  if (!['manual', 'every', 'count', 'interval', 'either'].includes(profile.publication.mode)) fail('publication.mode must be manual, count, interval or either (every is the legacy count alias)');
+  if (['interval', 'either'].includes(profile.publication.mode)) {
+    if (!Number.isFinite(profile.publication.intervalMinutes) || profile.publication.intervalMinutes <= 0) fail('publication.intervalMinutes must be positive');
+    if (typeof profile.publication.anchorUtc !== 'string' || !profile.publication.anchorUtc.endsWith('Z') || !Number.isFinite(Date.parse(profile.publication.anchorUtc))) fail('publication.anchorUtc needs an explicit UTC timestamp');
+  }
+  for (const name of ['workAheadLimit', 'maxInFlightReleases', 'maxPendingReleases']) {
+    if ((profile.pipeline?.[name] ?? 1) !== 1) fail(`pipeline.${name} is bounded to one in this version`);
+  }
   if (!Number.isInteger(profile.publication.every) || profile.publication.every < 1) fail('publication.every must be positive');
   for (const [key, value] of Object.entries(profile.budgets)) {
     if (value !== null && (!Number.isFinite(value) || value <= 0)) fail(`${key} must be positive or null`);
@@ -64,6 +72,12 @@ export function normalizedScope(scope = {}) {
   }
   result.deliveryClass = typeof scope.deliveryClass === 'string' && scope.deliveryClass.trim() ? scope.deliveryClass : 'unclassified';
   result.owners = Array.isArray(scope.owners) ? structuredClone(scope.owners) : [];
+  for (const key of ['authorityRefs', 'canonicalScopeRefs', 'childRefs']) {
+    if (scope[key] !== undefined) {
+      if (!Array.isArray(scope[key]) || scope[key].some(ref => typeof ref !== 'string' || !ref.trim())) throw new Error(`scope.${key} must contain reference strings`);
+      result[key] = [...new Set(scope[key])];
+    }
+  }
   if (!result.outcomes.length) throw new Error('An independently usable outcome must be named in scope.outcomes');
   return result;
 }

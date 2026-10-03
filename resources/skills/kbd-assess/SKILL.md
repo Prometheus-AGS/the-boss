@@ -7,6 +7,10 @@ description: "Use when starting or resuming the KBD lifecycle for a project — 
 
 Run the **Assess** phase of the KBD lifecycle for any project.
 
+## OpenSpec lifecycle preflight
+
+Before this stage, follow the [orchestrator preflight](../kbd-process-orchestrator/SKILL.md#openspec-lifecycle-preflight): refresh existing KBD/OpenSpec projects with the managed latest-stable CLI, then use that same runner for OpenSpec commands. Retry a pending startup refresh before OpenSpec work; preserve authored specs and task state. Phase scripts run this automatically, including canonical-runtime paths.
+
 ## What this does
 
 Inspects the current codebase and produces a structured gap report against the

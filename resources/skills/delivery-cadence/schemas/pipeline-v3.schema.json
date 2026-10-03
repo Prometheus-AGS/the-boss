@@ -1,0 +1,355 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prometheusags.ai/schemas/delivery-cadence/pipeline-v3.schema.json",
+  "title": "Delivery Cadence pipeline records",
+  "$defs": {
+    "candidates": {
+      "type": "object",
+      "required": [
+        "id",
+        "iterationId",
+        "sourceRefs"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidateId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "iterationId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contentManifestDigest": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "createdAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "executionRoots": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "outputRoots": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "featureOperation": {
+          "$ref": "#/$defs/featureOperation"
+        }
+      }
+    },
+    "jobs": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidateId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ownershipToken": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "enum": [
+            "claimed",
+            "launching",
+            "running",
+            "cancelRequested",
+            "succeeded",
+            "success",
+            "failed",
+            "cancelled",
+            "unknown",
+            "blocked"
+          ]
+        }
+      }
+    },
+    "workAhead": {
+      "type": "object",
+      "required": [
+        "id",
+        "predecessorCandidateId"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "predecessorCandidateId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "firstWorkAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "state": {
+          "enum": [
+            "admitted",
+            "working",
+            "blocked",
+            "eligible",
+            "promoted",
+            "cancelled"
+          ]
+        }
+      }
+    },
+    "obligations": {
+      "type": "object",
+      "required": [
+        "id",
+        "candidateId"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidateId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dueAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "type": "string"
+        },
+        "requiredPlatforms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "releaseAttempts": {
+      "type": "object",
+      "required": [
+        "id",
+        "obligationId",
+        "candidateId"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "obligationId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidateId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "type": "string"
+        }
+      }
+    },
+    "opportunities": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "type": "string"
+        },
+        "disposition": {
+          "type": "string"
+        }
+      }
+    },
+    "adoptedReceipts": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "candidateId": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "featureOperation": {
+      "type": "object",
+      "required": [
+        "id",
+        "outcome",
+        "procedure",
+        "checkpointId"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome": {
+          "type": "string",
+          "minLength": 1
+        },
+        "promisedCapability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "procedure": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checkpointId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entrypoint": {
+          "type": "object",
+          "required": [
+            "command",
+            "args",
+            "cwd"
+          ],
+          "properties": {
+            "command": {
+              "type": "string",
+              "minLength": 1
+            },
+            "args": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "cwd": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "creationTaskRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "object"
+        },
+        "evidenceLevel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "externalEffects": {
+          "type": "array"
+        },
+        "authorityRefs": {
+          "type": "array"
+        }
+      }
+    },
+    "request": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "commandId",
+        "commandType",
+        "input"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 3
+        },
+        "commandId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commandType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expectedRevision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "input": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

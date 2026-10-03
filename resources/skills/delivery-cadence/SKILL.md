@@ -1,10 +1,10 @@
 ---
 name: delivery-cadence
-description: Operate timed usable deliveries with child-phase recovery, build-and-run checkpoints and evidence-based learning. Use when running repeated delivery increments under KBD, a native goal, or standalone work. Do NOT use for initial architecture assessment; use kbd-assess.
+description: Operate timed usable deliveries with frozen delivery candidates, bounded work-ahead, child recovery and publication evidence. Use when running repeated delivery increments under KBD, a native goal, or standalone work. Do NOT use for initial architecture assessment; use kbd-assess.
 license: MIT
 compatibility: Node.js 22 or newer. Build tools belong to the selected project. Optional KBD, Compass, memory and native goal capabilities are detected, never assumed.
 metadata:
-  version: "1.1.2"
+  version: "1.2.0"
   tags: "delivery, cadence, kbd, recovery"
 ---
 
@@ -21,12 +21,12 @@ Invoke `node <this-skill>/scripts/cadence.mjs <command> --root <state-directory>
 1. `init` creates the run from a profile; `configure` changes future policy deliberately.
 2. `start` selects one independently usable increment, with explicit tasks, owners, outcomes and source revisions.
 3. Implement the complete increment, including its UI, strings, persistence and packaging. Keep reviewers dormant. Attach problem/architecture child phases to this delivery using `child enter`; the clock continues. Read [child recovery](references/child-recovery.md) before entry or resume.
-4. `ready` records completed production scope. `checkpoint` builds the deliverable, then launches it and exercises its actual function. These are product operations, **not test-suite execution**.
-5. Fix build, launch or functional errors before admitting another increment. Repeat only the failed boundary procedure after the fix; do not add test suites, per-edit checks or partial verification loops.
+4. `ready` records completed production scope; `candidate freeze` pins its inputs and operation contract. `checkpoint` builds the frozen deliverable, then launches it and exercises its actual function. These are product operations, **not test-suite execution**. Read [pipeline contracts](references/pipeline-contract.md) when admitting work-ahead or adopting existing receipts.
+5. Once the current candidate is frozen, `work-ahead admit` may authorize one independent scope in isolated source/output roots while the current build or publication runs. It is not another active iteration or KBD phase. Fix current delivery failures before promotion; only disjoint authorized edits continue during repair. Repeat only failed boundary procedures.
 6. `finish` records the work outcome, dispatches approved hooks and emits the final report. `review` records actual operator approval when a human boundary is due. Never fabricate approval.
-7. When publication is due, perform the profile's release procedure through its website update and record `publication`. A workflow dispatch alone is not publication.
+7. `tick` evaluates configured publication opportunities without a daemon. Use `publication attempt/reconcile` for candidate-specific obligations and immutable platform/metadata/site receipts. A dispatch is not publication. Keep one full release in flight and one pending candidate; preserve old debt and separately pending installed acceptance.
 
-New state/reports use schema version 2; profiles and public hook events retain version 1. Use explicit `migrate` for existing state, preserving backups and historical receipts. `history` links earlier untracked child evidence without counting it as a new delivery.
+New state/reports use schema version 3; profiles and public hook events retain version 1. Use explicit `migrate` for existing v1/v2 state after stopping old mutators, preserving backups and historical receipts. `history` links earlier untracked child evidence without counting it as a new delivery.
 
 A clock tick stops new scope admission, never certifies unfinished code. Finish the committed increment with an honest overrun; a hard budget or operator stop takes precedence. If the harness cannot continue autonomously, leave durable state and a resume instruction; never claim background execution.
 
@@ -43,3 +43,16 @@ Use the selected `.agent-team/project-routing.json` / team manifest and the inst
 Refresh Compass for changed repositories about hourly when resources permit. Record stale/deferred status; do not launch a competing heavy build. Keep optional services optional.
 
 For KBD/native goal binding and the Boss build-and-publication policy, read [harness adapters](references/adapters.md). Completion of this skill never closes unfinished product work.
+
+## Progress Signals
+
+Emit to plain response text (no tool call) at each delivery increment and child-phase boundary:
+
+```
+Starting delivery-cadence — <profile> increment <i> of <n>
+Starting phase <i> out of <n>: <child-phase>
+Completed phase <i> out of <n>: <child-phase>
+Completed delivery-cadence — <profile> increment <i> of <n> (<accepted|pending|blocked>)
+```
+
+Acceptance and publication are reported separately; never report an increment as published because it was accepted.

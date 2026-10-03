@@ -1,4 +1,4 @@
-import { promises as fs } from 'node:fs';
+import { createReadStream, promises as fs } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { randomUUID } from 'node:crypto';
@@ -23,19 +23,31 @@ export async function withLock(root, action) {
   const lockPath = path.join(root, 'run.lock');
   const owner = { id: randomUUID(), pid: process.pid, hostname: os.hostname(), startedAt: new Date().toISOString() };
   let handle;
-  for (let attempt = 0; attempt < 2; attempt++) {
+  for (let attempt = 0; attempt < 100; attempt++) {
     try { handle = await fs.open(lockPath, 'wx', 0o600); break; }
     catch (error) {
       if (error.code !== 'EEXIST') throw error;
       let previous;
       try { previous = JSON.parse(await fs.readFile(lockPath, 'utf8')); }
-      catch { throw new Error(`Incomplete cadence lock at ${lockPath}; confirm its owner has exited before recovery`); }
+      catch { if (attempt < 99) { await new Promise(resolve => setTimeout(resolve, 20)); continue; } throw new Error(`Incomplete cadence lock at ${lockPath}; confirm its owner has exited before recovery`); }
       let alive = true;
       if (previous.hostname === os.hostname()) {
         try { process.kill(previous.pid, 0); } catch (check) { if (check.code === 'ESRCH') alive = false; }
       }
-      if (alive) throw new Error(`Cadence is owned by ${previous.hostname} process ${previous.pid}; do not start another writer`);
-      await fs.rename(lockPath, `${lockPath}.recovered.${randomUUID()}`);
+      if (alive) {
+        if (attempt === 99) throw new Error(`Cadence transaction owned by ${previous.hostname} process ${previous.pid}; retry after it finishes`);
+        await new Promise(resolve => setTimeout(resolve, 20)); continue;
+      }
+      const recoveryPath = path.join(root, 'lock-recovery');
+      let recovery;
+      try { recovery = await fs.open(recoveryPath, 'wx', 0o600); }
+      catch (claim) { if (claim.code !== 'EEXIST') throw claim; throw new Error('Interrupted/concurrent lock recovery; inspect lock-recovery before resuming'); }
+      try {
+        let current;
+        try { current = JSON.parse(await fs.readFile(lockPath, 'utf8')); } catch (read) { if (read.code !== 'ENOENT') throw read; }
+        if (current?.id === previous.id) await fs.rename(lockPath, `${lockPath}.recovered.${randomUUID()}`);
+      } finally { await recovery.close(); await fs.unlink(recoveryPath); }
+
     }
   }
   if (!handle) throw new Error('Could not acquire cadence ownership');
@@ -53,24 +65,28 @@ export async function withLock(root, action) {
 
 export async function loadState(root, { optional = false, recover = false } = {}) {
   const file = path.join(root, 'events.jsonl');
-  let data;
-  try { data = await fs.readFile(file, 'utf8'); }
-  catch (error) { if (error.code === 'ENOENT' && optional) return null; throw error; }
-  let state = null, seq = 0;
-  const lines = data.split('\n');
-  const incomplete = lines.pop();
-  for (const line of lines) {
-    if (!line) continue;
-    const event = JSON.parse(line);
-    if (event.seq !== seq + 1 || event.state?.eventsSeq !== event.seq) throw new Error(`Cadence event sequence broken at ${seq + 1}`);
-    seq = event.seq; state = event.state;
-  }
+  let state = null, seq = 0, incomplete = '', boundary = 0;
+  try {
+    let pending = '';
+    for await (const chunk of createReadStream(file, { encoding: 'utf8' })) {
+      pending += chunk;
+      for (let newline = pending.indexOf('\n'); newline !== -1; newline = pending.indexOf('\n')) {
+        const line = pending.slice(0, newline);
+        pending = pending.slice(newline + 1);
+        boundary += Buffer.byteLength(line) + 1;
+        if (!line) continue;
+        const event = JSON.parse(line);
+        if (event.seq !== seq + 1 || event.state?.eventsSeq !== event.seq) throw new Error(`Cadence event sequence broken at ${seq + 1}`);
+        seq = event.seq; state = event.state;
+      }
+    }
+    incomplete = pending;
+  } catch (error) { if (error.code === 'ENOENT' && optional) return null; throw error; }
   if (incomplete) {
     if (!recover) throw new Error('Interrupted event append; use resume to preserve and recover the incomplete tail');
     await fs.writeFile(path.join(root, `interrupted-tail-${randomUUID()}.jsonl`), incomplete, { flag: 'wx', mode: 0o600 });
-    const boundary = data.lastIndexOf('\n') + 1;
     const handle = await fs.open(file, 'r+');
-    try { await handle.truncate(Buffer.byteLength(data.slice(0, boundary))); await handle.sync(); }
+    try { await handle.truncate(boundary); await handle.sync(); }
     finally { await handle.close(); }
   }
   if (!state && !optional) throw new Error('Cadence run has no committed state');

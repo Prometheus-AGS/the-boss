@@ -8,6 +8,10 @@ description: Manually create a new top-level KBD phase. Accepts <name> [goals…
 Create a fresh top-level KBD phase from scratch — the manual-entry
 counterpart to `/kbd-next-phase`.
 
+## OpenSpec lifecycle preflight
+
+Before this stage, follow the [orchestrator preflight](../kbd-process-orchestrator/SKILL.md#openspec-lifecycle-preflight): refresh existing KBD/OpenSpec projects with the managed latest-stable CLI, then use that same runner for OpenSpec commands. Retry a pending startup refresh before OpenSpec work; preserve authored specs and task state. Phase scripts run this automatically, including canonical-runtime paths.
+
 ## What this does
 
 1. Parses arguments — `<name>` plus zero or more `[goals…]`.

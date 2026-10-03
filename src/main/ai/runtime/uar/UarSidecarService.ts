@@ -105,10 +105,15 @@ type RunningSidecar = Omit<UarSidecarEndpoint, 'storage'> & {
   launchToken: string
   authToken: string
   adminKey: string
+  principalMode: 'host-asserted' | 'token-subject'
   storage: AppliedUarStorage
 }
 
-type VerifiedEndpoint = UarSidecarEndpoint & { authToken: string; adminKey?: string }
+type VerifiedEndpoint = UarSidecarEndpoint & {
+  authToken: string
+  adminKey?: string
+  principalMode: 'host-asserted' | 'token-subject'
+}
 
 function isolatedSidecarEnvironment(raw: Record<string, string>): Record<string, string> {
   return Object.fromEntries(
@@ -422,7 +427,7 @@ export class UarSidecarService extends BaseService {
   }
 
   private async authenticatedFetch(
-    running: Pick<VerifiedEndpoint, 'baseUrl' | 'authToken'>,
+    running: Pick<VerifiedEndpoint, 'baseUrl' | 'authToken' | 'principalMode'>,
     pathname: string,
     principal: string,
     init: RequestInit,
@@ -430,7 +435,8 @@ export class UarSidecarService extends BaseService {
   ): Promise<Response> {
     const headers = new Headers(init.headers)
     headers.set('authorization', `Bearer ${running.authToken}`)
-    headers.set('x-uar-principal', principal)
+    if (running.principalMode === 'host-asserted') headers.set('x-uar-principal', principal)
+    else headers.delete('x-uar-principal')
     return this.fetchWithRateLimitRetries(new URL(pathname, baseUrl), { ...init, headers })
   }
 
@@ -503,7 +509,8 @@ export class UarSidecarService extends BaseService {
             UAR_PERSISTENCE__SURREAL_PASS: storage.password ?? '',
             UAR_PERSISTENCE__SURREAL_AUTH_LEVEL: storage.profile.authLevel,
             UAR_PERSISTENCE__SURREAL_NS: storage.profile.namespace,
-            UAR_PERSISTENCE__SURREAL_DB: storage.profile.database
+            UAR_PERSISTENCE__SURREAL_DB: storage.profile.database,
+            ...(storage.profile.remoteDurabilityAttested ? { UAR_REMOTE_SURREAL_DURABILITY_ATTESTED: '1' } : {})
           }
         : {
             UAR_PERSISTENCE__DATABASE_URL: `surrealkv://${path.resolve(dataRoot, 'runtime.db').replaceAll('\\', '/')}`
@@ -513,6 +520,9 @@ export class UarSidecarService extends BaseService {
       // Trusted local operation staging is never accepted from renderer settings or shell providers.
       ...(process.env.UAR_TEAM_EXECUTION_PROFILE_STAGE === 'operation'
         ? { UAR_TEAM_EXECUTION_PROFILE_STAGE: 'operation' }
+        : {}),
+      ...(process.env.UAR_WORKFLOW_EXECUTION_PROFILE_STAGE === 'operation'
+        ? { UAR_WORKFLOW_EXECUTION_PROFILE_STAGE: 'operation' }
         : {}),
       UAR_SIDECAR: '1',
       UAR_SERVICE_INSTANCE__INSTANCE_ID: managedInstance.expectedRuntimeId,
@@ -552,6 +562,7 @@ export class UarSidecarService extends BaseService {
         launchToken,
         authToken: launchToken,
         adminKey,
+        principalMode: capabilities.principalMode,
         baseUrl,
         effectivePort: port,
         ...(child.pid ? { processId: child.pid } : {}),
@@ -706,9 +717,6 @@ export class UarSidecarService extends BaseService {
     if (body.ownership !== instance.ownership) {
       throw new Error(`UAR ownership mismatch: expected ${instance.ownership}, received ${body.ownership}`)
     }
-    if (instance.runtimeCredentialRef && body.references.credential !== instance.runtimeCredentialRef) {
-      throw new Error('UAR runtime credential reference mismatch')
-    }
     if (instance.ownership === 'external') {
       for (const role of ['runtime', 'administration', 'models', 'console'] as const) {
         if (this.normalizedEndpoint(body.endpoints[role]) !== this.normalizedEndpoint(instance.endpoints[role])) {
@@ -716,7 +724,9 @@ export class UarSidecarService extends BaseService {
         }
       }
     }
-    return { uarVersion: body.uar_version, capabilities, administration: body.administration, observed }
+    const principalMode =
+      body.authentication?.principalMode ?? (instance.ownership === 'managed' ? 'host-asserted' : 'token-subject')
+    return { uarVersion: body.uar_version, capabilities, administration: body.administration, observed, principalMode }
   }
 
   private async connectExternal(instance: UarRuntimeInstance): Promise<UarSidecarEndpoint> {
@@ -736,6 +746,7 @@ export class UarSidecarService extends BaseService {
       (candidate) =>
         candidate.instanceId === instance.id &&
         candidate.ownership === 'external' &&
+        candidate.principalMode === capabilities.principalMode &&
         JSON.stringify(candidate.observed) === JSON.stringify(capabilities.observed)
     )
     const generation = previous?.generation ?? ++this.generation
@@ -757,7 +768,8 @@ export class UarSidecarService extends BaseService {
       administration: capabilities.administration,
       observed: capabilities.observed,
       authToken: credentials.runtimeBearer,
-      adminKey: credentials.adminKey
+      adminKey: credentials.adminKey,
+      principalMode: capabilities.principalMode
     }
     this.verifiedEndpoints.set(generation, endpoint)
     return endpoint

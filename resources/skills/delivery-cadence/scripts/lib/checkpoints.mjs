@@ -5,8 +5,11 @@ import { promises as fs, createReadStream } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { runCommand } from './process.mjs';
-import { saveEvent } from './storage.mjs';
-import { checkpointPurpose, evidenceInterval, publicationRequirements } from './delivery-contract.mjs';
+import { claimResources, releaseResources } from './resources.mjs';
+import { claimCommand, jobTransaction, immutableJson, attemptDirectory, reconcileJob, digest, now } from './jobs.mjs';
+import { assertChildrenResolved } from './children.mjs';
+import { saveEvent, atomicJson } from './storage.mjs';
+import { checkpointPurpose, evidenceInterval, publicationRequirements, assertOperationReady } from './delivery-contract.mjs';
 
 const exec = promisify(execFile);
 async function git(repository, args, encoding = 'utf8') {
@@ -32,7 +35,20 @@ export async function captureSources(refs, root) {
       if (stat.isSymbolicLink()) hash.update(await fs.readlink(file));
       else if (stat.isFile()) for await (const chunk of createReadStream(file)) hash.update(chunk);
     }
-    captured.push({ repository, revision, fingerprint: hash.digest('hex') });
+    const entries = (await git(repository, ['ls-files', '--stage', '-z'])).split('\0').filter(line => line.startsWith('160000 '));
+    const submoduleRefs = [];
+    for (const entry of entries) {
+      const name = entry.slice(entry.indexOf('\t') + 1), nested = path.join(repository, name);
+      const initialized = await fs.access(path.join(nested, '.git')).then(() => true, () => false);
+      if (!initialized) {
+        const pinned = entry.split(' ')[1];
+        submoduleRefs.push({ repository: nested, name, initialized: false, revision: pinned, workingTree: 'unobserved' });
+        hash.update(name).update(pinned); continue;
+      }
+      const [snapshot] = await captureSources([{ repository: nested }], root);
+      submoduleRefs.push({ ...snapshot, name }); hash.update(name).update(snapshot.fingerprint);
+    }
+    captured.push({ repository, revision, fingerprint: hash.digest('hex'), ...(submoduleRefs.length ? { submoduleRefs } : {}) });
   }
   return captured.sort((a, b) => a.repository.localeCompare(b.repository));
 }
@@ -89,90 +105,132 @@ export async function publicationReceipt(file, artifacts, sourceRefs, profile) {
   return { ...receipt, path: resolved, sha256: createHash('sha256').update(text).digest('hex') };
 }
 
-export async function runCheckpoint(root, state, iteration, input, commandId) {
-  if (!['ready', 'checkpoint-failed', 'checkpoint-running'].includes(iteration.status)) throw new Error('Complete production scope with ready before building or running');
-  const step = iteration.profile.checkpoints.find((item) => item.id === input.id);
-  if (!step) throw new Error(`No configured checkpoint ${input.id}`);
-  const previous = iteration.checkpoints.find((item) => item.commandId === commandId);
-  if (previous) return previous;
-  if (input.timeoutMs !== undefined && (!Number.isSafeInteger(input.timeoutMs) || input.timeoutMs <= 0 || typeof input.reason !== 'string' || !input.reason.trim())) {
-    throw new Error('A checkpoint timeout adjustment requires positive integer milliseconds and a recorded reason');
-  }
-  const requestedTimeoutMs = input.timeoutMs ?? step.timeoutMs ?? 14_400_000;
-  const repeated = iteration.checkpoints.some((item) => item.id === step.id);
-  if (step.kind === 'build' && repeated && (iteration.contractVersion ?? 1) >= 2 && (typeof input.reason !== 'string' || !input.reason.trim())) {
-    throw new Error('Repeated builds require a reason identifying the repair or changed release input');
-  }
-  const purpose = checkpointPurpose(iteration, step);
-  for (const pending of iteration.checkpoints.filter((item) => ['running', 'unknown'].includes(item.status))) {
-    if (pending.hostname !== os.hostname() || !pending.pid) throw new Error(`Reconcile interrupted checkpoint ${pending.attemptId} before another build; its process ownership is unknown`);
-    try { process.kill(pending.pid, 0); throw new Error(`Checkpoint ${pending.attemptId} is still running as process ${pending.pid}; wait for it to finish`); }
-    catch (error) { if (error.code !== 'ESRCH') throw error; }
-  }
-  if (step.kind === 'run') {
-    const builds = iteration.profile.checkpoints.filter((item) => item.kind === 'build' && item.required !== false);
-    if (!builds.every((build) => {
-      const receipt = iteration.checkpoints.filter((item) => item.id === build.id).at(-1);
-      return receipt?.status === 'success' && !receipt.invalidatedAt && sameSources(receipt.sourceRefs, iteration.sourceRefs);
-    })) {
-      throw new Error('Build the frozen increment successfully before running the program');
+
+/** Preserve dirty source bytes; references alone cannot reconstruct a frozen candidate. */
+export async function preserveSources(root, sourceRefs) {
+  const before = await captureSources(sourceRefs, root);
+  if (!sameSources(before, sourceRefs)) throw new Error('Sources changed before preservation');
+  const snapshots = [];
+  for (const ref of sourceRefs) {
+    const directory = path.join(root, 'sources', ref.fingerprint, randomUUID());
+    await fs.mkdir(directory, { recursive: true });
+    const excluded = path.relative(ref.repository, root).replaceAll(path.sep, '/');
+    const pathspec = excluded && !excluded.startsWith('../') && !path.isAbsolute(excluded) ? ['.', `:(exclude)${excluded}`] : ['.'];
+    const patch = await git(ref.repository, ['diff', 'HEAD', '--binary', '--', ...pathspec], 'buffer');
+    await fs.writeFile(path.join(directory, 'tracked.patch'), patch, { mode: 0o600 });
+    const files = (await git(ref.repository, ['ls-files', '--others', '--exclude-standard', '-z', '--', ...pathspec])).split('\0').filter(Boolean);
+    for (const name of files) {
+      const from = path.join(ref.repository, name), to = path.join(directory, 'untracked', name);
+      await fs.mkdir(path.dirname(to), { recursive: true });
+      const stat = await fs.lstat(from);
+      if (stat.isSymbolicLink()) throw new Error(`Frozen untracked symlink requires explicit source ownership: ${name}`);
+      if (stat.isFile()) await fs.copyFile(from, to);
     }
-    if (purpose === 'feature' && (iteration.contractVersion ?? 1) >= 2) {
-      const launches = iteration.profile.checkpoints.filter((item) => item.kind === 'run' && checkpointPurpose(iteration, item) === 'launch');
-      if (!launches.some((launch) => {
-        const receipt = iteration.checkpoints.filter((item) => item.id === launch.id).at(-1);
-        return receipt?.status === 'success' && !receipt.invalidatedAt && sameSources(receipt.sourceRefs, iteration.sourceRefs);
-      })) throw new Error('Launch the built increment before operating the delivered feature');
-    }
+    const submodules = (await git(ref.repository, ['submodule', 'status', '--recursive'])).trim();
+    const initializedRefs = (ref.submoduleRefs ?? []).filter(nested => nested.initialized !== false).map(({ name, ...nested }) => nested);
+    const preservedSubmodules = initializedRefs.length ? await preserveSources(root, initializedRefs) : [];
+    snapshots.push({ ...ref, directory, preservedSubmodules, patchSha256: createHash('sha256').update(patch).digest('hex'), untrackedFiles: files, submodules });
   }
-  const before = await captureSources(iteration.sourceRefs, root);
-  if (!sameSources(before, iteration.sourceRefs)) throw new Error('Sources changed after ready; run ready with the repaired source set before rebuilding');
-  const startedAt = new Date().toISOString();
-  const attempt = { id: step.id, attemptId: randomUUID(), commandId, kind: step.kind, purpose, status: 'running', startedAt,
-    ...(purpose === 'feature' ? { featureOperationId: iteration.featureOperation.id } : {}),
-    reason: input.reason ?? (repeated ? 'Unspecified legacy retry' : 'Initial delivery checkpoint'),
-    configuredTimeoutMs: step.timeoutMs ?? 14_400_000, requestedTimeoutMs,
-    sourceRefs: iteration.sourceRefs, command: step.command, args: step.args, cwd: path.resolve(step.cwd), hostname: os.hostname() };
-  iteration.checkpoints.push(attempt); iteration.status = 'checkpoint-running';
-  await saveEvent(root, state, 'checkpoint.started', { iterationId: iteration.id, attemptId: attempt.attemptId });
-  const logDir = path.join(root, 'logs'); await fs.mkdir(logDir, { recursive: true });
-  const logPath = path.join(logDir, `${attempt.attemptId}.log`);
-  const log = await fs.open(logPath, 'a', 0o600);
-  const controller = new AbortController();
-  const cancel = () => controller.abort();
-  process.once('SIGINT', cancel); process.once('SIGTERM', cancel);
-  let outputQueue = Promise.resolve();
-  let spawnSave = Promise.resolve();
-  const secrets = (step.secretEnv ?? []).map((key) => process.env[key]).filter(Boolean);
-  const redact = (text) => secrets.reduce((result, secret) => result.replaceAll(secret, '[REDACTED]'), text);
-  const remaining = state.profile.budgets.maxRunMinutes
-    ? Date.parse(state.startedAt) + state.profile.budgets.maxRunMinutes * 60_000 - Date.now() : Infinity;
-  try {
-    if (remaining <= 0) throw new Error('Run budget exhausted before checkpoint dispatch');
-    const result = await runCommand({ ...step, timeoutMs: Math.min(requestedTimeoutMs, remaining) }, {
-      cwd: step.cwd, signal: controller.signal,
-      onSpawn(pid) { attempt.pid = pid; spawnSave = saveEvent(root, state, 'checkpoint.process', { attemptId: attempt.attemptId, pid }); },
-      onOutput(stream, text) {
-        const safe = redact(text);
-        outputQueue = outputQueue.then(() => log.write(`[${stream}] ${safe}`));
-        process.stderr.write(safe);
-      }
-    });
-    Object.assign(attempt, { status: result.status, exitCode: result.exitCode, signal: result.signal,
-      startedAt: result.startedAt ?? startedAt, finishedAt: result.finishedAt ?? new Date().toISOString(), logPath });
-    const after = await captureSources(iteration.sourceRefs, root);
-    if (!sameSources(after, iteration.sourceRefs)) {
-      attempt.status = 'failed'; attempt.reason = 'Source changed during checkpoint; rebuild the repaired frozen increment';
-    }
-    if (attempt.status === 'success') attempt.artifacts = await artifactReceipts(input.artifacts ?? []);
-  } catch (error) {
-    attempt.status = controller.signal.aborted ? 'cancelled' : 'failed';
-    attempt.reason = redact(error.message); attempt.finishedAt = new Date().toISOString();
-  } finally {
-    process.removeListener('SIGINT', cancel); process.removeListener('SIGTERM', cancel);
-    await spawnSave; await outputQueue; await log.sync(); await log.close();
-  }
-  iteration.status = attempt.status === 'success' ? 'ready' : 'checkpoint-failed';
-  await saveEvent(root, state, 'checkpoint.finished', { iterationId: iteration.id, attemptId: attempt.attemptId });
-  return attempt;
+  if (!sameSources(await captureSources(sourceRefs, root), sourceRefs)) throw new Error('Sources changed during preservation');
+  return snapshots;
 }
+function current(state, id) {
+  const iteration = state.iterations.find(i => i.id === (id ?? state.activeIterationId));
+  if (!iteration) throw new Error('No matching iteration'); return iteration;
+}
+function prerequisites(iteration, step) {
+  if (step.kind !== 'run') return;
+  const successful = id => iteration.checkpoints.some(r => r.id === id && r.status === 'success' && !r.invalidatedAt && sameSources(r.sourceRefs, iteration.sourceRefs));
+  if (!iteration.profile.checkpoints.filter(c => c.kind === 'build' && c.required !== false).every(c => successful(c.id))) throw new Error('Build the frozen increment before running it');
+  if (checkpointPurpose(iteration, step) === 'feature' && !iteration.profile.checkpoints.some(c => c.kind === 'run' && checkpointPurpose(iteration, c) === 'launch' && successful(c.id))) throw new Error('Launch the built increment before operating its feature');
+}
+export async function dispatchCheckpoint(root, input = {}, args = {}) {
+  const claim = await jobTransaction(root, async state => {
+    const prior = claimCommand(state, 'checkpoint', input, args); if (prior) return { prior };
+    const duplicate = state.jobs?.find(j => j.commandId === args.commandId);
+    if (duplicate) return { duplicate: duplicate.id };
+    const iteration = current(state, input.iterationId); assertChildrenResolved(iteration);
+    if (!['ready', 'checkpoint-failed'].includes(iteration.status)) throw new Error('Complete and freeze the production increment before checkpoint');
+    const candidateId = input.candidateId ?? iteration.candidateId;
+    const candidate = state.candidates?.find(c => (c.id ?? c.candidateId) === candidateId);
+    if (!candidate || candidate.iterationId !== iteration.id || candidateId !== iteration.candidateId) throw new Error('Checkpoint requires the current frozen candidate');
+    if (state.jobs?.some(j => j.iterationId === iteration.id && ['claimed','launching','running','unknown','cancelRequested'].includes(j.state))) throw new Error('Reconcile the existing candidate job before another checkpoint');
+    const step = iteration.profile.checkpoints.find(c => c.id === input.id);
+    if (!step) throw new Error(`No configured checkpoint ${input.id}`);
+    prerequisites(iteration, step);
+    if (input.timeoutMs !== undefined && (!Number.isSafeInteger(input.timeoutMs) || input.timeoutMs <= 0 || !input.reason?.trim())) throw new Error('Timeout adjustment requires positive integer milliseconds and reason');
+    if (step.kind === 'build' && iteration.checkpoints.some(c => c.id === step.id) && !input.reason?.trim()) throw new Error('Repeated builds require a recorded reason');
+    const requestedTimeoutMs = input.timeoutMs ?? step.timeoutMs ?? 14_400_000;
+    const remaining = state.profile.budgets?.maxRunMinutes ? Date.parse(state.startedAt) + state.profile.budgets.maxRunMinutes * 60_000 - Date.now() : Infinity;
+    if (remaining <= 0) throw new Error('Run budget exhausted before dispatch');
+    const job = { id: randomUUID(), commandId: args.commandId, candidateId, iterationId: iteration.id, kind: step.kind,
+      operationToken: randomUUID(), state: 'claimed', claimedAt: now(), owner: { pid: process.pid, hostname: os.hostname() },
+      contractDigest: digest(step), contentManifestDigest: candidate.contentManifestDigest,
+      command: { ...step, timeoutMs: Math.min(requestedTimeoutMs, remaining) }, sourceRefs: structuredClone(iteration.sourceRefs),
+      resourcePaths: [...new Set([path.resolve(step.cwd), ...(candidate.outputRoots ?? []), ...(step.resourcePaths ?? [])])],
+      registry: state.profile.resources?.registryRoot ?? state.profile.resourceRegistryRoot, requestedTimeoutMs, resourceClaims: [] };
+    const receipt = { id: step.id, attemptId: job.id, candidateId, commandId: args.commandId, kind: step.kind, purpose: checkpointPurpose(iteration, step), status: 'running', startedAt: job.claimedAt,
+      sourceRefs: job.sourceRefs, contentManifestDigest: job.contentManifestDigest, reason: input.reason ?? 'Initial delivery checkpoint', configuredTimeoutMs: step.timeoutMs ?? 14_400_000, requestedTimeoutMs,
+      command: step.command, args: step.args, cwd: path.resolve(step.cwd), hostname: os.hostname(), ...(checkpointPurpose(iteration, step) === 'feature' ? { featureOperationId: iteration.featureOperation.id } : {}) };
+    state.jobs ??= []; state.jobs.push(job); iteration.checkpoints.push(receipt); iteration.status = 'checkpoint-running';
+    await immutableJson(path.join(attemptDirectory(root, job.id), 'claim.json'), job);
+    await saveEvent(root, state, 'job.claimed', { attemptId: job.id, candidateId });
+    return { job, iteration: structuredClone(iteration) };
+  });
+  if (claim.prior) return claim.prior;
+  if (claim.duplicate) return reconcileJob(root, claim.duplicate);
+  const { job, iteration } = claim, directory = attemptDirectory(root, job.id);
+  let claims = [], execution, spawned = false, launchRecord = Promise.resolve(), log, outputQueue = Promise.resolve(), poll;
+  const controller = new AbortController(), cancel = () => controller.abort();
+  const secrets = (job.command.secretEnv ?? []).map(k => process.env[k]).filter(Boolean);
+  const redact = text => secrets.reduce((s, secret) => s.replaceAll(secret, '[REDACTED]'), String(text));
+  const buffered = new Map();
+  const keep = Math.max(0, ...secrets.map(s => s.length - 1));
+  const output = (stream, text, flush = false) => {
+    const safe = redact((buffered.get(stream) ?? '') + text);
+    const boundary = flush ? safe.length : Math.max(0, safe.length - keep);
+    buffered.set(stream, safe.slice(boundary));
+    const emitted = safe.slice(0, boundary);
+    if (emitted) { outputQueue = outputQueue.then(() => log.write(`[${stream}] ${emitted}`)); process.stderr.write(emitted); }
+  };
+  process.once('SIGINT', cancel); process.once('SIGTERM', cancel);
+  try {
+    if (!sameSources(await captureSources(job.sourceRefs, root), job.sourceRefs)) throw new Error('Source changed after freeze');
+    if (checkpointPurpose(iteration, job.command) === 'feature') await assertOperationReady(iteration.featureOperation, iteration.scope, {
+      stage: 'after-build', contractVersion: iteration.contractVersion, profile: iteration.profile,
+      completedTaskRefs: iteration.completedTaskRefs ?? [], satisfiedPrerequisiteIds: iteration.satisfiedPrerequisiteIds ?? []
+    });
+    claims = await claimResources(job.resourcePaths, { runId: (await jobTransaction(root, async s => s.runId)), attemptId: job.id, operationToken: job.operationToken, owner: job.owner }, job.registry);
+    await immutableJson(path.join(directory, 'resources.json'), claims);
+    await jobTransaction(root, async state => { const fresh = state.jobs.find(j => j.id === job.id); fresh.resourceClaims = claims; fresh.state = 'launching'; await saveEvent(root, state, 'job.launch-intent', { attemptId: job.id }); });
+    const checkCancel = async () => { try { const request = JSON.parse(await fs.readFile(path.join(directory, 'cancel.json'), 'utf8')); if (request.operationToken === job.operationToken) controller.abort(); } catch (e) { if (e.code !== 'ENOENT') controller.abort(); } };
+    await checkCancel(); poll = setInterval(() => { void checkCancel(); }, 250);
+    const logPath = path.join(directory, 'output.log'); log = await fs.open(logPath, 'a', 0o600);
+    execution = await runCommand(job.command, { cwd: job.command.cwd, signal: controller.signal,
+      onSpawn(pid) { spawned = true; launchRecord = (async () => {
+        await immutableJson(path.join(directory, 'process.json'), { pid, operationToken: job.operationToken, owner: job.owner, startedAt: now() });
+        await jobTransaction(root, async state => { const fresh = state.jobs.find(j => j.id === job.id); fresh.pid = pid; fresh.state = 'running'; fresh.startedAt = now(); await saveEvent(root, state, 'job.process', { attemptId: job.id, pid }); });
+      })().catch(error => { controller.abort(); job.launchError = error.message; }); },
+      onOutput(stream, text) { output(stream, text); }
+    });
+    await launchRecord;
+    if (job.launchError) throw new Error(job.launchError);
+    execution.logPath = logPath;
+    if (!sameSources(await captureSources(job.sourceRefs, root), job.sourceRefs)) { execution.status = 'failed'; execution.reason = 'Source changed during checkpoint'; }
+    if (execution.status === 'success') execution.artifacts = await artifactReceipts(input.artifacts ?? []);
+  } catch (error) {
+    execution = { ...execution, status: execution?.status === 'unknown' || (spawned && execution?.processStopped !== true) ? 'unknown' : controller.signal.aborted ? 'cancelled' : 'failed', reason: redact(error.message), startedAt: execution?.startedAt ?? job.claimedAt, finishedAt: now(), processStopped: execution?.processStopped ?? !spawned };
+  } finally {
+    clearInterval(poll); process.removeListener('SIGINT', cancel); process.removeListener('SIGTERM', cancel);
+    if (log) for (const stream of buffered.keys()) output(stream, '', true);
+    await outputQueue; if (log) { await log.sync(); await log.close(); }
+  }
+  delete execution.stdout; delete execution.stderr; delete execution.message;
+  const result = { ...execution, attemptId: job.id, candidateId: job.candidateId, operationToken: job.operationToken, sourceRefs: job.sourceRefs, contentManifestDigest: job.contentManifestDigest };
+  await immutableJson(path.join(directory, 'result.json'), result);
+  await reconcileJob(root, job.id);
+  if (result.processStopped === true) await releaseResources(claims, job.operationToken);
+  return jobTransaction(root, async state => state.iterations.find(i => i.id === job.iterationId).checkpoints.find(r => r.attemptId === job.id));
+}
+// The legacy helper must never reintroduce a long operation within a caller-held lock.
+export async function runCheckpoint() { throw new Error('Use dispatchCheckpoint outside the run transaction'); }

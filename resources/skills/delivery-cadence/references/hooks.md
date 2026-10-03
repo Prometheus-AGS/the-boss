@@ -73,7 +73,7 @@ receipts are never replayed. Failed and unknown executions are never automatical
 retried. Receipts retain structured status/reason and the original non-secret event,
 not stdout, stderr, exception text, provider response bodies or arbitrary returned
 objects. Registry and receipt files use private file mode where supported. Hooks
-execute serially under the command owner's lock.
+execute in registration order outside the short run mutex. Durable job claims and receipts allow status and independent authorized work to continue; the owner reloads state before reconciliation. Required failures still block delivery promotion.
 
 ## Templates
 
