@@ -1,4 +1,5 @@
 import { arrayMove } from '@dnd-kit/sortable'
+import { Settings2 } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -20,9 +21,11 @@ import SidebarShortcutIcon from '@renderer/components/icons/SidebarShortcutIcon'
 import App from '@renderer/components/MiniApp/MiniApp'
 import Scrollbar from '@renderer/components/Scrollbar'
 import { useLaunchpadAppOrder } from '@renderer/hooks/useLaunchpadAppOrder'
+import { useBossFangDashboard } from '@renderer/hooks/useBossFangDashboard'
 import { useMiniApps } from '@renderer/hooks/useMiniApps'
 import { useSidebarShortcuts } from '@renderer/hooks/useSidebarShortcuts'
 import { getSidebarIconLabelKey } from '@renderer/i18n/label'
+import { ipcApi } from '@renderer/ipc'
 import { toast } from '@renderer/services/toast'
 import type { SidebarAppId } from '@renderer/utils/sidebar'
 import { createSidebarShortcutTarget, getSidebarMenuPath, SIDEBAR_SHORTCUT_PROVIDER_IDS } from '@renderer/utils/sidebar'
@@ -57,6 +60,7 @@ const APP_ICON_SOURCES: Record<SidebarAppId, string> = {
 export default function LaunchpadPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { open: openBossFang, opening: bossFangOpening } = useBossFangDashboard()
   const [defaultPaintingProvider] = usePreference('feature.paintings.default_provider')
   const {
     pinned,
@@ -154,6 +158,16 @@ export default function LaunchpadPage() {
 
   const openDeepSeekHarness = () => {
     void navigateToUrl(DEEPSEEK_HARNESS_URL)
+  }
+
+  const handleOpenBossFang = async () => {
+    const status = await ipcApi.request('bossfang.status')
+    if (!status.configured) {
+      toast.info(t('bossfang.statusSetupRequired'))
+      void navigateToUrl('/settings/uar')
+      return
+    }
+    await openBossFang()
   }
 
   const pinToSidebar = useCallback(
@@ -322,6 +336,18 @@ export default function LaunchpadPage() {
                 </span>
                 <span className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-foreground">
                   {t('launchpad.deepseek_harness_shortcut')}
+                </span>
+              </button>
+              <button
+                type="button"
+                disabled={bossFangOpening}
+                onClick={() => void handleOpenBossFang()}
+                className={`${LAUNCHPAD_ITEM_CLASS} group flex cursor-pointer flex-col items-center gap-1 rounded-2xl px-1 py-2 text-center outline-none transition-transform duration-200 hover:scale-105 focus-visible:scale-105 active:scale-95 disabled:cursor-wait disabled:opacity-60`}>
+                <span className={APP_ICON_TILE_CLASS}>
+                  <Settings2 size={28} aria-hidden="true" className="text-foreground" />
+                </span>
+                <span className="w-full overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-foreground">
+                  {t('bossfang.title')}
                 </span>
               </button>
             </div>

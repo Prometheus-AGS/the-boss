@@ -12,6 +12,7 @@ import { useTheme } from '@renderer/hooks/useTheme'
 import { getSettingDomId } from '@renderer/pages/settings/settingsSearch/types'
 
 import { IntegrationChoice, IntegrationField } from './IntegrationFields'
+import { BossFangSettingsPanel } from './BossFangSettingsPanel'
 import { IntegrationPage, IntegrationSecretField, integrationText } from './IntegrationPage'
 import { UarAdministrationWorkspace } from './UarAdministrationWorkspace'
 import { UarIntegrationStatus } from './UarIntegrationStatus'
@@ -143,6 +144,7 @@ export default function UarSettings() {
                     <SettingHelpText>{integrationText(t, 'uarStorageHelp')}</SettingHelpText>
                   </div>
                 </SettingGroup>
+                <BossFangSettingsPanel />
               </>
             }
           />

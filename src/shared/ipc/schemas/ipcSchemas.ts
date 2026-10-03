@@ -3,6 +3,7 @@ import { type AiEventSchemas, aiRequestSchemas } from './ai'
 import { type ApiGatewayEventSchemas, apiGatewayRequestSchemas } from './apiGateway'
 import { type AppEventSchemas, appRequestSchemas } from './app'
 import { type BackupEventSchemas, backupRequestSchemas } from './backup'
+import { bossFangRequestSchemas } from './bossFang'
 import { type BinaryEventSchemas, binaryRequestSchemas } from './binary'
 import { type BrowserEventSchemas, browserRequestSchemas } from './browser'
 import { type ChannelEventSchemas, channelRequestSchemas } from './channel'
@@ -56,6 +57,7 @@ export const ipcRequestSchemas = {
   ...apiGatewayRequestSchemas,
   ...appRequestSchemas,
   ...backupRequestSchemas,
+  ...bossFangRequestSchemas,
   ...binaryRequestSchemas,
   ...browserRequestSchemas,
   ...channelRequestSchemas,

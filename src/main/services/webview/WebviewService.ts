@@ -17,6 +17,7 @@ import { AnnotationSession } from './AnnotationSession'
 const logger = loggerService.withContext('WebviewService')
 /** The one session site mini apps share; every other partition belongs to a policy this service must not touch. */
 const WEBVIEW_PARTITION = 'persist:webview'
+const BOSSFANG_PARTITION = 'persist:bossfang-dashboard'
 /** Sessions whose guests run the annotation preload: mini-app sites plus the agent browser panes. */
 const ANNOTATION_PARTITIONS = [
   WEBVIEW_PARTITION,
@@ -74,7 +75,23 @@ export class WebviewService extends BaseService {
 
   protected async onInit() {
     this.initSessionUserAgent()
+    this.initBossFangSession()
     this.initWebviews()
+  }
+
+  private initBossFangSession() {
+    const bossfangSession = session.fromPartition(BOSSFANG_PARTITION)
+    bossfangSession.webRequest.onBeforeRequest((details, callback) => {
+      const allowed = application.get('BossFangService').getDashboardOrigin()
+      let permit = false
+      try {
+        permit = Boolean(allowed && new URL(details.url).origin === allowed)
+      } catch {
+        permit = false
+      }
+      callback({ cancel: !permit })
+    })
+    this.registerDisposable(() => bossfangSession.webRequest.onBeforeRequest(null))
   }
 
   protected async onStop() {
