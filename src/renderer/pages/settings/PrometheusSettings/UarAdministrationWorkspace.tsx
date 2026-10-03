@@ -199,6 +199,9 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
   const requestedPanel = typeof search.panel === 'string' ? search.panel : undefined
   const selectedId = navigationSurfaces.some((surface) => surface.id === requestedPanel) ? requestedPanel! : 'overview'
   const selected = surfaces.find((surface) => surface.id === selectedId)
+  useEffect(() => {
+    if (selectedId === 'local-scoped-observers') void refetchWorkspaces()
+  }, [selectedId, refetchWorkspaces])
   const grouped = useMemo(
     () =>
       GROUPS.map((group) => ({
