@@ -422,7 +422,7 @@ export class UarSidecarService extends BaseService {
   }
 
   private async authenticatedFetch(
-    running: Pick<VerifiedEndpoint, 'baseUrl' | 'authToken'>,
+    running: Pick<VerifiedEndpoint, 'baseUrl' | 'authToken' | 'ownership'>,
     pathname: string,
     principal: string,
     init: RequestInit,
@@ -430,7 +430,7 @@ export class UarSidecarService extends BaseService {
   ): Promise<Response> {
     const headers = new Headers(init.headers)
     headers.set('authorization', `Bearer ${running.authToken}`)
-    headers.set('x-uar-principal', principal)
+    if (running.ownership === 'managed') headers.set('x-uar-principal', principal)
     return this.fetchWithRateLimitRetries(new URL(pathname, baseUrl), { ...init, headers })
   }
 
