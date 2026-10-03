@@ -3,7 +3,7 @@ const fs = require('node:fs')
 const path = require('node:path')
 
 const root = path.resolve(__dirname, '..')
-const pins = require('../build/integration-sources.json')
+const pins = require('../build/integration-artifacts.json')
 const marker = '.liter-local-payload.json'
 
 function loadLocalLiterRecord(platform) {
@@ -16,11 +16,16 @@ function loadLocalLiterRecord(platform) {
   const matches = records.filter((record) => record.name === 'liter-llm')
   if (matches.length !== 1) throw new Error('Local native build must contain exactly one Liter record')
   const record = matches[0]
+  const tool = pins.tools.find((item) => item.name === 'liter-llm')
+  const artifact = tool.packages[platform]
+  const source = artifact.source ?? pins.sources['liter-llm']
   if (
     record.platform !== platform ||
-    record.version !== pins.tools['liter-llm'].version ||
-    record.source?.repository !== pins.sources['liter-llm'].repository ||
-    record.source?.revision !== pins.sources['liter-llm'].revision ||
+    record.version !== tool.version ||
+    record.source?.repository !== source.repository ||
+    record.source?.revision !== source.revision ||
+    record.sha256 !== artifact.sha256 ||
+    record.size !== artifact.size ||
     record.asset !== `liter-llm-${platform}` ||
     record.archive !== 'none' ||
     JSON.stringify(record.binaries) !== JSON.stringify(['liter-llm']) ||

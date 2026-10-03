@@ -515,6 +515,9 @@ export class UarSidecarService extends BaseService {
       ...(process.env.UAR_TEAM_EXECUTION_PROFILE_STAGE === 'operation'
         ? { UAR_TEAM_EXECUTION_PROFILE_STAGE: 'operation' }
         : {}),
+      ...(process.env.UAR_WORKFLOW_EXECUTION_PROFILE_STAGE === 'operation'
+        ? { UAR_WORKFLOW_EXECUTION_PROFILE_STAGE: 'operation' }
+        : {}),
       UAR_SIDECAR: '1',
       UAR_SERVICE_INSTANCE__INSTANCE_ID: managedInstance.expectedRuntimeId,
       UAR_SERVICE_INSTANCE__WORKSPACE_LOCATION: managedInstance.workspaceLocation,
