@@ -707,9 +707,6 @@ export class UarSidecarService extends BaseService {
     if (body.ownership !== instance.ownership) {
       throw new Error(`UAR ownership mismatch: expected ${instance.ownership}, received ${body.ownership}`)
     }
-    if (instance.runtimeCredentialRef && body.references.credential !== instance.runtimeCredentialRef) {
-      throw new Error('UAR runtime credential reference mismatch')
-    }
     if (instance.ownership === 'external') {
       for (const role of ['runtime', 'administration', 'models', 'console'] as const) {
         if (this.normalizedEndpoint(body.endpoints[role]) !== this.normalizedEndpoint(instance.endpoints[role])) {
