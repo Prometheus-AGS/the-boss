@@ -22,6 +22,7 @@ for (const filename of fs
   )) {
     if (!platforms.includes(platform)) continue
     if (!tools.has(name)) tools.set(name, { name, version, packages: {} })
+    tools.get(name).version = version
     tools.get(name).packages[platform] = { ...record, asset, url: url(asset) }
   }
 }

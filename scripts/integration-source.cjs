@@ -16,6 +16,8 @@ function checkoutIntegrationSource(name, directory = path.join(root, 'build', 'i
   git('fetch', '--depth=1', `https://github.com/${pin.repository}.git`, pin.revision)
   git('checkout', '--detach', 'FETCH_HEAD')
   if (git('rev-parse', 'HEAD') !== pin.revision) throw new Error(`Integration source pin mismatch: ${name}`)
+  if (name === 'uar')
+    git('submodule', 'update', '--init', 'crates/prometheus-skill-system', 'vendor/git/liter-llm', 'vendor/git/rust-mcp-filesystem')
   return directory
 }
 

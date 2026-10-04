@@ -16,6 +16,7 @@
 | [Release Workflow Operations](./contrib/release-workflow.md) | Maintainer runbook for preparing, validating, hotfixing, publishing, and synchronizing release branches |
 | [Test Plan](./contrib/test-plan.md) | The Test Plan process for beta and rc testing, covering user participation and maintainer PR workflow |
 | [The Boss integration release](./contrib/the-boss-release.md) | Native integration payloads, serialized publication, and installed acceptance for The Boss |
+| [UAR workflow consumption and pending acceptance](./contrib/uar-workflow-acceptance.md) | Merged UAR workflow source and the installed-app acceptance still required |
 | [UI/UX routing and team adoption](./contrib/ui-ux-routing.md) | The Boss UI/UX catalog, project-team adoption, portable helpers, and completed-phase evidence limits |
 | [Upstream merge log](./contrib/upstream-merge-log.md) | Dated record of every upstream CherryHQ/cherry-studio merge into The Boss fork, plus open branding items carried between merges |
 | [Consuming upstream](./contrib/upstream-merges.md) | How this fork consumes upstream CherryHQ/cherry-studio releases without losing The Boss branding |
