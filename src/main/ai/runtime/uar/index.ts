@@ -96,3 +96,12 @@ export {
   actOnUarChannelObserver,
   readUarChannelDeliveries
 } from './uarChannelObserverAdministration'
+
+export {
+  readUarWorkflows,
+  readUarWorkflow,
+  startUarWorkflow,
+  decideUarWorkflow,
+  cancelUarWorkflow,
+  recoverUarWorkflow
+} from './UarWorkflowExecutionAdapter'

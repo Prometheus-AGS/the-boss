@@ -97,6 +97,15 @@ import type {
   UarTeamMailboxPage,
   UarTeamsSnapshot
 } from '@shared/types/uarTeams'
+import {
+  uarWorkflowWorkspaceSchema,
+  uarWorkflowSelectorSchema,
+  uarWorkflowStartSchema,
+  uarWorkflowDecisionSchema,
+  uarWorkflowControlSchema,
+  uarWorkflowRunSchema,
+  uarWorkflowsSnapshotSchema
+} from '@shared/types/uarWorkflows'
 
 import { defineRoute } from '../define'
 
@@ -138,6 +147,15 @@ const teamControlSchema = teamExecutionSelectorSchema.extend({
  * process cannot report.
  */
 export const prometheusRequestSchemas = {
+  'prometheus.uar.workflows.snapshot': defineRoute({
+    input: uarWorkflowWorkspaceSchema,
+    output: uarWorkflowsSnapshotSchema
+  }),
+  'prometheus.uar.workflows.read': defineRoute({ input: uarWorkflowSelectorSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.start': defineRoute({ input: uarWorkflowStartSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.decide': defineRoute({ input: uarWorkflowDecisionSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.cancel': defineRoute({ input: uarWorkflowControlSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.recover': defineRoute({ input: uarWorkflowControlSchema, output: uarWorkflowRunSchema }),
   'prometheus.liter_config.select_local': defineRoute({
     input: z.object({}).strict(),
     output: z.custom<LiterConfigSourceSelection>()

@@ -105,10 +105,15 @@ type RunningSidecar = Omit<UarSidecarEndpoint, 'storage'> & {
   launchToken: string
   authToken: string
   adminKey: string
+  principalMode: 'host-asserted' | 'token-subject'
   storage: AppliedUarStorage
 }
 
-type VerifiedEndpoint = UarSidecarEndpoint & { authToken: string; adminKey?: string }
+type VerifiedEndpoint = UarSidecarEndpoint & {
+  authToken: string
+  adminKey?: string
+  principalMode: 'host-asserted' | 'token-subject'
+}
 
 function isolatedSidecarEnvironment(raw: Record<string, string>): Record<string, string> {
   return Object.fromEntries(
@@ -422,7 +427,7 @@ export class UarSidecarService extends BaseService {
   }
 
   private async authenticatedFetch(
-    running: Pick<VerifiedEndpoint, 'baseUrl' | 'authToken' | 'ownership'>,
+    running: Pick<VerifiedEndpoint, 'baseUrl' | 'authToken' | 'principalMode'>,
     pathname: string,
     principal: string,
     init: RequestInit,
@@ -430,7 +435,8 @@ export class UarSidecarService extends BaseService {
   ): Promise<Response> {
     const headers = new Headers(init.headers)
     headers.set('authorization', `Bearer ${running.authToken}`)
-    if (running.ownership === 'managed') headers.set('x-uar-principal', principal)
+    if (running.principalMode === 'host-asserted') headers.set('x-uar-principal', principal)
+    else headers.delete('x-uar-principal')
     return this.fetchWithRateLimitRetries(new URL(pathname, baseUrl), { ...init, headers })
   }
 
@@ -515,6 +521,9 @@ export class UarSidecarService extends BaseService {
       ...(process.env.UAR_TEAM_EXECUTION_PROFILE_STAGE === 'operation'
         ? { UAR_TEAM_EXECUTION_PROFILE_STAGE: 'operation' }
         : {}),
+      ...(process.env.UAR_WORKFLOW_EXECUTION_PROFILE_STAGE === 'operation'
+        ? { UAR_WORKFLOW_EXECUTION_PROFILE_STAGE: 'operation' }
+        : {}),
       UAR_SIDECAR: '1',
       UAR_SERVICE_INSTANCE__INSTANCE_ID: managedInstance.expectedRuntimeId,
       UAR_SERVICE_INSTANCE__WORKSPACE_LOCATION: managedInstance.workspaceLocation,
@@ -553,6 +562,7 @@ export class UarSidecarService extends BaseService {
         launchToken,
         authToken: launchToken,
         adminKey,
+        principalMode: capabilities.principalMode,
         baseUrl,
         effectivePort: port,
         ...(child.pid ? { processId: child.pid } : {}),
@@ -714,7 +724,9 @@ export class UarSidecarService extends BaseService {
         }
       }
     }
-    return { uarVersion: body.uar_version, capabilities, administration: body.administration, observed }
+    const principalMode =
+      body.authentication?.principalMode ?? (instance.ownership === 'managed' ? 'host-asserted' : 'token-subject')
+    return { uarVersion: body.uar_version, capabilities, administration: body.administration, observed, principalMode }
   }
 
   private async connectExternal(instance: UarRuntimeInstance): Promise<UarSidecarEndpoint> {
@@ -734,6 +746,7 @@ export class UarSidecarService extends BaseService {
       (candidate) =>
         candidate.instanceId === instance.id &&
         candidate.ownership === 'external' &&
+        candidate.principalMode === capabilities.principalMode &&
         JSON.stringify(candidate.observed) === JSON.stringify(capabilities.observed)
     )
     const generation = previous?.generation ?? ++this.generation
@@ -755,7 +768,8 @@ export class UarSidecarService extends BaseService {
       administration: capabilities.administration,
       observed: capabilities.observed,
       authToken: credentials.runtimeBearer,
-      adminKey: credentials.adminKey
+      adminKey: credentials.adminKey,
+      principalMode: capabilities.principalMode
     }
     this.verifiedEndpoints.set(generation, endpoint)
     return endpoint

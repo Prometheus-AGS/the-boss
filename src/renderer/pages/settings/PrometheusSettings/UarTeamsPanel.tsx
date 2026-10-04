@@ -24,6 +24,7 @@ import { UarTeamModelPicker } from './UarTeamModelPicker'
 import { UarTeamPeerMessages } from './UarTeamPeerMessages'
 import { UarTeamTaskBoard } from './UarTeamTaskBoard'
 import { UarTeamTaskForm } from './UarTeamTaskForm'
+import { UarWorkflowsPanel } from './UarWorkflowsPanel'
 
 const definitionKey = (definition: UarTeamsSnapshot['definitions'][number]) =>
   `${definition.id}:${definition.version}:${definition.digest}`
@@ -235,6 +236,12 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
       </SettingGroup>
 
       <UarExecutionOwnerPanel />
+      <UarWorkflowsPanel
+        key={workspaceId}
+        workspaceId={workspaceId}
+        team={selectedInstance}
+        onTeamChanged={refreshQuietly}
+      />
       {snapshot && (
         <>
           <SettingGroup>

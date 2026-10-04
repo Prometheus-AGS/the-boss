@@ -16,6 +16,10 @@ export async function migrateState(root, state, input = {}) {
   const directory = path.join(root, 'backups', `v${from}-${state.eventsSeq}-${randomUUID()}`);
   await fs.mkdir(directory, { recursive: true });
   for (const file of ['events.jsonl', 'state.json']) await fs.copyFile(path.join(root, file), path.join(directory, file));
+  try {
+    await fs.copyFile(path.join(root, 'event-archives.json'), path.join(directory, 'event-archives.json'));
+    await fs.cp(path.join(root, 'archives'), path.join(directory, 'archives'), { recursive: true });
+  } catch (error) { if (error.code !== 'ENOENT') throw error; }
   for (const name of ['hooks', 'reports']) {
     try { await fs.cp(path.join(root, name), path.join(directory, name), { recursive: true, errorOnExist: true, force: false }); }
     catch (error) { if (error.code !== 'ENOENT') throw error; }

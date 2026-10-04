@@ -8,7 +8,11 @@ import { BaseService, DependsOn, Injectable, Phase, ServicePhase } from '@main/c
 import { getAppLanguage, t } from '@main/i18n'
 import type { WindowId } from '@shared/ipc/types'
 import type { WebviewAnnotation, WebviewAnnotationTarget } from '@shared/types/webviewAnnotation'
-import { getWebviewPartition, WebviewSecurityProfile } from '@shared/utils/webviewSecurity'
+import {
+  BOSSFANG_DASHBOARD_PARTITION,
+  getWebviewPartition,
+  WebviewSecurityProfile
+} from '@shared/utils/webviewSecurity'
 
 import { isSafeExternalUrl } from '../../utils/externalUrlSafety'
 import { exportAnnotationDocument } from './annotationExport'
@@ -74,7 +78,23 @@ export class WebviewService extends BaseService {
 
   protected async onInit() {
     this.initSessionUserAgent()
+    this.initBossFangSession()
     this.initWebviews()
+  }
+
+  private initBossFangSession() {
+    const bossfangSession = session.fromPartition(BOSSFANG_DASHBOARD_PARTITION)
+    bossfangSession.webRequest.onBeforeRequest((details, callback) => {
+      const allowed = application.get('BossFangService').getDashboardOrigin()
+      let permit = false
+      try {
+        permit = Boolean(allowed && new URL(details.url).origin === allowed)
+      } catch {
+        permit = false
+      }
+      callback({ cancel: !permit })
+    })
+    this.registerDisposable(() => bossfangSession.webRequest.onBeforeRequest(null))
   }
 
   protected async onStop() {

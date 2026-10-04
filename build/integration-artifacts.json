@@ -25,11 +25,16 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "0b098c99012a1791e9e4c5d2a9f548a37874a647"
+      "revision": "bf2c1eea265d3c206c186c7dbaf663f8954e9b17"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "afeb528b794961483862436edac6b7063065d66e"
+      "revision": "1db1afb48b606e5a92057386dda4f8d19cbbf2c1",
+      "platformRevisions": {
+        "darwin-x64": "afeb528b794961483862436edac6b7063065d66e",
+        "win32-x64": "1db1afb48b606e5a92057386dda4f8d19cbbf2c1",
+        "win32-arm64": "afeb528b794961483862436edac6b7063065d66e"
+      }
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
@@ -38,6 +43,10 @@
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
       "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
+    },
+    "bossfang": {
+      "repository": "GQAdonis/librefang",
+      "revision": "e60d5a7321ada0c4f544eb21ca87067c68153e53"
     }
   },
   "tools": [
@@ -316,9 +325,9 @@
       "version": "1.0.0",
       "packages": {
         "win32-x64": {
-          "source": "afeb528b794961483862436edac6b7063065d66e",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-p1.25/uar-sidecar-win32-x64.tar.gz",
-          "sha256": "3b18344a6ff5a472238391747721196fb46b91746ef119ae45534a0f0d8c8e1c",
+          "source": "1db1afb48b606e5a92057386dda4f8d19cbbf2c1",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-afc-c10-1db1afb4-20261004/uar-sidecar-win32-x64.tar.gz",
+          "sha256": "3a1a87acaef2c4fafff284be240fb21af8696034fa12608ff818a67f4eb738d8",
           "archive": "tar.gz",
           "binaries": [
             "crc_fast-c45996daf34d96b5.dll",
@@ -338,9 +347,9 @@
           ]
         },
         "darwin-arm64": {
-          "source": "afeb528b794961483862436edac6b7063065d66e",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-p1.25/uar-sidecar-darwin-arm64.tar.gz",
-          "sha256": "be5b09de06df9fc52db1e9e45ad620a85a404160656f70682361b661d70e21bc",
+          "source": "1db1afb48b606e5a92057386dda4f8d19cbbf2c1",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-afc-c10-1db1afb4-20261004/uar-sidecar-darwin-arm64.tar.gz",
+          "sha256": "8399aee9d22aebe91c44f7f5d0e70cceb63b05ca059564c00c1c75b0f9d032ae",
           "archive": "tar.gz",
           "binaries": [
             "libcrc_fast-c9544bfaf069c5bc.dylib",
@@ -402,6 +411,44 @@
             "uar-sidecar",
             "payload-manifest.json"
           ]
+        }
+      }
+    },
+    {
+      "name": "bossfang",
+      "version": "2026.9.19+e60d5a732",
+      "packages": {
+        "darwin-arm64": {
+          "source": "e60d5a7321ada0c4f544eb21ca87067c68153e53",
+          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-e60d5a732/bossfang-darwin-arm64",
+          "sha256": "64e6e54a638a0e10015972a85cc4e0f6df6b57ee6fb397ddfde8429f965d9eeb",
+          "size": 158556496,
+          "archive": "none",
+          "binaries": [
+            "bossfang"
+          ],
+          "dashboard": {
+            "basePath": "/dashboard/",
+            "embedded": true,
+            "assetCount": 280,
+            "sourceAssetsSha256": "f8fc7404e1c4219f4646c74f702877dceec7f93f78f6ff9685e508c5a30f77e4"
+          }
+        },
+        "win32-x64": {
+          "source": "e60d5a7321ada0c4f544eb21ca87067c68153e53",
+          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-e60d5a732/bossfang-win32-x64.exe",
+          "sha256": "2638e88e346fbaf2f501c285c5244ddd3ee9ad1c6171e79df7743252b2ed34cb",
+          "size": 184983040,
+          "archive": "none",
+          "binaries": [
+            "bossfang.exe"
+          ],
+          "dashboard": {
+            "basePath": "/dashboard/",
+            "embedded": true,
+            "assetCount": 280,
+            "sourceAssetsSha256": "2d235010c203121b2f201b25e2042a8433ec7430d892e84e6b43ff0f4ff0004a"
+          }
         }
       }
     }

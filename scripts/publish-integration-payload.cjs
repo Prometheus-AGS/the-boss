@@ -46,6 +46,22 @@ for (const name of Object.keys(pins.tools)) {
   }
 }
 tools.set('node', JSON.parse(fs.readFileSync(path.join(root, 'build/node-artifacts.json'))))
+const pinnedIntegration = JSON.parse(fs.readFileSync(path.join(root, 'build/integration-artifacts.json')))
+const pinnedBossfang = pinnedIntegration.tools.find((tool) => tool.name === 'bossfang')
+if (
+  pinnedIntegration.sources.bossfang?.revision !== pins.sources.bossfang?.revision ||
+  !pinnedBossfang ||
+  Object.entries(pinnedBossfang.packages).some(
+    ([platform, artifact]) =>
+      !['darwin-arm64', 'win32-x64'].includes(platform) ||
+      artifact.source !== pins.sources.bossfang.revision ||
+      !/^https:\/\/github\.com\/GQAdonis\/librefang\/releases\/download\//.test(artifact.url) ||
+      !/^[a-f0-9]{64}$/.test(artifact.sha256)
+  )
+) {
+  throw new Error('Pinned BossFang payload does not match the selected source revision')
+}
+tools.set('bossfang', pinnedBossfang)
 const images = {
   surrealdb: 'surrealdb/surrealdb:v3.3.0@sha256:681c6c22c287421b5c7d99e0fde79b6e0d32c36c1ddeaab2762a1661cb04cd20'
 }
