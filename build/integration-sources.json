@@ -20,11 +20,16 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "f6b765c4d80fb872f932250a19f2752bbcdeb4bd"
+      "revision": "bf2c1eea265d3c206c186c7dbaf663f8954e9b17"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "c906c24fb8114f1a3b55dc83a12feec542ae8b8d"
+      "revision": "1db1afb48b606e5a92057386dda4f8d19cbbf2c1",
+      "platformRevisions": {
+        "darwin-x64": "afeb528b794961483862436edac6b7063065d66e",
+        "win32-x64": "afeb528b794961483862436edac6b7063065d66e",
+        "win32-arm64": "afeb528b794961483862436edac6b7063065d66e"
+      }
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
@@ -32,11 +37,11 @@
     },
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
-      "revision": "0617979022aea621dd13541dee07ad84ffcf7d21"
+      "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
     },
     "bossfang": {
       "repository": "GQAdonis/librefang",
-      "revision": "2d7167f49a24de95cf5028606f54a951df0fdcc7"
+      "revision": "e60d5a7321ada0c4f544eb21ca87067c68153e53"
     }
   },
   "tools": {

@@ -25,11 +25,15 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "f6b765c4d80fb872f932250a19f2752bbcdeb4bd"
+      "revision": "bf2c1eea265d3c206c186c7dbaf663f8954e9b17"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "afeb528b794961483862436edac6b7063065d66e"
+      "revision": "1db1afb48b606e5a92057386dda4f8d19cbbf2c1",
+      "platformRevisions": {
+        "darwin-x64": "afeb528b794961483862436edac6b7063065d66e",
+        "win32-arm64": "afeb528b794961483862436edac6b7063065d66e"
+      }
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
@@ -37,7 +41,7 @@
     },
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
-      "revision": "0617979022aea621dd13541dee07ad84ffcf7d21"
+      "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
     },
     "bossfang": {
       "repository": "GQAdonis/librefang",
@@ -342,9 +346,9 @@
           ]
         },
         "darwin-arm64": {
-          "source": "afeb528b794961483862436edac6b7063065d66e",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-p1.25/uar-sidecar-darwin-arm64.tar.gz",
-          "sha256": "be5b09de06df9fc52db1e9e45ad620a85a404160656f70682361b661d70e21bc",
+          "source": "1db1afb48b606e5a92057386dda4f8d19cbbf2c1",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-afc-c10-1db1afb4-20261004/uar-sidecar-darwin-arm64.tar.gz",
+          "sha256": "8399aee9d22aebe91c44f7f5d0e70cceb63b05ca059564c00c1c75b0f9d032ae",
           "archive": "tar.gz",
           "binaries": [
             "libcrc_fast-c9544bfaf069c5bc.dylib",
