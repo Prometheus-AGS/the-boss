@@ -27,7 +27,7 @@
       "revision": "1db1afb48b606e5a92057386dda4f8d19cbbf2c1",
       "platformRevisions": {
         "darwin-x64": "afeb528b794961483862436edac6b7063065d66e",
-        "win32-x64": "afeb528b794961483862436edac6b7063065d66e",
+        "win32-x64": "1db1afb48b606e5a92057386dda4f8d19cbbf2c1",
         "win32-arm64": "afeb528b794961483862436edac6b7063065d66e"
       }
     },
