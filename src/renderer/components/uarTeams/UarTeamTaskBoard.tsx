@@ -77,14 +77,26 @@ export function UarTeamTaskBoard({ workspaceId, instance, ownership, onChanged }
                   {uarTeamError(task.stateReason, (key) => tr('execution.' + key))}
                 </p>
               )}
-              <p className="mt-2 text-xs text-muted-foreground">
-                {tr('dependencies')}:{' '}
-                {task.dependsOn.length
-                  ? task.dependsOn
-                      .map((id) => instance.tasks.find((candidate) => candidate.id === id)?.title ?? id)
-                      .join(', ')
-                  : tr('none')}
-              </p>
+              <div className="mt-2 text-xs">
+                <p className="text-muted-foreground">{tr('dependencies')}:</p>
+                {task.dependsOn.length === 0 ? (
+                  <p className="mt-1 text-muted-foreground">{tr('none')}</p>
+                ) : (
+                  <ul className="mt-1 flex flex-wrap gap-1.5" aria-label={tr('dependencies')}>
+                    {task.dependsOn.map((id) => {
+                      const dependency = instance.tasks.find((candidate) => candidate.id === id)
+                      return (
+                        <li
+                          key={id}
+                          className="flex min-w-0 items-center gap-1 rounded-md border border-border px-2 py-1">
+                          <span className="min-w-0 break-words">{dependency?.title ?? id}</span>
+                          {dependency && <Badge variant="outline">{tr(`taskStatus.${dependency.status}`)}</Badge>}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </div>
               <details className="mt-3 border-t border-border-subtle pt-2 text-xs">
                 <summary className="cursor-pointer font-medium focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
                   {tr('taskDetails')}

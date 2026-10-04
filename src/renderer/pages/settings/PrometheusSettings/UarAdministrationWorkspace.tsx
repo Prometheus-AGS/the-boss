@@ -24,6 +24,7 @@ import { UarApprovalLifecyclePanel } from './UarApprovalLifecyclePanel'
 import { UarCompilerPanel } from './UarCompilerPanel'
 import { UarDurableInstancesPanel } from './UarDurableInstancesPanel'
 import { UarInstancesPanel } from './UarInstancesPanel'
+import { UarLifecyclePanel } from './UarLifecyclePanel'
 import { UarObserversPanel } from './UarObserversPanel'
 import { UarOperationalPanel } from './UarOperationalPanel'
 import { UarPresentationsPanel } from './UarPresentationsPanel'
@@ -40,6 +41,7 @@ type NavigationSurface = Pick<SurfaceProjection, 'id' | 'group'> & {
 }
 const EMPTY_SURFACES: UarAdministrationSnapshot['surfaces'] = []
 const BOSS_DURABLE_SURFACES: NavigationSurface[] = [
+  { id: 'lifecycle', group: 'agents' },
   { id: 'teams', group: 'agents' },
   { id: 'durable-agent-instances', group: 'agents' },
   { id: 'local-scoped-observers', group: 'agents' }
@@ -315,7 +317,7 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
             <UarPresentationsPanel />
           ) : selectedId === 'approvals' ? (
             <UarApprovalLifecyclePanel />
-          ) : ['teams', 'durable-agent-instances', 'local-scoped-observers'].includes(selectedId) ? (
+          ) : ['lifecycle', 'teams', 'durable-agent-instances', 'local-scoped-observers'].includes(selectedId) ? (
             <div id={getSettingDomId('/settings/uar', selectedId)} className="scroll-mt-6">
               <SettingGroup className="mb-4">
                 <SettingTitle>{navText(t, 'durable.workspaceTitle')}</SettingTitle>
@@ -353,7 +355,13 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
                 )}
               </SettingGroup>
               {selectedWorkspaceId &&
-                (selectedId === 'teams' ? (
+                (selectedId === 'lifecycle' ? (
+                  <UarLifecyclePanel
+                    key={selectedWorkspaceId}
+                    workspaceId={selectedWorkspaceId}
+                    onNavigate={selectSurface}
+                  />
+                ) : selectedId === 'teams' ? (
                   <UarTeamsPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
                 ) : selectedId === 'durable-agent-instances' ? (
                   <UarDurableInstancesPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
