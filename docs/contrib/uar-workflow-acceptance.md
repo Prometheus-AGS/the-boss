@@ -1,3 +1,11 @@
+---
+description: Merged UAR workflow source and the installed-app acceptance still required
+sources:
+  - build/integration-sources.json
+  - build/integration-artifacts.json
+  - build/local-uar-source.json
+---
+
 # UAR workflow consumption and pending acceptance
 
 UAR PR [#344](https://github.com/Prometheus-AGS/universal-agent-runtime/pull/344) was merged into `main` as `bb6ea8ba10378732db5647c6957ba88788626ff9` on 2026-10-04. The Boss release payload should use native sidecar archives built from that exact commit on each supported Mac and Windows architecture. Do not substitute the earlier `c906c24f` or pre-merge `1db1afb4` archives for this pin.
