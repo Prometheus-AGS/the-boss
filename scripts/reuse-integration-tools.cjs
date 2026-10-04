@@ -28,9 +28,12 @@ function originalPins(runId) {
 for (const run of process.env.NATIVE_RUNS.split(',').map((value) => value.trim())) {
   if (!/^\d+$/.test(run)) throw new Error('Native payload reuse requires GitHub run IDs')
   // A failed run can still contain successful tools; publication checks the complete set.
-  execFileSync('gh', ['run', 'watch', run, '--repo', process.env.GITHUB_REPOSITORY, '--interval', '30'], {
-    stdio: 'inherit'
-  })
+  const sourceRun = JSON.parse(
+    execFileSync('gh', ['api', `repos/${process.env.GITHUB_REPOSITORY}/actions/runs/${run}`], {
+      encoding: 'utf8'
+    })
+  )
+  if (sourceRun.status !== 'completed') throw new Error(`Native payload run ${run} is not complete`)
   const directory = path.resolve('build/reused-native', run)
   execFileSync(
     'gh',
