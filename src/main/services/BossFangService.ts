@@ -4,8 +4,8 @@ import fs from 'node:fs/promises'
 import { createServer } from 'node:net'
 import path from 'node:path'
 
-import { safeStorage } from 'electron'
 import { Mutex } from 'async-mutex'
+import { safeStorage } from 'electron'
 
 import { application } from '@application'
 import { loggerService } from '@logger'
@@ -17,7 +17,7 @@ import { redactSecretText } from '@shared/utils/redaction'
 
 const logger = loggerService.withContext('BossFangService')
 const HOST = '127.0.0.1'
-const START_TIMEOUT_MS = 30_000
+const START_TIMEOUT_MS = 120_000
 
 type Credentials = { username: string; password: string }
 type Status = 'stopped' | 'starting' | 'running' | 'error'
@@ -68,7 +68,8 @@ export class BossFangService extends BaseService {
   }
 
   async start(): Promise<
-    { success: true; url: string } | { success: false; reason: 'not_installed' | 'credentials_required' | 'startup_failed'; message: string }
+    | { success: true; url: string }
+    | { success: false; reason: 'not_installed' | 'credentials_required' | 'startup_failed'; message: string }
   > {
     return this.mutex.runExclusive(async () => {
       if (this.child && this.status === 'running' && this.url) return { success: true, url: this.url }
@@ -98,11 +99,12 @@ export class BossFangService extends BaseService {
         const origin = `http://${HOST}:${port}`
         const directory = application.getPath('feature.agents.bossfang.data')
         await fs.mkdir(directory, { recursive: true, mode: 0o700 })
+        const dataDirectory = path.join(directory, 'data')
         const configFile = application.getPath('feature.agents.bossfang.data', 'config.toml')
         if (!existsSync(configFile)) {
           await fs.writeFile(
             configFile,
-            `home_dir = ${JSON.stringify(directory)}\napi_listen = ${JSON.stringify(`${HOST}:${port}`)}\ndashboard_user = ${JSON.stringify(credentials.username)}\n`,
+            `home_dir = ${JSON.stringify(directory)}\ndata_dir = ${JSON.stringify(dataDirectory)}\napi_listen = ${JSON.stringify(`${HOST}:${port}`)}\ndashboard_user = ${JSON.stringify(credentials.username)}\n\n[storage]\nnamespace = "librefang"\ndatabase = "main"\n\n[storage.backend]\nkind = "embedded"\npath = ${JSON.stringify(path.join(dataDirectory, 'librefang.surreal'))}\n`,
             { mode: 0o600 }
           )
         }
@@ -112,9 +114,10 @@ export class BossFangService extends BaseService {
           {
             env: {
               ...Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('LIBREFANG_'))),
-              BOSSFANG_HOME: directory,
+              LIBREFANG_HOME: directory,
               LIBREFANG_DASHBOARD_PASS: credentials.password
             },
+            cwd: directory,
             detached: !isWin,
             stdio: ['ignore', 'ignore', 'ignore'],
             windowsHide: true
@@ -187,7 +190,11 @@ export class BossFangService extends BaseService {
     if (!(await waitForProcessExit(child, 1_000))) throw new Error('BossFang did not stop')
   }
 
-  private async waitUntilReady(child: ChildProcess, origin: string, launchError: () => Error | undefined): Promise<void> {
+  private async waitUntilReady(
+    child: ChildProcess,
+    origin: string,
+    launchError: () => Error | undefined
+  ): Promise<void> {
     const deadline = Date.now() + START_TIMEOUT_MS
     let degraded = false
     while (Date.now() < deadline) {
@@ -209,7 +216,9 @@ export class BossFangService extends BaseService {
       await new Promise((resolve) => setTimeout(resolve, 250))
     }
     throw new Error(
-      degraded ? 'BossFang is listening, but its database health check failed' : 'BossFang did not start within 30 seconds'
+      degraded
+        ? 'BossFang is listening, but its database health check failed'
+        : 'BossFang did not start within 120 seconds'
     )
   }
 }

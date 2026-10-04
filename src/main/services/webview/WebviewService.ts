@@ -8,7 +8,11 @@ import { BaseService, DependsOn, Injectable, Phase, ServicePhase } from '@main/c
 import { getAppLanguage, t } from '@main/i18n'
 import type { WindowId } from '@shared/ipc/types'
 import type { WebviewAnnotation, WebviewAnnotationTarget } from '@shared/types/webviewAnnotation'
-import { getWebviewPartition, WebviewSecurityProfile } from '@shared/utils/webviewSecurity'
+import {
+  BOSSFANG_DASHBOARD_PARTITION,
+  getWebviewPartition,
+  WebviewSecurityProfile
+} from '@shared/utils/webviewSecurity'
 
 import { isSafeExternalUrl } from '../../utils/externalUrlSafety'
 import { exportAnnotationDocument } from './annotationExport'
@@ -17,7 +21,6 @@ import { AnnotationSession } from './AnnotationSession'
 const logger = loggerService.withContext('WebviewService')
 /** The one session site mini apps share; every other partition belongs to a policy this service must not touch. */
 const WEBVIEW_PARTITION = 'persist:webview'
-const BOSSFANG_PARTITION = 'persist:bossfang-dashboard'
 /** Sessions whose guests run the annotation preload: mini-app sites plus the agent browser panes. */
 const ANNOTATION_PARTITIONS = [
   WEBVIEW_PARTITION,
@@ -80,7 +83,7 @@ export class WebviewService extends BaseService {
   }
 
   private initBossFangSession() {
-    const bossfangSession = session.fromPartition(BOSSFANG_PARTITION)
+    const bossfangSession = session.fromPartition(BOSSFANG_DASHBOARD_PARTITION)
     bossfangSession.webRequest.onBeforeRequest((details, callback) => {
       const allowed = application.get('BossFangService').getDashboardOrigin()
       let permit = false

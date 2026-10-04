@@ -5,7 +5,7 @@ import { redactSecretText } from '@shared/utils/redaction'
 
 export const bossFangHandlers: IpcHandlersFor<typeof bossFangRequestSchemas> = {
   'bossfang.start': () => application.get('BossFangService').start(),
-  'bossfang.status': () => application.get('BossFangService').getStatus(),
+  'bossfang.status': async () => application.get('BossFangService').getStatus(),
   'bossfang.configure_credentials': async (input) => {
     await application.get('BossFangService').configureCredentials(input)
     return { success: true }
