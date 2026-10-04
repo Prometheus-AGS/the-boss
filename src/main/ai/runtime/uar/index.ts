@@ -90,3 +90,9 @@ export {
 } from './UarExecutionOwnershipAdapter'
 
 export { readUarTeamContext, readUarTeamPeerMessages } from './UarTeamContextAdapter'
+
+export {
+  readUarChannelObservers,
+  actOnUarChannelObserver,
+  readUarChannelDeliveries
+} from './uarChannelObserverAdministration'

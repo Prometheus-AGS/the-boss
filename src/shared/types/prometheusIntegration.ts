@@ -89,6 +89,7 @@ const filesystemConfigSchema = z.object({
 export const uarStorageConfigSchema = z
   .object({
     backend: z.enum(['embedded', 'remote']).default('embedded'),
+    remoteDurabilityAttested: z.boolean().default(false),
     port: z.number().int().min(1).max(65535).default(1906),
     endpoint: uarEndpoint.default('http://127.0.0.1:28000'),
     namespace: z

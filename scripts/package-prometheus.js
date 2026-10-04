@@ -2,6 +2,9 @@ const fs = require('node:fs')
 const path = require('node:path')
 const crypto = require('node:crypto')
 const { execFileSync } = require('node:child_process')
+const { checkoutIntegrationSource } = require('./integration-source.cjs')
+const { resolveReleaseProfile } = require('./release-profile.cjs')
+const { loadLocalLiterRecord } = require('./local-liter-payload.cjs')
 
 const root = path.join(__dirname, '..')
 const source = path.join(root, 'resources', 'prometheus-skills-mini')
@@ -81,6 +84,16 @@ function copyPrometheusPayload(sourceRoot, destinationRoot) {
 
 function packagePrometheus() {
   const artifacts = JSON.parse(fs.readFileSync(path.join(root, 'build', 'integration-artifacts.json'), 'utf8'))
+  const pins = require('../build/integration-sources.json')
+  const profile = resolveReleaseProfile()
+  const platform = process.env.THE_BOSS_PACKAGE_PLATFORM || `${process.platform}-${process.arch}`
+  const localLiter = profile.localUar ? loadLocalLiterRecord(platform).record : undefined
+  if (
+    profile.uarEnabled &&
+    !profile.localUar &&
+    artifacts.imageProvenance?.['liter-llm']?.source?.revision !== pins.sources['liter-llm'].revision
+  )
+    throw new Error('Publish and import the pinned Liter managed image before public UAR packaging')
   const revision = execFileSync('git', ['-C', source, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
   const gitlink = execFileSync('git', ['ls-tree', 'HEAD', 'resources/prometheus-skills-mini'], {
     cwd: root,
@@ -93,10 +106,10 @@ function packagePrometheus() {
     throw new Error('The packaged mini revision does not match the pinned integration revision')
   fs.rmSync(destination, { recursive: true, force: true })
   copyPrometheusPayload(source, destination)
-  const literSource = path.join(source, 'tools', 'liter-llm')
+  const literSource = checkoutIntegrationSource('liter-llm')
   const literCatalogDestination = path.join(destination, 'catalogs', 'liter-llm')
   const literRevision = execFileSync('git', ['-C', literSource, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
-  if (literRevision !== artifacts.sources['liter-llm'].revision)
+  if (literRevision !== pins.sources['liter-llm'].revision)
     throw new Error('The liter-llm catalog source does not match the pinned integration revision')
   fs.mkdirSync(literCatalogDestination, { recursive: true })
   for (const [sourceName, artifactName] of [
@@ -105,7 +118,7 @@ function packagePrometheus() {
   ]) {
     const sourceFile = path.join(literSource, 'schemas', sourceName)
     const checksum = crypto.createHash('sha256').update(fs.readFileSync(sourceFile)).digest('hex')
-    if (checksum !== artifacts.catalogs['liter-llm'][artifactName])
+    if (checksum !== pins.catalogs['liter-llm'][artifactName])
       throw new Error(`The liter-llm ${artifactName} catalog checksum does not match the integration manifest`)
     fs.copyFileSync(sourceFile, path.join(literCatalogDestination, sourceName))
   }
@@ -114,10 +127,10 @@ function packagePrometheus() {
     `${JSON.stringify(
       {
         schema: 1,
-        repository: artifacts.sources['liter-llm'].repository,
+        repository: pins.sources['liter-llm'].repository,
         revision: literRevision,
-        providersSha256: artifacts.catalogs['liter-llm'].providers,
-        catalogSha256: artifacts.catalogs['liter-llm'].models
+        providersSha256: pins.catalogs['liter-llm'].providers,
+        catalogSha256: pins.catalogs['liter-llm'].models
       },
       null,
       2
@@ -180,6 +193,18 @@ function packagePrometheus() {
     tools: Object.fromEntries(artifacts.tools.map((tool) => [tool.name, tool.version])),
     sources: artifacts.sources,
     images: artifacts.images,
+    imageProvenance: artifacts.imageProvenance,
+    sourceIntent: pins.sources,
+    catalogSources: { 'liter-llm': pins.sources['liter-llm'] },
+    catalogs: pins.catalogs,
+    ...(profile.localUar
+      ? {
+          localNativePayloads: {
+            'liter-llm': localLiter,
+            'uar-sidecar': require('./local-uar-payload.cjs').inspectLocalUarRecord().record
+          }
+        }
+      : {}),
     files: inventory(destination)
   }
   fs.writeFileSync(path.join(destination, 'release-manifest.json'), JSON.stringify(manifest, null, 2) + '\n')

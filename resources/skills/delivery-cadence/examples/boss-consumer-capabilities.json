@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "boss-existing-release-consumer",
+  "owner": "boss-desktop/release",
+  "assessedAt": "2026-09-30T20:20:03.442Z",
+  "assessment": "read-only source assessment; no workflow execution or remote consumer conformance proof",
+  "source": {
+    "repository": "/Users/gqadonis/Projects/prometheus/the-boss",
+    "commit": "e2ae2ce21245030293c0bea96ed02ae853b820a7",
+    "files": [
+      {
+        "path": ".github/workflows/the-boss-release.yml",
+        "sha256": "d52f25534293bc6eb957d8b3b71416237c7c90329569a8b4affb3f97ad32f98e"
+      },
+      {
+        "path": "scripts/coordinate-release-publication.cjs",
+        "sha256": "c616a0a39e4bbce7bafb028e067039418d45d8844a53120d7e5810c893416970"
+      },
+      {
+        "path": "scripts/queue-release-publication.cjs",
+        "sha256": "2014b145bd1eecb6ea30cad8ca5c866fbbe5866782c6fceb0db0d39d538ec5c6"
+      },
+      {
+        "path": "scripts/verify-github-release.cjs",
+        "sha256": "3a6908a659d3b8b2df6470a10a3e2ca7780d57d6e8c471e549b3f694f39db42f"
+      },
+      {
+        "path": "scripts/commit-release-entry.cjs",
+        "sha256": "5311e7e69210b0fdb13fd11bf98df56b5b1aca5071049aaea07b5bfc66d5e51e"
+      }
+    ]
+  },
+  "capabilities": {
+    "immutableSourceDispatch": {
+      "supported": false,
+      "evidenceRef": ".github/workflows/the-boss-release.yml:6",
+      "reason": "Installer jobs report github.sha, but this consumer accepts no expected Cadence candidate source or manifest digest and has no Cadence request adapter. Source equality cannot be enforced from a moving ref alone."
+    },
+    "externalCorrelation": {
+      "supported": false,
+      "evidenceRef": "scripts/queue-release-publication.cjs:50",
+      "reason": "Dispatch carries tag/platform/profile/manifestAsset, not Cadence attempt/correlation ID. Source-named manifests help manual recovery but do not provide the required dispatch acknowledgement and lost-ack protocol."
+    },
+    "artifactProvenance": {
+      "supported": true,
+      "evidenceRef": "scripts/verify-github-release.cjs:42",
+      "reason": "Existing publisher compares recorded source/profile, downloaded installer byte count and SHA-256. Source-supported capability only; no artifact was downloaded in this assessment."
+    },
+    "targetSerialization": {
+      "supported": false,
+      "evidenceRef": ".github/workflows/the-boss-release.yml:47",
+      "reason": "Metadata repository_dispatch uses a shared concurrency group, but builds use ref-scoped groups and landing deployment is a separate dispatch. End-to-end target-wide fencing for competing Cadence candidates is not demonstrated."
+    },
+    "expectedPredecessorPromotion": {
+      "supported": false,
+      "evidenceRef": "scripts/commit-release-entry.cjs:17",
+      "reason": "Metadata commits use branch-head CAS, but the coordinator reloads mutable origin/default branch and only checks package version; no expected advertised candidate or website predecessor is accepted."
+    },
+    "siteReceipts": {
+      "supported": false,
+      "evidenceRef": "scripts/coordinate-release-publication.cjs:140",
+      "reason": "Coordinator reports landing dispatch completion, not deployed site identity or exact live advertised artifact links."
+    }
+  },
+  "branchVersionOwnership": {
+    "required": true,
+    "evidenceRef": "scripts/coordinate-release-publication.cjs:76",
+    "reason": "Do not promote a new release version on the publication branch while a prior version requires it; independent edits/commits in another worktree remain possible."
+  },
+  "nextAction": "Create a separately approved Boss release-consumer follow-up owned by boss-desktop/release to accept immutable candidate/source identity and correlation, enforce target and predecessor promotion, and return platform/metadata/deployed-site receipts. Keep automatic Cadence dispatch blocked until actual capability evidence exists."
+}

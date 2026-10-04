@@ -20,7 +20,7 @@ Use the canonical KBD child transition first. Then call `child enter` with:
 
 KBD mode requires a fresh canonical snapshot through `binding.canonicalCommand` or `canonical` input. Snapshot shape: `source:"prometheus-kbd-status"`, integer `revision`, current `phaseId`, and `phases` keyed by phase ID with `parentPhaseId/status`. Cadence validates ancestry; KBD remains the transition/completion authority. Supply `parentPhaseId` for a standalone root when needed; standalone/goal modes explicitly have no KBD lifecycle.
 
-For architectural work, set `requiresApproval:true` and follow the existing assess/analyze/plan/approval process. Cadence records approval evidence; it never supplies approval itself. Entry appends a scope revision rather than silently discarding parent scope.
+For architectural work, set `requiresApproval:true` and follow the existing assess/analyze/plan/approval process. Cadence records approval evidence; it never supplies approval itself. Entry appends a scope revision rather than silently discarding parent scope. Carry the entire featureOperation and its operationContractSource, candidateId and workAheadId when applicable. A child/scope split must preserve the delivery promise or record an authorized replacement and its creation task; a suite runner is not a production entrypoint. Entry does not start a second work-ahead phase.
 
 ## Return
 

@@ -2,7 +2,7 @@
 
 Keep production scope, build, launch, feature operation, publication and installed acceptance separate. Tasks, changes and phases are distinct dimensions, never a summed score. Canonical KBD owns completion; receipt references do not create certification.
 
-## Report v2
+## Report v3
 
 Reports retain gross completed IDs, reopened IDs, current net-completed IDs and carryover. Parent and attached child events share canonical identities, so a child completion repeated in its parent is counted once. Explicit completion/reopen timestamps determine current state. Ambiguous legacy order is reported as uncertain rather than silently credited. Historical child links contribute no completion or delivery credit.
 
@@ -22,6 +22,8 @@ Each recommendation records evidence, baseline, expected effect and a pending fo
 
 The finalized report summarizes delivered scope/carryover, child interruption time, repeated builds/reasons, resource and coordination observations, and one supported recommendation or insufficient-evidence statement. Configure the optional learning recorder through `learning.command`, string-array `learning.args`, and `learning.cwd`; `{report}` in an argument expands to the durable report path. The recorder emits a JSON receipt. Missing/offline recording is degraded evidence, not a failed delivery.
 
-Team concurrency caps are harness instructions, not claims of machine-wide scheduling. Native Windows/macOS execution evidence must identify the actual platform. Portable code alone cannot certify either; unavailable execution stays pending.
+Report work-ahead firstWorkAt through promotion, queue/debt age, platform/site completion and separately pending installed acceptance. Union overlapping intervals rather than adding parallel wall time. Include repeated-build causes and external-receipt adoption so saved rebuilds are distinguishable from missing operation.
+
+Team concurrency caps are harness instructions, not claims of machine-wide scheduling. Shared physical reservations coordinate cooperating local commands only. Native Windows/macOS execution evidence must identify the actual platform. Portable code alone cannot certify either; unavailable execution stays pending.
 
 Research behind the process: [DORA small batches](https://dora.dev/capabilities/working-in-small-batches/), [DORA metrics](https://dora.dev/guides/dora-metrics/), [SPACE](https://www.microsoft.com/en-us/research/publication/the-space-of-developer-productivity-theres-more-to-it-than-you-think/), and [long-running harnesses](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents). These support usable increments and durable handoffs, not per-task test loops or throughput leaderboards. Whether one or two hours performs better remains a local empirical question.

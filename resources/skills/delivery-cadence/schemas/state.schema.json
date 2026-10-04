@@ -15,14 +15,21 @@
     "successfulDeliveries",
     "reviewDue",
     "publicationDue",
-    "nextPublicationDelivery"
+    "nextPublicationDelivery",
+    "candidates",
+    "jobs",
+    "workAhead",
+    "obligations",
+    "releaseAttempts",
+    "opportunities",
+    "adoptedReceipts"
   ],
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://prometheusags.ai/schemas/delivery-cadence/state-v2.json",
-  "title": "Delivery Cadence state v2 (legacy iterations preserved)",
+  "$id": "https://prometheusags.ai/schemas/delivery-cadence/state-v3.json",
+  "title": "Delivery Cadence state v3 (historical receipts preserved)",
   "properties": {
     "schemaVersion": {
-      "const": 2
+      "const": 3
     },
     "runId": {
       "type": "string",
@@ -293,10 +300,13 @@
       ],
       "properties": {
         "from": {
-          "const": 1
+          "enum": [
+            1,
+            2
+          ]
         },
         "to": {
-          "const": 2
+          "const": 3
         },
         "backup": {
           "type": "string",
@@ -310,6 +320,48 @@
           "type": "string",
           "format": "date-time"
         }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "$ref": "pipeline-v3.schema.json#/$defs/candidates"
+      }
+    },
+    "jobs": {
+      "type": "array",
+      "items": {
+        "$ref": "pipeline-v3.schema.json#/$defs/jobs"
+      }
+    },
+    "workAhead": {
+      "type": "array",
+      "items": {
+        "$ref": "pipeline-v3.schema.json#/$defs/workAhead"
+      }
+    },
+    "obligations": {
+      "type": "array",
+      "items": {
+        "$ref": "pipeline-v3.schema.json#/$defs/obligations"
+      }
+    },
+    "releaseAttempts": {
+      "type": "array",
+      "items": {
+        "$ref": "pipeline-v3.schema.json#/$defs/releaseAttempts"
+      }
+    },
+    "opportunities": {
+      "type": "array",
+      "items": {
+        "$ref": "pipeline-v3.schema.json#/$defs/opportunities"
+      }
+    },
+    "adoptedReceipts": {
+      "type": "array",
+      "items": {
+        "$ref": "pipeline-v3.schema.json#/$defs/adoptedReceipts"
       }
     }
   },
@@ -894,7 +946,8 @@
         "contractVersion": {
           "enum": [
             1,
-            2
+            2,
+            3
           ]
         },
         "phaseId": {
@@ -1070,6 +1123,9 @@
             "status",
             "reportPath"
           ]
+        },
+        "candidateId": {
+          "type": "string"
         }
       },
       "allOf": [
