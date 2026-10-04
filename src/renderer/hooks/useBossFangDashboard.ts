@@ -18,7 +18,12 @@ export function useBossFangDashboard() {
     try {
       const result = await ipcApi.request('bossfang.start')
       if (!result.success) {
-        const key = result.reason === 'credentials_required' ? 'bossfang.credentialsRequired' : 'bossfang.startFailed'
+        const key =
+          result.reason === 'credentials_required'
+            ? 'bossfang.credentialsRequired'
+            : result.reason === 'external_unavailable'
+              ? 'bossfang.externalUnavailable'
+              : 'bossfang.startFailed'
         toast.error(t(key, { detail: result.message }))
         return false
       }

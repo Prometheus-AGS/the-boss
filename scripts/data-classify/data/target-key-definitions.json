@@ -395,6 +395,20 @@
       "description": "OpenClaw gateway port"
     },
     {
+      "targetKey": "feature.bossfang.ownership",
+      "type": "PreferenceTypes.BossFangOwnership",
+      "defaultValue": "managed",
+      "status": "classified",
+      "description": "Whether The Boss manages BossFang or connects to an externally owned service"
+    },
+    {
+      "targetKey": "feature.bossfang.external_endpoint",
+      "type": "string",
+      "defaultValue": "",
+      "status": "classified",
+      "description": "Credential-free URL for an externally managed BossFang dashboard"
+    },
+    {
       "targetKey": "feature.openclaw.selected_model_id",
       "type": "string",
       "defaultValue": null,

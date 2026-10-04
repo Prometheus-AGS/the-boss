@@ -10,6 +10,10 @@ export const bossFangHandlers: IpcHandlersFor<typeof bossFangRequestSchemas> = {
     await application.get('BossFangService').configureCredentials(input)
     return { success: true }
   },
+  'bossfang.configure_external_endpoint': async ({ endpoint }) => {
+    await application.get('BossFangService').configureExternalEndpoint(endpoint)
+    return { success: true }
+  },
   'bossfang.stop': async () => {
     try {
       await application.get('BossFangService').stop()

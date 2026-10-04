@@ -33,6 +33,7 @@ export type PreferenceShortcutType = {
 
 /** Global menu presentation mode: native system menus or Cherry custom menus. */
 export type MenuPresentationMode = 'native' | 'cherry'
+export type BossFangOwnership = 'managed' | 'external'
 
 export type OnboardingProviderSetupStatus = 'pending' | 'completed' | 'skipped'
 

@@ -21,6 +21,24 @@ const START_TIMEOUT_MS = 120_000
 
 type Credentials = { username: string; password: string }
 type Status = 'stopped' | 'starting' | 'running' | 'error'
+type Ownership = 'managed' | 'external'
+
+function externalDashboardUrl(value: string): string {
+  const endpoint = new URL(value.trim())
+  const local = ['localhost', '127.0.0.1', '[::1]'].includes(endpoint.hostname)
+  if (
+    !local ||
+    !['http:', 'https:'].includes(endpoint.protocol) ||
+    endpoint.username ||
+    endpoint.password ||
+    endpoint.search ||
+    endpoint.hash ||
+    !['', '/', '/dashboard', '/dashboard/'].includes(endpoint.pathname)
+  ) {
+    throw new Error('Use a loopback HTTP or HTTPS address without credentials, query, or fragment')
+  }
+  return `${endpoint.origin}/dashboard/`
+}
 
 @Injectable('BossFangService')
 @ServicePhase(Phase.WhenReady)
@@ -31,23 +49,53 @@ export class BossFangService extends BaseService {
   private url: string | undefined
 
   protected async onStop(): Promise<void> {
-    await this.stop()
+    await this.mutex.runExclusive(async () => {
+      await this.stopOwnedProcess()
+      this.status = 'stopped'
+      this.url = undefined
+    })
   }
 
-  getStatus(): { status: Status; configured: boolean; url?: string } {
-    return {
-      status: this.status,
-      configured: existsSync(application.getPath('feature.agents.bossfang.data', 'credentials.enc')),
-      ...(this.url ? { url: this.url } : {})
-    }
+  async getStatus(): Promise<{ status: Status; ownership: Ownership; configured: boolean; url?: string }> {
+    return this.mutex.runExclusive(async () => {
+      const ownership = this.getOwnership()
+      if (ownership === 'external') {
+        await this.stopOwnedProcess()
+        await this.refreshExternalStatus()
+      } else if (!this.child) {
+        this.status = 'stopped'
+        this.url = undefined
+      }
+      const configured =
+        ownership === 'external'
+          ? Boolean(application.get('PreferenceService').get('feature.bossfang.external_endpoint').trim())
+          : existsSync(application.getPath('feature.agents.bossfang.data', 'credentials.enc'))
+      return {
+        status: this.status,
+        ownership,
+        configured,
+        ...(this.url ? { url: this.url } : {})
+      }
+    })
   }
 
   getDashboardOrigin(): string | undefined {
-    return this.status === 'running' && this.url ? new URL(this.url).origin : undefined
+    if (this.status !== 'running' || !this.url) return undefined
+    if (this.getOwnership() === 'managed') return this.child ? new URL(this.url).origin : undefined
+    try {
+      return this.url ===
+        externalDashboardUrl(application.get('PreferenceService').get('feature.bossfang.external_endpoint'))
+        ? new URL(this.url).origin
+        : undefined
+    } catch {
+      return undefined
+    }
   }
 
   async configureCredentials(credentials: Credentials): Promise<void> {
     await this.mutex.runExclusive(async () => {
+      if (this.getOwnership() === 'external')
+        throw new Error('External BossFang credentials belong in its own dashboard')
       const directory = application.getPath('feature.agents.bossfang.data')
       const target = application.getPath('feature.agents.bossfang.data', 'credentials.enc')
       if (existsSync(target)) {
@@ -67,11 +115,40 @@ export class BossFangService extends BaseService {
     })
   }
 
+  async configureExternalEndpoint(endpoint: string): Promise<void> {
+    const normalized = endpoint.trim() ? new URL(externalDashboardUrl(endpoint)).origin : ''
+    await application.get('PreferenceService').set('feature.bossfang.external_endpoint', normalized)
+  }
+
   async start(): Promise<
     | { success: true; url: string }
-    | { success: false; reason: 'not_installed' | 'credentials_required' | 'startup_failed'; message: string }
+    | {
+        success: false
+        reason: 'not_installed' | 'credentials_required' | 'startup_failed' | 'external_unavailable'
+        message: string
+      }
   > {
     return this.mutex.runExclusive(async () => {
+      if (this.getOwnership() === 'external') {
+        await this.stopOwnedProcess()
+        try {
+          const endpoint = application.get('PreferenceService').get('feature.bossfang.external_endpoint')
+          if (!endpoint.trim()) throw new Error('Set an external BossFang endpoint in Settings')
+          const url = externalDashboardUrl(endpoint)
+          await this.checkHealth(new URL(url).origin)
+          this.url = url
+          this.status = 'running'
+          return { success: true, url }
+        } catch (error) {
+          this.status = 'error'
+          this.url = undefined
+          return {
+            success: false,
+            reason: 'external_unavailable',
+            message: redactSecretText(error instanceof Error ? error.message : String(error)).slice(0, 500)
+          }
+        }
+      }
       if (this.child && this.status === 'running' && this.url) return { success: true, url: this.url }
       const binary = toAsarUnpackedPath(
         path.join(
@@ -155,6 +232,7 @@ export class BossFangService extends BaseService {
 
   async stop(): Promise<void> {
     await this.mutex.runExclusive(async () => {
+      if (this.getOwnership() === 'external') throw new Error('External BossFang is managed outside The Boss')
       await this.stopOwnedProcess()
       this.status = 'stopped'
       this.url = undefined
@@ -177,6 +255,37 @@ export class BossFangService extends BaseService {
       throw new Error('Stored BossFang credentials are invalid; enter them again in Settings')
     }
     return value as Credentials
+  }
+
+  private getOwnership(): Ownership {
+    return application.get('PreferenceService').get('feature.bossfang.ownership')
+  }
+
+  private async checkHealth(origin: string): Promise<void> {
+    const response = await fetch(`${origin}/api/health`, { redirect: 'error', signal: AbortSignal.timeout(3_000) })
+    if (!response.ok) throw new Error(`BossFang health request failed (HTTP ${response.status})`)
+    const health: unknown = await response.json()
+    if (!health || typeof health !== 'object' || !('status' in health) || health.status !== 'ok') {
+      throw new Error('BossFang is listening but its database is not operational')
+    }
+  }
+
+  private async refreshExternalStatus(): Promise<void> {
+    const endpoint = application.get('PreferenceService').get('feature.bossfang.external_endpoint')
+    try {
+      if (!endpoint.trim()) {
+        this.status = 'stopped'
+        this.url = undefined
+        return
+      }
+      const url = externalDashboardUrl(endpoint)
+      await this.checkHealth(new URL(url).origin)
+      this.url = url
+      this.status = 'running'
+    } catch {
+      this.url = undefined
+      this.status = 'error'
+    }
   }
 
   private async stopOwnedProcess(): Promise<void> {
