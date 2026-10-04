@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { createHash, randomUUID } from 'node:crypto';
 import { createGzip } from 'node:zlib';
-import { Readable } from 'node:stream';
+import { Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { createInterface } from 'node:readline';
 
@@ -217,20 +217,27 @@ async function rotate(root, state) {
   const firstSeq = (previous?.lastSeq ?? 0) + 1;
   const directory = path.join(root, 'archives'); await fs.mkdir(directory, { recursive: true });
   const temporary = path.join(directory, `${randomUUID()}.tmp`);
-  let expected = firstSeq, lastState = null;
-  const source = createInterface({ input: createReadStream(file, { encoding: 'utf8' }), crlfDelay: Infinity });
-  async function* validatedLines() {
-    for await (const line of source) {
-      if (!line) continue;
-      const event = JSON.parse(line);
-      if (event.seq !== expected || event.state?.eventsSeq !== expected) throw new Error(`Cadence event sequence broken at ${expected}`);
-      expected++; lastState = event.state;
-      yield `${line}\n`;
-    }
-  }
+  let expected = firstSeq, prefix = '';
+  const sequenceScan = new Transform({
+    transform(chunk, _encoding, callback) {
+      try {
+        for (let offset = 0; offset < chunk.length;) {
+          const newline = chunk.indexOf(10, offset);
+          const end = newline < 0 ? chunk.length : newline;
+          if (prefix.length < 256) prefix += chunk.subarray(offset, Math.min(end, offset + 256 - prefix.length)).toString('utf8');
+          if (newline < 0) break;
+          const match = prefix.match(/^\{"schemaVersion":1,"id":"[^"]+","seq":(\d+),/);
+          if (!match || Number(match[1]) !== expected) throw new Error(`Cadence event sequence broken at ${expected}`);
+          expected++; prefix = ''; offset = newline + 1;
+        }
+        callback(null, chunk);
+      } catch (error) { callback(error); }
+    },
+    flush(callback) { callback(prefix ? new Error('Cadence event journal ends with an incomplete line') : null); }
+  });
   try {
-    await pipeline(Readable.from(validatedLines()), createGzip({ level: 6 }), createWriteStream(temporary, { flags: 'wx', mode: 0o600 }));
-    if (expected - 1 !== state.eventsSeq || digest(lastState) !== digest(activeLast.state)) throw new Error('Cadence archive does not match the current event');
+    await pipeline(createReadStream(file), sequenceScan, createGzip({ level: 6 }), createWriteStream(temporary, { flags: 'wx', mode: 0o600 }));
+    if (expected - 1 !== state.eventsSeq) throw new Error('Cadence archive does not match the current event');
     const staged = await fs.open(temporary, 'r');
     try { await staged.sync(); } finally { await staged.close(); }
     const hash = createHash('sha256');
