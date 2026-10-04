@@ -16,11 +16,11 @@
     },
     "pk": {
       "repository": "Prometheus-AGS/prometheus-knowledge-rs",
-      "revision": "abb6745e31da7577611d7c32005af26a72254484"
+      "revision": "4b3a6744a4211512ff88a1cb96cf1e2a7db4c3ef"
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "0b098c99012a1791e9e4c5d2a9f548a37874a647"
+      "revision": "4ba9581cf013d28f4e70e08db9382a4dfad8cb1c"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
@@ -28,7 +28,7 @@
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
-      "revision": "6acb60565949334beda22f52bcd36b33895b1db6"
+      "revision": "0af8ae1f3c7486bf7128beff8ef83aaf1a832ea6"
     },
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
@@ -56,7 +56,7 @@
     "pk": {
       "source": "pk",
       "package": "pk-cli",
-      "version": "1.9.0"
+      "version": "1.11.0"
     },
     "uar-sidecar": {
       "source": "uar",
