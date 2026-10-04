@@ -412,7 +412,40 @@
     {
       "name": "bossfang",
       "version": "2026.9.19+2d7167f49",
-      "packages": {}
+      "packages": {
+        "darwin-arm64": {
+          "source": "2d7167f49a24de95cf5028606f54a951df0fdcc7",
+          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-2d7167f49/bossfang-darwin-arm64",
+          "sha256": "c3ceac83d185c6b5dcb5e013b5afd35ef9e97b62087fbca7de249afe11cf4d99",
+          "size": 158556496,
+          "archive": "none",
+          "binaries": [
+            "bossfang"
+          ],
+          "dashboard": {
+            "basePath": "/dashboard/",
+            "embedded": true,
+            "assetCount": 280,
+            "sourceAssetsSha256": "f8fc7404e1c4219f4646c74f702877dceec7f93f78f6ff9685e508c5a30f77e4"
+          }
+        },
+        "win32-x64": {
+          "source": "2d7167f49a24de95cf5028606f54a951df0fdcc7",
+          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-2d7167f49/bossfang-win32-x64.exe",
+          "sha256": "2bc449f2f4151f7dd3084a6a46d653523ae0ce153c662606b306b1dd22456880",
+          "size": 184983040,
+          "archive": "none",
+          "binaries": [
+            "bossfang.exe"
+          ],
+          "dashboard": {
+            "basePath": "/dashboard/",
+            "embedded": true,
+            "assetCount": 280,
+            "sourceAssetsSha256": "2d235010c203121b2f201b25e2042a8433ec7430d892e84e6b43ff0f4ff0004a"
+          }
+        }
+      }
     }
   ],
   "images": {
