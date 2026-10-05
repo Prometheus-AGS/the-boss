@@ -182,3 +182,16 @@ distributed authorization service. See [task and handoff contracts](references/t
 for revision/lock recovery and [models and memory](references/models-memory.md)
 for optional shared services and Karpathy boundaries. Existing KBD state stays
 authoritative; never hand-edit its generated projections.
+
+## Progress Signals
+
+Emit to plain response text (no tool call) before any other action and after the last step:
+
+```
+Starting agent-team-creator — <team-id>
+Starting task <i> out of <n>: <guide|validate|init|export <target>|install-project <target>>
+Completed task <i> out of <n>: <same step>
+Completed agent-team-creator — <team-id> (<roles> roles, <targets> native targets)
+```
+
+Take the task total from the steps you will actually run (one export or install per target). Report export as staged, never as live execution.

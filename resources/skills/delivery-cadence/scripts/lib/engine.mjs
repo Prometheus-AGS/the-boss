@@ -42,7 +42,10 @@ function admission(state, correction) {
   if (state.activeIterationId) fail('Finish or repair the current iteration before starting another');
   const reason = budgetReason(state); if (reason) fail(reason);
   const last = state.iterations.at(-1);
-  if (last && last.workOutcome !== 'success') fail('Repair the previous failed delivery with ready before admitting new work');
+  if (correction && (last?.id !== correction.iterationId || last.workOutcome !== 'failed' || last.failureResolution))
+    fail('Corrective scope must address the immediately preceding unresolved failed delivery');
+  if (last && last.workOutcome !== 'success' && !(last.workOutcome === 'failed' && (correction || last.failureResolution?.disposition === 'retired')))
+    fail('Repair or explicitly retire the previous failed delivery before admitting new work');
   if (last?.hookBlocked) fail('Required hook failed; reconcile or retry it and resume before new work');
   if (state.reviewDue) fail('Human review is due; record review acknowledgement before new work');
   const capacity=publicationAdmission(state);
@@ -77,6 +80,25 @@ async function execute(root, state, command, input, args) {
       return result;
     }
     case 'history': return linkHistorical(state, input);
+    case 'failure': {
+      if ((args._?.[1] ?? input.action) !== 'resolve') fail('Use failure resolve with an explicit evidence-linked disposition');
+      if (state.activeIterationId) fail('Finalize the failed iteration before resolving it');
+      const iteration = state.iterations.at(-1);
+      if (!iteration || iteration.id !== input.iterationId || iteration.workOutcome !== 'failed' || iteration.status !== 'finished')
+        fail('Only the immediately preceding finalized failed iteration may be retired');
+      if (iteration.failureResolution) fail('This failed iteration already has a disposition');
+      if (iteration.hookBlocked) fail('Reconcile required hooks before retiring the failed iteration');
+      if (input.disposition !== 'retired' || typeof input.reason !== 'string' || !input.reason.trim()
+        || typeof input.authorityRef !== 'string' || !input.authorityRef.trim())
+        fail('Retirement requires disposition:retired, a reason, and an authorityRef');
+      const evidence = await evidenceFile(input.evidencePath);
+      iteration.failureResolution = {
+        disposition: 'retired', reason: input.reason.trim(), authorityRef: input.authorityRef.trim(),
+        evidence: { path: evidence.path, sha256: evidence.sha256 }, recordedAt: now(), countedAsDelivery: false
+      };
+      return { iterationId: iteration.id, workOutcome: iteration.workOutcome, failureResolution: iteration.failureResolution,
+        publicationDue: state.publicationDue };
+    }
     case 'child': return handleChild(state, current(state, input.iterationId), args._?.[1] ?? input.action, input);
     case 'activity': return handleActivity(current(state, input.iterationId), args._?.[1] ?? input.action, input);
     case 'configure': {
@@ -122,6 +144,7 @@ async function execute(root, state, command, input, args) {
       if (input.iterationId && state.activeIterationId && input.iterationId !== state.activeIterationId) fail('Finish the active iteration before repairing another');
       let iteration = state.activeIterationId ? current(state, input.iterationId) : state.iterations.at(-1);
       if (!iteration || iteration.workOutcome === 'success') fail('Start a new iteration before ready');
+      if (iteration.failureResolution) fail('A retired delivery cannot be repaired; start a new iteration');
       if ((state.jobs ?? []).some(j => j.iterationId === iteration.id && ['claimed','launching','running','cancelRequested','unknown'].includes(j.state))) fail('Reconcile the active or uncertain process before changing its frozen inputs');
       if (state.profile.mode === 'kbd') await reconcileChildren(state, iteration, input);
       assertChildrenResolved(iteration);
