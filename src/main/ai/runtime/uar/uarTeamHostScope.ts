@@ -34,10 +34,14 @@ export async function resolveTeamHostScope(team: UarTeamInstance, generation: nu
     throw new Error('TEAM_SCOPE_DENIED')
   z.object({
     required: z.literal(true),
-    version: z.literal(1),
-    workspacePath: z.literal(directory),
-    servers: z.tuple([z.literal('filesystem')]),
-    tools: z.tuple([])
+    value: z
+      .object({
+        version: z.literal(1),
+        workspacePath: z.literal(directory),
+        servers: z.tuple([z.literal('filesystem')]),
+        tools: z.tuple([])
+      })
+      .strict()
   })
     .strict()
     .parse((binding.document.extensions as Record<string, unknown> | undefined)?.[UAR_TEAM_HOST_EXTENSION])

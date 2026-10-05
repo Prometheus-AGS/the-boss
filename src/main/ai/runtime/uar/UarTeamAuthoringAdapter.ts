@@ -173,10 +173,12 @@ export async function deployUarAuthoredTeam(input: {
     extensions: {
       [UAR_TEAM_HOST_EXTENSION]: {
         required: true,
-        version: 1,
-        workspacePath: directory,
-        servers: ['filesystem'],
-        tools: []
+        value: {
+          version: 1,
+          workspacePath: directory,
+          servers: ['filesystem'],
+          tools: []
+        }
       }
     }
   })

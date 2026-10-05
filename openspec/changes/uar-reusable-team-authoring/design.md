@@ -8,4 +8,6 @@ Deployment uses the current UAR capabilities, package preflight/install, and bin
 
 Security boundary: authoring text and selected skills are untrusted data; only the existing trusted host and UAR binding/approval boundary may activate tools or credentials. Editing does not change an active run's pinned definition or silently rebind an installed workspace.
 
+The host-workspace extension follows the pinned draft.2 common extension contract: `{required: true, value: {version: 1, ...}}`. Portable member tools/servers and private binding workspace/tools/servers live inside `value`; main-process host admission validates the strict envelope and its payload. This repairs the canonical shape mismatch observed as HTTP 422 at the predecessor's real package boundary. Stored immutable revisions remain unchanged; an author must explicitly save a new revision to compile corrected bytes. Promotion also requires the coordinated native host reader repair and the stable predecessor coding producer repair.
+
 Delivery boundary: complete production UI, locale strings, IPC, persistence and packaged operation before the lead's single Mac ARM64 build and real feature operation. No intermediate suites or partial verification builds.

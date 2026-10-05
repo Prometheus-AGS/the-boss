@@ -113,7 +113,10 @@ export async function compileAuthoredTeam(team: UarAuthoredTeam, revision: numbe
         skills: member.skills,
         models: [{ role: 'primary', capabilities: ['text'], preferredAliases: ['role:' + member.role] }],
         extensions: {
-          [UAR_TEAM_HOST_EXTENSION]: { required: true, version: 1, tools: member.tools, servers: ['filesystem'] }
+          [UAR_TEAM_HOST_EXTENSION]: {
+            required: true,
+            value: { version: 1, tools: member.tools, servers: ['filesystem'] }
+          }
         },
         requestedLimits: { concurrentTurns: 1, maxMembers: team.members.length, maxDepth: 0, maxPendingTasks: 16 },
         sourceIdentity: {
