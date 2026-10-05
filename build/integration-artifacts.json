@@ -540,10 +540,10 @@
       "version": "2026.9.19+bafa21e8d",
       "packages": {
         "darwin-arm64": {
-          "source": "72cab04dc58d331574b8b81a9f18db48d1e64c4f",
-          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-72cab04dc/bossfang-darwin-arm64",
-          "sha256": "06163e3876ab2d281cd91f9b07a416cb1e808db91b1a09f84fd0f820e33459a5",
-          "size": 119442912,
+          "source": "bafa21e8d469a41104c07c7281a4e3f97cb16009",
+          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-bafa21e8d/bossfang-darwin-arm64",
+          "sha256": "7ff58b58f50afa12bf814443b1d7d1185d66e5aede23173848afd4b3010c0669",
+          "size": 119525552,
           "archive": "none",
           "binaries": [
             "bossfang"
