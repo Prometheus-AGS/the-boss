@@ -1,5 +1,5 @@
 import type { Harness, ObjectValue, Team } from './types.mjs';
-import { json, markdown, merge, model, object, prompt, toml, yaml } from './adapters-codecs.mjs';
+import { CODEX_NAME, codexName, json, markdown, merge, model, object, prompt, roleMemoryIndex, toml, yaml } from './adapters-codecs.mjs';
 import type { ExportContext } from './adapters-codecs.mjs';
 
 const deferredSkills = new Set(['prometheus-ui-ux', 'prometheus-ui-review', 'interface-review', 'break', 'variant', 'explain-interface']);
@@ -22,14 +22,18 @@ export function exportLocal(team: Team, target: Exclude<Harness, 'uar'>, ctx: Ex
     const body = prompt(team, role);
     const uiReviewer = role.skills.includes('prometheus-ui-review');
     if (target === 'codex') {
-      const agent = merge({ name: role.id, description: role.description, developer_instructions: body, ...(uiReviewer ? { sandbox_mode: 'read-only' } : {}), ...modelField }, native);
-      const name = ctx.claimName(agent.name);
+      // Subagent threads must not consolidate into the user-level Codex memory summary (design 5).
+      const agent = merge({ name: codexName(role.id), description: role.description, developer_instructions: body, memories: { generate_memories: false }, ...(uiReviewer ? { sandbox_mode: 'read-only' } : {}), ...modelField }, native);
+      agent.name = codexName(agent.name);
+      const name = ctx.claimName(agent.name, CODEX_NAME);
       ctx.add(`.codex/agents/${name}.toml`, toml(agent));
     } else if (target === 'claude' || target === 'copilot' || target === 'minimax') {
       const preloadSkills = role.skills.filter(skill => !deferredSkills.has(skill));
       const overrideSkills = Array.isArray(native.skills) ? native.skills.filter(skill => typeof skill === 'string' && deferredSkills.has(skill)) : [];
       if (overrideSkills.length) ctx.diagnostics.push(`${role.id}: explicit native.${target}.skills requests conditional or user-only preloads (${overrideSkills.join(', ')}). The override is preserved, but conflicts with conditional UI loading or upstream user-only invocation restrictions; resolve it before native invocation. Direct file reads are not a workaround.`);
+      const localMemory = target === 'claude' && team.agentMemory?.claude === 'local';
       const agent = merge({ name: role.id, description: role.description, ...modelField, skills: preloadSkills,
+        ...(localMemory ? { memory: 'local' } : {}),
         ...(uiReviewer && target === 'claude' ? { tools: ['Read', 'Glob', 'Grep'] } : {}) }, native);
       const name = ctx.claimName(agent.name);
       const content = markdown(agent, body);
@@ -38,6 +42,7 @@ export function exportLocal(team: Team, target: Exclude<Harness, 'uar'>, ctx: Ex
       ctx.add(path, content);
       if (target === 'claude') {
         ctx.add(`${pluginRoot}/agents/${name}.md`, content);
+        if (localMemory) ctx.add(`.claude/agent-memory-local/${name}/MEMORY.md`, roleMemoryIndex(team, role));
         const ignored = ['hooks', 'mcpServers', 'permissionMode', 'initialPrompt', 'omitClaudeMd']
           .filter(key => Object.hasOwn(native, key));
         if (ignored.length) ctx.diagnostics.push(`${role.id}: Claude plugin subagents ignore ${ignored.join(', ')}; use the project agent copy for those fields. Values remain preserved in both copies.`);
@@ -74,6 +79,7 @@ export function exportLocal(team: Team, target: Exclude<Harness, 'uar'>, ctx: Ex
     if (options) ctx.add('.codex/config.toml', toml(options));
     ctx.instructions.push('Review and merge .codex/agents and optional .codex/config.toml into the project; config values are native Codex options.');
     ctx.diagnostics.push('Standalone agent files are supported. A Codex plugin agents manifest field is not verified; no such field is emitted.');
+    ctx.diagnostics.push('Codex agent names use underscores (role-id becomes role_id) and set memories.generate_memories=false so subagent threads do not write the user-level memory summary.');
   } else if (target === 'claude') {
     if (options) ctx.add('.claude/settings.json', json(options));
     ctx.add(`${pluginRoot}/.claude-plugin/plugin.json`, json({ name: team.id, version: '1.0.0', description: team.outcome }));

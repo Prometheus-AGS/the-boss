@@ -69,3 +69,29 @@ The corrective iteration must name the immediately preceding unresolved failed d
 `history` links `{ "phaseId":"canonical-child", "reason":"why previously untracked", "evidencePath":"/absolute/receipt", "sourceRefs":[] }`. These references carry no delivery or completion credit and unknown timing. Use this for the earlier UAR inference child; do not invent an iteration.
 
 Read [child recovery](child-recovery.md) for nested work and [measurement](measurement.md) for timing/learning semantics.
+
+## Skill-pack refresh procedure
+
+`scripts/refresh-skill-pack.sh` is a ready-made checkpoint procedure that refreshes an installed skill pack from merged `main`. It replaces ad hoc, untracked per-machine scripts. Inputs come from flags or the matching environment variable:
+
+| Flag | Env | Meaning |
+|---|---|---|
+| `--deploy <worktree>` | `REFRESH_DEPLOY` | Clean worktree that tracks `origin/main`. Never the actively edited checkout: a checkpoint freezes every source it names. |
+| `--state <state.json>` | `REFRESH_STATE` | Cadence state, read directly for `--mode auto`. The cadence CLI is never called (a checkpoint already holds its lock). |
+| `--mode full\|verify\|auto` | `REFRESH_MODE` | `auto` reads the active iteration's `index` from `state.json`: odd runs `full`, even runs `verify`. |
+| `--services a,b` | `REFRESH_SERVICES` | launchd labels to `launchctl kickstart -k gui/$UID/<label>` after install. |
+| `--receipt <file>` | `REFRESH_RECEIPT` | Also write the JSON summary here. |
+
+`full` refuses a dirty or diverged deploy worktree (exit 1) before any install step, fast-forwards it to `origin/main`, runs `git submodule update --init --recursive`, then `scripts/update-skill-pack.sh --force` and `scripts/install-binaries.sh` from that worktree, then kickstarts each service. `verify` changes nothing. Both print one JSON summary with `sourceCommit`, `versions` (pk, learningWorker, surrealMemory), `health` (surreal-memory `/health`, overridable with `REFRESH_HEALTH_URL`), `pluginGeneration` and `pluginSourceCommit`.
+
+Failures are loud: exit 1 for a failed step, exit 2 for unusable input. A missing, unreadable or non-numeric iteration in `state.json` exits 2 and does no work; the script never defaults an iteration number.
+
+Point a checkpoint at it as a program plus arguments, for example:
+
+```json
+{"id":"refresh","kind":"procedure","command":"bash",
+ "args":["/abs/path/.prometheus/cadence/procedures/refresh-skill-pack.sh"],
+ "cwd":"/abs/project","required":true}
+```
+
+The local procedure file is a git-ignored shim that `exec`s `$HOME/.claude/skills/delivery-cadence/scripts/refresh-skill-pack.sh` with this machine's deploy worktree, state path and services; see [examples/refresh-skill-pack-shim.sh](../examples/refresh-skill-pack-shim.sh). Only integration tests set `REFRESH_TEST_MODE=1` with `REFRESH_UPDATE_CMD`, `REFRESH_INSTALL_CMD` and `REFRESH_KICKSTART_CMD` (receives the label as `$1`) to substitute recording stubs.

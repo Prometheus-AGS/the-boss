@@ -39,6 +39,8 @@ export interface Team {
   modelPolicy?: ModelPolicy;
   skillPolicies?: Record<string, ModelPolicy>;
   native?: Partial<Record<Target, NativeConfig>>;
+  /** Opt-in per-harness agent memory. `claude: 'local'` emits `memory: local` and a per-role MEMORY.md. */
+  agentMemory?: { claude?: 'local' };
 }
 export interface KbdIdentity {
   projectId: string;

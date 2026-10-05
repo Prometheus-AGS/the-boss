@@ -4,7 +4,7 @@ description: Operate timed usable deliveries with frozen delivery candidates, bo
 license: MIT
 compatibility: Node.js 22 or newer. Build tools belong to the selected project. Optional KBD, Compass, memory and native goal capabilities are detected, never assumed.
 metadata:
-  version: "1.2.2"
+  version: "1.2.3"
   tags: "delivery, cadence, kbd, recovery"
 ---
 
@@ -15,6 +15,8 @@ The harness owns execution. This skill owns inspectable delivery metadata and pr
 ## Configure
 
 Read project instructions and current work first. Reuse existing choices. Configure iteration duration, build and functional-run commands, human review, publication frequency and explicit optimization bounds in a profile. See [profile and commands](references/profile.md).
+
+For refreshing an installed skill pack from merged `main` at a checkpoint, use `scripts/refresh-skill-pack.sh` (profile inputs, odd/even parity from `state.json`, fail-loud); see [the refresh procedure](references/profile.md#skill-pack-refresh-procedure).
 
 Invoke `node <this-skill>/scripts/cadence.mjs <command> --root <state-directory> --input <request.json>`. The default state directory is `.prometheus/cadence` in the current project. Use a stable `--command-id` when retrying a mutation.
 
