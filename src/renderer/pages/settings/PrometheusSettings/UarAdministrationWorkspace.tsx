@@ -321,12 +321,15 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
                 <SettingTitle>{navText(t, 'durable.workspaceTitle')}</SettingTitle>
                 <SettingDescription>{navText(t, 'durable.workspaceDescription')}</SettingDescription>
                 <Select value={selectedWorkspaceId} onValueChange={setWorkspaceId} disabled={workspacesLoading}>
-                  <SelectTrigger className="mt-4" aria-label={navText(t, 'durable.workspaceTitle')}>
+                  <SelectTrigger
+                    data-ui="uar-teams-workspace"
+                    className="mt-4"
+                    aria-label={navText(t, 'durable.workspaceTitle')}>
                     <SelectValue placeholder={navText(t, 'durable.workspacePlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {userWorkspaces.map((workspace) => (
-                      <SelectItem key={workspace.id} value={workspace.id}>
+                      <SelectItem key={workspace.id} value={workspace.id} data-workspace-id={workspace.id}>
                         {workspace.name}
                       </SelectItem>
                     ))}

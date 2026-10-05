@@ -22,6 +22,7 @@ import { ipcApi } from '@renderer/ipc'
 import type { UarTeamModelSelection, UarTeamsSnapshot } from '@shared/types/uarTeams'
 
 import { UarExecutionOwnerPanel } from './UarExecutionOwnerPanel'
+import { UarTeamAuthoringPanel } from './UarTeamAuthoringPanel'
 import { UarTeamMailbox } from './UarTeamMailbox'
 import { UarTeamTaskForm } from './UarTeamTaskForm'
 import { UarWorkflowsPanel } from './UarWorkflowsPanel'
@@ -236,6 +237,7 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
       </SettingGroup>
 
       <UarExecutionOwnerPanel />
+      <UarTeamAuthoringPanel key={workspaceId + ':authoring'} workspaceId={workspaceId} onChanged={refreshQuietly} />
       <UarWorkflowsPanel
         key={workspaceId}
         workspaceId={workspaceId}

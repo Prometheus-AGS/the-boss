@@ -12,9 +12,9 @@ import type {
 } from '@shared/types/uarTeams'
 
 import { rawPendingApproval } from './uarApprovalLifecycle'
-import { UAR_CODING_TEAM_ID } from './uarCodingTeamPackage'
 import { scopedRequest } from './UarDurableAdministrationAdapter'
 import { admitUarTeamTask, readUarTeamExecution } from './UarTeamExecutionAdapter'
+import { resolveTeamHostScope } from './uarTeamHostScope'
 import { addUarTeamTask, claimUarTeamTask, planningState, scopedTeam } from './UarTeamsAdministrationAdapter'
 
 function commandId(id: string, stage: string): string {
@@ -39,8 +39,8 @@ async function target(input: UarTeamExecutionSelector) {
   if (!state.coding) throw new Error('TEAM_CAPABILITY_UNSUPPORTED')
   const path = '/api/v1/collaboration/team-instances/' + encodeURIComponent(input.teamInstanceId)
   const team = scopedTeam(await scopedRequest(state.workspaceId, path, state.generation), state.workspaceId)
-  if (team.id !== input.teamInstanceId || team.definition.id !== UAR_CODING_TEAM_ID)
-    throw new Error('TEAM_SCOPE_DENIED')
+  if (team.id !== input.teamInstanceId) throw new Error('TEAM_SCOPE_DENIED')
+  await resolveTeamHostScope(team, state.generation)
   return { ...state, path, team }
 }
 

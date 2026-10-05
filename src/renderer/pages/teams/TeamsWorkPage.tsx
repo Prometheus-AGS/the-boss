@@ -170,7 +170,12 @@ function TeamWorkspace({
             )}
           </section>
           {instance && (
-            <div className="space-y-6" data-ui="teams-run" data-team-id={instance.id}>
+            <div
+              className="space-y-6"
+              data-ui="teams-run"
+              data-team-id={instance.id}
+              data-definition-digest={instance.definition.digest}
+              data-package-digest={instance.package.digest}>
               <section
                 data-ui="teams-members"
                 aria-label={t('settings.prometheus.integration.uarAdmin.teams.membersTitle')}>
@@ -178,7 +183,7 @@ function TeamWorkspace({
                   {t('settings.prometheus.integration.uarAdmin.teams.membersTitle')}
                 </h2>
                 <p className="mt-1 break-all text-xs text-muted-foreground">
-                  {instance.definition.id} · {instance.definition.version}
+                  {instance.definition.id} · {instance.definition.version} · {instance.definition.digest}
                 </p>
                 <ul className="mt-3 flex flex-wrap gap-3">
                   {instance.members.map((member) => (
