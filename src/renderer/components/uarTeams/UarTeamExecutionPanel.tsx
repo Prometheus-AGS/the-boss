@@ -234,6 +234,7 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, cooper
               id={id + 'reason'}
               value={reason}
               maxLength={512}
+              data-ui="teams-control-reason"
               disabled={Boolean(busy)}
               onChange={(event) => setReason(event.target.value)}
               aria-describedby={id + 'reasonHelp'}
@@ -249,12 +250,24 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, cooper
             ) : (
               <ol className="mt-2 space-y-3">
                 {summary.attempts.map((attempt) => (
-                  <li key={attempt.id} className="min-w-0 rounded-lg border border-border p-3">
+                  <li
+                    key={attempt.id}
+                    className="min-w-0 rounded-lg border border-border p-3"
+                    data-ui="teams-attempt"
+                    data-attempt-id={attempt.id}
+                    data-run-id={attempt.runId}
+                    data-root-id={attempt.rootId}
+                    data-approval-scope-id={attempt.approvalScopeId}
+                    data-task-id={attempt.taskId}
+                    data-member-id={attempt.memberId}
+                    data-status={attempt.status}>
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <h4 className="break-words text-sm font-medium">
                         {instance.tasks.find((task) => task.id === attempt.taskId)?.title ?? attempt.taskId}
                       </h4>
-                      <Badge variant="outline">{tr('execution.status.' + attempt.status)}</Badge>
+                      <Badge variant="outline" aria-live="polite">
+                        {tr('execution.status.' + attempt.status)}
+                      </Badge>
                     </div>
                     <p className="mt-1 break-all text-xs text-muted-foreground">
                       {attempt.runId} · {new Date(attempt.updatedAt).toLocaleString(i18n.language)}
@@ -326,7 +339,9 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, cooper
                           {tr('execution.output')}
                         </summary>
                         <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-md bg-background-subtle p-2">
-                          {JSON.stringify(attempt.output, null, 2)}
+                          {typeof attempt.output === 'string'
+                            ? attempt.output
+                            : JSON.stringify(attempt.output, null, 2)}
                         </pre>
                       </details>
                     )}
@@ -352,6 +367,7 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, cooper
                         size="sm"
                         disabled={Boolean(busy) || !reason.trim()}
                         aria-describedby={id + 'reasonHelp'}
+                        data-ui="teams-cancel"
                         onClick={() => void control('cancel', attempt.id)}>
                         {tr('execution.cancel')}
                       </Button>
@@ -361,11 +377,44 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, cooper
               </ol>
             )}
           </div>
+          <section data-ui="teams-artifacts" aria-label={tr('execution.context')}>
+            <h3 className="text-sm font-medium">{tr('execution.context')}</h3>
+            {artifacts.length === 0 ? (
+              <p className="mt-2 text-sm text-muted-foreground">{tr('execution.noArtifacts')}</p>
+            ) : (
+              <ul className="mt-2 space-y-3">
+                {artifacts.map((artifact) => (
+                  <li
+                    key={artifact.id}
+                    className="min-w-0 rounded-md border border-border p-3"
+                    data-artifact-id={artifact.id}
+                    data-task-id={artifact.taskId}
+                    data-member-id={artifact.memberId}
+                    data-attempt-id={artifact.attemptId}>
+                    <h4 className="break-words text-sm font-medium">
+                      {instance.tasks.find((task) => task.id === artifact.taskId)?.title ?? artifact.taskId}
+                    </h4>
+                    <p className="mt-1 break-all text-xs text-muted-foreground">
+                      {instance.members.find((member) => member.id === artifact.memberId)?.role ?? artifact.memberId}
+                      {' · '}
+                      {new Date(artifact.createdAt).toLocaleString(i18n.language)}
+                    </p>
+                    <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-md bg-background-subtle p-2 text-xs">
+                      {typeof artifact.content === 'string'
+                        ? artifact.content
+                        : JSON.stringify(artifact.content, null, 2)}
+                    </pre>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
           <div className="border-t border-border-subtle pt-3">
             <Button
               className="mt-3"
               size="sm"
               variant="outline"
+              data-ui="teams-recover"
               disabled={Boolean(busy) || !reason.trim()}
               onClick={() => void control('recover', instance.id)}>
               {tr('execution.recover')}

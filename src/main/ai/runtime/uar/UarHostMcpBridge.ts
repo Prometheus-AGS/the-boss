@@ -41,12 +41,12 @@ export interface UarHostMcpBridge {
 
 type MountedServer = {
   path: string
-  server: AgentMcpServer
+  server: { name: string; instance: Pick<AgentMcpServer['instance'], 'connect' | 'close'> }
   transport: StreamableHTTPServerTransport
 }
 
 export async function createUarHostMcpBridge(
-  servers: Record<string, AgentMcpServer>,
+  servers: Record<string, MountedServer['server']>,
   admissionOptions: UarHostToolAdmissionOptions,
   onError: (error: unknown) => void = () => undefined
 ): Promise<UarHostMcpBridge> {
@@ -95,7 +95,10 @@ export async function createUarHostMcpBridge(
   }
 }
 
-async function connectServers(servers: Record<string, AgentMcpServer>, token: string): Promise<MountedServer[]> {
+async function connectServers(
+  servers: Record<string, MountedServer['server']>,
+  token: string
+): Promise<MountedServer[]> {
   const mounted: MountedServer[] = []
   try {
     for (const [serverId, server] of Object.entries(servers)) {

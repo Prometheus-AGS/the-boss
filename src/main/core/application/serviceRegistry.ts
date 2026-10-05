@@ -20,7 +20,7 @@ import {
   ClaudeCodeSessionStateService,
   ClaudeCodeWarmQueryManager
 } from '@main/ai/runtime/claudeCode'
-import { UarSidecarService } from '@main/ai/runtime/uar'
+import { UarSidecarService, UarTeamHostService } from '@main/ai/runtime/uar'
 import { AiStreamManager } from '@main/ai/streamManager'
 import { JobManager } from '@main/core/job/JobManager'
 import type { ServiceConstructor } from '@main/core/lifecycle'
@@ -165,6 +165,7 @@ export const services = {
   PdfTranslationService,
   ClaudeCodeProcessManager,
   UarSidecarService,
+  UarTeamHostService,
   AgentSessionRuntimeService,
   AgentSessionDeliveryService,
   AgentJobsService,

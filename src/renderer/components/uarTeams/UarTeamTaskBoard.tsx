@@ -23,7 +23,7 @@ export function UarTeamTaskBoard({ workspaceId, instance, ownership, onChanged }
   }
 
   return (
-    <SettingGroup>
+    <SettingGroup data-ui="teams-task-board">
       <SettingTitle>{tr('taskBoardTitle')}</SettingTitle>
       <SettingDescription>{tr('taskBoardDescription')}</SettingDescription>
       <p className="mt-2 text-xs text-muted-foreground">{tr('execution.assignmentHelp')}</p>
@@ -37,7 +37,14 @@ export function UarTeamTaskBoard({ workspaceId, instance, ownership, onChanged }
       ) : (
         <ol className="mt-4 space-y-2">
           {instance.tasks.map((task) => (
-            <li key={task.id} className="min-w-0 rounded-lg border border-border bg-card p-3">
+            <li
+              key={task.id}
+              className="min-w-0 rounded-lg border border-border bg-card p-3"
+              data-task-id={task.id}
+              data-status={task.status}
+              data-role={task.role}
+              data-assignee-id={task.assigneeMemberId ?? undefined}
+              data-reviewer-id={task.reviewerMemberId ?? undefined}>
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0">
                   <h3 className="break-words text-sm font-medium">{task.title}</h3>

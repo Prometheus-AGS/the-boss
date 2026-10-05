@@ -74,6 +74,7 @@ export {
   toggleUarSkill
 } from './UarCatalogAdministrationAdapter'
 export { UarRuntimeDriver } from './UarRuntimeDriver'
+export { UarTeamHostService } from './UarTeamHostService'
 export { modelSnapshotForUarAssignment } from './uarModelAssignments'
 export { UarSidecarService, type UarSidecarEndpoint } from './UarSidecarService'
 export { readAppliedUarStorage } from './uarStorageProfile'
@@ -105,3 +106,6 @@ export {
   cancelUarWorkflow,
   recoverUarWorkflow
 } from './UarWorkflowExecutionAdapter'
+
+export { setupUarCodingTeam } from './UarCodingTeamAdministrationAdapter'
+export { submitUarTeamTask, readUarTeamApprovals, decideUarTeamApproval } from './UarTeamWorkAdapter'

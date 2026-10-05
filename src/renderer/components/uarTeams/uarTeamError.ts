@@ -17,13 +17,16 @@ const reasons: Record<string, string> = {
   TEAM_PENDING_LIMIT: 'budget',
   TEAM_CONTEXT_REQUIRED_UNSUPPORTED: 'context',
   TEAM_CONTEXT_REQUIRED_TOO_LARGE: 'context',
+  TEAM_HOST_CONTEXT_REQUIRED: 'hostContext',
+  TEAM_WORKSPACE_DENIED: 'workspace',
   TEAM_FIT_UNQUALIFIED: 'context',
   TEAM_WAIT_CYCLE: 'wait',
   TEAM_WAIT_INVALIDATED: 'wait',
-  TEAM_COMMAND_CONFLICT: 'revision'
+  TEAM_COMMAND_CONFLICT: 'revision',
+  UAR_APPROVAL_STALE: 'approvalStale'
 }
 
 export function uarTeamError(message: string, translate: (key: string) => string): string {
-  const code = message.match(/TEAM_[A-Z_]+/)?.[0]
+  const code = message.match(/TEAM_[A-Z_]+|UAR_APPROVAL_STALE/)?.[0]
   return code ? translate('diagnostic.' + (reasons[code] ?? 'other')) + ' (' + code + ')' : message
 }

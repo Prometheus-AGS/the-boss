@@ -91,7 +91,15 @@ export interface UarTeamsSnapshot {
   schemaVersion: 1
   workspaceId: string
   generation: number
-  capabilities: { planning: boolean; ownership: boolean; mailbox: boolean; execution: boolean; cooperation?: boolean }
+  capabilities: {
+    planning: boolean
+    ownership: boolean
+    mailbox: boolean
+    execution: boolean
+    cooperation?: boolean
+    coding: boolean
+    approvals: boolean
+  }
   executionProfileStage?: 'unqualified' | 'operation' | 'qualified'
   executionProfile?: string
   executionCapabilities?: string[]
@@ -275,4 +283,28 @@ export interface UarTeamModelSelection {
   source: 'uar' | 'gateway'
   providerId: string
   modelId: string
+}
+
+export interface UarSubmitTeamTaskInput extends UarTeamExecutionSelector {
+  commandId: string
+  prompt: string
+}
+
+export interface UarTeamApproval {
+  attemptId: string
+  runId: string
+  approvalId: string
+  eventId: string
+  cursor: number
+  toolName: string
+  argumentsJson: string
+  riskReason: string
+}
+
+export interface UarTeamApprovalDecision extends UarTeamExecutionSelector {
+  attemptId: string
+  approvalId: string
+  eventId: string
+  cursor: number
+  approved: boolean
 }

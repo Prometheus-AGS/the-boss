@@ -113,6 +113,7 @@ export interface UarHostToolAdmissionOptions {
   disposition(toolName: string): UarHostToolDisposition
   persistLifecycle?(snapshot: UarHostAdmissionSnapshot): void
   onLifecycle?(snapshot: UarHostAdmissionSnapshot): void
+  verifyTeamInvocation?(invocation: UarPreparedInvocation): Promise<boolean>
 }
 
 export class UarHostToolAdmission {
@@ -249,7 +250,10 @@ export class UarHostToolAdmission {
       this.respond(response, 422, { error: 'Invalid prepared tool invocation' })
       return true
     }
-    if (!this.binds(invocation)) {
+    if (
+      !this.binds(invocation) ||
+      (this.options.verifyTeamInvocation && !(await this.options.verifyTeamInvocation(invocation)))
+    ) {
       this.respond(response, 409, { error: 'Prepared tool invocation belongs to another host binding' })
       return true
     }
@@ -356,6 +360,10 @@ export class UarHostToolAdmission {
       return true
     }
     const currentDisposition = this.options.disposition(invocation.providerToolName)
+    if (this.options.verifyTeamInvocation && !(await this.options.verifyTeamInvocation(invocation))) {
+      this.respond(response, 409, { error: 'Team tool authority changed before claim' })
+      return true
+    }
     let authority: UarAuthorityDecision
     try {
       authority = await this.options.authorityProvider.revalidate(
@@ -449,15 +457,18 @@ export class UarHostToolAdmission {
       invocation.version !== UAR_TOOL_ADMISSION_VERSION ||
       invocation.hostEpoch !== this.hostEpoch ||
       invocation.ownerId !== this.options.ownerId ||
-      invocation.principalId !== this.options.principalId ||
+      (!this.options.verifyTeamInvocation && invocation.principalId !== this.options.principalId) ||
       invocation.workspace !== this.options.workspace ||
       invocation.attempt !== 1
     ) {
       return false
     }
     this.runtimeEpoch ??= invocation.runtimeEpoch
-    this.rootRunId ??= invocation.rootRunId
-    return this.runtimeEpoch === invocation.runtimeEpoch && this.rootRunId === invocation.rootRunId
+    if (!this.options.verifyTeamInvocation) this.rootRunId ??= invocation.rootRunId
+    return (
+      this.runtimeEpoch === invocation.runtimeEpoch &&
+      (Boolean(this.options.verifyTeamInvocation) || this.rootRunId === invocation.rootRunId)
+    )
   }
 
   private receipt(record: AdmissionRecord): Record<string, unknown> {
@@ -521,7 +532,7 @@ export class UarHostToolAdmission {
       effectId,
       invocation,
       trustedPrincipal: this.options.ownerId,
-      trustedActor: this.options.principalId,
+      trustedActor: this.options.verifyTeamInvocation ? invocation.principalId : this.options.principalId,
       trustedSessionId: this.options.sessionId ?? this.options.ownerId,
       trustedWorkspace: this.options.workspace,
       hostDisposition
@@ -690,7 +701,7 @@ function safeActionDisplay(invocation: UarPreparedInvocation): Record<string, un
 }
 
 function safeTarget(argumentsValue: Record<string, unknown>): string | undefined {
-  for (const key of ['path', 'filePath', 'directory', 'root', 'uri', 'url']) {
+  for (const key of ['path', 'file_path', 'filePath', 'directory', 'root', 'uri', 'url']) {
     const value = argumentsValue[key]
     if (typeof value !== 'string' || !value.trim()) continue
     const trimmed = value.trim().slice(0, 512)

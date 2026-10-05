@@ -26,7 +26,7 @@ function digest(value: string): string {
   return `sha256:${createHash('sha256').update(value).digest('hex')}`
 }
 
-function document<T extends Record<string, JsonValue>>(value: T): T & { contentDigest: string } {
+export function document<T extends Record<string, JsonValue>>(value: T): T & { contentDigest: string } {
   return { ...value, contentDigest: digest(JSON.stringify(canonical(value))) }
 }
 

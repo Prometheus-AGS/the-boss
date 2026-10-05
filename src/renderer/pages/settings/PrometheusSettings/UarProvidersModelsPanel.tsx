@@ -13,12 +13,12 @@ import {
   Textarea
 } from '@cherrystudio/ui'
 import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/components/SettingsPrimitives'
+import { uarTeamError } from '@renderer/components/uarTeams/uarTeamError'
 import { ipcApi } from '@renderer/ipc'
 import type { UarModelSourceSnapshot, UarProviderMutation } from '@shared/types/prometheusIntegration'
 
 import { IntegrationChoice, IntegrationField, IntegrationToggle } from './IntegrationFields'
 import { UarProviderExecutionSettings } from './UarProviderExecutionSettings'
-import { uarTeamError } from './uarTeamError'
 
 type ProviderProjection = UarModelSourceSnapshot['sources'][number]['providers'][number]
 type ProviderDraft = Omit<UarProviderMutation, 'models' | 'credential'> & {

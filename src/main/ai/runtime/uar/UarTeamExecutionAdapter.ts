@@ -204,6 +204,8 @@ export async function readUarTeamArtifacts(input: UarTeamExecutionSelector): Pro
 
 export async function admitUarTeamTask(input: UarAdmitTeamTaskInput): Promise<UarTeamExecutionAttempt> {
   const state = await executionTarget(input)
+  if (state.team.definition.id === 'urn:boss:coding:team')
+    await application.get('UarTeamHostService').ensure(state.team, state.generation)
   return scopedAttempt(
     await scopedRequest(
       state.workspaceId,
@@ -245,6 +247,8 @@ export async function cancelUarTeamAttempt(
 
 export async function recoverUarTeamExecution(input: UarTeamControlInput): Promise<UarTeamExecutionAttempt[]> {
   const state = await executionTarget(input)
+  if (state.team.definition.id === 'urn:boss:coding:team')
+    await application.get('UarTeamHostService').ensure(state.team, state.generation)
   const result = z
     .array(z.unknown())
     .parse(
@@ -294,6 +298,8 @@ async function privilegedTeamRequest(
 
 export async function queueUarTeamTask(input: UarAdmitTeamTaskInput): Promise<UarTeamExecutionAttempt> {
   const state = await executionTarget(input)
+  if (state.team.definition.id === 'urn:boss:coding:team')
+    await application.get('UarTeamHostService').ensure(state.team, state.generation)
   return scopedAttempt(
     await privilegedTeamRequest(state, '/tasks/' + encodeURIComponent(input.taskId) + '/admit-queued', {
       commandId: input.commandId,
@@ -311,6 +317,8 @@ export async function dispatchUarTeamAttempt(
   input: UarTeamExecutionSelector & { commandId: string; expectedTeamRevision: number; attemptId: string }
 ): Promise<UarTeamExecutionAttempt> {
   const state = await executionTarget(input)
+  if (state.team.definition.id === 'urn:boss:coding:team')
+    await application.get('UarTeamHostService').ensure(state.team, state.generation)
   return scopedAttempt(
     await privilegedTeamRequest(state, '/attempts/' + encodeURIComponent(input.attemptId) + '/dispatch', {
       commandId: input.commandId,

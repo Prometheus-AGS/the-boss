@@ -92,6 +92,7 @@ import type {
   UarTeamExecutionAttempt,
   UarTeamExecutionSummary,
   UarTeamBinding,
+  UarTeamApproval,
   UarTeamInstance,
   UarTeamMailboxMessage,
   UarTeamMailboxPage,
@@ -392,6 +393,50 @@ export const prometheusRequestSchemas = {
       })
       .strict(),
     output: z.custom<UarTeamBinding>()
+  }),
+  'prometheus.uar.teams.setup_coding': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        model: z
+          .object({
+            source: z.enum(['uar', 'gateway']),
+            providerId: z.string().min(1).max(128),
+            modelId: z.string().min(1).max(256)
+          })
+          .strict()
+      })
+      .strict(),
+    output: z.custom<UarTeamBinding>()
+  }),
+  'prometheus.uar.teams.submit_task': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        teamInstanceId: z.string().min(1).max(256),
+        commandId: z.uuid(),
+        prompt: z.string().trim().min(1).max(32768)
+      })
+      .strict(),
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.approvals': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256), teamInstanceId: z.string().min(1).max(256) }).strict(),
+    output: z.custom<{ approvals: UarTeamApproval[] }>()
+  }),
+  'prometheus.uar.teams.decide_approval': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        teamInstanceId: z.string().min(1).max(256),
+        attemptId: z.string().min(1).max(256),
+        approvalId: z.string().min(1).max(256),
+        eventId: z.string().min(1).max(256),
+        cursor: z.number().int().nonnegative(),
+        approved: z.boolean()
+      })
+      .strict(),
+    output: z.object({ resolved: z.literal(true) })
   }),
   'prometheus.uar.teams.create': defineRoute({
     input: z
