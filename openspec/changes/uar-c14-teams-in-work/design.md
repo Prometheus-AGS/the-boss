@@ -85,3 +85,30 @@ HTTP 429, without changing quota, adding retries or disguising authorization.
 Only the three runtime adapters/services and this factual source plan change.
 No worker tests, compiler, builds or review run. The lead owns packaging and the
 actual operation rerun; source diagnosis is not completed runtime acceptance.
+
+## Observed native control admission ownership repair
+
+Packaged operation `c14-c82ed87f-b1ca-4c1d-983d-687cde550348` with
+Boss `06ab37daa3f289f76a350dbf6728b56c68a28318` and UAR
+`0402514acec7b67dbb3c0fa690c8dae0c9ce4253` launched and inferred, but the
+coordinator's native roster/delegation requests received host HTTP 422.
+The native producer misnames the version-1 governance revision wire field;
+the run-wide admission port also routes UAR coordination through the filesystem
+host. Align the producer with the established host contract and route explicitly
+owned runtime-control handlers through UAR's existing governed admission lifecycle.
+Do not classify all built-in tools as runtime controls or widen host filesystem
+permissions. Persist ownership for recovery; model input cannot choose it.
+
+Authoritative pending approvals carry `admissionOwner` as `uar-runtime` or
+`paired-host`; historical missing ownership defaults to `paired-host`. Boss reads
+this value through the trusted main-process UAR request, retaining the current
+workspace, team, running-attempt, generation and exact approval/event/cursor checks.
+Only paired-host approval acknowledges the host bridge before submitting the
+existing UAR decision. Runtime-control approval uses the same UAR decision route
+without a nonexistent filesystem-host approval. Neither path auto-approves.
+
+Root owns the two Boss approval adapters. The runtime worker owns native admission,
+wire metadata and pending ownership. The operation worker owns exact fixture
+approval checks. Finish the complete seam before rebuilding the affected native
+payload and Mac application and repeating the failed Work operation. Prior signed
+build/launch receipts remain evidence for their actual source, not this repair.

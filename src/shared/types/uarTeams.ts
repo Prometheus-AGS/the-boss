@@ -293,6 +293,7 @@ export interface UarSubmitTeamTaskInput extends UarTeamExecutionSelector {
 }
 
 export interface UarTeamApproval {
+  admissionOwner: 'uar-runtime' | 'paired-host'
   attemptId: string
   runId: string
   approvalId: string
