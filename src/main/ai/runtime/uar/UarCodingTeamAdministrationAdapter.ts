@@ -90,10 +90,12 @@ export async function setupUarCodingTeam(workspaceId: string, model: UarTeamMode
     extensions: {
       [UAR_TEAM_HOST_EXTENSION]: {
         required: true,
-        version: 1,
-        workspacePath: directory,
-        tools: [],
-        servers: ['filesystem']
+        value: {
+          version: 1,
+          workspacePath: directory,
+          tools: [],
+          servers: ['filesystem']
+        }
       }
     },
     effectiveBudget: { maxTokens: 32768, maxCostMicrounits: 5000000, currency: 'USD', maxElapsedSeconds: 1200 }
@@ -107,11 +109,13 @@ export async function setupUarCodingTeam(workspaceId: string, model: UarTeamMode
       saved.package.id !== preset.identity.id ||
       z
         .object({
-          workspacePath: z.literal(directory),
           required: z.literal(true),
-          version: z.literal(1),
-          servers: z.tuple([z.literal('filesystem')]),
-          tools: z.tuple([])
+          value: z.object({
+            workspacePath: z.literal(directory),
+            version: z.literal(1),
+            servers: z.tuple([z.literal('filesystem')]),
+            tools: z.tuple([])
+          })
         })
         .safeParse((saved.document.extensions as Record<string, unknown> | undefined)?.[UAR_TEAM_HOST_EXTENSION])
         .success === false)
