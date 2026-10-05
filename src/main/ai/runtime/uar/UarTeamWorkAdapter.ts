@@ -148,9 +148,12 @@ export async function decideUarTeamApproval(input: UarTeamApprovalDecision): Pro
     pending.cursor !== input.cursor
   )
     throw new Error('UAR_APPROVAL_STALE')
-  const bridge = application.get('UarTeamHostService').bridge(state.team, state.generation)
-  if (!bridge || !pending.admissionId || !(await bridge.recordHumanDecision(pending.admissionId, input.approved)))
-    throw new Error('UAR_APPROVAL_STALE')
+  if (!pending.admissionId) throw new Error('UAR_APPROVAL_STALE')
+  if (pending.admissionOwner === 'paired-host') {
+    const bridge = application.get('UarTeamHostService').bridge(state.team, state.generation)
+    if (!bridge || !(await bridge.recordHumanDecision(pending.admissionId, input.approved)))
+      throw new Error('UAR_APPROVAL_STALE')
+  }
   return z.object({ resolved: z.literal(true) }).parse(
     await scopedRequest(state.workspaceId, path, state.generation, 'POST', {
       approved: input.approved,
