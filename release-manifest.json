@@ -1,5 +1,5 @@
 {
-  "version": "2.2.9",
+  "version": "2.2.11",
   "profile": "uar-enabled",
   "features": {
     "uar": true
@@ -10,34 +10,34 @@
     "darwin-arm64",
     "darwin-x64"
   ],
-  "source": "102d7df70dbf5b2975b0fd1290b66f0e4b25c0b2",
-  "publishedAt": "2026-09-30T19:08:25.071Z",
+  "source": "1630d68837aa26635084d5ee0b38bd3de41961c7",
+  "publishedAt": "2026-10-04T17:57:27.728Z",
   "pendingPlatforms": [
-    "win32-x64",
+    "win32-arm64",
     "darwin-x64"
   ],
   "artifacts": [
     {
-      "name": "The-Boss-2.2.9-mac-arm64.dmg",
-      "size": 625009738,
-      "sha256": "484a634b50a11128879b11d3774e8bba116a535d3575fe873ea10da520d17319",
-      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.9/The-Boss-2.2.9-mac-arm64.dmg",
+      "name": "The-Boss-2.2.11-mac-arm64.dmg",
+      "size": 702840034,
+      "sha256": "1adc6fb49219cfbd09746c429cfd88aaf94c42ee384fe871e348f0cfa840389a",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.11/The-Boss-2.2.11-mac-arm64.dmg",
       "signing": "Developer ID (notarized)",
       "profile": "uar-enabled",
       "platform": "darwin",
       "arch": "arm64",
-      "source": "102d7df70dbf5b2975b0fd1290b66f0e4b25c0b2"
+      "source": "a09ba923b8c447468296e834f51d7ec644e09f6e"
     },
     {
-      "name": "The-Boss-2.2.9-win-arm64-setup.exe",
-      "size": 434709095,
-      "sha256": "f73247d4c00ee9ddb2217b64bf32dbace9f0666eeb0f359b97dcc1ca08fef7ef",
-      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.9/The-Boss-2.2.9-win-arm64-setup.exe",
+      "name": "The-Boss-2.2.11-win-x64-setup.exe",
+      "size": 526204026,
+      "sha256": "f8aa2a13b40bb763e91738ec68e94da27ff6b3e5412602f0d71a6f240da8f8f6",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.11/The-Boss-2.2.11-win-x64-setup.exe",
       "signing": "unsigned",
       "profile": "uar-enabled",
       "platform": "win32",
-      "arch": "arm64",
-      "source": "102d7df70dbf5b2975b0fd1290b66f0e4b25c0b2"
+      "arch": "x64",
+      "source": "1630d68837aa26635084d5ee0b38bd3de41961c7"
     }
   ]
 }

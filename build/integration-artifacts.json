@@ -21,23 +21,23 @@
     },
     "pk": {
       "repository": "Prometheus-AGS/prometheus-knowledge-rs",
-      "revision": "abb6745e31da7577611d7c32005af26a72254484"
+      "revision": "4b3a6744a4211512ff88a1cb96cf1e2a7db4c3ef"
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "f6b765c4d80fb872f932250a19f2752bbcdeb4bd"
+      "revision": "4ba9581cf013d28f4e70e08db9382a4dfad8cb1c"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "afeb528b794961483862436edac6b7063065d66e"
+      "revision": "bb6ea8ba10378732db5647c6957ba88788626ff9"
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
-      "revision": "6acb60565949334beda22f52bcd36b33895b1db6"
+      "revision": "0af8ae1f3c7486bf7128beff8ef83aaf1a832ea6"
     },
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
-      "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
+      "revision": "a6047386cc9fae4258b4a8577f6a016022095586"
     }
   },
   "tools": [
@@ -45,29 +45,39 @@
       "name": "compass",
       "version": "0.3.28",
       "packages": {
-        "darwin-x64": {
-          "sha256": "25fa207a660263261647d207a2b2ea1c58c65047c42d5f9a120d3cd6af421bf3",
-          "binaries": [
-            "compass"
-          ],
-          "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/compass-darwin-x64"
-        },
         "darwin-arm64": {
           "sha256": "706bda14f4867cf99e29c92c5c42c90b021e84c92f709ba96791e8c07c4d7e55",
           "binaries": [
             "compass"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/compass-darwin-arm64"
+          "source": {
+            "repository": "GQAdonis/compass",
+            "revision": "d0b9e0fb3cc62a1985bd6a83c5b5ea7798d937f9"
+          },
+          "sourceEvidence": {
+            "runId": "35854287160",
+            "kind": "original-workflow-frozen-pins"
+          },
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/compass-darwin-arm64",
+          "size": 183488880
         },
-        "win32-x64": {
-          "sha256": "9c697e1fc4412fc462181559aa2b6af559f97508064ce03894abbbdcef732f33",
+        "darwin-x64": {
+          "sha256": "25fa207a660263261647d207a2b2ea1c58c65047c42d5f9a120d3cd6af421bf3",
           "binaries": [
-            "compass.exe"
+            "compass"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/compass-win32-x64.exe"
+          "source": {
+            "repository": "GQAdonis/compass",
+            "revision": "d0b9e0fb3cc62a1985bd6a83c5b5ea7798d937f9"
+          },
+          "sourceEvidence": {
+            "runId": "35854287160",
+            "kind": "original-workflow-frozen-pins"
+          },
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/compass-darwin-x64",
+          "size": 173957692
         },
         "win32-arm64": {
           "sha256": "35f77fc4e8155ff3d3ab51155b9324d98b6b5cb8809492bd26ce6147b4ec60d9",
@@ -75,7 +85,33 @@
             "compass.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/compass-win32-arm64.exe"
+          "source": {
+            "repository": "GQAdonis/compass",
+            "revision": "d0b9e0fb3cc62a1985bd6a83c5b5ea7798d937f9"
+          },
+          "sourceEvidence": {
+            "runId": "35854287160",
+            "kind": "original-workflow-frozen-pins"
+          },
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/compass-win32-arm64.exe",
+          "size": 182602240
+        },
+        "win32-x64": {
+          "sha256": "9c697e1fc4412fc462181559aa2b6af559f97508064ce03894abbbdcef732f33",
+          "binaries": [
+            "compass.exe"
+          ],
+          "archive": "none",
+          "source": {
+            "repository": "GQAdonis/compass",
+            "revision": "d0b9e0fb3cc62a1985bd6a83c5b5ea7798d937f9"
+          },
+          "sourceEvidence": {
+            "runId": "35854287160",
+            "kind": "original-workflow-frozen-pins"
+          },
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/compass-win32-x64.exe",
+          "size": 194479616
         }
       }
     },
@@ -83,29 +119,39 @@
       "name": "rust-mcp-filesystem",
       "version": "0.4.5",
       "packages": {
-        "darwin-x64": {
-          "sha256": "edb0d0e76e95d86cbaf4b37ef55a85b2c70c03848cf310f32a5bc32b80b4da8f",
-          "binaries": [
-            "rust-mcp-filesystem"
-          ],
-          "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/rust-mcp-filesystem-darwin-x64"
-        },
         "darwin-arm64": {
           "sha256": "8c473b7d8492967a1d043bd2d1efac9be5403d85b455928f23cb0ebd4c69f42c",
           "binaries": [
             "rust-mcp-filesystem"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/rust-mcp-filesystem-darwin-arm64"
+          "source": {
+            "repository": "GQAdonis/rust-mcp-filesystem",
+            "revision": "3a8d18233aa666f7cf776d5d998a28e7b2b88d0d"
+          },
+          "sourceEvidence": {
+            "runId": "35854287160",
+            "kind": "original-workflow-frozen-pins"
+          },
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/rust-mcp-filesystem-darwin-arm64",
+          "size": 8480368
         },
-        "win32-x64": {
-          "sha256": "a4043ed6bc651d8d8d196a2bfb40b2266c1fffc86f73e1609d07217d2108756d",
+        "darwin-x64": {
+          "sha256": "edb0d0e76e95d86cbaf4b37ef55a85b2c70c03848cf310f32a5bc32b80b4da8f",
           "binaries": [
-            "rust-mcp-filesystem.exe"
+            "rust-mcp-filesystem"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/rust-mcp-filesystem-win32-x64.exe"
+          "source": {
+            "repository": "GQAdonis/rust-mcp-filesystem",
+            "revision": "3a8d18233aa666f7cf776d5d998a28e7b2b88d0d"
+          },
+          "sourceEvidence": {
+            "runId": "35854287160",
+            "kind": "original-workflow-frozen-pins"
+          },
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/rust-mcp-filesystem-darwin-x64",
+          "size": 8866468
         },
         "win32-arm64": {
           "sha256": "7703105ca9bd841f7bf607d2d19d26fb3c310a652137cdecdab6d048c0adea9a",
@@ -113,7 +159,33 @@
             "rust-mcp-filesystem.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/rust-mcp-filesystem-win32-arm64.exe"
+          "source": {
+            "repository": "GQAdonis/rust-mcp-filesystem",
+            "revision": "3a8d18233aa666f7cf776d5d998a28e7b2b88d0d"
+          },
+          "sourceEvidence": {
+            "runId": "35854287160",
+            "kind": "original-workflow-frozen-pins"
+          },
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/rust-mcp-filesystem-win32-arm64.exe",
+          "size": 6707200
+        },
+        "win32-x64": {
+          "sha256": "a4043ed6bc651d8d8d196a2bfb40b2266c1fffc86f73e1609d07217d2108756d",
+          "binaries": [
+            "rust-mcp-filesystem.exe"
+          ],
+          "archive": "none",
+          "source": {
+            "repository": "GQAdonis/rust-mcp-filesystem",
+            "revision": "3a8d18233aa666f7cf776d5d998a28e7b2b88d0d"
+          },
+          "sourceEvidence": {
+            "runId": "35854287160",
+            "kind": "original-workflow-frozen-pins"
+          },
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/rust-mcp-filesystem-win32-x64.exe",
+          "size": 7973376
         }
       }
     },
@@ -121,29 +193,39 @@
       "name": "prometheus",
       "version": "1.10.0",
       "packages": {
-        "darwin-x64": {
-          "sha256": "760fb9497701fc7d350c5f397f4090009e8c42232680d99a16793a969d0e4886",
-          "binaries": [
-            "prometheus"
-          ],
-          "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/prometheus-darwin-x64"
-        },
         "darwin-arm64": {
           "sha256": "ddf4df1252e1fd97da8b1be854f901292a3517075e2af65964c44ec4779262be",
           "binaries": [
             "prometheus"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/prometheus-darwin-arm64"
+          "source": {
+            "repository": "Prometheus-AGS/prometheus-skill-system",
+            "revision": "e57421a86fae08ac4d1e3a625a213cf3f3eb98bc"
+          },
+          "sourceEvidence": {
+            "runId": "35857706218",
+            "kind": "original-workflow-frozen-pins"
+          },
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/prometheus-darwin-arm64",
+          "size": 15666336
         },
-        "win32-x64": {
-          "sha256": "5d73625eee7765a4e3ce055ed3c1469ef43eb7745151a0048072e6e3c653ea10",
+        "darwin-x64": {
+          "sha256": "760fb9497701fc7d350c5f397f4090009e8c42232680d99a16793a969d0e4886",
           "binaries": [
-            "prometheus.exe"
+            "prometheus"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/prometheus-win32-x64.exe"
+          "source": {
+            "repository": "Prometheus-AGS/prometheus-skill-system",
+            "revision": "e57421a86fae08ac4d1e3a625a213cf3f3eb98bc"
+          },
+          "sourceEvidence": {
+            "runId": "35857706218",
+            "kind": "original-workflow-frozen-pins"
+          },
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/prometheus-darwin-x64",
+          "size": 17540084
         },
         "win32-arm64": {
           "sha256": "27c14ee09d44ca07dac3bf1bd574ffb3524255580e1a53ab9ce97512b2e5863f",
@@ -151,45 +233,91 @@
             "prometheus.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/prometheus-win32-arm64.exe"
+          "source": {
+            "repository": "Prometheus-AGS/prometheus-skill-system",
+            "revision": "e57421a86fae08ac4d1e3a625a213cf3f3eb98bc"
+          },
+          "sourceEvidence": {
+            "runId": "35857706218",
+            "kind": "original-workflow-frozen-pins"
+          },
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/prometheus-win32-arm64.exe",
+          "size": 19462656
+        },
+        "win32-x64": {
+          "sha256": "5d73625eee7765a4e3ce055ed3c1469ef43eb7745151a0048072e6e3c653ea10",
+          "binaries": [
+            "prometheus.exe"
+          ],
+          "archive": "none",
+          "source": {
+            "repository": "Prometheus-AGS/prometheus-skill-system",
+            "revision": "e57421a86fae08ac4d1e3a625a213cf3f3eb98bc"
+          },
+          "sourceEvidence": {
+            "runId": "35857706218",
+            "kind": "original-workflow-frozen-pins"
+          },
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/prometheus-win32-x64.exe",
+          "size": 23397376
         }
       }
     },
     {
       "name": "pk",
-      "version": "1.9.0",
+      "version": "1.11.0",
       "packages": {
-        "darwin-x64": {
-          "sha256": "feb531661f1b08e4466fd3bc72e7a8fae03cdbbcdb79afaf60ac4f7c928180ed",
-          "binaries": [
-            "pk"
-          ],
-          "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/pk-darwin-x64"
-        },
         "darwin-arm64": {
-          "sha256": "104561ba5c6c0c994405c1eb8da36a9e8ab8dff051c1140e3b06471345b93e73",
+          "source": {
+            "repository": "Prometheus-AGS/prometheus-knowledge-rs",
+            "revision": "4b3a6744a4211512ff88a1cb96cf1e2a7db4c3ef"
+          },
+          "size": 8429968,
+          "sha256": "35516b69ea50ba5423e1946b0edebd9fae1c14cccd99216efaa9dc0507afb975",
           "binaries": [
             "pk"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/pk-darwin-arm64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/pk-darwin-arm64"
         },
-        "win32-x64": {
-          "sha256": "0939602ff07bb53a5e4ebb57257c9f394570c543bbc33396fbb1d2679781bf97",
+        "darwin-x64": {
+          "source": {
+            "repository": "Prometheus-AGS/prometheus-knowledge-rs",
+            "revision": "4b3a6744a4211512ff88a1cb96cf1e2a7db4c3ef"
+          },
+          "size": 8620796,
+          "sha256": "6d3677e70091caade1e639d5cc938ca4db7b366bcab26ced57bdaf3767513ebb",
           "binaries": [
-            "pk.exe"
+            "pk"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/pk-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/pk-darwin-x64"
         },
         "win32-arm64": {
-          "sha256": "dc479d10f7eca5d1c2efe625fdfa86d6a641a7489d3ceab439edd5765a3d8d45",
+          "source": {
+            "repository": "Prometheus-AGS/prometheus-knowledge-rs",
+            "revision": "4b3a6744a4211512ff88a1cb96cf1e2a7db4c3ef"
+          },
+          "size": 6351360,
+          "sha256": "2e8114c9d1dd37c986d9fa481ba917458567692c8bf6cb8742a7e6a5465ab31b",
           "binaries": [
             "pk.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/pk-win32-arm64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/pk-win32-arm64.exe"
+        },
+        "win32-x64": {
+          "source": {
+            "repository": "Prometheus-AGS/prometheus-knowledge-rs",
+            "revision": "4b3a6744a4211512ff88a1cb96cf1e2a7db4c3ef"
+          },
+          "size": 7420416,
+          "sha256": "6e9cc95306550332d64ceff0d5a4ad4dd1fcdc4b765ef4a53ea48d1145edb795",
+          "binaries": [
+            "pk.exe"
+          ],
+          "archive": "none",
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/pk-win32-x64.exe"
         }
       }
     },
@@ -200,54 +328,54 @@
         "darwin-arm64": {
           "source": {
             "repository": "GQAdonis/liter-llm",
-            "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
+            "revision": "a6047386cc9fae4258b4a8577f6a016022095586"
           },
-          "size": 27877144,
-          "sha256": "41402e5dda2ec2ebd4c2adf5df14a241d95e057b2b3d776e0141f90bd0a7c029",
+          "size": 27878024,
+          "sha256": "c75e4e37637a9c8bd41ad72fb0b1819e42b41f23c6cf0cb7aabb58c70639057c",
           "binaries": [
             "liter-llm"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.11-c08-liter-12a2fae/liter-llm-darwin-arm64"
-        },
-        "win32-x64": {
-          "source": {
-            "repository": "GQAdonis/liter-llm",
-            "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
-          },
-          "size": 30825984,
-          "sha256": "0d8ec4a1d3144c6d9f9f110d008529516cafe01ace79844b600d31172cd7f9b8",
-          "binaries": [
-            "liter-llm.exe"
-          ],
-          "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.11-c08-liter-12a2fae/liter-llm-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/liter-llm-darwin-arm64"
         },
         "darwin-x64": {
           "source": {
             "repository": "GQAdonis/liter-llm",
-            "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
+            "revision": "a6047386cc9fae4258b4a8577f6a016022095586"
           },
-          "size": 29472144,
-          "sha256": "95c0dcd15818e9728967a8b0fb0f866d7ad5cbafb9e6b45967f3a4a4ea79537c",
+          "size": 29468928,
+          "sha256": "25bfbddc82a67cb5f0891b9aebbaa7a79b64f1d3455fb8f8dfa2cd3c17e74207",
           "binaries": [
             "liter-llm"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.11-c08-liter-12a2fae/liter-llm-darwin-x64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/liter-llm-darwin-x64"
         },
         "win32-arm64": {
           "source": {
             "repository": "GQAdonis/liter-llm",
-            "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
+            "revision": "a6047386cc9fae4258b4a8577f6a016022095586"
           },
-          "size": 27494400,
-          "sha256": "68d2cdf4d33edcdc0953478b7630c310dceffe14305b28c3c483a7994c6f2258",
+          "size": 27496448,
+          "sha256": "0a9615c0c0ebcbea2070de4b816e70c0750e63daa0bf842dfb1e00c5e6a1561c",
           "binaries": [
             "liter-llm.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.11-c08-liter-12a2fae/liter-llm-win32-arm64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/liter-llm-win32-arm64.exe"
+        },
+        "win32-x64": {
+          "source": {
+            "repository": "GQAdonis/liter-llm",
+            "revision": "a6047386cc9fae4258b4a8577f6a016022095586"
+          },
+          "size": 30829056,
+          "sha256": "678831e3da7b9b2416078a0c7531fd0a9a4931c99801d09e4d3244988fdf0e96",
+          "binaries": [
+            "liter-llm.exe"
+          ],
+          "archive": "none",
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/liter-llm-win32-x64.exe"
         }
       }
     },
@@ -316,9 +444,9 @@
       "version": "1.0.0",
       "packages": {
         "win32-x64": {
-          "source": "afeb528b794961483862436edac6b7063065d66e",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-p1.25/uar-sidecar-win32-x64.tar.gz",
-          "sha256": "3b18344a6ff5a472238391747721196fb46b91746ef119ae45534a0f0d8c8e1c",
+          "source": "bb6ea8ba10378732db5647c6957ba88788626ff9",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-merged-344-bb6ea8ba-20261004/uar-sidecar-win32-x64.tar.gz",
+          "sha256": "de933d0f7e1b8f1f0096873f1c7caf71a8a72a896a3b207854a6994ee6d16bc8",
           "archive": "tar.gz",
           "binaries": [
             "crc_fast-c45996daf34d96b5.dll",
@@ -337,32 +465,10 @@
             "payload-manifest.json"
           ]
         },
-        "darwin-arm64": {
-          "source": "afeb528b794961483862436edac6b7063065d66e",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-p1.25/uar-sidecar-darwin-arm64.tar.gz",
-          "sha256": "be5b09de06df9fc52db1e9e45ad620a85a404160656f70682361b661d70e21bc",
-          "archive": "tar.gz",
-          "binaries": [
-            "libcrc_fast-c9544bfaf069c5bc.dylib",
-            "libsevenz_rust2-bcd9d32571c57b36.dylib",
-            "LICENSE",
-            "policies/default.cedar",
-            "policies/skill-mutation.cedar",
-            "policies/tool-approval.cedar",
-            "uar-models/bg-small-en-v1.5.onnx",
-            "uar-models/config.json",
-            "uar-models/MODEL-NOTICE.txt",
-            "uar-models/special_tokens_map.json",
-            "uar-models/tokenizer_config.json",
-            "uar-models/tokenizer.json",
-            "uar-sidecar",
-            "payload-manifest.json"
-          ]
-        },
         "win32-arm64": {
-          "source": "afeb528b794961483862436edac6b7063065d66e",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-arm64-v1.0.0-p1.25/uar-sidecar-win32-arm64.tar.gz",
-          "sha256": "04684305d1b5d201cef7c3743458b03aeee4c032fe76827a5543e816c36fbe70",
+          "source": "bb6ea8ba10378732db5647c6957ba88788626ff9",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-arm64-v1.0.0-merged-344-bb6ea8ba-20261004/uar-sidecar-win32-arm64.tar.gz",
+          "sha256": "0c01d2ace3286909a68d4c28299315b12e2b40e8470a7c11e4d2505dbcc53b5a",
           "archive": "tar.gz",
           "binaries": [
             "crc_fast-ec816f13e81631da.dll",
@@ -381,10 +487,32 @@
             "payload-manifest.json"
           ]
         },
+        "darwin-arm64": {
+          "source": "bb6ea8ba10378732db5647c6957ba88788626ff9",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-merged-344-bb6ea8ba-20261004/uar-sidecar-darwin-arm64.tar.gz",
+          "sha256": "e56874b8593d6cd4231d8b3d1ab86f2bd28858e449b0d2c82f3cd13beea71b9f",
+          "archive": "tar.gz",
+          "binaries": [
+            "libcrc_fast-c9544bfaf069c5bc.dylib",
+            "libsevenz_rust2-bcd9d32571c57b36.dylib",
+            "LICENSE",
+            "policies/default.cedar",
+            "policies/skill-mutation.cedar",
+            "policies/tool-approval.cedar",
+            "uar-models/bg-small-en-v1.5.onnx",
+            "uar-models/config.json",
+            "uar-models/MODEL-NOTICE.txt",
+            "uar-models/special_tokens_map.json",
+            "uar-models/tokenizer_config.json",
+            "uar-models/tokenizer.json",
+            "uar-sidecar",
+            "payload-manifest.json"
+          ]
+        },
         "darwin-x64": {
-          "source": "afeb528b794961483862436edac6b7063065d66e",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.0.0-p1.25/uar-sidecar-darwin-x64.tar.gz",
-          "sha256": "a3ac00be22e6251d9fe5adb00bc32d064f9122e924806b9d3355f8f3958b0473",
+          "source": "bb6ea8ba10378732db5647c6957ba88788626ff9",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.0.0-merged-344-bb6ea8ba-20261004/uar-sidecar-darwin-x64.tar.gz",
+          "sha256": "36afdbe989fa77b89fc68a84d0220ada0f9d92a06c6b9227f4bff7ed6eb477b1",
           "archive": "tar.gz",
           "binaries": [
             "libcrc_fast-83ccf4684c30d646.dylib",
@@ -408,8 +536,36 @@
   ],
   "images": {
     "surrealdb": "surrealdb/surrealdb:v3.3.0@sha256:681c6c22c287421b5c7d99e0fde79b6e0d32c36c1ddeaab2762a1661cb04cd20",
-    "surreal-memory": "ghcr.io/prometheus-ags/the-boss-surreal-memory@sha256:e4e31dc855d67a1d2bf0757780a75266301d10d5abba1ba16038699287055c84",
-    "liter-llm": "ghcr.io/prometheus-ags/the-boss-liter-llm@sha256:e9a63ecea97da39d9c43c46a4559f080770b01b87ed957d2f9686e382ba95c27"
+    "surreal-memory": "ghcr.io/prometheus-ags/the-boss-surreal-memory@sha256:57ae574cd8c0e984a1eeb0f29e962844092890dad8baa507b9c54094445538bb",
+    "liter-llm": "ghcr.io/prometheus-ags/the-boss-liter-llm@sha256:c0d1d45213bda07ce1eef39025c4796b365980218088051ee3ca1b4f2a20cf23"
+  },
+  "imageProvenance": {
+    "surreal-memory": {
+      "image": "ghcr.io/prometheus-ags/the-boss-surreal-memory",
+      "digest": "sha256:57ae574cd8c0e984a1eeb0f29e962844092890dad8baa507b9c54094445538bb",
+      "source": {
+        "repository": "Prometheus-AGS/surreal-memory-server",
+        "revision": "0af8ae1f3c7486bf7128beff8ef83aaf1a832ea6"
+      },
+      "recipeSource": {
+        "repository": "Prometheus-AGS/surreal-memory-server",
+        "revision": "0af8ae1f3c7486bf7128beff8ef83aaf1a832ea6"
+      },
+      "workflowRun": "37231990818"
+    },
+    "liter-llm": {
+      "image": "ghcr.io/prometheus-ags/the-boss-liter-llm",
+      "digest": "sha256:c0d1d45213bda07ce1eef39025c4796b365980218088051ee3ca1b4f2a20cf23",
+      "source": {
+        "repository": "GQAdonis/liter-llm",
+        "revision": "a6047386cc9fae4258b4a8577f6a016022095586"
+      },
+      "recipeSource": {
+        "repository": "Prometheus-AGS/prometheus-skills-mini",
+        "revision": "4ba9581cf013d28f4e70e08db9382a4dfad8cb1c"
+      },
+      "workflowRun": "37231990818"
+    }
   },
   "catalogs": {
     "liter-llm": {
@@ -418,35 +574,7 @@
     }
   },
   "compassSkills": {
-    "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.4-uar-p1.19/compass-skills.tar.gz",
+    "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.12-pk1.11-memory1.10-20261004-r2/compass-skills.tar.gz",
     "sha256": "8b13681910d532411300268c4ba2bab5712e1b7e5cba70f105e766cd89e2c7b0"
-  },
-  "imageProvenance": {
-    "liter-llm": {
-      "image": "ghcr.io/prometheus-ags/the-boss-liter-llm",
-      "digest": "sha256:e9a63ecea97da39d9c43c46a4559f080770b01b87ed957d2f9686e382ba95c27",
-      "source": {
-        "repository": "GQAdonis/liter-llm",
-        "revision": "12a2fae9675e34b88e9373caa2bca9959f416493"
-      },
-      "recipeSource": {
-        "repository": "Prometheus-AGS/prometheus-skills-mini",
-        "revision": "f63617c24031960a99769d12c5f0b60065a95cee"
-      },
-      "workflowRun": "37005519137"
-    },
-    "surreal-memory": {
-      "image": "ghcr.io/prometheus-ags/the-boss-surreal-memory",
-      "digest": "sha256:e4e31dc855d67a1d2bf0757780a75266301d10d5abba1ba16038699287055c84",
-      "source": {
-        "repository": "Prometheus-AGS/surreal-memory-server",
-        "revision": "6acb60565949334beda22f52bcd36b33895b1db6"
-      },
-      "recipeSource": {
-        "repository": "Prometheus-AGS/surreal-memory-server",
-        "revision": "6acb60565949334beda22f52bcd36b33895b1db6"
-      },
-      "workflowRun": "37005519137"
-    }
   }
 }
