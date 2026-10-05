@@ -135,3 +135,11 @@ Root owns the Boss adapter and pin; runtime owns the native snapshot; operation
 owns the scoped driver evidence. Complete all three before the native/Mac build
 and failed Work operation rerun. Actual roster input remains unknown; there is
 no evidence authorizing a cursor repair yet.
+
+## Observed team-client MCP session ownership repair
+
+Actual packaged operation c14-d52f2b36-99d2-4d2c-b386-60fa6a3e82d8 at Boss cb171a43e055f5777562c4854ff63d0ba3911081/UAR4a28298225f137d713b2db8fbd5e8f78757e19d7 successfully initialized the coordinator filesystem connection, approved delegation and yielded. Worker and continuation then recorded required filesystem ConnectionFailed; neither reported the prior cache-shutdown failure. The installed SDK1.29.0 source rejects a second initialize on an already-initialized stateful transport. The HTTP400 is source-derived, not independently retained native HTTP evidence.
+
+The Boss team bridge must keep a separate stateful SDK server/transport per client session, mapped by exact MCP-Session-Id beneath its existing authenticated mounted route. UarTeamHostService supplies fresh FileSystemServer instances from the captured canonical workspace. Keep the existing bridge token, loopback/host/origin checks, shared authoritative admission port and exact member/run/binding/workspace effect checks. Client deletion closes only its owned session; team/generation teardown closes all sessions. Ordinary single-client bridges retain their existing instance path. UAR4a attempt-owned resources and normal cleanup remain correct. No stateless workaround, new scheduler, approval bypass or mutable workspace reread.
+
+Implementation order: record this repair; implement only UarHostMcpBridge.ts and UarTeamHostService.ts; complete source wiring and scoped formatting; then rebuild the real Mac application and repeat only the failed combined operation. No intermediate suites, compiler or review loops. No new UI strings, persisted fields or migrations are required by this protocol-lifetime repair. Parent canonical task ownership remains unchanged.
