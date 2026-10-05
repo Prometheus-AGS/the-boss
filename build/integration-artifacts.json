@@ -29,7 +29,7 @@
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "5a8fd22e1543ddbd7a182b2557fe94f631117c13"
+      "revision": "0b5c03d00795d5d9ebcf22d258740410a07aae0d"
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
@@ -492,9 +492,9 @@
           ]
         },
         "darwin-arm64": {
-          "source": "5a8fd22e1543ddbd7a182b2557fe94f631117c13",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-bossfang-grants-5a8fd22e-20261005/uar-sidecar-darwin-arm64.tar.gz",
-          "sha256": "c62948f1e22a0b171f6971816adae7371ec4e2c84587590bc107129aa5ed150b",
+          "source": "0b5c03d00795d5d9ebcf22d258740410a07aae0d",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-bossfang-grants-0b5c03d0-20261005/uar-sidecar-darwin-arm64.tar.gz",
+          "sha256": "5db7b6e5567247bcc173f74114a156716b0c7bbe6344cfeef99ade9e36a063f6",
           "archive": "tar.gz",
           "binaries": [
             "LICENSE",
