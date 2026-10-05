@@ -8,7 +8,7 @@ const run = (command, args, cwd, env = {}) =>
 
 function prepareDashboard(cwd) {
   const directory = path.join(cwd, 'crates/librefang-api/dashboard')
-  const pnpm = process.platform === 'win32' ? 'pnpm.exe' : 'pnpm'
+  const pnpm = process.env.BOSSFANG_PNPM_EXECUTABLE || (process.platform === 'win32' ? 'pnpm.exe' : 'pnpm')
   run(pnpm, ['install', '--frozen-lockfile', '--config.strict-dep-builds=false'], directory, { CI: 'true' })
   run(pnpm, ['run', 'build'], directory)
   return dashboardInventory(cwd)

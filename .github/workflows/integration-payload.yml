@@ -70,10 +70,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 12.6.0
-          standalone: true
+      - name: Install pinned dashboard package manager
+        run: npm install --prefix "${{ runner.temp }}/bossfang-pnpm" --no-save pnpm@12.6.0
       - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c
         with:
           toolchain: 1.97.1
@@ -99,6 +97,7 @@ jobs:
       - name: Build final native tool payload
         env:
           INTEGRATION_TOOLS: ${{ inputs.native_tools }}
+          BOSSFANG_PNPM_EXECUTABLE: ${{ runner.temp }}/bossfang-pnpm/node_modules/pnpm/pnpm${{ runner.os == 'Windows' && '.exe' || '' }}
         run: node scripts/build-integration-tools.cjs ${{ matrix.target }}
       - uses: actions/cache/save@v6
         if: always() && steps.native-cache.outputs.cache-hit != 'true'
