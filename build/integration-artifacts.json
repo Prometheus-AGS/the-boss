@@ -25,7 +25,7 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "62dc8243f34008e3e73dab48c910e418af7aef12"
+      "revision": "ce893fb89bb20c250ff222a6d12c2e0f4820eef0"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
