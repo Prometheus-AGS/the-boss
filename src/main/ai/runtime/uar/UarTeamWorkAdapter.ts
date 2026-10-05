@@ -48,7 +48,7 @@ export async function submitUarTeamTask(input: UarSubmitTeamTaskInput): Promise<
   const state = await target(input)
   let team = state.team
   await application.get('UarTeamHostService').ensure(team, state.generation)
-  const taskId = 'work:' + input.commandId
+  const taskId = 'work-' + input.commandId
   let task = team.tasks.find((record) => record.id === taskId)
   if (task && JSON.stringify(task.input) !== JSON.stringify({ request: input.prompt }))
     throw new Error('TEAM_REVISION_CONFLICT')
