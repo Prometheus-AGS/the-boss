@@ -25,8 +25,10 @@ export const bossFangHandlers: IpcHandlersFor<typeof bossFangRequestSchemas> = {
   'bossfang.diagnostic.start': ({ model }) => application.get('BossFangService').diagnostics.start(model),
   'bossfang.diagnostic.status': ({ id }) => application.get('BossFangService').diagnostics.restore(id),
   'bossfang.diagnostic.cancel': ({ id }) => application.get('BossFangService').diagnostics.cancel(id),
-  'bossfang.diagnostic.export': async ({ id }, { senderId }) =>
-    application
+  'bossfang.diagnostic.export': async ({ id }, { senderId }) => {
+    if (!senderId) throw new Error('Diagnostic export requires an application window')
+    return application
       .get('BossFangService')
       .exportLogs(senderId, id ? await application.get('BossFangService').diagnostics.restore(id) : undefined)
+  }
 }

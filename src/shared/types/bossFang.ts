@@ -63,12 +63,15 @@ export const bossFangDiagnosticSchema = z.object({
   cancellation: z
     .object({ requested: z.boolean(), acknowledged: z.boolean(), terminal: z.boolean(), cleanupUncertain: z.boolean() })
     .nullable(),
-  checks: bossFangDiagnosticChecksSchema.default(() => ({
-    listening: 'unknown',
-    authenticated: 'unknown',
-    compatible: 'unknown',
-    delegationOperational: 'unknown'
-  })),
+  checks: bossFangDiagnosticChecksSchema.default(
+    () =>
+      ({
+        listening: 'unknown',
+        authenticated: 'unknown',
+        compatible: 'unknown',
+        delegationOperational: 'unknown'
+      }) as const
+  ),
   stages: z.array(
     z.object({
       stage: z.enum(['connection', 'models', 'admission', 'delegation', 'completion']),

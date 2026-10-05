@@ -410,7 +410,7 @@ export class BossFangService extends BaseService {
     }
     throw new Error('BossFang did not become operational within 120 seconds; inspect redacted logs')
   }
-  async exportLogs(senderId: number, diagnostic?: unknown) {
+  async exportLogs(senderId: string, diagnostic?: unknown) {
     const parent = application.get('WindowManager').getWindow(senderId)
     if (!parent) throw new Error('Diagnostic export requires an application window')
     const { canceled, filePath } = await dialog.showSaveDialog(parent, {

@@ -431,7 +431,9 @@ export default function BossFangSettings() {
                       data-ui="bossfang-diagnostic-action"
                       variant="outline"
                       onClick={() => {
-                        if (diagnostic.action === 'open_dashboard') {
+                        const action = diagnostic.action
+                        if (!action) return
+                        if (action === 'open_dashboard') {
                           void act(() => open())
                           return
                         }
@@ -441,7 +443,7 @@ export default function BossFangSettings() {
                           select_workspace: 'bossfang-workspace',
                           select_model: 'bossfang-model',
                           retry: 'bossfang-diagnostic-start'
-                        }[diagnostic.action]
+                        }[action]
                         document.querySelector<HTMLElement>(`[data-ui~="${token}"]`)?.focus()
                       }}>
                       {t('bossfang.action.' + diagnostic.action)}

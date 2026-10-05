@@ -212,8 +212,9 @@ export class RetainedUarAuthorizations {
       if (!original.runtimeEpoch) throw failure('ORIGINAL_ADMISSION_EPOCH_UNAVAILABLE')
       const existing = [...this.records].filter((record) => this.matches(record, original))
       let authorization = selected && this.matches(selected, original) ? selected : existing.at(-1)
-      const configured = authorization
-        ? readIntegrationConfig().uar.instances.find((item) => item.id === authorization.inventoryId && item.enabled)
+      const authorizationInventoryId = authorization?.inventoryId
+      const configured = authorizationInventoryId
+        ? readIntegrationConfig().uar.instances.find((item) => item.id === authorizationInventoryId && item.enabled)
         : undefined
       if (authorization && !configured) throw failure('ORIGINAL_INVENTORY_DISABLED')
       const next = authorization
