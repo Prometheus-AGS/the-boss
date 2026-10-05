@@ -1,6 +1,6 @@
 const RELEASE_PLATFORM_KEYS = Object.freeze(['win32-x64', 'win32-arm64', 'darwin-arm64', 'darwin-x64'])
 const UAR_RELEASE_PLATFORM_KEYS = RELEASE_PLATFORM_KEYS
-const RETAINED_NATIVE_TOOLS = Object.freeze(['compass', 'rust-mcp-filesystem', 'prometheus', 'pk', 'node'])
+const RETAINED_NATIVE_TOOLS = Object.freeze(['compass', 'rust-mcp-filesystem', 'prometheus', 'pk', 'node', 'bossfang'])
 
 function resolveReleaseProfile(env = process.env) {
   const value = env.THE_BOSS_UAR_ENABLED

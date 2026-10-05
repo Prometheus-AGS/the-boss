@@ -24,7 +24,7 @@
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "bb6ea8ba10378732db5647c6957ba88788626ff9"
+      "revision": "eaac201443142f52937c1705393e30c4bb902d56"
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
@@ -33,6 +33,10 @@
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
       "revision": "a6047386cc9fae4258b4a8577f6a016022095586"
+    },
+    "bossfang": {
+      "repository": "GQAdonis/librefang",
+      "revision": "86413ac4c84760b210a9a3ec614fe76bd09a4aed"
     }
   },
   "tools": {
@@ -68,6 +72,12 @@
       "source": "liter-llm",
       "package": "liter-llm-cli",
       "version": "2.1.1"
+    },
+    "bossfang": {
+      "source": "bossfang",
+      "package": "librefang-cli",
+      "version": "2026.9.19+86413ac4c",
+      "features": "telemetry,surreal-backend,uar-driver"
     }
   },
   "catalogs": {

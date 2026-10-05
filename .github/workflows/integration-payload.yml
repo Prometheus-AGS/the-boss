@@ -70,6 +70,10 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 12.6.0
+          standalone: true
       - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c
         with:
           toolchain: 1.97.1
