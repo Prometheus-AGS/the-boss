@@ -76,7 +76,7 @@ export class UarTeamHostService extends BaseService {
           if (
             !attempt ||
             !member ||
-            member.status !== 'running' ||
+            ['revoked', 'stopped'].includes(member.status) ||
             member.revision !== attempt.memberRevision ||
             attempt.status !== 'running' ||
             attempt.bindingRevision !== team.binding.revision ||
