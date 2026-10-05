@@ -53,7 +53,7 @@ export class UarTeamHostService extends BaseService {
     }
     const directory = await realpath(agentWorkspaceService.getById(team.workspaceId).path)
     const bridge = await createUarHostMcpBridge(
-      { filesystem: { name: 'filesystem', instance: new FileSystemServer(directory).server } },
+      { filesystem: { name: 'filesystem', createInstance: () => new FileSystemServer(directory).server } },
       {
         sessionId: 'team:' + team.id,
         ownerId: team.ownerId,
