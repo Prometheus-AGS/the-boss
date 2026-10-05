@@ -64,6 +64,8 @@
   "appMenu.zoom": "Zoom",
   "appMenu.zoomIn": "Acercar",
   "appMenu.zoomOut": "Alejar",
+  "bossfang.diagnosticCheckFailed": "La comprobación de diagnóstico falló. Revise las credenciales del panel, la compatibilidad de UAR y los eventos de ejecución conservados.",
+  "bossfang.retainedAuthentication": "No se pudo actualizar la autenticación UAR original. Compruebe la instancia original habilitada, el espacio de trabajo y la ejecución conservada. La ejecución existente no se repite ni se traslada.",
   "chat.conversation.new": "Nuevo chat",
   "common.channel_available_commands": "Comandos disponibles:",
   "common.channel_command_processing_error": "⚠️ Se produjo un error al procesar el comando. Inténtalo de nuevo más tarde.",

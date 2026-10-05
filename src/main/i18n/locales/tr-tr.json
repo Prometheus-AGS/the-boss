@@ -64,6 +64,8 @@
   "appMenu.zoom": "Yakınlaştırma",
   "appMenu.zoomIn": "Yakınlaştır",
   "appMenu.zoomOut": "Uzaklaştır",
+  "bossfang.diagnosticCheckFailed": "Tanılama denetimi başarısız oldu. Pano kimlik bilgilerini, UAR uyumluluğunu ve saklanan çalıştırma olaylarını kontrol edin.",
+  "bossfang.retainedAuthentication": "Özgün UAR kimlik doğrulaması güncellenemedi. Özgün etkin örneği, çalışma alanını ve saklanan çalıştırmayı kontrol edin. Mevcut çalıştırma yeniden başlatılmaz veya taşınmaz.",
   "chat.conversation.new": "Yeni Sohbet",
   "common.channel_available_commands": "Kullanılabilir komutlar:",
   "common.channel_command_processing_error": "⚠️ Komut işlenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.",

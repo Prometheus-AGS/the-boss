@@ -83,8 +83,7 @@ export class BossFangService extends BaseService {
     }
     this.registerDisposable(
       application.get('PreferenceService').subscribeChange('app.prometheus.integrations', () => {
-        if (this.connection.state === 'connected')
-          void this.connection.refresh().catch((error) => this.log('error', String(error)))
+        void this.connection.refresh().catch((error) => this.log('error', String(error)))
       })
     )
   }
@@ -247,7 +246,9 @@ export class BossFangService extends BaseService {
               ...Object.fromEntries(
                 Object.entries(process.env).filter(
                   ([key]) =>
-                    !key.startsWith('LIBREFANG_') && !/(_API_KEY|_API_TOKEN|_ACCESS_TOKEN|_SECRET_KEY)$/.test(key)
+                    !key.startsWith('LIBREFANG_') &&
+                    !['LITER_LLM_MASTER_KEY', 'KNOW_ME_GITOPS_TOKEN'].includes(key) &&
+                    !/(_API_KEY|_API_TOKEN|_ACCESS_TOKEN|_SECRET_KEY)$/.test(key)
                 )
               ),
               LIBREFANG_HOME: directory,
@@ -272,7 +273,7 @@ export class BossFangService extends BaseService {
           this.status = 'error'
           this.origin = null
           this.dashboardToken = null
-          void this.connection.disconnect().catch(() => undefined)
+          void this.connection.shutdown().catch(() => undefined)
           this.log('error', 'Managed BossFang process exited; restart from Settings')
         })
         await this.waitUntilReady(child, () => spawnError)
@@ -382,7 +383,7 @@ export class BossFangService extends BaseService {
     })
   }
   private async stopOwnedProcess() {
-    await this.connection.disconnect().catch((error) => this.log('warning', String(error)))
+    await this.connection.shutdown().catch((error) => this.log('warning', String(error)))
     const child = this.child
     this.child = null
     if (!child?.pid) return

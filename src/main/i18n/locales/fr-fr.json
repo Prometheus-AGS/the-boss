@@ -64,6 +64,8 @@
   "appMenu.zoom": "Zoom",
   "appMenu.zoomIn": "Zoom Avant",
   "appMenu.zoomOut": "Dézoomer",
+  "bossfang.diagnosticCheckFailed": "Le contrôle de diagnostic a échoué. Vérifiez les identifiants du tableau de bord, la compatibilité UAR et les événements d’exécution conservés.",
+  "bossfang.retainedAuthentication": "L’authentification UAR d’origine n’a pas pu être mise à jour. Vérifiez l’instance d’origine activée, l’espace de travail et l’exécution conservée. L’exécution existante n’est ni rejouée ni déplacée.",
   "chat.conversation.new": "Nouvelle conversation",
   "common.channel_available_commands": "Commandes disponibles :",
   "common.channel_command_processing_error": "⚠️ Une erreur s’est produite lors du traitement de la commande. Veuillez réessayer plus tard.",

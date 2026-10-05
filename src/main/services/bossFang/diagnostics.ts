@@ -5,6 +5,7 @@ import fs from 'node:fs/promises'
 import * as z from 'zod'
 
 import { application } from '@application'
+import { t } from '@main/i18n'
 import { bossFangDiagnosticSchema, type BossFangDiagnostic } from '@shared/types/bossFang'
 
 import { readConfig } from './storage'
@@ -99,6 +100,50 @@ export class BossFangDiagnostics {
     stage.detail = this.safe(detail)
     this.publish(record)
   }
+  private check(
+    record: BossFangDiagnostic,
+    name: keyof BossFangDiagnostic['checks'],
+    status: BossFangDiagnostic['checks'][typeof name]
+  ) {
+    record.checks[name] = status
+    this.publish(record)
+  }
+  private async checkConnection(record: BossFangDiagnostic) {
+    for (const name of ['listening', 'authenticated'] as const) {
+      this.check(record, name, 'running')
+      const response = await this.request(name === 'listening' ? '/api/health' : '/api/authz/whoami')
+      const body = await response.json().catch(() => null)
+      const valid =
+        name === 'listening'
+          ? z.object({ status: z.literal('ok') }).safeParse(body).success
+          : z.object({ user_id: z.string().min(1), role: z.enum(['viewer', 'user', 'admin', 'owner']) }).safeParse(body)
+              .success
+      this.check(record, name, response.ok && valid ? 'succeeded' : 'failed')
+      if (!response.ok || !valid)
+        throw new Error(t('bossfang.diagnosticCheckFailed') + ' [' + name + '_HTTP_' + response.status + ']')
+    }
+  }
+  private async checkCompatibility(record: BossFangDiagnostic) {
+    this.check(record, 'compatible', 'running')
+    const response = await this.request('/api/uar/status')
+    const result = z
+      .object({
+        state: z.literal('healthy'),
+        selected_instance_id: z.string(),
+        effective_binding: z.object({ instance_id: z.string(), capabilities: z.array(z.string()) }),
+        compatibility: z.null()
+      })
+      .safeParse(await response.json().catch(() => null))
+    const compatible =
+      response.ok &&
+      result.success &&
+      result.data.selected_instance_id === record.instanceId &&
+      result.data.effective_binding.instance_id === record.instanceId &&
+      result.data.effective_binding.capabilities.includes('full_harness_delegation_v1')
+    this.check(record, 'compatible', compatible ? 'succeeded' : 'failed')
+    if (!compatible)
+      throw new Error(t('bossfang.diagnosticCheckFailed') + ' [COMPATIBILITY_HTTP_' + response.status + ']')
+  }
   async start(model: string) {
     const config = readConfig()
     const running = [...this.records.values()].find((x) => x.status === 'running')
@@ -113,6 +158,12 @@ export class BossFangDiagnostics {
       model,
       taskId: null,
       cancellation: null,
+      checks: {
+        listening: 'pending',
+        authenticated: 'pending',
+        compatible: 'pending',
+        delegationOperational: 'pending'
+      },
       stages: ['connection', 'models', 'admission', 'delegation', 'completion'].map((stage) => ({
         stage: stage as BossFangDiagnostic['stages'][number]['stage'],
         status: 'pending',
@@ -132,11 +183,13 @@ export class BossFangDiagnostics {
     let stage: BossFangDiagnostic['stages'][number]['stage'] = 'connection'
     try {
       this.stage(record, stage, 'running')
+      await this.checkConnection(record)
       await this.connect()
       const current = readConfig()
       if (current.workspaceId !== record.workspaceId || current.uarInstanceId !== record.instanceId)
         throw new Error('Diagnostic selection changed before admission; start a new diagnostic for the saved selection')
       record.instanceId = this.selectedInstance() ?? record.instanceId
+      await this.checkCompatibility(record)
       if (this.cancelled.has(record.id)) throw new Error('Diagnostic cancelled before admission')
       this.stage(record, stage, 'succeeded')
       stage = 'models'
@@ -180,6 +233,8 @@ export class BossFangDiagnostics {
       stage = 'delegation'
       this.stage(record, stage, 'running')
       let cursor = 0
+      let modelTextObserved = false
+      this.check(record, 'delegationOperational', 'running')
       while (!this.stopping) {
         const response = await this.request(
           `/api/uar/delegations/${encodeURIComponent(record.taskId)}/events?after=${cursor}`
@@ -206,6 +261,10 @@ export class BossFangDiagnostics {
             ...(event.occurredAt ? { occurredAt: event.occurredAt } : {}),
             detail: this.safe(JSON.stringify(event.data))
           })
+          if (event.type === 'agui.message.delta') {
+            const delta = z.object({ delta: z.object({ text: z.string() }) }).safeParse(event.data)
+            if (delta.success && delta.data.delta.text.trim().length > 0) modelTextObserved = true
+          }
           if (event.type === 'agui.done' && event.data && typeof event.data === 'object') {
             const data = event.data as Record<string, unknown>
             const usage = modelUsageSchema.safeParse(data.usage)
@@ -216,7 +275,8 @@ export class BossFangDiagnostics {
         this.publish(record)
         const state = page.delegation.executionState
         if (['completed', 'failed', 'cancelled'].includes(state)) {
-          const succeeded = state === 'completed'
+          const succeeded = state === 'completed' && modelTextObserved
+          this.check(record, 'delegationOperational', succeeded ? 'succeeded' : 'failed')
           record.status = succeeded ? 'succeeded' : state === 'cancelled' ? 'cancelled' : 'failed'
           if (!succeeded) {
             record.error = this.safe(`Diagnostic execution ended in ${state}; inspect the retained run events`)
@@ -229,11 +289,14 @@ export class BossFangDiagnostics {
         await new Promise((resolve) => setTimeout(resolve, 500))
       }
       if (this.stopping) {
+        this.check(record, 'delegationOperational', 'failed')
         record.status = 'failed'
         record.error = 'Diagnostic observer stopped; execution was not replayed or implicitly cancelled'
         record.action = 'open_dashboard'
       }
     } catch (error) {
+      for (const name of Object.keys(record.checks) as (keyof BossFangDiagnostic['checks'])[])
+        if (record.checks[name] === 'running') record.checks[name] = 'failed'
       record.status = this.cancelled.has(record.id) && !record.taskId ? 'cancelled' : 'failed'
       record.error = this.safe(error instanceof Error ? error.message : String(error))
       record.action ??= 'retry'

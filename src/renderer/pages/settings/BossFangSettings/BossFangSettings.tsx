@@ -389,6 +389,18 @@ export default function BossFangSettings() {
                   className="mt-4 space-y-3"
                   aria-live="polite">
                   <p>{t('bossfang.diagnosticStatus.' + diagnostic.status)}</p>
+                  <ul className="space-y-2">
+                    {(['listening', 'authenticated', 'compatible', 'delegationOperational'] as const).map((check) => (
+                      <li
+                        key={check}
+                        data-ui={'bossfang-check-' + check}
+                        data-check-status={diagnostic.checks[check]}
+                        className="text-sm">
+                        <span className="font-medium">{t('bossfang.check.' + check)}</span> ·{' '}
+                        {t('bossfang.stageStatus.' + diagnostic.checks[check])}
+                      </li>
+                    ))}
+                  </ul>
                   <ol className="space-y-2">
                     {diagnostic.stages.map((stage) => (
                       <li

@@ -45,6 +45,12 @@ export const bossFangStatusSchema = z.object({
 })
 export type BossFangStatus = z.infer<typeof bossFangStatusSchema>
 
+export const bossFangDiagnosticChecksSchema = z.object({
+  listening: z.enum(['unknown', 'pending', 'running', 'succeeded', 'failed']),
+  authenticated: z.enum(['unknown', 'pending', 'running', 'succeeded', 'failed']),
+  compatible: z.enum(['unknown', 'pending', 'running', 'succeeded', 'failed']),
+  delegationOperational: z.enum(['unknown', 'pending', 'running', 'succeeded', 'failed'])
+})
 export const bossFangDiagnosticSchema = z.object({
   id: z.string(),
   status: z.enum(['running', 'succeeded', 'failed', 'cancelled']),
@@ -57,6 +63,12 @@ export const bossFangDiagnosticSchema = z.object({
   cancellation: z
     .object({ requested: z.boolean(), acknowledged: z.boolean(), terminal: z.boolean(), cleanupUncertain: z.boolean() })
     .nullable(),
+  checks: bossFangDiagnosticChecksSchema.default(() => ({
+    listening: 'unknown',
+    authenticated: 'unknown',
+    compatible: 'unknown',
+    delegationOperational: 'unknown'
+  })),
   stages: z.array(
     z.object({
       stage: z.enum(['connection', 'models', 'admission', 'delegation', 'completion']),

@@ -64,6 +64,8 @@
   "appMenu.zoom": "Zoom",
   "appMenu.zoomIn": "Heranzoomen",
   "appMenu.zoomOut": "Herauszoomen",
+  "bossfang.diagnosticCheckFailed": "Diagnoseprüfung fehlgeschlagen. Prüfen Sie Dashboard-Zugangsdaten, UAR-Kompatibilität und die gespeicherten Ausführungsereignisse.",
+  "bossfang.retainedAuthentication": "Die ursprüngliche UAR-Authentifizierung konnte nicht aktualisiert werden. Prüfen Sie die ursprüngliche aktivierte Instanz, den Arbeitsbereich und den gespeicherten Lauf. Die bestehende Ausführung wird weder wiederholt noch verschoben.",
   "chat.conversation.new": "Neuer Chat",
   "common.channel_available_commands": "Verfügbare Befehle:",
   "common.channel_command_processing_error": "⚠️ Beim Verarbeiten des Befehls ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.",

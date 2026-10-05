@@ -64,6 +64,8 @@
   "appMenu.zoom": "Thu phóng",
   "appMenu.zoomIn": "Phóng to",
   "appMenu.zoomOut": "Thu nhỏ",
+  "bossfang.diagnosticCheckFailed": "Kiểm tra chẩn đoán thất bại. Kiểm tra thông tin đăng nhập bảng điều khiển, tính tương thích UAR và các sự kiện thực thi được lưu giữ.",
+  "bossfang.retainedAuthentication": "Không thể cập nhật xác thực UAR ban đầu. Kiểm tra phiên bản đang bật ban đầu, không gian làm việc và lượt chạy được giữ lại. Lượt chạy hiện tại không được chạy lại hoặc chuyển đi.",
   "chat.conversation.new": "Cuộc trò chuyện mới",
   "common.channel_available_commands": "Các lệnh có sẵn:",
   "common.channel_command_processing_error": "⚠️ Đã xảy ra lỗi khi xử lý lệnh. Vui lòng thử lại sau.",
