@@ -86,6 +86,7 @@ import {
   type UarInstanceInventorySnapshot
 } from '@shared/types/uarServiceInstance'
 import { uarTeamContextSchema, uarTeamPeerMessagesSchema } from '@shared/types/uarTeamContext'
+import type { UarTeamRunEventsSnapshot } from '@shared/types/uarTeamRunEvents'
 import type { UarExecutionOwnerSnapshot, UarExecutionReclaimReceipt } from '@shared/types/uarTeamProfiles'
 import {
   uarAuthoredTeamSchema,
@@ -557,6 +558,13 @@ export const prometheusRequestSchemas = {
   'prometheus.uar.teams.execution': defineRoute({
     input: teamExecutionSelectorSchema,
     output: z.custom<UarTeamExecutionSummary>()
+  }),
+  'prometheus.uar.teams.events': defineRoute({
+    input: teamExecutionSelectorSchema.extend({
+      attemptId: z.string().min(1).max(256),
+      after: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER).optional()
+    }),
+    output: z.custom<UarTeamRunEventsSnapshot>()
   }),
   'prometheus.uar.teams.artifacts': defineRoute({
     input: teamExecutionSelectorSchema,

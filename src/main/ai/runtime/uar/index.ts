@@ -91,6 +91,7 @@ export {
 } from './UarExecutionOwnershipAdapter'
 
 export { readUarTeamContext, readUarTeamPeerMessages } from './UarTeamContextAdapter'
+export { readUarTeamRunEvents } from './UarTeamRunEventsAdapter'
 
 export {
   readUarChannelObservers,
