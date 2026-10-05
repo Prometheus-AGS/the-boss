@@ -112,3 +112,26 @@ wire metadata and pending ownership. The operation worker owns exact fixture
 approval checks. Finish the complete seam before rebuilding the affected native
 payload and Mac application and repeating the failed Work operation. Prior signed
 build/launch receipts remain evidence for their actual source, not this repair.
+
+## Observed run-event inspection gap
+
+The complete packaged operation reached an approval the fixture could not safely
+classify; a subsequent operation stopped after a roster cursor conflict. Exact
+tool inputs were not retained before the isolated sidecar stopped. Native public
+SSE already contains those inputs, but subscribing has disconnect cancellation
+semantics and its bounded process-local history disappears on shutdown.
+
+UAR provides an owner-scoped, read-only snapshot of that existing history at
+`GET /api/uar/runs/{id}/events?after=0`. It adds no subscription, persistence
+authority, cursor normalization or execution permission. Retention gaps are
+explicit. The Boss exposes only a typed workspace/team/attempt selector through
+protected main-process IPC, resolves its run from the authoritative execution
+summary, and checks response identity and sequence. Renderer input cannot select
+an arbitrary run, URL or credential. The operation driver retains only safe
+tool argument classifications, hashes and correlated error codes before exit;
+it does not relax approval checks or retain full prompts/transcripts.
+
+Root owns the Boss adapter and pin; runtime owns the native snapshot; operation
+owns the scoped driver evidence. Complete all three before the native/Mac build
+and failed Work operation rerun. Actual roster input remains unknown; there is
+no evidence authorizing a cursor repair yet.
