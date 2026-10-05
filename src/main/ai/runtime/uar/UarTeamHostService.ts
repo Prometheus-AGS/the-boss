@@ -7,7 +7,7 @@ import { FileSystemServer } from '@main/ai/mcp/servers/filesystem'
 import { BaseService, Injectable, Phase, ServicePhase } from '@main/core/lifecycle'
 import type { UarTeamInstance } from '@shared/types/uarTeams'
 
-import { uarApprovalLifecycleStore } from './uarApprovalLifecycleStore'
+import { uarApprovalLifecycleStore } from './UarApprovalLifecycleStore'
 import { createUarAuthorityProvider } from './UarAuthorityProvider'
 import { codingReadTools, codingWriteTools, UAR_CODING_TEAM_ID } from './uarCodingTeamPackage'
 import { scopedRequest } from './UarDurableAdministrationAdapter'
