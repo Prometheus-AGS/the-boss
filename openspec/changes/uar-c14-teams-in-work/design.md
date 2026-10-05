@@ -39,3 +39,23 @@ The shipped mini authoring contract is pinned to `62dc8243f34008e3e73dab48c910e4
 Both consume the identical strict draft.2 task-acceptance schema and retain
 the draft.1 predecessor. This pin updates source payloads; native operation
 remains the acceptance authority.
+
+## Observed coding package capability closure repair
+
+Actual packaged Work operation `c14-a9c12098-ff4e-488d-9934-937f36b7ba7a`
+still reports HTTP 422 during coding-preset-through-work with native UAR
+`d8896d743cd945d40f918ff8ca397909f6c1fe22` and Boss `309af328f075646061d38a30e3ee6df4218a8c7a`.
+Its preserved evidence reports the ordinary qualified profile and no pricing
+unavailable error. Source identifies a separate producer defect: each coding
+AgentDefinition and TeamDefinition requires `team_execution_host_workspace_v1`,
+but the package manifest declares only `collaboration_definition_packages_v2`.
+UAR `validation/graph.rs` requires every definition-required capability to have
+a required manifest declaration and rejects the incomplete closure during package
+preflight. Add the existing host capability to `capabilityDeclarations` with
+`required: true`; preserve all definition, tool, binding and runtime admission
+requirements. No UAR validator change or capability grant is introduced.
+
+This repair is source-only. No worker tests, compiler, builds or review run;
+commit and push hooks are suppressed under the lead's approved delivery boundary.
+The lead owns the exact candidate freeze, packaged build and failed-operation
+rerun. A repaired manifest does not prove later binding or execution succeeds.
