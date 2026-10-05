@@ -59,3 +59,29 @@ This repair is source-only. No worker tests, compiler, builds or review run;
 commit and push hooks are suppressed under the lead's approved delivery boundary.
 The lead owns the exact candidate freeze, packaged build and failed-operation
 rerun. A repaired manifest does not prove later binding or execution succeeds.
+
+## Observed request provenance and member lifecycle repair
+
+The lead reports an actual packaged team created successfully, followed by
+`TEAM_SCOPE_DENIED` before any attempt. Native team member slots are initialized
+as `inactive`; native task claims and execution admission exclude `revoked` and
+`stopped` membership, without requiring membership status `running`. Boss task
+submission instead searches for a coordinator with status `running`, and host
+invocation verification separately imposes the same unsupported membership
+requirement. Match native membership eligibility in both places. Keep the host's
+separate running execution attempt, member revision, binding revision, selected
+generation, run identity, principal, owner, workspace and role/tool checks.
+Membership eligibility itself confers no execution or effect authority.
+
+An observed lost HTTP failure provenance also exposes a separate request-helper
+defect: privileged team requests parse JSON before checking HTTP status and
+replace every non-`TEAM_*` native error with `TEAM_SCOPE_DENIED`. Handle failed
+body parsing without replacing its HTTP failure; preserve method/path/status and
+the native structured error code using the existing scoped request error format.
+Parse successful JSON normally. This retains genuine team codes for the existing
+localized renderer diagnostic mapper. Bare or non-team HTTP 429 must remain an
+HTTP 429, without changing quota, adding retries or disguising authorization.
+
+Only the three runtime adapters/services and this factual source plan change.
+No worker tests, compiler, builds or review run. The lead owns packaging and the
+actual operation rerun; source diagnosis is not completed runtime acceptance.
