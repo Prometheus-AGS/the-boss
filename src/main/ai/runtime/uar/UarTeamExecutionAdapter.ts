@@ -286,14 +286,13 @@ async function privilegedTeamRequest(
     },
     state.generation
   )
-  const body: unknown = await response.json()
   if (!response.ok) {
-    const error = z.object({ error: z.object({ code: z.string() }) }).safeParse(body)
+    const error = z.object({ error: z.object({ code: z.string() }) }).safeParse(await response.json().catch(() => null))
     throw new Error(
-      error.success && /^TEAM_[A-Z_]+$/.test(error.data.error.code) ? error.data.error.code : 'TEAM_SCOPE_DENIED'
+      `UAR request POST ${state.path + suffix} failed with HTTP ${response.status}${error.success ? ` (${error.data.error.code})` : ''}`
     )
   }
-  return body
+  return response.json()
 }
 
 export async function queueUarTeamTask(input: UarAdmitTeamTaskInput): Promise<UarTeamExecutionAttempt> {

@@ -67,7 +67,9 @@ export async function submitUarTeamTask(input: UarSubmitTeamTaskInput): Promise<
     task = team.tasks.find((record) => record.id === taskId)
   }
   if (!task) throw new Error('TEAM_SCOPE_DENIED')
-  const coordinator = team.members.find((member) => member.role === 'coordinator' && member.status === 'running')
+  const coordinator = team.members.find(
+    (member) => member.role === 'coordinator' && !['revoked', 'stopped'].includes(member.status)
+  )
   if (!coordinator) throw new Error('TEAM_SCOPE_DENIED')
   if (!task.assigneeMemberId) {
     team = await claimUarTeamTask({
