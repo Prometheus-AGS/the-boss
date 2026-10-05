@@ -37,7 +37,7 @@ export function relativeFile(file: string): string {
 }
 export function validateTeam(value: unknown): Team {
   const t = object(value, 'team');
-  const allowed = ['schemaVersion','id','outcome','scope','harness','roles','modelPolicy','skillPolicies','native'];
+  const allowed = ['schemaVersion','id','outcome','scope','harness','roles','modelPolicy','skillPolicies','native','agentMemory'];
   for (const key of Object.keys(t)) if (!allowed.includes(key)) throw Error(`Unknown team field ${key}; use native.<target>.options or files for harness-specific configuration`);
   if (t.schemaVersion !== 1) throw Error('team.schemaVersion must be 1');
   id(t.id, 'team.id'); text(t.outcome, 'team.outcome');
@@ -64,6 +64,11 @@ export function validateTeam(value: unknown): Team {
     visiting.add(key); r.dependsOn.forEach(visit); visiting.delete(key); visited.add(key);
   }
   ids.forEach(visit);
+  if (t.agentMemory !== undefined) {
+    const m = object(t.agentMemory, 'agentMemory');
+    for (const key of Object.keys(m)) if (key !== 'claude') throw Error(`Unknown agentMemory field ${key}`);
+    if (m.claude !== undefined && m.claude !== 'local') throw Error("agentMemory.claude must be 'local'");
+  }
   if (t.modelPolicy !== undefined) policy(t.modelPolicy, 'modelPolicy');
   if (t.skillPolicies !== undefined) for (const [key, v] of Object.entries(object(t.skillPolicies))) policy(v, `skillPolicies.${key}`);
   if (t.native !== undefined) for (const [key, v] of Object.entries(object(t.native))) {

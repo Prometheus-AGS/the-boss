@@ -11,7 +11,7 @@
   },
   "provider": {
     "repository": "Prometheus-AGS/universal-agent-runtime",
-    "commit": "0db89a46db5bd590e5d9a9732389f41e3785bdb1",
+    "commit": "d8896d743cd945d40f918ff8ca397909f6c1fe22",
     "profile": "urn:prometheus:uar:collaboration:0.1.0-draft.2",
     "sourceDirectory": "docs/agents/collaboration/v0.1.0-draft.2/schemas"
   },
@@ -59,7 +59,7 @@
     },
     {
       "path": "team-definition.schema.json",
-      "sha256": "3b7f1102c5d822b654dc562689b7fa6316c80c01b63d3bb3fe808d4ee30673ef"
+      "sha256": "0fee47de55de762c09c158c73cda481c5b3857c5f999253885069b35daa58bcc"
     },
     {
       "path": "workflow-definition.schema.json",
