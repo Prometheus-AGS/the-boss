@@ -21,3 +21,21 @@ payload without weakening schema or workspace/tool authority. Existing malformed
 definitions are not silently relabelled or migrated. Repeat the affected packaged
 operation after rebuilding the corrected complete delivery; this source repair
 does not itself establish runtime acceptance.
+
+## Observed direct-task contract repair
+
+The corrected packaged preset still returned `collaboration_invalid` from
+`POST /api/v1/collaboration/packages:preflight`. Its bounded coordinator team
+intentionally declares no workflows, but the draft.2 schema required at least
+one. Consume the canonical schema repair at UAR `d8896d743cd945d40f918ff8ca397909f6c1fe22`:
+coordinator-within-binding permits an empty immutable workflow allow-list;
+operator mode retains its nonempty requirement. Workflow execution still
+requires an exact allow-list member. Mirror the same strict contract into
+the shipped authoring skill; do not invent a workflow or widen tool authority.
+Rebuild and operate the actual preset; source acceptance is not runtime evidence.
+
+The shipped mini authoring contract is pinned to `62dc8243f34008e3e73dab48c910e418af7aef12`
+(full-pack mirror `34beecdfbda23748cdb4d423e2401aa270ebce3f`).
+Both consume the identical strict draft.2 task-acceptance schema and retain
+the draft.1 predecessor. This pin updates source payloads; native operation
+remains the acceptance authority.
