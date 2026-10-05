@@ -103,7 +103,10 @@ export function codingTeamPackage() {
       { path: 'team.json', kind: 'TeamDefinition', definition: teamRef }
     ].map((entry) => ({ ...entry, byteDigest: byteDigest(files[entry.path]) })),
     lock: refs.map(({ ref, path }) => ({ requestedBy: UAR_CODING_TEAM_ID, reference: ref, resolvedPath: path })),
-    capabilityDeclarations: [{ capability: 'collaboration_definition_packages_v2', required: true }],
+    capabilityDeclarations: [
+      { capability: 'collaboration_definition_packages_v2', required: true },
+      { capability: UAR_TEAM_HOST_CAPABILITY, required: true }
+    ],
     resolution: 'exact-version-and-digest'
   })
   return {
