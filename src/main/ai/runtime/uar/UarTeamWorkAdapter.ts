@@ -120,6 +120,7 @@ export async function readUarTeamApprovals(input: UarTeamExecutionSelector): Pro
               attemptId: attempt.id,
               runId: attempt.runId,
               approvalId: pending.approvalId,
+              admissionOwner: pending.admissionOwner,
               eventId: pending.eventId,
               cursor: pending.cursor,
               toolName: pending.name,
