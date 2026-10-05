@@ -470,9 +470,9 @@
           ]
         },
         "win32-arm64": {
-          "source": "bb6ea8ba10378732db5647c6957ba88788626ff9",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-arm64-v1.0.0-merged-344-bb6ea8ba-20261004/uar-sidecar-win32-arm64.tar.gz",
-          "sha256": "0c01d2ace3286909a68d4c28299315b12e2b40e8470a7c11e4d2505dbcc53b5a",
+          "source": "eaac201443142f52937c1705393e30c4bb902d56",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-arm64-v1.0.0-bossfang-grants-eaac2014-20261005/uar-sidecar-win32-arm64.tar.gz",
+          "sha256": "690934e808f1c5b5c46f1e817c7a32902fdf91258f2c7170ebf9620eed3b32a9",
           "archive": "tar.gz",
           "binaries": [
             "crc_fast-ec816f13e81631da.dll",
