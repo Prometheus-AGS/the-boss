@@ -24,7 +24,7 @@
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "0b5c03d00795d5d9ebcf22d258740410a07aae0d"
+      "revision": "4a28298225f137d713b2db8fbd5e8f78757e19d7"
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
