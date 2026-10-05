@@ -492,13 +492,11 @@
           ]
         },
         "darwin-arm64": {
-          "source": "eaac201443142f52937c1705393e30c4bb902d56",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-bossfang-grants-eaac2014-20261005/uar-sidecar-darwin-arm64.tar.gz",
-          "sha256": "4b49a8ce2c97966b641f862fa0d7aceddb3b984db54e9b465756d437f788e1f4",
+          "source": "5a8fd22e1543ddbd7a182b2557fe94f631117c13",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-bossfang-grants-5a8fd22e-20261005/uar-sidecar-darwin-arm64.tar.gz",
+          "sha256": "c62948f1e22a0b171f6971816adae7371ec4e2c84587590bc107129aa5ed150b",
           "archive": "tar.gz",
           "binaries": [
-            "libcrc_fast-c9544bfaf069c5bc.dylib",
-            "libsevenz_rust2-bcd9d32571c57b36.dylib",
             "LICENSE",
             "policies/default.cedar",
             "policies/skill-mutation.cedar",

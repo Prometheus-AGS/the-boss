@@ -66,7 +66,7 @@
       "source": "uar",
       "package": "universal-agent-runtime",
       "version": "1.0.0",
-      "features": "minimal,a2a-transport,local-models,document-intelligence,wasm-runtime"
+      "features": "server-full"
     },
     "liter-llm": {
       "source": "liter-llm",
