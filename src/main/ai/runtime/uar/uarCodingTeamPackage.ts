@@ -37,7 +37,9 @@ export function codingTeamPackage() {
             ? 'Make only the requested bounded change within the assigned workspace using filesystem tools. Read the relevant files first. Tool effects require host authorization. Return a concise string describing actual edits and evidence; do not claim checks you did not run.'
             : 'Independently inspect the actual workspace files and supplied worker artifacts with readonly filesystem tools. Return a string with concrete findings and acceptance or rejection. You cannot write files.',
       requiredCapabilities: [UAR_TEAM_HOST_CAPABILITY],
-      extensions: { [UAR_TEAM_HOST_EXTENSION]: { required: true, version: 1, tools, servers: ['filesystem'] } },
+      extensions: {
+        [UAR_TEAM_HOST_EXTENSION]: { required: true, value: { version: 1, tools, servers: ['filesystem'] } }
+      },
       output: { type: 'string' },
       requestedLimits: { concurrentTurns: 1, maxMembers: 3, maxDepth: 0, maxPendingTasks: 8 }
     })
