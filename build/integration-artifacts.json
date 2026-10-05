@@ -29,7 +29,7 @@
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "eaac201443142f52937c1705393e30c4bb902d56"
+      "revision": "5a8fd22e1543ddbd7a182b2557fe94f631117c13"
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
@@ -41,7 +41,7 @@
     },
     "bossfang": {
       "repository": "GQAdonis/librefang",
-      "revision": "72cab04dc58d331574b8b81a9f18db48d1e64c4f"
+      "revision": "bafa21e8d469a41104c07c7281a4e3f97cb16009"
     }
   },
   "tools": [
@@ -539,7 +539,7 @@
     },
     {
       "name": "bossfang",
-      "version": "2026.9.19+72cab04dc",
+      "version": "2026.9.19+bafa21e8d",
       "packages": {
         "darwin-arm64": {
           "source": "72cab04dc58d331574b8b81a9f18db48d1e64c4f",
