@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "kind": "source-integration-checkpoint",
   "status": "source-only-not-promoted",
-  "recordedAt": "2026-10-06T22:18:36.327Z",
+  "recordedAt": "2026-10-06T22:52:17.578Z",
   "merge": {
-    "commit": "d5ff81679922c50cf776aa758a9c196be0c05b97",
+    "commit": "29e84a2d6c3a235d660a01b8d0db7282003c572d",
     "parents": [
-      "7603418b6598c9e2efcc135ad22c77a4d9af0f5c",
-      "d2a865314be21c626fc235dee125381b6d4361a0"
+      "65d6b7f112aae080384be4058f72dc48e5095f34",
+      "be00ee09e1c6e32f6a57f58d22c10c42aca67520"
     ],
     "approvalSource": "7603418b6598c9e2efcc135ad22c77a4d9af0f5c",
-    "repairedC15": "d2a865314be21c626fc235dee125381b6d4361a0",
+    "repairedC15": "be00ee09e1c6e32f6a57f58d22c10c42aca67520",
     "conflicts": false
   },
   "mini": {
@@ -259,7 +259,7 @@
   ],
   "preserved": [
     "C14.2 approval lifecycle source",
-    "UAR source and binary URLs",
+    "Published UAR binary URLs; local source inherited only through exact C15 merge",
     "historical imageProvenance recipe source",
     "full-pack dirty checkout",
     "Cadence ledgers"
@@ -276,5 +276,33 @@
     "packaging": "not-run",
     "operations": "not-run",
     "promotion": "not-performed"
+  },
+  "priorMerges": [
+    {
+      "commit": "d5ff81679922c50cf776aa758a9c196be0c05b97",
+      "parents": [
+        "7603418b6598c9e2efcc135ad22c77a4d9af0f5c",
+        "d2a865314be21c626fc235dee125381b6d4361a0"
+      ],
+      "approvalSource": "7603418b6598c9e2efcc135ad22c77a4d9af0f5c",
+      "repairedC15": "d2a865314be21c626fc235dee125381b6d4361a0",
+      "conflicts": false
+    }
+  ],
+  "boundedDiagnostics": {
+    "sourceCommit": "9f7d936d9c06051aae0012bd659c8b65069c32ce",
+    "fields": [
+      "sourceStage",
+      "category",
+      "httpStatus",
+      "collaborationCode"
+    ],
+    "purpose": "Preserve safe failure stage and approved codes through existing scoped attempt IPC and Teams UI; retain safe attempt evidence before operation failure.",
+    "localUarSourceInheritedFromC15": "d324d94a8fcd374f5ddde325a7dada354502cd1b",
+    "approvalRuntimePinSelected": false,
+    "publishedBinaryUrlsChanged": false,
+    "receiptProcedureExecuted": false,
+    "underlyingAttemptSuccess": "unverified",
+    "completedPackagedApprovalOperation": "pending"
   }
 }
