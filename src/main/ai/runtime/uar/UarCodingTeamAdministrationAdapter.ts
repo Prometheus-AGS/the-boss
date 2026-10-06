@@ -80,7 +80,7 @@ export async function setupUarCodingTeam(workspaceId: string, model: UarTeamMode
     storageBackend: capabilities.catalogStorage.backend,
     packageIdentity: preset.identity,
     ...selected,
-    bindingId: 'urn:boss:coding:binding:' + state.workspaceId + ':' + modelKey,
+    bindingId: 'urn:boss:coding:binding:' + state.workspaceId + ':' + preset.identity.version + ':' + modelKey,
     effectiveLimits: { concurrentTurns: 1, maxMembers: 3, maxDepth: 0, maxPendingTasks: 8 }
   })
   const { contentDigest: _digest, ...fields } = base
