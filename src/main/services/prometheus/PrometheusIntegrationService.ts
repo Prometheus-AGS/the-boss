@@ -47,6 +47,7 @@ import {
   migrateIntegrationDocument,
   readIntegrationConfig,
   readIntegrationDocument,
+  readLiterCredentialSnapshot,
   readSecrets,
   readUarInstanceCredentialPresence,
   stageLiterConnectionCredential,
@@ -76,6 +77,12 @@ import {
 
 const logger = loggerService.withContext('PrometheusIntegrationService')
 
+type LiterCatalogFetch = {
+  key: string
+  generation: number
+  result: Promise<{ models: LiterLiveModel[]; error?: string }>
+}
+
 @Injectable('PrometheusIntegrationService')
 @ServicePhase(Phase.Background)
 export class PrometheusIntegrationService extends BaseService {
@@ -86,8 +93,9 @@ export class PrometheusIntegrationService extends BaseService {
   private configurationMutation: Promise<void> = Promise.resolve()
   private serviceDiscovery: ServiceDiscovery = { candidates: [], errors: [] }
   private lastUarApplyError?: string
-  private literLiveModels?: LiterLiveModel[]
-  private literLiveError?: string
+  private literCatalogCache?: { key: string; models: LiterLiveModel[] }
+  private literCatalogFetch?: LiterCatalogFetch
+  private literCatalogGeneration = 0
 
   protected onAllReady(): void {
     void this.ensureInitialized().catch(() => undefined)
@@ -460,23 +468,50 @@ export class PrometheusIntegrationService extends BaseService {
 
   async readLiterCatalog(refresh = false): Promise<LiterGatewayCatalogSnapshot> {
     await this.ensureInitialized()
-    const document = readIntegrationDocument()
-    if (refresh || !this.literLiveModels) {
-      try {
-        this.literLiveModels = await fetchLiterLiveModels(document.config)
-        this.literLiveError = undefined
-      } catch (error) {
-        this.literLiveModels = []
-        this.literLiveError = error instanceof Error ? error.message : String(error)
+    let forceRefresh = refresh
+    while (true) {
+      const document = readIntegrationDocument()
+      const credential = await readLiterCredentialSnapshot()
+      const key = JSON.stringify([new URL(document.config.services.liter.endpoint).href, credential.revision])
+      if (!forceRefresh && this.literCatalogCache?.key === key) {
+        return reconcileLiterCatalog(
+          document.config,
+          document.revisions.services,
+          this.serviceDiscovery,
+          this.literCatalogCache.models
+        )
       }
+      let fetch = !forceRefresh && this.literCatalogFetch?.key === key ? this.literCatalogFetch : undefined
+      if (!fetch) {
+        const generation = ++this.literCatalogGeneration
+        const result = fetchLiterLiveModels(document.config, credential.credential).then(
+          (models) => ({ models }),
+          (error) => ({ models: [], error: error instanceof Error ? error.message : String(error) })
+        )
+        fetch = { key, generation, result }
+        this.literCatalogFetch = fetch
+      }
+      const result = await fetch.result
+      const currentDocument = readIntegrationDocument()
+      const currentCredential = await readLiterCredentialSnapshot()
+      const currentKey = JSON.stringify([
+        new URL(currentDocument.config.services.liter.endpoint).href,
+        currentCredential.revision
+      ])
+      if (currentKey !== key || fetch.generation !== this.literCatalogGeneration) {
+        forceRefresh = false
+        continue
+      }
+      if (this.literCatalogFetch?.generation === fetch.generation) this.literCatalogFetch = undefined
+      this.literCatalogCache = result.error ? undefined : { key, models: result.models }
+      return reconcileLiterCatalog(
+        currentDocument.config,
+        currentDocument.revisions.services,
+        this.serviceDiscovery,
+        result.models,
+        result.error
+      )
     }
-    return reconcileLiterCatalog(
-      document.config,
-      document.revisions.services,
-      this.serviceDiscovery,
-      this.literLiveModels,
-      this.literLiveError
-    )
   }
 
   async readLiterRoles(): Promise<LiterRoleSnapshot> {
@@ -544,8 +579,6 @@ export class PrometheusIntegrationService extends BaseService {
       })
       await writeMiniConfiguration()
       this.serviceDiscovery = await discoverServiceCandidates(config)
-      this.literLiveModels = undefined
-      this.literLiveError = undefined
       return this.readLiterCatalog(true)
     })
   }

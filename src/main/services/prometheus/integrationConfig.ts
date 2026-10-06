@@ -20,6 +20,7 @@ import { MANAGED_UAR_INSTANCE_ID, managedUarRuntimeInstance } from '@shared/type
 
 const INTEGRATION_PREFERENCE = 'app.prometheus.integrations' as const
 type ManagedIntegrationSecret = IntegrationSecret | 'uarAdminKey' | 'uarCredentialEncryptionKey'
+let credentialStoreRevision = 0
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -189,6 +190,14 @@ export async function readSecrets(): Promise<Partial<Record<ManagedIntegrationSe
   }
 }
 
+export async function readLiterCredentialSnapshot(): Promise<{ credential?: string; revision: number }> {
+  while (true) {
+    const revision = credentialStoreRevision
+    const credential = (await readSecrets()).literKey
+    if (revision === credentialStoreRevision) return { ...(credential ? { credential } : {}), revision }
+  }
+}
+
 async function replaceSecrets(secrets: Partial<Record<ManagedIntegrationSecret, string>>): Promise<void> {
   if (
     !(await safeStorage.isAsyncEncryptionAvailable()) ||
@@ -200,6 +209,7 @@ async function replaceSecrets(secrets: Partial<Record<ManagedIntegrationSecret, 
   const filename = path.join(integrationDirectory(), 'secrets.enc')
   await fs.writeFile(`${filename}.tmp`, await safeStorage.encryptStringAsync(JSON.stringify(secrets)), { mode: 0o600 })
   await fs.rename(`${filename}.tmp`, filename)
+  credentialStoreRevision += 1
 }
 
 function literConnectionSecretKey(providerConnectionId: string): string {
@@ -349,9 +359,13 @@ export async function ensureManagedSecrets(): Promise<Partial<Record<ManagedInte
     'literKey'
   ]
   if (isUarEnabled()) managedSecretNames.push('uarPassword', 'uarAdminKey', 'uarCredentialEncryptionKey')
+  let changed = false
   for (const key of managedSecretNames) {
-    if (!secrets[key]) secrets[key] = randomBytes(32).toString('hex')
+    if (!secrets[key]) {
+      secrets[key] = randomBytes(32).toString('hex')
+      changed = true
+    }
   }
-  await replaceSecrets(secrets)
+  if (changed) await replaceSecrets(secrets)
   return secrets
 }

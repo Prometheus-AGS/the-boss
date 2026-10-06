@@ -14,7 +14,7 @@ import type {
 } from '@shared/types/literGateway'
 import type { IntegrationConfig, ServiceCandidate, ServiceDiscovery } from '@shared/types/prometheusIntegration'
 
-import { readLiterConnectionCredentialPresence, readSecrets } from './integrationConfig'
+import { readLiterConnectionCredentialPresence } from './integrationConfig'
 
 const capabilitiesSchema = z
   .object({
@@ -203,11 +203,14 @@ export async function contextWindowForLiterAlias(
     : undefined
 }
 
-export async function fetchLiterLiveModels(config: IntegrationConfig, signal?: AbortSignal): Promise<LiterLiveModel[]> {
-  const secrets = await readSecrets()
+export async function fetchLiterLiveModels(
+  config: IntegrationConfig,
+  credential?: string,
+  signal?: AbortSignal
+): Promise<LiterLiveModel[]> {
   const response = await fetch(`${config.services.liter.endpoint.replace(/\/$/, '')}/v1/models`, {
     signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(15_000)]) : AbortSignal.timeout(15_000),
-    headers: secrets.literKey ? { Authorization: `Bearer ${secrets.literKey}` } : undefined
+    headers: credential ? { Authorization: `Bearer ${credential}` } : undefined
   })
   if (!response.ok) throw new Error(`prometheus.error.gatewayModels:${response.status}`)
   return liveModelsSchema.parse(await response.json()).data
