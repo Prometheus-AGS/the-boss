@@ -5,6 +5,7 @@ import * as z from 'zod'
 
 import { application } from '@application'
 import { agentWorkspaceService } from '@data/services/AgentWorkspaceService'
+import { uarApprovalHistorySchema, type UarTeamApprovalHistory } from '@shared/types/uarApprovalRecords'
 import type {
   UarSubmitTeamTaskInput,
   UarTeamApproval,
@@ -14,6 +15,7 @@ import type {
 } from '@shared/types/uarTeams'
 
 import { rawPendingApproval } from './uarApprovalLifecycle'
+import { readTeamApprovalHistory } from './uarTeamApprovalHistory'
 import { scopedRequest } from './UarDurableAdministrationAdapter'
 import { admitUarTeamTask, readUarTeamExecution } from './UarTeamExecutionAdapter'
 import { resolveTeamHostScope } from './uarTeamHostScope'
@@ -101,7 +103,9 @@ export async function submitUarTeamTask(input: UarSubmitTeamTaskInput): Promise<
   return scopedTeam(await scopedRequest(state.workspaceId, state.path, state.generation), state.workspaceId)
 }
 
-export async function readUarTeamApprovals(input: UarTeamExecutionSelector): Promise<{ approvals: UarTeamApproval[] }> {
+export async function readUarTeamApprovals(
+  input: UarTeamExecutionSelector
+): Promise<{ approvals: UarTeamApproval[]; history: UarTeamApprovalHistory[] }> {
   const state = await target(input)
   const execution = await readUarTeamExecution(input)
   const directory = await realpath(agentWorkspaceService.getById(state.workspaceId).path)
@@ -118,6 +122,7 @@ export async function readUarTeamApprovals(input: UarTeamExecutionSelector): Pro
         )
         if (result.runId !== attempt.runId) throw new Error('TEAM_SCOPE_DENIED')
         const pending = result.pending
+        if (pending && (!pending.issuerId || !pending.challengeId)) throw new Error('UAR_APPROVAL_STALE')
         let preparedEffect: UarTeamApproval['preparedEffect']
         if (pending?.admissionOwner === 'paired-host') {
           const bridge = application.get('UarTeamHostService').bridge(state.team, state.generation)
@@ -164,6 +169,8 @@ export async function readUarTeamApprovals(input: UarTeamExecutionSelector): Pro
               attemptId: attempt.id,
               runId: attempt.runId,
               approvalId: pending.approvalId,
+              issuerId: pending.issuerId!,
+              challengeId: pending.challengeId!,
               ...(pending.admissionId ? { admissionId: pending.admissionId } : {}),
               rootRunId: pending.rootRunId,
               toolCallId: pending.toolCallId,
@@ -179,7 +186,10 @@ export async function readUarTeamApprovals(input: UarTeamExecutionSelector): Pro
           : null
       })
   )
-  return { approvals: records.filter((record): record is UarTeamApproval => record !== null) }
+  return {
+    approvals: records.filter((record): record is UarTeamApproval => record !== null),
+    history: await readTeamApprovalHistory(state.workspaceId, state.generation, execution.attempts)
+  }
 }
 
 const rawPreparedEffect = z.object({
@@ -222,12 +232,27 @@ export async function decideUarTeamApproval(input: UarTeamApprovalDecision): Pro
     result.runId !== attempt.runId ||
     !pending ||
     pending.approvalId !== input.approvalId ||
+    (input.issuerId !== undefined && pending.issuerId !== input.issuerId) ||
+    (input.challengeId !== undefined && pending.challengeId !== input.challengeId) ||
     pending.eventId !== input.eventId ||
     pending.cursor !== input.cursor
   )
     throw new Error('UAR_APPROVAL_STALE')
-  if (!pending.admissionId) throw new Error('UAR_APPROVAL_STALE')
+  const history = uarApprovalHistorySchema.parse(await scopedRequest(state.workspaceId, path, state.generation))
+  const challenge = history.records.find(
+    (record) => record.issuerId === pending.issuerId && record.challengeId === pending.challengeId
+  )
+  if (
+    history.runId !== attempt.runId ||
+    !challenge ||
+    challenge.workspaceId !== state.workspaceId ||
+    challenge.rootRunId !== attempt.runId ||
+    challenge.state !== 'pending' ||
+    !challenge.resolvable
+  )
+    throw new Error('UAR_APPROVAL_STALE')
   if (pending.admissionOwner === 'paired-host') {
+    if (!pending.admissionId) throw new Error('UAR_APPROVAL_STALE')
     const bridge = application.get('UarTeamHostService').bridge(state.team, state.generation)
     if (!bridge || !(await bridge.recordHumanDecision(pending.admissionId, input.approved)))
       throw new Error('UAR_APPROVAL_STALE')

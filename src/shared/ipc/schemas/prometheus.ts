@@ -67,6 +67,7 @@ import {
   type UarSettingsSnapshot,
   type UarSettingsUpdateResult
 } from '@shared/types/prometheusIntegration'
+import type { UarTeamApprovalHistory } from '@shared/types/uarApprovalRecords'
 import {
   uarChannelObserverActionSchema,
   uarChannelSubscriptionSchema,
@@ -86,8 +87,8 @@ import {
   type UarInstanceInventorySnapshot
 } from '@shared/types/uarServiceInstance'
 import { uarTeamContextSchema, uarTeamPeerMessagesSchema } from '@shared/types/uarTeamContext'
-import type { UarTeamRunEventsSnapshot } from '@shared/types/uarTeamRunEvents'
 import type { UarExecutionOwnerSnapshot, UarExecutionReclaimReceipt } from '@shared/types/uarTeamProfiles'
+import type { UarTeamRunEventsSnapshot } from '@shared/types/uarTeamRunEvents'
 import {
   uarAuthoredTeamSchema,
   type UarTeamAuthoringSnapshot,
@@ -448,7 +449,7 @@ export const prometheusRequestSchemas = {
   }),
   'prometheus.uar.teams.approvals': defineRoute({
     input: z.object({ workspaceId: z.string().min(1).max(256), teamInstanceId: z.string().min(1).max(256) }).strict(),
-    output: z.custom<{ approvals: UarTeamApproval[] }>()
+    output: z.custom<{ approvals: UarTeamApproval[]; history: UarTeamApprovalHistory[] }>()
   }),
   'prometheus.uar.teams.decide_approval': defineRoute({
     input: z
@@ -457,6 +458,8 @@ export const prometheusRequestSchemas = {
         teamInstanceId: z.string().min(1).max(256),
         attemptId: z.string().min(1).max(256),
         approvalId: z.string().min(1).max(256),
+        issuerId: z.string().min(1).max(256).optional(),
+        challengeId: z.string().min(1).max(256).optional(),
         eventId: z.string().min(1).max(256),
         cursor: z.number().int().nonnegative(),
         approved: z.boolean()
