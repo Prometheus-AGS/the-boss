@@ -51,6 +51,10 @@ async function main() {
   for (const name of selected) {
     const recipe = pins.tools[name]
     if (!recipe) throw new Error(`Unknown native tool: ${name}`)
+    const effectiveFeatures =
+      name === 'uar-sidecar' && target === 'x86_64-apple-darwin'
+        ? `${recipe.features},tract-embeddings`
+        : recipe.features
     const source = checkoutIntegrationSource(recipe.source)
     const cwd = path.join(source, recipe.directory || '')
     const dashboard = name === 'bossfang' ? require('./bossfang-payload.cjs').prepareDashboard(cwd) : undefined
@@ -72,7 +76,7 @@ async function main() {
         name,
         '--target',
         target,
-        ...(recipe.features ? ['--features', recipe.features] : [])
+        ...(effectiveFeatures ? ['--features', effectiveFeatures] : [])
       ],
       cwd,
       env
@@ -90,6 +94,7 @@ async function main() {
       sha256: hash(path.join(output, asset)),
       binaries: [binary],
       archive: 'none',
+      ...(name === 'uar-sidecar' ? { features: effectiveFeatures.split(',') } : {}),
       ...(dashboard ? { dashboard, features: recipe.features.split(','), uarLifecycle: 'connection-only' } : {})
     })
     if (name === 'bossfang')
