@@ -58,6 +58,7 @@ export class BossFangService extends BaseService {
 
   readonly diagnostics = new BossFangDiagnostics(
     (p, i) => this.request(p, i),
+    () => this.diagnosticObserver(),
     () => this.connect(),
     () => this.models(),
     (text) => this.safe(text),
@@ -333,14 +334,37 @@ export class BossFangService extends BaseService {
   async request(pathname: string, init: RequestInit = {}) {
     if (!this.origin || !this.dashboardToken)
       throw new Error('Start BossFang and configure dashboard credentials first')
+    return this.requestAt(this.origin, this.dashboardToken, pathname, init)
+  }
+  private requestAt(
+    origin: string,
+    dashboardToken: string,
+    pathname: string,
+    init: RequestInit = {},
+    beforeFetch?: (signal: AbortSignal) => Promise<void>
+  ) {
     const headers = new Headers(init.headers)
-    headers.set('Authorization', `Bearer ${this.dashboardToken}`)
-    return fetchWithRateLimitRetries(new URL(pathname, this.origin), {
-      ...init,
-      headers,
-      redirect: 'error',
-      signal: init.signal ?? AbortSignal.timeout(30_000)
-    })
+    headers.set('Authorization', `Bearer ${dashboardToken}`)
+    const signal = init.signal ?? AbortSignal.timeout(30_000)
+    return fetchWithRateLimitRetries(
+      new URL(pathname, origin),
+      { ...init, headers, redirect: 'error', signal },
+      beforeFetch ? () => beforeFetch(signal) : undefined
+    )
+  }
+  private diagnosticObserver() {
+    const origin = this.origin
+    const dashboardToken = this.dashboardToken
+    const endpoint = this.connection.endpoint
+    if (!origin || !dashboardToken || !endpoint)
+      throw new Error('Start BossFang and configure dashboard credentials first')
+    const binding = { ownership: endpoint.ownership, generation: endpoint.generation, instanceId: endpoint.instanceId }
+    // Native observation performs epoch + stream, then epoch + lookup.
+    // Reserve those four upstream reads in the same managed instance queue.
+    return (pathname: string) =>
+      this.requestAt(origin, dashboardToken, pathname, {}, (signal) =>
+        application.get('UarSidecarService').admitRequest(binding, 4, signal)
+      )
   }
   async connect() {
     await this.connection.connect(readConfig())

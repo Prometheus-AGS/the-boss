@@ -37,6 +37,7 @@ export class BossFangDiagnostics {
   lastId: string | null = null
   constructor(
     private readonly request: (path: string, init?: RequestInit) => Promise<Response>,
+    private readonly observationRequest: () => (path: string) => Promise<Response>,
     private readonly connect: () => Promise<unknown>,
     private readonly models: () => Promise<{ id: string; name: string; provider: string; modelId: string }[]>,
     private readonly safe: (text: string) => string,
@@ -207,6 +208,7 @@ export class BossFangDiagnostics {
         this.selectedInstance() !== record.instanceId
       )
         throw new Error('Diagnostic selection changed before admission; reconnect the saved selection')
+      const observe = this.observationRequest()
       stage = 'admission'
       this.stage(record, stage, 'running')
       const response = await this.request('/api/uar/diagnostics/delegation', {
@@ -236,7 +238,7 @@ export class BossFangDiagnostics {
       let modelTextObserved = false
       this.check(record, 'delegationOperational', 'running')
       while (!this.stopping) {
-        const response = await this.request(
+        const response = await observe(
           `/api/uar/delegations/${encodeURIComponent(record.taskId)}/events?after=${cursor}`
         )
         if (!response.ok)
