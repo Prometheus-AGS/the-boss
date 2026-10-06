@@ -443,36 +443,7 @@ export class UarSidecarService extends BaseService {
     headers.set('authorization', `Bearer ${running.authToken}`)
     if (running.principalMode === 'host-asserted') headers.set('x-uar-principal', principal)
     else headers.delete('x-uar-principal')
-    const beforeFetch =
-      running.ownership === 'managed'
-        ? async () => {
-            let admission = this.requestAdmissions.get(running.generation)
-            if (!admission) {
-              admission = { mutex: new Mutex(), nextAt: 0 }
-              this.requestAdmissions.set(running.generation, admission)
-            }
-            const currentAdmission = admission
-            const queued = currentAdmission.mutex.runExclusive(async () => {
-              init.signal?.throwIfAborted()
-              const wait = currentAdmission.nextAt - Date.now()
-              if (wait > 0) await delay(wait, undefined, { signal: init.signal ?? undefined })
-              const current = this.verifiedEndpoints.get(running.generation)
-              if (!current || current.instanceId !== running.instanceId) {
-                throw new Error(`UAR instance ${running.instanceId} binding expired before the request was admitted`)
-              }
-              // The managed sidecar retains its default global quota of ten requests per second.
-              currentAdmission.nextAt = Date.now() + 100
-            })
-            if (!init.signal) return queued
-            const signal = init.signal
-            return new Promise<void>((resolve, reject) => {
-              const onAbort = () => reject(signal.reason)
-              signal.addEventListener('abort', onAbort, { once: true })
-              if (signal.aborted) onAbort()
-              queued.then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort))
-            })
-          }
-        : undefined
+    const beforeFetch = () => this.admitRequest(running, 1, init.signal)
     const url = new URL(pathname, baseUrl)
     const response = await fetchWithRateLimitRetries(url, { ...init, headers }, beforeFetch)
     if (!response.ok) {
@@ -484,6 +455,38 @@ export class UarSidecarService extends BaseService {
       })
     }
     return response
+  }
+
+  admitRequest(
+    endpoint: Pick<UarSidecarEndpoint, 'ownership' | 'generation' | 'instanceId'>,
+    weight: number,
+    signal?: AbortSignal | null
+  ): Promise<void> {
+    if (endpoint.ownership !== 'managed') return Promise.resolve()
+    let admission = this.requestAdmissions.get(endpoint.generation)
+    if (!admission) {
+      admission = { mutex: new Mutex(), nextAt: 0 }
+      this.requestAdmissions.set(endpoint.generation, admission)
+    }
+    const currentAdmission = admission
+    const queued = currentAdmission.mutex.runExclusive(async () => {
+      signal?.throwIfAborted()
+      const wait = currentAdmission.nextAt - Date.now()
+      if (wait > 0) await delay(wait, undefined, { signal: signal ?? undefined })
+      const current = this.verifiedEndpoints.get(endpoint.generation)
+      if (!current || current.instanceId !== endpoint.instanceId) {
+        throw new Error(`UAR instance ${endpoint.instanceId} binding expired before the request was admitted`)
+      }
+      // The managed sidecar retains its default global quota of ten requests per second.
+      currentAdmission.nextAt = Date.now() + 100 * weight
+    })
+    if (!signal) return queued
+    return new Promise<void>((resolve, reject) => {
+      const onAbort = () => reject(signal.reason)
+      signal.addEventListener('abort', onAbort, { once: true })
+      if (signal.aborted) onAbort()
+      queued.then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort))
+    })
   }
 
   private ensureRunning(): Promise<RunningSidecar> {
