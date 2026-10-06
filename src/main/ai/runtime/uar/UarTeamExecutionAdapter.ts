@@ -7,7 +7,7 @@ import {
   uarTeamContinuationSchema,
   uarTeamWaitSchema
 } from '@shared/types/uarTeamContext'
-import { uarReasoningSchema } from '@shared/types/uarTeamProfiles'
+import { uarReasoningSchema, uarTeamDiagnosticDetailsSchema } from '@shared/types/uarTeamProfiles'
 import type {
   UarAdmitTeamTaskInput,
   UarTeamArtifact,
@@ -89,7 +89,8 @@ const attempt = z.object({
       field: z.string().optional(),
       retryable: z.boolean(),
       action: z.enum(['rebind', 'change-settings', 'reconcile', 'contact-operator', 'none']),
-      protectedDiagnosticRef: z.string().optional()
+      protectedDiagnosticRef: z.string().optional(),
+      ...uarTeamDiagnosticDetailsSchema.shape
     })
     .nullish(),
   rootId: z.string().optional(),

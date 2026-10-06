@@ -25,6 +25,7 @@ import {
   type UarObservedInstance,
   type UarRuntimeInstance
 } from '@shared/types/uarServiceInstance'
+import { uarTeamDiagnosticDetailsSchema } from '@shared/types/uarTeamProfiles'
 import { redactSecretText } from '@shared/utils/redaction'
 
 import { inspectUarPayload, requireUarPayload, type UarPayload } from './uarPayload'
@@ -35,7 +36,16 @@ const logger = loggerService.withContext('UarSidecarService')
 const safeTeamProviderDiagnostic = z.object({
   fields: z.object({
     message: z.literal('Captured safe team provider failure'),
-    code: z.enum(['TEAM_PROVIDER_REQUEST_REJECTED', 'TEAM_PROVIDER_STREAM_FAILED']),
+    code: z.enum([
+      'TEAM_PROVIDER_REQUEST_REJECTED',
+      'TEAM_PROVIDER_STREAM_FAILED',
+      'TEAM_COLLABORATION_HANDOFF_FAILED',
+      'TEAM_REQUEST_PREPARATION_FAILED'
+    ]),
+    source_stage: uarTeamDiagnosticDetailsSchema.shape.sourceStage.nullish(),
+    category: uarTeamDiagnosticDetailsSchema.shape.category.nullish(),
+    http_status: uarTeamDiagnosticDetailsSchema.shape.httpStatus.nullish(),
+    collaboration_code: uarTeamDiagnosticDetailsSchema.shape.collaborationCode.nullish(),
     diagnostic_reference: z.uuid(),
     provider_error_kind: z.enum([
       'provider_error',
@@ -653,8 +663,24 @@ export class UarSidecarService extends BaseService {
         }
         const result = safeTeamProviderDiagnostic.safeParse(value)
         if (!result.success) return
-        const { code, diagnostic_reference, provider_error_kind } = result.data.fields
-        logger.warn('UAR team provider diagnostic', { code, diagnostic_reference, provider_error_kind })
+        const {
+          code,
+          diagnostic_reference,
+          provider_error_kind,
+          source_stage,
+          category,
+          http_status,
+          collaboration_code
+        } = result.data.fields
+        logger.warn('UAR team execution diagnostic', {
+          code,
+          diagnostic_reference,
+          provider_error_kind,
+          source_stage,
+          category,
+          http_status,
+          collaboration_code
+        })
       })
       return [output]
     })
