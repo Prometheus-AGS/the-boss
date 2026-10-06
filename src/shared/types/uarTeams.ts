@@ -290,16 +290,45 @@ export interface UarSubmitTeamTaskInput extends UarTeamExecutionSelector {
   prompt: string
 }
 
+export interface UarTeamPreparedEffect {
+  version: 1
+  admissionId: string
+  invocationId: string
+  toolCallId: string
+  callIndex: number
+  rootRunId: string
+  runId: string
+  ownerId: string
+  workspace: string
+  toolName: string
+  argumentsSha256: string
+  actionDisplaySha256: string
+  targetPath?: string
+  write?: { contentSha256: string }
+  edit?: {
+    oldStringSha256: string
+    newStringSha256: string
+    oldStringLength: number
+    newStringLength: number
+    replaceAll: boolean
+  }
+}
+
 export interface UarTeamApproval {
   admissionOwner: 'uar-runtime' | 'paired-host'
   attemptId: string
   runId: string
   approvalId: string
+  admissionId?: string
+  rootRunId?: string
+  toolCallId?: string
+  callIndex?: number
   eventId: string
   cursor: number
   toolName: string
   argumentsJson: string
   riskReason: string
+  preparedEffect?: UarTeamPreparedEffect
 }
 
 export interface UarTeamApprovalDecision extends UarTeamExecutionSelector {

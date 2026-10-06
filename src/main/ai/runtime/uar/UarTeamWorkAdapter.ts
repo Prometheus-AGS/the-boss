@@ -1,8 +1,10 @@
 import { createHash } from 'node:crypto'
+import { realpath } from 'node:fs/promises'
 
 import * as z from 'zod'
 
 import { application } from '@application'
+import { agentWorkspaceService } from '@data/services/AgentWorkspaceService'
 import type {
   UarSubmitTeamTaskInput,
   UarTeamApproval,
@@ -102,10 +104,11 @@ export async function submitUarTeamTask(input: UarSubmitTeamTaskInput): Promise<
 export async function readUarTeamApprovals(input: UarTeamExecutionSelector): Promise<{ approvals: UarTeamApproval[] }> {
   const state = await target(input)
   const execution = await readUarTeamExecution(input)
+  const directory = await realpath(agentWorkspaceService.getById(state.workspaceId).path)
   const records = await Promise.all(
     execution.attempts
       .filter((attempt) => attempt.status === 'running')
-      .map(async (attempt) => {
+      .map(async (attempt): Promise<UarTeamApproval | null> => {
         const result = rawPendingApproval.parse(
           await scopedRequest(
             state.workspaceId,
@@ -115,23 +118,97 @@ export async function readUarTeamApprovals(input: UarTeamExecutionSelector): Pro
         )
         if (result.runId !== attempt.runId) throw new Error('TEAM_SCOPE_DENIED')
         const pending = result.pending
+        let preparedEffect: UarTeamApproval['preparedEffect']
+        if (pending?.admissionOwner === 'paired-host') {
+          const bridge = application.get('UarTeamHostService').bridge(state.team, state.generation)
+          if (!bridge || !pending.admissionId) throw new Error('UAR_APPROVAL_STALE')
+          const response = await fetch(bridge.toolAdmission.url + '/inspect', {
+            method: 'POST',
+            headers: { ...bridge.toolAdmission.headers, 'content-type': 'application/json' },
+            body: JSON.stringify({
+              admissionId: pending.admissionId,
+              inspection: {
+                ownerId: state.team.ownerId,
+                workspace: directory,
+                rootRunId: pending.rootRunId,
+                runId: attempt.runId,
+                toolCallId: pending.toolCallId,
+                callIndex: pending.callIndex,
+                toolName: pending.name,
+                actionDisplay: JSON.parse(pending.argumentsJson)
+              }
+            })
+          })
+          if (!response.ok) throw new Error('UAR_APPROVAL_STALE')
+          preparedEffect = rawPreparedEffect.parse(await response.json()).preparedEffect
+          const current = rawPendingApproval.parse(
+            await scopedRequest(
+              state.workspaceId,
+              '/api/uar/runs/' + encodeURIComponent(attempt.runId) + '/tool-approval/pending',
+              state.generation
+            )
+          )
+          if (
+            current.runId !== attempt.runId ||
+            !current.pending ||
+            current.pending.admissionId !== pending.admissionId ||
+            current.pending.approvalId !== pending.approvalId ||
+            current.pending.eventId !== pending.eventId ||
+            current.pending.cursor !== pending.cursor ||
+            current.pending.argumentsJson !== pending.argumentsJson
+          )
+            throw new Error('UAR_APPROVAL_STALE')
+        }
         return pending
           ? {
               attemptId: attempt.id,
               runId: attempt.runId,
               approvalId: pending.approvalId,
+              ...(pending.admissionId ? { admissionId: pending.admissionId } : {}),
+              rootRunId: pending.rootRunId,
+              toolCallId: pending.toolCallId,
+              callIndex: pending.callIndex,
               admissionOwner: pending.admissionOwner,
               eventId: pending.eventId,
               cursor: pending.cursor,
               toolName: pending.name,
               argumentsJson: pending.argumentsJson,
-              riskReason: pending.riskReason
+              riskReason: pending.riskReason,
+              ...(preparedEffect ? { preparedEffect } : {})
             }
           : null
       })
   )
   return { approvals: records.filter((record): record is UarTeamApproval => record !== null) }
 }
+
+const rawPreparedEffect = z.object({
+  preparedEffect: z.object({
+    version: z.literal(1),
+    admissionId: z.string(),
+    invocationId: z.string(),
+    toolCallId: z.string(),
+    callIndex: z.number().int(),
+    rootRunId: z.string(),
+    runId: z.string(),
+    ownerId: z.string(),
+    workspace: z.string(),
+    toolName: z.string(),
+    argumentsSha256: z.string(),
+    actionDisplaySha256: z.string(),
+    targetPath: z.string().optional(),
+    write: z.object({ contentSha256: z.string() }).optional(),
+    edit: z
+      .object({
+        oldStringSha256: z.string(),
+        newStringSha256: z.string(),
+        oldStringLength: z.number().int().nonnegative(),
+        newStringLength: z.number().int().nonnegative(),
+        replaceAll: z.boolean()
+      })
+      .optional()
+  })
+})
 
 export async function decideUarTeamApproval(input: UarTeamApprovalDecision): Promise<{ resolved: true }> {
   const state = await target(input)
