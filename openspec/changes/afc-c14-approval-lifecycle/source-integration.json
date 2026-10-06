@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "kind": "source-integration-checkpoint",
   "status": "source-only-not-promoted",
-  "recordedAt": "2026-10-06T22:52:17.578Z",
+  "recordedAt": "2026-10-06T22:57:29.495Z",
   "merge": {
     "commit": "29e84a2d6c3a235d660a01b8d0db7282003c572d",
     "parents": [
@@ -259,7 +259,7 @@
   ],
   "preserved": [
     "C14.2 approval lifecycle source",
-    "Published UAR binary URLs; local source inherited only through exact C15 merge",
+    "Published UAR binary URLs and asset source labels; local packaging source separately selects the actual approval/diagnostic merge",
     "historical imageProvenance recipe source",
     "full-pack dirty checkout",
     "Cadence ledgers"
@@ -299,10 +299,24 @@
     ],
     "purpose": "Preserve safe failure stage and approved codes through existing scoped attempt IPC and Teams UI; retain safe attempt evidence before operation failure.",
     "localUarSourceInheritedFromC15": "d324d94a8fcd374f5ddde325a7dada354502cd1b",
-    "approvalRuntimePinSelected": false,
+    "approvalRuntimePinSelected": true,
     "publishedBinaryUrlsChanged": false,
     "receiptProcedureExecuted": false,
     "underlyingAttemptSuccess": "unverified",
     "completedPackagedApprovalOperation": "pending"
+  },
+  "localUarPackagingSource": {
+    "path": "build/local-uar-source.json",
+    "priorRevision": "d324d94a8fcd374f5ddde325a7dada354502cd1b",
+    "revision": "150b4332804108d86d491aca40523e7557e090eb",
+    "mergeParents": [
+      "1ef53d384945bb306d449d0521b4b6bbf8632391",
+      "d324d94a8fcd374f5ddde325a7dada354502cd1b"
+    ],
+    "remoteBranch": "codex/uar-c14-durable-approvals",
+    "status": "actual-merged-source-selected-packaging-pending",
+    "publishedAssetUrlsOrSourceLabelsChanged": false,
+    "workAheadPromoted": false,
+    "c14Completed": false
   }
 }
