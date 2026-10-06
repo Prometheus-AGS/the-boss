@@ -30,7 +30,8 @@ function loadIntegrationBinaries({ required = false, platform: targetPlatform } 
         throw new Error(`BossFang dashboard assets are not pinned for ${platform}`)
       if (required && ['uar-sidecar', 'liter-llm', 'bossfang'].includes(name)) {
         const source = typeof asset.source === 'string' ? asset.source : asset.source?.revision
-        const expected = pins.sources[name === 'uar-sidecar' ? 'uar' : name].revision
+        const pin = pins.sources[name === 'uar-sidecar' ? 'uar' : name]
+        const expected = pin.platformRevisions?.[platform] ?? pin.revision
         if (source !== expected)
           throw new Error(`Publish and import ${name} ${platform} from pinned source ${expected} before packaging`)
       }
