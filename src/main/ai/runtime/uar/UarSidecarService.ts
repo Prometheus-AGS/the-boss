@@ -471,14 +471,15 @@ export class UarSidecarService extends BaseService {
     const currentAdmission = admission
     const queued = currentAdmission.mutex.runExclusive(async () => {
       signal?.throwIfAborted()
-      const wait = currentAdmission.nextAt - Date.now()
+      // Accumulate every weighted slot before releasing a native upstream read burst.
+      const wait = Math.max(0, currentAdmission.nextAt - Date.now()) + 100 * (weight - 1)
       if (wait > 0) await delay(wait, undefined, { signal: signal ?? undefined })
       const current = this.verifiedEndpoints.get(endpoint.generation)
       if (!current || current.instanceId !== endpoint.instanceId) {
         throw new Error(`UAR instance ${endpoint.instanceId} binding expired before the request was admitted`)
       }
       // The managed sidecar retains its default global quota of ten requests per second.
-      currentAdmission.nextAt = Date.now() + 100 * weight
+      currentAdmission.nextAt = Date.now() + 100
     })
     if (!signal) return queued
     return new Promise<void>((resolve, reject) => {
