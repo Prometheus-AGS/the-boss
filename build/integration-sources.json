@@ -36,7 +36,7 @@
     },
     "bossfang": {
       "repository": "GQAdonis/librefang",
-      "revision": "bac04cb6b2c144520e28234ad77f00d4cf0f5b23"
+      "revision": "295ff50201fbb09a6e22390de85d9b374c3d9edd"
     }
   },
   "tools": {
@@ -76,7 +76,7 @@
     "bossfang": {
       "source": "bossfang",
       "package": "librefang-cli",
-      "version": "2026.9.19+bac04cb6b",
+      "version": "2026.9.19+295ff5020",
       "features": "telemetry,surreal-backend,uar-driver"
     }
   },

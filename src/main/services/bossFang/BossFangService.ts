@@ -359,7 +359,7 @@ export class BossFangService extends BaseService {
     if (!origin || !dashboardToken || !endpoint)
       throw new Error('Start BossFang and configure dashboard credentials first')
     const binding = { ownership: endpoint.ownership, generation: endpoint.generation, instanceId: endpoint.instanceId }
-    // Native observation performs epoch + stream, then epoch + lookup.
+    // Native observation performs epoch + lookup, then epoch + stream.
     // Reserve those four upstream reads in the same managed instance queue.
     return (pathname: string) =>
       this.requestAt(origin, dashboardToken, pathname, {}, (signal) =>
