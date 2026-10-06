@@ -1,5 +1,9 @@
 [
   {
+    "version": "2.2.13",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.13 - Reusable team configuration\n\n- [Teams] Create named coding and product/design teams with role-specific models, tools, knowledge and skills.\n- [Work] Deploy versioned team definitions and keep existing runs bound to their original definitions.\n- [Runtime] Package the updated UAR skill deployment catalog with exact per-role skill bindings.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.13 - 可复用的团队配置\n\n- [团队] 创建命名的编程与产品设计团队，并为各角色配置模型、工具、知识和技能。\n- [工作] 部署版本化的团队定义，并保留现有运行所绑定的原始定义。\n- [运行时] 打包更新后的 UAR 技能部署目录，并准确绑定各角色的技能。\n<!--LANG:END-->"
+  },
+  {
     "version": "2.2.12",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.12 - UAR workflow controls and skill refresh\n\n- [Workflows] Add workflow selection, draft inspection, and exact decision controls for supported UAR workflow profiles.\n- [Runtime] Include the updated pinned UAR sidecar and liter-llm gateway payloads.\n- [Skills] Refresh the complete mini payload, Delivery Cadence, and Codex hook compatibility.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.12 - UAR 工作流控制与技能更新\n\n- [工作流] 为受支持的 UAR 工作流配置提供工作流选择、草稿查看和精确决策控制。\n- [运行时] 包含更新并固定版本的 UAR 辅助进程和 liter-llm 网关。\n- [技能] 更新完整的 mini 技能包、Delivery Cadence 和 Codex 钩子兼容性。\n<!--LANG:END-->"
   },
