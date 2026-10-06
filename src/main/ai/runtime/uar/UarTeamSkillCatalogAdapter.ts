@@ -62,12 +62,6 @@ export async function resolveAuthoredTeamSkills(team: UarAuthoredTeam, generatio
       throw new Error('UAR_TEAM_SKILL_STALE: ' + skill.id)
     return { ...skill, installedLocation: entry.privateBinding.installedLocation }
   })
-  const distinct = new Map<string, (typeof bindings)[number]>()
-  for (const binding of bindings) {
-    const previous = distinct.get(binding.id)
-    if (previous && JSON.stringify(previous) !== JSON.stringify(binding))
-      throw new Error('UAR_TEAM_SKILL_SCOPE_CONFLICT: ' + binding.id)
-    distinct.set(binding.id, binding)
-  }
+  const distinct = new Map(bindings.map((binding) => [JSON.stringify(binding), binding]))
   return [...distinct.values()]
 }
