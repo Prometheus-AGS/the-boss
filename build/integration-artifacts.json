@@ -25,7 +25,7 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "48ca7c4a9bfc969de2b7f48f6b6db19c3c2c7fbc"
+      "revision": "e3fed05944e6b365ad74af30926b875e6857190f"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
@@ -524,10 +524,10 @@
       "version": "2026.9.19+bac04cb6b",
       "packages": {
         "darwin-arm64": {
-          "source": "bafa21e8d469a41104c07c7281a4e3f97cb16009",
-          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-bafa21e8d/bossfang-darwin-arm64",
-          "sha256": "7ff58b58f50afa12bf814443b1d7d1185d66e5aede23173848afd4b3010c0669",
-          "size": 119525552,
+          "source": "bac04cb6b2c144520e28234ad77f00d4cf0f5b23",
+          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-bac04cb6b/bossfang-darwin-arm64",
+          "sha256": "f6d1f9b2a16791e2334d04b2ea9978d8fbc5ff33aaba3cdde54834cb08d29204",
+          "size": 158726816,
           "archive": "none",
           "binaries": [
             "bossfang"

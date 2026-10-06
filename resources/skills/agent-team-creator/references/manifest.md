@@ -153,10 +153,21 @@ activate or execute a team.
 
 `runtime/package.json` pins TypeScript 7.0.2 and Node type declarations. Run
 `npm ci --prefix <skill>/runtime` then `npm run build --prefix <skill>/runtime`
-when maintaining source. Runtime consumers need only Node.js 22+ and the copied
-skill files; they do not need npm, TypeScript or the repository checkout. Full
-and mini distribute identical source and emitted `.mjs` files. Each sibling skill
-declares its dependency on this creator companion in its instructions.
+at the completed-production boundary when maintaining source. Consumers run
+the emitted skill files with Node.js 22+ without npm or TypeScript dependencies;
+optional integrations still require their configured services and helper executables.
+
+Full and mini share portable team/schema contracts and selected provider
+provenance. They do not distribute an identical runtime or emitted payload.
+Full alone provides `team-publish`, `team-discover`, `team-request` and
+`team-intake`, plus the full pack’s Python learning hooks, durable writer outbox
+and optional Cortex mirror. Mini uses a reduced file-backed queue and optional
+configured publication with its own project-identity resolution. The memory
+contracts are documented in [models-memory.md](models-memory.md); a matching
+filename or schema does not prove byte, service or execution parity. Rebuild
+changed source and record exact payload provenance at the final local boundary
+before claiming the copied `.mjs` implements it. Each sibling skill declares
+its dependency on this creator companion in its instructions.
 
 The four SKILL.md frontmatters follow the
 [AgentSkills specification](https://agentskills.io/specification): version and

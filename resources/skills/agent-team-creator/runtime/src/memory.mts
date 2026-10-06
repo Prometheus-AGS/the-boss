@@ -1,6 +1,9 @@
 import { createHash } from 'node:crypto';
+import { realpathSync, statSync } from 'node:fs';
+import path from 'node:path';
 import type { Json, MemoryEntry, ObjectValue, TeamState } from './types.mjs';
 import { assertNoCredentials, endpoint, object, requestJson, RequestFailure, text } from './models-http.mjs';
+import { projectFile, readFile } from './project-files.mjs';
 
 function canonical(value: Json): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
@@ -17,13 +20,89 @@ function reference(state: TeamState, provenance: ObjectValue): void {
   if (!matching) throw new Error('KBD provenance must exactly reference a linked team task; canonical validation is separate');
 }
 
+const KINDS = ['lesson', 'gotcha', 'decision', 'progress', 'candidate'] as const;
+const AUTHOR_HARNESSES = ['claude-code', 'codex', 'opencode', 'kimi', 'other'] as const;
+type ScopeRoute = { visibility: 'agent' | 'lead' | 'team' | 'project'; roleId?: string; agentId: string };
+
+function routeScope(state: TeamState, scope: string): ScopeRoute {
+  const role = /^(?:role|agent):(.+)$/.exec(scope);
+  if (role) {
+    if (!state.team.roles.some(item => item.id === role[1])) throw new Error('memory scope must name a role in this team');
+    return { visibility: 'agent', roleId: role[1], agentId: `${state.team.id}/${role[1]}` };
+  }
+  if (scope === 'lead') return { visibility: 'lead', agentId: `${state.team.id}/@lead` };
+  if (scope === 'team' || scope.startsWith('team:')) return { visibility: 'team', agentId: `${state.team.id}/@team` };
+  if (scope === 'project' || scope.startsWith('project:')) return { visibility: 'project', agentId: '@project' };
+  throw new Error('memory.scope must be role:<role>, agent:<role>, lead, team[:<id>] or project[:<id>]');
+}
+
+function authorHarness(value: string): string {
+  if (value === 'claude') return 'claude-code';
+  return (AUTHOR_HARNESSES as readonly string[]).includes(value) ? value : 'other';
+}
+
+function optionalAuthor(value: unknown): ObjectValue | undefined {
+  if (value === undefined) return undefined;
+  const author = object(value, 'memory.author');
+  const out: ObjectValue = {};
+  for (const key of Object.keys(author)) if (!['harness', 'agentId', 'agentType', 'sessionId'].includes(key)) throw new Error('unsupported memory.author field');
+  if (author.harness !== undefined) out.harness = authorHarness(text(author.harness, 'memory.author.harness'));
+  for (const key of ['agentId', 'agentType', 'sessionId']) if (author[key] !== undefined) out[key] = text(author[key], `memory.author.${key}`);
+  return out;
+}
+
+function scopedProject(value: unknown): string {
+  const id = text(value, 'memory.projectId');
+  if (id.startsWith('@')) throw new Error('memory.projectId must name a project, not a shared user/global namespace');
+  assertNoCredentials(id);
+  return id;
+}
+
+/** Resolve only explicit identity or selected project context, never the runtime's process cwd. */
+function projectId(input: ObjectValue, provenance: ObjectValue, context: ObjectValue): string | undefined {
+  const linked = provenance.kbd === undefined ? undefined : object(provenance.kbd, 'provenance.kbd').projectId;
+  const ids = [input.projectId, context.projectId, linked].filter(value => value !== undefined).map(scopedProject);
+  if (new Set(ids).size > 1) throw new Error('memory project id conflicts with explicit or linked project identity');
+  if (ids.length) return ids[0];
+  const selected = context.project ?? context.cwd;
+  if (selected === undefined) return undefined;
+  let root = realpathSync(path.resolve(text(selected, 'memory project context')));
+  if (!statSync(root).isDirectory()) throw new Error('memory project context must be a directory');
+  for (;;) {
+    const marker = readFile(projectFile(root, '.prometheus/project.json'));
+    if (marker !== null) {
+      const record = object(JSON.parse(marker.replace(/^\uFEFF/, '')), 'project.json');
+      return record.projectId === undefined ? undefined : scopedProject(record.projectId);
+    }
+    // An explicit project is a root. Only an explicitly supplied cwd discovers
+    // its containing project, using the mini's .prometheus/project.json marker.
+    if (context.project !== undefined) return undefined;
+    const parent = path.dirname(root);
+    if (parent === root) return undefined;
+    root = parent;
+  }
+}
+
+function unavailable(entry: MemoryEntry, reason: string): Json {
+  const previous = entry.receipt && typeof entry.receipt === 'object' && !Array.isArray(entry.receipt) ? entry.receipt as ObjectValue : {};
+  entry.receipt = { ...previous, at: new Date().toISOString(), outcome: 'unavailable', reason, uncertain: previous.uncertain === true };
+  return { id: entry.id, status: 'queued', receipt: entry.receipt };
+}
+
 /** Caller commits this mutation atomically before offering the entry for publication. */
-export function queueMemory(state: TeamState, input: ObjectValue): MemoryEntry {
+export function queueMemory(state: TeamState, input: ObjectValue, context: ObjectValue = {}): MemoryEntry {
   assertNoCredentials(input);
   const content = text(input.content, 'memory.content');
   const scope = text(input.scope, 'memory.scope');
   const supplied = input.provenance === undefined ? {} : object(input.provenance, 'memory.provenance');
   reference(state, supplied);
+  const route = routeScope(state, scope);
+  const resolvedProject = projectId(input, supplied, context);
+  const kind = input.kind === undefined ? undefined : text(input.kind, 'memory.kind');
+  if (kind !== undefined && !(KINDS as readonly string[]).includes(kind)) throw new Error('unsupported memory.kind');
+  const roleId = input.roleId === undefined ? undefined : text(input.roleId, 'memory.roleId');
+  if (roleId !== undefined && (!state.team.roles.some(role => role.id === roleId) || (route.roleId !== undefined && roleId !== route.roleId))) throw new Error('memory.roleId must match a role in this team and its scope');
+  const author = optionalAuthor(input.author);
   const provenance: ObjectValue = { ...supplied, teamId: state.team.id, source: 'agent-team-runtime', authority: 'local-team-record; KBD references are unverified mirrors' };
   const identity = digest({ content, scope, provenance });
   const id = input.id === undefined ? `memory-${identity.slice(0, 48)}` : text(input.id, 'memory.id');
@@ -31,9 +110,21 @@ export function queueMemory(state: TeamState, input: ObjectValue): MemoryEntry {
   const existing = state.outbox.find(entry => entry.id === id);
   if (existing) {
     if (digest({ content: existing.content, scope: existing.scope, provenance: existing.provenance }) !== identity) throw new Error('memory id conflicts with different content, scope or provenance');
+    if (resolvedProject !== undefined && existing.projectId !== undefined && resolvedProject !== existing.projectId) throw new Error('memory id conflicts with a different project id');
+    // Old queued entries can acquire project identity before their first
+    // attempt; never change the body of a recorded or published attempt.
+    if (existing.status === 'queued' && existing.projectId === undefined && resolvedProject !== undefined) {
+      const receipt = existing.receipt && typeof existing.receipt === 'object' && !Array.isArray(existing.receipt) ? existing.receipt as ObjectValue : {};
+      if (receipt.publicationKey === undefined && receipt.uncertain !== true) existing.projectId = resolvedProject;
+    }
     return existing;
   }
-  const entry: MemoryEntry = { id, content, scope, provenance, status: 'queued' };
+  const entry: MemoryEntry = { id, content, scope, provenance, status: 'queued', ts: new Date().toISOString() };
+  if (resolvedProject !== undefined) entry.projectId = resolvedProject;
+  if (kind !== undefined) entry.kind = kind as MemoryEntry['kind'];
+  if (roleId !== undefined) entry.roleId = roleId;
+  if (author !== undefined) entry.author = author;
+  if (resolvedProject === undefined) unavailable(entry, 'missing_project_id');
   state.outbox.push(entry);
   return entry;
 }
@@ -52,21 +143,36 @@ function field(value: unknown, label: string): string {
   return key;
 }
 
-function publication(entry: MemoryEntry, input: ObjectValue): Publication {
+function publication(state: TeamState, entry: MemoryEntry, input: ObjectValue): Publication {
   if (input.provider === 'surreal-memory') {
     const scope = object(input.scopeMapping, 'scopeMapping');
     if (scope.scope !== entry.scope) throw new Error('scopeMapping.scope must match the queued scope exactly');
-    const agentId = text(scope.agentId, 'scopeMapping.agentId');
-    const userId = scope.userId === undefined ? null : text(scope.userId, 'scopeMapping.userId');
-    const sessionId = scope.sessionId === undefined ? null : text(scope.sessionId, 'scopeMapping.sessionId');
-    // The verified REST request has no metadata or idempotency fields. Keep the
-    // publication envelope inside content rather than inventing accepted fields.
-    const content = JSON.stringify({ schemaVersion: 1, kind: 'agent-team-memory', id: entry.id, scope: entry.scope, provenance: entry.provenance, content: entry.content });
+    const route = routeScope(state, entry.scope);
+    const userId = scopedProject(entry.projectId);
+    if (scope.userId !== undefined && text(scope.userId, 'scopeMapping.userId') !== userId) throw new Error('scopeMapping.userId must match the resolved project id');
+    const writer = scope.agentId === undefined ? undefined : text(scope.agentId, 'scopeMapping.agentId');
+    const author: ObjectValue = { harness: authorHarness(state.team.harness), ...(optionalAuthor(entry.author) ?? {}) };
+    if (author.agentId === undefined && writer !== undefined) author.agentId = writer;
+    if (author.sessionId === undefined && scope.sessionId !== undefined) author.sessionId = text(scope.sessionId, 'scopeMapping.sessionId');
+    const hash = createHash('sha256').update(entry.content.normalize('NFC').trim().replace(/\s+/g, ' ')).digest('hex');
+    const roleId = route.roleId ?? entry.roleId;
+    if (roleId !== undefined && !state.team.roles.some(role => role.id === roleId)) throw new Error('memory.roleId no longer belongs to this team');
+    const kind = entry.kind ?? (route.visibility === 'lead' ? 'progress' : 'lesson');
+    if (!(KINDS as readonly string[]).includes(kind)) throw new Error('unsupported stored memory.kind');
+    const envelope: ObjectValue = { schemaVersion: 1, projectId: userId, teamId: state.team.id };
+    if (roleId !== undefined) envelope.roleId = roleId;
+    Object.assign(envelope, { visibility: route.visibility, kind, author, contentHash: hash, ts: entry.ts ?? new Date(0).toISOString() });
+    const categories = ['env:1', `vis:${route.visibility}`, `kind:${kind}`, `h:${hash.slice(0, 16)}`];
+    if (roleId !== undefined) categories.push(`author:${state.team.id}/${roleId}`);
+    // AddMemoryRequest has no metadata/idempotency fields: preserve lesson text
+    // and attach the full client's learning-envelope trailer, not legacy JSON.
+    const content = `${entry.content}\n\n<!-- prometheus-envelope ${JSON.stringify(envelope)} -->`;
     return {
-      body: { content, agent_id: agentId, user_id: userId, session_id: sessionId, categories: ['agent-team', entry.scope] },
+      body: { content, agent_id: route.agentId, user_id: userId, session_id: author.sessionId ?? null, categories },
       headers: {}, remoteIdField: 'id', method: 'POST',
       contract: { provider: 'surreal-memory', source: 'https://github.com/Prometheus-AGS/surreal-memory-server/blob/dd7fdcd6d8974af4059d1d51401bd33ae29f65db/src/contracts.rs',
-        route: 'POST /api/v1/memory/', scopeBinding: 'explicit identity filters and content envelope; not an authorization guarantee', remoteIdempotency: 'unsupported-by-verified-contract' },
+        route: 'POST /api/v1/memory', envelope: 'shared/schemas/learning-envelope.schema.json (content trailer)',
+        scopeBinding: 'design-table agent_id and project user_id filters; not an authorization guarantee', remoteIdempotency: 'unsupported-by-verified-contract' },
     };
   }
   if (input.provider !== 'mapped-http') throw new Error('memory provider must be surreal-memory or mapped-http');
@@ -99,7 +205,7 @@ function publication(entry: MemoryEntry, input: ObjectValue): Publication {
 }
 
 /** Only an already-queued entry is eligible. Caller persists success AND failure receipts. */
-export async function publishMemory(state: TeamState, input: ObjectValue): Promise<Json> {
+export async function publishMemory(state: TeamState, input: ObjectValue, context: ObjectValue = {}): Promise<Json> {
   assertNoCredentials(input);
   const id = text(input.id, 'memory.id');
   const entry = state.outbox.find(item => item.id === id);
@@ -109,13 +215,20 @@ export async function publishMemory(state: TeamState, input: ObjectValue): Promi
   if (previous.uncertain === true && input.retryUncertain !== true) {
     return { id, status: 'queued', receipt: previous, reason: 'remote outcome uncertain; reconcile before explicitly setting retryUncertain' };
   }
+  const selectedProject = projectId(input, entry.provenance, context);
+  if (entry.projectId !== undefined && selectedProject !== undefined && entry.projectId !== selectedProject) throw new Error('publication project id conflicts with queued project identity');
+  const resolvedProject = entry.projectId === undefined ? selectedProject : scopedProject(entry.projectId);
+  if (resolvedProject === undefined) return unavailable(entry, 'missing_project_id');
+  entry.projectId = resolvedProject;
   if (input.url === undefined) {
-    entry.receipt = { at: new Date().toISOString(), outcome: 'unavailable', reason: 'no memory endpoint configured', uncertain: false };
-    return { id, status: 'queued', receipt: entry.receipt };
+    return unavailable(entry, 'no memory endpoint configured');
   }
   const url = endpoint(input.url);
-  if (input.provider === 'surreal-memory' && !url.pathname.endsWith('/api/v1/memory/')) throw new Error('surreal-memory url must name the verified /api/v1/memory/ route');
-  const request = publication(entry, input);
+  if (input.provider === 'surreal-memory') {
+    if (!/\/api\/v1\/memory\/?$/.test(url.pathname)) throw new Error('surreal-memory url must name the verified /api/v1/memory route');
+    url.pathname = url.pathname.replace(/\/$/, '');
+  }
+  const request = publication(state, entry, input);
   assertNoCredentials(request.body);
   const target = { url: url.href, contract: request.contract };
   const publicationKey = digest({ id, content: entry.content, scope: entry.scope, provenance: entry.provenance, target, body: request.body });

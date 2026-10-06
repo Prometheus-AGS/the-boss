@@ -77,7 +77,10 @@ export async function launchBoss(args) {
   const scenario = args.scenario ? fs.realpathSync(path.resolve(args.scenario)) : null;
   if (scenario && path.extname(scenario) !== '.mjs') throw new Error('Scenario must be a trusted .mjs file.');
   const scenarioDigest = scenario ? createHash('sha256').update(fs.readFileSync(scenario)).digest('hex') : null;
-  const receiptFile = path.resolve(args.receipt ?? path.join(repository, '.prometheus', 'cadence', 'receipts', `boss-launch-${randomUUID()}.json`));
+  const requestedReceipt = path.resolve(args.receipt ?? path.join(repository, '.prometheus', 'cadence', 'receipts', `boss-launch-${randomUUID()}.json`));
+  const receiptFile = args.receipt && fs.existsSync(requestedReceipt)
+    ? path.join(path.dirname(requestedReceipt), `${path.parse(requestedReceipt).name}-${randomUUID()}${path.extname(requestedReceipt)}`)
+    : requestedReceipt;
   const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'cadence-boss-'));
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort('timeout'), timeoutMs);

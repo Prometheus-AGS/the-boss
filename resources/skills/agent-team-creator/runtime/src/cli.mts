@@ -59,10 +59,10 @@ async function dispatch(command: string, input: ObjectValue): Promise<unknown> {
     });
     case 'models-discover': return discoverModels(input);
     case 'models-select': return selectModel(validateTeam(input.team), text(input.roleId, 'roleId'), strings(input.skills ?? [], 'skills'), (input.taskPolicy ?? {}) as ModelPolicy, input.catalog);
-    case 'memory-queue': return mutateState(stateFile(input), revision(input), state => { queueMemory(state, object(input.entry, 'entry')); });
+    case 'memory-queue': return mutateState(stateFile(input), revision(input), state => { queueMemory(state, object(input.entry, 'entry'), input); });
     case 'memory-publish': {
       let receipt: Json = null;
-      const state = await mutateStateAsync(stateFile(input), revision(input), async state => { receipt = await publishMemory(state, object(input.publication, 'publication')); });
+      const state = await mutateStateAsync(stateFile(input), revision(input), async state => { receipt = await publishMemory(state, object(input.publication, 'publication'), input); });
       return { state, publication: receipt };
     }
     case 'uar-capabilities': return uarCapabilities(input);
