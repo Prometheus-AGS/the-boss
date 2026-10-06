@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next'
 
 import { Badge, Button, Input } from '@cherrystudio/ui'
 import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/components/SettingsPrimitives'
+import { useUarTeamLiveOutput } from '@renderer/hooks/useUarTeamLiveOutput'
 import { ipcApi } from '@renderer/ipc'
 import type { UarTeamArtifact, UarTeamExecutionSummary, UarTeamInstance } from '@shared/types/uarTeams'
 
 import { UarEffectiveModel } from './UarEffectiveModel'
 import { UarTeamAdmission } from './UarTeamAdmission'
+import { UarTeamAttemptOutput } from './UarTeamAttemptOutput'
 import { UarTeamContextView } from './UarTeamContextView'
 import { uarTeamError } from './uarTeamError'
 import { UarTeamWaits } from './UarTeamWaits'
@@ -36,6 +38,7 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, cooper
   const inFlight = useRef(false)
   const mounted = useRef(true)
   const intents = useRef<Record<string, { fingerprint: string; commandId: string }>>({})
+  const liveOutputs = useUarTeamLiveOutput(workspaceId, instance.id, summary?.attempts ?? [], available)
 
   const refresh = useCallback(
     async (quiet = false) => {
@@ -333,18 +336,13 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, cooper
                         attemptId={attempt.id}
                       />
                     )}
-                    {attempt.output != null && (
-                      <details className="mt-2 text-xs">
-                        <summary className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                          {tr('execution.output')}
-                        </summary>
-                        <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-md bg-background-subtle p-2">
-                          {typeof attempt.output === 'string'
-                            ? attempt.output
-                            : JSON.stringify(attempt.output, null, 2)}
-                        </pre>
-                      </details>
-                    )}
+                    <UarTeamAttemptOutput
+                      attempt={attempt}
+                      live={liveOutputs[attempt.id]}
+                      memberRole={
+                        instance.members.find((member) => member.id === attempt.memberId)?.role ?? attempt.memberId
+                      }
+                    />
                     {attempt.status === 'queued' && (
                       <Button
                         className="mt-3 mr-2"
