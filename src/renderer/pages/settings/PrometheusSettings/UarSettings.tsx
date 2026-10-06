@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -44,6 +45,12 @@ export default function UarSettings() {
             onReady={() => void controller.load()}
             overview={
               <>
+                <SettingGroup>
+                  <Link data-ui="bossfang-settings-entry" to="/settings/bossfang" className="text-link">
+                    {t('bossfang.settingsLink')}
+                  </Link>
+                  <SettingHelpText>{t('bossfang.connectionIndependent')}</SettingHelpText>
+                </SettingGroup>
                 <UarIntegrationStatus
                   snapshot={snapshot}
                   busy={controller.busy}

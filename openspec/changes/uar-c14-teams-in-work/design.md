@@ -135,3 +135,17 @@ Root owns the Boss adapter and pin; runtime owns the native snapshot; operation
 owns the scoped driver evidence. Complete all three before the native/Mac build
 and failed Work operation rerun. Actual roster input remains unknown; there is
 no evidence authorizing a cursor repair yet.
+
+## Observed team-client MCP session ownership repair
+
+Actual packaged operation c14-d52f2b36-99d2-4d2c-b386-60fa6a3e82d8 at Boss cb171a43e055f5777562c4854ff63d0ba3911081/UAR4a28298225f137d713b2db8fbd5e8f78757e19d7 successfully initialized the coordinator filesystem connection, approved delegation and yielded. Worker and continuation then recorded required filesystem ConnectionFailed; neither reported the prior cache-shutdown failure. The installed SDK1.29.0 source rejects a second initialize on an already-initialized stateful transport. The HTTP400 is source-derived, not independently retained native HTTP evidence.
+
+The Boss team bridge must keep a separate stateful SDK server/transport per client session, mapped by exact MCP-Session-Id beneath its existing authenticated mounted route. UarTeamHostService supplies fresh FileSystemServer instances from the captured canonical workspace. Keep the existing bridge token, loopback/host/origin checks, shared authoritative admission port and exact member/run/binding/workspace effect checks. Client deletion closes only its owned session; team/generation teardown closes all sessions. Ordinary single-client bridges retain their existing instance path. UAR4a attempt-owned resources and normal cleanup remain correct. No stateless workaround, new scheduler, approval bypass or mutable workspace reread.
+
+Implementation order: record this repair; implement only UarHostMcpBridge.ts and UarTeamHostService.ts; complete source wiring and scoped formatting; then rebuild the real Mac application and repeat only the failed combined operation. No intermediate suites, compiler or review loops. No new UI strings, persisted fields or migrations are required by this protocol-lifetime repair. Parent canonical task ownership remains unchanged.
+
+## Observed partition-scoped team tool-admission repair
+
+Actual packaged operation c14-95842c8e-1564-421f-9490-716bdee42ce5 initializes worker and continuation MCP sessions after the Boss session fix, but the worker filesystem read receives paired-host admission HTTP 409. Source traces the mismatch: the collaboration API and admitted attempt use ActorOwner.presentation_owner_key(), while with_verified_owner deliberately keeps the raw subject for ordinary run/session identity and manager previously reused that raw subject for the tool-admission owner. The Boss correctly requires the captured partition-scoped team owner.
+
+Repair native admission construction for trusted collaboration-bound team attempts by deriving and validating the canonical verified owner against both the immutable binding and attempt. Preserve ordinary raw session identity, artifact principal, root attempt identity, workspace scope, current membership/binding/generation fences, lease/budget revisions and authority hashes. No Boss authorization relaxation. Pin and package the actual corrected native source, then rebuild and repeat the failed complete operation; compilation alone does not grant task or delivery completion.

@@ -34,7 +34,7 @@ export const PACK_ENTRIES = [
 ] as const
 
 /** Single files, copied alongside the directories above. */
-const PACK_FILES = ['package.json', 'versions.toml', 'release-manifest.json'] as const
+const PACK_FILES = ['package.json', 'versions.toml', 'skill-system.json', 'release-manifest.json'] as const
 
 /**
  * Install the runnable pack into `{userData}/Data/PrometheusPack`.

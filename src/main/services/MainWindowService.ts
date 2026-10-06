@@ -28,7 +28,12 @@ import { IpcChannel } from '@shared/IpcChannel'
 import type { MainWindowInitData } from '@shared/types/mainWindow'
 import { normalizeBrowserEntryUrl, normalizeBrowserUrl } from '@shared/utils/browserUrl'
 import { HTML_ARTIFACT_PREVIEW_DATA_URL_PREFIX, HTML_ARTIFACT_PREVIEW_PARTITION } from '@shared/utils/htmlArtifact'
-import { getWebviewPartition, getWebviewSecurityProfile, WebviewSecurityProfile } from '@shared/utils/webviewSecurity'
+import {
+  BOSSFANG_DASHBOARD_PARTITION,
+  getWebviewPartition,
+  getWebviewSecurityProfile,
+  WebviewSecurityProfile
+} from '@shared/utils/webviewSecurity'
 import { MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH } from '@shared/utils/window'
 
 import iconPath from '../../../build/icon.png?asset'
@@ -430,11 +435,14 @@ export class MainWindowService extends BaseService {
 
     mainWindow.webContents.on('will-attach-webview', (event, webPreferences, params) => {
       const securityProfile = getWebviewSecurityProfile(params.partition ?? '')
-      // Mini app partitions carry their own gate (installMiniAppWebviewHost) and the
-      // shared `persist:webview` lockdown lives in WebviewService.attachWebviewPreload.
+      // Installed mini apps carry their own gate. The dedicated BossFang guest uses
+      // this host's hardened preferences and its loopback-only session request gate.
       if (!securityProfile) {
-        if (!isMiniAppPartition(params.partition)) event.preventDefault()
-        return
+        if (isMiniAppPartition(params.partition)) return
+        if (params.partition !== BOSSFANG_DASHBOARD_PARTITION) {
+          event.preventDefault()
+          return
+        }
       }
       if (securityProfile === WebviewSecurityProfile.MiniApp) return
 
@@ -452,7 +460,10 @@ export class MainWindowService extends BaseService {
         return
       }
 
-      if (securityProfile === WebviewSecurityProfile.HtmlArtifactPreview) {
+      if (
+        securityProfile === WebviewSecurityProfile.HtmlArtifactPreview ||
+        params.partition === BOSSFANG_DASHBOARD_PARTITION
+      ) {
         delete webPreferences.preload
       } else {
         webPreferences.preload = application.getPath('feature.webview.preload_file')
@@ -468,6 +479,10 @@ export class MainWindowService extends BaseService {
     })
 
     mainWindow.webContents.on('did-attach-webview', (_, webContents) => {
+      if (webContents.session === session.fromPartition(BOSSFANG_DASHBOARD_PARTITION)) {
+        application.get('BossFangService').attachDashboardGuest(webContents)
+        return
+      }
       if (
         webContents.session === agentBrowserSession ||
         webContents.session === agentDevSession ||

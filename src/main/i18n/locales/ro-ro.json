@@ -64,6 +64,8 @@
   "appMenu.zoom": "Zoom",
   "appMenu.zoomIn": "Mărește",
   "appMenu.zoomOut": "Micșorează",
+  "bossfang.diagnosticCheckFailed": "Verificarea de diagnostic a eșuat. Verificați acreditările panoului, compatibilitatea UAR și evenimentele de execuție păstrate.",
+  "bossfang.retainedAuthentication": "Autentificarea UAR originală nu a putut fi actualizată. Verificați instanța originală activată, spațiul de lucru și execuția păstrată. Execuția existentă nu este repetată sau mutată.",
   "chat.conversation.new": "Conversație nouă",
   "common.channel_available_commands": "Comenzi disponibile:",
   "common.channel_command_processing_error": "⚠️ A apărut o eroare la procesarea comenzii. Încercați din nou mai târziu.",

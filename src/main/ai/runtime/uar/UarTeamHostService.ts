@@ -50,7 +50,7 @@ export class UarTeamHostService extends BaseService {
       this.bridges.delete(key)
     }
     const bridge = await createUarHostMcpBridge(
-      { filesystem: { name: 'filesystem', instance: new FileSystemServer(directory).server } },
+      { filesystem: { name: 'filesystem', createInstance: () => new FileSystemServer(directory).server } },
       {
         sessionId: 'team:' + team.id,
         ownerId: team.ownerId,

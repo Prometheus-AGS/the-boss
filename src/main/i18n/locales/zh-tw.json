@@ -64,6 +64,8 @@
   "appMenu.zoom": "縮放",
   "appMenu.zoomIn": "放大",
   "appMenu.zoomOut": "縮小",
+  "bossfang.diagnosticCheckFailed": "診斷檢查失敗。請檢查儀表板憑證、UAR 相容性與保留的執行事件。",
+  "bossfang.retainedAuthentication": "無法更新原始 UAR 身分驗證。請檢查原始已啟用執行個體、工作區和保留的執行。現有執行不會被重播或遷移。",
   "chat.conversation.new": "新對話",
   "common.channel_available_commands": "可用指令：",
   "common.channel_command_processing_error": "⚠️ 處理指令時發生錯誤。請稍後再試。",

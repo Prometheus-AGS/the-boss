@@ -49,8 +49,11 @@ successful invocation.
 
 Schema-v1 UAR export remains a legacy `AgentArtifact` compatibility projection
 for ordinary single-agent consumers. It is not a team registration protocol.
-New collaboration authoring uses the official Draft 0.1.0-draft.1 schemas copied
-under `schemas/uar/`, compiles all agent/team/workflow definitions into one
+New collaboration authoring uses the official `0.1.0-draft.2` schemas under
+`schemas/uar/0.1.0-draft.2/`. The [consumer source receipt](../schemas/uar/0.1.0-draft.2/consumer-source-receipt.json)
+records the selected provider commit and schema hashes. Draft.1 remains a
+separate legacy reader/migration input; it is not the new authoring profile.
+The authoring path compiles all agent/team/workflow definitions into one
 immutable PackageManifest, and installs atomically through the versioned
 collaboration package API. A private DeploymentBinding follows package install.
 See `uar-deployment.md` for exact routes, request bodies, capability preflight,

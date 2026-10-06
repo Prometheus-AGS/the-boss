@@ -53,8 +53,10 @@ async function main() {
     if (!recipe) throw new Error(`Unknown native tool: ${name}`)
     const source = checkoutIntegrationSource(recipe.source)
     const cwd = path.join(source, recipe.directory || '')
+    const dashboard = name === 'bossfang' ? require('./bossfang-payload.cjs').prepareDashboard(cwd) : undefined
     const env = {
       RUSTC_WRAPPER: '',
+      ...(name === 'bossfang' ? { SKIP_DASHBOARD_BUILD: '1', GITHUB_SHA: pins.sources[recipe.source].revision } : {}),
       CARGO_BUILD_BUILD_DIR: path.join(cwd, 'target'),
       ...(name === 'compass' ? { PROJECT_ROOT: await parserSources(), TSLP_OFFLINE: '1' } : {})
     }
@@ -87,8 +89,18 @@ async function main() {
       size: fs.statSync(path.join(output, asset)).size,
       sha256: hash(path.join(output, asset)),
       binaries: [binary],
-      archive: 'none'
+      archive: 'none',
+      ...(dashboard ? { dashboard, features: recipe.features.split(','), uarLifecycle: 'connection-only' } : {})
     })
+    if (name === 'bossfang')
+      require('./bossfang-payload.cjs').packagePayload({
+        sourceDirectory: cwd,
+        sourceCommit: pins.sources[recipe.source].revision,
+        target,
+        platform,
+        features: recipe.features.split(','),
+        output
+      })
     fs.writeFileSync(path.join(output, `tools-${platform}.json`), JSON.stringify(records, null, 2))
     if (name === 'compass' && platform === 'linux-x64') {
       const skills = path.join(output, 'compass-skills')

@@ -1,6 +1,9 @@
 import { createHash, randomUUID } from 'node:crypto'
 import type { ServerResponse } from 'node:http'
 
+import { validatePath } from '@main/ai/mcp/servers/filesystem'
+import type { UarTeamPreparedEffect } from '@shared/types/uarTeams'
+
 import type { UarAuthorityDecision, UarAuthorityEffect, UarAuthorityProvider } from './UarAuthorityProvider'
 import { sanitizeUarProviderToolName } from './uarToolNames'
 
@@ -434,12 +437,39 @@ export class UarHostToolAdmission {
     return true
   }
 
-  private inspect(body: unknown, response: ServerResponse): true {
+  private async inspect(body: unknown, response: ServerResponse): Promise<true> {
     const admissionId = isRecord(body) && typeof body.admissionId === 'string' ? body.admissionId : ''
     const record = this.records.get(admissionId)
     if (!record) {
       this.respond(response, 404, { error: 'Tool admission is unknown' })
       return true
+    }
+    const inspection = isRecord(body) ? body.inspection : undefined
+    let preparedEffect: UarTeamPreparedEffect | undefined
+    if (inspection !== undefined) {
+      const invocation = record.invocation
+      if (
+        !isRecord(inspection) ||
+        inspection.ownerId !== invocation.ownerId ||
+        inspection.workspace !== invocation.workspace ||
+        inspection.rootRunId !== invocation.rootRunId ||
+        inspection.runId !== invocation.executingRunId ||
+        inspection.toolCallId !== invocation.modelToolCallId ||
+        inspection.callIndex !== invocation.callIndex ||
+        inspection.toolName !== invocation.providerToolName ||
+        !isRecord(inspection.actionDisplay) ||
+        argumentDigest(inspection.actionDisplay) !== argumentDigest(record.actionDisplay) ||
+        !['prepared', 'awaiting-human'].includes(record.state)
+      ) {
+        this.respond(response, 409, { error: 'Prepared effect does not match its pending approval' })
+        return true
+      }
+      try {
+        preparedEffect = await inspectPreparedEffect(record)
+      } catch {
+        this.respond(response, 409, { error: 'Prepared effect target is unavailable' })
+        return true
+      }
     }
     this.respond(response, 200, {
       admissionId,
@@ -447,7 +477,8 @@ export class UarHostToolAdmission {
       toolName: record.invocation.providerToolName,
       state: record.state,
       hostDisposition: record.hostDisposition,
-      updatedAt: record.updatedAt
+      updatedAt: record.updatedAt,
+      ...(preparedEffect ? { preparedEffect } : {})
     })
     return true
   }
@@ -538,6 +569,51 @@ export class UarHostToolAdmission {
       hostDisposition
     }
   }
+}
+
+async function inspectPreparedEffect(record: AdmissionRecord): Promise<UarTeamPreparedEffect> {
+  const invocation = record.invocation
+  const args = invocation.validatedArguments
+  const effect: UarTeamPreparedEffect = {
+    version: 1,
+    admissionId: record.admissionId,
+    invocationId: invocation.invocationId,
+    toolCallId: invocation.modelToolCallId,
+    callIndex: invocation.callIndex,
+    rootRunId: invocation.rootRunId,
+    runId: invocation.executingRunId,
+    ownerId: invocation.ownerId,
+    workspace: invocation.workspace,
+    toolName: invocation.providerToolName,
+    argumentsSha256: record.argumentDigest,
+    actionDisplaySha256: argumentDigest(record.actionDisplay)
+  }
+  if (invocation.mountedServerId !== 'filesystem') return effect
+  const fileOperation = ['read', 'write', 'edit'].includes(invocation.nativeToolName)
+  const queryOperation = ['ls', 'glob', 'grep'].includes(invocation.nativeToolName)
+  const target = fileOperation ? args.file_path : queryOperation ? args.path || invocation.workspace : undefined
+  if (typeof target === 'string') effect.targetPath = await validatePath(target, invocation.workspace)
+  if (invocation.nativeToolName === 'write' && typeof args.content === 'string') {
+    effect.write = { contentSha256: textDigest(args.content) }
+  }
+  if (
+    invocation.nativeToolName === 'edit' &&
+    typeof args.old_string === 'string' &&
+    typeof args.new_string === 'string'
+  ) {
+    effect.edit = {
+      oldStringSha256: textDigest(args.old_string),
+      newStringSha256: textDigest(args.new_string),
+      oldStringLength: args.old_string.length,
+      newStringLength: args.new_string.length,
+      replaceAll: args.replace_all === true
+    }
+  }
+  return effect
+}
+
+function textDigest(value: string): string {
+  return createHash('sha256').update(value).digest('hex')
 }
 
 function isPreparedInvocation(value: unknown): value is UarPreparedInvocation {

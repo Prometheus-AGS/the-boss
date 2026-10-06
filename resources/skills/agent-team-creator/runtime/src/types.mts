@@ -85,6 +85,12 @@ export interface MemoryEntry {
   provenance: ObjectValue;
   status: 'queued' | 'published';
   receipt?: Json;
+  /** Optional locally; required for scoped REST publication. Legacy entries remain readable. */
+  projectId?: string;
+  ts?: string;
+  kind?: 'lesson' | 'gotcha' | 'decision' | 'progress' | 'candidate';
+  roleId?: string;
+  author?: ObjectValue;
 }
 export interface TeamState {
   schemaVersion: 1;

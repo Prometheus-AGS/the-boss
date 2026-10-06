@@ -14,6 +14,7 @@ import { BaseService, Injectable, Phase, ServicePhase } from '@main/core/lifecyc
 import { isWin } from '@main/core/platform'
 import { ensureManagedSecrets } from '@main/services/prometheus/integrationConfig'
 import { readIntegrationConfig, readUarInstanceCredentials } from '@main/services/prometheus/integrationConfig'
+import { fetchWithRateLimitRetries } from '@main/utils/http'
 import { crossPlatformSpawn, terminateProcessTree, waitForProcessExit } from '@main/utils/processRunner'
 import { getRawShellEnv } from '@main/utils/shellEnv'
 import { assertUarEnabled, isUarEnabled } from '@shared/ai/agentRuntimeCapabilities'
@@ -437,17 +438,7 @@ export class UarSidecarService extends BaseService {
     headers.set('authorization', `Bearer ${running.authToken}`)
     if (running.principalMode === 'host-asserted') headers.set('x-uar-principal', principal)
     else headers.delete('x-uar-principal')
-    return this.fetchWithRateLimitRetries(new URL(pathname, baseUrl), { ...init, headers })
-  }
-
-  private async fetchWithRateLimitRetries(url: URL, init: RequestInit): Promise<Response> {
-    for (let attempt = 0; attempt < 6; attempt += 1) {
-      const response = await fetch(url, init)
-      if (response.status !== 429 || attempt === 5) return response
-      await response.body?.cancel()
-      await new Promise((resolve) => setTimeout(resolve, 250))
-    }
-    throw new Error('UAR request exhausted its rate-limit retries')
+    return fetchWithRateLimitRetries(new URL(pathname, baseUrl), { ...init, headers })
   }
 
   private ensureRunning(): Promise<RunningSidecar> {
@@ -669,7 +660,7 @@ export class UarSidecarService extends BaseService {
   }
 
   private async readCapabilities(instance: UarRuntimeInstance, baseUrl: string, authToken: string) {
-    const response = await this.fetchWithRateLimitRetries(new URL('/api/uar/capabilities', baseUrl), {
+    const response = await fetchWithRateLimitRetries(new URL('/api/uar/capabilities', baseUrl), {
       headers: { authorization: `Bearer ${authToken}` },
       signal: AbortSignal.timeout(5_000)
     })
