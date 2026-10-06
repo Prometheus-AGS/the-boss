@@ -36,6 +36,7 @@ export {
 export { setupUarStarterAgent, setupUarStarterTeam, rebindUarStarterTeam } from './UarStarterAdministrationAdapter'
 export {
   deleteUarProvider,
+  providerResponseSchema,
   readUarModelSources,
   saveUarProvider,
   setDefaultUarProvider,

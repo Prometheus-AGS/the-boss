@@ -10,10 +10,11 @@ import * as z from 'zod'
 import { application } from '@application'
 import { agentWorkspaceService } from '@data/services/AgentWorkspaceService'
 import { loggerService } from '@logger'
-import { providerResponseSchema } from '@main/ai/runtime/uar/UarModelSourceAdapter'
+import { providerResponseSchema } from '@main/ai/runtime/uar'
 import { BaseService, Injectable, Phase, ServicePhase } from '@main/core/lifecycle'
 import { isWin } from '@main/core/platform'
 import { toAsarUnpackedPath } from '@main/utils/asar'
+import { fetchWithRateLimitRetries } from '@main/utils/http'
 import { crossPlatformSpawn, terminateProcessTree, waitForProcessExit } from '@main/utils/processRunner'
 import type { BossFangConfig, BossFangStatus } from '@shared/types/bossFang'
 import { bossFangConfigSchema } from '@shared/types/bossFang'
@@ -334,7 +335,7 @@ export class BossFangService extends BaseService {
       throw new Error('Start BossFang and configure dashboard credentials first')
     const headers = new Headers(init.headers)
     headers.set('Authorization', `Bearer ${this.dashboardToken}`)
-    return fetch(new URL(pathname, this.origin), {
+    return fetchWithRateLimitRetries(new URL(pathname, this.origin), {
       ...init,
       headers,
       redirect: 'error',

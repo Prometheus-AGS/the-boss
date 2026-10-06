@@ -286,7 +286,7 @@ export class BossFangDiagnostics {
           this.stage(record, 'completion', succeeded ? 'succeeded' : 'failed', state)
           break
         }
-        await new Promise((resolve) => setTimeout(resolve, 500))
+        await new Promise((resolve) => setTimeout(resolve, 2000))
       }
       if (this.stopping) {
         this.check(record, 'delegationOperational', 'failed')
