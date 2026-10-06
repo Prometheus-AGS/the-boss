@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "source": "e23348760b776f058f704e2fe965833353005a90",
+  "version": "1.0.0",
+  "packagingScript": "scripts/package-boss-sidecar.mjs",
+  "platforms": {
+    "darwin-arm64": {
+      "nativeRun": 37522635614,
+      "releaseTag": "boss-sidecar-darwin-arm64-v1.0.0-team-catalog-e2334876-20261006",
+      "nativeBinarySha256": "31bc97bd9479298d117ec8752642a56225cb7a47c364a7c4b0c3fa4257f9145b",
+      "features": [
+        "server-full"
+      ],
+      "archiveUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-team-catalog-e2334876-20261006/uar-sidecar-darwin-arm64.tar.gz",
+      "archiveSize": 126410488,
+      "archiveSha256": "9304890322799632e59c7bda7b0e3f65b1dddaf09958092f3e4996d49487fd71",
+      "recordUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-team-catalog-e2334876-20261006/uar-sidecar-darwin-arm64.json",
+      "recordSha256": "342de600c585db4282f980d684bda164227d82ff452d56fa5f05b101d57b1aee",
+      "modelSha256": "6c9c6101a956d62dfb5e7190c538226c0c5bb9cb27b651234b6df063ee7dbfe4",
+      "payloadFileCount": 13
+    }
+  }
+}
