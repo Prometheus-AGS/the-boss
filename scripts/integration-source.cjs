@@ -17,8 +17,28 @@ function checkoutIntegrationSource(name, directory = path.join(root, 'build', 'i
   git('checkout', '--detach', 'FETCH_HEAD')
   if (git('rev-parse', 'HEAD') !== pin.revision) throw new Error(`Integration source pin mismatch: ${name}`)
   if (name === 'uar')
-    git('submodule', 'update', '--init', 'crates/prometheus-skill-system', 'vendor/git/liter-llm', 'vendor/git/rust-mcp-filesystem')
+    git(
+      'submodule',
+      'update',
+      '--init',
+      'crates/prometheus-skill-system',
+      'vendor/git/liter-llm',
+      'vendor/git/rust-mcp-filesystem'
+    )
   return directory
 }
 
 module.exports = { checkoutIntegrationSource }
+
+if (require.main === module) {
+  const selected = process.env.INTEGRATION_TOOLS
+    ? process.env.INTEGRATION_TOOLS.split(',').filter(Boolean)
+    : Object.keys(pins.tools)
+  const sources = new Set()
+  for (const name of selected) {
+    const recipe = pins.tools[name]
+    if (!recipe) throw new Error(`Unknown native tool: ${name}`)
+    sources.add(recipe.source)
+  }
+  for (const name of sources) checkoutIntegrationSource(name)
+}

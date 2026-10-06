@@ -12,7 +12,7 @@
     },
     "prometheus": {
       "repository": "Prometheus-AGS/prometheus-skill-system",
-      "revision": "e57421a86fae08ac4d1e3a625a213cf3f3eb98bc"
+      "revision": "3e8a891bcd472e18cc1c097c04b208cb93f7f78f"
     },
     "pk": {
       "repository": "Prometheus-AGS/prometheus-knowledge-rs",
@@ -28,7 +28,7 @@
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
-      "revision": "0af8ae1f3c7486bf7128beff8ef83aaf1a832ea6"
+      "revision": "bfb6d49a7fe25d82ef4ad55f49c8f97e6e82c54a"
     },
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
@@ -55,7 +55,7 @@
       "source": "prometheus",
       "package": "prometheus-cli",
       "directory": "tools/prometheus-cli",
-      "version": "1.10.0"
+      "version": "1.11.3"
     },
     "pk": {
       "source": "pk",

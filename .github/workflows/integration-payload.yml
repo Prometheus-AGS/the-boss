@@ -85,6 +85,11 @@ jobs:
         run: |
           choco install nasm --no-progress -y
           'C:\Program Files\NASM' >> $env:GITHUB_PATH
+      # Check out the pinned ignore rules before restoring target-only build caches.
+      - name: Prepare pinned native sources
+        env:
+          INTEGRATION_TOOLS: ${{ inputs.native_tools }}
+        run: node scripts/integration-source.cjs
       - uses: actions/cache@v6
         id: native-cache
         with:
