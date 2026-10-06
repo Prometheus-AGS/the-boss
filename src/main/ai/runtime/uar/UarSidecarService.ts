@@ -4,6 +4,7 @@ import { constants } from 'node:fs'
 import { chmod, copyFile, mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import readline from 'node:readline'
+import { setTimeout as delay } from 'node:timers/promises'
 
 import { Mutex } from 'async-mutex'
 import * as z from 'zod'
@@ -139,6 +140,7 @@ export class UarSidecarService extends BaseService {
   private generation = 0
   private stopping = false
   private readonly verifiedEndpoints = new Map<number, VerifiedEndpoint>()
+  private readonly requestAdmissions = new Map<number, { mutex: Mutex; nextAt: number }>()
   private readonly instanceDiagnostics = new Map<
     string,
     {
@@ -428,7 +430,10 @@ export class UarSidecarService extends BaseService {
   }
 
   private async authenticatedFetch(
-    running: Pick<VerifiedEndpoint, 'baseUrl' | 'authToken' | 'principalMode'>,
+    running: Pick<
+      VerifiedEndpoint,
+      'baseUrl' | 'authToken' | 'principalMode' | 'generation' | 'instanceId' | 'ownership'
+    >,
     pathname: string,
     principal: string,
     init: RequestInit,
@@ -438,7 +443,47 @@ export class UarSidecarService extends BaseService {
     headers.set('authorization', `Bearer ${running.authToken}`)
     if (running.principalMode === 'host-asserted') headers.set('x-uar-principal', principal)
     else headers.delete('x-uar-principal')
-    return fetchWithRateLimitRetries(new URL(pathname, baseUrl), { ...init, headers })
+    const beforeFetch =
+      running.ownership === 'managed'
+        ? async () => {
+            let admission = this.requestAdmissions.get(running.generation)
+            if (!admission) {
+              admission = { mutex: new Mutex(), nextAt: 0 }
+              this.requestAdmissions.set(running.generation, admission)
+            }
+            const currentAdmission = admission
+            const queued = currentAdmission.mutex.runExclusive(async () => {
+              init.signal?.throwIfAborted()
+              const wait = currentAdmission.nextAt - Date.now()
+              if (wait > 0) await delay(wait, undefined, { signal: init.signal ?? undefined })
+              const current = this.verifiedEndpoints.get(running.generation)
+              if (!current || current.instanceId !== running.instanceId) {
+                throw new Error(`UAR instance ${running.instanceId} binding expired before the request was admitted`)
+              }
+              // The managed sidecar retains its default global quota of ten requests per second.
+              currentAdmission.nextAt = Date.now() + 100
+            })
+            if (!init.signal) return queued
+            const signal = init.signal
+            return new Promise<void>((resolve, reject) => {
+              const onAbort = () => reject(signal.reason)
+              signal.addEventListener('abort', onAbort, { once: true })
+              if (signal.aborted) onAbort()
+              queued.then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort))
+            })
+          }
+        : undefined
+    const url = new URL(pathname, baseUrl)
+    const response = await fetchWithRateLimitRetries(url, { ...init, headers }, beforeFetch)
+    if (!response.ok) {
+      logger.warn('UAR HTTP request failed', {
+        method: (init.method ?? 'GET').toUpperCase(),
+        path: url.pathname,
+        status: response.status,
+        generation: running.generation
+      })
+    }
+    return response
   }
 
   private ensureRunning(): Promise<RunningSidecar> {
@@ -790,6 +835,7 @@ export class UarSidecarService extends BaseService {
     this.running = undefined
     if (!running) return
     this.verifiedEndpoints.delete(running.generation)
+    this.requestAdmissions.delete(running.generation)
     await this.terminate(running.child)
   }
 
