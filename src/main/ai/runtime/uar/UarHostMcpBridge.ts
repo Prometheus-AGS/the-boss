@@ -2,6 +2,7 @@ import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'node:crypt
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
 
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
+import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js'
 
 import type { AgentMcpServer } from '@main/ai/runtime/agentMcpServers'
 
@@ -39,14 +40,20 @@ export interface UarHostMcpBridge {
   close(): Promise<void>
 }
 
+type McpInstance = Pick<AgentMcpServer['instance'], 'connect' | 'close'>
+type HostServer = { name: string } & ({ instance: McpInstance } | { createInstance: () => McpInstance })
+type ClientSession = { instance: McpInstance; transport: StreamableHTTPServerTransport }
+
 type MountedServer = {
   path: string
-  server: AgentMcpServer
-  transport: StreamableHTTPServerTransport
+  server: HostServer
+  transport?: StreamableHTTPServerTransport
+  sessions: Map<string, ClientSession>
+  ownedSessions: Set<ClientSession>
 }
 
 export async function createUarHostMcpBridge(
-  servers: Record<string, AgentMcpServer>,
+  servers: Record<string, MountedServer['server']>,
   admissionOptions: UarHostToolAdmissionOptions,
   onError: (error: unknown) => void = () => undefined
 ): Promise<UarHostMcpBridge> {
@@ -95,17 +102,24 @@ export async function createUarHostMcpBridge(
   }
 }
 
-async function connectServers(servers: Record<string, AgentMcpServer>, token: string): Promise<MountedServer[]> {
+async function connectServers(
+  servers: Record<string, MountedServer['server']>,
+  token: string
+): Promise<MountedServer[]> {
   const mounted: MountedServer[] = []
   try {
     for (const [serverId, server] of Object.entries(servers)) {
-      const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: randomUUID })
-      await server.instance.connect(transport)
-      mounted.push({
+      const entry: MountedServer = {
         path: `/mcp/${createHash('sha256').update(`${token}\0${serverId}`).digest('hex')}`,
         server,
-        transport
-      })
+        sessions: new Map(),
+        ownedSessions: new Set()
+      }
+      mounted.push(entry)
+      if ('instance' in server) {
+        entry.transport = new StreamableHTTPServerTransport({ sessionIdGenerator: randomUUID })
+        await server.instance.connect(entry.transport)
+      }
     }
     return mounted
   } catch (error) {
@@ -143,6 +157,8 @@ async function handleRequest(
     response.end()
     return
   }
+  const transport = await clientTransport(mounted, request, response, body)
+  if (!transport) return
   const claim = admissions.claimToolCall(body, mounted.server.name)
   if (claim.error) {
     response.writeHead(200, { 'content-type': 'application/json' })
@@ -155,7 +171,64 @@ async function handleRequest(
     )
     return
   }
-  await mounted.transport.handleRequest(request, response, body)
+  try {
+    await transport.handleRequest(request, response, body)
+  } finally {
+    // A rejected initialize owns no resumable session.
+    if ('createInstance' in mounted.server && !transport.sessionId) {
+      const session = [...mounted.ownedSessions].find((entry) => entry.transport === transport)
+      if (session) {
+        mounted.ownedSessions.delete(session)
+        await session.instance.close()
+      }
+    }
+  }
+}
+
+async function clientTransport(
+  mounted: MountedServer,
+  request: IncomingMessage,
+  response: ServerResponse,
+  body: unknown
+): Promise<StreamableHTTPServerTransport | undefined> {
+  if (mounted.transport) return mounted.transport
+  const sessionId = request.headers['mcp-session-id']
+  if (typeof sessionId === 'string') {
+    const session = mounted.sessions.get(sessionId)
+    if (session) return session.transport
+    response.writeHead(404)
+    response.end()
+    return
+  }
+  if (sessionId !== undefined || request.method !== 'POST' || !isInitializeRequest(body)) {
+    response.writeHead(400)
+    response.end()
+    return
+  }
+  if (!('createInstance' in mounted.server)) return
+  const instance = mounted.server.createInstance()
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: randomUUID,
+    onsessioninitialized: (id) => {
+      mounted.sessions.set(id, session)
+    }
+  })
+  const session: ClientSession = { instance, transport }
+  mounted.ownedSessions.add(session)
+  transport.onclose = () => {
+    if (transport.sessionId && mounted.sessions.get(transport.sessionId) === session) {
+      mounted.sessions.delete(transport.sessionId)
+    }
+    mounted.ownedSessions.delete(session)
+  }
+  try {
+    await instance.connect(transport)
+    return transport
+  } catch (error) {
+    mounted.ownedSessions.delete(session)
+    await instance.close()
+    throw error
+  }
 }
 
 async function readJsonBody(request: IncomingMessage): Promise<unknown> {
@@ -205,5 +278,11 @@ function closeHttpServer(server: Server): Promise<void> {
 }
 
 async function closeMountedServers(mounted: readonly MountedServer[]): Promise<void> {
-  await Promise.allSettled(mounted.map((entry) => entry.server.instance.close()))
+  await Promise.allSettled(
+    mounted.flatMap((entry) =>
+      'instance' in entry.server
+        ? [entry.server.instance.close()]
+        : [...entry.ownedSessions].map((session) => session.instance.close())
+    )
+  )
 }

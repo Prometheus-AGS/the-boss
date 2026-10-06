@@ -209,16 +209,16 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.11 - Scoped channel routing
+    The Boss 2.2.12 - UAR workflow controls and skill refresh
 
-    - [Channels] Add workspace-scoped channel observer settings with source scope, delivery status, cursor details, and pause/resume controls.
-    - [UAR] Keep channel observation controls separate from execution cancellation and report unsupported cancellation explicitly.
-    - [Models] Update the bundled LiterLLM 2.1.1 gateway, model catalog, and native payloads to the latest pinned source.
+    - [Workflows] Add workflow selection, draft inspection, and exact decision controls for supported UAR workflow profiles.
+    - [Runtime] Include the updated pinned UAR sidecar and liter-llm gateway payloads.
+    - [Skills] Refresh the complete mini payload, Delivery Cadence, and Codex hook compatibility.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.11 - 范围限定的频道路由
+    The Boss 2.2.12 - UAR 工作流控制与技能更新
 
-    - [频道] 添加按工作区隔离的频道观察者设置，显示来源范围、投递状态和游标详情，并提供暂停与恢复控制。
-    - [UAR] 将频道观察控制与执行取消分开，并明确报告不支持的取消操作。
-    - [模型] 将内置 LiterLLM 2.1.1 网关、模型目录和原生程序更新到最新固定源码版本。
+    - [工作流] 为受支持的 UAR 工作流配置提供工作流选择、草稿查看和精确决策控制。
+    - [运行时] 包含更新并固定版本的 UAR 辅助进程和 liter-llm 网关。
+    - [技能] 更新完整的 mini 技能包、Delivery Cadence 和 Codex 钩子兼容性。
     <!--LANG:END-->

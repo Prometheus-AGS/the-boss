@@ -10,6 +10,8 @@ The operation contract records outcome, promisedCapability, procedure, checkpoin
 
 Candidate freeze requires outputRoots (or checkpoint outputRoots) and actual source refs. Ready freezes implicitly; candidate freeze is also available. Dirty bytes and initialized submodules are preserved; uninitialized submodules retain pins with explicit unobserved checkout state. Candidate identities and immutable attempts survive repairs.
 
+A failed candidate has two recovery paths. An evidence-linked correction starts a new iteration for the immediately preceding unresolved failure. Alternatively, after finalizing failure and reconciling any required hooks, `failure resolve` records an authority- and evidence-linked retirement. The old candidate remains failed; its receipts remain immutable and provide no delivery credit. Neither path rewrites canonical KBD completion or removes an independent publication obligation.
+
 Publication modes manual/count/interval/either preserve every as a count alias. Explicit tick or normal commands evaluate UTC opportunities; no daemon wakes. Each due candidate keeps its own obligation until platform, metadata and website receipts match. Installed acceptance remains separate. A declared consumer must supply source, correlation, artifact, serialization, predecessor and website capability evidence before dispatch.
 
 See profile.md for CLI requests, adapters.md for KBD boundaries and hooks.md for trusted handler registration.

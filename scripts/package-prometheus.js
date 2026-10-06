@@ -27,7 +27,7 @@ const entries = [
   'config',
   '.agents/skills'
 ]
-const files = ['package.json', 'package-lock.json', 'versions.toml']
+const files = ['package.json', 'package-lock.json', 'versions.toml', 'skill-system.json']
 
 function inventory(directory, prefix = '') {
   return fs.readdirSync(path.join(directory, prefix), { withFileTypes: true }).flatMap((entry) => {

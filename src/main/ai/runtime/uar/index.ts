@@ -36,6 +36,7 @@ export {
 export { setupUarStarterAgent, setupUarStarterTeam, rebindUarStarterTeam } from './UarStarterAdministrationAdapter'
 export {
   deleteUarProvider,
+  providerResponseSchema,
   readUarModelSources,
   saveUarProvider,
   setDefaultUarProvider,
@@ -74,6 +75,7 @@ export {
   toggleUarSkill
 } from './UarCatalogAdministrationAdapter'
 export { UarRuntimeDriver } from './UarRuntimeDriver'
+export { UarTeamHostService } from './UarTeamHostService'
 export { modelSnapshotForUarAssignment } from './uarModelAssignments'
 export { UarSidecarService, type UarSidecarEndpoint } from './UarSidecarService'
 export { readAppliedUarStorage } from './uarStorageProfile'
@@ -90,9 +92,22 @@ export {
 } from './UarExecutionOwnershipAdapter'
 
 export { readUarTeamContext, readUarTeamPeerMessages } from './UarTeamContextAdapter'
+export { readUarTeamRunEvents } from './UarTeamRunEventsAdapter'
 
 export {
   readUarChannelObservers,
   actOnUarChannelObserver,
   readUarChannelDeliveries
 } from './uarChannelObserverAdministration'
+
+export {
+  readUarWorkflows,
+  readUarWorkflow,
+  startUarWorkflow,
+  decideUarWorkflow,
+  cancelUarWorkflow,
+  recoverUarWorkflow
+} from './UarWorkflowExecutionAdapter'
+
+export { setupUarCodingTeam } from './UarCodingTeamAdministrationAdapter'
+export { submitUarTeamTask, readUarTeamApprovals, decideUarTeamApproval } from './UarTeamWorkAdapter'

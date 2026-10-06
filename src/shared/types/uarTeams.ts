@@ -91,7 +91,15 @@ export interface UarTeamsSnapshot {
   schemaVersion: 1
   workspaceId: string
   generation: number
-  capabilities: { planning: boolean; ownership: boolean; mailbox: boolean; execution: boolean; cooperation?: boolean }
+  capabilities: {
+    planning: boolean
+    ownership: boolean
+    mailbox: boolean
+    execution: boolean
+    cooperation?: boolean
+    coding: boolean
+    approvals: boolean
+  }
   executionProfileStage?: 'unqualified' | 'operation' | 'qualified'
   executionProfile?: string
   executionCapabilities?: string[]
@@ -275,4 +283,58 @@ export interface UarTeamModelSelection {
   source: 'uar' | 'gateway'
   providerId: string
   modelId: string
+}
+
+export interface UarSubmitTeamTaskInput extends UarTeamExecutionSelector {
+  commandId: string
+  prompt: string
+}
+
+export interface UarTeamPreparedEffect {
+  version: 1
+  admissionId: string
+  invocationId: string
+  toolCallId: string
+  callIndex: number
+  rootRunId: string
+  runId: string
+  ownerId: string
+  workspace: string
+  toolName: string
+  argumentsSha256: string
+  actionDisplaySha256: string
+  targetPath?: string
+  write?: { contentSha256: string }
+  edit?: {
+    oldStringSha256: string
+    newStringSha256: string
+    oldStringLength: number
+    newStringLength: number
+    replaceAll: boolean
+  }
+}
+
+export interface UarTeamApproval {
+  admissionOwner: 'uar-runtime' | 'paired-host'
+  attemptId: string
+  runId: string
+  approvalId: string
+  admissionId?: string
+  rootRunId?: string
+  toolCallId?: string
+  callIndex?: number
+  eventId: string
+  cursor: number
+  toolName: string
+  argumentsJson: string
+  riskReason: string
+  preparedEffect?: UarTeamPreparedEffect
+}
+
+export interface UarTeamApprovalDecision extends UarTeamExecutionSelector {
+  attemptId: string
+  approvalId: string
+  eventId: string
+  cursor: number
+  approved: boolean
 }

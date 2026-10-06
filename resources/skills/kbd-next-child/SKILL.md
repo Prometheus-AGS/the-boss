@@ -7,6 +7,10 @@ description: Advance childPointer to the next entry in childPhases[], or jump to
 
 Advance the active child within the current parent phase.
 
+## OpenSpec lifecycle preflight
+
+Before this stage, follow the [orchestrator preflight](../kbd-process-orchestrator/SKILL.md#openspec-lifecycle-preflight): refresh existing KBD/OpenSpec projects with the managed latest-stable CLI, then use that same runner for OpenSpec commands. Retry a pending startup refresh before OpenSpec work; preserve authored specs and task state. Phase scripts run this automatically, including canonical-runtime paths.
+
 ## What this does
 
 1. With no argument: moves `childPointer` to the next entry in `childPhases[]` after the current pointer.

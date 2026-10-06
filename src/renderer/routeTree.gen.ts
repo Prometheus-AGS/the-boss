@@ -27,6 +27,7 @@ import { Route as SettingsAboutRouteImport } from './routes/settings/about'
 import { Route as SettingsApiGatewayRouteImport } from './routes/settings/api-gateway'
 import { Route as SettingsAppearanceRouteImport } from './routes/settings/appearance'
 import { Route as SettingsArchiveRouteImport } from './routes/settings/archive'
+import { Route as SettingsBossfangRouteImport } from './routes/settings/bossfang'
 import { Route as SettingsBrowserRouteImport } from './routes/settings/browser'
 import { Route as SettingsChannelsRouteImport } from './routes/settings/channels'
 import { Route as SettingsCodeExecutionRouteImport } from './routes/settings/code-execution'
@@ -162,6 +163,11 @@ const SettingsAppearanceRoute = SettingsAppearanceRouteImport.update({
 const SettingsArchiveRoute = SettingsArchiveRouteImport.update({
   id: '/archive',
   path: '/archive',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsBossfangRoute = SettingsBossfangRouteImport.update({
+  id: '/bossfang',
+  path: '/bossfang',
   getParentRoute: () => SettingsRoute,
 } as any)
 const SettingsBrowserRoute = SettingsBrowserRouteImport.update({
@@ -418,6 +424,7 @@ export interface FileRoutesByFullPath {
   '/settings/api-gateway': typeof SettingsApiGatewayRoute
   '/settings/appearance': typeof SettingsAppearanceRoute
   '/settings/archive': typeof SettingsArchiveRoute
+  '/settings/bossfang': typeof SettingsBossfangRoute
   '/settings/browser': typeof SettingsBrowserRoute
   '/settings/channels': typeof SettingsChannelsRoute
   '/settings/code-execution': typeof SettingsCodeExecutionRoute
@@ -483,6 +490,7 @@ export interface FileRoutesByTo {
   '/settings/api-gateway': typeof SettingsApiGatewayRoute
   '/settings/appearance': typeof SettingsAppearanceRoute
   '/settings/archive': typeof SettingsArchiveRoute
+  '/settings/bossfang': typeof SettingsBossfangRoute
   '/settings/browser': typeof SettingsBrowserRoute
   '/settings/channels': typeof SettingsChannelsRoute
   '/settings/code-execution': typeof SettingsCodeExecutionRoute
@@ -547,6 +555,7 @@ export interface FileRoutesById {
   '/settings/api-gateway': typeof SettingsApiGatewayRoute
   '/settings/appearance': typeof SettingsAppearanceRoute
   '/settings/archive': typeof SettingsArchiveRoute
+  '/settings/bossfang': typeof SettingsBossfangRoute
   '/settings/browser': typeof SettingsBrowserRoute
   '/settings/channels': typeof SettingsChannelsRoute
   '/settings/code-execution': typeof SettingsCodeExecutionRoute
@@ -615,6 +624,7 @@ export interface FileRouteTypes {
     | '/settings/api-gateway'
     | '/settings/appearance'
     | '/settings/archive'
+    | '/settings/bossfang'
     | '/settings/browser'
     | '/settings/channels'
     | '/settings/code-execution'
@@ -680,6 +690,7 @@ export interface FileRouteTypes {
     | '/settings/api-gateway'
     | '/settings/appearance'
     | '/settings/archive'
+    | '/settings/bossfang'
     | '/settings/browser'
     | '/settings/channels'
     | '/settings/code-execution'
@@ -743,6 +754,7 @@ export interface FileRouteTypes {
     | '/settings/api-gateway'
     | '/settings/appearance'
     | '/settings/archive'
+    | '/settings/bossfang'
     | '/settings/browser'
     | '/settings/channels'
     | '/settings/code-execution'
@@ -923,6 +935,13 @@ declare module '@tanstack/react-router' {
       path: '/archive'
       fullPath: '/settings/archive'
       preLoaderRoute: typeof SettingsArchiveRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/bossfang': {
+      id: '/settings/bossfang'
+      path: '/bossfang'
+      fullPath: '/settings/bossfang'
+      preLoaderRoute: typeof SettingsBossfangRouteImport
       parentRoute: typeof SettingsRoute
     }
     '/settings/browser': {
@@ -1349,6 +1368,7 @@ interface SettingsRouteChildren {
   SettingsApiGatewayRoute: typeof SettingsApiGatewayRoute
   SettingsAppearanceRoute: typeof SettingsAppearanceRoute
   SettingsArchiveRoute: typeof SettingsArchiveRoute
+  SettingsBossfangRoute: typeof SettingsBossfangRoute
   SettingsBrowserRoute: typeof SettingsBrowserRoute
   SettingsChannelsRoute: typeof SettingsChannelsRoute
   SettingsCodeExecutionRoute: typeof SettingsCodeExecutionRoute
@@ -1387,6 +1407,7 @@ const SettingsRouteChildren: SettingsRouteChildren = {
   SettingsApiGatewayRoute: SettingsApiGatewayRoute,
   SettingsAppearanceRoute: SettingsAppearanceRoute,
   SettingsArchiveRoute: SettingsArchiveRoute,
+  SettingsBossfangRoute: SettingsBossfangRoute,
   SettingsBrowserRoute: SettingsBrowserRoute,
   SettingsChannelsRoute: SettingsChannelsRoute,
   SettingsCodeExecutionRoute: SettingsCodeExecutionRoute,

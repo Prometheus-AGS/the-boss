@@ -194,11 +194,20 @@ const MiniAppWebview = memo(
         onDidStartNavigation={handleStartNavigation}
         onDidNavigate={handleNavigate}
         onFocusChange={handleFocusChange}
-        elementAttributes={{ 'data-mini-app-id': appid }}
-        allowPopups={kind === 'site'}
-        openLinksExternal={kind === 'site' ? openLinkExternal : undefined}
+        elementAttributes={{
+          'data-mini-app-id': appid,
+          ...(appid === 'bossfang-dashboard' ? { 'data-ui': 'bossfang-dashboard' } : {})
+        }}
+        allowPopups={kind === 'site' && appid !== 'bossfang-dashboard'}
+        openLinksExternal={kind === 'site' && appid !== 'bossfang-dashboard' ? openLinkExternal : undefined}
         style={WebviewStyle}
-        partition={kind === 'app' ? `persist:miniapp:${appid}` : 'persist:webview'}
+        partition={
+          kind === 'app'
+            ? `persist:miniapp:${appid}`
+            : appid === 'bossfang-dashboard'
+              ? 'persist:bossfang-dashboard'
+              : 'persist:webview'
+        }
         userAgent={
           kind === 'site' && appid === 'google'
             ? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)  Safari/537.36'

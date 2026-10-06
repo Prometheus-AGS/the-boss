@@ -1,3 +1,5 @@
+import { setTimeout as delay } from 'node:timers/promises'
+
 import { normalizeHeaders } from '@ai-sdk/provider-utils'
 
 import { ATTRIBUTION_NAME, ATTRIBUTION_URL } from '@shared/utils/branding'
@@ -23,3 +25,29 @@ export const defaultAppHeaders = () => {
  */
 export const mergeHeaders = (...parts: Array<Record<string, string | undefined> | undefined>): Record<string, string> =>
   Object.assign({}, ...parts.map(normalizeHeaders))
+
+/** Retry throttled reads within the existing six-attempt, five-delay budget. */
+export async function fetchWithRateLimitRetries(
+  url: URL,
+  init: RequestInit,
+  beforeFetch?: () => Promise<void>
+): Promise<Response> {
+  if ((init.method ?? 'GET').toUpperCase() !== 'GET') {
+    await beforeFetch?.()
+    return fetch(url, init)
+  }
+  let remainingDelay = 5 * 250
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    await beforeFetch?.()
+    const response = await fetch(url, init)
+    if (response.status !== 429 || attempt === 5) return response
+    const retryAfter = response.headers.get('retry-after') ?? ''
+    const advertisedDelay = /^\d+$/.test(retryAfter) ? Number(retryAfter) * 1000 : Date.parse(retryAfter) - Date.now()
+    const wait = Number.isFinite(advertisedDelay) ? Math.max(250, advertisedDelay) : 250
+    if (wait > remainingDelay) return response
+    await response.body?.cancel()
+    await delay(wait, undefined, { signal: init.signal ?? undefined })
+    remainingDelay -= wait
+  }
+  throw new Error('Read request exhausted its rate-limit retries')
+}

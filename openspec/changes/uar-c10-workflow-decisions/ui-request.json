@@ -1,0 +1,9 @@
+{
+  "project": ".",
+  "affected": ["src/renderer/pages/settings/PrometheusSettings"],
+  "operation": "refine",
+  "surface": "app",
+  "model": "gpt-6",
+  "focus": "audit",
+  "ui": true
+}

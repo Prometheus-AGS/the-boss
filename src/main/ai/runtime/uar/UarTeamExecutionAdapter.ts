@@ -204,6 +204,8 @@ export async function readUarTeamArtifacts(input: UarTeamExecutionSelector): Pro
 
 export async function admitUarTeamTask(input: UarAdmitTeamTaskInput): Promise<UarTeamExecutionAttempt> {
   const state = await executionTarget(input)
+  if (state.team.definition.id === 'urn:boss:coding:team')
+    await application.get('UarTeamHostService').ensure(state.team, state.generation)
   return scopedAttempt(
     await scopedRequest(
       state.workspaceId,
@@ -245,6 +247,8 @@ export async function cancelUarTeamAttempt(
 
 export async function recoverUarTeamExecution(input: UarTeamControlInput): Promise<UarTeamExecutionAttempt[]> {
   const state = await executionTarget(input)
+  if (state.team.definition.id === 'urn:boss:coding:team')
+    await application.get('UarTeamHostService').ensure(state.team, state.generation)
   const result = z
     .array(z.unknown())
     .parse(
@@ -282,18 +286,19 @@ async function privilegedTeamRequest(
     },
     state.generation
   )
-  const body: unknown = await response.json()
   if (!response.ok) {
-    const error = z.object({ error: z.object({ code: z.string() }) }).safeParse(body)
+    const error = z.object({ error: z.object({ code: z.string() }) }).safeParse(await response.json().catch(() => null))
     throw new Error(
-      error.success && /^TEAM_[A-Z_]+$/.test(error.data.error.code) ? error.data.error.code : 'TEAM_SCOPE_DENIED'
+      `UAR request POST ${state.path + suffix} failed with HTTP ${response.status}${error.success ? ` (${error.data.error.code})` : ''}`
     )
   }
-  return body
+  return response.json()
 }
 
 export async function queueUarTeamTask(input: UarAdmitTeamTaskInput): Promise<UarTeamExecutionAttempt> {
   const state = await executionTarget(input)
+  if (state.team.definition.id === 'urn:boss:coding:team')
+    await application.get('UarTeamHostService').ensure(state.team, state.generation)
   return scopedAttempt(
     await privilegedTeamRequest(state, '/tasks/' + encodeURIComponent(input.taskId) + '/admit-queued', {
       commandId: input.commandId,
@@ -311,6 +316,8 @@ export async function dispatchUarTeamAttempt(
   input: UarTeamExecutionSelector & { commandId: string; expectedTeamRevision: number; attemptId: string }
 ): Promise<UarTeamExecutionAttempt> {
   const state = await executionTarget(input)
+  if (state.team.definition.id === 'urn:boss:coding:team')
+    await application.get('UarTeamHostService').ensure(state.team, state.generation)
   return scopedAttempt(
     await privilegedTeamRequest(state, '/attempts/' + encodeURIComponent(input.attemptId) + '/dispatch', {
       commandId: input.commandId,

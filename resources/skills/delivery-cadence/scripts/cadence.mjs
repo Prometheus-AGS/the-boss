@@ -17,7 +17,7 @@ try {
   if (Number(process.versions.node.split('.')[0]) < 22) throw new Error('Delivery Cadence requires Node.js 22 or newer');
   const args = parse(process.argv.slice(2));
   if (args.help || !args._.length) {
-    process.stdout.write('Delivery Cadence\nCommands: init, start, ready, checkpoint, finish, resume, status, report, configure, observe, activity, child, migrate, history, review, publication, hooks, candidate, work-ahead, job, tick\nOptions: --root <state-directory> --input <JSON-file> --command-id <stable-id>\nHooks: scaffold, add, list, enable, disable, remove, retry\n');
+    process.stdout.write('Delivery Cadence\nCommands: init, start, ready, checkpoint, finish, failure resolve, resume, status, report, configure, observe, activity, child, migrate, history, review, publication, hooks, candidate, work-ahead, job, tick\nOptions: --root <state-directory> --input <JSON-file> --command-id <stable-id>\nHooks: scaffold, add, list, enable, disable, remove, retry\n');
   } else {
     const root = path.resolve(typeof args.root === 'string' ? args.root : path.join(process.cwd(), '.prometheus', 'cadence'));
     args.input = typeof args.input === 'string' ? JSON.parse(await fs.readFile(path.resolve(args.input), 'utf8')) : {};

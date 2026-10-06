@@ -22,6 +22,10 @@ task.
 
 ## The per-task loop (what the model does each turn)
 
+Before beginning the selected task, read its scoped **Task model assignments** entry from the phase `plan.md` and follow [task model selection](../kbd-plan/references/task-model-selection.md). Recheck the concrete provider/model, supported effort and native or liter-llm-plus-worker route. Record the assignment reference and actual route in `execution.md` and the worker handoff. Create an explicit assignment for a legacy plan; revise one whose task, harness or model evidence changed. Do not silently substitute the host model or a listed native alternative.
+
+If the route is unresolved, surface the prerequisite and retain the task as pending; independent eligible tasks may proceed in dependency order. The driver owns begin/end hooks and canonical completion. Return worker results to this driver; inference alone never proves workspace execution. This selection step does not authorize per-task tests or early review.
+
 ```bash
 APPLY="boss-mini kbd-apply.mjs"
 # Select the change from DERIVED state — see "Which change" below. Never from
@@ -44,7 +48,7 @@ $APPLY end-task "$CHANGE" "$ID" "$I" "$TOTAL" "$TITLE"
 #     fires task:after, prints "Completed task <I> of <TOTAL>: <TITLE>"
 #   → on the final task, closes change:after
 
-# 3. After the LAST task: run the QA gate for this repo, then:
+# 3. Only at the complete production delivery boundary, run this repo's final QA gate, then:
 $APPLY verify  "$CHANGE"   # backend verify (openspec validate)
 $APPLY archive "$CHANGE"   # backend archive (openspec archive)
 ```

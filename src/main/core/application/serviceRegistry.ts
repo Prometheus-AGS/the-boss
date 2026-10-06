@@ -20,7 +20,7 @@ import {
   ClaudeCodeSessionStateService,
   ClaudeCodeWarmQueryManager
 } from '@main/ai/runtime/claudeCode'
-import { UarSidecarService } from '@main/ai/runtime/uar'
+import { UarSidecarService, UarTeamHostService } from '@main/ai/runtime/uar'
 import { AiStreamManager } from '@main/ai/streamManager'
 import { JobManager } from '@main/core/job/JobManager'
 import type { ServiceConstructor } from '@main/core/lifecycle'
@@ -40,6 +40,7 @@ import { AppService } from '@main/services/AppService'
 import { AppUpdaterService } from '@main/services/AppUpdaterService'
 import { AutoBackupService } from '@main/services/AutoBackupService'
 import { BinaryManager } from '@main/services/binaryManager'
+import { BossFangService } from '@main/services/bossFang'
 import { CherryCloudService } from '@main/services/cherryCloud/CherryCloudService'
 import { CitationPreviewService } from '@main/services/CitationPreviewService'
 import { CodeCliService } from '@main/services/codeCli'
@@ -161,10 +162,12 @@ export const services = {
   McpRuntimeService,
   McpCatalogService,
   BinaryManager,
+  BossFangService,
   OpenClawService,
   PdfTranslationService,
   ClaudeCodeProcessManager,
   UarSidecarService,
+  UarTeamHostService,
   AgentSessionRuntimeService,
   AgentSessionDeliveryService,
   AgentJobsService,

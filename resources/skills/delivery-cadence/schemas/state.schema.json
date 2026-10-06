@@ -1097,6 +1097,25 @@
             "cancelled"
           ]
         },
+        "failureResolution": {
+          "type": "object",
+          "required": ["disposition", "reason", "authorityRef", "evidence", "recordedAt", "countedAsDelivery"],
+          "properties": {
+            "disposition": { "const": "retired" },
+            "reason": { "type": "string", "minLength": 1 },
+            "authorityRef": { "type": "string", "minLength": 1 },
+            "evidence": {
+              "type": "object",
+              "required": ["path", "sha256"],
+              "properties": {
+                "path": { "type": "string", "minLength": 1 },
+                "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+              }
+            },
+            "recordedAt": { "type": "string", "format": "date-time" },
+            "countedAsDelivery": { "const": false }
+          }
+        },
         "artifacts": {
           "type": "array",
           "items": {

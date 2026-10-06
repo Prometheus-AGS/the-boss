@@ -112,6 +112,7 @@ export function iterationReport(iteration, context = {}) {
   })));
   return {
     schemaVersion: iteration.contractVersion >= 3 ? 3 : 2, id: iteration.id, index: iteration.index, status: iteration.status, workOutcome: iteration.workOutcome,
+    failureResolution: iteration.failureResolution ?? null,
     selected, completed: progress.net, carryover, counts: progress.counts.net, grossCompleted: progress.gross,
     grossCounts: progress.counts.gross, reopenedCounts: progress.counts.reopened, netCounts: progress.counts.net,
     unresolvedReopened: progress.unresolved, uncertainCompletionOrder: progress.uncertain, completionTimeline: timeline,

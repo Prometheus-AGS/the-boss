@@ -1,11 +1,15 @@
 ---
 name: kbd-plan
-description: Use to create a prioritized, ordered change list for the current KBD project phase. Project-agnostic — reads the assessment and project constraints to produce an ordered change list, auto-detecting OpenSpec availability and emitting the appropriate change format.
+description: Use to create an ordered KBD phase plan with evidenced, quality-first model and execution-route recommendations for every task, preserving task identity across OpenSpec and native KBD.
 ---
 
 # /kbd-plan
 
 Run the **Plan** phase of the KBD lifecycle for any project.
+
+## OpenSpec lifecycle preflight
+
+Before this stage, follow the [orchestrator preflight](../kbd-process-orchestrator/SKILL.md#openspec-lifecycle-preflight): refresh existing KBD/OpenSpec projects with the managed latest-stable CLI, then use that same runner for OpenSpec commands. Retry a pending startup refresh before OpenSpec work; preserve authored specs and task state. Phase scripts run this automatically, including canonical-runtime paths.
 
 ## What this does
 
@@ -15,7 +19,7 @@ every tool knows the exact next step.
 
 Output:
 
-- `.kbd-orchestrator/phases/<phase-name>/plan.md` — ordered change list
+- `.kbd-orchestrator/phases/<phase-name>/plan.md` — ordered change list and Task model assignments
 - `.kbd-orchestrator/current-waypoint.md` and `current-waypoint.json` — refreshed
 
 ## Analyze inputs (when the Analyze stage ran)
@@ -88,7 +92,7 @@ Use the canonical phase name from the argument or `current-waypoint.json`. Emit 
 3. **Load assessment** — from `.kbd-orchestrator/phases/<phase>/assessment.md`
 4. **Read project constraints** — from `AGENTS.md` and project spec files
 5. **Detect change backend** — OpenSpec or native KBD (see OpenSpec Detection)
-6. **Write plan.md** with ordered change list and recommended agent per change
+6. **Draft tasks and model assignments** — read [task model selection](references/task-model-selection.md). Draft backend task identities, analyze each task's requirements, discover configured models and the installed harness's controls, then write the ordered change list and one scoped concrete model/route assignment per task in `plan.md`. Quality-first is the default within explicit policy and budget constraints; a model class or agent recommendation per change is insufficient. Record unresolved routes without launching workers or configuring providers.
 7. **Adversarial vet** — when `adversarial-review` is installed and
    `--skip-adversarial-review` was not passed, run it in artifact mode against
    the written plan. CRITICAL findings (ordering errors, missing dependencies,
@@ -96,8 +100,12 @@ Use the canonical phase name from the argument or `current-waypoint.json`. Emit 
    accept with an "Unresolved review findings" section appended). WARNING
    findings → carry into the stage handoff summary. Vet **before** emitting
    change structures, so a corrected plan never leaves stale changes behind.
-8. **Emit change structures** via OpenSpec or native KBD
-9. **Record plan state** through typed KBD stage/change/task commands; the runtime regenerates progress and waypoint projections
+8. **Emit and reconcile change structures** via OpenSpec or native KBD. Add non-checkbox references to the scoped assignments, preserving task IDs and titles. Reconcile every emitted task with its row before handoff; revise and re-vet material changes to the reviewed draft.
+9. **Record the handoff and refresh projections** through the canonical KBD writer. Include assignment references, unresolved prerequisites and review findings; never hand-edit generated waypoints.
+
+## Plan integrity
+
+Before finalizing, screen the draft with `sycophancy-correction` when available using `target: completion`, `strictness: standard`, and `context.evaluation_domain: pmpo_plan_phase`. Surface unsupported feasibility, scope expansion and unresolved model evidence; do not manufacture a trade-off to satisfy a score. Report an unavailable screen honestly. This complements the independent adversarial vet.
 
 ## Examples
 

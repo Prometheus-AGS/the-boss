@@ -26,7 +26,9 @@ function loadIntegrationBinaries({ required = false, platform: targetPlatform } 
       const asset = tool.packages[platform]
       if (!asset || !asset.url.startsWith('https://') || !/^[a-f0-9]{64}$/.test(asset.sha256))
         throw new Error(`Unpinned integration artifact: ${name} ${platform}`)
-      if (required && ['uar-sidecar', 'liter-llm'].includes(name)) {
+      if (name === 'bossfang' && (asset.dashboard?.embedded !== true || asset.dashboard?.basePath !== '/dashboard/'))
+        throw new Error(`BossFang dashboard assets are not pinned for ${platform}`)
+      if (required && ['uar-sidecar', 'liter-llm', 'bossfang'].includes(name)) {
         const source = typeof asset.source === 'string' ? asset.source : asset.source?.revision
         const expected = pins.sources[name === 'uar-sidecar' ? 'uar' : name].revision
         if (source !== expected)
@@ -40,6 +42,7 @@ function loadIntegrationBinaries({ required = false, platform: targetPlatform } 
       ...tool,
       required,
       versionFile: `.${tool.name}-version`,
+      ...(tool.name === 'bossfang' && targetPlatform ? { contentSha256: tool.packages[targetPlatform]?.sha256 } : {}),
       ...(tool.name === 'uar-sidecar'
         ? {
             payloadIdentity: {

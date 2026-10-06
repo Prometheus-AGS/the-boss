@@ -70,13 +70,18 @@ export function UarTeamModelPicker({ value, disabled, onChange }: Props) {
           onValueChange={(selected) =>
             onChange(choices.find((choice) => key(choice.selection) === selected)?.selection)
           }>
-          <SelectTrigger id={id} className="min-w-0 flex-1" aria-describedby={id + 'help'}>
+          <SelectTrigger id={id} className="min-w-0 flex-1" aria-describedby={id + 'help'} data-ui="teams-model">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="planning">{tr('planningBinding')}</SelectItem>
             {choices.map((choice) => (
-              <SelectItem key={key(choice.selection)} value={key(choice.selection)}>
+              <SelectItem
+                key={key(choice.selection)}
+                value={key(choice.selection)}
+                data-model-source={choice.selection.source}
+                data-provider-id={choice.selection.providerId}
+                data-model-id={choice.selection.modelId}>
                 {choice.name}
               </SelectItem>
             ))}

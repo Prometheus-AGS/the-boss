@@ -5,6 +5,7 @@ import { aiHandlers } from './ai'
 import { apiGatewayHandlers } from './apiGateway'
 import { appHandlers } from './app'
 import { backupHandlers } from './backup'
+import { bossFangHandlers } from './bossFang'
 import { binaryHandlers } from './binary'
 import { browserHandlers } from './browser'
 import { channelHandlers } from './channel'
@@ -60,6 +61,7 @@ export const ipcHandlers: IpcHandlersFor<IpcRequestSchemas> = {
   ...apiGatewayHandlers,
   ...appHandlers,
   ...backupHandlers,
+  ...bossFangHandlers,
   ...binaryHandlers,
   ...browserHandlers,
   ...channelHandlers,

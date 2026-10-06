@@ -13,17 +13,18 @@ import {
   Textarea
 } from '@cherrystudio/ui'
 import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/components/SettingsPrimitives'
+import { uarTeamError } from '@renderer/components/uarTeams/uarTeamError'
+import { UarTeamExecutionPanel } from '@renderer/components/uarTeams/UarTeamExecutionPanel'
+import { UarTeamModelPicker } from '@renderer/components/uarTeams/UarTeamModelPicker'
+import { UarTeamPeerMessages } from '@renderer/components/uarTeams/UarTeamPeerMessages'
+import { UarTeamTaskBoard } from '@renderer/components/uarTeams/UarTeamTaskBoard'
 import { ipcApi } from '@renderer/ipc'
 import type { UarTeamModelSelection, UarTeamsSnapshot } from '@shared/types/uarTeams'
 
 import { UarExecutionOwnerPanel } from './UarExecutionOwnerPanel'
-import { uarTeamError } from './uarTeamError'
-import { UarTeamExecutionPanel } from './UarTeamExecutionPanel'
 import { UarTeamMailbox } from './UarTeamMailbox'
-import { UarTeamModelPicker } from './UarTeamModelPicker'
-import { UarTeamPeerMessages } from './UarTeamPeerMessages'
-import { UarTeamTaskBoard } from './UarTeamTaskBoard'
 import { UarTeamTaskForm } from './UarTeamTaskForm'
+import { UarWorkflowsPanel } from './UarWorkflowsPanel'
 
 const definitionKey = (definition: UarTeamsSnapshot['definitions'][number]) =>
   `${definition.id}:${definition.version}:${definition.digest}`
@@ -235,6 +236,12 @@ export function UarTeamsPanel({ workspaceId }: { workspaceId: string }) {
       </SettingGroup>
 
       <UarExecutionOwnerPanel />
+      <UarWorkflowsPanel
+        key={workspaceId}
+        workspaceId={workspaceId}
+        team={selectedInstance}
+        onTeamChanged={refreshQuietly}
+      />
       {snapshot && (
         <>
           <SettingGroup>

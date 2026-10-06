@@ -3,10 +3,9 @@ import { useTranslation } from 'react-i18next'
 
 import { Badge, Button, Input } from '@cherrystudio/ui'
 import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/components/SettingsPrimitives'
+import { uarTeamError } from '@renderer/components/uarTeams/uarTeamError'
 import { ipcApi } from '@renderer/ipc'
 import type { UarExecutionOwnerSnapshot, UarExecutionReclaimReceipt } from '@shared/types/uarTeamProfiles'
-
-import { uarTeamError } from './uarTeamError'
 
 export function UarExecutionOwnerPanel() {
   const { t } = useTranslation()

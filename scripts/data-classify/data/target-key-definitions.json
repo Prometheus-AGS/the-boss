@@ -936,6 +936,13 @@
       "defaultValue": "{\"schemaVersion\":4,\"revisions\":{\"compass\":0,\"filesystem\":0,\"uar\":0,\"services\":0},\"config\":{}}",
       "status": "classified",
       "description": "Non-secret Compass, UAR storage, workspace filesystem and service configuration. Validated by integrationConfigSchema; credentials remain in OS-protected main-process storage."
+    },
+    {
+      "targetKey": "feature.bossfang.configuration",
+      "type": "string",
+      "defaultValue": "{\"schemaVersion\":1,\"ownership\":\"managed\",\"host\":\"127.0.0.1\",\"port\":4545,\"portPolicy\":\"automatic\",\"externalEndpoint\":\"\",\"uarInstanceId\":\"managed-local\",\"workspaceId\":\"\",\"diagnosticModelId\":\"\"}",
+      "description": "Saved BossFang process and independent UAR selection; contains no credentials",
+      "status": "classified"
     }
   ]
 }

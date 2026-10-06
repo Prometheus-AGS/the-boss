@@ -1,23 +1,19 @@
-# UAR collaboration schema snapshot
+# UAR collaboration schema snapshots
 
-The files directly in this directory are byte-for-byte copies of the official
-Draft `0.1.0-draft.1` schemas from Universal Agent Runtime commit
-`cbb511ac61eb6b2928d7a80c67324baeb913ca11`:
+This directory retains the draft.1 provider schema family and the separate
+`0.1.0-draft.2/` family. They are distinct snapshots; retaining an older reader or
+migration path does not relabel its documents as the newer profile.
 
-`docs/agents/collaboration/v0.1.0-draft.1/schemas/`
+The draft.2 source repository, exact provider commit, source paths and hashes are
+recorded in [the consumer source receipt](0.1.0-draft.2/consumer-source-receipt.json).
+Use that receipt for the selected identity rather than a separately maintained
+commit in this README. A consumer receipt is provenance, not a provider schema or
+proof of live runtime conformance.
 
-The `0.1.0-draft.2/` directory is the byte-identical provider schema family from
-UAR commit `41375cf6cd137a8a825be102c49516211c3fa2e5` at:
-
-`docs/agents/collaboration/v0.1.0-draft.2/schemas/`
-
-Its accepted source paths and hashes are recorded in
-`0.1.0-draft.2/consumer-source-receipt.json` and the repository-scoped OpenSpec
-change evidence. The receipt is consumer provenance, not a provider schema.
-Draft.1 stays available for reads and explicit
-migration; it is never relabeled as draft.2.
-
-These snapshots describe canonical compiled documents. The adjacent authoring
-and workspace schemas describe pre-digest input carriers owned by this skill.
-Never modify provider-owned schema bytes or infer runtime conformance from schema
-validity. Full and mini mirrors consume the same frozen provider checkpoint.
+Provider schemas describe canonical compiled documents. Adjacent authoring and
+workspace schemas describe the skill's input carriers. Preserve provider-owned
+schema bytes and attribution; updates require a deliberate new snapshot and
+compatible consumer changes. Full and mini source mirrors must retain the same
+selected provider identity, and their generated payloads are reconciled at the
+final production boundary. Schema validity alone does not certify registration,
+communication or execution by a real UAR host.

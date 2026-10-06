@@ -166,7 +166,29 @@ function requireOperation(state: Awaited<ReturnType<typeof capabilityState>>, id
   if (!state.operations[id].available) throw new Error(`UAR operation ${id} is unavailable`)
 }
 
+const pendingScopedReads = new Map<string, Promise<unknown>>()
+
 export async function scopedRequest(
+  workspaceId: string,
+  pathname: string,
+  generation: number,
+  method = 'GET',
+  payload?: object
+): Promise<unknown> {
+  if (method.toUpperCase() !== 'GET' || payload !== undefined) {
+    return sendScopedRequest(workspaceId, pathname, generation, method, payload)
+  }
+  const key = JSON.stringify([workspaceId, generation, pathname])
+  const pending = pendingScopedReads.get(key)
+  if (pending) return structuredClone(await pending)
+  const request = sendScopedRequest(workspaceId, pathname, generation, method).finally(() => {
+    if (pendingScopedReads.get(key) === request) pendingScopedReads.delete(key)
+  })
+  pendingScopedReads.set(key, request)
+  return structuredClone(await request)
+}
+
+async function sendScopedRequest(
   workspaceId: string,
   pathname: string,
   generation: number,

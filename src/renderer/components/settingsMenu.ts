@@ -204,6 +204,12 @@ export const settingsMenu: readonly SettingsMenuEntry[] = [
     icon: createElement(Flame),
     groupKey: 'settings.menuGroups.system'
   },
+  {
+    route: '/settings/bossfang',
+    titleKey: 'bossfang.title',
+    icon: createElement(Bot),
+    groupKey: 'settings.menuGroups.system'
+  },
   ...(isUarEnabled()
     ? [
         {

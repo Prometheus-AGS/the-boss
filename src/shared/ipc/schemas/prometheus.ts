@@ -86,17 +86,28 @@ import {
   type UarInstanceInventorySnapshot
 } from '@shared/types/uarServiceInstance'
 import { uarTeamContextSchema, uarTeamPeerMessagesSchema } from '@shared/types/uarTeamContext'
+import type { UarTeamRunEventsSnapshot } from '@shared/types/uarTeamRunEvents'
 import type { UarExecutionOwnerSnapshot, UarExecutionReclaimReceipt } from '@shared/types/uarTeamProfiles'
 import type {
   UarTeamArtifact,
   UarTeamExecutionAttempt,
   UarTeamExecutionSummary,
   UarTeamBinding,
+  UarTeamApproval,
   UarTeamInstance,
   UarTeamMailboxMessage,
   UarTeamMailboxPage,
   UarTeamsSnapshot
 } from '@shared/types/uarTeams'
+import {
+  uarWorkflowWorkspaceSchema,
+  uarWorkflowSelectorSchema,
+  uarWorkflowStartSchema,
+  uarWorkflowDecisionSchema,
+  uarWorkflowControlSchema,
+  uarWorkflowRunSchema,
+  uarWorkflowsSnapshotSchema
+} from '@shared/types/uarWorkflows'
 
 import { defineRoute } from '../define'
 
@@ -138,6 +149,15 @@ const teamControlSchema = teamExecutionSelectorSchema.extend({
  * process cannot report.
  */
 export const prometheusRequestSchemas = {
+  'prometheus.uar.workflows.snapshot': defineRoute({
+    input: uarWorkflowWorkspaceSchema,
+    output: uarWorkflowsSnapshotSchema
+  }),
+  'prometheus.uar.workflows.read': defineRoute({ input: uarWorkflowSelectorSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.start': defineRoute({ input: uarWorkflowStartSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.decide': defineRoute({ input: uarWorkflowDecisionSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.cancel': defineRoute({ input: uarWorkflowControlSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.recover': defineRoute({ input: uarWorkflowControlSchema, output: uarWorkflowRunSchema }),
   'prometheus.liter_config.select_local': defineRoute({
     input: z.object({}).strict(),
     output: z.custom<LiterConfigSourceSelection>()
@@ -375,6 +395,50 @@ export const prometheusRequestSchemas = {
       .strict(),
     output: z.custom<UarTeamBinding>()
   }),
+  'prometheus.uar.teams.setup_coding': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        model: z
+          .object({
+            source: z.enum(['uar', 'gateway']),
+            providerId: z.string().min(1).max(128),
+            modelId: z.string().min(1).max(256)
+          })
+          .strict()
+      })
+      .strict(),
+    output: z.custom<UarTeamBinding>()
+  }),
+  'prometheus.uar.teams.submit_task': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        teamInstanceId: z.string().min(1).max(256),
+        commandId: z.uuid(),
+        prompt: z.string().trim().min(1).max(32768)
+      })
+      .strict(),
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.approvals': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256), teamInstanceId: z.string().min(1).max(256) }).strict(),
+    output: z.custom<{ approvals: UarTeamApproval[] }>()
+  }),
+  'prometheus.uar.teams.decide_approval': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        teamInstanceId: z.string().min(1).max(256),
+        attemptId: z.string().min(1).max(256),
+        approvalId: z.string().min(1).max(256),
+        eventId: z.string().min(1).max(256),
+        cursor: z.number().int().nonnegative(),
+        approved: z.boolean()
+      })
+      .strict(),
+    output: z.object({ resolved: z.literal(true) })
+  }),
   'prometheus.uar.teams.create': defineRoute({
     input: z
       .object({
@@ -469,6 +533,13 @@ export const prometheusRequestSchemas = {
   'prometheus.uar.teams.execution': defineRoute({
     input: teamExecutionSelectorSchema,
     output: z.custom<UarTeamExecutionSummary>()
+  }),
+  'prometheus.uar.teams.events': defineRoute({
+    input: teamExecutionSelectorSchema.extend({
+      attemptId: z.string().min(1).max(256),
+      after: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER).optional()
+    }),
+    output: z.custom<UarTeamRunEventsSnapshot>()
   }),
   'prometheus.uar.teams.artifacts': defineRoute({
     input: teamExecutionSelectorSchema,

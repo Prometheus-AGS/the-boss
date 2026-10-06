@@ -4,6 +4,7 @@ import { constants } from 'node:fs'
 import { chmod, copyFile, mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import readline from 'node:readline'
+import { setTimeout as delay } from 'node:timers/promises'
 
 import { Mutex } from 'async-mutex'
 import * as z from 'zod'
@@ -14,6 +15,7 @@ import { BaseService, Injectable, Phase, ServicePhase } from '@main/core/lifecyc
 import { isWin } from '@main/core/platform'
 import { ensureManagedSecrets } from '@main/services/prometheus/integrationConfig'
 import { readIntegrationConfig, readUarInstanceCredentials } from '@main/services/prometheus/integrationConfig'
+import { fetchWithRateLimitRetries } from '@main/utils/http'
 import { crossPlatformSpawn, terminateProcessTree, waitForProcessExit } from '@main/utils/processRunner'
 import { getRawShellEnv } from '@main/utils/shellEnv'
 import { assertUarEnabled, isUarEnabled } from '@shared/ai/agentRuntimeCapabilities'
@@ -105,10 +107,15 @@ type RunningSidecar = Omit<UarSidecarEndpoint, 'storage'> & {
   launchToken: string
   authToken: string
   adminKey: string
+  principalMode: 'host-asserted' | 'token-subject'
   storage: AppliedUarStorage
 }
 
-type VerifiedEndpoint = UarSidecarEndpoint & { authToken: string; adminKey?: string }
+type VerifiedEndpoint = UarSidecarEndpoint & {
+  authToken: string
+  adminKey?: string
+  principalMode: 'host-asserted' | 'token-subject'
+}
 
 function isolatedSidecarEnvironment(raw: Record<string, string>): Record<string, string> {
   return Object.fromEntries(
@@ -133,6 +140,7 @@ export class UarSidecarService extends BaseService {
   private generation = 0
   private stopping = false
   private readonly verifiedEndpoints = new Map<number, VerifiedEndpoint>()
+  private readonly requestAdmissions = new Map<number, { mutex: Mutex; nextAt: number }>()
   private readonly instanceDiagnostics = new Map<
     string,
     {
@@ -422,7 +430,10 @@ export class UarSidecarService extends BaseService {
   }
 
   private async authenticatedFetch(
-    running: Pick<VerifiedEndpoint, 'baseUrl' | 'authToken' | 'ownership'>,
+    running: Pick<
+      VerifiedEndpoint,
+      'baseUrl' | 'authToken' | 'principalMode' | 'generation' | 'instanceId' | 'ownership'
+    >,
     pathname: string,
     principal: string,
     init: RequestInit,
@@ -430,18 +441,53 @@ export class UarSidecarService extends BaseService {
   ): Promise<Response> {
     const headers = new Headers(init.headers)
     headers.set('authorization', `Bearer ${running.authToken}`)
-    if (running.ownership === 'managed') headers.set('x-uar-principal', principal)
-    return this.fetchWithRateLimitRetries(new URL(pathname, baseUrl), { ...init, headers })
+    if (running.principalMode === 'host-asserted') headers.set('x-uar-principal', principal)
+    else headers.delete('x-uar-principal')
+    const beforeFetch = () => this.admitRequest(running, 1, init.signal)
+    const url = new URL(pathname, baseUrl)
+    const response = await fetchWithRateLimitRetries(url, { ...init, headers }, beforeFetch)
+    if (!response.ok) {
+      logger.warn('UAR HTTP request failed', {
+        method: (init.method ?? 'GET').toUpperCase(),
+        path: url.pathname,
+        status: response.status,
+        generation: running.generation
+      })
+    }
+    return response
   }
 
-  private async fetchWithRateLimitRetries(url: URL, init: RequestInit): Promise<Response> {
-    for (let attempt = 0; attempt < 6; attempt += 1) {
-      const response = await fetch(url, init)
-      if (response.status !== 429 || attempt === 5) return response
-      await response.body?.cancel()
-      await new Promise((resolve) => setTimeout(resolve, 250))
+  admitRequest(
+    endpoint: Pick<UarSidecarEndpoint, 'ownership' | 'generation' | 'instanceId'>,
+    weight: number,
+    signal?: AbortSignal | null
+  ): Promise<void> {
+    if (endpoint.ownership !== 'managed') return Promise.resolve()
+    let admission = this.requestAdmissions.get(endpoint.generation)
+    if (!admission) {
+      admission = { mutex: new Mutex(), nextAt: 0 }
+      this.requestAdmissions.set(endpoint.generation, admission)
     }
-    throw new Error('UAR request exhausted its rate-limit retries')
+    const currentAdmission = admission
+    const queued = currentAdmission.mutex.runExclusive(async () => {
+      signal?.throwIfAborted()
+      // Accumulate every weighted slot before releasing a native upstream read burst.
+      const wait = Math.max(0, currentAdmission.nextAt - Date.now()) + 100 * (weight - 1)
+      if (wait > 0) await delay(wait, undefined, { signal: signal ?? undefined })
+      const current = this.verifiedEndpoints.get(endpoint.generation)
+      if (!current || current.instanceId !== endpoint.instanceId) {
+        throw new Error(`UAR instance ${endpoint.instanceId} binding expired before the request was admitted`)
+      }
+      // The managed sidecar retains its default global quota of ten requests per second.
+      currentAdmission.nextAt = Date.now() + 100
+    })
+    if (!signal) return queued
+    return new Promise<void>((resolve, reject) => {
+      const onAbort = () => reject(signal.reason)
+      signal.addEventListener('abort', onAbort, { once: true })
+      if (signal.aborted) onAbort()
+      queued.then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort))
+    })
   }
 
   private ensureRunning(): Promise<RunningSidecar> {
@@ -515,6 +561,9 @@ export class UarSidecarService extends BaseService {
       ...(process.env.UAR_TEAM_EXECUTION_PROFILE_STAGE === 'operation'
         ? { UAR_TEAM_EXECUTION_PROFILE_STAGE: 'operation' }
         : {}),
+      ...(process.env.UAR_WORKFLOW_EXECUTION_PROFILE_STAGE === 'operation'
+        ? { UAR_WORKFLOW_EXECUTION_PROFILE_STAGE: 'operation' }
+        : {}),
       UAR_SIDECAR: '1',
       UAR_SERVICE_INSTANCE__INSTANCE_ID: managedInstance.expectedRuntimeId,
       UAR_SERVICE_INSTANCE__WORKSPACE_LOCATION: managedInstance.workspaceLocation,
@@ -553,6 +602,7 @@ export class UarSidecarService extends BaseService {
         launchToken,
         authToken: launchToken,
         adminKey,
+        principalMode: capabilities.principalMode,
         baseUrl,
         effectivePort: port,
         ...(child.pid ? { processId: child.pid } : {}),
@@ -659,7 +709,7 @@ export class UarSidecarService extends BaseService {
   }
 
   private async readCapabilities(instance: UarRuntimeInstance, baseUrl: string, authToken: string) {
-    const response = await this.fetchWithRateLimitRetries(new URL('/api/uar/capabilities', baseUrl), {
+    const response = await fetchWithRateLimitRetries(new URL('/api/uar/capabilities', baseUrl), {
       headers: { authorization: `Bearer ${authToken}` },
       signal: AbortSignal.timeout(5_000)
     })
@@ -714,7 +764,9 @@ export class UarSidecarService extends BaseService {
         }
       }
     }
-    return { uarVersion: body.uar_version, capabilities, administration: body.administration, observed }
+    const principalMode =
+      body.authentication?.principalMode ?? (instance.ownership === 'managed' ? 'host-asserted' : 'token-subject')
+    return { uarVersion: body.uar_version, capabilities, administration: body.administration, observed, principalMode }
   }
 
   private async connectExternal(instance: UarRuntimeInstance): Promise<UarSidecarEndpoint> {
@@ -734,6 +786,7 @@ export class UarSidecarService extends BaseService {
       (candidate) =>
         candidate.instanceId === instance.id &&
         candidate.ownership === 'external' &&
+        candidate.principalMode === capabilities.principalMode &&
         JSON.stringify(candidate.observed) === JSON.stringify(capabilities.observed)
     )
     const generation = previous?.generation ?? ++this.generation
@@ -755,7 +808,8 @@ export class UarSidecarService extends BaseService {
       administration: capabilities.administration,
       observed: capabilities.observed,
       authToken: credentials.runtimeBearer,
-      adminKey: credentials.adminKey
+      adminKey: credentials.adminKey,
+      principalMode: capabilities.principalMode
     }
     this.verifiedEndpoints.set(generation, endpoint)
     return endpoint
@@ -785,6 +839,7 @@ export class UarSidecarService extends BaseService {
     this.running = undefined
     if (!running) return
     this.verifiedEndpoints.delete(running.generation)
+    this.requestAdmissions.delete(running.generation)
     await this.terminate(running.child)
   }
 

@@ -478,7 +478,13 @@ function chmodExec(filePath) {
   if (process.platform !== 'win32') fs.chmodSync(filePath, 0o755)
 }
 
-function isUpToDate(binaryPaths, versionPath, expectedVersion, outputDir, payloadIdentity) {
+function isUpToDate(binaryPaths, versionPath, expectedVersion, outputDir, payloadIdentity, contentSha256) {
+  if (
+    contentSha256 &&
+    fs.existsSync(binaryPaths[0]) &&
+    crypto.createHash('sha256').update(fs.readFileSync(binaryPaths[0])).digest('hex') !== contentSha256
+  )
+    return false
   if (binaryPaths.some((binaryPath) => !fs.existsSync(binaryPath))) return false
   if (payloadIdentity) {
     try {
@@ -596,7 +602,7 @@ function downloadTool(tool, platformKey, outputDir, { versionFile = null } = {})
   const binaryPaths = pkg.binaries.map((binary) => path.join(outputDir, binary))
   const versionPath = versionFile ? path.join(outputDir, versionFile) : null
 
-  if (isUpToDate(binaryPaths, versionPath, tool.version, outputDir, tool.payloadIdentity)) {
+  if (isUpToDate(binaryPaths, versionPath, tool.version, outputDir, tool.payloadIdentity, tool.contentSha256)) {
     for (const binaryPath of binaryPaths) chmodExec(binaryPath)
     // A partial download of a version already installed has nothing left to
     // resume, and a cache hit is the one path that would otherwise never clear

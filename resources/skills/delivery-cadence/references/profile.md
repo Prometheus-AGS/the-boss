@@ -60,6 +60,8 @@ The feature checkpoint must be configured. `start.checkpoints` can supply the co
 
 One authorized isolated scope can use `work-ahead admit` while the frozen delivery builds or publishes; it cannot become another active iteration. Use `work-ahead status/promote` to preserve blockers and its original first work time. Publication capacity and unresolved delivery failures constrain promotion without erasing owed obligations. Corrective `start` additionally needs `correction: { "iterationId":"failed-delivery-id", "reason":"observed problem", "evidencePath":"/absolute/failure.json" }`. The evidence identifies that iteration, `status:"failed"`, and the failed `operation`. Corrective scope must address that failure; it does not waive publication debt.
 
+The corrective iteration must name the immediately preceding unresolved failed delivery. It keeps a new source baseline and must build and operate its own complete increment. When a later, separately authorized integration gate has already resolved the product issue but cannot be matched to the frozen failed candidate, first `finish` the failed iteration with `outcome:"failed"` and no invented completion. Then run `failure resolve` with `{ "iterationId":"failed-delivery-id", "disposition":"retired", "reason":"why this frozen candidate cannot be repaired or credited", "authorityRef":"operator-or-canonical-decision-reference", "evidencePath":"/absolute/reconciliation.json" }`. The evidence is a JSON document retained by path and SHA-256. Retirement does not make that candidate successful, count a delivery, certify a KBD task, clear hooks, or discharge publication. Report and status keep the disposition visible. Reconcile canonical task state separately through supported KBD commands.
+
 ## Compatibility and historical work
 
 `status` and `report` can read existing state. Run explicit `migrate` before new v3 mutations: it backs up state/events, appends a migration record, and leaves old iteration objects and receipts unchanged. Stop old mutators first. Migrate supported v1 through v2 into v3 without rewriting history to claim new acceptance.
@@ -67,3 +69,29 @@ One authorized isolated scope can use `work-ahead admit` while the frozen delive
 `history` links `{ "phaseId":"canonical-child", "reason":"why previously untracked", "evidencePath":"/absolute/receipt", "sourceRefs":[] }`. These references carry no delivery or completion credit and unknown timing. Use this for the earlier UAR inference child; do not invent an iteration.
 
 Read [child recovery](child-recovery.md) for nested work and [measurement](measurement.md) for timing/learning semantics.
+
+## Skill-pack refresh procedure
+
+`scripts/refresh-skill-pack.sh` is a ready-made checkpoint procedure that refreshes an installed skill pack from merged `main`. It replaces ad hoc, untracked per-machine scripts. Inputs come from flags or the matching environment variable:
+
+| Flag | Env | Meaning |
+|---|---|---|
+| `--deploy <worktree>` | `REFRESH_DEPLOY` | Clean worktree that tracks `origin/main`. Never the actively edited checkout: a checkpoint freezes every source it names. |
+| `--state <state.json>` | `REFRESH_STATE` | Cadence state, read directly for `--mode auto`. The cadence CLI is never called (a checkpoint already holds its lock). |
+| `--mode full\|verify\|auto` | `REFRESH_MODE` | `auto` reads the active iteration's `index` from `state.json`: odd runs `full`, even runs `verify`. |
+| `--services a,b` | `REFRESH_SERVICES` | launchd labels to `launchctl kickstart -k gui/$UID/<label>` after install. |
+| `--receipt <file>` | `REFRESH_RECEIPT` | Also write the JSON summary here. |
+
+`full` refuses a dirty or diverged deploy worktree (exit 1) before any install step, fast-forwards it to `origin/main`, runs `git submodule update --init --recursive`, then `scripts/update-skill-pack.sh --force` and `scripts/install-binaries.sh` from that worktree, then kickstarts each service. `verify` changes nothing. Both print one JSON summary with `sourceCommit`, `versions` (pk, learningWorker, surrealMemory), `health` (surreal-memory `/health`, overridable with `REFRESH_HEALTH_URL`), `pluginGeneration` and `pluginSourceCommit`.
+
+Failures are loud: exit 1 for a failed step, exit 2 for unusable input. A missing, unreadable or non-numeric iteration in `state.json` exits 2 and does no work; the script never defaults an iteration number.
+
+Point a checkpoint at it as a program plus arguments, for example:
+
+```json
+{"id":"refresh","kind":"procedure","command":"bash",
+ "args":["/abs/path/.prometheus/cadence/procedures/refresh-skill-pack.sh"],
+ "cwd":"/abs/project","required":true}
+```
+
+The local procedure file is a git-ignored shim that `exec`s `$HOME/.claude/skills/delivery-cadence/scripts/refresh-skill-pack.sh` with this machine's deploy worktree, state path and services; see [examples/refresh-skill-pack-shim.sh](../examples/refresh-skill-pack-shim.sh). Only integration tests set `REFRESH_TEST_MODE=1` with `REFRESH_UPDATE_CMD`, `REFRESH_INSTALL_CMD` and `REFRESH_KICKSTART_CMD` (receives the label as `$1`) to substitute recording stubs.

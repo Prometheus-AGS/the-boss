@@ -39,6 +39,8 @@ export interface Team {
   modelPolicy?: ModelPolicy;
   skillPolicies?: Record<string, ModelPolicy>;
   native?: Partial<Record<Target, NativeConfig>>;
+  /** Opt-in per-harness agent memory. `claude: 'local'` emits `memory: local` and a per-role MEMORY.md. */
+  agentMemory?: { claude?: 'local' };
 }
 export interface KbdIdentity {
   projectId: string;
@@ -83,6 +85,12 @@ export interface MemoryEntry {
   provenance: ObjectValue;
   status: 'queued' | 'published';
   receipt?: Json;
+  /** Optional locally; required for scoped REST publication. Legacy entries remain readable. */
+  projectId?: string;
+  ts?: string;
+  kind?: 'lesson' | 'gotcha' | 'decision' | 'progress' | 'candidate';
+  roleId?: string;
+  author?: ObjectValue;
 }
 export interface TeamState {
   schemaVersion: 1;

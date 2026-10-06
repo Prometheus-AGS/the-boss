@@ -1,5 +1,6 @@
 import * as z from 'zod'
 
+import { application } from '@application'
 import {
   UAR_TEAM_COOPERATION_CAPABILITIES,
   UAR_TEAM_EXECUTION_PROFILE,
@@ -17,6 +18,7 @@ import type {
   UarTeamsSnapshot
 } from '@shared/types/uarTeams'
 
+import { UAR_TEAM_HOST_CAPABILITY } from './uarCodingTeamPackage'
 import { capabilityState, rawBinding, scopedRequest, workspace } from './UarDurableAdministrationAdapter'
 
 const basePath = '/api/v1/collaboration/team-instances'
@@ -148,7 +150,16 @@ export async function planningState(workspaceId: string) {
       })
     })
     .parse(await scopedRequest(resolved, '/api/v1/collaboration/capabilities', state.generation))
+  const endpoint = await application.get('UarSidecarService').resolveSelected()
+  const coding =
+    endpoint.ownership === 'managed' &&
+    capabilities.executionProfile === UAR_TEAM_EXECUTION_PROFILE &&
+    capabilities.executionProfileStage === 'qualified' &&
+    capabilities.capabilities.includes(UAR_TEAM_HOST_CAPABILITY) &&
+    UAR_TEAM_COOPERATION_CAPABILITIES.every((id) => capabilities.capabilities.includes(id))
   return {
+    coding,
+    approvals: coding,
     workspaceId: resolved,
     generation: state.generation,
     planning: capabilities.collaboration.activation.teamPlanning,
@@ -180,7 +191,14 @@ export async function readUarTeams(workspaceId: string): Promise<UarTeamsSnapsho
       schemaVersion: 1,
       workspaceId: state.workspaceId,
       generation: state.generation,
-      capabilities: { planning: false, ownership: false, mailbox: false, execution: false },
+      capabilities: {
+        planning: false,
+        ownership: false,
+        mailbox: false,
+        execution: false,
+        coding: false,
+        approvals: false
+      },
       unavailableReason: 'team_planning_unsupported',
       definitions: [],
       bindings: [],
@@ -201,6 +219,8 @@ export async function readUarTeams(workspaceId: string): Promise<UarTeamsSnapsho
     workspaceId: state.workspaceId,
     generation: state.generation,
     capabilities: {
+      coding: state.coding,
+      approvals: state.approvals,
       planning: true,
       ownership: state.ownership,
       mailbox: state.mailbox,

@@ -64,6 +64,8 @@
   "appMenu.zoom": "Zoom",
   "appMenu.zoomIn": "Zoom In",
   "appMenu.zoomOut": "Zoom Out",
+  "bossfang.diagnosticCheckFailed": "Diagnostic check failed. Check dashboard credentials, UAR compatibility and the retained run events.",
+  "bossfang.retainedAuthentication": "Original UAR authentication could not be updated. Check the original enabled instance, workspace and retained run. Existing execution is not replayed or moved.",
   "chat.conversation.new": "New Chat",
   "common.channel_available_commands": "Available commands:",
   "common.channel_command_processing_error": "⚠️ An error occurred while processing the command. Please try again later.",

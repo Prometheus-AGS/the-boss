@@ -144,27 +144,52 @@
       "minItems": 0
     },
     "taskAcceptance": {
-      "type": "object",
-      "properties": {
-        "mode": {
-          "enum": [
-            "operator",
-            "coordinator-within-binding"
-          ]
-        },
-        "allowedWorkflows": {
-          "type": "array",
-          "items": {
-            "$ref": "common.schema.json#/$defs/immutableRef"
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "enum": [
+                "coordinator-within-binding"
+              ]
+            },
+            "allowedWorkflows": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/immutableRef"
+              },
+              "minItems": 0
+            }
           },
-          "minItems": 1
+          "required": [
+            "mode",
+            "allowedWorkflows"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "enum": [
+                "operator"
+              ]
+            },
+            "allowedWorkflows": {
+              "type": "array",
+              "items": {
+                "$ref": "common.schema.json#/$defs/immutableRef"
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "mode",
+            "allowedWorkflows"
+          ],
+          "additionalProperties": false
         }
-      },
-      "required": [
-        "mode",
-        "allowedWorkflows"
-      ],
-      "additionalProperties": false
+      ]
     },
     "routing": {
       "type": "object",

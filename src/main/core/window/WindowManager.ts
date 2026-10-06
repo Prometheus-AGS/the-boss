@@ -17,6 +17,7 @@ import {
   ServicePhase
 } from '@main/core/lifecycle'
 import { isDev, isMac } from '@main/core/platform'
+import { isAppRendererUrl } from '@main/core/security/validateSender'
 import { applyWindowBehavior, BehaviorController } from '@main/core/window/behavior'
 import { applyWindowQuirks } from '@main/core/window/quirks'
 import type { WindowType } from '@main/core/window/types'
@@ -1376,14 +1377,14 @@ export class WindowManager extends BaseService {
     window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
 
     window.webContents.on('will-navigate', (event, url) => {
+      if (isAppRendererUrl(url)) return
       if (url.startsWith('http:') || url.startsWith('https:')) {
         const currentURL = window.webContents.getURL()
         if (currentURL && new URL(url).origin !== new URL(currentURL).origin) {
           event.preventDefault()
         }
       } else {
-        // Non-web schemes (file:, custom protocols) have no legitimate in-window
-        // navigation path; deny like the window-open handler denies non-http(s) popups.
+        // Non-web navigation outside the trusted app root remains denied.
         event.preventDefault()
         logger.warn(`Blocked navigation to untrusted URL scheme: ${url}`)
       }

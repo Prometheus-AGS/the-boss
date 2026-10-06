@@ -12,7 +12,7 @@
     },
     "prometheus": {
       "repository": "Prometheus-AGS/prometheus-skill-system",
-      "revision": "e57421a86fae08ac4d1e3a625a213cf3f3eb98bc"
+      "revision": "3e8a891bcd472e18cc1c097c04b208cb93f7f78f"
     },
     "pk": {
       "repository": "Prometheus-AGS/prometheus-knowledge-rs",
@@ -20,19 +20,23 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "4ba9581cf013d28f4e70e08db9382a4dfad8cb1c"
+      "revision": "e3fed05944e6b365ad74af30926b875e6857190f"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "bb6ea8ba10378732db5647c6957ba88788626ff9"
+      "revision": "035678b6290353a5988a5a96668d08a9781b1471"
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
-      "revision": "0af8ae1f3c7486bf7128beff8ef83aaf1a832ea6"
+      "revision": "bfb6d49a7fe25d82ef4ad55f49c8f97e6e82c54a"
     },
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
       "revision": "a6047386cc9fae4258b4a8577f6a016022095586"
+    },
+    "bossfang": {
+      "repository": "GQAdonis/librefang",
+      "revision": "295ff50201fbb09a6e22390de85d9b374c3d9edd"
     }
   },
   "tools": {
@@ -51,7 +55,7 @@
       "source": "prometheus",
       "package": "prometheus-cli",
       "directory": "tools/prometheus-cli",
-      "version": "1.10.0"
+      "version": "1.11.3"
     },
     "pk": {
       "source": "pk",
@@ -62,12 +66,18 @@
       "source": "uar",
       "package": "universal-agent-runtime",
       "version": "1.0.0",
-      "features": "minimal,a2a-transport,local-models,document-intelligence,wasm-runtime"
+      "features": "server-full"
     },
     "liter-llm": {
       "source": "liter-llm",
       "package": "liter-llm-cli",
       "version": "2.1.1"
+    },
+    "bossfang": {
+      "source": "bossfang",
+      "package": "librefang-cli",
+      "version": "2026.9.19+295ff5020",
+      "features": "telemetry,surreal-backend,uar-driver"
     }
   },
   "catalogs": {
