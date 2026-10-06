@@ -5,6 +5,7 @@ import { setTimeout as delay } from 'node:timers/promises'
 
 import { digest, write, same, route, requireFact, waitFor } from './io.mjs'
 import { liveOutputObserver } from './live-output.mjs'
+import { attemptFailureEvidence } from './attempt-diagnostics.mjs'
 
 const visible = (selector) =>
   `[...document.querySelectorAll(${JSON.stringify(selector)})].find(node=>node.getClientRects().length)`
@@ -299,10 +300,11 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
       signal,
       async () => {
         const value = await execution()
-        requireFact(
-          !value.attempts.some((item) => ['failed', 'cancelled', 'uncertain'].includes(item.status)),
-          'C15_REAL_ATTEMPT_FAILED'
-        )
+        if (value.attempts.some((item) => ['failed', 'cancelled', 'uncertain'].includes(item.status))) {
+          evidence.failedExecution = { ...selector, attempts: value.attempts.map(attemptFailureEvidence) }
+          write(configuration.evidence + '.attempt-failure.json', evidence.failedExecution)
+          requireFact(false, 'C15_REAL_ATTEMPT_FAILED')
+        }
         await live.capture(value.attempts)
         const current = (await snapshot()).instances.find((item) => item.id === instance.id)
         const finished = value.attempts.filter(

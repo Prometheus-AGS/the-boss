@@ -67,7 +67,48 @@ export interface UarEffectiveModelReceipt {
   limits: { contextTokens?: number; outputTokens?: number; source: string; sourceRevision?: string }
   fit: { mode: 'settings-only'; guaranteedFit: false; reason: string }
 }
-export interface UarTeamDiagnostic {
+export const uarTeamDiagnosticDetailsSchema = z.object({
+  sourceStage: z
+    .enum(['request-preparation', 'handoff-validation', 'provider-opening', 'handoff-recording', 'provider-stream'])
+    .optional(),
+  category: z
+    .enum([
+      'provider_authentication_failed',
+      'provider_invalid_request',
+      'provider_rate_limited',
+      'provider_overloaded',
+      'provider_timeout',
+      'provider_transport_failed',
+      'provider_stream_failed',
+      'provider_budget_exceeded',
+      'provider_external_error',
+      'provider_internal_error',
+      'collaboration_invalid',
+      'collaboration_not_found',
+      'collaboration_conflict',
+      'collaboration_storage',
+      'request_preparation_failed',
+      'unclassified'
+    ])
+    .optional(),
+  httpStatus: z.number().int().min(100).max(599).optional(),
+  collaborationCode: z
+    .enum([
+      'TEAM_SCOPE_DENIED',
+      'TEAM_EDGE_DENIED',
+      'TEAM_CONTEXT_REQUIRED_UNSUPPORTED',
+      'TEAM_CONTEXT_REQUIRED_TOO_LARGE',
+      'TEAM_REVISION_CONFLICT',
+      'TEAM_EXECUTION_EPOCH_STALE',
+      'TEAM_EXECUTION_OWNER_CONFLICT',
+      'TEAM_COMMAND_CONFLICT',
+      'TEAM_BUDGET_EXHAUSTED',
+      'TEAM_PROFILE_UNSUPPORTED',
+      'TEAM_ROUTE_PROFILE_MISMATCH'
+    ])
+    .optional()
+})
+export interface UarTeamDiagnostic extends z.infer<typeof uarTeamDiagnosticDetailsSchema> {
   code: string
   field?: string
   retryable: boolean

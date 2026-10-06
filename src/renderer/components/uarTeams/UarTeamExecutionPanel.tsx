@@ -309,8 +309,32 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, cooper
                     ))}
                     {attempt.diagnostic && (
                       <p className="mt-2 break-words text-xs text-error" role="alert">
-                        {uarTeamError(attempt.diagnostic.code, (key) => tr('execution.' + key))}
+                        {uarTeamError(
+                          attempt.diagnostic.code,
+                          (key) => tr('execution.' + key),
+                          attempt.diagnostic.sourceStage
+                        )}
                         {attempt.diagnostic.field ? ' · ' + attempt.diagnostic.field : ''}
+                        {attempt.diagnostic.sourceStage && (
+                          <span className="block">
+                            {tr('execution.diagnosticStage', { stage: attempt.diagnostic.sourceStage })}
+                          </span>
+                        )}
+                        {attempt.diagnostic.category && (
+                          <span className="block">
+                            {tr('execution.diagnosticCategory', { category: attempt.diagnostic.category })}
+                          </span>
+                        )}
+                        {attempt.diagnostic.httpStatus && (
+                          <span className="block">
+                            {tr('execution.diagnosticHttpStatus', { status: attempt.diagnostic.httpStatus })}
+                          </span>
+                        )}
+                        {attempt.diagnostic.collaborationCode && (
+                          <span className="block">
+                            {uarTeamError(attempt.diagnostic.collaborationCode, (key) => tr('execution.' + key))}
+                          </span>
+                        )}
                         {attempt.diagnostic.protectedDiagnosticRef
                           ? ' · ' +
                             tr('execution.diagnosticReference') +
@@ -321,7 +345,7 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, cooper
                     )}
                     {attempt.stateReason && (
                       <p className="mt-2 break-words text-xs text-muted-foreground">
-                        {uarTeamError(attempt.stateReason, (key) => tr('execution.' + key))}
+                        {uarTeamError(attempt.stateReason, (key) => tr('execution.' + key), attempt.diagnostic?.sourceStage)}
                       </p>
                     )}
                     {attempt.continuationOfWaitId && (
