@@ -107,7 +107,9 @@ export async function deployUarAuthoredTeam(input: {
       }
     }
   const skillBindings = await resolveAuthoredTeamSkills(record.team, state.generation)
-  const modelBindings = []
+  const modelBindings: Array<
+    Awaited<ReturnType<typeof configureTeamModel>> & { requestedAlias: string; credentialRef: string }
+  > = []
   for (const member of record.team.members) {
     if (!member.model) throw new Error('UAR_TEAM_MODEL_REQUIRED: ' + member.role)
     const model = await configureTeamModel(member.model, state.generation)
