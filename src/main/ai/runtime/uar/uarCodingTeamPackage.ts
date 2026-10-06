@@ -9,7 +9,7 @@ export const codingReadTools = ['filesystem__glob', 'filesystem__ls', 'filesyste
 export const codingWriteTools = ['filesystem__edit', 'filesystem__write']
 
 export function codingTeamPackage() {
-  const version = '1.0.0'
+  const version = '1.0.1'
   const source = JSON.parse(starterPackage().files['agent-definition.json'])
   const { contentDigest: _digest, ...base } = source
   const instructions =
@@ -78,6 +78,7 @@ export function codingTeamPackage() {
       { fromRole: 'coordinator', toRole: 'worker', modes: ['queue-only', 'trigger-turn'] },
       { fromRole: 'coordinator', toRole: 'reviewer', modes: ['queue-only', 'trigger-turn'] },
       { fromRole: 'worker', toRole: 'coordinator', modes: ['queue-only'] },
+      { fromRole: 'worker', toRole: 'reviewer', modes: ['queue-only'] },
       { fromRole: 'reviewer', toRole: 'coordinator', modes: ['queue-only'] }
     ],
     taskAcceptance: { mode: 'coordinator-within-binding', allowedWorkflows: [] },
