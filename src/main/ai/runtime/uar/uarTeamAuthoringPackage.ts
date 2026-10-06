@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto'
 import { pathToFileURL } from 'node:url'
 
 import { application } from '@application'
+import { toAsarUnpackedPath } from '@main/utils/asar'
 import type { UarAuthoredTeam } from '@shared/types/uarTeams'
 
 import {
@@ -159,7 +160,7 @@ export async function compileAuthoredTeam(team: UarAuthoredTeam, revision: numbe
       { fromRole: 'coordinator', toRole: member.role, modes: ['queue-only', 'trigger-turn'] },
       { fromRole: member.role, toRole: 'coordinator', modes: ['queue-only'] }
     ]),
-    limits: { concurrentTurns: 1, maxMembers: team.members.length, maxDepth: 0, maxPendingTasks: 16 },
+    limits: { concurrentTurns: 1, maxMembers: team.members.length, maxDepth: 1, maxPendingTasks: 16 },
     budget: { maxTokens: 65536, maxCostMicrounits: 10000000, currency: 'USD', maxElapsedSeconds: 2400 },
     ...(team.instructions.trim()
       ? { instructions: { revision, text: team.instructions, digest: digest(team.instructions) } }
@@ -174,7 +175,9 @@ export async function compileAuthoredTeam(team: UarAuthoredTeam, revision: numbe
     definitions: [...members, { path: 'teams/root.json', document: definition }]
   }
   const url = pathToFileURL(
-    application.getPath('feature.prometheus.pack.builtin', 'skills/agent-team-creator/scripts/uar-package.mjs')
+    toAsarUnpackedPath(
+      application.getPath('feature.prometheus.pack.builtin', 'skills/agent-team-creator/scripts/uar-package.mjs')
+    )
   ).href
   const creator = (await import(/* @vite-ignore */ url)) as Creator
   const normalized = creator.normalizeAuthoring(source)
