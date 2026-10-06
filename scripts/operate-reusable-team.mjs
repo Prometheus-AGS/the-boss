@@ -64,9 +64,12 @@ export async function operate(args = process.argv.slice(2)) {
       sidecarSha256: digest(fs.readFileSync(path.join(payload, 'uar-sidecar'))),
       launcherSha256: digest(fs.readFileSync(options.launcher)),
       scenarioFiles: Object.fromEntries(
-        ['operate-reusable-team.mjs', 'reusable-team-operation/scenario.mjs', 'reusable-team-operation/io.mjs'].map(
-          (name) => [name, digest(fs.readFileSync(new URL(name, import.meta.url)))]
-        )
+        [
+          'operate-reusable-team.mjs',
+          'reusable-team-operation/scenario.mjs',
+          'reusable-team-operation/io.mjs',
+          'reusable-team-operation/live-output.mjs'
+        ].map((name) => [name, digest(fs.readFileSync(new URL(name, import.meta.url)))])
       )
     }
     const workspaceDirectory = path.join(output, 'workspace')

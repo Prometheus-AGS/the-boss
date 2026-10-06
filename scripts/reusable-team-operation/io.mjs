@@ -10,13 +10,13 @@ export const route = (name) => 'prometheus.uar.teams.' + name
 export function requireFact(condition, code) {
   if (!condition) throw Object.assign(new Error(code), { code })
 }
-export async function waitFor(signal, read, code, timeout = 30000) {
+export async function waitFor(signal, read, code, timeout = 30000, interval = 250) {
   const deadline = Date.now() + timeout
   while (Date.now() < deadline) {
     signal.throwIfAborted()
     const value = await read()
     if (value) return value
-    await delay(250, undefined, { signal })
+    await delay(interval, undefined, { signal })
   }
   requireFact(false, code)
 }

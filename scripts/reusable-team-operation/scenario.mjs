@@ -4,6 +4,7 @@ import path from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 
 import { digest, write, same, route, requireFact, waitFor } from './io.mjs'
+import { liveOutputObserver } from './live-output.mjs'
 
 const visible = (selector) =>
   `[...document.querySelectorAll(${JSON.stringify(selector)})].find(node=>node.getClientRects().length)`
@@ -292,6 +293,8 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     const selector = { workspaceId: selected.workspaceId, teamInstanceId: instance.id }
     const execution = () => ipc(evaluate, route('execution'), selector)
     const memberRoles = Object.fromEntries(instance.members.map((member) => [member.id, member.role]))
+    const live = liveOutputObserver(evaluate, selector, memberRoles)
+    evidence.liveOutput = live.evidence
     const completed = await waitFor(
       signal,
       async () => {
@@ -300,6 +303,7 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
           !value.attempts.some((item) => ['failed', 'cancelled', 'uncertain'].includes(item.status)),
           'C15_REAL_ATTEMPT_FAILED'
         )
+        await live.capture(value.attempts)
         const current = (await snapshot()).instances.find((item) => item.id === instance.id)
         const finished = value.attempts.filter(
           (item) => item.status === 'succeeded' || item.executionOutcome === 'succeeded'
@@ -311,7 +315,8 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
           : false
       },
       'C15_REAL_MIXED_TEAM_OR_REQUIRED_OPERATOR_APPROVAL_UNAVAILABLE',
-      900000
+      900000,
+      3000
     )
     const artifacts = (await ipc(evaluate, route('artifacts'), selector)).artifacts
     const attempts = completed.attempts.filter(
@@ -440,6 +445,7 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
       ),
       'C15_REOPEN_CHANGED_ARTIFACTS'
     )
+    await live.finish(attempts, signal)
     requireFact(
       digest(fs.readFileSync(path.join(configuration.workspaceDirectory, 'README.md'))) ===
         configuration.workspaceSha256 &&
@@ -448,7 +454,9 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     )
     evidence.checks.push(
       'revision-preserves-running-definition-package-binding',
-      'renderer-reopen-preserves-authoring-identities-attempts-and-artifacts'
+      'renderer-reopen-preserves-authoring-identities-attempts-and-artifacts',
+      'pre-terminal-public-member-model-output-visible',
+      'renderer-reopen-shows-correlated-saved-final-output'
     )
     evidence.complete = true
   } catch (error) {
