@@ -27,10 +27,18 @@ export const mergeHeaders = (...parts: Array<Record<string, string | undefined> 
   Object.assign({}, ...parts.map(normalizeHeaders))
 
 /** Retry throttled reads within the existing six-attempt, five-delay budget. */
-export async function fetchWithRateLimitRetries(url: URL, init: RequestInit): Promise<Response> {
-  if ((init.method ?? 'GET').toUpperCase() !== 'GET') return fetch(url, init)
+export async function fetchWithRateLimitRetries(
+  url: URL,
+  init: RequestInit,
+  beforeFetch?: () => Promise<void>
+): Promise<Response> {
+  if ((init.method ?? 'GET').toUpperCase() !== 'GET') {
+    await beforeFetch?.()
+    return fetch(url, init)
+  }
   let remainingDelay = 5 * 250
   for (let attempt = 0; attempt < 6; attempt += 1) {
+    await beforeFetch?.()
     const response = await fetch(url, init)
     if (response.status !== 429 || attempt === 5) return response
     const retryAfter = response.headers.get('retry-after') ?? ''
