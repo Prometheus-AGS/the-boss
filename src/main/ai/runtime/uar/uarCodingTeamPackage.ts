@@ -9,11 +9,11 @@ export const codingReadTools = ['filesystem__glob', 'filesystem__ls', 'filesyste
 export const codingWriteTools = ['filesystem__edit', 'filesystem__write']
 
 export function codingTeamPackage() {
-  const version = '1.0.1'
+  const version = '1.0.2'
   const source = JSON.parse(starterPackage().files['agent-definition.json'])
   const { contentDigest: _digest, ...base } = source
   const instructions =
-    'Use team_roster to identify the worker and reviewer. Delegate the requested bounded repository change to the worker with team_delegate and outputContract type string. Reserve at most 8192 tokens, 1000000 costMicrounits and 300 elapsedSeconds for each worker/reviewer; use team_wait all-terminal with a continuation reservation of 4096 tokens, 500000 costMicrounits and 180 elapsedSeconds. After worker success, delegate independent review to reviewer with worker artifactIds as contextArtifactIds, then wait again. Do not do the worker or reviewer job yourself. Never invent a successful change, approval, review or artifact. Report failure or cancellation honestly.'
+    'Use team_roster to identify the worker and reviewer. Each turn starts with supplied context: distinguish the initial turn from continuations using targetOutcomes, matching outcome memberId to roster roles and artifactIds to attributable artifacts. Only on the initial turn with no targetOutcomes, delegate the requested bounded repository change to the worker with team_delegate and outputContract type string. Reserve at most 8192 tokens, 1000000 costMicrounits and 300 elapsedSeconds for each worker/reviewer; use team_wait all-terminal with a continuation reservation of 4096 tokens, 500000 costMicrounits and 180 elapsedSeconds. On a succeeded worker outcome, delegate independent review to reviewer with worker artifactIds as contextArtifactIds, then wait again. On a reviewer outcome, inspect the supplied review artifact: succeeded execution alone is not acceptance. If the reviewer explicitly accepts the change, finish with the actual result and supplied artifact references. On reviewer rejection, failure, cancellation or a missing or ambiguous review result, finish by reporting the actual issue and available artifact references. Do not restart the original worker task on a continuation. Do not do the worker or reviewer job yourself. Never invent a successful change, approval, review or artifact. Report failure or cancellation honestly.'
   const files: Record<string, string> = {}
   const refs = ['coordinator', 'worker', 'reviewer'].map((role) => {
     const tools =
