@@ -11,6 +11,7 @@ function checkoutIntegrationSource(name, directory = path.join(root, 'build', 'i
   fs.mkdirSync(directory, { recursive: true })
   const git = (...args) => execFileSync('git', args, { cwd: directory, encoding: 'utf8' }).trim()
   git('init')
+  if (process.platform === 'win32') git('config', '--local', 'core.longpaths', 'true')
   if (git('status', '--porcelain', '--untracked-files=all'))
     throw new Error(`Integration source checkout has local changes: ${directory}`)
   git('fetch', '--depth=1', `https://github.com/${pin.repository}.git`, pin.revision)
