@@ -4775,9 +4775,9 @@
           "uarLifecycle": "connection-only"
         },
         "darwin-x64": {
-          "source": "bac04cb6b2c144520e28234ad77f00d4cf0f5b23",
-          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-bac04cb6b/bossfang-darwin-x64",
-          "sha256": "22c4351eda68d7e44069563b9fbaa8af31bf35c2c0b702f92e7377f25636152a",
+          "source": "295ff50201fbb09a6e22390de85d9b374c3d9edd",
+          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-295ff5020/bossfang-darwin-x64",
+          "sha256": "28bdf801d270d921a9a3dbb96df911a6d9b9acc466c61395bf483e2fd4885e11",
           "size": 131117300,
           "archive": "none",
           "binaries": [
