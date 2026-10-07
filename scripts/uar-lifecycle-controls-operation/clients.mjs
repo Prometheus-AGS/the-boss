@@ -38,7 +38,7 @@ export async function controls(evaluate, signal, instanceId, snapshot) {
     const row=[...document.querySelectorAll('[data-ui="uar-durable-instance"]')].find(node=>
       node.getClientRects().length&&node.dataset.instanceId===${JSON.stringify(instanceId)});
     if(!row)return false;
-    return [...row.querySelectorAll('[data-ui="uar-durable-action"]')].filter(node=>node.getClientRects().length)
+    return [...row.querySelectorAll('[data-ui~="uar-durable-action"]')].filter(node=>node.getClientRects().length)
       .map(node=>({action:node.dataset.instanceAction,disabled:node.disabled}));
   })()`), 'C14C_DURABLE_INSTANCE_NOT_VISIBLE')
   requireFact(JSON.stringify(observed.map((item) => item.action)) === JSON.stringify(expected),
@@ -48,7 +48,7 @@ export async function controls(evaluate, signal, instanceId, snapshot) {
 
 export async function drain(evaluate, signal, instanceId) {
   await waitFor(signal, () => evaluate(`(() => {
-    const button=[...document.querySelectorAll('[data-ui="uar-durable-action"]')].find(node=>
+    const button=[...document.querySelectorAll('[data-ui~="uar-durable-action"]')].find(node=>
       node.dataset.instanceId===${JSON.stringify(instanceId)}&&node.dataset.instanceAction==='drain');
     if(!button?.getClientRects().length||button.disabled)return false;
     button.scrollIntoView({block:'center'});button.focus();button.click();return true;
@@ -60,7 +60,7 @@ export async function hidden(evaluate, signal, workspaceId) {
     const panel=document.querySelector('[data-ui="uar-durable-panel"]');
     if(!panel?.getClientRects().length||panel.dataset.workspaceId!==${JSON.stringify(workspaceId)}||
       panel.dataset.loading!=='false'||panel.dataset.capabilityInstances!=='false')return false;
-    const controls=[...document.querySelectorAll('[data-ui="uar-durable-action"]')].filter(node=>node.getClientRects().length);
+    const controls=[...document.querySelectorAll('[data-ui~="uar-durable-action"]')].filter(node=>node.getClientRects().length);
     const rows=[...document.querySelectorAll('[data-ui="uar-durable-instance"]')].filter(node=>node.getClientRects().length);
     return { loaded:true, capabilityInstances:false, visibleActionCount:controls.length, visibleInstanceCount:rows.length };
   })()`), 'C14C_REFUSAL_OR_UNSUPPORTED_PANEL_NOT_VISIBLE')
