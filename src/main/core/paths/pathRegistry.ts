@@ -407,6 +407,8 @@ const NO_ENSURE = [
   'feature.agents.skills.builtin',
   'feature.prometheus.pack.builtin',
   'feature.prometheus.toml_editor_wasm',
+  // The shell writer must create private backups with mode 0700 itself.
+  'feature.prometheus.commands.rc_backups',
   'feature.mini_app.builtin',
   // AgentSessionService stores this path through DataApi. The runtime creates
   // the concrete session directory later, keeping database writes filesystem-free.
