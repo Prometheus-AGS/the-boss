@@ -18,7 +18,7 @@ import { loggerService } from '@logger'
 import { isMac, isWin } from '@main/core/platform'
 import { PRODUCT_DIRNAME } from '@shared/utils/branding'
 
-import { CHERRY_HOME, LOGS_DIR } from './constants'
+import { CHERRY_HOME, DEV_PROFILE_ROOT, LOGS_DIR } from './constants'
 
 const logger = loggerService.withContext('PathRegistry')
 
@@ -220,7 +220,9 @@ export function buildPathRegistry() {
       : path.join(__dirname, '../../build/prometheus-payload'),
     'feature.prometheus.pack.runtime': path.join(appUserDataData, 'PrometheusPack'),
     'feature.prometheus.state': path.join(appUserDataData, 'Prometheus'),
-    'feature.prometheus.commands': path.join(appUserData, 'commands'),
+    'feature.prometheus.commands': path.join(CHERRY_HOME, 'commands'),
+    'feature.prometheus.commands.registration_file': path.join(CHERRY_HOME, 'config', 'path-registration.json'),
+    'feature.prometheus.commands.rc_backups': path.join(CHERRY_HOME, 'rc-backups'),
     'feature.prometheus.toml_editor_wasm': app.isPackaged
       ? path.join(appExtraResources, 'toml-edit-js', 'index_bg.wasm')
       : path.join(__dirname, '../../node_modules/@rainbowatcher/toml-edit-js/index_bg.wasm'),
@@ -297,6 +299,7 @@ export function buildPathRegistry() {
     'v1.agents.claude': path.join(appUserData, '.claude'),
 
     // -- F. external.* — third-party tool paths (Cherry reads/writes, does NOT own) --
+    'external.shell.home': DEV_PROFILE_ROOT ? path.join(DEV_PROFILE_ROOT, 'home') : sysHome,
     'external.claude.config': path.join(sysHome, '.claude'),
     'external.browser.chrome': isMac
       ? path.join(sysHome, 'Library/Application Support/Google/Chrome')
@@ -404,6 +407,8 @@ const NO_ENSURE = [
   'feature.agents.skills.builtin',
   'feature.prometheus.pack.builtin',
   'feature.prometheus.toml_editor_wasm',
+  // The shell writer must create private backups with mode 0700 itself.
+  'feature.prometheus.commands.rc_backups',
   'feature.mini_app.builtin',
   // AgentSessionService stores this path through DataApi. The runtime creates
   // the concrete session directory later, keeping database writes filesystem-free.
