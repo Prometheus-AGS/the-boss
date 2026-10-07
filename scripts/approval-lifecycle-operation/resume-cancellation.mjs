@@ -92,6 +92,8 @@ export async function resumeCancellation(args = process.argv.slice(2)) {
       marker: 'C142-corrective-' + randomUUID() }, evidence)
     alive()
   } catch (error) {
+    if (error.code === 'C142_EFFECT_OUTSIDE_EXACT_OPERATION_SCOPE' && error.scopeMismatch)
+      evidence.scopeMismatch = error.scopeMismatch
     evidence.complete = false
     evidence.failureCode = signal.aborted ? 'C142_OPERATION_CANCELLED_OR_TIMED_OUT' :
       /^C142_[A-Z0-9_]+$/.test(error.code ?? '') ? error.code : 'C142_CORRECTIVE_OPERATION_UNAVAILABLE'

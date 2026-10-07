@@ -587,6 +587,22 @@
       "tests": "not-run",
       "lint": "not-run",
       "promotion": "not-performed"
+    },
+    {
+      "recordedAt": "2026-10-07T20:42:20.300Z",
+      "status": "bounded-mac-operation-complete-parent-pending",
+      "bossBuildSource": "4cae06d65ec05cc156274cf6ba53e68f3fe3c472",
+      "uarBuildSource": "36f096dbda0f17c6e15c71b284ce89cb04f04502",
+      "packaging": "pnpm build:mac:arm64 succeeded",
+      "operation": "Visible executor stop persisted cancelled approval without decision; runtime restart retained cancellation and prior decision without replay",
+      "evidence": "evidence/README.md",
+      "receiptInventory": "evidence/receipt-inventory.json",
+      "localTasks": "5/5 via kbd-apply end-task",
+      "parentTask": "C14.2 pending broader acceptance",
+      "cadencePromotion": "not-performed; awaiting approval",
+      "tests": "not-run",
+      "nativeWindows": "pending",
+      "publication": "not-performed for corrective candidate"
     }
   ]
 }

@@ -40,12 +40,31 @@ export async function pendingWrite(evaluate, signal, selector, configuration, fi
     120000,
     1000
   )
-  requireFact(
-    pending.toolName === 'filesystem__write' &&
-      pending.preparedEffect?.targetPath === path.join(configuration.workspaceDirectory, fileName) &&
-      pending.preparedEffect?.write?.contentSha256 === digest(content),
-    'C142_EFFECT_OUTSIDE_EXACT_OPERATION_SCOPE'
-  )
+  const expectedTarget = path.join(configuration.workspaceDirectory, fileName)
+  const actualTarget = pending.preparedEffect?.targetPath
+  const expectedContentSha256 = digest(content)
+  const actualContentSha256 = pending.preparedEffect?.write?.contentSha256
+  const toolMatches = pending.toolName === 'filesystem__write'
+  const targetMatches = actualTarget === expectedTarget
+  const contentMatches = actualContentSha256 === expectedContentSha256
+  try {
+    requireFact(toolMatches && targetMatches && contentMatches, 'C142_EFFECT_OUTSIDE_EXACT_OPERATION_SCOPE')
+  } catch (error) {
+    error.scopeMismatch = {
+      attemptId: attempt.id,
+      approvalId: pending.approvalId,
+      issuerId: pending.issuerId,
+      challengeId: pending.challengeId,
+      toolMatches,
+      targetMatches,
+      contentMatches,
+      expectedTargetSha256: digest(expectedTarget),
+      actualTargetSha256: typeof actualTarget === 'string' ? digest(actualTarget) : null,
+      expectedContentSha256,
+      actualContentSha256: /^[a-f0-9]{64}$/i.test(actualContentSha256 ?? '') ? actualContentSha256 : null
+    }
+    throw error
+  }
   return { attempt, pending, content, fileName }
 }
 
