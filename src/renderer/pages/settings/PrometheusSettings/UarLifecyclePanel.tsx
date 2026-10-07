@@ -7,6 +7,8 @@ import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/compon
 import { ipcApi } from '@renderer/ipc'
 import type { UarLifecycleSnapshot } from '@shared/types/uarLifecycleAdministration'
 
+import { UarLifecycleBindingPosture } from './UarLifecycleBindingPosture'
+import { UarLifecycleDurable } from './UarLifecycleDurable'
 import { UarLifecycleExecutions } from './UarLifecycleExecutions'
 import {
   LifecycleEmpty,
@@ -15,6 +17,7 @@ import {
   LifecycleReference,
   LifecycleSource
 } from './UarLifecycleRecords'
+import { UarLifecycleWorkflows } from './UarLifecycleWorkflows'
 
 export function UarLifecyclePanel({
   workspaceId,
@@ -174,6 +177,7 @@ export function UarLifecyclePanel({
                 <LifecycleField label={tr('lifecycle.definition')}>
                   {binding.package.id} · {binding.package.version} · {binding.package.digest}
                 </LifecycleField>
+                <UarLifecycleBindingPosture binding={binding} />
               </LifecycleRecord>
             ))}
             {teams?.instances.map((team) => (
@@ -233,171 +237,9 @@ export function UarLifecyclePanel({
               </LifecycleRecord>
             ))}
           </LifecycleSource>
-          <LifecycleSource title={tr('durable.instancesTitle')} source={data.durable}>
-            {durable && (
-              <>
-                {durable.bindings.map((binding) => (
-                  <LifecycleRecord
-                    key={binding.id}
-                    id={binding.id}
-                    title={tr('lifecycle.binding') + ' · ' + binding.id}
-                    status={tr(
-                      binding.activationSupported ? 'durable.bindingReady' : 'durable.bindingActivationUnavailable'
-                    )}>
-                    <LifecycleField label={tr('durable.revision')}>{binding.revision}</LifecycleField>
-                    {binding.package && (
-                      <LifecycleField label={tr('lifecycle.definition')}>
-                        {binding.package.id} · {binding.package.version} · {binding.package.digest}
-                      </LifecycleField>
-                    )}
-                  </LifecycleRecord>
-                ))}
-                {!durable.capabilities.instances && (
-                  <p className="text-sm text-muted-foreground">
-                    {tr('lifecycle.state.unsupported')} · {tr('durable.instancesTitle')}
-                  </p>
-                )}
-                {durable.capabilities.instances && durable.instances.length === 0 && <LifecycleEmpty />}
-                {durable.instances.map((instance) => (
-                  <LifecycleRecord
-                    key={instance.instanceId}
-                    id={instance.instanceId}
-                    title={instance.instanceId}
-                    status={tr('durable.lifecycle.' + instance.lifecycle)}>
-                    <LifecycleField label={tr('lifecycle.definition')}>
-                      <LifecycleReference
-                        id={instance.definitionId}
-                        targetId={instance.definitionId + '@' + instance.definitionVersion}
-                        exists={definitionIds.has(instance.definitionId + '@' + instance.definitionVersion)}
-                      />{' '}
-                      · {instance.definitionVersion}
-                    </LifecycleField>
-                    <LifecycleField label={tr('lifecycle.binding')}>
-                      <LifecycleReference id={instance.bindingId} exists={bindingIds.has(instance.bindingId)} /> ·{' '}
-                      {tr('durable.revision')} {instance.bindingRevision}
-                    </LifecycleField>
-                    <LifecycleField label={tr('durable.activeRun')}>
-                      {instance.activeRunId ? (
-                        <LifecycleReference
-                          id={instance.activeRunId}
-                          exists={data.executions.some((source) =>
-                            source.data?.attempts.some((attempt) => attempt.runId === instance.activeRunId)
-                          )}
-                        />
-                      ) : (
-                        t('common.none')
-                      )}
-                    </LifecycleField>
-                    <LifecycleField label={tr('durable.profile')}>
-                      {tr('durable.profile.' + instance.profile)}
-                    </LifecycleField>
-                    <LifecycleField label={tr('durable.epoch')}>
-                      {instance.epoch} · {tr('durable.revision')} {instance.revision}
-                    </LifecycleField>
-                    <LifecycleField label={tr('durable.queueDepth')}>{instance.queueDepth}</LifecycleField>
-                    <LifecycleField label={tr('durable.recoveryGuidance')}>
-                      {tr('durable.recovery.' + instance.recovery)}
-                    </LifecycleField>
-                    {instance.lastErrorCode && (
-                      <LifecycleField label={tr('durable.lastError')}>{instance.lastErrorCode}</LifecycleField>
-                    )}
-                  </LifecycleRecord>
-                ))}
-                <h3 className="pt-2 text-sm font-medium">{tr('durable.observersTitle')}</h3>
-                {!durable.capabilities.observers && (
-                  <p className="text-sm text-muted-foreground">{tr('lifecycle.state.unsupported')}</p>
-                )}
-                {durable.capabilities.observers && durable.observers.length === 0 && <LifecycleEmpty />}
-                {durable.observers.map((observer) => (
-                  <LifecycleRecord
-                    key={observer.subscriptionId}
-                    id={observer.subscriptionId}
-                    title={observer.subscriptionId}
-                    status={tr(
-                      observer.revoked ? 'durable.revoked' : observer.paused ? 'durable.paused' : 'durable.active'
-                    )}>
-                    <LifecycleField label={tr('durable.observerInstance')}>
-                      <LifecycleReference
-                        id={observer.observerInstanceId}
-                        exists={durable.instances.some(
-                          (instance) => instance.instanceId === observer.observerInstanceId
-                        )}
-                      />
-                    </LifecycleField>
-                    <LifecycleField label={tr('durable.backlogDepth')}>
-                      {observer.backlogDepth} · {tr('durable.deadLetters')}: {observer.deadLetterCount}
-                    </LifecycleField>
-                    {observer.sources.map((source) => (
-                      <LifecycleField key={source.sourceInstanceId} label={tr('durable.sourceProgress')}>
-                        <LifecycleReference
-                          id={source.sourceInstanceId}
-                          exists={durable.instances.some((instance) => instance.instanceId === source.sourceInstanceId)}
-                        />
-                        <br />
-                        {tr('durable.cursor')}: {source.cursor ?? tr('durable.unknown')} · {tr('durable.sourceHigh')}:{' '}
-                        {source.sourceHigh ?? tr('durable.unknown')}
-                        <br />
-                        {tr('durable.lagUnknown')}{' '}
-                        · {tr('durable.retainedLow')}: {source.retainedLow ?? tr('durable.unknown')}
-                      </LifecycleField>
-                    ))}
-                    <LifecycleField label={tr('durable.retentionGaps')}>
-                      {observer.gaps.length === 0
-                        ? t('common.none')
-                        : observer.gaps.map((gap) => (
-                            <p key={gap.sourceInstanceId + ':' + gap.missingFrom}>
-                              {gap.sourceInstanceId} · {gap.missingFrom}–{gap.missingThrough} ·{' '}
-                              {gap.acknowledgedAt ? tr('durable.acknowledged') : tr('durable.recoveryGuidance')}
-                            </p>
-                          ))}
-                    </LifecycleField>
-                    {observer.recoveryActions.length > 0 && (
-                      <LifecycleField label={tr('durable.recoveryGuidance')}>
-                        {observer.recoveryActions.map((action) => (
-                          <p key={action}>
-                            {t('settings.prometheus.integration.uarAdmin.durable.recoveryAction.' + action, {
-                              defaultValue: action
-                            })}
-                          </p>
-                        ))}
-                      </LifecycleField>
-                    )}
-                  </LifecycleRecord>
-                ))}
-              </>
-            )}
-          </LifecycleSource>
+          <UarLifecycleDurable data={data} definitionIds={definitionIds} bindingIds={bindingIds} />
           <UarLifecycleExecutions snapshot={data} />
-          <LifecycleSource title={tr('workflows.title')} source={data.workflows}>
-            {!data.workflows.data?.runs.length && <LifecycleEmpty />}
-            {data.workflows.data?.runs.map((run) => (
-              <LifecycleRecord
-                key={run.id}
-                id={run.id}
-                title={run.id}
-                status={tr(
-                  ['awaiting_decision', 'reconciling', 'accepted', 'rejected'].includes(run.status)
-                    ? 'workflows.' + run.status
-                    : run.status === 'ready'
-                      ? 'teams.taskStatus.ready'
-                      : 'teams.execution.status.' + run.status
-                )}>
-                <LifecycleField label={tr('lifecycle.team')}>
-                  <LifecycleReference
-                    id={run.teamId}
-                    exists={Boolean(teams?.instances.some((team) => team.id === run.teamId))}
-                  />
-                </LifecycleField>
-                <LifecycleField label={tr('lifecycle.definition')}>
-                  {run.definition.id} · {run.definition.version}
-                </LifecycleField>
-                <LifecycleField label={tr('lifecycle.binding')}>
-                  <LifecycleReference id={run.binding.id} exists={bindingIds.has(run.binding.id)} />
-                </LifecycleField>
-                {run.stateReason && <LifecycleField label={tr('durable.lastError')}>{run.stateReason}</LifecycleField>}
-              </LifecycleRecord>
-            ))}
-          </LifecycleSource>
+          <UarLifecycleWorkflows data={data} bindingIds={bindingIds} />
           <LifecycleSource title={tr('surface.approvals')} source={data.approvals}>
             {!data.approvals.data?.length && <LifecycleEmpty />}
             {data.approvals.data?.map((approval) => (

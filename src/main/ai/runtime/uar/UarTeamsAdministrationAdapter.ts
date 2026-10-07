@@ -19,6 +19,7 @@ import type {
 } from '@shared/types/uarTeams'
 
 import { UAR_TEAM_HOST_CAPABILITY } from './uarCodingTeamPackage'
+import { projectBinding } from './uarBindingPosture'
 import { capabilityState, rawBinding, scopedRequest, workspace } from './UarDurableAdministrationAdapter'
 import type { UarSidecarEndpoint } from './UarSidecarService'
 
@@ -258,7 +259,7 @@ export async function readUarTeams(
     executionProfileStage: state.executionProfileStage,
     executionCapabilities: state.executionCapabilities,
     definitions: z.array(definition).parse(definitions),
-    bindings: scopedBindings,
+    bindings: scopedBindings.map(projectBinding),
     instances: z
       .array(z.unknown())
       .parse(instances)

@@ -1,5 +1,6 @@
 import * as z from 'zod'
 
+import type { UarBindingPosture, UarBindingPreflightDiagnostic } from './uarBindingPosture'
 import type {
   UarTeamCommandReceipt,
   UarTeamContextReceipt,
@@ -35,6 +36,8 @@ export interface UarTeamBinding {
   revision: number
   activationSupported: boolean
   package: UarTeamIdentity
+  posture?: UarBindingPosture | null
+  preflightDiagnostics?: UarBindingPreflightDiagnostic[]
 }
 
 export interface UarTeamTask {

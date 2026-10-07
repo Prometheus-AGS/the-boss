@@ -68,7 +68,7 @@ export async function readUarWorkflows(
   endpoint?: UarSidecarEndpoint
 ): Promise<UarWorkflowsSnapshot> {
   const state = await workflowState(workspaceId, endpoint)
-  if (!state.available) return { ...state, definitions: [], runs: [] }
+  // Native catalog and retained-run reads are independent of launch qualification.
   const [definitions, runs] = await Promise.all([
     scopedRequest(state.workspaceId, base + '/workflow-definitions', state.generation, 'GET', undefined, endpoint),
     scopedRequest(state.workspaceId, base + '/workflow-runs', state.generation, 'GET', undefined, endpoint)
@@ -85,7 +85,6 @@ export async function readUarWorkflows(
 
 export async function readUarWorkflow(input: UarWorkflowSelector): Promise<UarWorkflowRun> {
   const state = await workflowState(input.workspaceId)
-  if (!state.available) throw new Error('WORKFLOW_UNAVAILABLE')
   return scopedRun(
     await scopedRequest(
       state.workspaceId,

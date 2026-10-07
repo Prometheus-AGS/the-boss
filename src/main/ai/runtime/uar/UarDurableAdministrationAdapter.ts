@@ -14,8 +14,12 @@ import type {
 } from '@shared/types/uarDurableAdministration'
 
 import { readUarAdministrationSnapshot } from './UarAdministrationAdapter'
+import { projectBinding, rawBinding } from './uarBindingPosture'
+import { projectInstance, projectObserver } from './uarDurableProjections'
 import { uarPrincipalForSession } from './uarPrincipal'
 import type { UarSidecarEndpoint } from './UarSidecarService'
+
+export { rawBinding } from './uarBindingPosture'
 
 const instancePath = '/api/uar/agent-instances/v1'
 const observerPath = '/api/uar/observers/v1'
@@ -45,74 +49,6 @@ const operations = [
   'observers.resume',
   'observers.gap.acknowledge'
 ] as const satisfies readonly UarDurableOperation[]
-
-export const rawBinding = z.object({
-  id: z.string(),
-  workspaceId: z.string(),
-  revision: z.number().int().nonnegative(),
-  activationSupported: z.boolean(),
-  package: z.object({ id: z.string(), version: z.string(), digest: z.string() })
-})
-
-const rawInstance = z.object({
-  instanceId: z.string(),
-  workspaceId: z.string(),
-  definitionId: z.string(),
-  definitionVersion: z.string(),
-  bindingId: z.string(),
-  bindingRevision: z.number().int().nonnegative(),
-  profile: z.enum(['request', 'on_demand', 'resident']),
-  lifecycle: z.enum(['dormant', 'active', 'draining', 'disabled', 'failed']),
-  recovery: z.enum(['ready', 'pending_reconciliation', 'effect_uncertain']),
-  revision: z.number().int().nonnegative(),
-  epoch: z.number().int().nonnegative(),
-  queueDepth: z.number().int().nonnegative(),
-  activeRunId: z.string().nullable(),
-  activeCommandId: z.string().nullable(),
-  restartAttempts: z.number().int().nonnegative(),
-  lastErrorCode: z.string().nullable(),
-  nextEventSequence: z.number().int().nonnegative(),
-  commands: z.array(
-    z.object({
-      commandId: z.string(),
-      kind: z.enum(['turn', 'activate', 'passivate', 'drain', 'disable', 'restart', 'cancel']),
-      status: z.enum(['accepted', 'running', 'completed', 'failed', 'cancelled', 'uncertain'])
-    })
-  )
-})
-
-const rawObserver = z.object({
-  subscription: z.object({
-    subscription_id: z.string(),
-    workspace_id: z.string(),
-    observer_instance_id: z.string(),
-    source_instance_ids: z.array(z.string()),
-    conversation_ids: z.array(z.string()).nullable(),
-    revision: z.number().int().nonnegative(),
-    paused: z.boolean(),
-    revoked: z.boolean(),
-    gaps: z.array(
-      z.object({
-        source_instance_id: z.string(),
-        missing_from: z.number().int().nonnegative(),
-        missing_through: z.number().int().nonnegative(),
-        detected_at: z.string(),
-        acknowledged_at: z.string().nullable()
-      })
-    )
-  }),
-  sources: z.array(
-    z.object({
-      sourceInstanceId: z.string(),
-      cursor: z.number().int().nonnegative().nullable(),
-      retainedLow: z.number().int().nonnegative().nullable(),
-      sourceHigh: z.number().int().nonnegative().nullable()
-    })
-  ),
-  backlogDepth: z.number().int().nonnegative(),
-  deadLetterCount: z.number().int().nonnegative(),
-  recoveryActions: z.array(z.string())
-})
 
 export function workspace(workspaceId: string): string {
   // The renderer supplies a selector. Main resolves it against Boss's user-workspace store.
@@ -222,39 +158,6 @@ async function sendScopedRequest(
   return response.json()
 }
 
-function projectInstance(value: unknown, workspaceId: string): UarDurableInstance {
-  const instance = rawInstance.parse(value)
-  if (instance.workspaceId !== workspaceId) throw new Error('UAR instance workspace scope mismatch')
-  return instance
-}
-
-function projectObserver(value: unknown, workspaceId: string): UarDurableObserver {
-  const status = rawObserver.parse(value)
-  const subscription = status.subscription
-  if (subscription.workspace_id !== workspaceId) throw new Error('UAR observer workspace scope mismatch')
-  return {
-    subscriptionId: subscription.subscription_id,
-    workspaceId: subscription.workspace_id,
-    observerInstanceId: subscription.observer_instance_id,
-    sourceInstanceIds: subscription.source_instance_ids,
-    conversationIds: subscription.conversation_ids,
-    revision: subscription.revision,
-    paused: subscription.paused,
-    revoked: subscription.revoked,
-    gaps: subscription.gaps.map((gap) => ({
-      sourceInstanceId: gap.source_instance_id,
-      missingFrom: gap.missing_from,
-      missingThrough: gap.missing_through,
-      detectedAt: gap.detected_at,
-      acknowledgedAt: gap.acknowledged_at
-    })),
-    sources: status.sources,
-    backlogDepth: status.backlogDepth,
-    deadLetterCount: status.deadLetterCount,
-    recoveryActions: status.recoveryActions
-  }
-}
-
 async function scopedBindings(
   workspaceId: string,
   generation: number,
@@ -265,7 +168,7 @@ async function scopedBindings(
     .parse(await scopedRequest(workspaceId, bindingPath, generation, 'GET', undefined, endpoint))
   return bindings.map((binding) => {
     if (binding.workspaceId !== workspaceId) throw new Error('UAR binding workspace scope mismatch')
-    if (endpoint) return binding
+    if (endpoint) return projectBinding(binding)
     return { id: binding.id, revision: binding.revision, activationSupported: binding.activationSupported }
   })
 }

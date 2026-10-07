@@ -71,10 +71,6 @@ export async function readUarLifecycleSnapshot(input: UarLifecycleSelector): Pro
     teams.state = 'unsupported'
     teams.reason = teams.data.unavailableReason ?? 'team_planning_unsupported'
   }
-  if (workflows.data && !workflows.data.available) {
-    workflows.state = 'unsupported'
-    workflows.reason = 'workflow_execution_unsupported'
-  }
   const executions = await Promise.all(
     (teams.data?.instances ?? []).map(async (team) => ({
       teamInstanceId: team.id,
