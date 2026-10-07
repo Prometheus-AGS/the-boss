@@ -14,7 +14,13 @@ export function assertProjection(value, records, nativeBinding, nativeRuns, cred
     'C14D_DURABLE_COMMAND_HISTORY_MISMATCH')
   for (const key of ['definitionDigest', 'bindingDigest', 'sessionId', 'reconciliationReceipt'])
     requireFact(source[key] === records.sourceView[key], 'C14D_DURABLE_IDENTITY_MISMATCH')
-  requireFact(source.definitionId === records.agentIdentity.id && source.bindingId === records.bindingId && source.sessionId,
+  // Native AgentInstanceRecord.definition pins bound.binding.package, not its agent entrypoint.
+  const nativeBindingRef = nativeBinding?.effectiveBindingReceipt?.bindingRef
+  requireFact(source.definitionId === records.packageIdentity.id &&
+    source.definitionVersion === records.packageIdentity.version && source.definitionDigest === records.packageIdentity.digest &&
+    same(nativeBinding?.package, records.packageIdentity) && source.bindingId === records.bindingId &&
+    source.bindingId === nativeBindingRef?.id && source.bindingRevision === nativeBindingRef?.revision &&
+    source.bindingDigest === nativeBindingRef?.digest && source.sessionId,
     'C14D_DURABLE_DEFINITION_BINDING_MISMATCH')
   const events = records.sourceView.events.filter((item) => item.commandId === records.commandId)
   requireFact(events.length > 0 && events.every((event) => source.events?.some((item) => same(item, event))), 'C14D_DURABLE_EVENT_HISTORY_MISMATCH')
