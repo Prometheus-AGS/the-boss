@@ -209,16 +209,16 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.13 - Reusable team configuration
+    The Boss 2.2.14 - Durable team approvals
 
-    - [Teams] Create named coding and product/design teams with role-specific models, tools, knowledge and skills.
-    - [Work] Deploy versioned team definitions and keep existing runs bound to their original definitions.
-    - [Runtime] Package the updated UAR skill deployment catalog with exact per-role skill bindings.
+    - [Teams] Show authoritative approval decisions across clients and distinguish detaching output from stopping execution.
+    - [Runtime] Preserve cancelled approvals after runtime restart without replaying tool effects.
+    - [Skills] Include the Delivery Cadence source reconciliation repair in the packaged mini skills.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.13 - 可复用的团队配置
+    The Boss 2.2.14 - 持久化团队审批
 
-    - [团队] 创建命名的编程与产品设计团队，并为各角色配置模型、工具、知识和技能。
-    - [工作] 部署版本化的团队定义，并保留现有运行所绑定的原始定义。
-    - [运行时] 打包更新后的 UAR 技能部署目录，并准确绑定各角色的技能。
+    - [团队] 在不同客户端显示权威审批结果，并区分断开输出与停止执行。
+    - [运行时] 重启运行时后保留已取消的审批，避免重复执行工具操作。
+    - [技能] 打包包含 Delivery Cadence 源码协调修复的 mini 技能包。
     <!--LANG:END-->
