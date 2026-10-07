@@ -32,7 +32,8 @@ export async function scenario({ evaluate, signal }, configuration) {
     requireFact(inventory.instances.some((item) => item.id === managedId && item.ownership === 'managed'), 'C14D_MANAGED_SELECTION_REQUIRED')
     const selector = await team(evaluate, workspace.workspaceId, workspace.model, configuration.marker)
     const before = await current(evaluate, selector)
-    host = await startCooperationHost({ evaluate, signal, repository: configuration.repository, selectInstance: false, experimentalStage: false })
+    host = await startCooperationHost({ evaluate, signal, repository: configuration.repository, selectInstance: false,
+      experimentalStage: false, durableStorage: true })
     host.setOwner(before.ownerId)
     requireFact(await selected(evaluate) === managedId, 'C14D_HOST_CHANGED_WORK_SELECTION')
     evidence.externalRuntime = host.evidence
@@ -95,6 +96,7 @@ export async function scenario({ evaluate, signal }, configuration) {
     evidence.complete = true
   } catch (error) {
     evidence.failureStage = stage
+    if (error.runtimeRequest) evidence.runtimeRequestFailure = error.runtimeRequest
     evidence.failureCode = signal.aborted ? 'C14D_OPERATION_CANCELLED_OR_TIMED_OUT'
       : /^C14[12D]_[A-Z0-9_]+$/.test(error.code ?? '') ? error.code : 'C14D_REAL_APPLICATION_CONTRACT_UNAVAILABLE'
   } finally {

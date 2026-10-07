@@ -63,7 +63,8 @@ async function stopProcess(owned, graceful = true) {
 }
 
 /** Trusted completed-boundary fixture. Credentials never enter the receipt. */
-export async function startCooperationHost({ evaluate, signal, repository, selectInstance = true, experimentalStage = true }) {
+export async function startCooperationHost({ evaluate, signal, repository, selectInstance = true, experimentalStage = true,
+  durableStorage = false }) {
   const root = await mkdtemp(path.join(os.tmpdir(), 'boss-c094-host-'))
   const platform = `${process.platform}-${process.arch}`
   const { getPackagedBinaryDirectory } = createRequire(import.meta.url)(
@@ -78,6 +79,8 @@ export async function startCooperationHost({ evaluate, signal, repository, selec
     process.env.BOSS_CADENCE_SURREAL_BINARY ?? path.join(os.homedir(), '.prometheus', 'bin', 'surreal-3.3.0')
   const instanceId = 'cadence-c094-' + randomUUID().slice(0, 8)
   const databasePort = await freePort()
+  const databaseStoragePath = durableStorage ? path.join(root, 'database') : null
+  const databaseStorage = durableStorage ? 'surrealkv://' + databaseStoragePath : 'memory'
   const port = await freePort()
   const endpoint = `http://127.0.0.1:${port}`
   const token = randomBytes(32).toString('hex')
@@ -110,6 +113,7 @@ export async function startCooperationHost({ evaluate, signal, repository, selec
     CREDENTIAL_ENCRYPTION_KEY: encryptionKey,
     UAR_PERSISTENCE__PROVIDER: 'surreal',
     UAR_PERSISTENCE__DATABASE_URL: `ws://127.0.0.1:${databasePort}`,
+    UAR_REMOTE_SURREAL_DURABILITY_ATTESTED: durableStorage ? '1' : '0',
     UAR_PERSISTENCE__SURREAL_USER: 'root',
     UAR_PERSISTENCE__SURREAL_PASS: password,
     UAR_PERSISTENCE__SURREAL_AUTH_LEVEL: 'root',
@@ -179,7 +183,7 @@ export async function startCooperationHost({ evaluate, signal, repository, selec
     }
   }
   try {
-    database = launch(surrealBinary, ['start', '--bind', `127.0.0.1:${databasePort}`, 'memory'], root, {
+    database = launch(surrealBinary, ['start', '--bind', `127.0.0.1:${databasePort}`, databaseStorage], root, {
       ...process.env,
       SURREAL_USER: 'root',
       SURREAL_PASS: password,
@@ -259,6 +263,9 @@ export async function startCooperationHost({ evaluate, signal, repository, selec
         platform,
         payload,
         databaseVersion: version.trim(),
+        databaseStorageBackend: durableStorage ? 'surrealkv' : 'memory',
+        databaseStoragePath,
+        databaseDurabilityAttested: durableStorage,
         configuredTeamCapacity: 1,
         stage: experimentalStage ? 'operation' : 'normal',
         selectionRevision: inventoryAfterSelection.revision

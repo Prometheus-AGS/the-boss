@@ -12,8 +12,17 @@ const document = (value) => ({ ...value, contentDigest: 'sha256:' + digest(JSON.
 const reference = (value) => ({ id: value.id, version: value.version, digest: value.contentDigest })
 
 export async function createRecords(host, signal, workspaceId, gateway, marker) {
-  const request = (method, pathname, body) => host.trustedRequest({ workspaceId, method, path: pathname,
-    ...(body === undefined ? {} : { body }) })
+  const request = async (method, pathname, body) => {
+    try {
+      return await host.trustedRequest({ workspaceId, method, path: pathname,
+        ...(body === undefined ? {} : { body }) })
+    } catch (error) {
+      error.runtimeRequest = { method, route: pathname, status: error.status ?? null,
+        code: /^[a-zA-Z_][a-zA-Z0-9_-]{0,127}$/.test(error.code ?? '') ? error.code : null }
+      error.code = 'C14D_NATIVE_REQUEST_REFUSED'
+      throw error
+    }
+  }
   const capabilities = await request('GET', '/api/v1/collaboration/capabilities')
   requireFact(capabilities.instance.id === host.instanceId && capabilities.bindingOwnerId, 'C14D_RUNTIME_AUTHORITY_UNAVAILABLE')
   const providerId = 'c14-detail-' + randomUUID()
