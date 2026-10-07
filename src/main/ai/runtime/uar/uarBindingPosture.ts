@@ -43,17 +43,19 @@ const posture = z.object({
   )
 })
 
-export const rawBinding = z
-  .object({
-    id: z.string(),
-    workspaceId: z.string(),
-    revision,
-    activationSupported: z.boolean(),
-    package: identity,
-    preflightDiagnostics: z.array(z.object({ field: z.string(), disposition, message: z.string() })).optional(),
-    effectiveBindingReceipt: posture.nullable().optional()
-  })
-  .transform(({ effectiveBindingReceipt, ...binding }) => ({
+export const rawBinding = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  revision,
+  activationSupported: z.boolean(),
+  package: identity,
+  preflightDiagnostics: z.array(z.object({ field: z.string(), disposition, message: z.string() })).optional(),
+  effectiveBindingReceipt: posture.nullable().optional()
+})
+
+export function projectBinding({ effectiveBindingReceipt, ...binding }: z.infer<typeof rawBinding>) {
+  return {
     ...binding,
     ...(effectiveBindingReceipt === undefined ? {} : { posture: effectiveBindingReceipt })
-  }))
+  }
+}

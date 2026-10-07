@@ -14,7 +14,7 @@ import type {
 } from '@shared/types/uarDurableAdministration'
 
 import { readUarAdministrationSnapshot } from './UarAdministrationAdapter'
-import { rawBinding } from './uarBindingPosture'
+import { projectBinding, rawBinding } from './uarBindingPosture'
 import { projectInstance, projectObserver } from './uarDurableProjections'
 import { uarPrincipalForSession } from './uarPrincipal'
 import type { UarSidecarEndpoint } from './UarSidecarService'
@@ -168,7 +168,7 @@ async function scopedBindings(
     .parse(await scopedRequest(workspaceId, bindingPath, generation, 'GET', undefined, endpoint))
   return bindings.map((binding) => {
     if (binding.workspaceId !== workspaceId) throw new Error('UAR binding workspace scope mismatch')
-    if (endpoint) return binding
+    if (endpoint) return projectBinding(binding)
     return { id: binding.id, revision: binding.revision, activationSupported: binding.activationSupported }
   })
 }
