@@ -139,6 +139,20 @@ export function UarDurableInstancesPanel({ workspaceId }: { workspaceId: string 
               </div>
             </div>
             {snapshot.bindings.length === 0 && <p className="mt-3 text-sm text-muted-foreground">{tr('noBindings')}</p>}
+            {snapshot.bindings.length > 0 && (
+              <ul className="mt-3 space-y-1 text-xs" aria-label={tr('deploymentBinding')}>
+                {snapshot.bindings.map((binding) => (
+                  <li key={binding.id} className="flex flex-wrap items-center gap-2">
+                    <span className="break-all">
+                      {binding.id} · {tr('revision')} {binding.revision}
+                    </span>
+                    <Badge variant={binding.activationSupported ? 'secondary' : 'outline'}>
+                      {binding.activationSupported ? tr('bindingReady') : tr('bindingActivationUnavailable')}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
             {needsStarter && (
               <div className="mt-4 rounded-lg border border-border bg-background/40 p-4">
                 <p className="text-sm text-muted-foreground">{tr('setupStarterDescription')}</p>

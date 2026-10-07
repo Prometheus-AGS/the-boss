@@ -20,6 +20,7 @@ import type {
 
 import { scopedRequest } from './UarDurableAdministrationAdapter'
 import { planningState, scopedTeam } from './UarTeamsAdministrationAdapter'
+import type { UarSidecarEndpoint } from './UarSidecarService'
 
 const reservation = z.object({
   tokens: z.number().int().nonnegative(),
@@ -119,11 +120,14 @@ const artifact = z.object({
   createdAt: z.string()
 })
 
-async function executionTarget(input: UarTeamExecutionSelector) {
-  const state = await planningState(input.workspaceId)
+async function executionTarget(input: UarTeamExecutionSelector, endpoint?: UarSidecarEndpoint) {
+  const state = await planningState(input.workspaceId, endpoint)
   if (!state.execution) throw new Error('UAR team execution is unavailable')
   const path = '/api/v1/collaboration/team-instances/' + encodeURIComponent(input.teamInstanceId)
-  const team = scopedTeam(await scopedRequest(state.workspaceId, path, state.generation), state.workspaceId)
+  const team = scopedTeam(
+    await scopedRequest(state.workspaceId, path, state.generation, 'GET', undefined, endpoint),
+    state.workspaceId
+  )
   if (team.id !== input.teamInstanceId) throw new Error('UAR team execution selector mismatch')
   return { ...state, path, team }
 }
@@ -136,8 +140,11 @@ function scopedAttempt(value: unknown, team: UarTeamInstance): UarTeamExecutionA
   return result
 }
 
-export async function readUarTeamExecution(input: UarTeamExecutionSelector): Promise<UarTeamExecutionSummary> {
-  const state = await executionTarget(input)
+export async function readUarTeamExecution(
+  input: UarTeamExecutionSelector,
+  endpoint?: UarSidecarEndpoint
+): Promise<UarTeamExecutionSummary> {
+  const state = await executionTarget(input, endpoint)
   const summary = z
     .object({
       attempts: z.array(z.unknown()),
@@ -161,7 +168,9 @@ export async function readUarTeamExecution(input: UarTeamExecutionSelector): Pro
         maxPendingTasks: z.number().int().nonnegative()
       })
     })
-    .parse(await scopedRequest(state.workspaceId, state.path + '/execution', state.generation))
+    .parse(
+      await scopedRequest(state.workspaceId, state.path + '/execution', state.generation, 'GET', undefined, endpoint)
+    )
   for (const receipt of summary.commandReceipts ?? []) {
     if (
       receipt.scope.ownerId !== state.team.ownerId ||

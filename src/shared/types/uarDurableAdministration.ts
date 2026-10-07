@@ -6,6 +6,8 @@ export interface UarDurableBinding {
   id: string
   revision: number
   activationSupported: boolean
+  workspaceId?: string
+  package?: { id: string; version: string; digest: string }
 }
 
 export interface UarDurableInstance {
