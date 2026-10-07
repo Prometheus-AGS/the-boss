@@ -9,4 +9,6 @@ exec "$HOME/.claude/skills/delivery-cadence/scripts/refresh-skill-pack.sh" \
   --deploy "${DEPLOY_WORKTREE:-$HOME/Projects/prometheus/worktrees/deploy-main}" \
   --state "$(cd "$(dirname "$0")/.." && pwd)/state.json" \
   --services "${REFRESH_SERVICES:-ai.prometheus.surreal-memory-native}" \
+  --kbd-root "${KBD_ROOT:-$(cd "$(dirname "$0")/../../.." && pwd)}" \
+  --reconcile-phase auto \
   "${ARGS[@]}"

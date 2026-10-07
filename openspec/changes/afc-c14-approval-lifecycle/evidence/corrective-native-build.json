@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "corrective-production-native-build",
+  "source": "36f096dbda0f17c6e15c71b284ce89cb04f04502",
+  "root": "/Users/gqadonis/.claude/worktrees/uar-c14-durable-approvals",
+  "command": {
+    "program": "cargo",
+    "args": [
+      "build",
+      "--release",
+      "--locked",
+      "--no-default-features",
+      "--features",
+      "server-full",
+      "--bin",
+      "uar-sidecar",
+      "--target",
+      "aarch64-apple-darwin",
+      "--jobs",
+      "4"
+    ]
+  },
+  "startedAt": "2026-10-07T20:20:39.705Z",
+  "buildFinishedAt": "2026-10-07T20:27:12.823Z",
+  "finishedAt": "2026-10-07T20:27:23.826Z",
+  "exitCode": 0,
+  "packageExitCode": 0,
+  "status": "success",
+  "log": "/Users/gqadonis/Projects/prometheus/worktrees/agent-fabric-c06/librefang/docs/plans/agent-fabric-convergence/.prometheus/cadence/artifacts/c14-cancellation-native-build-20261007.log",
+  "reason": "Observed packaged cancellation left durable approval pending; finished native authority repair",
+  "testsRun": false
+}

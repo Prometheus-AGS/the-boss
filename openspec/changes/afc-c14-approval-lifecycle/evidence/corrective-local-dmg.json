@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "kind": "local-corrective-installer",
+  "version": "2.2.13",
+  "platform": "darwin-arm64",
+  "artifact": "/Users/gqadonis/.claude/worktrees/afc-c14-approval-lifecycle/dist/The-Boss-2.2.13-mac-arm64.dmg",
+  "size": 699049862,
+  "sha256": "ff77e695c2e06fa567efcff52d35f0b01a972d1e1fd4a769e3bc4507df990766",
+  "source": {
+    "boss": "4cae06d65ec05cc156274cf6ba53e68f3fe3c472",
+    "uar": "36f096dbda0f17c6e15c71b284ce89cb04f04502"
+  },
+  "buildReceipt": "c14-corrective-mac-arm64-build-20261007.json",
+  "signing": "Developer ID signed",
+  "notarized": false,
+  "published": false,
+  "operation": "pending",
+  "note": "Internal source-bound candidate, distinct from existing public v2.2.13"
+}

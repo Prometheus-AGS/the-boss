@@ -16,14 +16,17 @@ export function useUarTeamLiveOutput(
   workspaceId: string,
   teamInstanceId: string,
   attempts: UarTeamExecutionAttempt[],
-  available: boolean
+  available: boolean,
+  detachedAttempts: ReadonlySet<string>
 ) {
   const attemptsRef = useRef(attempts)
+  const detachedRef = useRef(detachedAttempts)
   const [outputs, setOutputs] = useState<Record<string, UarTeamLiveOutput>>({})
 
   useEffect(() => {
     attemptsRef.current = attempts
-  }, [attempts])
+    detachedRef.current = detachedAttempts
+  }, [attempts, detachedAttempts])
 
   useEffect(() => {
     const captured: Record<string, UarTeamLiveOutput> = {}
@@ -38,6 +41,7 @@ export function useUarTeamLiveOutput(
       try {
         for (const attempt of attemptsRef.current) {
           if (disposed) break
+          if (detachedRef.current.has(attempt.id)) continue
           if (attempt.workspaceId !== workspaceId || attempt.teamId !== teamInstanceId) continue
           const previous = captured[attempt.id]?.runId === attempt.runId ? captured[attempt.id] : undefined
           const active = ['running', 'cancellation_requested'].includes(attempt.status)
@@ -62,6 +66,7 @@ export function useUarTeamLiveOutput(
               after: current.cursor
             })
             if (disposed) break
+            if (detachedRef.current.has(attempt.id)) continue
             if (
               page.attemptId !== attempt.id ||
               page.teamInstanceId !== teamInstanceId ||

@@ -44,8 +44,74 @@ Supported proof strategies:
   may use this disposition. Supply a nonempty `reason`; it cannot waive an admitted
   predecessor dependency. Both immutable source sets remain bound in the evidence.
 
-Nested-source reconciliation beyond exact snapshot equality remains unsupported
-by the ancestry proof. Record that limitation and obtain an explicit follow-up;
-never declare it proven from an arbitrary evidence string. If source inputs change
-after reconciliation, collect new evidence before promotion. This operation does
-not merge, rebase, reset or edit any checkout.
+- `ancestor-with-nested-sources`: the same exact parent revision mapping and Git
+  ancestry check, with clean committed parent and recursive nested fingerprints
+  reconstructed against each commit's gitlinks. Each observed initialized nested
+  repository must exist with the captured commit available. Every captured nested
+  revision must equal its enclosing committed gitlink. Dirty snapshots, missing or
+  duplicate entries, moved/added/deleted topology and unsupported initialization
+  identities are refused. Uninitialized modules retain their committed pin and
+  `workingTree: "unobserved"`; this does not observe their bytes or descend into
+  unavailable nested trees. No admitted source roots are added.
+
+For this strategy add `nestedMappings` to the parent mapping, one entry for every
+recursive nested source path relative to that parent, including uninitialized
+entries. Order is immaterial. Bind each entry to the exact captured objects
+(including absolute repository identity, name, revision, fingerprint when observed,
+initialization and recursive submodule refs):
+
+```json
+{
+  "repository": "/absolute/future-checkout",
+  "predecessorRepository": "/absolute/predecessor-checkout",
+  "strategy": "ancestor-with-nested-sources",
+  "repairedRevision": "exact-repaired-parent-commit",
+  "futureRevision": "exact-future-parent-commit",
+  "nestedMappings": [
+    {
+      "path": "resources/mini",
+      "predecessorSourceRef": {},
+      "futureSourceRef": {},
+      "strategy": "authorized-replacement",
+      "authorityRef": {
+        "path": "/absolute/external/nested-replacement.json",
+        "sha256": "sha256-of-the-authority-file-bytes"
+      }
+    }
+  ]
+}
+```
+
+Replace the empty source objects with complete captured nested entries. Use
+`strategy: "unchanged"` without an authority reference only when the same relative
+identity, revision, content fingerprint and initialization agree. The mapped
+absolute identities remain bound to their respective parent checkouts; identical
+content does not make the two checkout paths interchangeable. A changed pin,
+content or initialization requires `authorized-replacement`, with a checksummed
+JSON authority document:
+
+```json
+{
+  "schemaVersion": 1,
+  "kind": "nested-source-replacement",
+  "workAheadId": "recorded-work-id",
+  "repairedCandidateId": "current-predecessor-candidate-id",
+  "contentManifestDigest": "recorded-candidate-digest",
+  "predecessorSourceRef": {},
+  "futureSourceRef": {},
+  "reason": "Operator-authorized reason for this exact replacement"
+}
+```
+
+The authority document binds the exact old/new captured objects, not labels or
+inferred equivalence. Its bytes must match the supplied SHA-256. Record actual
+operator authority; authoring this document does not grant permission. Keep proof
+documents outside mutable source inputs. Reconciliation retains authority hashes
+in `repairedBaseRef.nestedAuthorityRefs`, checks them again after source proof, and
+promotion rechecks those hashes alongside the existing reconciliation-evidence
+hash and independent exact future recapture.
+
+If source inputs or authority documents change after reconciliation, collect new
+evidence before promotion. This operation does not merge, rebase, reset or edit
+any checkout, alter firstWorkAt/history/candidate receipts, reclassify dependency,
+change KBD authority or reconcile publication debt.

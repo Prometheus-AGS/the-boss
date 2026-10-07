@@ -317,6 +317,8 @@ export interface UarTeamPreparedEffect {
 }
 
 export interface UarTeamApproval {
+  issuerId: string
+  challengeId: string
   admissionOwner: 'uar-runtime' | 'paired-host'
   attemptId: string
   runId: string
@@ -334,6 +336,8 @@ export interface UarTeamApproval {
 }
 
 export interface UarTeamApprovalDecision extends UarTeamExecutionSelector {
+  issuerId?: string
+  challengeId?: string
   attemptId: string
   approvalId: string
   eventId: string
