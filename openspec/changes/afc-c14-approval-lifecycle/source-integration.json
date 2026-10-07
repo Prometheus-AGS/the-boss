@@ -307,11 +307,11 @@
   },
   "localUarPackagingSource": {
     "path": "build/local-uar-source.json",
-    "priorRevision": "99a0d457777ecc84efd28ef3f854bb6a2f05125e",
-    "revision": "69a488c7b65ecfa53d8b35af082676d0c7e495b0",
+    "priorRevision": "69a488c7b65ecfa53d8b35af082676d0c7e495b0",
+    "revision": "a464c1e7790ba8b29294d3e1a7fb350736f5a4b6",
     "mergeParents": [
-      "99a0d457777ecc84efd28ef3f854bb6a2f05125e",
-      "7f353fb197b1c634610e0f9758d7b4e52a8a424e"
+      "69a488c7b65ecfa53d8b35af082676d0c7e495b0",
+      "e4efce59601c93e834a3d58c6b6489aec6149cf1"
     ],
     "remoteBranch": "codex/uar-c14-durable-approvals",
     "status": "actual-merged-source-selected-packaging-pending",
@@ -341,6 +341,20 @@
       "mergeParents": [
         "150b4332804108d86d491aca40523e7557e090eb",
         "b6bdcd15330a12a3b4eba5fe6ef14ca65d1acafd"
+      ],
+      "remoteBranch": "codex/uar-c14-durable-approvals",
+      "status": "actual-merged-source-selected-packaging-pending",
+      "publishedAssetUrlsOrSourceLabelsChanged": false,
+      "workAheadPromoted": false,
+      "c14Completed": false
+    },
+    {
+      "path": "build/local-uar-source.json",
+      "priorRevision": "99a0d457777ecc84efd28ef3f854bb6a2f05125e",
+      "revision": "69a488c7b65ecfa53d8b35af082676d0c7e495b0",
+      "mergeParents": [
+        "99a0d457777ecc84efd28ef3f854bb6a2f05125e",
+        "7f353fb197b1c634610e0f9758d7b4e52a8a424e"
       ],
       "remoteBranch": "codex/uar-c14-durable-approvals",
       "status": "actual-merged-source-selected-packaging-pending",
@@ -466,6 +480,34 @@
       ],
       "hooks": {
         "boss": "Per-command core.hooksPath=/dev/null; Oxfmt, ESLint and install hooks not run",
+        "persistentConfigurationChanged": false
+      },
+      "productBuild": "not-run",
+      "compiler": "not-run",
+      "tests": "not-run",
+      "lint": "not-run",
+      "review": "not-run",
+      "operation": "not-run",
+      "promotion": "not-performed",
+      "remainingBoundary": "Current C15 corrected delivery gate must succeed before C14 promotion; C14 merged source still requires its later complete delivery build and operation"
+    },
+    {
+      "recordedAt": "2026-10-07T14:19:54.894Z",
+      "status": "source-only-not-promoted",
+      "purpose": "Retain the completed C15 canonical SkillRef context identity repair alongside durable approvals and attributed continuation",
+      "priorBoss": "20f38e19ecf646592a7d7eda4ad34ee2f6bb4c90",
+      "priorUar": "69a488c7b65ecfa53d8b35af082676d0c7e495b0",
+      "consumedUar": "e4efce59601c93e834a3d58c6b6489aec6149cf1",
+      "resultingUar": "a464c1e7790ba8b29294d3e1a7fb350736f5a4b6",
+      "conflictsResolved": [],
+      "mini": {
+        "preservedC14Gitlink": "df8fd71578381b2ac50e7e7cae465b05aaa5f392",
+        "previouslyObservedC15Gitlink": "e3fed05944e6b365ad74af30926b875e6857190f",
+        "exactNestedSourceReuseClaimed": false
+      },
+      "hooks": {
+        "boss": "Per-command core.hooksPath=/dev/null; Oxfmt, ESLint and install hooks not run",
+        "uar": "Per-command core.hooksPath=/dev/null; automatic installation and build hooks not run",
         "persistentConfigurationChanged": false
       },
       "productBuild": "not-run",
