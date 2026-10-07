@@ -5989,6 +5989,7 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.budget": "Budget ou limite de file épuisé. Réconciliez les réservations avant de continuer.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.context": "Contexte incompatible ou trop volumineux. Ajustez le contexte et le profil.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.evidence": "Effets ou nettoyage non confirmés. Obtenez une preuve vérifiée avant récupération.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.executionBudget": "L’exécution s’est arrêtée en raison d’une condition liée au budget d’exécution, à l’annulation, au délai ou au suivi de l’utilisation. Vérifiez la catégorie du diagnostic avant de réessayer.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.handoff": "Le transfert de l’équipe a échoué. Vérifiez l’étape du diagnostic et le code de collaboration avant de réessayer.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.hostContext": "Les outils de l’espace de travail doivent être reconnectés. Ouvrez cette exécution dans son espace d’origine, saisissez un motif de récupération et utilisez Récupérer avant de réessayer.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.other": "Opération refusée. Actualisez l’état faisant autorité et consultez le diagnostic.",

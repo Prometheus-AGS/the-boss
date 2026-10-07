@@ -5989,6 +5989,7 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.budget": "Εξαντλήθηκε ο προϋπολογισμός ή το όριο ουράς. Συμφιλιώστε δεσμεύσεις πριν νέα εργασία.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.context": "Πλαίσιο μη υποστηριζόμενο ή πολύ μεγάλο. Προσαρμόστε το πλαίσιο και το προφίλ.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.evidence": "Επιδράσεις ή καθαρισμός δεν επιβεβαιώθηκαν. Λάβετε επαληθευμένα στοιχεία πριν την ανάκτηση.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.executionBudget": "Η εκτέλεση σταμάτησε λόγω συνθήκης προϋπολογισμού εκτέλεσης, ακύρωσης, προθεσμίας ή καταγραφής χρήσης. Ελέγξτε την κατηγορία διάγνωσης πριν δοκιμάσετε ξανά.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.handoff": "Η παράδοση εργασίας της ομάδας απέτυχε. Ελέγξτε το στάδιο διάγνωσης και τον κωδικό συνεργασίας πριν δοκιμάσετε ξανά.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.hostContext": "Τα εργαλεία χώρου εργασίας πρέπει να επανασυνδεθούν. Ανοίξτε αυτή την εκτέλεση στον αρχικό χώρο εργασίας, εισαγάγετε αιτία ανάκτησης και χρησιμοποιήστε την Ανάκτηση πριν δοκιμάσετε ξανά.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.other": "Η εκτέλεση απέρριψε την ενέργεια. Ανανεώστε την έγκυρη κατάσταση και δείτε τη διάγνωση.",

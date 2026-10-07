@@ -5989,6 +5989,7 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.budget": "预算或待处理工作额度已耗尽。添加工作前请核对预留额度。",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.context": "必需上下文不受支持或过大。请调整上下文和模型配置。",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.evidence": "旧作用或进程清理尚未确认。恢复前请取得验证过的隔离证据。",
+  "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.executionBudget": "执行因运行时预算、取消、截止时间或用量核算条件而停止。请在重试前检查诊断类别。",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.handoff": "团队交接失败。请在重试前检查诊断阶段和协作代码。",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.hostContext": "需要重新连接工作区工具。请在原工作区中打开此运行，输入恢复原因，并在重试前执行恢复操作。",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.other": "运行时拒绝操作。请刷新权威状态并查看诊断。",

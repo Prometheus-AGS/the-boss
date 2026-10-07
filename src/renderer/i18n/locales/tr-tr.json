@@ -5989,6 +5989,7 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.budget": "Bütçe veya kuyruk sınırı doldu. Yeni iş eklemeden rezervasyonları uzlaştırın.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.context": "Bağlam desteklenmiyor veya çok büyük. Bağlamı ve profili ayarlayın.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.evidence": "Önceki etkiler veya temizlik doğrulanmadı. Kurtarmadan önce doğrulanmış kanıt alın.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.executionBudget": "Çalışma zamanı bütçesi, iptal, son tarih veya kullanım hesaplamasıyla ilgili bir koşul nedeniyle yürütme durdu. Yeniden denemeden önce tanılama kategorisini inceleyin.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.handoff": "Ekip devri başarısız oldu. Yeniden denemeden önce tanılama aşamasını ve iş birliği kodunu inceleyin.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.hostContext": "Çalışma alanı araçlarının yeniden bağlanması gerekiyor. Bu çalışmayı özgün çalışma alanında açın, kurtarma nedenini girin ve yeniden denemeden önce Kurtar işlemini kullanın.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.other": "Çalışma zamanı işlemi reddetti. Yetkili durumu yenileyip tanılamayı inceleyin.",

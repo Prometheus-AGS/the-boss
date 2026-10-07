@@ -5989,6 +5989,7 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.budget": "Bugetul sau limita cozii epuizate. Reconciliați rezervările înainte de lucru nou.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.context": "Context incompatibil sau prea mare. Ajustați contextul și profilul.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.evidence": "Efecte sau curățare neconfirmate. Obțineți dovadă verificată înainte de recuperare.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.executionBudget": "Execuția s-a oprit din cauza unei condiții privind bugetul de execuție, anularea, termenul-limită sau contabilizarea utilizării. Verifică categoria diagnosticului înainte de a reîncerca.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.handoff": "Predarea sarcinii în echipă a eșuat. Verifică etapa diagnosticului și codul de colaborare înainte de a reîncerca.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.hostContext": "Instrumentele spațiului de lucru trebuie reconectate. Deschideți această execuție în spațiul original, introduceți un motiv de recuperare și folosiți Recuperare înainte de a reîncerca.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.other": "Operație refuzată. Actualizați starea autoritativă și consultați diagnosticul.",
