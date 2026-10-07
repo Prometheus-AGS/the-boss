@@ -282,7 +282,7 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
       evaluate,
       signal,
       '[data-ui~="teams-prompt"]',
-      `Read README.md using scoped repository tools. Have product define user acceptance criteria, designer propose the interaction, and reviewer independently assess their outputs. Each role must return the exact marker ${configuration.marker}. Do not write, commit, publish, install dependencies, or run tests.`
+      `Read README.md directly with filesystem__read. Do not list directories or use glob or grep; give each delegated role the same direct-read instruction. Have product define user acceptance criteria, designer propose the interaction, and reviewer independently assess their outputs. Each role must return the exact marker ${configuration.marker}. Do not write, commit, publish, install dependencies, or run tests.`
     )
     await click(evaluate, signal, '[data-ui~="teams-start"]')
     const instance = await waitFor(
@@ -297,7 +297,7 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     const memberRoles = Object.fromEntries(instance.members.map((member) => [member.id, member.role]))
     const live = liveOutputObserver(evaluate, selector, memberRoles)
     evidence.liveOutput = live.evidence
-    const approvalOperator = mixedTeamApprovalOperator({ evaluate, signal, selector, instance, instructions: first.team.instructions })
+    const approvalOperator = mixedTeamApprovalOperator({ evaluate, signal, selector, instance, instructions: first.team.instructions, workspaceDirectory: configuration.workspaceDirectory })
     evidence.approvals = approvalOperator.evidence
     const completed = await waitFor(
       signal,
@@ -467,6 +467,8 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     evidence.complete = true
   } catch (error) {
     evidence.failureStage = stage
+    if (error.approvalIpcFailure) evidence.approvalIpcFailure = error.approvalIpcFailure
+    if (error.approvalScopeFailure) evidence.approvalScopeFailure = error.approvalScopeFailure
     evidence.failureCode = signal.aborted
       ? 'C15_OPERATION_CANCELLED_OR_TIMED_OUT'
       : /^C15_[A-Z0-9_]+$/.test(error.code ?? '')

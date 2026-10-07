@@ -1,3 +1,6 @@
+import { realpath } from 'node:fs/promises'
+import path from 'node:path'
+
 import { digest, requireFact, route, waitFor } from './io.mjs'
 
 const readOnlyInstructions =
@@ -12,14 +15,20 @@ const ids = (value, allowed) => Array.isArray(value) && value.length <= 16 &&
   new Set(value).size === value.length && value.every((item) => id(item) && allowed.has(item))
 const identity = (left, right) => left?.id === right?.id && left?.version === right?.version && left?.digest === right?.digest
 
-async function request(evaluate, name, input) {
+async function request(evaluate, name, input, stage = 'scope-read') {
   const result = await evaluate(`window.api.ipcApi.request(${JSON.stringify(route(name))},${JSON.stringify(input)})`)
-  requireFact(result?.ok, 'C15_APPROVAL_SCOPE_READ_UNAVAILABLE')
+  if (!result?.ok) {
+    const allowed = ['UAR_APPROVAL_STALE', 'TEAM_SCOPE_DENIED', 'TEAM_CAPABILITY_UNSUPPORTED', 'TEAM_REVISION_CONFLICT']
+    const code = [result?.error?.code, result?.error?.message].find((value) => allowed.includes(value)) ?? null
+    throw Object.assign(new Error('C15_APPROVAL_SCOPE_READ_UNAVAILABLE'), {
+      code: 'C15_APPROVAL_SCOPE_READ_UNAVAILABLE', approvalIpcFailure: { method: route(name), stage, code }
+    })
+  }
   return result.data
 }
 
-function validate(approval, execution, team, initial, selector, artifacts) {
-  requireFact(['team_delegate', 'team_send'].includes(approval.toolName), 'C15_APPROVAL_UNSUPPORTED_TOOL_REQUIRES_OPERATOR')
+function validate(approval, execution, team, initial, selector, artifacts, readScope) {
+  requireFact(['team_delegate', 'team_send', 'filesystem__read', 'filesystem__ls'].includes(approval.toolName), 'C15_APPROVAL_UNSUPPORTED_TOOL_REQUIRES_OPERATOR')
   requireFact(
     team && team.id === initial.id && team.workspaceId === selector.workspaceId && team.ownerId === initial.ownerId &&
     identity(team.definition, initial.definition) && identity(team.package, initial.package) &&
@@ -35,13 +44,36 @@ function validate(approval, execution, team, initial, selector, artifacts) {
     attempt && attempt.status === 'running' && attempt.runId === approval.runId &&
     attempt.ownerId === team.ownerId && attempt.workspaceId === team.workspaceId && attempt.teamId === team.id &&
     members.has(attempt.memberId) && team.tasks.some((task) => task.id === attempt.taskId) &&
-    approval.admissionOwner === 'uar-runtime' &&
+    approval.admissionOwner === (['filesystem__read', 'filesystem__ls'].includes(approval.toolName) ? 'paired-host' : 'uar-runtime') &&
     [approval.approvalId, approval.attemptId, approval.runId, approval.toolCallId].every(id),
     'C15_APPROVAL_ATTEMPT_SCOPE_MISMATCH'
   )
   let envelope
   try { envelope = JSON.parse(approval.argumentsJson) } catch {
     requireFact(false, 'C15_APPROVAL_ARGUMENTS_INVALID')
+  }
+  if (['filesystem__read', 'filesystem__ls'].includes(approval.toolName)) {
+    const denyListing = approval.toolName === 'filesystem__ls'
+    const effect = approval.preparedEffect
+    requireFact(
+      keys(envelope, ['operation', 'server', 'detailsAvailable'], ['target']) &&
+      envelope.operation === (denyListing ? 'ls' : 'read') && envelope.server === 'filesystem' &&
+      (denyListing || (envelope.detailsAvailable === true && typeof envelope.target === 'string' && envelope.target.length > 0)),
+      'C15_APPROVAL_READ_DISPLAY_MISMATCH'
+    )
+    const displayHash = digest(JSON.stringify(Object.fromEntries(Object.entries(envelope).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0))))
+    requireFact(
+      effect && effect.version === 1 && id(effect.invocationId) && id(approval.admissionId) &&
+      effect.admissionId === approval.admissionId && effect.ownerId === attempt.ownerId &&
+      effect.runId === attempt.runId && effect.rootRunId === attempt.runId && approval.rootRunId === attempt.runId &&
+      effect.toolCallId === approval.toolCallId && effect.callIndex === approval.callIndex &&
+      Number.isSafeInteger(effect.callIndex) && effect.callIndex >= 0 && effect.toolName === approval.toolName &&
+      effect.workspace === readScope.workspace && (denyListing || effect.targetPath === readScope.readme) &&
+      /^[a-f0-9]{64}$/.test(effect.argumentsSha256) && effect.actionDisplaySha256 === displayHash &&
+      effect.write === undefined && effect.edit === undefined,
+      'C15_APPROVAL_READ_PREPARED_EFFECT_SCOPE_MISMATCH'
+    )
+    return
   }
   requireFact(keys(envelope, ['operation', 'arguments']) && envelope.operation === approval.toolName,
     'C15_APPROVAL_NATIVE_ENVELOPE_MISMATCH')
@@ -68,16 +100,36 @@ function validate(approval, execution, team, initial, selector, artifacts) {
     return
   }
   const recipient = members.get(args.recipientMemberId)
-  requireFact(
-    keys(args, ['commandId', 'recipientMemberId', 'expectedTeamRevision', 'task', 'payload', 'reservation']) &&
-    members.get(attempt.memberId).role === 'coordinator' && recipient &&
-    ['product', 'designer', 'reviewer'].includes(recipient.role) && args.expectedTeamRevision === team.revision &&
-    keys(args.task, ['taskId', 'role', 'input', 'outputContract', 'dependsOn']) &&
-    id(args.task.taskId) && !team.tasks.some((task) => task.id === args.task.taskId) &&
-    args.task.role === recipient.role && object(args.task.outputContract) &&
-    ids(args.task.dependsOn, new Set(team.tasks.map((task) => task.id))),
-    'C15_APPROVAL_DELEGATION_SCOPE_MISMATCH'
-  )
+  const delegationChecks = {
+    argumentFieldsMatch: keys(args, ['commandId', 'recipientMemberId', 'expectedTeamRevision', 'task', 'payload', 'reservation']),
+    actorIsCoordinator: members.get(attempt.memberId).role === 'coordinator',
+    recipientExists: Boolean(recipient),
+    recipientRoleAllowed: ['product', 'designer', 'reviewer'].includes(recipient?.role),
+    revisionMatches: args.expectedTeamRevision === team.revision,
+    taskFieldsMatch: keys(args.task, ['taskId', 'role', 'input', 'outputContract', 'dependsOn']),
+    taskIdValid: id(args.task?.taskId),
+    taskIdIsNew: !team.tasks.some((task) => task.id === args.task?.taskId),
+    taskRoleMatches: Boolean(recipient) && args.task?.role === recipient.role,
+    outputContractIsObject: object(args.task?.outputContract),
+    dependenciesValid: ids(args.task?.dependsOn, new Set(team.tasks.map((task) => task.id)))
+  }
+  if (!Object.values(delegationChecks).every(Boolean)) {
+    throw Object.assign(new Error('C15_APPROVAL_DELEGATION_SCOPE_MISMATCH'), {
+      code: 'C15_APPROVAL_DELEGATION_SCOPE_MISMATCH',
+      approvalScopeFailure: {
+        checks: delegationChecks, actorRole: members.get(attempt.memberId).role, recipientRole: recipient?.role ?? null,
+        expectedTeamRevision: Number.isSafeInteger(args.expectedTeamRevision) ? args.expectedTeamRevision : null,
+        liveTeamRevision: team.revision, taskIdExists: !delegationChecks.taskIdIsNew,
+        dependencyExists: Array.isArray(args.task?.dependsOn) ? args.task.dependsOn.map((dependency) =>
+          team.tasks.some((task) => task.id === dependency)) : null,
+        argumentFields: Object.keys(args), taskFields: object(args.task) ? Object.keys(args.task) : [],
+        executionSnapshot: { teamInstanceId: team.id, attempts: execution.attempts.map((item) => ({
+          id: item.id, taskId: item.taskId, runId: item.runId, memberId: item.memberId, status: item.status,
+          memberRole: members.get(item.memberId)?.role ?? null
+        })) }
+      }
+    })
+  }
   const reservation = args.reservation
   requireFact(keys(reservation, ['tokens', 'costMicrounits', 'elapsedSeconds']) &&
     Object.values(reservation).every(Number.isSafeInteger) &&
@@ -87,11 +139,17 @@ function validate(approval, execution, team, initial, selector, artifacts) {
     'C15_APPROVAL_RESERVATION_EXCEEDS_SCENARIO_BUDGET')
 }
 
-export function mixedTeamApprovalOperator({ evaluate, signal, selector, instance, instructions }) {
+export function mixedTeamApprovalOperator({ evaluate, signal, selector, instance, instructions, workspaceDirectory }) {
   requireFact(instructions === readOnlyInstructions, 'C15_APPROVAL_READ_ONLY_CONTEXT_CHANGED')
-  const evidence = { instructionSha256: digest(instructions), readOnly: true, approvals: [] }
+  const evidence = { instructionSha256: digest(instructions), readOnly: true, approvals: [], requests: [] }
   const handled = new Set()
-  const read = () => request(evaluate, 'approvals', selector)
+  const read = (stage = 'pending-snapshot') => request(evaluate, 'approvals', selector, stage)
+  const readScope = async () => {
+    const workspace = await realpath(workspaceDirectory)
+    const readme = await realpath(path.join(workspace, 'README.md'))
+    requireFact(path.dirname(readme) === workspace, 'C15_APPROVAL_README_OUTSIDE_SCENARIO_WORKSPACE')
+    return { workspace, readme }
+  }
   return {
     evidence,
     async handle() {
@@ -104,15 +162,26 @@ export function mixedTeamApprovalOperator({ evaluate, signal, selector, instance
         const team = (await request(evaluate, 'snapshot', { workspaceId: selector.workspaceId })).instances
           .find((item) => item.id === instance.id)
         const { artifacts } = await request(evaluate, 'artifacts', selector)
-        validate(approval, execution, team, instance, selector, artifacts)
+        evidence.requests.push({ approvalId: approval.approvalId, attemptId: approval.attemptId, runId: approval.runId, toolName: approval.toolName, admissionOwner: approval.admissionOwner, argumentsSha256: digest(approval.argumentsJson), observedAt: new Date().toISOString() })
+        validate(approval, execution, team, instance, selector, artifacts, await readScope())
         const argumentsSha256 = digest(approval.argumentsJson)
-        const latest = (await read()).approvals.find((item) => item.attemptId === approval.attemptId && item.approvalId === approval.approvalId)
+        const latest = (await read('before-click')).approvals.find((item) => item.attemptId === approval.attemptId && item.approvalId === approval.approvalId)
         requireFact(latest && latest.eventId === approval.eventId && latest.cursor === approval.cursor &&
           latest.runId === approval.runId && latest.toolName === approval.toolName &&
+          latest.admissionOwner === approval.admissionOwner && latest.admissionId === approval.admissionId &&
           digest(latest.argumentsJson) === argumentsSha256, 'C15_APPROVAL_CHANGED_BEFORE_CLICK')
+        if (['filesystem__read', 'filesystem__ls'].includes(approval.toolName)) {
+          const latestExecution = await request(evaluate, 'execution', selector)
+          const latestTeam = (await request(evaluate, 'snapshot', { workspaceId: selector.workspaceId })).instances
+            .find((item) => item.id === instance.id)
+          validate(latest, latestExecution, latestTeam, instance, selector, [], await readScope())
+          requireFact(digest(JSON.stringify(latest.preparedEffect)) === digest(JSON.stringify(approval.preparedEffect)),
+            'C15_APPROVAL_READ_PREPARED_EFFECT_CHANGED')
+        }
+        const decision = approval.toolName === 'filesystem__ls' ? 'deny' : 'allow'
         await waitFor(signal, () => evaluate(`(async () => {
           const expected=${JSON.stringify({ approvalId: approval.approvalId, attemptId: approval.attemptId,
-            runId: approval.runId, toolName: approval.toolName, argumentsSha256 })};
+            runId: approval.runId, toolName: approval.toolName, argumentsSha256, buttonText: decision === 'deny' ? 'Deny' : 'Allow once' })};
           const rows=[...document.querySelectorAll('li[data-approval-id][data-attempt-id][data-tool-name]')]
             .filter(row=>row.getClientRects().length && row.dataset.approvalId===expected.approvalId &&
               row.dataset.attemptId===expected.attemptId && row.dataset.runId===expected.runId && row.dataset.toolName===expected.toolName);
@@ -123,17 +192,28 @@ export function mixedTeamApprovalOperator({ evaluate, signal, selector, instance
           const hash=[...new Uint8Array(bytes)].map(value=>value.toString(16).padStart(2,'0')).join('');
           if(hash!==expected.argumentsSha256 || !row.isConnected || row.querySelector('pre')?.textContent!==text)return false;
           const buttons=[...row.querySelectorAll('button')].filter(button=>button.getClientRects().length &&
-            button.innerText.trim()==='Allow once' && !button.disabled && button.getAttribute('aria-disabled')!=='true');
+            button.innerText.trim()===expected.buttonText && !button.disabled && button.getAttribute('aria-disabled')!=='true');
           if(buttons.length!==1)return false;
           buttons[0].scrollIntoView({block:'center'});buttons[0].focus();buttons[0].click();return true;
         })()`), 'C15_APPROVAL_VISIBLE_MATCHING_ROW_UNAVAILABLE', 15000)
         handled.add(key)
         const receipt = { approvalId: approval.approvalId, attemptId: approval.attemptId, runId: approval.runId,
-          toolCallId: approval.toolCallId, toolName: approval.toolName, argumentsSha256, clickedAt: new Date().toISOString() }
+          toolCallId: approval.toolCallId, toolName: approval.toolName, argumentsSha256, decision, clickedAt: new Date().toISOString() }
         evidence.approvals.push(receipt)
-        await waitFor(signal, async () => !(await read()).approvals.some((item) =>
-          item.attemptId === approval.attemptId && item.approvalId === approval.approvalId),
-        'C15_APPROVAL_NOT_RESOLVED_AFTER_CLICK', 15000)
+        await waitFor(signal, async () => {
+          try {
+            return !(await read('after-click')).approvals.some((item) =>
+              item.attemptId === approval.attemptId && item.approvalId === approval.approvalId)
+          } catch (error) {
+            const failure = error.approvalIpcFailure
+            if (error.code !== 'C15_APPROVAL_SCOPE_READ_UNAVAILABLE' ||
+              failure?.method !== route('approvals') || failure.stage !== 'after-click' ||
+              failure.code !== 'UAR_APPROVAL_STALE') throw error
+            receipt.transientReads ??= []
+            receipt.transientReads.push({ ...failure, observedAt: new Date().toISOString() })
+            return false
+          }
+        }, 'C15_APPROVAL_NOT_RESOLVED_AFTER_CLICK', 15000)
         receipt.pendingClearedAt = new Date().toISOString()
       }
     }
