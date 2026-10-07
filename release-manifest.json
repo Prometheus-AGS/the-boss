@@ -1,5 +1,5 @@
 {
-  "version": "2.2.12",
+  "version": "2.2.13",
   "profile": "uar-enabled",
   "features": {
     "uar": true
@@ -10,53 +10,24 @@
     "darwin-arm64",
     "darwin-x64"
   ],
-  "source": "b3d55f0633124d557035d8d58cdaf858511c0941",
-  "publishedAt": "2026-10-06T20:41:28.742Z",
-  "pendingPlatforms": [],
+  "source": "3a1f57693d632b5a2cf77ff6e531c10e48f57c89",
+  "publishedAt": "2026-10-07T17:56:19.086Z",
+  "pendingPlatforms": [
+    "win32-x64",
+    "darwin-arm64",
+    "darwin-x64"
+  ],
   "artifacts": [
     {
-      "name": "The-Boss-2.2.12-win-x64-setup.exe",
-      "size": 528757374,
-      "sha256": "99199d108cd9d7286b4f2d8eabd7db774d93d1df8035aa3850c37e57d816c178",
-      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.12/The-Boss-2.2.12-win-x64-setup.exe",
-      "signing": "unsigned",
-      "profile": "uar-enabled",
-      "platform": "win32",
-      "arch": "x64",
-      "source": "b3d55f0633124d557035d8d58cdaf858511c0941"
-    },
-    {
-      "name": "The-Boss-2.2.12-mac-arm64.dmg",
-      "size": 707579075,
-      "sha256": "cf0d1ed3fc3c5ab980d0c150bbb15841d791a5b8727f4d89d9f8781f2d5d3207",
-      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.12/The-Boss-2.2.12-mac-arm64.dmg",
-      "signing": "Developer ID (notarized)",
-      "profile": "uar-enabled",
-      "platform": "darwin",
-      "arch": "arm64",
-      "source": "b3d55f0633124d557035d8d58cdaf858511c0941"
-    },
-    {
-      "name": "The-Boss-2.2.12-mac-x64.dmg",
-      "size": 733455673,
-      "sha256": "399b28b63594b0ea8f014765de21c1a5f1ec084f4b51e1438e295e98fbce0854",
-      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.12/The-Boss-2.2.12-mac-x64.dmg",
-      "signing": "Developer ID (notarized)",
-      "profile": "uar-enabled",
-      "platform": "darwin",
-      "arch": "x64",
-      "source": "b3d55f0633124d557035d8d58cdaf858511c0941"
-    },
-    {
-      "name": "The-Boss-2.2.12-win-arm64-setup.exe",
-      "size": 492206101,
-      "sha256": "e61fe2848c8660153bd98ae85bf2791fbe084c3bc6e3641e573a826dc1e8d1ae",
-      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.12/The-Boss-2.2.12-win-arm64-setup.exe",
+      "name": "The-Boss-2.2.13-win-arm64-setup.exe",
+      "size": 492239434,
+      "sha256": "d86edc48c23bafbb1710da4a663cad2d1e17174a9ea75ffb204e4a08307ccadb",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.13/The-Boss-2.2.13-win-arm64-setup.exe",
       "signing": "unsigned",
       "profile": "uar-enabled",
       "platform": "win32",
       "arch": "arm64",
-      "source": "b3d55f0633124d557035d8d58cdaf858511c0941"
+      "source": "3a1f57693d632b5a2cf77ff6e531c10e48f57c89"
     }
   ]
 }
