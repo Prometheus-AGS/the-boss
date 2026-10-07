@@ -545,6 +545,27 @@
       "review": "not-run",
       "operation": "not-run",
       "promotion": "not-performed"
+    },
+    {
+      "recordedAt": "2026-10-07T14:45:24.747Z",
+      "status": "source-only-not-promoted",
+      "purpose": "Retain the completed C15 operation helper readiness and navigation repair for team reopen from Settings",
+      "priorBoss": "e5d5365b325f82f7717fe2a303a7c3048b163db7",
+      "consumedBoss": "505b46c43b00a2bc9a739f6ba2944c62f6c480bf",
+      "preservedUar": "a464c1e7790ba8b29294d3e1a7fb350736f5a4b6",
+      "preservedMiniGitlink": "df8fd71578381b2ac50e7e7cae465b05aaa5f392",
+      "conflictsResolved": [],
+      "hooks": {
+        "boss": "Per-command core.hooksPath=/dev/null; Oxfmt, ESLint and install hooks not run",
+        "persistentConfigurationChanged": false
+      },
+      "productBuild": "not-run",
+      "compiler": "not-run",
+      "tests": "not-run",
+      "lint": "not-run",
+      "review": "not-run",
+      "operation": "not-run",
+      "promotion": "not-performed"
     }
   ]
 }
