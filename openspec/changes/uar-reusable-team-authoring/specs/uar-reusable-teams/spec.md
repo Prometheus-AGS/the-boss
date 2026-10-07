@@ -9,6 +9,10 @@ The Boss SHALL let an operator create and revise a named coding or product/desig
 - **WHEN** an operator chooses a template, edits roles and instructions, and selects available role models and scoped resources
 - **THEN** The Boss shows the exact reviewed choices and can save a versioned reusable authoring record.
 
+#### Scenario: Forward artifacts to subsequent roles
+- **WHEN** the coordinator delegates with selected artifacts from earlier roles in the template's declared order
+- **THEN** the compiled definition explicitly permits those producer-to-consumer paths with queue-only edges, preserving coordinator-only activation and existing workspace, tool and approval restrictions.
+
 ### Requirement: Immutable deployment
 The Boss SHALL compile each revision into an immutable package and install only a private workspace binding for model, credential, storage and host authority choices.
 

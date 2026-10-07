@@ -448,6 +448,34 @@
       "operation": "not-run",
       "promotion": "not-performed",
       "remainingBoundary": "Current C15 corrected delivery gate must succeed before C14 promotion; C14 merged source still requires its later complete delivery build and operation"
+    },
+    {
+      "recordedAt": "2026-10-07T13:59:35.818Z",
+      "status": "source-only-not-promoted",
+      "purpose": "Retain C15 task cancellation procedure, intended forward queue-only authored artifact graph and safe attempt diagnostics alongside C14 approvals",
+      "priorBoss": "b639cfe70b9faf3c54a8ee152a20927d48ce0522",
+      "consumedBoss": "3be6ab4c8b0a404b25aac35145dde0e5cc35ee08",
+      "consumedBossParent": "f0e3037a5b84edf66771e3efec2eb21a7dbc2e59",
+      "preservedUar": "69a488c7b65ecfa53d8b35af082676d0c7e495b0",
+      "conflictsResolved": [
+        {
+          "path": "build/local-uar-source.json",
+          "incomingRevision": "7f353fb197b1c634610e0f9758d7b4e52a8a424e",
+          "resolution": "Retain the selected C14 merged UAR source, which includes the C15 continuation repair and durable approvals; preserve other pin fields"
+        }
+      ],
+      "hooks": {
+        "boss": "Per-command core.hooksPath=/dev/null; Oxfmt, ESLint and install hooks not run",
+        "persistentConfigurationChanged": false
+      },
+      "productBuild": "not-run",
+      "compiler": "not-run",
+      "tests": "not-run",
+      "lint": "not-run",
+      "review": "not-run",
+      "operation": "not-run",
+      "promotion": "not-performed",
+      "remainingBoundary": "Current C15 corrected delivery gate must succeed before C14 promotion; C14 merged source still requires its later complete delivery build and operation"
     }
   ]
 }
