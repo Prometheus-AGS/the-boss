@@ -5989,6 +5989,7 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.budget": "預算或待處理工作額度已耗盡。新增工作前請核對預留額度。",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.context": "必要上下文不受支援或過大。請調整上下文與模型設定檔。",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.evidence": "先前作用或程序清理尚未確認。復原前請取得核實過的隔離證據。",
+  "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.executionBudget": "執行因執行階段預算、取消、截止時間或用量核算條件而停止。請在重試前檢查診斷類別。",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.handoff": "團隊交接失敗。請在重試前檢查診斷階段和協作代碼。",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.hostContext": "需要重新連接工作區工具。請在原工作區中開啟此執行，輸入復原原因，並在重試前執行復原操作。",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.other": "執行階段拒絕操作。請重新整理權威狀態並查看診斷。",

@@ -5989,6 +5989,7 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.budget": "Бюджет или лимит очереди исчерпан. Согласуйте резервы перед новой работой.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.context": "Контекст не поддерживается или слишком велик. Измените контекст и профиль.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.evidence": "Последствия или очистка не подтверждены. Получите проверенное доказательство перед восстановлением.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.executionBudget": "Выполнение остановлено из-за условия, связанного с бюджетом среды выполнения, отменой, сроком или учётом использования. Перед повторной попыткой проверьте категорию диагностики.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.handoff": "Передача задания в команде не удалась. Перед повторной попыткой проверьте этап диагностики и код взаимодействия.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.hostContext": "Инструменты рабочего пространства нужно подключить заново. Откройте этот запуск в исходном рабочем пространстве, укажите причину восстановления и выполните восстановление перед повторной попыткой.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.other": "Среда выполнения отклонила операцию. Обновите достоверное состояние и проверьте диагностику.",

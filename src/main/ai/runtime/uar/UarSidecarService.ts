@@ -40,7 +40,8 @@ const safeTeamProviderDiagnostic = z.object({
       'TEAM_PROVIDER_REQUEST_REJECTED',
       'TEAM_PROVIDER_STREAM_FAILED',
       'TEAM_COLLABORATION_HANDOFF_FAILED',
-      'TEAM_REQUEST_PREPARATION_FAILED'
+      'TEAM_REQUEST_PREPARATION_FAILED',
+      'TEAM_EXECUTION_BUDGET_FAILED'
     ]),
     source_stage: uarTeamDiagnosticDetailsSchema.shape.sourceStage.nullish(),
     category: uarTeamDiagnosticDetailsSchema.shape.category.nullish(),
@@ -60,6 +61,17 @@ const safeTeamProviderDiagnostic = z.object({
       'provider_external_error',
       'provider_internal_error'
     ])
+  })
+})
+const safeTeamProviderRetry = z.object({
+  fields: safeTeamProviderDiagnostic.shape.fields.omit({ provider_error_kind: true }).extend({
+    message: z.literal('LLM stream creation failed; retrying before semantic events'),
+    error: safeTeamProviderDiagnostic.shape.fields.shape.provider_error_kind,
+    request_id: z.uuid(),
+    iteration: z.number().int().nonnegative(),
+    attempt: z.number().int().positive(),
+    max_attempts: z.number().int().positive(),
+    delay_ms: z.number().int().nonnegative()
   })
 })
 const START_TIMEOUT_MS = 30_000
@@ -659,6 +671,25 @@ export class UarSidecarService extends BaseService {
         try {
           value = JSON.parse(line)
         } catch {
+          return
+        }
+        const retry = safeTeamProviderRetry.safeParse(value)
+        if (retry.success) {
+          const { fields } = retry.data
+          logger.warn('UAR team provider retry', {
+            request_id: fields.request_id,
+            iteration: fields.iteration,
+            attempt: fields.attempt,
+            max_attempts: fields.max_attempts,
+            delay_ms: fields.delay_ms,
+            provider_error_kind: fields.error,
+            code: fields.code,
+            category: fields.category,
+            source_stage: fields.source_stage,
+            http_status: fields.http_status,
+            collaboration_code: fields.collaboration_code,
+            diagnostic_reference: fields.diagnostic_reference
+          })
           return
         }
         const result = safeTeamProviderDiagnostic.safeParse(value)

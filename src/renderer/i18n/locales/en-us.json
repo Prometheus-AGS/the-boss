@@ -5989,6 +5989,7 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.budget": "Budget or pending-work limit exhausted. Reconcile reservations before adding work.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.context": "Required context is unsupported or too large. Adjust context and model profile.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.evidence": "Previous effects or cleanup are unconfirmed. Obtain verified fencing evidence before recovery.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.executionBudget": "Execution stopped because of a runtime budget, cancellation, deadline or usage-accounting condition. Inspect the diagnostic category before retrying.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.handoff": "Team handoff failed. Inspect the diagnostic stage and collaboration code before retrying.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.hostContext": "Workspace tools need to be reattached. Open this run in its original workspace, enter a recovery reason and use Recover before retrying.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.other": "Runtime refused this operation. Refresh authoritative state and inspect its diagnostic.",

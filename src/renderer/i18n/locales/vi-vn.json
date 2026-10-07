@@ -5989,6 +5989,7 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.budget": "Hết ngân sách hoặc giới hạn hàng đợi. Đối soát dự trữ trước khi thêm việc.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.context": "Ngữ cảnh không hỗ trợ hoặc quá lớn. Điều chỉnh ngữ cảnh và hồ sơ.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.evidence": "Tác động hoặc dọn dẹp chưa xác nhận. Lấy bằng chứng xác minh trước khi khôi phục.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.executionBudget": "Quá trình thực thi đã dừng do điều kiện về ngân sách thời gian chạy, hủy, thời hạn hoặc hạch toán mức sử dụng. Kiểm tra loại chẩn đoán trước khi thử lại.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.handoff": "Bàn giao nhóm thất bại. Kiểm tra giai đoạn chẩn đoán và mã cộng tác trước khi thử lại.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.hostContext": "Cần kết nối lại các công cụ của không gian làm việc. Mở lượt chạy này trong không gian ban đầu, nhập lý do khôi phục và dùng Khôi phục trước khi thử lại.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.other": "Bộ thực thi từ chối thao tác. Làm mới trạng thái có thẩm quyền và xem chẩn đoán.",

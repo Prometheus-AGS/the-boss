@@ -18,6 +18,7 @@ const reasons: Record<string, string> = {
   TEAM_PROVIDER_REQUEST_REJECTED: 'provider',
   TEAM_PROVIDER_STREAM_FAILED: 'provider',
   TEAM_BUDGET_EXHAUSTED: 'budget',
+  TEAM_EXECUTION_BUDGET_FAILED: 'executionBudget',
   TEAM_PENDING_LIMIT: 'budget',
   TEAM_CONTEXT_REQUIRED_UNSUPPORTED: 'context',
   TEAM_CONTEXT_REQUIRED_TOO_LARGE: 'context',

@@ -307,16 +307,68 @@
   },
   "localUarPackagingSource": {
     "path": "build/local-uar-source.json",
-    "priorRevision": "d324d94a8fcd374f5ddde325a7dada354502cd1b",
-    "revision": "150b4332804108d86d491aca40523e7557e090eb",
+    "priorRevision": "150b4332804108d86d491aca40523e7557e090eb",
+    "revision": "99a0d457777ecc84efd28ef3f854bb6a2f05125e",
     "mergeParents": [
-      "1ef53d384945bb306d449d0521b4b6bbf8632391",
-      "d324d94a8fcd374f5ddde325a7dada354502cd1b"
+      "150b4332804108d86d491aca40523e7557e090eb",
+      "b6bdcd15330a12a3b4eba5fe6ef14ca65d1acafd"
     ],
     "remoteBranch": "codex/uar-c14-durable-approvals",
     "status": "actual-merged-source-selected-packaging-pending",
     "publishedAssetUrlsOrSourceLabelsChanged": false,
     "workAheadPromoted": false,
     "c14Completed": false
-  }
+  },
+  "localUarPackagingSourceHistory": [
+    {
+      "path": "build/local-uar-source.json",
+      "priorRevision": "d324d94a8fcd374f5ddde325a7dada354502cd1b",
+      "revision": "150b4332804108d86d491aca40523e7557e090eb",
+      "mergeParents": [
+        "1ef53d384945bb306d449d0521b4b6bbf8632391",
+        "d324d94a8fcd374f5ddde325a7dada354502cd1b"
+      ],
+      "remoteBranch": "codex/uar-c14-durable-approvals",
+      "status": "actual-merged-source-selected-packaging-pending",
+      "publishedAssetUrlsOrSourceLabelsChanged": false,
+      "workAheadPromoted": false,
+      "c14Completed": false
+    }
+  ],
+  "preparationHistory": [
+    {
+      "recordedAt": "2026-10-07T11:19:30.188Z",
+      "status": "source-only-not-promoted",
+      "purpose": "Retain current C15 team and issue39 safety history plus safe budget/retry diagnostics alongside durable approvals",
+      "priorBoss": "2ac132f9053596e02d8ce86da2adabeffa76ac17",
+      "consumedBoss": "83c32514e3278e2ead68cc836a4f10c48fb6535d",
+      "priorUar": "150b4332804108d86d491aca40523e7557e090eb",
+      "consumedUar": "b6bdcd15330a12a3b4eba5fe6ef14ca65d1acafd",
+      "resultingUar": "99a0d457777ecc84efd28ef3f854bb6a2f05125e",
+      "conflictsResolved": [
+        {
+          "path": "build/local-uar-source.json",
+          "resolution": "Select the actual merged C14 runtime revision; preserve schema/platform/repository/version"
+        }
+      ],
+      "hooks": {
+        "boss": "Per-command core.hooksPath=/dev/null; Oxfmt, ESLint and install hooks not run",
+        "uar": "Initial normal merge commit-msg hook auto-installed dependencies and ran dependency postinstall scripts before commitlint; known unstaged pnpm-lock.yaml delta restored",
+        "lockfileDelta": {
+          "added": 69,
+          "removed": 2496,
+          "retainedPatch": "/tmp/c14-uar-merge-hook-lockfile-20261007.patch"
+        },
+        "persistentConfigurationChanged": false
+      },
+      "productBuild": "not-run",
+      "compiler": "not-run",
+      "tests": "not-run",
+      "lint": "not-run",
+      "review": "not-run",
+      "operation": "not-run",
+      "promotion": "not-performed",
+      "remainingBoundary": "Current C15 team operation must succeed before C14 promotion; merged C14 source needs its later complete delivery build and operation"
+    }
+  ]
 }

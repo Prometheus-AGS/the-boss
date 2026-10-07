@@ -5989,6 +5989,7 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.budget": "Presupuesto o límite de cola agotado. Concilie reservas antes de añadir trabajo.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.context": "Contexto incompatible o demasiado grande. Ajuste el contexto y el perfil.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.evidence": "Efectos o limpieza sin confirmar. Obtenga evidencia verificada antes de recuperar.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.executionBudget": "La ejecución se detuvo por una condición de presupuesto de ejecución, cancelación, plazo o registro de uso. Revisa la categoría del diagnóstico antes de reintentar.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.handoff": "La transferencia del equipo falló. Revisa la etapa del diagnóstico y el código de colaboración antes de reintentar.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.hostContext": "Es necesario volver a conectar las herramientas del espacio de trabajo. Abre esta ejecución en su espacio original, introduce un motivo de recuperación y usa Recuperar antes de reintentar.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.other": "Operación rechazada. Actualice el estado autoritativo y revise el diagnóstico.",

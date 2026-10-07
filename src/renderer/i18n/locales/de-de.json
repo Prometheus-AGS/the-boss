@@ -5989,6 +5989,7 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.budget": "Budget oder Warteschlangenlimit erschöpft. Reservierungen vor neuer Arbeit abgleichen.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.context": "Kontext nicht unterstützt oder zu groß. Kontext und Modellprofil anpassen.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.evidence": "Auswirkungen oder Bereinigung unbestätigt. Vor Wiederherstellung verifizierten Nachweis erhalten.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.executionBudget": "Die Ausführung wurde wegen einer Laufzeitbudget-, Abbruch-, Frist- oder Verbrauchserfassungsbedingung beendet. Prüfen Sie vor einem erneuten Versuch die Diagnosekategorie.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.handoff": "Die Teamübergabe ist fehlgeschlagen. Prüfen Sie vor einem erneuten Versuch die Diagnosephase und den Zusammenarbeitscode.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.hostContext": "Die Arbeitsbereichswerkzeuge müssen erneut verbunden werden. Öffnen Sie diesen Lauf im ursprünglichen Arbeitsbereich, geben Sie einen Wiederherstellungsgrund ein und verwenden Sie vor dem erneuten Versuch die Wiederherstellung.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.other": "Laufzeit hat die Aktion abgelehnt. Autoritativen Status und Diagnose prüfen.",

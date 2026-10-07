@@ -5989,6 +5989,7 @@
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.budget": "Orçamento ou limite de fila esgotado. Reconcilie reservas antes de adicionar trabalho.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.context": "Contexto incompatível ou demasiado grande. Ajuste o contexto e o perfil.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.evidence": "Efeitos ou limpeza não confirmados. Obtenha prova verificada antes de recuperar.",
+  "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.executionBudget": "A execução parou devido a uma condição de orçamento de execução, cancelamento, prazo ou contabilização da utilização. Verifique a categoria do diagnóstico antes de tentar novamente.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.handoff": "A transferência da equipa falhou. Verifique a fase do diagnóstico e o código de colaboração antes de tentar novamente.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.hostContext": "É necessário voltar a ligar as ferramentas do espaço de trabalho. Abra esta execução no espaço original, introduza um motivo de recuperação e utilize Recuperar antes de tentar novamente.",
   "settings.prometheus.integration.uarAdmin.teams.execution.diagnostic.other": "Operação recusada. Atualize o estado autoritativo e consulte o diagnóstico.",
