@@ -22,7 +22,25 @@ type Registration = { directory: string; added: boolean; files: string[] }
 
 async function readRegistration(file: string): Promise<Registration | undefined> {
   try {
-    return JSON.parse(await fs.readFile(file, 'utf8')) as Registration
+    const value: unknown = JSON.parse(await fs.readFile(file, 'utf8'))
+    const record = value as Partial<Registration> | null
+    const expected = application.getPath(
+      file === registrationFile() ? 'feature.prometheus.commands' : 'feature.prometheus.commands.legacy'
+    )
+    const normalize = (directory: string) =>
+      process.platform === 'win32' ? path.resolve(directory).toLowerCase() : path.resolve(directory)
+    if (
+      !record ||
+      typeof record.directory !== 'string' ||
+      !path.isAbsolute(record.directory) ||
+      normalize(record.directory) !== normalize(expected) ||
+      typeof record.added !== 'boolean' ||
+      !Array.isArray(record.files) ||
+      !record.files.every((entry) => typeof entry === 'string')
+    ) {
+      throw new Error('Managed command registration has an invalid or foreign directory; no cleanup performed')
+    }
+    return { directory: expected, added: record.added, files: record.files }
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined
     throw error

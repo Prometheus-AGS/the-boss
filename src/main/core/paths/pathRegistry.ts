@@ -221,6 +221,7 @@ export function buildPathRegistry() {
     'feature.prometheus.pack.runtime': path.join(appUserDataData, 'PrometheusPack'),
     'feature.prometheus.state': path.join(appUserDataData, 'Prometheus'),
     'feature.prometheus.commands': path.join(CHERRY_HOME, 'commands'),
+    'feature.prometheus.commands.legacy': path.join(appUserData, 'commands'),
     'feature.prometheus.commands.registration_file': path.join(CHERRY_HOME, 'config', 'path-registration.json'),
     'feature.prometheus.commands.rc_backups': path.join(CHERRY_HOME, 'rc-backups'),
     'feature.prometheus.toml_editor_wasm': app.isPackaged
@@ -409,6 +410,7 @@ const NO_ENSURE = [
   'feature.prometheus.toml_editor_wasm',
   // The shell writer must create private backups with mode 0700 itself.
   'feature.prometheus.commands.rc_backups',
+  'feature.prometheus.commands.legacy',
   'feature.mini_app.builtin',
   // AgentSessionService stores this path through DataApi. The runtime creates
   // the concrete session directory later, keeping database writes filesystem-free.
