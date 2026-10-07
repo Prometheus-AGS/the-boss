@@ -156,9 +156,14 @@ export async function compileAuthoredTeam(team: UarAuthoredTeam, revision: numbe
       max: 1,
       responsibility: team.members[index].responsibility
     })),
-    communication: nonCoordinators.flatMap((member) => [
+    communication: nonCoordinators.flatMap((member, index) => [
       { fromRole: 'coordinator', toRole: member.role, modes: ['queue-only', 'trigger-turn'] },
-      { fromRole: member.role, toRole: 'coordinator', modes: ['queue-only'] }
+      { fromRole: member.role, toRole: 'coordinator', modes: ['queue-only'] },
+      ...nonCoordinators.slice(index + 1).map((recipient) => ({
+        fromRole: member.role,
+        toRole: recipient.role,
+        modes: ['queue-only']
+      }))
     ]),
     limits: { concurrentTurns: 1, maxMembers: team.members.length, maxDepth: 1, maxPendingTasks: 16 },
     budget: { maxTokens: 65536, maxCostMicrounits: 10000000, currency: 'USD', maxElapsedSeconds: 2400 },

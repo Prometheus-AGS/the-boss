@@ -69,6 +69,7 @@ export async function operate(args = process.argv.slice(2)) {
           'reusable-team-operation/scenario.mjs',
           'reusable-team-operation/io.mjs',
           'reusable-team-operation/live-output.mjs',
+          'reusable-team-operation/attempt-diagnostics.mjs',
           'reusable-team-operation/approvals.mjs'
         ].map((name) => [name, digest(fs.readFileSync(new URL(name, import.meta.url)))])
       )
