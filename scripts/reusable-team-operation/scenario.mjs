@@ -6,6 +6,7 @@ import { setTimeout as delay } from 'node:timers/promises'
 import { digest, write, same, route, requireFact, waitFor } from './io.mjs'
 import { liveOutputObserver } from './live-output.mjs'
 import { attemptFailureEvidence } from './attempt-diagnostics.mjs'
+import { mixedTeamApprovalOperator } from './approvals.mjs'
 
 const visible = (selector) =>
   `[...document.querySelectorAll(${JSON.stringify(selector)})].find(node=>node.getClientRects().length)`
@@ -296,6 +297,8 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     const memberRoles = Object.fromEntries(instance.members.map((member) => [member.id, member.role]))
     const live = liveOutputObserver(evaluate, selector, memberRoles)
     evidence.liveOutput = live.evidence
+    const approvalOperator = mixedTeamApprovalOperator({ evaluate, signal, selector, instance, instructions: first.team.instructions })
+    evidence.approvals = approvalOperator.evidence
     const completed = await waitFor(
       signal,
       async () => {
@@ -305,6 +308,7 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
           write(configuration.evidence + '.attempt-failure.json', evidence.failedExecution)
           requireFact(false, 'C15_REAL_ATTEMPT_FAILED')
         }
+        await approvalOperator.handle()
         await live.capture(value.attempts)
         const current = (await snapshot()).instances.find((item) => item.id === instance.id)
         const finished = value.attempts.filter(
