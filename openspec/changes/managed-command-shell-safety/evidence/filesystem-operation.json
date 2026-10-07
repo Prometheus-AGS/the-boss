@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "issue": 39,
+  "sourceCommit": "d24897edbd",
+  "platform": "darwin",
+  "status": "passed",
+  "checks": [
+    "ten-real-process-writers-preserve-user-bytes-single-block-mode-and-symlink",
+    "unchanged-registration-does-not-replace-file",
+    "immutable-original-backup-preserves-exact-bytes",
+    "concurrent-install-remove-and-explicit-removal-preserve-user-bytes",
+    "well-formed-duplicate-blocks-converge-without-user-byte-loss",
+    "torn-nested-and-unmatched-markers-refused-without-modification",
+    "dangling-symlink-refused-without-replacement"
+  ],
+  "resources": "/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/boss-issue39-operation-3ppoRy",
+  "completedAt": "2026-10-07T08:03:41.384Z",
+  "limitations": [
+    "Native Windows execution pending",
+    "This real-filesystem operation is not installed-app or team-inference acceptance"
+  ]
+}

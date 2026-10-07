@@ -909,7 +909,7 @@ export class PrometheusIntegrationService extends BaseService {
       async (signal, output, operation, controls) => {
         const config = readIntegrationConfig()
         if (action === 'repair-path') {
-          await installCommandPath()
+          await installCommandPath({ strict: true })
           return
         }
         if (action === 'discover-services') {
