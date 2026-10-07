@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "mode": "diff-correction",
+  "scope": "Only the prior critical registration-directory ownership finding",
+  "reviewed_commit": "5c76f3928bf70938384da2c3eb76dd36a65ad969",
+  "prior_findings_file": "/Users/gqadonis/.prometheus/backups/issue39-review-findings.json",
+  "judge_model": "unknown",
+  "isolation_mode": "harness-native",
+  "producer_model": "unknown",
+  "cross_model_check": "unverified-producer-unknown",
+  "identity_correction": "The original artifact's judge_model value GPT-6 was not an exposed runtime model identity and must not be treated as verified. The original artifact is preserved as history.",
+  "disposition": "ADDRESSED",
+  "remaining_critical_findings_for_reviewed_criterion": 0,
+  "evidence": [
+    "readRegistration parses JSON as unknown and validates an absolute directory, boolean added flag, and an array of string file entries before admitting a Registration.",
+    "The record directory must normalize to the registry-derived shared directory for the shared registration file, or the registry-derived legacy directory for the legacy registration file; a foreign identity throws before cleanup retirement or Windows PATH removal.",
+    "The returned Registration uses directory: expected, so downstream writes and PATH removals receive the trusted registry path rather than the JSON-supplied spelling.",
+    "The legacy registry key is derived from appUserData/commands and is excluded from automatic directory creation."
+  ],
+  "verification": "Static review of the focused commit diff only. No tests, builds, reproductions, source edits, or broader review were performed. This disposition closes only the named critical criterion."
+}

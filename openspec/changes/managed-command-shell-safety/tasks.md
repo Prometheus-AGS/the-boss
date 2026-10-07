@@ -1,8 +1,8 @@
 ## 1. Complete production repair
 
-- [ ] 1.1 Implement serialized atomic shell-file updates, full-line parsing, backups, symlink/mode preservation and unchanged-file no-op.
-- [ ] 1.2 Wire shared registration and command paths, safe install/uninstall, legacy helper retirement and accurate PATH status.
+- [x] 1.1 Implement serialized atomic shell-file updates, full-line parsing, backups, symlink/mode preservation and unchanged-file no-op.
+- [x] 1.2 Wire shared registration and command paths, safe install/uninstall, legacy helper retirement and accurate PATH status.
 
 ## 2. Completed delivery boundary
 
-- [ ] 2.1 Build Mac ARM64, launch the packaged app and operate the completed registration/removal through real filesystem entrypoints; record native Windows status separately, commit/push and propagate the repair to the following delivery branch.
+- [x] 2.1 Build Mac ARM64, launch the packaged app and operate the completed registration/removal through real filesystem entrypoints; record native Windows status separately, commit/push and propagate the repair to the following delivery branch.
