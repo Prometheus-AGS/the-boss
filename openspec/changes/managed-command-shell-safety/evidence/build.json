@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "issue": 39,
+  "sourceCommit": "ee32ed2166",
+  "status": "success",
+  "exitCode": 0,
+  "attemptId": "410b9d94-a6a4-4126-a6ff-f3b7df8ac3f8",
+  "candidateId": "cc4a146b-5222-4165-9c70-bfd7188f66cd",
+  "startedAt": "2026-10-07T08:24:16.688Z",
+  "finishedAt": "2026-10-07T08:31:08.763Z",
+  "command": "pnpm build:mac:arm64",
+  "artifact": {
+    "path": "/Users/gqadonis/.claude/worktrees/afc-c15-team-authoring/dist/The-Boss-2.2.13-mac-arm64.dmg",
+    "bytes": 698875272,
+    "sha256": "9ce491ace3a218e4f4ec638536dbd6345408ca1739f1e19de0b37610d2a3bd6e",
+    "platform": "darwin-arm64",
+    "version": "2.2.13",
+    "signing": "Developer ID Application",
+    "notarization": "skipped by existing configuration",
+    "publication": "not-published"
+  },
+  "limitations": [
+    "Built from the team-authoring integration worktree containing the repair, not an installer built from this focused main-based branch",
+    "Native Windows operation pending",
+    "C15 inference remains unresolved"
+  ]
+}

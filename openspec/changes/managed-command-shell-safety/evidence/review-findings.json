@@ -1,0 +1,18 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "GPT-6",
+  "isolation_mode": "harness-native",
+  "producer_model": "unknown",
+  "cross_model_check": "unverified-producer-unknown",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "src/main/services/prometheus/commandPath.ts",
+      "line": 208,
+      "claim": "Registration metadata can direct cleanup retirement outside the application-owned commands directory without any ownership or directory-identity validation.",
+      "evidence": "readRegistration at line 25 casts arbitrary parsed JSON to Registration. installCommandPath passes legacy.directory to retireLegacyCleanup, and removeCommandPath passes every registration.directory at line 208 without checking it against a known application-owned path. retireLegacyCleanup joins that value with remove-registration.cjs and replaces the complete file after only one prefix and two substring checks (lines 51-68). A record naming another directory therefore causes an existing matching helper there to be overwritten, and on Windows the same unchecked directory selects a User PATH entry for removal. This crosses the actual file-writing boundary and contradicts design decision 5: 'Global registration and legacy metadata are read only as application-owned records' and 'clears only application-owned registrations.'",
+      "suggested_fix": "Validate registration structure and prove the directory belongs to the current shared registration or the known legacy profile commands path before using it for retirement or PATH removal. Refuse foreign directory identities without writing their files; preserve migration of the recognized legacy profile. Do not treat an arbitrary directory from JSON plus matching source fragments as proof of ownership."
+    }
+  ]
+}

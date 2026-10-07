@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "issue": 39,
+  "status": "passed",
+  "sourceCommit": "ee32ed2166",
+  "platform": "darwin",
+  "executable": "/Users/gqadonis/.claude/worktrees/afc-c15-team-authoring/dist/mac-arm64/The Boss.app/Contents/MacOS/The Boss",
+  "resources": "/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/boss-issue39-packaged-yBYw6p",
+  "effectiveDirectory": "/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/boss-issue39-packaged-yBYw6p/home/.the-boss/commands",
+  "checks": [
+    "profile-one-launch-and-safe-registration",
+    "profile-two-launch-and-safe-registration",
+    "two-packaged-profiles-converge-without-rc-replacement",
+    "new-bash-session-resolves-stable-compass-command",
+    "packaged-explicit-uninstall-removes-only-managed-blocks"
+  ],
+  "originalSha256": "9fb2655441e3296a2d7f081c09cb7b2b394908a8ac7e9b1a94c8b60ca6fcbae1",
+  "finishedAt": "2026-10-07T08:31:22.521Z",
+  "limitations": [
+    "Native Windows execution pending",
+    "Does not certify C15 inference"
+  ]
+}
