@@ -307,11 +307,11 @@
   },
   "localUarPackagingSource": {
     "path": "build/local-uar-source.json",
-    "priorRevision": "150b4332804108d86d491aca40523e7557e090eb",
-    "revision": "99a0d457777ecc84efd28ef3f854bb6a2f05125e",
+    "priorRevision": "99a0d457777ecc84efd28ef3f854bb6a2f05125e",
+    "revision": "69a488c7b65ecfa53d8b35af082676d0c7e495b0",
     "mergeParents": [
-      "150b4332804108d86d491aca40523e7557e090eb",
-      "b6bdcd15330a12a3b4eba5fe6ef14ca65d1acafd"
+      "99a0d457777ecc84efd28ef3f854bb6a2f05125e",
+      "7f353fb197b1c634610e0f9758d7b4e52a8a424e"
     ],
     "remoteBranch": "codex/uar-c14-durable-approvals",
     "status": "actual-merged-source-selected-packaging-pending",
@@ -327,6 +327,20 @@
       "mergeParents": [
         "1ef53d384945bb306d449d0521b4b6bbf8632391",
         "d324d94a8fcd374f5ddde325a7dada354502cd1b"
+      ],
+      "remoteBranch": "codex/uar-c14-durable-approvals",
+      "status": "actual-merged-source-selected-packaging-pending",
+      "publishedAssetUrlsOrSourceLabelsChanged": false,
+      "workAheadPromoted": false,
+      "c14Completed": false
+    },
+    {
+      "path": "build/local-uar-source.json",
+      "priorRevision": "150b4332804108d86d491aca40523e7557e090eb",
+      "revision": "99a0d457777ecc84efd28ef3f854bb6a2f05125e",
+      "mergeParents": [
+        "150b4332804108d86d491aca40523e7557e090eb",
+        "b6bdcd15330a12a3b4eba5fe6ef14ca65d1acafd"
       ],
       "remoteBranch": "codex/uar-c14-durable-approvals",
       "status": "actual-merged-source-selected-packaging-pending",
@@ -401,6 +415,29 @@
       "conflictsResolved": [],
       "hooks": {
         "boss": "Per-command core.hooksPath=/dev/null; Oxfmt, ESLint and install hooks not run",
+        "persistentConfigurationChanged": false
+      },
+      "productBuild": "not-run",
+      "compiler": "not-run",
+      "tests": "not-run",
+      "lint": "not-run",
+      "review": "not-run",
+      "operation": "not-run",
+      "promotion": "not-performed",
+      "remainingBoundary": "Current C15 corrected delivery gate must succeed before C14 promotion; C14 merged source still requires its later complete delivery build and operation"
+    },
+    {
+      "recordedAt": "2026-10-07T12:59:45.269Z",
+      "status": "source-only-not-promoted",
+      "purpose": "Retain the completed C15 attributed continuation handoff repair alongside durable approval authority",
+      "priorBoss": "0184e831f4c197b30802499946efa72b5194b7d0",
+      "priorUar": "99a0d457777ecc84efd28ef3f854bb6a2f05125e",
+      "consumedUar": "7f353fb197b1c634610e0f9758d7b4e52a8a424e",
+      "resultingUar": "69a488c7b65ecfa53d8b35af082676d0c7e495b0",
+      "conflictsResolved": [],
+      "hooks": {
+        "boss": "Per-command core.hooksPath=/dev/null; Oxfmt, ESLint and install hooks not run",
+        "uar": "Per-command core.hooksPath=/dev/null; automatic installation and build hooks not run",
         "persistentConfigurationChanged": false
       },
       "productBuild": "not-run",
