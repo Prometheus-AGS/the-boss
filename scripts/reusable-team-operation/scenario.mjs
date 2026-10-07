@@ -48,7 +48,8 @@ async function openWork(evaluate, signal) {
     () =>
       evaluate(`(() => {
     const later=[...document.querySelectorAll('button')].find(node=>node.getClientRects().length&&node.innerText.trim()==='Set up later');
-    if(later)later.click();return Boolean(document.querySelector('#app-sidebar'));})()`),
+    if(later)later.click();return Boolean(document.querySelector('#app-sidebar') ||
+      [...document.querySelectorAll('[data-ui~="settings.view"]')].find(node=>node.getClientRects().length));})()`),
     'C15_ONBOARDING_UNAVAILABLE'
   )
   const visibleWork = await evaluate(
