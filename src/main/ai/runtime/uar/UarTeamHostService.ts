@@ -1,7 +1,4 @@
-import { realpath } from 'node:fs/promises'
-
 import { application } from '@application'
-import { agentWorkspaceService } from '@data/services/AgentWorkspaceService'
 import { loggerService } from '@logger'
 import { FileSystemServer } from '@main/ai/mcp/servers/filesystem'
 import { BaseService, Injectable, Phase, ServicePhase } from '@main/core/lifecycle'
@@ -9,10 +6,11 @@ import type { UarTeamInstance } from '@shared/types/uarTeams'
 
 import { uarApprovalLifecycleStore } from './UarApprovalLifecycleStore'
 import { createUarAuthorityProvider } from './UarAuthorityProvider'
-import { codingReadTools, codingWriteTools, UAR_CODING_TEAM_ID } from './uarCodingTeamPackage'
+import { codingReadTools, codingWriteTools } from './uarCodingTeamPackage'
 import { scopedRequest } from './UarDurableAdministrationAdapter'
 import { createUarHostMcpBridge, type UarHostMcpBridge } from './UarHostMcpBridge'
 import { readUarTeamExecution } from './UarTeamExecutionAdapter'
+import { resolveTeamHostScope } from './uarTeamHostScope'
 import { scopedTeam } from './UarTeamsAdministrationAdapter'
 
 const logger = loggerService.withContext('UarTeamHostService')
@@ -43,7 +41,7 @@ export class UarTeamHostService extends BaseService {
   }
 
   private async attach(team: UarTeamInstance, generation: number): Promise<UarHostMcpBridge> {
-    if (team.definition.id !== UAR_CODING_TEAM_ID) throw new Error('TEAM_SCOPE_DENIED')
+    const { directory, memberTools } = await resolveTeamHostScope(team, generation)
     const key = team.workspaceId + ':' + team.id
     const saved = this.bridges.get(key)
     if (saved?.generation === generation && saved.bindingRevision === team.binding.revision) return saved.bridge
@@ -51,7 +49,6 @@ export class UarTeamHostService extends BaseService {
       await saved.bridge.close()
       this.bridges.delete(key)
     }
-    const directory = await realpath(agentWorkspaceService.getById(team.workspaceId).path)
     const bridge = await createUarHostMcpBridge(
       { filesystem: { name: 'filesystem', createInstance: () => new FileSystemServer(directory).server } },
       {
@@ -89,10 +86,7 @@ export class UarTeamHostService extends BaseService {
             invocation.workspace !== directory
           )
             return false
-          return (
-            codingReadTools.includes(invocation.providerToolName) ||
-            (member.role === 'worker' && codingWriteTools.includes(invocation.providerToolName))
-          )
+          return memberTools.get(member.role)?.includes(invocation.providerToolName) === true
         }
       },
       (error) => logger.warn('Team host request failed', { error })

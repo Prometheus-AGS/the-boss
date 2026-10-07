@@ -1,3 +1,5 @@
+import * as z from 'zod'
+
 import type {
   UarTeamCommandReceipt,
   UarTeamContextReceipt,
@@ -337,4 +339,102 @@ export interface UarTeamApprovalDecision extends UarTeamExecutionSelector {
   eventId: string
   cursor: number
   approved: boolean
+}
+
+export const uarTeamSkillRefSchema = z
+  .object({
+    id: z.string().min(1),
+    version: z.string().regex(/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/),
+    digest: z.string().regex(/^sha256:[a-f0-9]{64}$/),
+    required: z.boolean(),
+    config: z.record(z.string(), z.json()),
+    entrypoint: z.string().min(1).nullable(),
+    requiredTools: z.array(z.string().min(1))
+  })
+  .strict()
+
+export const uarAuthoredTeamSchema = z
+  .object({
+    id: z.uuid(),
+    title: z.string().trim().min(1).max(128),
+    template: z.enum(['coding', 'product-design']),
+    purpose: z.string().trim().min(1).max(4096),
+    instructions: z.string().max(16384),
+    members: z
+      .array(
+        z
+          .object({
+            role: z.string().regex(/^[a-z][a-z0-9-]{0,63}$/),
+            responsibility: z.string().trim().min(1).max(4096),
+            instructions: z.string().trim().min(1).max(16384),
+            model: z
+              .object({
+                source: z.enum(['uar', 'gateway']),
+                providerId: z.string().min(1).max(128),
+                modelId: z.string().min(1).max(256)
+              })
+              .strict()
+              .optional(),
+            tools: z.array(
+              z.enum([
+                'filesystem__glob',
+                'filesystem__ls',
+                'filesystem__grep',
+                'filesystem__read',
+                'filesystem__edit',
+                'filesystem__write'
+              ])
+            ),
+            skills: z.array(uarTeamSkillRefSchema),
+            knowledge: z.array(z.object({ path: z.string().min(1).max(1024), required: z.boolean() }).strict())
+          })
+          .strict()
+      )
+      .min(2)
+      .max(6)
+  })
+  .strict()
+  .superRefine((value, context) => {
+    if (
+      value.members.filter((member) => member.role === 'coordinator').length !== 1 ||
+      new Set(value.members.map((member) => member.role)).size !== value.members.length
+    )
+      context.addIssue({
+        code: 'custom',
+        path: ['members'],
+        message: 'Exactly one coordinator and unique member roles are required'
+      })
+    if (value.members.some((member) => member.role === 'coordinator' && member.tools.length))
+      context.addIssue({
+        code: 'custom',
+        path: ['members'],
+        message: 'The coordinator delegates workspace work to members'
+      })
+  })
+
+export type UarAuthoredTeam = z.infer<typeof uarAuthoredTeamSchema>
+export type UarTeamSkillRef = z.infer<typeof uarTeamSkillRefSchema>
+export interface UarAuthoredTeamRevision {
+  schemaVersion: 1
+  revision: number
+  savedAt: string
+  team: UarAuthoredTeam
+  package: UarTeamIdentity
+  definition: UarTeamIdentity
+}
+export interface UarTeamAuthoringSnapshot {
+  schemaVersion: 1
+  revisions: UarAuthoredTeamRevision[]
+  templates: UarAuthoredTeam[]
+}
+export interface UarTeamSkillCatalog {
+  schemaVersion: 1
+  entries: Array<{
+    skillId: string
+    title: string
+    description: string
+    availability: 'available' | 'unavailable'
+    reasons: string[]
+    skillRef: UarTeamSkillRef | null
+  }>
 }

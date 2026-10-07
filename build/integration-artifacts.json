@@ -29,7 +29,10 @@
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "035678b6290353a5988a5a96668d08a9781b1471"
+      "revision": "8e647589c42c73488dd5e56523a797bfa6e4a36b",
+      "platformRevisions": {
+        "darwin-arm64": "e23348760b776f058f704e2fe965833353005a90"
+      }
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
@@ -432,17 +435,15 @@
       "version": "1.0.0",
       "packages": {
         "win32-x64": {
-          "source": "035678b6290353a5988a5a96668d08a9781b1471",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-terminal-replay-035678b6-20261006/uar-sidecar-win32-x64.tar.gz",
-          "sha256": "fffa755e33fa7b20b6dff71c763aef292a18342fa148e42e21628c3e748317d1",
+          "source": "8e647589c42c73488dd5e56523a797bfa6e4a36b",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-team-catalog-8e647589-20261006/uar-sidecar-win32-x64.tar.gz",
+          "sha256": "e457fa7fa3e153772a62aa118e51c0a5848319783fc365af11a161a91809b640",
           "archive": "tar.gz",
           "binaries": [
-            "crc_fast-c45996daf34d96b5.dll",
             "LICENSE",
             "policies/default.cedar",
             "policies/skill-mutation.cedar",
             "policies/tool-approval.cedar",
-            "sevenz_rust2-0296aedd6d6c479a.dll",
             "uar-models/bg-small-en-v1.5.onnx",
             "uar-models/config.json",
             "uar-models/MODEL-NOTICE.txt",
@@ -454,17 +455,15 @@
           ]
         },
         "win32-arm64": {
-          "source": "035678b6290353a5988a5a96668d08a9781b1471",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-arm64-v1.0.0-terminal-replay-035678b6-20261006/uar-sidecar-win32-arm64.tar.gz",
-          "sha256": "39254db3d61b685e46ade613ea34cf9be75f418fd48a424945cdf85219feb8f7",
+          "source": "8e647589c42c73488dd5e56523a797bfa6e4a36b",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-arm64-v1.0.0-team-catalog-8e647589-20261006/uar-sidecar-win32-arm64.tar.gz",
+          "sha256": "a8b27cdc894ec4c833207662c20a3e885e97820aca69cdd1d502c6be78804f84",
           "archive": "tar.gz",
           "binaries": [
-            "crc_fast-ec816f13e81631da.dll",
             "LICENSE",
             "policies/default.cedar",
             "policies/skill-mutation.cedar",
             "policies/tool-approval.cedar",
-            "sevenz_rust2-74faf33cd846d44a.dll",
             "uar-models/bg-small-en-v1.5.onnx",
             "uar-models/config.json",
             "uar-models/MODEL-NOTICE.txt",
@@ -476,11 +475,13 @@
           ]
         },
         "darwin-arm64": {
-          "source": "035678b6290353a5988a5a96668d08a9781b1471",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-terminal-replay-035678b6-20261006/uar-sidecar-darwin-arm64.tar.gz",
-          "sha256": "517d21f9ae5d0d4cc47bb9983ea373bf57214abad46c2d2a1abcc89aae9f2901",
+          "source": "e23348760b776f058f704e2fe965833353005a90",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-team-catalog-e2334876-20261006/uar-sidecar-darwin-arm64.tar.gz",
+          "sha256": "9304890322799632e59c7bda7b0e3f65b1dddaf09958092f3e4996d49487fd71",
           "archive": "tar.gz",
           "binaries": [
+            "libcrc_fast-c9544bfaf069c5bc.dylib",
+            "libsevenz_rust2-bcd9d32571c57b36.dylib",
             "LICENSE",
             "policies/default.cedar",
             "policies/skill-mutation.cedar",
@@ -496,13 +497,11 @@
           ]
         },
         "darwin-x64": {
-          "source": "035678b6290353a5988a5a96668d08a9781b1471",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.0.0-terminal-replay-035678b6-20261006/uar-sidecar-darwin-x64.tar.gz",
-          "sha256": "89fddc7c60136248596e21162423680fe919394646d1c874e335be483e12b0b3",
+          "source": "8e647589c42c73488dd5e56523a797bfa6e4a36b",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.0.0-team-catalog-8e647589-20261006/uar-sidecar-darwin-x64.tar.gz",
+          "sha256": "d785eef235d1dfa3eb1ab9064e638110ff7be46958177d985e91f1e8afb67ca0",
           "archive": "tar.gz",
           "binaries": [
-            "libcrc_fast-83ccf4684c30d646.dylib",
-            "libsevenz_rust2-1192d4db71fe5529.dylib",
             "LICENSE",
             "policies/default.cedar",
             "policies/skill-mutation.cedar",

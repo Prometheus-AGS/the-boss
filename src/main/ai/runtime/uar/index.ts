@@ -110,4 +110,11 @@ export {
 } from './UarWorkflowExecutionAdapter'
 
 export { setupUarCodingTeam } from './UarCodingTeamAdministrationAdapter'
+export {
+  readUarTeamAuthoring,
+  saveUarTeamAuthoring,
+  deployUarAuthoredTeam,
+  selectUarTeamKnowledge
+} from './UarTeamAuthoringAdapter'
+export { readUarTeamSkillCatalog } from './UarTeamSkillCatalogAdapter'
 export { submitUarTeamTask, readUarTeamApprovals, decideUarTeamApproval } from './UarTeamWorkAdapter'

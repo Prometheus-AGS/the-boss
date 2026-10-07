@@ -1,3 +1,5 @@
+import type { UarTeamDiagnostic } from '@shared/types/uarTeamProfiles'
+
 const reasons: Record<string, string> = {
   TEAM_PROFILE_UNSUPPORTED: 'profile',
   TEAM_CAPABILITY_UNSUPPORTED: 'profile',
@@ -11,9 +13,12 @@ const reasons: Record<string, string> = {
   TEAM_EDGE_DENIED: 'authorization',
   TEAM_RECLAIM_EVIDENCE_REQUIRED: 'evidence',
   TEAM_EFFECTS_UNCERTAIN: 'evidence',
+  TEAM_COLLABORATION_HANDOFF_FAILED: 'handoff',
+  TEAM_REQUEST_PREPARATION_FAILED: 'preparation',
   TEAM_PROVIDER_REQUEST_REJECTED: 'provider',
   TEAM_PROVIDER_STREAM_FAILED: 'provider',
   TEAM_BUDGET_EXHAUSTED: 'budget',
+  TEAM_EXECUTION_BUDGET_FAILED: 'executionBudget',
   TEAM_PENDING_LIMIT: 'budget',
   TEAM_CONTEXT_REQUIRED_UNSUPPORTED: 'context',
   TEAM_CONTEXT_REQUIRED_TOO_LARGE: 'context',
@@ -26,7 +31,19 @@ const reasons: Record<string, string> = {
   UAR_APPROVAL_STALE: 'approvalStale'
 }
 
-export function uarTeamError(message: string, translate: (key: string) => string): string {
+export function uarTeamError(
+  message: string,
+  translate: (key: string) => string,
+  sourceStage?: UarTeamDiagnostic['sourceStage']
+): string {
   const code = message.match(/TEAM_[A-Z_]+|UAR_APPROVAL_STALE/)?.[0]
-  return code ? translate('diagnostic.' + (reasons[code] ?? 'other')) + ' (' + code + ')' : message
+  const stageReason =
+    code && ['TEAM_PROVIDER_REQUEST_REJECTED', 'TEAM_PROVIDER_STREAM_FAILED'].includes(code)
+      ? sourceStage === 'request-preparation'
+        ? 'preparation'
+        : sourceStage === 'handoff-validation' || sourceStage === 'handoff-recording'
+          ? 'handoff'
+          : undefined
+      : undefined
+  return code ? translate('diagnostic.' + (stageReason ?? reasons[code] ?? 'other')) + ' (' + code + ')' : message
 }

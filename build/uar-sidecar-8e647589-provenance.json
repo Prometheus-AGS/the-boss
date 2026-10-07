@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "source": "8e647589c42c73488dd5e56523a797bfa6e4a36b",
+  "version": "1.0.0",
+  "packagingScript": "scripts/package-boss-sidecar.mjs",
+  "platforms": {
+    "darwin-arm64": {
+      "nativeRun": 37494056479,
+      "nativeBinarySha256": "723ccf1f31a9beae308d6a5eb70b5515ee5a774615a25576a7d8d6d604b54e94",
+      "features": [
+        "server-full"
+      ],
+      "archiveUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-team-catalog-8e647589-20261006/uar-sidecar-darwin-arm64.tar.gz",
+      "archiveSize": 126200321,
+      "archiveSha256": "f354eb33bc5840eca2e3f96b527ce405f736c188133849b294674cc58936eced",
+      "recordUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-team-catalog-8e647589-20261006/uar-sidecar-darwin-arm64.json",
+      "recordSha256": "f2bbd502d4dc048ff903daca6859086641a16c459126470958dbf81a119e368a",
+      "modelSha256": "6c9c6101a956d62dfb5e7190c538226c0c5bb9cb27b651234b6df063ee7dbfe4",
+      "payloadFileCount": 11
+    },
+    "darwin-x64": {
+      "nativeRun": 37502360365,
+      "nativeBinarySha256": "e03085268b38b23690f49be456b56d60f3c4aa6e4939a23d0a70f82ccece54a1",
+      "features": [
+        "server-full",
+        "tract-embeddings"
+      ],
+      "archiveUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.0.0-team-catalog-8e647589-20261006/uar-sidecar-darwin-x64.tar.gz",
+      "archiveSize": 131552167,
+      "archiveSha256": "d785eef235d1dfa3eb1ab9064e638110ff7be46958177d985e91f1e8afb67ca0",
+      "recordUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.0.0-team-catalog-8e647589-20261006/uar-sidecar-darwin-x64.json",
+      "recordSha256": "d4ef5203af21addc49a54d484dd9a8920cff30c3f05254a37cde0e1407e4bbfa",
+      "modelSha256": "6c9c6101a956d62dfb5e7190c538226c0c5bb9cb27b651234b6df063ee7dbfe4",
+      "payloadFileCount": 11
+    },
+    "win32-x64": {
+      "nativeRun": 37494056479,
+      "nativeBinarySha256": "f00e043e743569268f4c60dd15739cbc4f67ef8d8bb2979e70b2fce2b6265edd",
+      "features": [
+        "server-full"
+      ],
+      "archiveUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-team-catalog-8e647589-20261006/uar-sidecar-win32-x64.tar.gz",
+      "archiveSize": 129599105,
+      "archiveSha256": "e457fa7fa3e153772a62aa118e51c0a5848319783fc365af11a161a91809b640",
+      "recordUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-team-catalog-8e647589-20261006/uar-sidecar-win32-x64.json",
+      "recordSha256": "f65543c1e0764ac30437eb485b2dfad18de0fd417de78c6e046b2da93e7177c0",
+      "modelSha256": "6c9c6101a956d62dfb5e7190c538226c0c5bb9cb27b651234b6df063ee7dbfe4",
+      "payloadFileCount": 11
+    },
+    "win32-arm64": {
+      "nativeRun": 37494056479,
+      "nativeBinarySha256": "796fbdbce35014f3642c9bfc3ee7fb29c91d9028d0c8f3ee69964f429a31d00e",
+      "features": [
+        "server-full"
+      ],
+      "archiveUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-arm64-v1.0.0-team-catalog-8e647589-20261006/uar-sidecar-win32-arm64.tar.gz",
+      "archiveSize": 121215238,
+      "archiveSha256": "a8b27cdc894ec4c833207662c20a3e885e97820aca69cdd1d502c6be78804f84",
+      "recordUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-arm64-v1.0.0-team-catalog-8e647589-20261006/uar-sidecar-win32-arm64.json",
+      "recordSha256": "83d40c43f8c0dc4b7d3b6cec5b974305c3945b5a4aae0f41700dc4f74d42e1e9",
+      "modelSha256": "6c9c6101a956d62dfb5e7190c538226c0c5bb9cb27b651234b6df063ee7dbfe4",
+      "payloadFileCount": 11
+    }
+  },
+  "notes": [
+    "Complete archives contain native binary, pinned model assets, three Cedar policies, LICENSE, and checksummed payload-manifest.json.",
+    "Mac binaries import Apple system libraries only. Windows binaries import Windows, DirectML, and MSVC runtime libraries; The Boss installer provisions the VC redistributable. No application-private dynamic library is imported by these binaries.",
+    "Four immutable tags were pushed in one Git operation; GitHub Actions documents that no push event is created for more than three tags. No matching duplicate deploy.yml run was observed after publication."
+  ]
+}

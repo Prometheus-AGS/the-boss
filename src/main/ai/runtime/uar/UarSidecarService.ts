@@ -25,6 +25,7 @@ import {
   type UarObservedInstance,
   type UarRuntimeInstance
 } from '@shared/types/uarServiceInstance'
+import { uarTeamDiagnosticDetailsSchema } from '@shared/types/uarTeamProfiles'
 import { redactSecretText } from '@shared/utils/redaction'
 
 import { inspectUarPayload, requireUarPayload, type UarPayload } from './uarPayload'
@@ -35,7 +36,17 @@ const logger = loggerService.withContext('UarSidecarService')
 const safeTeamProviderDiagnostic = z.object({
   fields: z.object({
     message: z.literal('Captured safe team provider failure'),
-    code: z.enum(['TEAM_PROVIDER_REQUEST_REJECTED', 'TEAM_PROVIDER_STREAM_FAILED']),
+    code: z.enum([
+      'TEAM_PROVIDER_REQUEST_REJECTED',
+      'TEAM_PROVIDER_STREAM_FAILED',
+      'TEAM_COLLABORATION_HANDOFF_FAILED',
+      'TEAM_REQUEST_PREPARATION_FAILED',
+      'TEAM_EXECUTION_BUDGET_FAILED'
+    ]),
+    source_stage: uarTeamDiagnosticDetailsSchema.shape.sourceStage.nullish(),
+    category: uarTeamDiagnosticDetailsSchema.shape.category.nullish(),
+    http_status: uarTeamDiagnosticDetailsSchema.shape.httpStatus.nullish(),
+    collaboration_code: uarTeamDiagnosticDetailsSchema.shape.collaborationCode.nullish(),
     diagnostic_reference: z.uuid(),
     provider_error_kind: z.enum([
       'provider_error',
@@ -50,6 +61,17 @@ const safeTeamProviderDiagnostic = z.object({
       'provider_external_error',
       'provider_internal_error'
     ])
+  })
+})
+const safeTeamProviderRetry = z.object({
+  fields: safeTeamProviderDiagnostic.shape.fields.omit({ provider_error_kind: true }).extend({
+    message: z.literal('LLM stream creation failed; retrying before semantic events'),
+    error: safeTeamProviderDiagnostic.shape.fields.shape.provider_error_kind,
+    request_id: z.uuid(),
+    iteration: z.number().int().nonnegative(),
+    attempt: z.number().int().positive(),
+    max_attempts: z.number().int().positive(),
+    delay_ms: z.number().int().nonnegative()
   })
 })
 const START_TIMEOUT_MS = 30_000
@@ -651,10 +673,45 @@ export class UarSidecarService extends BaseService {
         } catch {
           return
         }
+        const retry = safeTeamProviderRetry.safeParse(value)
+        if (retry.success) {
+          const { fields } = retry.data
+          logger.warn('UAR team provider retry', {
+            request_id: fields.request_id,
+            iteration: fields.iteration,
+            attempt: fields.attempt,
+            max_attempts: fields.max_attempts,
+            delay_ms: fields.delay_ms,
+            provider_error_kind: fields.error,
+            code: fields.code,
+            category: fields.category,
+            source_stage: fields.source_stage,
+            http_status: fields.http_status,
+            collaboration_code: fields.collaboration_code,
+            diagnostic_reference: fields.diagnostic_reference
+          })
+          return
+        }
         const result = safeTeamProviderDiagnostic.safeParse(value)
         if (!result.success) return
-        const { code, diagnostic_reference, provider_error_kind } = result.data.fields
-        logger.warn('UAR team provider diagnostic', { code, diagnostic_reference, provider_error_kind })
+        const {
+          code,
+          diagnostic_reference,
+          provider_error_kind,
+          source_stage,
+          category,
+          http_status,
+          collaboration_code
+        } = result.data.fields
+        logger.warn('UAR team execution diagnostic', {
+          code,
+          diagnostic_reference,
+          provider_error_kind,
+          source_stage,
+          category,
+          http_status,
+          collaboration_code
+        })
       })
       return [output]
     })

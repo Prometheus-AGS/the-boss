@@ -88,6 +88,12 @@ import {
 import { uarTeamContextSchema, uarTeamPeerMessagesSchema } from '@shared/types/uarTeamContext'
 import type { UarTeamRunEventsSnapshot } from '@shared/types/uarTeamRunEvents'
 import type { UarExecutionOwnerSnapshot, UarExecutionReclaimReceipt } from '@shared/types/uarTeamProfiles'
+import {
+  uarAuthoredTeamSchema,
+  type UarTeamAuthoringSnapshot,
+  type UarAuthoredTeamRevision,
+  type UarTeamSkillCatalog
+} from '@shared/types/uarTeams'
 import type {
   UarTeamArtifact,
   UarTeamExecutionAttempt,
@@ -407,6 +413,25 @@ export const prometheusRequestSchemas = {
           })
           .strict()
       })
+      .strict(),
+    output: z.custom<UarTeamBinding>()
+  }),
+  'prometheus.uar.teams.authoring': defineRoute({
+    input: z.object({}).strict(),
+    output: z.custom<UarTeamAuthoringSnapshot>()
+  }),
+  'prometheus.uar.teams.skills': defineRoute({ input: z.object({}).strict(), output: z.custom<UarTeamSkillCatalog>() }),
+  'prometheus.uar.teams.select_knowledge': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
+    output: z.array(z.string())
+  }),
+  'prometheus.uar.teams.save_authoring': defineRoute({
+    input: z.object({ team: uarAuthoredTeamSchema, expectedRevision: z.number().int().nonnegative() }).strict(),
+    output: z.custom<UarAuthoredTeamRevision>()
+  }),
+  'prometheus.uar.teams.deploy_authored': defineRoute({
+    input: z
+      .object({ workspaceId: z.string().min(1).max(256), teamId: z.uuid(), revision: z.number().int().positive() })
       .strict(),
     output: z.custom<UarTeamBinding>()
   }),
