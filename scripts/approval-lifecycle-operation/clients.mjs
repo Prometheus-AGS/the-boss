@@ -31,7 +31,7 @@ export async function visibleRecord(evaluate, signal, record) {
       decisionId:node.dataset.decisionId,actor:node.dataset.decisionActor,durable:node.dataset.durable}:false;
   })()`), 'C142_CANONICAL_RECORD_NOT_VISIBLE')
 }
-function connect(url, signal) {
+export function connect(url, signal) {
   const endpoint = new URL(url)
   requireFact(['127.0.0.1', 'localhost'].includes(endpoint.hostname), 'C142_LOCAL_CDP_REQUIRED')
   return new Promise((resolve, reject) => {

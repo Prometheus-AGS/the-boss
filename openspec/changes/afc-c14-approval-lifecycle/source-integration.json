@@ -566,6 +566,27 @@
       "review": "not-run",
       "operation": "not-run",
       "promotion": "not-performed"
+    },
+    {
+      "recordedAt": "2026-10-07T20:27:03.631Z",
+      "status": "corrective-source-only-not-operated",
+      "purpose": "Retain the observed executor-stop failure and select the UAR cancellation ledger repair",
+      "failedBoundary": {
+        "packagedBuild": "Root reported successful macOS packaged build",
+        "evidenceDirectory": "/Users/gqadonis/Projects/prometheus/worktrees/agent-fabric-c06/librefang/docs/plans/agent-fabric-convergence/.prometheus/cadence/artifacts/c142-1f9c19b4-941c-4b85-be4e-8f3fa5ecc2be",
+        "failureStage": "executor-stop",
+        "failureCode": "C142_EXECUTOR_CANCELLATION_NOT_OBSERVED",
+        "observed": "Attempt cancelled; durable challenge remained pending and nonresolvable. Prior race, detach, reattach and effect checks were recorded as passing in the failed operation evidence."
+      },
+      "priorUar": "a464c1e7790ba8b29294d3e1a7fb350736f5a4b6",
+      "selectedUar": "36f096dbda0f17c6e15c71b284ce89cb04f04502",
+      "correctiveProcedure": "scripts/approval-lifecycle-operation/resume-cancellation.mjs",
+      "correctiveScope": "Reuse exact retained profile and team; one new pending write, visible executor stop, durable cancellation without human decision, runtime restart and persistence reads. Preserve prior decision and check no effect replay.",
+      "correctiveBuild": "Root-owned; no claim of completed corrective package",
+      "correctiveOperation": "not-run",
+      "tests": "not-run",
+      "lint": "not-run",
+      "promotion": "not-performed"
     }
   ]
 }

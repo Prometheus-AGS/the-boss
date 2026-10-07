@@ -17,3 +17,15 @@ A second write waits for approval and is stopped through the visible executor-st
 The receipt identifies two distinct renderer targets in one authenticated application, not two independent application processes. Reopen means renderer reload and runtime restart, not a full application relaunch. The maintained launcher always creates a fresh profile and offers no same-profile app relaunch. This procedure adds no launcher API.
 
 Existing durable-instance drain controls remain untouched. Team attempts expose cancellation, not a drain endpoint; this increment makes no team-drain claim. Native Windows, screen-reader, theme, keyboard and runtime acceptance remain unverified until the corresponding complete-boundary operation/review is performed. No result is inferred from source.
+
+## Corrective cancellation boundary
+
+The first packaged operation reached executor-stop and failed with `C142_EXECUTOR_CANCELLATION_NOT_OBSERVED`: the attempt was cancelled, but its durable record remained pending/nonresolvable. Its earlier race, detach, reattach and effect checks remain recorded in that failed operation's evidence. UAR repair `36f096dbda0f17c6e15c71b284ce89cb04f04502` is selected in the local source pin. The corrective procedure has not been invoked and no passing corrective result is claimed.
+
+```text
+node scripts/approval-lifecycle-operation/resume-cancellation.mjs --boss <C14.2-worktree> --output <new-receipt-directory>
+```
+
+Run only after the root packages the matching corrective native payload and stops its previously owned application process group. This focused application launcher uses the exact preserved isolated profile `/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/cadence-boss-b5vrdX` and existing workspace/team `ea9ede2f-0308-4980-a7ee-e4af3b1e3984` / `386e6e37-7411-47d1-9c6c-d085c2a8e09a`. It reads the original failed evidence from the recorded C142 artifact directory and adds one uniquely named pending filesystem-write request. It uses the visible stop control, requires a durable cancelled record without a human decision, restarts UAR, and checks retained cancellation and the unchanged earlier decision. The original approved file's content and modification time, absence of cancelled files, and unchanged attempt identifiers after restart bound the effect-replay check.
+
+This procedure launches the actual packaged executable with Node argument arrays, minimal environment and a fresh loopback CDP endpoint; it stops only the child process group it created. It changes no maintained skill launcher. The existing configured model and credentials come from the retained profile; it performs no gateway reconfiguration, team creation, approval race, detach or reattach operation. It uses one renderer for corrective cancellation/persistence and relies on the original evidence for the two-client checks. It does not repair or retroactively relabel the old already-cancelled attempt's pending challenge. It retains both the profile and separate new evidence for inspection, including failure codes when prerequisites or the operation fail. Native Windows and wider acceptance remain outside this corrective boundary.

@@ -14,7 +14,7 @@ const approvalSelector = (pending) =>
   `[data-approval-id="${pending.approvalId}"][data-attempt-id="${pending.attemptId}"]`
 const terminal = (attempt) => ['succeeded', 'failed', 'cancelled', 'uncertain'].includes(attempt.status)
 
-async function pendingWrite(evaluate, signal, selector, configuration, fileName) {
+export async function pendingWrite(evaluate, signal, selector, configuration, fileName) {
   const content = configuration.marker + '\n'
   const assigned = await task(
     evaluate,
@@ -49,14 +49,14 @@ async function pendingWrite(evaluate, signal, selector, configuration, fileName)
   return { attempt, pending, content, fileName }
 }
 
-async function canonical(evaluate, selector, pending) {
+export async function canonical(evaluate, selector, pending) {
   const page = await ipc(evaluate, route('approvals'), selector)
   const records = page.history.filter((record) => same(identity(record), identity(pending)))
   requireFact(records.length === 1 && records[0].durable, 'C142_SINGLE_DURABLE_CHALLENGE_REQUIRED')
   return records[0]
 }
 
-async function stopAttempt(evaluate, signal, selector, pending) {
+export async function stopAttempt(evaluate, signal, selector, pending) {
   const control = attemptSelector(pending.attempt)
   await fill(
     evaluate,
