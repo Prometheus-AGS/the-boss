@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "issue": 39,
+  "status": "failed",
+  "classification": "operation-harness-executable-path",
+  "executable": "TheBoss",
+  "correctExecutable": "The Boss",
+  "observed": "Exited before PATH registration; private log empty",
+  "doesNotEstablishApplicationFailure": true,
+  "recordedAt": "2026-10-07T08:12:11.232Z"
+}
