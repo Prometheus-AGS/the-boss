@@ -14,12 +14,13 @@ import {
 
 import { capabilityState, scopedRequest, workspace } from './UarDurableAdministrationAdapter'
 import { scopedTeam } from './UarTeamsAdministrationAdapter'
+import type { UarSidecarEndpoint } from './UarSidecarService'
 
 const base = '/api/v1/collaboration'
 
-async function workflowState(workspaceId: string) {
+async function workflowState(workspaceId: string, endpoint?: UarSidecarEndpoint) {
   const resolved = workspace(workspaceId)
-  const { generation } = await capabilityState()
+  const { generation } = await capabilityState(endpoint)
   const capabilities = z
     .object({
       collaboration: z.object({
@@ -34,7 +35,7 @@ async function workflowState(workspaceId: string) {
           .optional()
       })
     })
-    .parse(await scopedRequest(resolved, base + '/capabilities', generation))
+    .parse(await scopedRequest(resolved, base + '/capabilities', generation, 'GET', undefined, endpoint))
   const workflow = capabilities.collaboration.workflowExecution
   return {
     workspaceId: resolved,
@@ -62,12 +63,15 @@ function scopedRun(value: unknown, workspaceId: string, runId?: string): UarWork
   return run
 }
 
-export async function readUarWorkflows(workspaceId: string): Promise<UarWorkflowsSnapshot> {
-  const state = await workflowState(workspaceId)
+export async function readUarWorkflows(
+  workspaceId: string,
+  endpoint?: UarSidecarEndpoint
+): Promise<UarWorkflowsSnapshot> {
+  const state = await workflowState(workspaceId, endpoint)
   if (!state.available) return { ...state, definitions: [], runs: [] }
   const [definitions, runs] = await Promise.all([
-    scopedRequest(state.workspaceId, base + '/workflow-definitions', state.generation),
-    scopedRequest(state.workspaceId, base + '/workflow-runs', state.generation)
+    scopedRequest(state.workspaceId, base + '/workflow-definitions', state.generation, 'GET', undefined, endpoint),
+    scopedRequest(state.workspaceId, base + '/workflow-runs', state.generation, 'GET', undefined, endpoint)
   ])
   return {
     ...state,

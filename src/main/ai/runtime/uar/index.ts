@@ -118,3 +118,5 @@ export {
 } from './UarTeamAuthoringAdapter'
 export { readUarTeamSkillCatalog } from './UarTeamSkillCatalogAdapter'
 export { submitUarTeamTask, readUarTeamApprovals, decideUarTeamApproval } from './UarTeamWorkAdapter'
+
+export { readUarLifecycleSnapshot } from './UarLifecycleAdministrationAdapter'

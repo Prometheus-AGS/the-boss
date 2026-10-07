@@ -6,8 +6,8 @@ The Boss exposes UAR definitions, bindings, instances, runs, teams, tasks, workf
 
 ## What changes
 
-Add a workspace-scoped lifecycle overview in existing UAR settings using the already typed administration snapshots. Link to the existing detail panels. Show only values supported by those snapshots; distinguish unavailable or non-atomic information from confirmed state.
+Add a selected-instance, workspace-scoped lifecycle overview in existing UAR settings through one typed main-process read contract. Inspect any configured UAR without changing Work's execution selection. Link to existing detail panels only when their action owner matches the selected instance. Show only values supported by the runtime; distinguish unavailable or non-atomic information from confirmed state.
 
 ## Scope and ownership
 
-This is a bounded The Boss consumer increment within initiative C14.1, `afc-c14-studio-administration-and-isolated-service-consoles`. It does not complete C14.1's missing authoritative cross-snapshot lineage, explicit budget remaining, or detailed observer failure contracts. UAR remains the runtime authority.
+This is a bounded The Boss consumer increment within initiative C14.1, `afc-c14-studio-administration-and-isolated-service-consoles`. It does not invent authoritative cross-snapshot lineage, budget remaining, workspace approval inventory, or detailed observer failure contracts that UAR does not expose. UAR remains the runtime authority; whole-task completion requires the parent requirements, not this partial delivery.

@@ -18,6 +18,7 @@ import { useQuery } from '@renderer/data/hooks/useDataApi'
 import { ipcApi } from '@renderer/ipc'
 import { getSettingDomId } from '@renderer/pages/settings/settingsSearch/types'
 import type { UarAdministrationSnapshot } from '@shared/types/prometheusIntegration'
+import type { UarInstanceInventorySnapshot } from '@shared/types/uarServiceInstance'
 
 import { UarAgentsPanel } from './UarAgentsPanel'
 import { UarApprovalLifecyclePanel } from './UarApprovalLifecyclePanel'
@@ -154,7 +155,8 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
   const [snapshot, setSnapshot] = useState<UarAdministrationSnapshot>()
   const [error, setError] = useState<string>()
   const [loading, setLoading] = useState(true)
-  const [workspaceId, setWorkspaceId] = useState<string>()
+  const [inventory, setInventory] = useState<UarInstanceInventorySnapshot>()
+  const [inventoryError, setInventoryError] = useState<string>()
   const {
     data: workspaces,
     error: workspaceError,
@@ -180,6 +182,15 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
     }
   }, [])
 
+  const loadInventory = useCallback(async () => {
+    setInventoryError(undefined)
+    try {
+      setInventory(await ipcApi.request('prometheus.uar.instances.read', {}))
+    } catch (cause) {
+      setInventoryError(cause instanceof Error ? cause.message : String(cause))
+    }
+  }, [])
+
   useEffect(() => {
     void load()
   }, [load])
@@ -197,13 +208,27 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
     [surfaces]
   )
   const userWorkspaces = workspaces?.filter((workspace) => workspace.type === 'user') ?? []
-  const selectedWorkspaceId = userWorkspaces.some((workspace) => workspace.id === workspaceId) ? workspaceId : undefined
+  const selectedWorkspaceId = userWorkspaces.some((workspace) => workspace.id === search.adminWorkspaceId)
+    ? search.adminWorkspaceId
+    : undefined
+  const administrationInstanceId = search.adminInstanceId ?? inventory?.selectedInstanceId
+  const administrationInstance = inventory?.instances.find((instance) => instance.id === administrationInstanceId)
+  const detailScopeMatches = Boolean(inventory && administrationInstanceId === inventory.selectedInstanceId)
   const requestedPanel = typeof search.panel === 'string' ? search.panel : undefined
   const selectedId = navigationSurfaces.some((surface) => surface.id === requestedPanel) ? requestedPanel! : 'overview'
   const selected = surfaces.find((surface) => surface.id === selectedId)
   useEffect(() => {
-    if (selectedId === 'local-scoped-observers') void refetchWorkspaces()
-  }, [selectedId, refetchWorkspaces])
+    if (['lifecycle', 'local-scoped-observers'].includes(selectedId)) void refetchWorkspaces()
+    void loadInventory()
+  }, [selectedId, refetchWorkspaces, loadInventory])
+  useEffect(() => {
+    if (selectedId === 'lifecycle' && !search.adminInstanceId && inventory?.selectedInstanceId) {
+      void navigate({
+        search: (previous) => ({ ...previous, adminInstanceId: inventory.selectedInstanceId }),
+        replace: true
+      })
+    }
+  }, [selectedId, search.adminInstanceId, inventory?.selectedInstanceId, navigate])
   const grouped = useMemo(
     () =>
       GROUPS.map((group) => ({
@@ -216,8 +241,8 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
     void navigate({ search: (previous) => ({ ...previous, panel }), replace: false })
   }
 
-  if (loading) return <LoadingWorkspace />
-  if (error || !snapshot) {
+  if (loading && selectedId !== 'lifecycle') return <LoadingWorkspace />
+  if ((error || !snapshot) && selectedId === 'overview') {
     return (
       <div className="space-y-5">
         <SettingGroup>
@@ -228,6 +253,9 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
             {navText(t, 'retry')}
           </Button>
         </SettingGroup>
+        <Button variant="outline" size="sm" onClick={() => selectSurface('lifecycle')}>
+          {navText(t, 'surface.lifecycle')}
+        </Button>
         <UarInstancesPanel />
       </div>
     )
@@ -235,6 +263,13 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
 
   return (
     <div className="min-w-0">
+      {search.adminInstanceId && selectedId !== 'lifecycle' && selectedId !== 'instances' && (
+        <p
+          className="mb-4 rounded-md border border-warning-border bg-warning-subtle p-3 text-sm text-warning-subtle-foreground"
+          role="status">
+          {navText(t, 'lifecycle.detailScope')}
+        </p>
+      )}
       <div className="mb-4 lg:hidden">
         <Select value={selectedId} onValueChange={selectSurface}>
           <SelectTrigger aria-label={navText(t, 'destination')} className="w-full">
@@ -301,6 +336,17 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
               {overview}
               {selected && <CapabilitySurface surface={selected} />}
             </>
+          ) : search.adminInstanceId &&
+            !detailScopeMatches &&
+            selectedId !== 'instances' &&
+            selectedId !== 'lifecycle' ? (
+            <SettingGroup>
+              <SettingTitle>{navText(t, 'lifecycle.detailBlocked')}</SettingTitle>
+              <SettingDescription>{navText(t, 'lifecycle.detailScope')}</SettingDescription>
+              <Button variant="outline" size="sm" className="mt-4" onClick={() => selectSurface('lifecycle')}>
+                {navText(t, 'surface.lifecycle')}
+              </Button>
+            </SettingGroup>
           ) : selectedId === 'runtime-settings' ? (
             <UarRuntimeSettingsPanel />
           ) : selectedId === 'instances' ? (
@@ -322,7 +368,54 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
               <SettingGroup className="mb-4">
                 <SettingTitle>{navText(t, 'durable.workspaceTitle')}</SettingTitle>
                 <SettingDescription>{navText(t, 'durable.workspaceDescription')}</SettingDescription>
-                <Select value={selectedWorkspaceId} onValueChange={setWorkspaceId} disabled={workspacesLoading}>
+                {selectedId === 'lifecycle' && (
+                  <div className="mt-4">
+                    <label htmlFor="uar-administration-instance" className="mb-1.5 block text-sm font-medium">
+                      {navText(t, 'lifecycle.service')}
+                    </label>
+                    <Select
+                      value={administrationInstance?.id}
+                      onValueChange={(adminInstanceId) => {
+                        void navigate({ search: (previous) => ({ ...previous, adminInstanceId }), replace: false })
+                      }}>
+                      <SelectTrigger id="uar-administration-instance" data-ui="uar-administration-instance">
+                        <SelectValue placeholder={navText(t, 'lifecycle.chooseService')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {inventory?.instances.map((instance) => (
+                          <SelectItem key={instance.id} value={instance.id} disabled={!instance.enabled}>
+                            {instance.name} · {instance.id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="mt-2 text-xs text-muted-foreground">{navText(t, 'lifecycle.selectionHelp')}</p>
+                    {inventoryError && (
+                      <p className="mt-2 break-words text-sm text-error" role="alert">
+                        {inventoryError}
+                      </p>
+                    )}
+                    {search.adminInstanceId && !administrationInstance && inventory && (
+                      <p className="mt-2 text-sm text-warning-subtle-foreground" role="status">
+                        {navText(t, 'lifecycle.missingService')}
+                      </p>
+                    )}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button variant="outline" size="sm" onClick={() => void loadInventory()}>
+                        {t('common.refresh')}
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => selectSurface('instances')}>
+                        {navText(t, 'surface.instances')}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                <Select
+                  value={selectedWorkspaceId}
+                  onValueChange={(adminWorkspaceId) => {
+                    void navigate({ search: (previous) => ({ ...previous, adminWorkspaceId }), replace: false })
+                  }}
+                  disabled={workspacesLoading}>
                   <SelectTrigger
                     data-ui="uar-teams-workspace"
                     className="mt-4"
@@ -356,11 +449,15 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
               </SettingGroup>
               {selectedWorkspaceId &&
                 (selectedId === 'lifecycle' ? (
-                  <UarLifecyclePanel
-                    key={selectedWorkspaceId}
-                    workspaceId={selectedWorkspaceId}
-                    onNavigate={selectSurface}
-                  />
+                  administrationInstance?.enabled && (
+                    <UarLifecyclePanel
+                      key={selectedWorkspaceId + ':' + administrationInstance.id}
+                      workspaceId={selectedWorkspaceId}
+                      serviceInstanceId={administrationInstance.id}
+                      detailScopeMatches={detailScopeMatches}
+                      onNavigate={selectSurface}
+                    />
+                  )
                 ) : selectedId === 'teams' ? (
                   <UarTeamsPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
                 ) : selectedId === 'durable-agent-instances' ? (
@@ -368,7 +465,7 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
                 ) : (
                   <UarObserversPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
                 ))}
-              {selected && <MethodCoverage surface={selected} />}
+              {selected && selectedId !== 'lifecycle' && <MethodCoverage surface={selected} />}
             </div>
           ) : ['runs', 'knowledge', 'tools', 'security', 'protocols'].includes(selectedId) ? (
             <>
@@ -382,9 +479,11 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
           )}
         </section>
       </div>
-      <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-        {navText(t, 'runtimeVersion')} {snapshot.uarVersion}
-      </div>
+      {selectedId !== 'lifecycle' && (
+        <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+          {navText(t, 'runtimeVersion')} {snapshot?.uarVersion ?? navText(t, 'durable.unknown')}
+        </div>
+      )}
     </div>
   )
 }

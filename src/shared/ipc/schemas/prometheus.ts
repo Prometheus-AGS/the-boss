@@ -67,6 +67,7 @@ import {
   type UarSettingsSnapshot,
   type UarSettingsUpdateResult
 } from '@shared/types/prometheusIntegration'
+import { uarLifecycleSelectorSchema, type UarLifecycleSnapshot } from '@shared/types/uarLifecycleAdministration'
 import type { UarTeamApprovalHistory } from '@shared/types/uarApprovalRecords'
 import {
   uarChannelObserverActionSchema,
@@ -156,6 +157,10 @@ const teamControlSchema = teamExecutionSelectorSchema.extend({
  * process cannot report.
  */
 export const prometheusRequestSchemas = {
+  'prometheus.uar.lifecycle.snapshot': defineRoute({
+    input: uarLifecycleSelectorSchema,
+    output: z.custom<UarLifecycleSnapshot>()
+  }),
   'prometheus.uar.workflows.snapshot': defineRoute({
     input: uarWorkflowWorkspaceSchema,
     output: uarWorkflowsSnapshotSchema

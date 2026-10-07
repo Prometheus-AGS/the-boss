@@ -14,6 +14,8 @@ import {
   type UarSettingsUpdateResult
 } from '@shared/types/prometheusIntegration'
 
+import type { UarSidecarEndpoint } from './UarSidecarService'
+
 const rawSettingSchema = z.object({
   key: z.string().min(1),
   saved: z.unknown(),
@@ -357,8 +359,10 @@ function isAllowed(method: UarAdministrationMethod): boolean {
  * Project the sidecar manifest through The Boss's closed method/path/scope/apply allowlist.
  * Renderer code receives operation metadata, never an arbitrary fetch surface.
  */
-export async function readUarAdministrationSnapshot(): Promise<UarAdministrationSnapshot> {
-  const endpoint = await application.get('UarSidecarService').resolveSelected()
+export async function readUarAdministrationSnapshot(
+  selectedEndpoint?: UarSidecarEndpoint
+): Promise<UarAdministrationSnapshot> {
+  const endpoint = selectedEndpoint ?? (await application.get('UarSidecarService').resolveSelected())
   return {
     schemaVersion: 1,
     uarVersion: endpoint.uarVersion,
