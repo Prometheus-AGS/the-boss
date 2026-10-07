@@ -518,6 +518,33 @@
       "operation": "not-run",
       "promotion": "not-performed",
       "remainingBoundary": "Current C15 corrected delivery gate must succeed before C14 promotion; C14 merged source still requires its later complete delivery build and operation"
+    },
+    {
+      "recordedAt": "2026-10-07T14:36:49.790Z",
+      "status": "source-only-not-promoted",
+      "purpose": "Incorporate the C15 canonical SkillRef source-pin and provenance commit while retaining the C14 merged approval runtime",
+      "priorBoss": "a678b20b830d5cc800ff8ecc141f5c5a05e33104",
+      "consumedBoss": "6503590cb4e32289654c5ca5ab81f385d3272d50",
+      "preservedUar": "a464c1e7790ba8b29294d3e1a7fb350736f5a4b6",
+      "preservedMiniGitlink": "df8fd71578381b2ac50e7e7cae465b05aaa5f392",
+      "conflictsResolved": [
+        {
+          "path": "build/local-uar-source.json",
+          "incomingRevision": "e4efce59601c93e834a3d58c6b6489aec6149cf1",
+          "resolution": "Retain the C14 merged UAR source containing the incoming SkillRef repair and durable approvals; other pin fields unchanged"
+        }
+      ],
+      "hooks": {
+        "boss": "Per-command core.hooksPath=/dev/null; Oxfmt, ESLint and install hooks not run",
+        "persistentConfigurationChanged": false
+      },
+      "productBuild": "not-run",
+      "compiler": "not-run",
+      "tests": "not-run",
+      "lint": "not-run",
+      "review": "not-run",
+      "operation": "not-run",
+      "promotion": "not-performed"
     }
   ]
 }
