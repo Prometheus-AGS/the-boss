@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { captureSources } from './checkpoints.mjs';
 import { fail, digest, candidateId, candidateDigest, physicalPath, nonempty } from './pipeline-data.mjs';
+import { verifyNestedSources, assertNestedAuthoritiesUnchanged } from './work-ahead-nested-proof.mjs';
 const exec = promisify(execFile);
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 
@@ -31,7 +32,7 @@ export async function verifyRepairedBase(state, item, candidate, input) {
   const future = await captureFutureSources(state, item, input.baseSourceRefs, { exact: true });
   if (digest(evidence.futureSourceRefs) !== digest(future)) fail('Repair evidence differs from actual future checkout sources');
   if (!Array.isArray(evidence.mappings) || evidence.mappings.length !== future.length) fail('Repair evidence needs one explicit mapping for every future checkout');
-  const mapped = new Set();
+  const mapped = new Set(), nestedAuthorityRefs = [];
   for (const ref of future) {
     const mapping = evidence.mappings.find(entry => entry.repository === ref.repository);
     if (!mapping || mapped.has(mapping.repository)) fail('Missing or duplicate future-checkout repair mapping');
@@ -46,10 +47,12 @@ export async function verifyRepairedBase(state, item, candidate, input) {
       if (ref.fingerprint !== predecessor.fingerprint || ref.revision !== predecessor.revision) fail('Exact-snapshot mapping does not contain the repaired predecessor bytes');
       continue;
     }
-    if (mapping.strategy !== 'ancestor') fail('Repair strategy must be ancestor, exact-snapshot, or admitted independent');
+    if (!['ancestor', 'ancestor-with-nested-sources'].includes(mapping.strategy)) fail('Repair strategy must be ancestor, ancestor-with-nested-sources, exact-snapshot, or admitted independent');
+    if (mapping.strategy === 'ancestor-with-nested-sources')
+      nestedAuthorityRefs.push(...await verifyNestedSources(item, candidate, predecessor, ref, mapping));
     // captureSources hashes a clean commit as SHA256(revision). Dirty or nested
     // source content needs exact snapshot proof, or a committed repair/refreeze.
-    if (predecessor.submoduleRefs?.length || predecessor.fingerprint !== sha(predecessor.revision)) fail('Ancestry cannot prove preserved dirty or submodule repair content; use exact-snapshot or commit the repair and refreeze with explicit nested-source reconciliation');
+    if (mapping.strategy === 'ancestor' && (predecessor.submoduleRefs?.length || predecessor.fingerprint !== sha(predecessor.revision))) fail('Ancestry cannot prove preserved dirty or submodule repair content; use exact-snapshot or commit the repair and refreeze with explicit nested-source reconciliation');
     if (mapping.repairedRevision !== predecessor.revision || mapping.futureRevision !== ref.revision) fail('Ancestry mapping must identify the frozen repaired commit and actual future commit');
     try { await exec('git', ['-C', ref.repository, 'merge-base', '--is-ancestor', predecessor.revision, ref.revision], { shell: false }); }
     catch { fail('Future checkout does not descend from the repaired predecessor commit; reconcile its base before promotion'); }
@@ -57,8 +60,10 @@ export async function verifyRepairedBase(state, item, candidate, input) {
   // Re-read after the git observations so an edit during proof collection cannot
   // silently acquire a source-bound reconciliation receipt.
   await captureFutureSources(state, item, future, { exact: true });
+  await assertNestedAuthoritiesUnchanged(nestedAuthorityRefs);
   return { baseSourceRefs: future, evidence: { path: input.evidenceRef, sha256: sha(bytes) },
-    predecessorSourceRefs: structuredClone(candidate.sourceRefs), mappings: structuredClone(evidence.mappings) };
+    predecessorSourceRefs: structuredClone(candidate.sourceRefs), mappings: structuredClone(evidence.mappings),
+    ...(nestedAuthorityRefs.length ? { nestedAuthorityRefs } : {}) };
 }
 
 export async function assertRepairUnchanged(state, item) {
@@ -68,4 +73,9 @@ export async function assertRepairUnchanged(state, item) {
   const bytes = await fs.readFile(repaired.evidence.path);
   if (sha(bytes) !== repaired.evidence.sha256) fail('Repaired-base evidence changed; record a new reconciliation before promotion');
   await captureFutureSources(state, item, repaired.baseSourceRefs, { exact: true });
+  const authorities = repaired.mappings?.flatMap(mapping => mapping.strategy === 'ancestor-with-nested-sources'
+    ? (mapping.nestedMappings ?? []).filter(entry => entry.strategy === 'authorized-replacement').map(entry => entry.authorityRef) : []) ?? [];
+  const ordered = refs => [...refs].sort((a, b) => a.path.localeCompare(b.path) || a.sha256.localeCompare(b.sha256));
+  if (digest(ordered(authorities)) !== digest(ordered(repaired.nestedAuthorityRefs ?? []))) fail('Historical nested replacement proof lacks captured authority hashes; reconcile again before promotion');
+  await assertNestedAuthoritiesUnchanged(authorities);
 }
