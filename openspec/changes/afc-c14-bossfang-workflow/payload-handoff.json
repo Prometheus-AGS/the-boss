@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "bossfang-workflow-payload-handoff",
+  "status": "driver-authored-effect-resource-prerequisite-blocked",
+  "nativeSource": "/Users/gqadonis/Projects/prometheus/worktrees/afc-c14-workflow-delegation",
+  "bossSource": "/Users/gqadonis/Projects/prometheus/worktrees/afc-c14-bossfang-workflow",
+  "rootOwned": [
+    "build/integration-sources.json",
+    "build/integration-artifacts.json",
+    "native source freeze and immutable platform records",
+    "compiled embedded dashboard assets",
+    "one completed-boundary package and actual operation"
+  ],
+  "requiredRecordFields": [
+    "sourceCommit",
+    "target",
+    "executable",
+    "asset",
+    "bytes",
+    "sha256",
+    "features",
+    "dashboard.embedded",
+    "dashboard.basePath",
+    "dashboard.files",
+    "uarLifecycle"
+  ],
+  "requiredBossPackageMetadata": [
+    "source",
+    "url",
+    "sha256",
+    "dashboard.embedded",
+    "dashboard.basePath",
+    "dashboard.configurationAssets",
+    "uarLifecycle"
+  ],
+  "expectedNativeSource": null,
+  "builtPlatformRecord": null,
+  "payloadPinsChangedByOperationWriter": false,
+  "priorBoundary": "bossfang-remaining-boundary-20261006-v10/composite-operation-evidence.json",
+  "executionProfile": "ordinary bound agent; no inline diagnostic or experimental opt-in",
+  "operationEntrypoint": "scripts/operate-bossfang-workflow-delegation.mjs",
+  "arguments": ["--boss", "--launcher", "--output", "--bossfang-source", "--prior-receipt"],
+  "gatewayEnvironment": "Existing inherited BOSS_C142_* references; credential values are never persisted in this handoff or evidence.",
+  "boundDefinitionIdentityProcedure": "Configure the existing real gateway model, select its native provider default, call durable.setup_starter, and read definitionId/definitionVersion/definitionDigest from an inert native on_demand durable.create_instance record. Submit no durable turn or activation; disable the owned identity resource during cleanup.",
+  "authoredProcedure": [
+    "Authenticate the actual compiled isolated embedded dashboard using the existing BossFang session.",
+    "Create one disposable ordinary workflow, choose uar_bound and fill exact binding/workspace/definition fields through Canvas, save and read native persistence.",
+    "Run from the ordinary workflow UI; observe original native UAR task/thread/root/run, delegation and workflow/step IDs and actual visible output; check ordinary engine output settlement.",
+    "Start a second tool-free ordinary inference and cancel from its original owning delegation UI with confirmation; require native acknowledgment and terminal cleanup settlement.",
+    "Report C14W_ADMITTED_EFFECT_RESOURCE_PATH_UNAVAILABLE without claiming approval/effect acceptance; preserve failed receipts and all actual prior checks.",
+    "Cancel remaining owned disposable runs if necessary, disable inert identity resource, stop only the BossFang process this procedure started, and retain original Work selection/UAR PID/start/port."
+  ],
+  "remainingPrerequisite": "API peer confirms no supported effect resource seam in this increment: scoped BossFang cannot attach paired-host tool_admission and managed native file tools are disabled. Root must identify/adopt an existing admitted effect resource path before authoritative approval/effect acceptance can be authored. Do not forward paired-host credentials or enable file tools as a workaround.",
+  "checksOrOperationsRunByAuthor": false,
+  "fullRequestedAcceptanceImplemented": false,
+  "nativeWindowsInstalledAcceptance": "separate-unclaimed",
+  "publication": "separate-unclaimed"
+}
