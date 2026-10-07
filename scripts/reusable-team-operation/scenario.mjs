@@ -303,6 +303,10 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
       signal,
       async () => {
         const value = await execution()
+        const current = (await snapshot()).instances.find((item) => item.id === instance.id)
+        const cancelledTask = current?.tasks.find((task) => task.role === 'coordinator' && task.status === 'cancelled' && instance.tasks.some((initial) => initial.id === task.id && initial.role === 'coordinator'))
+        if (cancelledTask) evidence.cancelledCoordinatorTask = { ...selector, taskId: cancelledTask.id, memberId: cancelledTask.assigneeMemberId, status: cancelledTask.status }
+        requireFact(!cancelledTask, 'C15_REAL_COORDINATOR_TASK_CANCELLED')
         if (value.attempts.some((item) => ['failed', 'cancelled', 'uncertain'].includes(item.status))) {
           evidence.failedExecution = { ...selector, attempts: value.attempts.map(attemptFailureEvidence) }
           write(configuration.evidence + '.attempt-failure.json', evidence.failedExecution)
@@ -310,7 +314,6 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
         }
         await approvalOperator.handle()
         await live.capture(value.attempts)
-        const current = (await snapshot()).instances.find((item) => item.id === instance.id)
         const finished = value.attempts.filter(
           (item) => item.status === 'succeeded' || item.executionOutcome === 'succeeded'
         )
