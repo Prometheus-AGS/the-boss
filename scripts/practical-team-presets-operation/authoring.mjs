@@ -49,7 +49,8 @@ export async function authorPreset({ evaluate, signal, selected, configuration, 
       '\nRead README.md directly with filesystem__read. Do not list directories or use glob or grep.')
   }
   await click(evaluate, signal, memberSelector('reviewer') +
-    ' [data-ui~="team-authoring-skill"][data-skill-digest="' + skill.skillRef.digest + '"] [role="checkbox"]')
+    ' [data-ui~="team-authoring-skill"][data-skill-id="' + skill.skillId +
+    '"][data-skill-digest="' + skill.skillRef.digest + '"] [role="checkbox"]')
   await click(evaluate, signal, '[data-ui~="team-authoring-save"]')
   const first = await waitFor(signal, async () => (await authoring()).revisions.find((item) => item.team.title === title),
     'C16_PRACTICAL_PRESET_SAVE_UNAVAILABLE')
