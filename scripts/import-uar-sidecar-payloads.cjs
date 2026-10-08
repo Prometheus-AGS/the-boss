@@ -200,7 +200,13 @@ async function main() {
   const uarTool = { ...existing, version: expectedVersion, packages: nextPackages }
   const nextManifest = {
     ...manifest,
-    sources: { ...manifest.sources, uar: { ...uarSource } },
+    sources: {
+      ...manifest.sources,
+      uar: {
+        ...uarSource,
+        platformRevisions: Object.fromEntries(Object.entries(nextPackages).map(([platform, asset]) => [platform, asset.source]))
+      }
+    },
     tools: matches.length === 0 ? [...tools, uarTool] : tools.map((tool) => (tool === existing ? uarTool : tool))
   }
   fs.writeFileSync(manifestPath, `${JSON.stringify(nextManifest, null, 2)}\n`)
