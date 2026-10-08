@@ -1,5 +1,7 @@
 import * as z from 'zod'
 
+import { uarReviewedModelPolicySchema } from './uarTeamModelPolicy'
+
 import type {
   UarTeamCommandReceipt,
   UarTeamContextReceipt,
@@ -375,6 +377,8 @@ export const uarAuthoredTeamSchema = z
               })
               .strict()
               .optional(),
+            reviewedModelPolicy: uarReviewedModelPolicySchema.optional(),
+            modelPolicyMode: z.enum(['reviewed', 'manual']).optional(),
             tools: z.array(
               z.enum([
                 'filesystem__glob',
@@ -404,6 +408,20 @@ export const uarAuthoredTeamSchema = z
         path: ['members'],
         message: 'Exactly one coordinator and unique member roles are required'
       })
+    value.members.forEach((member, index) => {
+      if (
+        member.modelPolicyMode === 'reviewed' &&
+        (!member.reviewedModelPolicy ||
+          member.model?.source !== member.reviewedModelPolicy.selection.source ||
+          member.model?.providerId !== member.reviewedModelPolicy.selection.providerId ||
+          member.model?.modelId !== member.reviewedModelPolicy.selection.modelId)
+      )
+        context.addIssue({
+          code: 'custom',
+          path: ['members', index, 'model'],
+          message: 'Reviewed model selection must match its exact recommendation'
+        })
+    })
     if (value.members.some((member) => member.role === 'coordinator' && member.tools.length))
       context.addIssue({
         code: 'custom',

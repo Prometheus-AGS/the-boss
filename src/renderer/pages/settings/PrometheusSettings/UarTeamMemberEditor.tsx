@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { Button, Checkbox, Input, Textarea } from '@cherrystudio/ui'
 import { UarTeamModelPicker } from '@renderer/components/uarTeams/UarTeamModelPicker'
+import { UarTeamReviewedModelPolicy } from '@renderer/components/uarTeams/UarTeamReviewedModelPolicy'
 import { ipcApi } from '@renderer/ipc'
 import type { UarAuthoredTeam, UarTeamSkillCatalog } from '@shared/types/uarTeams'
 
@@ -92,10 +93,23 @@ export function UarTeamMemberEditor({
         value={member.instructions}
         onChange={(event) => onChange({ ...member, instructions: event.target.value })}
       />
+      <UarTeamReviewedModelPolicy
+        value={member.reviewedModelPolicy}
+        mode={member.modelPolicyMode}
+        disabled={disabled}
+        onError={onError}
+        onReview={(reviewedModelPolicy) => onChange({ ...member, reviewedModelPolicy, modelPolicyMode: undefined })}
+        onAccept={() => {
+          if (member.reviewedModelPolicy)
+            onChange({ ...member, model: member.reviewedModelPolicy.selection, modelPolicyMode: 'reviewed' })
+        }}
+      />
       <UarTeamModelPicker
         value={member.model}
         disabled={disabled}
-        onChange={(model) => onChange({ ...member, model })}
+        onChange={(model) =>
+          onChange({ ...member, model, ...(member.reviewedModelPolicy ? { modelPolicyMode: 'manual' as const } : {}) })
+        }
       />
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium">{tr('tools')}</legend>

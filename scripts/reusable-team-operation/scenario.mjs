@@ -495,3 +495,5 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     })
   }
 }
+
+export { click, fill, choose, ipc, openWork, openAuthoring, setup, selectTeam }

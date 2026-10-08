@@ -130,7 +130,15 @@ export async function compileAuthoredTeam(team: UarAuthoredTeam, revision: numbe
               responsibility: member.responsibility,
               instructions,
               skills: member.skills,
-              tools: member.tools
+              tools: member.tools,
+              ...(member.reviewedModelPolicy
+                ? {
+                    reviewedModelPolicy: member.reviewedModelPolicy.digest,
+                    reviewedModelSource: member.reviewedModelPolicy.sourceDigest,
+                    modelPolicyMode: member.modelPolicyMode,
+                    model: member.model
+                  }
+                : {})
             })
           ),
           revision: null

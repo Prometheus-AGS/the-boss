@@ -244,7 +244,12 @@ export function UarTeamAuthoringPanel({
             <Button
               variant="outline"
               data-ui="team-authoring-deploy"
-              disabled={busy || !saved || Boolean(dirty) || draft.members.some((member) => !member.model)}
+              disabled={
+                busy ||
+                !saved ||
+                Boolean(dirty) ||
+                draft.members.some((member) => !member.model || (member.reviewedModelPolicy && !member.modelPolicyMode))
+              }
               onClick={() => void deploy()}>
               {tr('deploy')}
             </Button>

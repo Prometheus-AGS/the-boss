@@ -11,7 +11,11 @@ import type { UarTeamModelSelection } from '@shared/types/uarTeams'
 import { providerResponseSchema, readUarModelSources } from './UarModelSourceAdapter'
 
 /** Resolve only a selected, currently advertised model; credentials remain in main and UAR's protected provider store. */
-export async function configureTeamModel(selection: UarTeamModelSelection, generation: number) {
+export async function configureTeamModel(
+  selection: UarTeamModelSelection,
+  generation: number,
+  reviewedTarget?: { providerId: string; modelId: string }
+) {
   const catalog = await readUarModelSources()
   if (catalog.generation !== generation) throw new Error('UAR instance changed during team model selection')
   const sidecar = application.get('UarSidecarService')
@@ -41,6 +45,11 @@ export async function configureTeamModel(selection: UarTeamModelSelection, gener
   const config = readIntegrationConfig()
   const pricingIdentity = configuredModelForLiterAlias(config, model.id)
   if (!pricingIdentity) throw new Error('UAR_TEAM_MODEL_PRICING_UNAVAILABLE')
+  if (
+    reviewedTarget &&
+    (pricingIdentity.providerId !== reviewedTarget.providerId || pricingIdentity.modelId !== reviewedTarget.modelId)
+  )
+    throw new Error('UAR_TEAM_MODEL_POLICY_TARGET_MISMATCH')
   const secrets = await readSecrets()
   if (!secrets.literKey?.trim())
     throw new Error('Configure the liter-llm gateway credential before setting up the team')
