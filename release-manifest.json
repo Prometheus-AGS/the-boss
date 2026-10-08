@@ -11,10 +11,8 @@
     "darwin-x64"
   ],
   "source": "8f8effe327f0db6a845d5efc7bbf23f6c8fa04f8",
-  "publishedAt": "2026-10-08T19:07:34.570Z",
-  "pendingPlatforms": [
-    "darwin-x64"
-  ],
+  "publishedAt": "2026-10-08T19:53:10.990Z",
+  "pendingPlatforms": [],
   "artifacts": [
     {
       "name": "The-Boss-2.2.18-mac-arm64.dmg",
@@ -46,6 +44,17 @@
       "signing": "unsigned",
       "profile": "uar-enabled",
       "platform": "win32",
+      "arch": "x64",
+      "source": "8f8effe327f0db6a845d5efc7bbf23f6c8fa04f8"
+    },
+    {
+      "name": "The-Boss-2.2.18-mac-x64.dmg",
+      "size": 746825561,
+      "sha256": "b8a6c8807d45dbbf80aaedc9d589fb9aa95a0ca40c0910674a345d8a8159df53",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.18/The-Boss-2.2.18-mac-x64.dmg",
+      "signing": "Developer ID (notarized)",
+      "profile": "uar-enabled",
+      "platform": "darwin",
       "arch": "x64",
       "source": "8f8effe327f0db6a845d5efc7bbf23f6c8fa04f8"
     }
