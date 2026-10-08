@@ -44,6 +44,9 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
+      - name: Enable long paths for the pinned UAR checkout
+        if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
       - uses: actions/checkout@v7
         with:
           repository: Prometheus-AGS/universal-agent-runtime
