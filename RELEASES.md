@@ -5,7 +5,7 @@ Each entry records the exact source commit, artifact checksum, size, and signing
 
 <!-- releases:newest-first -->
 
-## v2.2.19 — 2026-10-08T21:52:03.593Z
+## v2.2.19 — 2026-10-08T21:52:05.958Z
 
 Profile: uar-enabled
 
