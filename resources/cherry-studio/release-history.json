@@ -1,5 +1,9 @@
 [
   {
+    "version": "2.2.20",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.20 - Practical team presets\n\n- [Teams] Add product research, marketing/brand, logo/design, mobile design and customer-feedback presets with bounded deliverables and a separate reviewer.\n- [Configuration] Preserve explicit models, reviewed skills, knowledge, tools and project scope through existing immutable team authoring.\n- [Feedback] Prepare issue drafts and connector requirements only; presets do not create GitHub issues or grant publishing authority.\n- [Delivery] Local delivery preparation only; practical-team packaged operation and native Windows acceptance remain pending.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.20 - 实用团队预设\n\n- [团队] 添加产品研究、营销／品牌、标志／设计、移动设计和客户反馈预设，包含有界交付内容和独立审查角色。\n- [配置] 通过现有不可变团队创作流程，保留明确选择的模型、已审阅技能、知识、工具和项目范围。\n- [反馈] 仅准备问题草稿和连接器要求；预设不会创建 GitHub 问题，也不会授予发布权限。\n- [交付] 仅完成本地交付准备；实用团队打包操作和原生 Windows 验收仍待完成。\n<!--LANG:END-->"
+  },
+  {
     "version": "2.2.19",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.19 - Specialist team authoring\n\n- [Teams] Author bounded specialist delivery teams with coordinator, product, UI/UX, mobile, security, documentation and code-review roles.\n- [Guidance] Preserve project-relative scope, output instructions and evidence instructions for each member in immutable team revisions.\n- [Delivery] Local delivery preparation only; packaged operation and installer acceptance remain pending.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.19 - 专家团队创作\n\n- [团队] 创建由协调、产品、UI/UX、移动端、安全、文档和代码审查角色组成的有界专家交付团队。\n- [指导] 在不可变的团队修订中保留每位成员的项目相对范围、输出说明和证据说明。\n- [交付] 仅完成本地交付准备；打包操作和安装程序验收仍待完成。\n<!--LANG:END-->"
   },
