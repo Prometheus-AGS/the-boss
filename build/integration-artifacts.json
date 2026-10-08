@@ -1957,10 +1957,10 @@
           "uarLifecycle": "connection-only"
         },
         "win32-arm64": {
-          "source": "3282e40815c36b60897ca55b2e5691bae9984940",
-          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-3282e4081/bossfang-win32-arm64.exe",
-          "sha256": "4fd86338a552ee706c1fb7315f4de516f795aac6d33b4873d8a435be02a99404",
-          "size": 166126592,
+          "source": "dab625b6802c3ad03f3a00b365647c698cf3036b",
+          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-dab625b68/bossfang-win32-arm64.exe",
+          "sha256": "e68d6f92500466b16b83d20348597225e3689b15ebc7c3a4270bfd056e242058",
+          "size": 166135808,
           "archive": "none",
           "binaries": [
             "bossfang.exe"
@@ -3382,10 +3382,10 @@
           "uarLifecycle": "connection-only"
         },
         "win32-x64": {
-          "source": "3282e40815c36b60897ca55b2e5691bae9984940",
-          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-3282e4081/bossfang-win32-x64.exe",
-          "sha256": "5cad5c14ad3fc63d70a3710142d8c9e863f61e83166c8f302fabfdca7596082d",
-          "size": 185676800,
+          "source": "dab625b6802c3ad03f3a00b365647c698cf3036b",
+          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-dab625b68/bossfang-win32-x64.exe",
+          "sha256": "060e3d481dc1b2e855d4568cc01c16e9728b18695185b283d0f4813e21f0ea08",
+          "size": 185672192,
           "archive": "none",
           "binaries": [
             "bossfang.exe"
