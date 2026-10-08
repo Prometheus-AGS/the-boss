@@ -76,3 +76,9 @@ Limits remain explicit: this operation exercised renderer reload, not a full app
 - [ ] 8. Lead-owned complete application build and focused packaged reviewed-policy import/accept/manual-choice/save/deploy/run/reopen operation.
 
 This source increment follows the already accepted authoring delivery. Tasks 6–7 are implementation bookkeeping only; task 8 remains required for acceptance. No standalone tests, lint, compiler checks, builds, reviewers or operation have run for this bridge. The operator-approved per-command hook override prevents automatic install/build/lint during signed Git mutations and changes no persistent hook configuration. Cadence/KBD and C15 parent completion remain lead-owned. No release version or pin is changed.
+
+### C15.1 custom-alias selector-result compatibility correction
+
+Retain the existing supported nullable provider/catalog-model result for configured custom aliases. Capture the enabled configured target separately in the private receipt, preserve raw source/result identity and unknown metadata, include new binding provenance in immutable compilation, and compare that frozen target at reviewed deployment and in the focused procedure. Older fully mapped receipts stay readable without rewriting prior definitions. Manual choice and native pricing/accounting/governance remain unchanged.
+
+Latest fork main `12a2fae9675e34b88e9373caa2bca9959f416493` still lacks `openai/gpt-6.1-sol`; a dependency refresh cannot supply that missing identity. No existing tier annotation was found for this custom alias, so no role constraints were relaxed to manufacture a selected result. Source implementation remains separate from lead-owned task 8 acceptance. No tests, checks, builds, reviewers or operation executed; signed Git mutations disable hooks per command only.

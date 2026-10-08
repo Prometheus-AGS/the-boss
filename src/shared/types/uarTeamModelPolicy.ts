@@ -8,8 +8,8 @@ const model = z.object({ source: z.literal('gateway'), providerId: text, modelId
 export const uarReviewedModelResultSchema = z.object({
   selected: z.object({
     id: text,
-    provider: text,
-    catalogId: text,
+    provider: text.nullable(),
+    catalogId: text.nullable(),
     available: z.literal(true),
     tier: z.enum(['low', 'medium', 'hard']).nullable(),
     capabilities: z.record(z.string(), z.boolean()),
@@ -40,6 +40,11 @@ export const uarReviewedModelPolicySchema = z.object({
   sourceJson: z.string().min(1).max(8 * 1024 * 1024),
   digest: z.string().regex(/^sha256:[a-f0-9]{64}$/),
   result: uarReviewedModelResultSchema,
+  bindingTarget: z.object({
+    source: z.literal('enabled-configured-gateway-alias'),
+    providerId: text,
+    modelId: text
+  }).strict().optional(),
   selection: model
 }).strict()
 

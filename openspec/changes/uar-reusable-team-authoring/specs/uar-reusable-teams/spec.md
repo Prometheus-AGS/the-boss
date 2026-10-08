@@ -31,7 +31,7 @@ A deployed team SHALL appear in Work through the ordinary UAR team snapshot and 
 The existing reusable-team editor SHALL import the supported agent-team-creator models-select result without duplicating role guidance or model selection. It SHALL retain the original result/source digest, effective policy, rationale and metadata, and SHALL distinguish an imported recommendation, explicit acceptance and manual model choice.
 
 #### Scenario: Accept the exact configured recommendation
-- **WHEN** an operator imports a reviewed result whose selected wire alias is advertised by the configured liter-llm gateway and whose provider/catalog-model identity matches its enabled target
+- **WHEN** an operator imports a reviewed result whose selected wire alias is advertised by the configured liter-llm gateway and whose non-null provider/catalog-model identity matches its enabled target
 - **THEN** import shows a pending recommendation without changing the selected model, and Use recommendation selects that exact model through the existing picker/binding path.
 
 #### Scenario: Retain a manual choice
@@ -41,3 +41,7 @@ The existing reusable-team editor SHALL import the supported agent-team-creator 
 #### Scenario: Preserve policy identity across deployment and reopen
 - **WHEN** the operator saves, deploys and runs an accepted recommendation and later reopens the editor
 - **THEN** the private record retains the original JSON/source digest and policy/result digest, the real attempt receipts identify the exact wire alias and pricing provider/model, and prior authored revisions and run identities remain immutable with credentials outside portable definitions.
+
+#### Scenario: Retain a configured custom alias with unknown catalog metadata
+- **WHEN** the existing selector selects an unmapped served alias under declared constraints that permit unknown metadata
+- **THEN** import retains its nullable catalog identity, unknown capabilities/prices and original policy/rationale without filling them; a separate private receipt freezes its exact enabled configured provider/model target, and reviewed deployment rejects a changed target while preserving existing pricing/accounting checks.

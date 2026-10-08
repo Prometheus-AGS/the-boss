@@ -29,7 +29,7 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     const authoring = () => ipc(evaluate, route('authoring'), {})
     const snapshot = () => ipc(evaluate, route('snapshot'), { workspaceId: selected.workspaceId })
     const result = JSON.parse(configuration.reviewedSource)
-    requireFact(result.selected?.id === configuration.gateway.alias && result.selected.provider === configuration.gateway.providerId && result.selected.catalogId === configuration.gateway.modelId, 'C15_REVIEWED_EXACT_CONFIGURED_IDENTITY_REQUIRED')
+    requireFact(result.selected?.id === configuration.gateway.alias && (result.selected.provider === null || result.selected.provider === configuration.gateway.providerId) && (result.selected.catalogId === null || result.selected.catalogId === configuration.gateway.modelId), 'C15_REVIEWED_EXACT_CONFIGURED_IDENTITY_REQUIRED')
     await openAuthoring(evaluate, signal, selected.workspaceId)
     await click(evaluate, signal, '[data-ui~="team-authoring-new-product-design"]')
     await fill(evaluate, signal, '[data-ui~="team-authoring-name"]', configuration.marker)
@@ -50,6 +50,9 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     const first = await waitFor(signal, async () => (await authoring()).revisions.find((item) => item.team.title === configuration.marker), 'C15_REVIEWED_POLICY_SAVE_UNAVAILABLE')
     requireFact(first.team.members.every((member) => member.modelPolicyMode === 'reviewed' && same(member.model, selected.model) && member.reviewedModelPolicy?.sourceDigest === evidence.reviewedSourceDigest && same(member.reviewedModelPolicy.result, first.team.members[0].reviewedModelPolicy.result)), 'C15_REVIEWED_POLICY_NOT_PERSISTED')
     requireFact(first.team.members[0].reviewedModelPolicy.sourceJson === configuration.reviewedSource && first.team.members[0].reviewedModelPolicy.result.explanation === result.explanation, 'C15_REVIEWED_POLICY_RESULT_CHANGED')
+    requireFact(first.team.members.every((member) => member.reviewedModelPolicy.bindingTarget?.source === 'enabled-configured-gateway-alias' && member.reviewedModelPolicy.bindingTarget.providerId === configuration.gateway.providerId && member.reviewedModelPolicy.bindingTarget.modelId === configuration.gateway.modelId), 'C15_REVIEWED_BINDING_TARGET_NOT_RETAINED')
+    const bindingTarget = first.team.members[0].reviewedModelPolicy.bindingTarget
+    evidence.reviewedBindingTarget = bindingTarget
     evidence.policyDigest = first.team.members[0].reviewedModelPolicy.digest
     evidence.checks.push('existing-editor-distinguishes-import-from-exact-accepted-model')
     stage = 'explicit-manual-override'
@@ -99,7 +102,7 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
       roles.slice(1).every((role) => attempts.some((item) => memberRoles[item.memberId] === role)) &&
       attempts.every((attempt) => attempt.effectiveModels?.length && attempt.effectiveModels.every(
         (model) => model.support === 'validated' && model.supportEvidenceRef && model.wireModelAlias === result.selected.id &&
-          model.pricingIdentity?.providerId === result.selected.provider && model.pricingIdentity?.modelId === result.selected.catalogId && model.pricingIdentity.catalogRevision
+          model.pricingIdentity?.providerId === bindingTarget.providerId && model.pricingIdentity?.modelId === bindingTarget.modelId && model.pricingIdentity.catalogRevision
       )),
       'C15_EFFECTIVE_MODEL_DIFFERS_FROM_REVIEWED_IDENTITY'
     )

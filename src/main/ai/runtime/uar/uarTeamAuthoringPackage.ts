@@ -135,6 +135,9 @@ export async function compileAuthoredTeam(team: UarAuthoredTeam, revision: numbe
                 ? {
                     reviewedModelPolicy: member.reviewedModelPolicy.digest,
                     reviewedModelSource: member.reviewedModelPolicy.sourceDigest,
+                    ...(member.reviewedModelPolicy.bindingTarget
+                      ? { reviewedModelBindingTarget: member.reviewedModelPolicy.bindingTarget }
+                      : {}),
                     modelPolicyMode: member.modelPolicyMode,
                     model: member.model
                   }

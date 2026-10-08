@@ -19,7 +19,7 @@ import { document, starterBinding, revisedStarterBinding } from './uarStarterDoc
 import { compileAuthoredTeam, teamAuthoringTemplates } from './uarTeamAuthoringPackage'
 import { readAuthoredTeamRecords, projectAuthoredTeam, saveAuthoredTeamRecord } from './uarTeamAuthoringStore'
 import { configureTeamModel } from './uarTeamModelSetup'
-import { assertReviewedModelPolicy } from './uarTeamReviewedModelPolicy'
+import { assertReviewedModelPolicy, reviewedModelBindingTarget } from './uarTeamReviewedModelPolicy'
 import { planningState } from './UarTeamsAdministrationAdapter'
 import { resolveAuthoredTeamSkills } from './UarTeamSkillCatalogAdapter'
 
@@ -116,11 +116,11 @@ export async function deployUarAuthoredTeam(input: {
     if (!member.model) throw new Error('UAR_TEAM_MODEL_REQUIRED: ' + member.role)
     if (member.reviewedModelPolicy && !member.modelPolicyMode)
       throw new Error('UAR_TEAM_MODEL_POLICY_CHOICE_REQUIRED: ' + member.role)
-    const selected = member.modelPolicyMode === 'reviewed' ? member.reviewedModelPolicy?.result.selected : undefined
+    const reviewed = member.modelPolicyMode === 'reviewed' ? member.reviewedModelPolicy : undefined
     const model = await configureTeamModel(
       member.model,
       state.generation,
-      selected ? { providerId: selected.provider, modelId: selected.catalogId } : undefined
+      reviewed ? reviewedModelBindingTarget(reviewed) : undefined
     )
     modelBindings.push({
       requestedAlias: 'role:' + member.role,

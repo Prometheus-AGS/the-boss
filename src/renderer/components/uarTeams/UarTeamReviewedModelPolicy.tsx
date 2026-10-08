@@ -72,12 +72,12 @@ export function UarTeamReviewedModelPolicy({
           data-policy-mode={mode ?? 'pending'}
           data-recommended-model={value.selection.modelId}>
           <p className="break-all">
-            {t('recommendation')}: {value.result.selected.provider} / {value.result.selected.catalogId} · {value.selection.modelId}
+            {t('recommendation')}: {value.selection.modelId}
           </p>
           <p>{value.result.explanation}</p>
           <details>
             <summary className="cursor-pointer">{t('details')}</summary>
-            <pre className="mt-2 whitespace-pre-wrap break-all">{JSON.stringify(value.result, null, 2)}</pre>
+            <pre className="mt-2 whitespace-pre-wrap break-all">{JSON.stringify(value.bindingTarget ? { result: value.result, bindingTarget: value.bindingTarget } : value.result, null, 2)}</pre>
           </details>
           {value.result.warnings.map((warning, index) => (
             <p key={index} className="text-warning-subtle-foreground">{warning}</p>

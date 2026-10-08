@@ -51,12 +51,23 @@ export async function assertReviewedModelPolicy(policy: UarReviewedModelPolicy) 
     policy.selection.modelId !== policy.result.selected.id
   )
     throw new Error('UAR_TEAM_MODEL_POLICY_IDENTITY_MISMATCH')
+  reviewedModelBindingTarget(policy)
 }
 
-function assertReviewedModelTarget(policy: UarReviewedModelPolicy) {
-  const target = configuredModelForLiterAlias(readIntegrationConfig(), policy.selection.modelId)
-  if (target?.providerId !== policy.result.selected.provider || target?.modelId !== policy.result.selected.catalogId)
+export function reviewedModelBindingTarget(policy: UarReviewedModelPolicy): { providerId: string; modelId: string } {
+  const selected = policy.result.selected
+  const target = policy.bindingTarget ?? (
+    selected.provider !== null && selected.catalogId !== null
+      ? { providerId: selected.provider, modelId: selected.catalogId }
+      : undefined
+  )
+  if (
+    !target ||
+    (selected.provider !== null && selected.provider !== target.providerId) ||
+    (selected.catalogId !== null && selected.catalogId !== target.modelId)
+  )
     throw new Error('UAR_TEAM_MODEL_POLICY_TARGET_MISMATCH')
+  return { providerId: target.providerId, modelId: target.modelId }
 }
 
 /** Bridge an operator-reviewed skill result; selection and inference remain in their existing owners. */
@@ -72,6 +83,8 @@ export async function reviewUarTeamModelPolicy(source: string): Promise<UarRevie
       (item) => item.enabled && item.models.some((model) => model.enabled && model.id === result.selected.id)
     )
   if (!provider) throw new Error('UAR_TEAM_MODEL_POLICY_MODEL_UNAVAILABLE')
+  const target = configuredModelForLiterAlias(readIntegrationConfig(), result.selected.id)
+  if (!target) throw new Error('UAR_TEAM_MODEL_POLICY_TARGET_MISMATCH')
   const policy: UarReviewedModelPolicy = {
     schemaVersion: 1,
     source: 'agent-team-creator/models-select',
@@ -79,8 +92,9 @@ export async function reviewUarTeamModelPolicy(source: string): Promise<UarRevie
     sourceJson: source,
     digest: digest(JSON.stringify(result)),
     result,
+    bindingTarget: { source: 'enabled-configured-gateway-alias', ...target },
     selection: { source: 'gateway', providerId: provider.id, modelId: result.selected.id }
   }
-  assertReviewedModelTarget(policy)
+  reviewedModelBindingTarget(policy)
   return policy
 }
