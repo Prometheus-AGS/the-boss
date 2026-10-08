@@ -6,7 +6,11 @@ import { pathToFileURL } from 'node:url'
 
 import { digest, write, requireFact, gatewayEnvironment } from './reusable-team-operation/io.mjs'
 
-export async function operate(args = process.argv.slice(2)) {
+export async function operate(
+  args = process.argv.slice(2),
+  scenarioUrl = new URL('./reusable-team-operation/scenario.mjs', import.meta.url),
+  scenarioConfiguration = {}
+) {
   const options = {}
   for (let index = 0; index < args.length; index++) {
     requireFact(
@@ -63,6 +67,7 @@ export async function operate(args = process.argv.slice(2)) {
       appAsarSha256: digest(fs.readFileSync(path.join(resources, 'app.asar'))),
       sidecarSha256: digest(fs.readFileSync(path.join(payload, 'uar-sidecar'))),
       launcherSha256: digest(fs.readFileSync(options.launcher)),
+      selectedScenarioSha256: digest(fs.readFileSync(scenarioUrl)),
       scenarioFiles: Object.fromEntries(
         [
           'operate-reusable-team.mjs',
@@ -82,11 +87,19 @@ export async function operate(args = process.argv.slice(2)) {
     fs.writeFileSync(path.join(workspaceDirectory, 'README.md'), bytes, { flag: 'wx' })
     execFileSync('git', ['init', '--quiet', workspaceDirectory], { stdio: 'ignore' })
     const evidence = path.join(output, 'evidence.json')
-    const configuration = { sourceRefs, gateway, evidence, workspaceDirectory, marker, workspaceSha256: digest(bytes) }
+    const configuration = {
+      ...scenarioConfiguration,
+      sourceRefs,
+      gateway,
+      evidence,
+      workspaceDirectory,
+      marker,
+      workspaceSha256: digest(bytes)
+    }
     const scenarioFile = path.join(output, 'packaged-scenario.mjs')
     fs.writeFileSync(
       scenarioFile,
-      `import {scenario} from ${JSON.stringify(new URL('./reusable-team-operation/scenario.mjs', import.meta.url).href)}\nexport default context=>scenario(context,${JSON.stringify(configuration)})\n`,
+      `import {scenario} from ${JSON.stringify(scenarioUrl.href)}\nexport default context=>scenario(context,${JSON.stringify(configuration)})\n`,
       { flag: 'wx', mode: 0o600 }
     )
     const { launchBoss } = await import(pathToFileURL(options.launcher).href)

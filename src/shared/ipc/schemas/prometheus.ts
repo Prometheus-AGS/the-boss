@@ -24,6 +24,8 @@ import {
   type LiterRoleSnapshot,
   type LiterRoleSourceSelection
 } from '@shared/types/literRoles'
+import { uarReviewedModelPolicySchema } from '@shared/types/uarTeamModelPolicy'
+import { uarReviewedGuidanceSchema } from '@shared/types/uarTeamGuidance'
 import type { PrometheusDoctorReport, PrometheusFixOutcome, PrometheusPushState } from '@shared/types/prometheus'
 import {
   integrationActionSchema,
@@ -425,6 +427,14 @@ export const prometheusRequestSchemas = {
   'prometheus.uar.teams.authoring': defineRoute({
     input: z.object({}).strict(),
     output: z.custom<UarTeamAuthoringSnapshot>()
+  }),
+  'prometheus.uar.teams.review_model_policy': defineRoute({
+    input: z.object({ source: z.string().min(1).max(8 * 1024 * 1024) }).strict(),
+    output: uarReviewedModelPolicySchema
+  }),
+  'prometheus.uar.teams.review_guidance': defineRoute({
+    input: z.object({ source: z.string().min(1).max(8 * 1024 * 1024) }).strict(),
+    output: uarReviewedGuidanceSchema
   }),
   'prometheus.uar.teams.skills': defineRoute({ input: z.object({}).strict(), output: z.custom<UarTeamSkillCatalog>() }),
   'prometheus.uar.teams.select_knowledge': defineRoute({

@@ -1,6 +1,8 @@
 import * as z from 'zod'
 
 import type { UarBindingPosture, UarBindingPreflightDiagnostic } from './uarBindingPosture'
+import { uarGuidanceMappingSchema, uarGuidanceRoles, uarReviewedGuidanceSchema } from './uarTeamGuidance'
+import { uarReviewedModelPolicySchema } from './uarTeamModelPolicy'
 import type {
   UarTeamCommandReceipt,
   UarTeamContextReceipt,
@@ -367,6 +369,8 @@ export const uarAuthoredTeamSchema = z
     template: z.enum(['coding', 'product-design']),
     purpose: z.string().trim().min(1).max(4096),
     instructions: z.string().max(16384),
+    reviewedGuidance: uarReviewedGuidanceSchema.optional(),
+    guidanceMappings: z.array(uarGuidanceMappingSchema).optional(),
     members: z
       .array(
         z
@@ -382,6 +386,8 @@ export const uarAuthoredTeamSchema = z
               })
               .strict()
               .optional(),
+            reviewedModelPolicy: uarReviewedModelPolicySchema.optional(),
+            modelPolicyMode: z.enum(['reviewed', 'manual']).optional(),
             tools: z.array(
               z.enum([
                 'filesystem__glob',
@@ -402,6 +408,27 @@ export const uarAuthoredTeamSchema = z
   })
   .strict()
   .superRefine((value, context) => {
+    const mappings = value.guidanceMappings ?? []
+    const proposals = value.reviewedGuidance ? uarGuidanceRoles(value.reviewedGuidance) : []
+    if (
+      mappings.length &&
+      (
+        !value.reviewedGuidance?.result.ready ||
+        new Set(mappings.map((mapping) => mapping.sourceRole)).size !== mappings.length ||
+        new Set(mappings.map((mapping) => mapping.memberRole)).size !== mappings.length ||
+        mappings.some(
+          (mapping) =>
+            mapping.memberRole === 'coordinator' ||
+            !proposals.some((proposal) => proposal.id === mapping.sourceRole) ||
+            !value.members.some((member) => member.role === mapping.memberRole)
+        )
+      )
+    )
+      context.addIssue({
+        code: 'custom',
+        path: ['guidanceMappings'],
+        message: 'Guidance requires unique explicit non-coordinator mappings from a ready result'
+      })
     if (
       value.members.filter((member) => member.role === 'coordinator').length !== 1 ||
       new Set(value.members.map((member) => member.role)).size !== value.members.length
@@ -411,6 +438,20 @@ export const uarAuthoredTeamSchema = z
         path: ['members'],
         message: 'Exactly one coordinator and unique member roles are required'
       })
+    value.members.forEach((member, index) => {
+      if (
+        member.modelPolicyMode === 'reviewed' &&
+        (!member.reviewedModelPolicy ||
+          member.model?.source !== member.reviewedModelPolicy.selection.source ||
+          member.model?.providerId !== member.reviewedModelPolicy.selection.providerId ||
+          member.model?.modelId !== member.reviewedModelPolicy.selection.modelId)
+      )
+        context.addIssue({
+          code: 'custom',
+          path: ['members', index, 'model'],
+          message: 'Reviewed model selection must match its exact recommendation'
+        })
+    })
     if (value.members.some((member) => member.role === 'coordinator' && member.tools.length))
       context.addIssue({
         code: 'custom',

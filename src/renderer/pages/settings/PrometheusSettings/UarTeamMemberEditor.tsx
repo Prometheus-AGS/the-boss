@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next'
 
 import { Button, Checkbox, Input, Textarea } from '@cherrystudio/ui'
 import { UarTeamModelPicker } from '@renderer/components/uarTeams/UarTeamModelPicker'
+import { UarTeamReviewedModelPolicy } from '@renderer/components/uarTeams/UarTeamReviewedModelPolicy'
 import { ipcApi } from '@renderer/ipc'
+import type { uarGuidanceRoles } from '@shared/types/uarTeamGuidance'
 import type { UarAuthoredTeam, UarTeamSkillCatalog } from '@shared/types/uarTeams'
 
 type Member = UarAuthoredTeam['members'][number]
@@ -20,6 +22,7 @@ export function UarTeamMemberEditor({
   member,
   catalog,
   workspaceId,
+  guidanceRole,
   disabled,
   onChange,
   onRemove,
@@ -28,6 +31,7 @@ export function UarTeamMemberEditor({
   member: Member
   catalog?: UarTeamSkillCatalog
   workspaceId: string
+  guidanceRole?: ReturnType<typeof uarGuidanceRoles>[number]
   disabled: boolean
   onChange: (value: Member) => void
   onRemove: () => void
@@ -92,10 +96,37 @@ export function UarTeamMemberEditor({
         value={member.instructions}
         onChange={(event) => onChange({ ...member, instructions: event.target.value })}
       />
+      <UarTeamReviewedModelPolicy
+        value={member.reviewedModelPolicy}
+        mode={member.modelPolicyMode}
+        disabled={disabled}
+        onError={onError}
+        onReview={(reviewedModelPolicy) => onChange({ ...member, reviewedModelPolicy, modelPolicyMode: undefined })}
+        onAccept={() => {
+          if (member.reviewedModelPolicy)
+            onChange({ ...member, model: member.reviewedModelPolicy.selection, modelPolicyMode: 'reviewed' })
+        }}
+      />
+      {guidanceRole && (
+        <div
+          className="space-y-1 text-xs"
+          data-ui="team-authoring-requested-role-policy"
+          data-source-role={guidanceRole.id}>
+          <p>{tr('guidance.rolePolicy')}</p>
+          <pre className="whitespace-pre-wrap break-all">{JSON.stringify(guidanceRole.modelPolicy ?? null, null, 2)}</pre>
+          <p className="text-muted-foreground">{tr('guidance.manualPolicy')}</p>
+        </div>
+      )}
       <UarTeamModelPicker
         value={member.model}
         disabled={disabled}
-        onChange={(model) => onChange({ ...member, model })}
+        onChange={(model) =>
+          onChange({
+            ...member,
+            model,
+            ...(member.reviewedModelPolicy || guidanceRole ? { modelPolicyMode: 'manual' as const } : {})
+          })
+        }
       />
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium">{tr('tools')}</legend>
@@ -104,6 +135,8 @@ export function UarTeamMemberEditor({
           {tools.map((tool) => (
             <label key={tool} className="flex items-center gap-2 text-xs">
               <Checkbox
+                data-ui="team-authoring-tool"
+                data-tool-name={tool}
                 size="sm"
                 disabled={disabled || member.role === 'coordinator'}
                 checked={member.tools.includes(tool)}

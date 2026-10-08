@@ -59,7 +59,11 @@ export function UarTeamModelPicker({ value, disabled, onChange }: Props) {
     ?.models.find((model) => model.id === value?.modelId)
   const key = (model: UarTeamModelSelection) => JSON.stringify(model)
   return (
-    <div className="mt-3 space-y-2" data-ui="uar-team-model-picker">
+    <div
+      className="mt-3 space-y-2"
+      data-ui="uar-team-model-picker"
+      data-selected-model={value?.modelId}
+      data-selected-source={value?.source}>
       <label htmlFor={id} className="block text-sm font-medium">
         {tr('model')}
       </label>
@@ -74,7 +78,9 @@ export function UarTeamModelPicker({ value, disabled, onChange }: Props) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="planning">{tr('planningBinding')}</SelectItem>
+            <SelectItem value="planning" data-ui="teams-model-planning">
+              {tr('planningBinding')}
+            </SelectItem>
             {choices.map((choice) => (
               <SelectItem
                 key={key(choice.selection)}

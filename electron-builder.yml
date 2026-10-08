@@ -209,16 +209,16 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.15 - BossFang with the shared UAR
+    The Boss 2.2.16 - Reviewed team role guidance
 
-    - [BossFang] Open the embedded BossFang dashboard from Apps and its dedicated settings page.
-    - [Workflows] Delegate workflows to the selected UAR instance using scoped credentials and one approval authority.
-    - [Runtime] Keep UAR process ownership in The Boss and preserve correlated workflow output, approvals and cancellation.
+    - [Teams] Import creator role proposals and explicitly map them to existing coding-team members.
+    - [Configuration] Preserve manual models and resources, original guidance and immutable team revisions.
+    - [Policy] Show requested model policies without claiming unknown strength-tier compliance.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.15 - BossFang 与共享 UAR
+    The Boss 2.2.16 - 已审阅的团队角色建议
 
-    - [BossFang] 从应用列表和专属设置页面打开内嵌的 BossFang 控制台。
-    - [工作流] 使用限定权限的凭证和统一审批机制，将工作流委派给选定的 UAR 实例。
-    - [运行时] 由 The Boss 管理 UAR 进程，并保留关联的工作流输出、审批和取消状态。
+    - [团队] 导入创建工具的角色建议，并明确映射到现有编码团队成员。
+    - [配置] 保留手动选择的模型和资源、原始建议及不可变的团队修订。
+    - [策略] 显示所请求的模型策略，不宣称未知的能力等级已满足要求。
     <!--LANG:END-->

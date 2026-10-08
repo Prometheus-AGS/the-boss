@@ -27,7 +27,7 @@ async function request(evaluate, name, input, stage = 'scope-read') {
   return result.data
 }
 
-function validate(approval, execution, team, initial, selector, artifacts, readScope) {
+function validate(approval, execution, team, initial, selector, artifacts, readScope, permittedRoles) {
   requireFact(['team_delegate', 'team_send', 'filesystem__read', 'filesystem__ls'].includes(approval.toolName), 'C15_APPROVAL_UNSUPPORTED_TOOL_REQUIRES_OPERATOR')
   requireFact(
     team && team.id === initial.id && team.workspaceId === selector.workspaceId && team.ownerId === initial.ownerId &&
@@ -37,7 +37,7 @@ function validate(approval, execution, team, initial, selector, artifacts, readS
   )
   const members = new Map(team.members.filter((member) =>
     initial.members.some((prior) => prior.id === member.id && prior.role === member.role) &&
-    roles.includes(member.role) && !['revoked', 'stopped', 'cancelled'].includes(member.status)
+    permittedRoles.includes(member.role) && !['revoked', 'stopped', 'cancelled'].includes(member.status)
   ).map((member) => [member.id, member]))
   const attempt = execution.attempts.find((item) => item.id === approval.attemptId)
   requireFact(
@@ -104,7 +104,7 @@ function validate(approval, execution, team, initial, selector, artifacts, readS
     argumentFieldsMatch: keys(args, ['commandId', 'recipientMemberId', 'expectedTeamRevision', 'task', 'payload', 'reservation']),
     actorIsCoordinator: members.get(attempt.memberId).role === 'coordinator',
     recipientExists: Boolean(recipient),
-    recipientRoleAllowed: ['product', 'designer', 'reviewer'].includes(recipient?.role),
+    recipientRoleAllowed: permittedRoles.filter((role) => role !== 'coordinator').includes(recipient?.role),
     revisionMatches: args.expectedTeamRevision === team.revision,
     taskFieldsMatch: keys(args.task, ['taskId', 'role', 'input', 'outputContract', 'dependsOn']),
     taskIdValid: id(args.task?.taskId),
@@ -139,7 +139,9 @@ function validate(approval, execution, team, initial, selector, artifacts, readS
     'C15_APPROVAL_RESERVATION_EXCEEDS_SCENARIO_BUDGET')
 }
 
-export function mixedTeamApprovalOperator({ evaluate, signal, selector, instance, instructions, workspaceDirectory }) {
+export function mixedTeamApprovalOperator({ evaluate, signal, selector, instance, instructions, workspaceDirectory, template = 'product-design' }) {
+  requireFact(['coding', 'product-design'].includes(template), 'C15_APPROVAL_EXISTING_TEMPLATE_REQUIRED')
+  const permittedRoles = template === 'coding' ? ['coordinator', 'worker', 'reviewer'] : roles
   requireFact(instructions === readOnlyInstructions, 'C15_APPROVAL_READ_ONLY_CONTEXT_CHANGED')
   const evidence = { instructionSha256: digest(instructions), readOnly: true, approvals: [], requests: [] }
   const handled = new Set()
@@ -163,7 +165,7 @@ export function mixedTeamApprovalOperator({ evaluate, signal, selector, instance
           .find((item) => item.id === instance.id)
         const { artifacts } = await request(evaluate, 'artifacts', selector)
         evidence.requests.push({ approvalId: approval.approvalId, attemptId: approval.attemptId, runId: approval.runId, toolName: approval.toolName, admissionOwner: approval.admissionOwner, argumentsSha256: digest(approval.argumentsJson), observedAt: new Date().toISOString() })
-        validate(approval, execution, team, instance, selector, artifacts, await readScope())
+        validate(approval, execution, team, instance, selector, artifacts, await readScope(), permittedRoles)
         const argumentsSha256 = digest(approval.argumentsJson)
         const latest = (await read('before-click')).approvals.find((item) => item.attemptId === approval.attemptId && item.approvalId === approval.approvalId)
         requireFact(latest && latest.eventId === approval.eventId && latest.cursor === approval.cursor &&
@@ -174,7 +176,7 @@ export function mixedTeamApprovalOperator({ evaluate, signal, selector, instance
           const latestExecution = await request(evaluate, 'execution', selector)
           const latestTeam = (await request(evaluate, 'snapshot', { workspaceId: selector.workspaceId })).instances
             .find((item) => item.id === instance.id)
-          validate(latest, latestExecution, latestTeam, instance, selector, [], await readScope())
+          validate(latest, latestExecution, latestTeam, instance, selector, [], await readScope(), permittedRoles)
           requireFact(digest(JSON.stringify(latest.preparedEffect)) === digest(JSON.stringify(approval.preparedEffect)),
             'C15_APPROVAL_READ_PREPARED_EFFECT_CHANGED')
         }

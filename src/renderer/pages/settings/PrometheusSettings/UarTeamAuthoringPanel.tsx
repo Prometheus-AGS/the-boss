@@ -13,7 +13,9 @@ import {
   Textarea
 } from '@cherrystudio/ui'
 import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/components/SettingsPrimitives'
+import { UarTeamGuidance } from '@renderer/components/uarTeams/UarTeamGuidance'
 import { ipcApi } from '@renderer/ipc'
+import { uarGuidanceRoles, type UarGuidanceMapping } from '@shared/types/uarTeamGuidance'
 import {
   uarAuthoredTeamSchema,
   type UarAuthoredTeam,
@@ -98,6 +100,24 @@ export function UarTeamAuthoringPanel({
     } finally {
       setBusy(false)
     }
+  }
+  const applyGuidance = (mappings: UarGuidanceMapping[]) => {
+    if (!draft?.reviewedGuidance) return
+    const roles = uarGuidanceRoles(draft.reviewedGuidance)
+    const members = [...draft.members]
+    for (const mapping of mappings) {
+      const proposal = roles.find((role) => role.id === mapping.sourceRole)
+      if (!proposal || mapping.memberRole === 'coordinator') return
+      const index = members.findIndex((member) => member.role === mapping.memberRole)
+      if (index < 0) return
+      members[index] = {
+        ...members[index],
+        responsibility: proposal.description,
+        instructions: proposal.prompt,
+        modelPolicyMode: 'manual' as const
+      }
+    }
+    setDraft({ ...draft, members, guidanceMappings: mappings })
   }
   return (
     <SettingGroup data-ui="team-authoring">
@@ -196,20 +216,48 @@ export function UarTeamAuthoringPanel({
             onChange={(event) => setDraft({ ...draft, instructions: event.target.value })}
           />
           <p className="text-xs text-muted-foreground">{tr('scopeHelp')}</p>
-          {draft.members.map((member, index) => (
-            <UarTeamMemberEditor
+          <UarTeamGuidance
+            key={draft.reviewedGuidance?.digest ?? 'empty'}
+            value={draft.reviewedGuidance}
+            mappings={draft.guidanceMappings ?? []}
+            members={draft.members}
+            disabled={busy}
+            onError={report}
+            onReview={(reviewedGuidance) => setDraft({ ...draft, reviewedGuidance, guidanceMappings: [] })}
+            onApply={applyGuidance}
+          />
+          {draft.members.map((member, index) => {
+            const mapping = draft.guidanceMappings?.find((item) => item.memberRole === member.role)
+            const guidanceRole = draft.reviewedGuidance && mapping
+              ? uarGuidanceRoles(draft.reviewedGuidance).find((role) => role.id === mapping.sourceRole)
+              : undefined
+            return <UarTeamMemberEditor
               key={index}
               member={member}
               catalog={catalog}
               workspaceId={workspaceId}
+              guidanceRole={guidanceRole}
               disabled={busy}
               onError={report}
               onChange={(next) =>
-                setDraft({ ...draft, members: draft.members.map((item, at) => (at === index ? next : item)) })
+                setDraft({
+                  ...draft,
+                  members: draft.members.map((item, at) => (at === index ? next : item)),
+                  ...(draft.guidanceMappings ? {
+                    guidanceMappings: draft.guidanceMappings.map((item) => item.memberRole === member.role
+                      ? { ...item, memberRole: next.role } : item)
+                  } : {})
+                })
               }
-              onRemove={() => setDraft({ ...draft, members: draft.members.filter((_, at) => at !== index) })}
+              onRemove={() => setDraft({
+                ...draft,
+                members: draft.members.filter((_, at) => at !== index),
+                ...(draft.guidanceMappings ? {
+                  guidanceMappings: draft.guidanceMappings.filter((item) => item.memberRole !== member.role)
+                } : {})
+              })}
             />
-          ))}
+          })}
           <Button
             size="sm"
             variant="outline"
@@ -244,7 +292,12 @@ export function UarTeamAuthoringPanel({
             <Button
               variant="outline"
               data-ui="team-authoring-deploy"
-              disabled={busy || !saved || Boolean(dirty) || draft.members.some((member) => !member.model)}
+              disabled={
+                busy ||
+                !saved ||
+                Boolean(dirty) ||
+                draft.members.some((member) => !member.model || (member.reviewedModelPolicy && !member.modelPolicyMode))
+              }
               onClick={() => void deploy()}>
               {tr('deploy')}
             </Button>

@@ -19,6 +19,8 @@ import { document, starterBinding, revisedStarterBinding } from './uarStarterDoc
 import { compileAuthoredTeam, teamAuthoringTemplates } from './uarTeamAuthoringPackage'
 import { readAuthoredTeamRecords, projectAuthoredTeam, saveAuthoredTeamRecord } from './uarTeamAuthoringStore'
 import { configureTeamModel } from './uarTeamModelSetup'
+import { assertReviewedModelPolicy, reviewedModelBindingTarget } from './uarTeamReviewedModelPolicy'
+import { assertUarTeamGuidance } from './uarTeamGuidance'
 import { planningState } from './UarTeamsAdministrationAdapter'
 import { resolveAuthoredTeamSkills } from './UarTeamSkillCatalogAdapter'
 
@@ -47,7 +49,9 @@ export async function selectUarTeamKnowledge(workspaceId: string): Promise<strin
 
 export async function saveUarTeamAuthoring(input: { team: UarAuthoredTeam; expectedRevision: number }) {
   const team = uarAuthoredTeamSchema.parse(input.team)
+  if (team.reviewedGuidance) await assertUarTeamGuidance(team.reviewedGuidance)
   for (const member of team.members) {
+    if (member.reviewedModelPolicy) await assertReviewedModelPolicy(member.reviewedModelPolicy)
     if (member.knowledge.length && !member.tools.includes('filesystem__read'))
       throw new Error('UAR_TEAM_KNOWLEDGE_READ_REQUIRED: ' + member.role)
     if (
@@ -112,7 +116,14 @@ export async function deployUarAuthoredTeam(input: {
   > = []
   for (const member of record.team.members) {
     if (!member.model) throw new Error('UAR_TEAM_MODEL_REQUIRED: ' + member.role)
-    const model = await configureTeamModel(member.model, state.generation)
+    if (member.reviewedModelPolicy && !member.modelPolicyMode)
+      throw new Error('UAR_TEAM_MODEL_POLICY_CHOICE_REQUIRED: ' + member.role)
+    const reviewed = member.modelPolicyMode === 'reviewed' ? member.reviewedModelPolicy : undefined
+    const model = await configureTeamModel(
+      member.model,
+      state.generation,
+      reviewed ? reviewedModelBindingTarget(reviewed) : undefined
+    )
     modelBindings.push({
       requestedAlias: 'role:' + member.role,
       providerId: model.providerId,
