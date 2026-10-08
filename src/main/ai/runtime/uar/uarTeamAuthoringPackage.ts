@@ -340,7 +340,13 @@ export async function compileAuthoredTeam(team: UarAuthoredTeam, revision: numbe
       }))
     ]),
     limits: { concurrentTurns: 1, maxMembers: team.members.length, maxDepth: 1, maxPendingTasks: 16 },
-    budget: { maxTokens: 65536, maxCostMicrounits: 10000000, currency: 'USD', maxElapsedSeconds: 2400 },
+    // Unknown usage retains reservations, including each coordinator continuation.
+    budget: {
+      maxTokens: Math.max(65536, 4096 + nonCoordinators.length * (8192 + 4096)),
+      maxCostMicrounits: Math.max(10000000, 500000 + nonCoordinators.length * (1000000 + 500000)),
+      currency: 'USD',
+      maxElapsedSeconds: Math.max(2400, 180 + nonCoordinators.length * (300 + 180))
+    },
     ...(team.instructions.trim()
       ? { instructions: { revision, text: team.instructions, digest: digest(team.instructions) } }
       : {})

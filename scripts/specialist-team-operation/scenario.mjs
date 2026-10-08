@@ -8,6 +8,23 @@ import { attemptFailureEvidence } from '../reusable-team-operation/attempt-diagn
 import { mixedTeamApprovalOperator } from '../reusable-team-operation/approvals.mjs'
 import { roles, fields, readOnlyInstructions, memberSelector, fieldSelector, delivery } from './contracts.mjs'
 
+async function selectMemberModel(evaluate, signal, role, model) {
+  const trigger = memberSelector(role) + ' [data-ui~="teams-model"]'
+  await click(evaluate, signal, trigger)
+  const menu = await waitFor(signal, () => evaluate('document.querySelector(' + JSON.stringify(trigger) +
+    ')?.getAttribute("aria-controls")'), 'C16_MEMBER_MODEL_MENU_UNAVAILABLE')
+  const option = '[role="option"][data-model-source="gateway"][data-provider-id="' + model.providerId +
+    '"][data-model-id="' + model.modelId + '"]'
+  await waitFor(signal, () => evaluate('(()=>{const node=document.getElementById(' + JSON.stringify(menu) +
+    ')?.querySelector(' + JSON.stringify(option) + ');if(!node||!node.getClientRects().length)return false;' +
+    'node.focus();node.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));return true})()'),
+  'C16_MEMBER_MODEL_OPTION_UNAVAILABLE')
+  await waitFor(signal, () => evaluate('(()=>{const node=document.querySelector(' +
+    JSON.stringify(memberSelector(role) + ' [data-ui~="uar-team-model-picker"]') +
+    ');return node?.getAttribute("data-selected-model")===' + JSON.stringify(model.modelId) +
+    '&&node?.getAttribute("data-selected-source")==="gateway"})()'), 'C16_MEMBER_MODEL_NOT_SELECTED')
+}
+
 export async function scenario({ evaluate, signal, targets }, configuration) {
   const evidence = {
     schemaVersion: 1, kind: 'specialist-team-packaged-operation', creationTaskRef: 'C16.1',
@@ -39,8 +56,7 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     await fill(evaluate, signal, '[data-ui~="team-authoring-purpose"]', 'Read and assess the disposable brief with six separate specialists.')
     await fill(evaluate, signal, '[data-ui~="team-authoring-shared"]', readOnlyInstructions)
     for (const role of roles) {
-      await choose(evaluate, signal, memberSelector(role) + ' [data-ui~="teams-model"]',
-        '[role="option"][data-model-source="gateway"][data-provider-id="' + selected.model.providerId + '"][data-model-id="' + selected.model.modelId + '"]')
+      await selectMemberModel(evaluate, signal, role, selected.model)
       for (const field of fields) await fill(evaluate, signal, fieldSelector(role, field), delivery(role)[field])
     }
     await click(evaluate, signal, '[data-ui~="team-authoring-save"]')
@@ -99,6 +115,10 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     evidence.approvals = approvals.evidence
     const completed = await waitFor(signal, async () => {
       const value = await execution()
+      if (value.waits.some((item) => item.state === 'blocked' && item.reasonCode === 'TEAM_BUDGET_EXHAUSTED')) {
+        evidence.executionBudget = { budget: value.budget, committed: value.committed, reserved: value.reserved }
+        requireFact(false, 'C16_TEAM_BUDGET_EXHAUSTED')
+      }
       if (value.attempts.some((item) => ['failed', 'cancelled', 'uncertain'].includes(item.status))) {
         evidence.failedExecution = value.attempts.map(attemptFailureEvidence)
         requireFact(false, 'C16_REAL_ATTEMPT_FAILED')
@@ -112,6 +132,7 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     }, 'C16_REAL_SPECIALIST_WORK_UNAVAILABLE', 900000, 3000)
     const attempts = completed.attempts.filter((item) => roles.slice(1).includes(memberRoles[item.memberId]) &&
       (item.status === 'succeeded' || item.executionOutcome === 'succeeded'))
+    evidence.executionBudget = { budget: completed.budget, committed: completed.committed, reserved: completed.reserved }
     const artifacts = (await ipc(evaluate, route('artifacts'), selector)).artifacts
     requireFact(attempts.every((attempt) => artifacts.some((item) => item.attemptId === attempt.id &&
       item.memberId === attempt.memberId && item.taskId === attempt.taskId &&
