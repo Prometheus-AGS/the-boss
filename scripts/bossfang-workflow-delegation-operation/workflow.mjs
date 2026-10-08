@@ -6,6 +6,13 @@ const terminal = state => ['completed', 'failed', 'cancelled'].includes(state)
 export const runPath = id => '/api/workflows/runs/' + encodeURIComponent(id)
 export const delegationPath = id => '/api/uar/delegations/' + encodeURIComponent(id)
 
+export async function retainedDelegation(guest, runId, bossTaskId) {
+  const record = await request(guest, 'GET', runPath(runId))
+  const current = record.uar_delegations?.find(item => item.delegation.bossTaskId === bossTaskId)?.delegation
+  requireFact(current?.workflow?.workflowRunId === runId, 'C14W_RETAINED_WORKFLOW_DELEGATION_UNAVAILABLE')
+  return current
+}
+
 export function projection(value) {
   return Object.fromEntries(['bossTaskId', 'delegationId', 'targetBindingId', 'definitionMode', 'workspaceId',
     'selectedInstanceId', 'definition', 'delegatedHostContextId', 'uarTaskId', 'uarThreadId', 'uarRootRunId', 'uarRunId',
@@ -88,12 +95,10 @@ export async function start(guest, signal, workflow, input, runs) {
 }
 
 export async function observe(guest, signal, started, prepared, workflow, completed) {
-  const result = await waitFor(signal, async () => {
-    const value = await request(guest, 'GET', delegationPath(started.delegation.bossTaskId) + '/events')
-    const current = value.delegation
-    return (!completed || terminal(current.executionState)) && current.uarRunId ? value : false
+  const current = await waitFor(signal, async () => {
+    const value = await retainedDelegation(guest, started.runId, started.delegation.bossTaskId)
+    return (!completed || terminal(value.executionState)) && value.uarRunId ? value : false
   }, 'C14W_NATIVE_EXECUTION_STATE_UNAVAILABLE', 120000, 1000)
-  const current = result.delegation
   requireFact(current.definitionMode === 'bound' && current.targetBindingId === prepared.binding.id &&
     current.workspaceId === prepared.workspace.workspaceId && current.selectedInstanceId === prepared.runtimeId &&
     current.workflow?.workflowId === workflow.id && current.workflow.workflowRunId === started.runId &&
@@ -110,9 +115,8 @@ export async function observe(guest, signal, started, prepared, workflow, comple
       node.dataset.delegationId===${JSON.stringify(current.delegationId)} &&
       node.dataset.workflowRunId===${JSON.stringify(started.runId)};
   })()`), 'C14W_VISIBLE_NATIVE_CORRELATION_UNAVAILABLE')
-  return { current, selector, receipt: { ...projection(current), events: result.events.map(event => ({
-    type: event.type, taskId: event.taskId, cursor: event.cursor, revision: event.revision
-  })) } }
+  return { current, selector, receipt: { ...projection(current),
+    observationSource: runPath(started.runId), observationMode: 'retained-workflow-projection' } }
 }
 
 export async function output(guest, signal, observed, marker) {
@@ -128,8 +132,8 @@ export async function cancel(guest, signal, observed) {
   await click(guest, signal, observed.selector + ' ' + ui('cancel'))
   await click(guest, signal, observed.selector + ' ' + ui('cancel-confirm'))
   const receipt = await waitFor(signal, async () => {
-    const value = await request(guest, 'GET', delegationPath(observed.current.bossTaskId) + '/events')
-    return value.delegation.cancellation?.terminal && value.delegation.executionState === 'cancelled' ? value.delegation : false
+    const value = await retainedDelegation(guest, observed.current.workflow.workflowRunId, observed.current.bossTaskId)
+    return value.cancellation?.terminal && value.executionState === 'cancelled' ? value : false
   }, 'C14W_AUTHORITATIVE_CANCELLATION_UNSETTLED', 120000, 1000)
   requireFact(receipt.cancellation.requested && receipt.cancellation.acknowledged && !receipt.cancellation.cleanupUncertain &&
     receipt.uarTaskId === observed.current.uarTaskId && receipt.uarRunId === observed.current.uarRunId &&

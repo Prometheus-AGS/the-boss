@@ -1,8 +1,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { click, request } from './dashboard.mjs'
+import { click } from './dashboard.mjs'
 import { digest, ipc, requireFact, waitFor } from './io.mjs'
-import { delegationPath } from './workflow.mjs'
+import { retainedDelegation } from './workflow.mjs'
 
 const ui = name => '[data-ui~="uar-workflow-' + name + '"]'
 
@@ -14,7 +14,7 @@ export function writeInput(filename, content, marker) {
 
 export async function pending(evaluate, guest, signal, observed, prepared, directory, filename, content) {
   const current = await waitFor(signal, async () => {
-    const { delegation } = await request(guest, 'GET', delegationPath(observed.current.bossTaskId) + '/events')
+    const delegation = await retainedDelegation(guest, observed.current.workflow.workflowRunId, observed.current.bossTaskId)
     return delegation.executionState === 'input_required' &&
       delegation.pendingApproval?.type === 'agui.tool_call.approval_required' ? delegation : false
   }, 'C14W_REAL_PENDING_EFFECT_UNAVAILABLE', 120000, 1000)
