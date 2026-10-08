@@ -209,16 +209,18 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.18 - Reviewed team skills
+    The Boss 2.2.21 - Practical team guidance
     
-    - [Teams] Select reviewed skills from the packaged mini payload and trusted signed full-pack generations.
-    - [Integrity] Refuse changed skill dependencies and required tools outside the selected member scope.
-    - [Handoff] Preserve source and evidence hashes without transferring credentials or bypassing tool approvals.
+    - [Teams] Follow an outcome-first setup guide, inspect creator alternatives and choose single-agent Work for sequential tasks.
+    - [Models] Show reviewed strength, unknown prices and source provenance without claiming measured savings.
+    - [Configuration] Preserve role guidance and explicit resources in immutable team revisions; include guidance for all practical presets.
+    - [Delivery] Source preparation only; packaged operation and native Windows acceptance remain pending.
     
     <!--LANG:zh-CN-->
-    The Boss 2.2.18 - 已审阅的团队技能
+    The Boss 2.2.21 - 实用团队指导
     
-    - [团队] 从随应用提供的精简技能包和可信的已签名完整技能包中选择已审阅技能。
-    - [完整性] 拒绝依赖文件已更改的技能，以及超出所选成员权限范围的必需工具。
-    - [交接] 保留源文件和证据的哈希，不转移凭据，也不绕过工具审批。
+    - [团队] 按目标优先的设置流程操作，查看创建工具的替代方案，并为顺序任务选择单代理 Work。
+    - [模型] 显示已审阅能力等级、未知价格及来源信息，不宣称已测量的成本节省。
+    - [配置] 在不可变团队修订中保留角色指导和明确选择的资源，并提供所有实用预设的指导。
+    - [交付] 仅完成源码准备；打包操作和原生 Windows 验收仍待完成。
     <!--LANG:END-->
