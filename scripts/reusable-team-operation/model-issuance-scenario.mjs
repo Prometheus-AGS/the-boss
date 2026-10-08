@@ -1,7 +1,6 @@
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
-import { setTimeout as delay } from 'node:timers/promises'
 import { pathToFileURL } from 'node:url'
 import { isDeepStrictEqual } from 'node:util'
 
@@ -54,6 +53,20 @@ async function actualSelection(configuration) {
 }
 
 export async function scenario({ evaluate, signal, targets }, configuration) {
+  const rendererEvaluate = evaluate
+  evaluate = async (expression) => {
+    try {
+      return await rendererEvaluate(expression)
+    } catch (error) {
+      const code = {
+        'Renderer evaluation failed.': 'C15_RENDERER_EVALUATION_FAILED',
+        'Renderer connection failed.': 'C15_RENDERER_CONNECTION_FAILED',
+        'Renderer connection closed.': 'C15_RENDERER_CONNECTION_CLOSED'
+      }[error.message]
+      if (code) throw Object.assign(new Error(code), { code })
+      throw error
+    }
+  }
   const evidence = {
     schemaVersion: 1, kind: 'issued-team-model-provenance-packaged-operation', creationTaskRef: 'C15.1',
     complete: false, startedAt: new Date().toISOString(), sourceRefs: configuration.sourceRefs,
@@ -113,14 +126,32 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
       member.reviewedModelPolicy.bindingTarget.providerId === targetA.providerId && member.reviewedModelPolicy.bindingTarget.modelId === targetA.modelId), 'C15_ISSUED_RECEIPT_NOT_PERSISTED')
     evidence.issued = first.team.members.map((member) => ({ role: member.role, issuanceId: member.reviewedModelPolicy.issuanceId,
       digest: member.reviewedModelPolicy.digest, sourceDigest: member.reviewedModelPolicy.sourceDigest }))
+    stage = 'issued-receipt-renderer-reload'
+    const previousDocument = await evaluate('performance.timeOrigin')
+    evidence.rendererReload = { previousTimeOrigin: previousDocument, transientEvaluationRefusals: 0 }
     await evaluate('setTimeout(()=>location.reload(),50);true')
-    await delay(750, undefined, { signal })
+    stage = 'issued-receipt-reloaded-preload-readiness'
+    const reloaded = await waitFor(signal, async () => {
+      try {
+        return await evaluate(`(() => {if(performance.timeOrigin===${JSON.stringify(previousDocument)} ||
+          document.readyState!=='complete' || typeof window.api?.ipcApi?.request!=='function')return false;
+          return {timeOrigin:performance.timeOrigin};})()`)
+      } catch (error) {
+        if (error.code !== 'C15_RENDERER_EVALUATION_FAILED') throw error
+        evidence.rendererReload.transientEvaluationRefusals++
+        return false
+      }
+    }, 'C15_RELOADED_RENDERER_PRELOAD_UNAVAILABLE')
+    evidence.rendererReload.timeOrigin = reloaded.timeOrigin
+    stage = 'issued-receipt-reopen-authoring'
     await openAuthoring(evaluate, signal, selected.workspaceId)
+    stage = 'issued-receipt-reopen-persisted-identity'
     requireFact((await authoring()).revisions.some((item) => isDeepStrictEqual(item, first)), 'C15_REOPEN_CHANGED_ISSUANCE_IDENTITY')
+    stage = 'issued-receipt-reopen-visible-revision'
     await choose(evaluate, signal, '[data-ui~="team-authoring-select"]', '[role="option"][data-authored-team-id="' + first.team.id + '"][data-authored-revision="' + first.revision + '"]')
     evidence.checks.push('real-bundled-unknown-metadata-selection-import-save-reopen-retains-main-issuance')
     stage = 'forged-renderer-target-and-issued-fields-refused'
-    const before = await authoring()
+    const before = (await authoring()).revisions
     const forgedTarget = structuredClone(first.team)
     forgedTarget.members[0].reviewedModelPolicy.bindingTarget.modelId = targetB.modelId
     await refused(evaluate, route('save_authoring'), { team: forgedTarget, expectedRevision: first.revision }, 'UAR_TEAM_MODEL_POLICY_ISSUANCE_MISMATCH', evidence)
@@ -131,7 +162,12 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     policy.sourceDigest = 'sha256:' + digest(policy.sourceJson)
     policy.digest = 'sha256:' + digest(JSON.stringify(policy.result))
     await refused(evaluate, route('save_authoring'), { team: forgedSource, expectedRevision: first.revision }, 'UAR_TEAM_MODEL_POLICY_ISSUANCE_MISMATCH', evidence)
-    requireFact(isDeepStrictEqual(await authoring(), before), 'C15_REFUSED_ISSUANCE_CREATED_REVISION')
+    const after = (await authoring()).revisions
+    const revisionIdentities = (revisions) => revisions.map((item) => ({ teamId: item.team.id,
+      revision: item.revision, definition: item.definition, package: item.package }))
+    evidence.refusedSaveRevisions = { beforeCount: before.length, afterCount: after.length,
+      before: revisionIdentities(before), after: revisionIdentities(after) }
+    requireFact(isDeepStrictEqual(after, before), 'C15_REFUSED_ISSUANCE_CREATED_REVISION')
     evidence.checks.push('renderer-target-and-internally-consistent-issued-field-rewrites-refused-without-revision')
     stage = 'configuration-drift-refuses-reviewed-deployment'
     const bindingsBefore = (await snapshot()).bindings
