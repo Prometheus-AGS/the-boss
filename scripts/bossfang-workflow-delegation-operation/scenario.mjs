@@ -1,20 +1,20 @@
 import fs from 'node:fs'
 import { randomUUID } from 'node:crypto'
-import { digest, failure, ipc, requireFact, same, write } from './io.mjs'
+import { digest, failure, ipc, requireFact, same, waitFor, write } from './io.mjs'
 import { prepare, runtimeState } from './setup.mjs'
 import { openDashboard, request } from './dashboard.mjs'
 import { author, start, observe, output, cancel, runPath, delegationPath, projection } from './workflow.mjs'
+import { writeInput, pending, decide, settledHistory, verifyFiles } from './effects.mjs'
 
-/** Actual compiled guest + ordinary native workflow. Effect authority is an explicit unresolved prerequisite. */
+/** Actual compiled guest, ordinary native workflow and original paired-host effect authority. */
 export async function scenario({ evaluate, signal }, configuration) {
   const evidence = { schemaVersion: 1, kind: 'bossfang-ordinary-bound-workflow-packaged-operation',
     creationTaskRef: 'C14.4', complete: false, startedAt: new Date().toISOString(),
     sourceRefs: configuration.sourceRefs, previousReceipt: configuration.previousReceipt,
     normalProfile: true, experimentalOptIn: false, credentialValueRecorded: false, checks: [],
     limitations: [
-      'Scoped BossFang cannot attach paired-host tool admission and the managed UAR native file tools are disabled.',
-      'Approval/effect acceptance remains blocked pending an existing admitted effect resource path; no approval is invented or forwarded with host credentials.',
-      'Cancellation here targets a live ordinary bound inference, not a pending effect approval.',
+      'Host resources remain private to the original registered context; opaque context inventory is not effect authority.',
+      'Context expiry/revocation and cross-platform behavior are not operated by this bounded workflow procedure.',
       'Earlier passing dashboard, ports and ownership scopes retain only their exact original receipts and package identities.',
       'Native Windows installed acceptance and publication remain independent and unclaimed.'
     ] }
@@ -43,42 +43,82 @@ export async function scenario({ evaluate, signal }, configuration) {
     stage = 'visible-ordinary-workflow-authoring'
     const workflow = await author(dashboard.guest, signal, prepared, configuration.marker)
     evidence.workflow = workflow
+    evidence.hostContext = prepared.hostContext
     evidence.checks.push('actual-compiled-authenticated-embedded-dashboard',
       'visible-canvas-bound-target-authoring-and-native-persistence')
 
-    stage = 'ordinary-workflow-native-output'
+    stage = 'ordinary-workflow-real-pending-approved-effect'
+    const approvedContent = configuration.marker + '-approved\n'
     const first = await start(dashboard.guest, signal, workflow,
-      'Reply only with ' + configuration.marker + '. Do not use tools, access files, or delegate.', resources.runs)
+      writeInput('approved.txt', approvedContent, configuration.marker), resources.runs)
+    const firstPendingObserved = await observe(dashboard.guest, signal, first, prepared, workflow, false)
+    const approved = await pending(evaluate, dashboard.guest, signal, firstPendingObserved, prepared,
+      configuration.workspaceDirectory, 'approved.txt', approvedContent)
+    evidence.approvedPending = approved.receipt
+    await decide(dashboard.guest, signal, approved, true)
+    evidence.effectScope.approvalDecisionsSubmitted++
+    evidence.approvedHistory = await settledHistory(evaluate, signal, approved, 'approved')
     const firstObserved = await observe(dashboard.guest, signal, first, prepared, workflow, true)
     evidence.outputRun = firstObserved.receipt
     evidence.output = await output(dashboard.guest, signal, firstObserved, configuration.marker)
-    const ordinary = await request(dashboard.guest, 'GET', runPath(first.runId))
-    requireFact(ordinary.state === 'completed' && ordinary.output?.includes(configuration.marker) &&
-      ordinary.step_results?.some(item => item.step_name === workflow.stepName && item.output?.includes(configuration.marker)),
-    'C14W_ORDINARY_ENGINE_OUTPUT_NOT_SETTLED')
+    const ordinary = await waitFor(signal, async () => {
+      const record = await request(dashboard.guest, 'GET', runPath(first.runId))
+      return record.state === 'completed' && record.output?.includes(configuration.marker) &&
+        record.step_results?.some(item => item.step_name === workflow.stepName && item.output?.includes(configuration.marker)) ? record : false
+    }, 'C14W_ORDINARY_ENGINE_OUTPUT_NOT_SETTLED', 60000, 1000)
     evidence.ordinaryCompletion = { runId: first.runId, state: ordinary.state,
       outputSha256: digest(ordinary.output), stepResults: ordinary.step_results.map(item => ({
         stepName: item.step_name, outputSha256: digest(item.output), durationMs: item.duration_ms
       })) }
     evidence.checks.push('visible-ordinary-run-admission-to-original-bound-uar',
       'native-workflow-step-delegation-task-thread-root-run-correlations',
-      'actual-native-message-output-visible-and-settled-by-ordinary-engine')
+      'actual-native-message-output-visible-and-settled-by-ordinary-engine',
+      'visible-original-pending-approval-exact-prepared-write',
+      'canonical-durable-host-human-approval-before-exact-disposable-effect')
+    evidence.approvedEffect = verifyFiles(configuration, approvedContent)
+    requireFact(same(prepared.initial, await runtimeState(evaluate)), 'C14W_WORK_SELECTION_OR_UAR_PROCESS_CHANGED')
 
-    stage = 'visible-original-authority-cancellation'
+    stage = 'visible-original-authority-denial-without-effect'
     const second = await start(dashboard.guest, signal, workflow,
-      'Generate 1500 distinct numbered short sentences about arithmetic, starting at 1. Continue until all 1500 are generated. Do not use tools, files, or delegation.',
-      resources.runs)
+      writeInput('denied.txt', configuration.marker + '-denied\n', configuration.marker), resources.runs)
     const secondObserved = await observe(dashboard.guest, signal, second, prepared, workflow, false)
-    evidence.cancelBefore = secondObserved.receipt
-    evidence.cancelAfter = await cancel(dashboard.guest, signal, secondObserved)
-    evidence.checks.push('visible-two-step-confirmed-cancel-forwarded-to-original-native-run',
-      'native-cancellation-request-acknowledgment-terminal-cleanup-settled')
+    const denied = await pending(evaluate, dashboard.guest, signal, secondObserved, prepared,
+      configuration.workspaceDirectory, 'denied.txt', configuration.marker + '-denied\n')
+    evidence.deniedPending = denied.receipt
+    await decide(dashboard.guest, signal, denied, false)
+    evidence.effectScope.approvalDecisionsSubmitted++
+    evidence.deniedHistory = await settledHistory(evaluate, signal, denied, 'denied')
+    evidence.deniedRun = (await observe(dashboard.guest, signal, second, prepared, workflow, true)).receipt
+    const deniedOrdinary = await waitFor(signal, async () => {
+      const record = await request(dashboard.guest, 'GET', runPath(second.runId))
+      return ['completed', 'failed', 'cancelled'].includes(record.state) ? record : false
+    }, 'C14W_ORDINARY_ENGINE_DENIAL_NOT_SETTLED', 60000, 1000)
+    evidence.ordinaryDenial = { runId: deniedOrdinary.id, state: deniedOrdinary.state }
+    requireFact(!fs.existsSync(denied.expectedPath), 'C14W_DENIED_EFFECT_OCCURRED')
+    evidence.checks.push('visible-original-authoritative-denial-canonical-durable-history-without-effect')
+    requireFact(same(prepared.initial, await runtimeState(evaluate)), 'C14W_WORK_SELECTION_OR_UAR_PROCESS_CHANGED')
 
-    stage = 'approval-effect-resource-prerequisite'
-    // Native full-run scoped authority intentionally cannot create paired-host grants.
-    throw Object.assign(new Error('C14W_ADMITTED_EFFECT_RESOURCE_PATH_UNAVAILABLE'), {
-      code: 'C14W_ADMITTED_EFFECT_RESOURCE_PATH_UNAVAILABLE'
-    })
+    stage = 'visible-original-authority-cancellation-while-approval-pending'
+    const third = await start(dashboard.guest, signal, workflow,
+      writeInput('cancelled.txt', configuration.marker + '-cancelled\n', configuration.marker), resources.runs)
+    const thirdObserved = await observe(dashboard.guest, signal, third, prepared, workflow, false)
+    const cancelled = await pending(evaluate, dashboard.guest, signal, thirdObserved, prepared,
+      configuration.workspaceDirectory, 'cancelled.txt', configuration.marker + '-cancelled\n')
+    evidence.cancelPending = cancelled.receipt
+    evidence.cancelBefore = projection(cancelled.current)
+    evidence.cancelAfter = await cancel(dashboard.guest, signal, { ...thirdObserved, current: cancelled.current })
+    evidence.cancelHistory = await settledHistory(evaluate, signal, cancelled, 'cancelled')
+    requireFact(!fs.existsSync(cancelled.expectedPath), 'C14W_CANCELLED_PENDING_EFFECT_OCCURRED')
+    const cancelledOrdinary = await waitFor(signal, async () => {
+      const record = await request(dashboard.guest, 'GET', runPath(third.runId))
+      return record.state === 'cancelled' ? record : false
+    }, 'C14W_ORDINARY_ENGINE_CANCELLATION_NOT_SETTLED', 60000, 1000)
+    evidence.ordinaryCancellation = { runId: cancelledOrdinary.id, state: cancelledOrdinary.state }
+    evidence.checks.push('visible-two-step-confirmed-cancel-forwarded-to-original-native-run',
+      'native-cancellation-request-acknowledgment-terminal-cleanup-settled',
+      'pending-approval-cancelled-canonical-history-and-ordinary-engine-without-effect')
+    evidence.finalEffects = verifyFiles(configuration, approvedContent)
+    evidence.complete = true
   } catch (error) {
     evidence.failure = failure(error, stage, signal)
   } finally {
@@ -120,7 +160,10 @@ export async function scenario({ evaluate, signal }, configuration) {
         evidence.checks.push('work-global-selection-and-original-uar-pid-start-port-preserved')
       } catch (error) { cleanupFailures.push(failure(error, 'preserve-original-uar-and-selection')) }
     }
-    if (cleanupFailures.length) evidence.cleanupFailures = cleanupFailures
+    if (cleanupFailures.length) {
+      evidence.cleanupFailures = cleanupFailures
+      evidence.complete = false
+    }
     evidence.finishedAt = new Date().toISOString()
     write(configuration.evidence, evidence)
   }

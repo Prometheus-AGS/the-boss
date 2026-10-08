@@ -31,6 +31,7 @@ export function provenance(options) {
     'bossfang-workflow-delegation-operation/io.mjs', 'bossfang-workflow-delegation-operation/provenance.mjs',
     'bossfang-workflow-delegation-operation/setup.mjs', 'bossfang-workflow-delegation-operation/dashboard.mjs',
     'bossfang-workflow-delegation-operation/workflow.mjs', 'bossfang-workflow-delegation-operation/scenario.mjs',
+    'bossfang-workflow-delegation-operation/effects.mjs',
     'approval-lifecycle-operation/setup.mjs', 'approval-lifecycle-operation/io.mjs',
     'approval-lifecycle-operation/clients.mjs']
   return { app, sourceRefs: {

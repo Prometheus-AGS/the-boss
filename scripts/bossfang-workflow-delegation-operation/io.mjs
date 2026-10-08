@@ -20,7 +20,8 @@ export function failure(error, stage, signal) {
     ...(['GET', 'POST', 'DELETE'].includes(error?.method) ? { method: error.method } : {}),
     ...(typeof error?.path === 'string' && /^\/api\/[a-zA-Z0-9_/.%+-]+$/.test(error.path)
       ? { path: error.path } : {}),
-    ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {})
+    ...(Number.isInteger(status) && status >= 100 && status <= 599 ? { status } : {}),
+    ...(error?.code === 'C14W_EFFECT_OUTSIDE_EXACT_OPERATION_SCOPE' ? { scopeMismatch: error.scopeMismatch } : {})
   }
 }
 
