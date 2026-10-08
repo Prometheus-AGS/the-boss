@@ -1,5 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { spawnSync } from 'node:child_process'
+import { randomBytes, randomUUID } from 'node:crypto'
 
 import { mixedTeamApprovalOperator } from '../reusable-team-operation/approvals.mjs'
 import { attemptFailureEvidence } from '../reusable-team-operation/attempt-diagnostics.mjs'
@@ -11,6 +13,31 @@ const roles = ['coordinator', 'worker', 'reviewer']
 const readOnly = ['filesystem__glob', 'filesystem__ls', 'filesystem__grep', 'filesystem__read']
 const memberSelector = (role) => '[data-ui~="team-authoring-member"][data-role="' + role + '"]'
 
+function prepareIsolatedKeychain(home, evidence) {
+  const env = { ...process.env, HOME: home }
+  fs.mkdirSync(path.join(home, 'Library', 'Preferences'), { recursive: true, mode: 0o700 })
+  const keychain = path.join(home, 'c15-' + randomUUID() + '.keychain-db')
+  const password = randomBytes(32).toString('hex')
+  const invoke = (args) => spawnSync('/usr/bin/security', args, { env, encoding: 'utf8', shell: false })
+  const remove = () => invoke(['delete-keychain', keychain])
+  try {
+    for (const args of [
+      ['create-keychain', '-p', password, keychain],
+      ['unlock-keychain', '-p', password, keychain],
+      ['set-keychain-settings', '-lut', '1800', keychain],
+      ['default-keychain', '-d', 'user', '-s', keychain],
+      ['list-keychains', '-d', 'user', '-s', keychain]
+    ]) requireFact(invoke(args).status === 0, 'C15_ISOLATED_NATIVE_KEYCHAIN_UNAVAILABLE')
+    const selected = invoke(['default-keychain', '-d', 'user'])
+    requireFact(selected.status === 0 && selected.stdout.includes(keychain), 'C15_ISOLATED_NATIVE_KEYCHAIN_NOT_SELECTED')
+    evidence.credentialStorage = 'disposable-native-macos-keychain-in-isolated-home'
+    return remove
+  } catch (error) {
+    remove()
+    throw error
+  }
+}
+
 async function setReadOnlyTools(evaluate, signal, role) {
   for (const tool of ['filesystem__edit', 'filesystem__write']) {
     const selector = memberSelector(role) + ' [data-ui~="team-authoring-tool"][data-tool-name="' + tool + '"]'
@@ -20,6 +47,23 @@ async function setReadOnlyTools(evaluate, signal, role) {
     requireFact(await evaluate('document.querySelector(' + JSON.stringify(selector) +
       ')?.getAttribute("aria-checked")==="false"'), 'C15_REVIEWED_SKILL_READ_ONLY_TOOLS_REQUIRED')
   }
+}
+
+async function selectMemberModel(evaluate, signal, role, model) {
+  const trigger = memberSelector(role) + ' [data-ui~="teams-model"]'
+  await click(evaluate, signal, trigger)
+  const menu = await waitFor(signal, () => evaluate('document.querySelector(' + JSON.stringify(trigger) +
+    ')?.getAttribute("aria-controls")'), 'C15_REVIEWED_SKILL_MODEL_MENU_UNAVAILABLE')
+  const option = '[role="option"][data-model-source="gateway"][data-provider-id="' + model.providerId +
+    '"][data-model-id="' + model.modelId + '"]'
+  await waitFor(signal, () => evaluate('(()=>{const node=document.getElementById(' + JSON.stringify(menu) +
+    ')?.querySelector(' + JSON.stringify(option) + ');if(!node||!node.getClientRects().length)return false;' +
+    'node.focus();node.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));return true})()'),
+  'C15_REVIEWED_SKILL_MEMBER_MODEL_OPTION_UNAVAILABLE')
+  await waitFor(signal, () => evaluate('(()=>{const node=document.querySelector(' +
+    JSON.stringify(memberSelector(role) + ' [data-ui~="uar-team-model-picker"]') +
+    ');return node?.getAttribute("data-selected-model")===' + JSON.stringify(model.modelId) +
+    '&&node?.getAttribute("data-selected-source")==="gateway"})()'), 'C15_REVIEWED_SKILL_MEMBER_MODEL_NOT_SELECTED')
 }
 
 function disposablePackRoot(appDataPath) {
@@ -37,7 +81,8 @@ function reviewedMiniSkill(catalog, packRoot) {
   const skill = catalog.entries.find((entry) => {
     const ref = entry.skillRef
     const closure = inventory.skills.find((item) => item.identity.artifactDigest === ref?.digest)
-    return entry.availability === 'available' && entry.reviewedCoverage?.status === 'reviewed' && ref?.required === true &&
+    return ref?.id.startsWith('builtin::') && entry.availability === 'available' &&
+      entry.reviewedCoverage?.status === 'reviewed' && ref?.required === true &&
       ref.requiredTools.every((tool) => readOnly.includes(tool)) && closure?.closure.paths.some((file) => file !== closure.entrypoint)
   })
   requireFact(skill, 'C15_REQUIRED_REVIEWED_READ_ONLY_MINI_SKILL_UNAVAILABLE')
@@ -89,18 +134,52 @@ export async function scenario({ evaluate, signal, targets, trustedRequest }, co
     credentialValueRecorded: false,
     handoffOperation: 'reused Delivery10 evidence; not rerun'
   }
+  const evaluateApplication = evaluate
+  evaluate = async (expression) => {
+    const applicationExpression = /^window\.api\.ipcApi\.request\(/.test(expression)
+      ? '(async()=>{const result=await ' + expression + ';return result?.ok===false?{ok:false,error:{code:result.error?.code,message:result.error?.message}}:result})()'
+      : expression
+    const result = await evaluateApplication(applicationExpression)
+    const channel = expression.match(/^window\.api\.ipcApi\.request\("([a-z0-9_.]+)"/)?.[1]
+    if (channel && result?.ok === false) {
+      evidence.failedApplicationRequest = {
+        channel,
+        code: /^[A-Z0-9_]+$/.test(result.error?.code ?? '') ? result.error.code : 'UNCLASSIFIED',
+        redactedMessage: (() => {
+          let message = String(result.error?.message ?? '')
+          for (const [name, value] of Object.entries(process.env))
+            if (/TOKEN|SECRET|PASSWORD|KEY/i.test(name) && value?.length >= 6)
+              message = message.split(value).join('[credential]')
+          return message.replace(/https?:\/\/[^\s"']+/g, '[endpoint]')
+            .replace(/Bearer\s+\S+/gi, 'Bearer [credential]').slice(0, 500)
+        })(),
+        messageKey: result.error?.message?.match(/^prometheus\.error\.[A-Za-z]+$/)?.[0],
+        methodFailure: result.error?.message?.match(/(?:safeStorage\.)?[A-Za-z]+(?:Async)? is not a function/)?.[0],
+        validationIssues: (() => {
+          try {
+            const issues = JSON.parse(result.error?.message ?? 'null')
+            return Array.isArray(issues) ? issues.map(({ code, path }) => ({ code, path })) : undefined
+          } catch { return undefined }
+        })()
+      }
+    }
+    return result
+  }
   let stage = 'packaged-target'
+  let removeKeychain
   try {
     requireFact(targets.some((target) => target.type === 'page' && target.url.includes('/windows/main/index.html') &&
       !/^https?:/i.test(target.url)), 'C15_PACKAGED_MAIN_TARGET_UNAVAILABLE')
+    const app = await ipc(evaluate, 'app.get_info')
+    const { isolatedUserData, packRoot } = disposablePackRoot(app.appDataPath)
+    requireFact(app.resourcesPath === path.join(configuration.appResources, 'app.asar', 'resources'),
+      'C15_REVIEWED_SKILL_APP_RESOURCE_IDENTITY_MISMATCH')
+    requireFact(app.homePath === configuration.fullHome && configuration.preparedFullGeneration?.complete === true,
+      'C15_PREPARED_FULL_HOME_NOT_USED_BY_PACKAGED_APP')
+    removeKeychain = prepareIsolatedKeychain(app.homePath, evidence)
     stage = 'onboarding-and-configured-gateway'
     await openWork(evaluate, signal)
     const selected = await setup(evaluate, configuration)
-    const app = await ipc(evaluate, 'app.get_info', {})
-    const { isolatedUserData, packRoot } = disposablePackRoot(app.appDataPath)
-    requireFact(app.resourcesPath === configuration.appResources, 'C15_REVIEWED_SKILL_APP_RESOURCE_IDENTITY_MISMATCH')
-    requireFact(app.homePath === configuration.fullHome && configuration.preparedFullGeneration?.complete === true,
-      'C15_PREPARED_FULL_HOME_NOT_USED_BY_PACKAGED_APP')
     const fullGenerationRoot = signedGenerationRoot(app.homePath)
     const snapshot = () => ipc(evaluate, route('snapshot'), { workspaceId: selected.workspaceId })
     const authoring = () => ipc(evaluate, route('authoring'), {})
@@ -125,12 +204,12 @@ export async function scenario({ evaluate, signal, targets, trustedRequest }, co
     await fill(evaluate, signal, '[data-ui~="team-authoring-shared"]',
       'Read only README.md. Return its exact delivery marker. Never write files or perform external effects.')
     for (const role of roles) {
-      await choose(evaluate, signal, memberSelector(role) + ' [data-ui~="teams-model"]',
-        '[role="option"][data-model-source="gateway"][data-provider-id="' + selected.model.providerId +
-        '"][data-model-id="' + selected.model.modelId + '"]')
+      await selectMemberModel(evaluate, signal, role, selected.model)
       if (role !== 'coordinator') await setReadOnlyTools(evaluate, signal, role)
     }
     const catalog = await ipc(evaluate, route('skills'), {})
+    evidence.miniCatalog = catalog.entries.filter((entry) => entry.skillRef?.id.startsWith('builtin::'))
+      .map(({ availability, reviewedCoverage, skillRef }) => ({ availability, reviewedCoverage, skillRef }))
     const miniSkill = reviewedMiniSkill(catalog, packRoot)
     const fullSkill = reviewedFullSkill(catalog, packRoot, fullGenerationRoot)
     await click(evaluate, signal, memberSelector('reviewer') + ' [data-ui~="team-authoring-skill"][data-skill-digest="' +
@@ -144,6 +223,7 @@ export async function scenario({ evaluate, signal, targets, trustedRequest }, co
     const worker = revision.team.members.find((member) => member.role === 'worker')
     requireFact(reviewer?.skills.some((item) => item.required && same(item, miniSkill.skillRef)) &&
       worker?.skills.some((item) => item.required && same(item, fullSkill.skill.skillRef)) &&
+      revision.team.members.every((member) => same(member.model, selected.model)) &&
       reviewer.tools.every((tool) => readOnly.includes(tool)) && worker.tools.every((tool) => readOnly.includes(tool)),
     'C15_REQUIRED_REVIEWED_SKILLS_NOT_PERSISTED')
     evidence.selectedSkills = { mini: miniSkill.skillRef, full: fullSkill.skill.skillRef,
@@ -213,11 +293,13 @@ export async function scenario({ evaluate, signal, targets, trustedRequest }, co
     evidence.complete = true
   } catch (error) {
     evidence.failureStage = stage
+    evidence.memberModelControls = await evaluate('Array.from(document.querySelectorAll("[data-ui~=team-authoring-member]")).map(node=>({role:node.getAttribute("data-role"),model:node.querySelector("[data-ui~=uar-team-model-picker]")?.getAttribute("data-selected-model"),source:node.querySelector("[data-ui~=uar-team-model-picker]")?.getAttribute("data-selected-source")}))')
     if (error.approvalIpcFailure) evidence.approvalIpcFailure = error.approvalIpcFailure
     if (error.approvalScopeFailure) evidence.approvalScopeFailure = error.approvalScopeFailure
     evidence.failureCode = signal.aborted ? 'C15_OPERATION_CANCELLED_OR_TIMED_OUT' :
       /^C15_[A-Z0-9_]+$/.test(error.code ?? '') ? error.code : 'C15_REVIEWED_SKILL_OPERATION_UNAVAILABLE'
   } finally {
+    if (removeKeychain) evidence.isolatedKeychainRemoved = removeKeychain().status === 0
     evidence.finishedAt = new Date().toISOString()
     write(configuration.evidence, evidence)
   }
