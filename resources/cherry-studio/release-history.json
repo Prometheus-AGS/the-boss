@@ -1,5 +1,9 @@
 [
   {
+    "version": "2.2.15",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.15 - BossFang with the shared UAR\n\n- [BossFang] Open the embedded BossFang dashboard from Apps and its dedicated settings page.\n- [Workflows] Delegate workflows to the selected UAR instance using scoped credentials and one approval authority.\n- [Runtime] Keep UAR process ownership in The Boss and preserve correlated workflow output, approvals and cancellation.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.15 - BossFang 与共享 UAR\n\n- [BossFang] 从应用列表和专属设置页面打开内嵌的 BossFang 控制台。\n- [工作流] 使用限定权限的凭证和统一审批机制，将工作流委派给选定的 UAR 实例。\n- [运行时] 由 The Boss 管理 UAR 进程，并保留关联的工作流输出、审批和取消状态。\n<!--LANG:END-->"
+  },
+  {
     "version": "2.2.14",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.14 - Durable team approvals\n\n- [Teams] Show authoritative approval decisions across clients and distinguish detaching output from stopping execution.\n- [Runtime] Preserve cancelled approvals after runtime restart without replaying tool effects.\n- [Skills] Include the Delivery Cadence source reconciliation repair in the packaged mini skills.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.14 - 持久化团队审批\n\n- [团队] 在不同客户端显示权威审批结果，并区分断开输出与停止执行。\n- [运行时] 重启运行时后保留已取消的审批，避免重复执行工具操作。\n- [技能] 打包包含 Delivery Cadence 源码协调修复的 mini 技能包。\n<!--LANG:END-->"
   },
