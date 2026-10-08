@@ -9,7 +9,7 @@ import { provenance, previousReceipt } from './bossfang-workflow-delegation-oper
 export async function operate(args = process.argv.slice(2)) {
   const options = {}
   for (let index = 0; index < args.length; index++) {
-    requireFact(['--boss','--launcher','--output','--bossfang-source','--prior-receipt'].includes(args[index]) &&
+    requireFact(['--boss','--launcher','--output','--bossfang-source','--prior-receipt','--model-context'].includes(args[index]) &&
       args[index+1] && !args[index+1].startsWith('--'), 'C14W_ARGUMENTS')
     const key = args[index].slice(2)
     options[key] = key === 'bossfang-source' ? args[++index] : path.resolve(args[++index])
@@ -30,6 +30,15 @@ export async function operate(args = process.argv.slice(2)) {
     requireFact(['UAR_TEAM_EXECUTION_PROFILE_STAGE','UAR_WORKFLOW_EXECUTION_PROFILE_STAGE',
       'BOSS_C094_PUBLIC_QUALIFICATION'].every(name=>process.env[name]===undefined), 'C14W_EXPERIMENTAL_PROFILE_PRESENT')
     const gateway = gatewayEnvironment()
+    let modelContext
+    if (options['model-context']) {
+      const bytes = fs.readFileSync(options['model-context'])
+      const declared = JSON.parse(bytes)
+      requireFact(declared.modelId === gateway.modelId && Number.isInteger(declared.contextWindow) &&
+        declared.contextWindow > 0 && declared.contextWindow <= 2000000 && declared.sourceRef,
+      'C14W_MODEL_CONTEXT_PROVENANCE_REQUIRED')
+      modelContext = { ...declared, declarationSha256: digest(bytes) }
+    }
     const { app, sourceRefs } = provenance(options)
     const prior = previousReceipt(options['prior-receipt'])
     Object.assign(operation, { sourceRefs, previousReceipt: prior })
@@ -40,7 +49,7 @@ export async function operate(args = process.argv.slice(2)) {
     fs.writeFileSync(path.join(workspaceDirectory, 'README.md'), readme, { flag: 'wx' })
     execFileSync('git', ['init','--quiet',workspaceDirectory], { stdio: 'ignore' })
     const evidence = path.join(output, 'evidence.json')
-    const configuration = { sourceRefs, previousReceipt: prior, gateway, evidence,
+    const configuration = { sourceRefs, previousReceipt: prior, gateway, modelContext, evidence,
       workspaceDirectory, marker, workspaceSha256: digest(readme), repository: options.boss }
     const scenarioFile = path.join(output, 'packaged-scenario.mjs')
     fs.writeFileSync(scenarioFile,
