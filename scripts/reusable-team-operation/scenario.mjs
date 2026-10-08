@@ -59,7 +59,11 @@ async function openWork(evaluate, signal) {
   await click(evaluate, signal, '[data-ui~="work-mode-teams"]')
 }
 async function openAuthoring(evaluate, signal, workspaceId) {
-  await ipc(evaluate, 'navigation.open_route_in_main', { path: '/settings/uar?panel=teams' })
+  await waitFor(signal, () => evaluate(`(() => {
+    const event=new CustomEvent('cherry:open-main-route', {
+      cancelable:true,detail:{path:'/settings/uar?panel=teams'}
+    });window.dispatchEvent(event);return event.defaultPrevented;
+  })()`), 'C15_AUTHORING_NAVIGATION_NOT_ACKNOWLEDGED')
   await choose(
     evaluate,
     signal,
