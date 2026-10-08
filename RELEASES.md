@@ -5,6 +5,16 @@ Each entry records the exact source commit, artifact checksum, size, and signing
 
 <!-- releases:newest-first -->
 
+## v2.2.15 — 2026-10-08T10:22:04.184Z
+
+Profile: uar-enabled
+
+| Installer | Size | Download | SHA-256 | Signing | Source |
+|---|---|---|---|---|---|
+| `The-Boss-2.2.15-win-x64-setup.exe` | 506.3 MB | [Download](https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.15/The-Boss-2.2.15-win-x64-setup.exe) | `91cf56f4944683ce22f4f7e3dbd881aa28d430200eea38e686b9caa69e02dda8` | unsigned | [`997247b43`](https://github.com/Prometheus-AGS/the-boss/commit/997247b431593e4339d73398ac1409fdf4332e50) |
+
+
+
 ## v2.2.14 — 2026-10-08T00:49:55.963Z
 
 Profile: uar-enabled
