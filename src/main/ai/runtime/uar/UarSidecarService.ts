@@ -30,6 +30,7 @@ import { redactSecretText } from '@shared/utils/redaction'
 
 import { inspectUarPayload, requireUarPayload, type UarPayload } from './uarPayload'
 import { uarPrincipalForSession } from './uarPrincipal'
+import { reviewedSkillSources } from './uarReviewedSkillSources'
 import { type AppliedUarStorage, readAppliedUarStorage, writeAppliedUarStorage } from './uarStorageProfile'
 
 const logger = loggerService.withContext('UarSidecarService')
@@ -594,7 +595,9 @@ export class UarSidecarService extends BaseService {
       CREDENTIAL_ENCRYPTION_KEY: credentialEncryptionKey,
       UAR_PERSISTENCE__PROVIDER: 'surreal',
       ...persistence,
+      ELECTRON_RUN_AS_NODE: '1',
       UAR_BUILTIN_SKILLS_DIR: path.join(application.getPath('feature.prometheus.pack.runtime'), 'skills'),
+      UAR_REVIEWED_SKILL_SOURCES: await reviewedSkillSources(),
       UAR_MODELS_DIR: payload.modelsDirectory,
       UAR_LOAD_IMPORTED_SKILLS: 'true',
       UAR_NATIVE_TOOLS__FILE_TOOLS_ENABLED: 'false',

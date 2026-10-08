@@ -28,7 +28,7 @@ export async function operate(
   const operation = {
     schemaVersion: 1,
     kind: 'completed-feature-operation',
-    creationTaskRef: 'C15.1',
+    creationTaskRef: scenarioConfiguration.creationTaskRef ?? 'C15.1',
     status: 'blocked',
     startedAt: new Date().toISOString(),
     evidenceLevel: 'real-packaged-authoring-and-work-ui',

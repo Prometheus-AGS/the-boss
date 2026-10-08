@@ -34,7 +34,28 @@ export const PACK_ENTRIES = [
 ] as const
 
 /** Single files, copied alongside the directories above. */
-const PACK_FILES = ['package.json', 'versions.toml', 'skill-system.json', 'release-manifest.json'] as const
+const PACK_FILES = [
+  'package.json',
+  'versions.toml',
+  'skill-system.json',
+  'reviewed-skill-closures.json',
+  'release-manifest.json'
+] as const
+
+/** Trust the application's packaged baseline, never the writable installed manifest. */
+export async function readPackagedSkillInventoryDigest(): Promise<string | undefined> {
+  const source = toAsarUnpackedPath(application.getPath('feature.prometheus.pack.builtin'))
+  try {
+    const manifest = JSON.parse(await fs.readFile(path.join(source, 'release-manifest.json'), 'utf8'))
+    const digest = manifest.reviewedSkills?.inventoryDigest
+    return typeof digest === 'string' && /^sha256:[a-f0-9]{64}$/.test(digest) ? digest : undefined
+  } catch (error) {
+    logger.warn('Packaged skill review baseline is unavailable', {
+      error: error instanceof Error ? error.message : String(error)
+    })
+    return undefined
+  }
+}
 
 /**
  * Install the runnable pack into `{userData}/Data/PrometheusPack`.

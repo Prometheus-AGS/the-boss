@@ -22,7 +22,11 @@ import { configureTeamModel } from './uarTeamModelSetup'
 import { assertReviewedModelPolicy, reviewedModelBindingTarget } from './uarTeamReviewedModelPolicy'
 import { assertUarTeamGuidance } from './uarTeamGuidance'
 import { planningState } from './UarTeamsAdministrationAdapter'
-import { resolveAuthoredTeamSkills } from './UarTeamSkillCatalogAdapter'
+import {
+  reviewedSkillCoverageExtension,
+  resolveAuthoredTeamSkills,
+  UAR_REVIEWED_SKILL_COVERAGE_EXTENSION
+} from './UarTeamSkillCatalogAdapter'
 
 export function readUarTeamAuthoring(): UarTeamAuthoringSnapshot {
   return {
@@ -113,7 +117,8 @@ export async function deployUarAuthoredTeam(input: {
         if (knowledge.required || (error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
       }
     }
-  const skillBindings = await resolveAuthoredTeamSkills(record.team, state.generation)
+  const reviewedSkills = await resolveAuthoredTeamSkills(record.team, state.generation)
+  const skillBindings = reviewedSkills.skillBindings
   const modelBindings: Array<
     Awaited<ReturnType<typeof configureTeamModel>> & { requestedAlias: string; credentialRef: string }
   > = []
@@ -164,7 +169,7 @@ export async function deployUarAuthoredTeam(input: {
     )
   )
   const modelKey = createHash('sha256')
-    .update(JSON.stringify({ modelBindings, skillBindings, directory }))
+    .update(JSON.stringify({ modelBindings, skillBindings, coverage: reviewedSkills.coverage, directory }))
     .digest('hex')
     .slice(0, 16)
   const bindingId =
@@ -195,7 +200,8 @@ export async function deployUarAuthoredTeam(input: {
           servers: ['filesystem'],
           tools: []
         }
-      }
+      },
+      [UAR_REVIEWED_SKILL_COVERAGE_EXTENSION]: reviewedSkillCoverageExtension(reviewedSkills.coverage)
     }
   })
   const bindingPath = '/api/v1/collaboration/deployment-bindings'

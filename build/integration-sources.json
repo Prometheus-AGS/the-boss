@@ -20,16 +20,16 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "4e956c547b37f4a5d990c82f9c3bdfb40e213240"
+      "revision": "50488a7b25a0707aad34c60611abc985edb90f4f"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "3daa3ef89aaebe0da379ca42b1582172d21f127a",
+      "revision": "e5d9ec7b903cc4c9b83cfcef04dda789d9ca78cd",
       "platformRevisions": {
-        "darwin-arm64": "3daa3ef89aaebe0da379ca42b1582172d21f127a",
-        "win32-x64": "3daa3ef89aaebe0da379ca42b1582172d21f127a",
-        "darwin-x64": "3daa3ef89aaebe0da379ca42b1582172d21f127a",
-        "win32-arm64": "3daa3ef89aaebe0da379ca42b1582172d21f127a"
+        "darwin-arm64": "e5d9ec7b903cc4c9b83cfcef04dda789d9ca78cd",
+        "win32-x64": "e5d9ec7b903cc4c9b83cfcef04dda789d9ca78cd",
+        "darwin-x64": "e5d9ec7b903cc4c9b83cfcef04dda789d9ca78cd",
+        "win32-arm64": "e5d9ec7b903cc4c9b83cfcef04dda789d9ca78cd"
       }
     },
     "surreal-memory": {
@@ -43,6 +43,10 @@
     "bossfang": {
       "repository": "GQAdonis/librefang",
       "revision": "0899e4993ebfede3f91366b22cfe9310b2e58f69"
+    },
+    "skill-pack": {
+      "repository": "Prometheus-AGS/prometheus-skill-system",
+      "revision": "75f9429f34875d85ececcbdd347a8973393adee4"
     }
   },
   "tools": {

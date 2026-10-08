@@ -49,8 +49,9 @@ export function uarTeamError(
 }
 
 export function uarTeamAuthoringError(message: string, translate: (key: string) => string): string {
-  const code = message.match(/UAR_TEAM_MODEL_POLICY_(ISSUANCE_MISMATCH|REIMPORT_REQUIRED)/)?.[0]
+  const code = message.match(/UAR_TEAM_MODEL_POLICY_(ISSUANCE_MISMATCH|REIMPORT_REQUIRED)|UAR_TEAM_SKILL_REVIEW_REQUIRED/)?.[0]
   if (!code) return message
+  if (code === 'UAR_TEAM_SKILL_REVIEW_REQUIRED') return translate('reviewedSkill.requiredReview') + ' (' + code + ')'
   const key = code === 'UAR_TEAM_MODEL_POLICY_ISSUANCE_MISMATCH' ? 'issuanceMismatch' : 'reimportRequired'
   return translate('modelPolicy.' + key) + ' (' + code + ')'
 }
