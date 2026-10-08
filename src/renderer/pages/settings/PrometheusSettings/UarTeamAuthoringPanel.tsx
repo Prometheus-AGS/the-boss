@@ -146,6 +146,12 @@ export function UarTeamAuthoringPanel({
           {t('common.refresh')}
         </Button>
       </div>
+      {draft && !['coding', 'product-design', 'specialist-delivery'].includes(draft.template) && (
+        <div className="mt-3 space-y-1 text-sm text-muted-foreground" data-ui="team-authoring-preset-help">
+          <p>{tr('presetHelp.' + draft.template)}</p>
+          <p>{tr('presetResources')}</p>
+        </div>
+      )}
       <div className="mt-3 space-y-1">
         <label htmlFor={id + '-revision'} className="block text-sm font-medium">
           {tr('savedTeams')}

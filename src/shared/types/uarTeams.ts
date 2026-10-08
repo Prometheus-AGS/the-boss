@@ -3,6 +3,7 @@ import * as z from 'zod'
 import type { UarBindingPosture, UarBindingPreflightDiagnostic } from './uarBindingPosture'
 import { uarGuidanceMappingSchema, uarGuidanceRoles, uarReviewedGuidanceSchema } from './uarTeamGuidance'
 import { uarReviewedModelPolicySchema } from './uarTeamModelPolicy'
+import { uarTeamPresetIds } from './uarTeamPresets'
 import type {
   UarTeamCommandReceipt,
   UarTeamContextReceipt,
@@ -366,7 +367,7 @@ export const uarAuthoredTeamSchema = z
   .object({
     id: z.uuid(),
     title: z.string().trim().min(1).max(128),
-    template: z.enum(['coding', 'product-design', 'specialist-delivery']),
+    template: z.enum(uarTeamPresetIds),
     purpose: z.string().trim().min(1).max(4096),
     instructions: z.string().max(16384),
     reviewedGuidance: uarReviewedGuidanceSchema.optional(),

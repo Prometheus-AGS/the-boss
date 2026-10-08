@@ -140,9 +140,17 @@ function validate(approval, execution, team, initial, selector, artifacts, readS
 }
 
 export function mixedTeamApprovalOperator({ evaluate, signal, selector, instance, instructions, workspaceDirectory, template = 'product-design' }) {
-  requireFact(['coding', 'product-design', 'specialist-delivery'].includes(template), 'C15_APPROVAL_EXISTING_TEMPLATE_REQUIRED')
+  const practicalRoles = {
+    'product-research': ['coordinator', 'researcher', 'product', 'reviewer'],
+    'marketing-brand': ['coordinator', 'brand', 'marketing', 'reviewer'],
+    'logo-design': ['coordinator', 'brand', 'designer', 'reviewer'],
+    'mobile-design': ['coordinator', 'ui-ux', 'mobile', 'reviewer'],
+    'customer-feedback': ['coordinator', 'product', 'documentation', 'reviewer']
+  }
+  requireFact(['coding', 'product-design', 'specialist-delivery', ...Object.keys(practicalRoles)].includes(template), 'C15_APPROVAL_EXISTING_TEMPLATE_REQUIRED')
   const permittedRoles = template === 'coding' ? ['coordinator', 'worker', 'reviewer'] :
-    template === 'specialist-delivery' ? ['coordinator', 'product', 'ui-ux', 'mobile', 'security', 'documentation', 'code-review'] : roles
+    template === 'specialist-delivery' ? ['coordinator', 'product', 'ui-ux', 'mobile', 'security', 'documentation', 'code-review'] :
+      practicalRoles[template] ?? roles
   requireFact(instructions === readOnlyInstructions, 'C15_APPROVAL_READ_ONLY_CONTEXT_CHANGED')
   const evidence = { instructionSha256: digest(instructions), readOnly: true, approvals: [], requests: [] }
   const handled = new Set()

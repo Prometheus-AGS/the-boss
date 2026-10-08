@@ -209,16 +209,18 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.18 - Reviewed team skills
+    The Boss 2.2.20 - Practical team presets
     
-    - [Teams] Select reviewed skills from the packaged mini payload and trusted signed full-pack generations.
-    - [Integrity] Refuse changed skill dependencies and required tools outside the selected member scope.
-    - [Handoff] Preserve source and evidence hashes without transferring credentials or bypassing tool approvals.
+    - [Teams] Add product research, marketing/brand, logo/design, mobile design and customer-feedback presets with bounded deliverables and a separate reviewer.
+    - [Configuration] Preserve explicit models, reviewed skills, knowledge, tools and project scope through existing immutable team authoring.
+    - [Feedback] Prepare issue drafts and connector requirements only; presets do not create GitHub issues or grant publishing authority.
+    - [Delivery] Local delivery preparation only; practical-team packaged operation and native Windows acceptance remain pending.
     
     <!--LANG:zh-CN-->
-    The Boss 2.2.18 - 已审阅的团队技能
+    The Boss 2.2.20 - 实用团队预设
     
-    - [团队] 从随应用提供的精简技能包和可信的已签名完整技能包中选择已审阅技能。
-    - [完整性] 拒绝依赖文件已更改的技能，以及超出所选成员权限范围的必需工具。
-    - [交接] 保留源文件和证据的哈希，不转移凭据，也不绕过工具审批。
+    - [团队] 添加产品研究、营销／品牌、标志／设计、移动设计和客户反馈预设，包含有界交付内容和独立审查角色。
+    - [配置] 通过现有不可变团队创作流程，保留明确选择的模型、已审阅技能、知识、工具和项目范围。
+    - [反馈] 仅准备问题草稿和连接器要求；预设不会创建 GitHub 问题，也不会授予发布权限。
+    - [交付] 仅完成本地交付准备；实用团队打包操作和原生 Windows 验收仍待完成。
     <!--LANG:END-->
