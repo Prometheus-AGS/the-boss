@@ -131,6 +131,7 @@ export async function scenario({ evaluate: rawEvaluate, signal }, configuration)
     requireFact(!unsupported.capabilities.instances && unsupported.instances.length === 0 &&
       actions.every((action) => !unsupported.operations['agent-instances.' + action].available),
     'C14C_MEMORY_PROFILE_ADVERTISED_DURABLE_CONTROL')
+    await open(evaluate, signal, host.instanceId, workspaceId, 'lifecycle')
     await open(evaluate, signal, host.instanceId, workspaceId)
     const absent = await hidden(evaluate, signal, workspaceId)
     requireFact(absent.visibleActionCount === 0 && absent.visibleInstanceCount === 0, 'C14C_UNSUPPORTED_CONTROLS_VISIBLE')
