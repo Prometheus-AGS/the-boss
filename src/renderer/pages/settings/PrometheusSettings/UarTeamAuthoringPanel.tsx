@@ -263,7 +263,7 @@ export function UarTeamAuthoringPanel({
           <Button
             size="sm"
             variant="outline"
-            disabled={busy || draft.members.length >= 6}
+            disabled={busy || draft.members.length >= 7}
             onClick={() =>
               setDraft({
                 ...draft,

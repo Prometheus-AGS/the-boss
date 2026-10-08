@@ -1,9 +1,9 @@
 ## Production source
 
-- [ ] 1. Confirm native member capacity and add bounded specialist preset and compatible member fields.
-- [ ] 2. Compile populated delivery instructions into existing immutable identity.
-- [ ] 3. Add member editor fields, seven-member bound and meaningful locale labels.
-- [ ] 4. Prepare real packaged author/save/deploy/run/reopen operation without executing it.
+- [x] 1. Confirm native member capacity and add bounded specialist preset and compatible member fields.
+- [x] 2. Compile populated delivery instructions into existing immutable identity.
+- [x] 3. Add member editor fields, seven-member bound and meaningful locale labels.
+- [x] 4. Prepare real packaged author/save/deploy/run/reopen operation without executing it.
 
 ## Root-owned completed boundary
 

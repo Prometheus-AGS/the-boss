@@ -6,9 +6,11 @@ Keep the existing flow: Settings draft â†’ strict shared IPC authoring schema â†
 
 Use `specialist-delivery` with role order coordinator, product, ui-ux, mobile, security, documentation, code-review. The coordinator delegates; specialists receive existing readonly filesystem choices. Operators retain explicit manual model, skill, knowledge and tool selection. Roles and scope are instructions, never authority. Native max-member support must be confirmed before increasing schema/editor capacity to seven.
 
-Member fields `projectScope`, `outputInstructions`, `evidenceInstructions` are optional bounded strings, interpreted as empty when absent. Project scope describes project-relative paths or areas in plain text; it is not a filesystem allowlist. Append only populated fields to compiled instructions, preserving compilation of existing teams. The resulting instructions are already part of sourceIdentity digest; new fields therefore change a new immutable revision without changing old stored packages.
+Member fields `projectScope`, `outputInstructions`, `evidenceInstructions` are optional bounded strings, interpreted as empty when absent. Project scope describes project-relative paths or areas in plain text; it is not a filesystem allowlist. Append only populated fields to compiled instructions, preserving compilation of existing teams. Include populated delivery text and its structured fields in sourceIdentity digest; new fields therefore change a new immutable revision without changing old stored packages.
 
 ## UI contract
+
+Native capacity inspected at UAR `b0070b42e7d39d06dca83094cd7868920760cbed`: draft.2 common limits permit maxMembers up to 16; team_planning.rs checks against the definition's declared maxMembers, execution clamps to the private binding cap, and MAX_CONTEXT_ROSTER_MEMBERS is 16. Boss authored deployment already derives its binding cap from member count. Seven therefore fits the existing source contract; runtime acceptance remains pending.
 
 Refine the existing Operate settings surface using shared Textarea controls, associated labels, existing disabled state and semantic tokens. Place the three fields after member instructions. Explain project-relative work scope and that actual permissions remain governed by host policy. Use ordinary text, no raw JSON configuration. Preserve the existing model/resource and reviewed-guidance controls, dirty/save/deploy behavior, keyboard order and wrapping.
 
