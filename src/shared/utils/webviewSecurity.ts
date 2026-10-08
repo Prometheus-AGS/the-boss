@@ -18,6 +18,8 @@ export const WEBVIEW_SECURITY_PARTITIONS = {
 
 export type WebviewSecurityPartition = (typeof WEBVIEW_SECURITY_PARTITIONS)[WebviewSecurityProfile]
 
+export const BOSSFANG_DASHBOARD_PARTITION = 'persist:bossfang-dashboard'
+
 export function getWebviewPartition(profile: WebviewSecurityProfile): WebviewSecurityPartition {
   return WEBVIEW_SECURITY_PARTITIONS[profile]
 }

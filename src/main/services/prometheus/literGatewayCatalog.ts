@@ -6,19 +6,15 @@ import * as z from 'zod'
 
 import { application } from '@application'
 import type {
-  IntegrationConfig,
-  ServiceCandidate,
-  ServiceDiscovery
-} from '@shared/types/prometheusIntegration'
-import type {
   LiterCatalogModel,
   LiterCatalogProvider,
   LiterGatewayCatalogSnapshot,
   LiterModelCapabilities,
   LiterServedAlias
 } from '@shared/types/literGateway'
+import type { IntegrationConfig, ServiceCandidate, ServiceDiscovery } from '@shared/types/prometheusIntegration'
 
-import { readLiterConnectionCredentialPresence, readSecrets } from './integrationConfig'
+import { readLiterConnectionCredentialPresence } from './integrationConfig'
 
 const capabilitiesSchema = z
   .object({
@@ -63,9 +59,7 @@ const catalogModelSchema = z
 const catalogProviderSchema = z
   .object({ name: z.string().min(1), models: z.record(z.string(), catalogModelSchema) })
   .passthrough()
-const catalogSchema = z
-  .object({ providers: z.record(z.string(), catalogProviderSchema) })
-  .passthrough()
+const catalogSchema = z.object({ providers: z.record(z.string(), catalogProviderSchema) }).passthrough()
 const catalogManifestSchema = z
   .object({
     schema: z.literal(1),
@@ -77,11 +71,7 @@ const catalogManifestSchema = z
   .strict()
 const liveModelsSchema = z
   .object({
-    data: z.array(
-      z
-        .object({ id: z.string().min(1), owned_by: z.string().min(1).optional() })
-        .passthrough()
-    )
+    data: z.array(z.object({ id: z.string().min(1), owned_by: z.string().min(1).optional() }).passthrough())
   })
   .passthrough()
 
@@ -90,6 +80,7 @@ type CatalogBundle = {
   providers: LiterCatalogProvider[]
   providerIds: Set<string>
   modelKeys: Set<string>
+  contextLimits: Array<{ providerId: string; modelId: string; window: number }>
 }
 
 export type LiterLiveModel = z.infer<typeof liveModelsSchema>['data'][number]
@@ -125,6 +116,13 @@ async function loadLiterCatalogBundle(): Promise<CatalogBundle> {
   const catalogDocument = catalogSchema.parse(await checkedJson('catalog.json', metadata.catalogSha256))
   const providerIds = new Set(providerDocument.providers.map((provider) => provider.name))
   const modelKeys = new Set<string>()
+  // Live aliases may target catalog models whose provider has no direct
+  // provider definition. Their limits still belong to the pinned catalog.
+  const contextLimits = Object.entries(catalogDocument.providers).flatMap(([providerId, provider]) =>
+    Object.values(provider.models).flatMap((model) =>
+      model.limit?.context ? [{ providerId, modelId: model.id, window: model.limit.context }] : []
+    )
+  )
   const providers = providerDocument.providers.map((provider): LiterCatalogProvider => {
     const catalogProvider = catalogDocument.providers[provider.name]
     const models = Object.values(catalogProvider?.models ?? {})
@@ -145,14 +143,19 @@ async function loadLiterCatalogBundle(): Promise<CatalogBundle> {
       name: provider.display_name,
       ...(provider.base_url ? { baseUrl: provider.base_url } : {}),
       ...(provider.auth
-        ? { auth: { type: provider.auth.type, ...(provider.auth.env_var ? { environmentVariable: provider.auth.env_var } : {}) } }
+        ? {
+            auth: {
+              type: provider.auth.type,
+              ...(provider.auth.env_var ? { environmentVariable: provider.auth.env_var } : {})
+            }
+          }
         : {}),
       endpoints: provider.endpoints,
       capabilities: modelCapabilities(provider.capabilities),
       models
     }
   })
-  return { metadata, providers, providerIds, modelKeys }
+  return { metadata, providers, providerIds, modelKeys, contextLimits }
 }
 
 function readLiterCatalogBundle(): Promise<CatalogBundle> {
@@ -160,11 +163,54 @@ function readLiterCatalogBundle(): Promise<CatalogBundle> {
   return catalogBundle
 }
 
-export async function fetchLiterLiveModels(config: IntegrationConfig, signal?: AbortSignal): Promise<LiterLiveModel[]> {
-  const secrets = await readSecrets()
+/** Resolve only the selected gateway's explicitly configured, enabled alias target. Never infer identity from an alias name. */
+export function configuredModelForLiterAlias(
+  config: IntegrationConfig,
+  alias: string
+): { providerId: string; modelId: string } | undefined {
+  const configured = config.services.literAliases.find(
+    (entry) => entry.gatewayConnectionId === selectedGatewayId(config) && entry.alias === alias && entry.enabled
+  )
+  if (!configured) return undefined
+  const connection = config.services.literConnections.find(
+    (entry) =>
+      entry.providerConnectionId === configured.target.providerConnectionId &&
+      entry.providerId === configured.target.providerId &&
+      entry.enabled
+  )
+  return connection ? { providerId: configured.target.providerId, modelId: configured.target.modelId } : undefined
+}
+
+/** Return a catalog window only when the selected alias has an exact configured
+ * target or every exact-name catalog match agrees on the same limit. */
+export async function contextWindowForLiterAlias(
+  config: IntegrationConfig,
+  alias: string
+): Promise<number | undefined> {
+  const bundle = await readLiterCatalogBundle()
+  const configured = config.services.literAliases.find(
+    (entry) => entry.gatewayConnectionId === selectedGatewayId(config) && entry.alias === alias && entry.enabled
+  )
+  if (configured) {
+    const window = bundle.contextLimits.find(
+      (model) => model.providerId === configured.target.providerId && model.modelId === configured.target.modelId
+    )?.window
+    return window === undefined ? undefined : Math.min(window, 2_000_000)
+  }
+  const windows = bundle.contextLimits.filter((model) => model.modelId === alias).map((model) => model.window)
+  return windows.length > 0 && windows.every((window) => window === windows[0])
+    ? Math.min(windows[0], 2_000_000)
+    : undefined
+}
+
+export async function fetchLiterLiveModels(
+  config: IntegrationConfig,
+  credential?: string,
+  signal?: AbortSignal
+): Promise<LiterLiveModel[]> {
   const response = await fetch(`${config.services.liter.endpoint.replace(/\/$/, '')}/v1/models`, {
     signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(15_000)]) : AbortSignal.timeout(15_000),
-    headers: secrets.literKey ? { Authorization: `Bearer ${secrets.literKey}` } : undefined
+    headers: credential ? { Authorization: `Bearer ${credential}` } : undefined
   })
   if (!response.ok) throw new Error(`prometheus.error.gatewayModels:${response.status}`)
   return liveModelsSchema.parse(await response.json()).data
@@ -190,8 +236,7 @@ export async function reconcileLiterCatalog(
       candidate.service === 'liter' &&
       candidate.endpoint === selectedEndpoint &&
       candidate.provenance.some(
-        (entry) =>
-          entry.source === config.services.liter.source && entry.ownership === config.services.liter.ownership
+        (entry) => entry.source === config.services.liter.source && entry.ownership === config.services.liter.ownership
       )
   )
   const credentialPresence = await readLiterConnectionCredentialPresence()
@@ -202,22 +247,19 @@ export async function reconcileLiterCatalog(
     knownProvider: bundle.providerIds.has(connection.providerId)
   }))
   const configuredAliases = new Map<string, LiterServedAlias>(
-    config.services.literAliases.map(
-      (alias): [string, LiterServedAlias] => [
-        JSON.stringify([alias.gatewayConnectionId, alias.alias]),
-        {
-          identity: { gatewayConnectionId: alias.gatewayConnectionId, alias: alias.alias },
-          target: alias.target,
-          displayName: alias.displayName ?? alias.alias,
-          enabled: alias.enabled,
-          available: false,
-          custom:
-            alias.custom || !bundle.modelKeys.has(JSON.stringify([alias.target.providerId, alias.target.modelId])),
-          reconciliation: 'resolved',
-          source: 'configured'
-        }
-      ]
-    )
+    config.services.literAliases.map((alias): [string, LiterServedAlias] => [
+      JSON.stringify([alias.gatewayConnectionId, alias.alias]),
+      {
+        identity: { gatewayConnectionId: alias.gatewayConnectionId, alias: alias.alias },
+        target: alias.target,
+        displayName: alias.displayName ?? alias.alias,
+        enabled: alias.enabled,
+        available: false,
+        custom: alias.custom || !bundle.modelKeys.has(JSON.stringify([alias.target.providerId, alias.target.modelId])),
+        reconciliation: 'resolved',
+        source: 'configured'
+      }
+    ])
   )
   for (const live of liveModels) {
     const key = JSON.stringify([selectedConnectionId, live.id])

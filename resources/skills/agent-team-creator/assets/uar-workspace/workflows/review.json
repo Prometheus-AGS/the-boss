@@ -1,0 +1,101 @@
+{
+  "profile": "urn:prometheus:uar:collaboration:0.1.0-draft.2",
+  "kind": "WorkflowDefinition",
+  "id": "urn:prometheus:mini:example:workflow:review",
+  "version": "1.0.0",
+  "provenance": {
+    "source": "UAR collaboration draft.2 contract checkpoint fixtures",
+    "authors": [
+      "Prometheus-AGS"
+    ]
+  },
+  "requiredCapabilities": [],
+  "extensions": {},
+  "title": "Coordinate then review nested work",
+  "input": {
+    "type": "object",
+    "properties": {
+      "brief": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "brief"
+    ],
+    "additionalProperties": false
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "artifact": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "artifact"
+    ],
+    "additionalProperties": false
+  },
+  "steps": [
+    {
+      "id": "coordinate",
+      "role": "coordinator",
+      "dependsOn": [],
+      "inputMapping": {
+        "brief": "workflow-input:brief"
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "artifact": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact"
+        ],
+        "additionalProperties": false
+      },
+      "effect": "read",
+      "approval": "current-authority",
+      "retry": {
+        "maxAttempts": 1,
+        "onUnknownEffect": "reconcile-before-retry"
+      },
+      "completion": "artifact",
+      "instructions": "Prepare the bounded review brief."
+    },
+    {
+      "id": "review",
+      "role": "research",
+      "dependsOn": [
+        "coordinate"
+      ],
+      "inputMapping": {
+        "brief": "workflow-input:brief"
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "artifact": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact"
+        ],
+        "additionalProperties": false
+      },
+      "effect": "read",
+      "approval": "current-authority",
+      "retry": {
+        "maxAttempts": 1,
+        "onUnknownEffect": "reconcile-before-retry"
+      },
+      "completion": "artifact",
+      "instructions": "Review the brief through the nested team."
+    }
+  ],
+  "failurePolicy": "stop-dependent",
+  "maxActivations": 1
+}

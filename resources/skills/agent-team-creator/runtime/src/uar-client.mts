@@ -49,15 +49,19 @@ async function request(connectionValue: unknown, method: 'GET' | 'POST', route: 
   return payload;
 }
 
-function catalogOnly(operation: string, response: unknown): ObjectValue {
+function collaborationBoundary(operation: string, response: unknown, binding = false): ObjectValue {
   return {
     operation,
     response: response as never,
-    catalogOnly: true,
+    profile: 'urn:prometheus:uar:collaboration:0.1.0-draft.2',
+    catalogOnly: !binding,
+    authority: {
+      conferredByPackageInstallation: false,
+      privateBindingEvaluatedByUar: binding,
+    },
     activation: {
       supported: false,
-      reason: 'Team activation is unavailable until the durable local-team I2 runtime is implemented.',
-      nextPhase: 'I2',
+      reason: 'This authoring client installs definitions and private bindings; runtime activation belongs to the selected UAR instance and its negotiated execution profile.',
     },
   };
 }
@@ -84,7 +88,7 @@ export async function uarPackagePreflight(input: ObjectValue): Promise<ObjectVal
     ...command(input), manifest: compiled.manifestUtf8,
     files: Object.fromEntries(compiled.files.map(file => [file.path, file.contentUtf8])),
   });
-  return catalogOnly('package-preflight', response);
+  return collaborationBoundary('package-preflight', response);
 }
 
 export async function uarPackageInstall(input: ObjectValue): Promise<ObjectValue> {
@@ -93,14 +97,14 @@ export async function uarPackageInstall(input: ObjectValue): Promise<ObjectValue
     ...command(input), manifest: compiled.manifestUtf8,
     files: Object.fromEntries(compiled.files.map(file => [file.path, file.contentUtf8])),
   });
-  return catalogOnly('package-install', response);
+  return collaborationBoundary('package-install', response);
 }
 
 export async function uarPackageStatus(input: ObjectValue): Promise<ObjectValue> {
   const id = encodeURIComponent(text(input.packageId, 'packageId'));
   const version = encodeURIComponent(text(input.version, 'version'));
   const response = await request(input.connection, 'GET', `/api/v1/collaboration/packages/${id}/versions/${version}`);
-  return catalogOnly('package-status', response);
+  return collaborationBoundary('package-status', response);
 }
 
 function bindingRequest(input: ObjectValue): { body: ObjectValue; workspaceId: string } {
@@ -121,22 +125,22 @@ function bindingRequest(input: ObjectValue): { body: ObjectValue; workspaceId: s
 export async function uarBindingPreflight(input: ObjectValue): Promise<ObjectValue> {
   const { body, workspaceId } = bindingRequest(input);
   const response = await request(input.connection, 'POST', '/api/v1/collaboration/deployment-bindings:preflight', body, { 'x-uar-workspace-id': workspaceId });
-  return catalogOnly('binding-preflight', response);
+  return collaborationBoundary('binding-preflight', response, true);
 }
 
 export async function uarBindingInstall(input: ObjectValue): Promise<ObjectValue> {
   const { body, workspaceId } = bindingRequest(input);
   const response = await request(input.connection, 'POST', '/api/v1/collaboration/deployment-bindings', body, { 'x-uar-workspace-id': workspaceId });
-  return catalogOnly('binding-install', response);
+  return collaborationBoundary('binding-install', response, true);
 }
 
 export async function uarBindingStatus(input: ObjectValue): Promise<ObjectValue> {
   const id = encodeURIComponent(text(input.bindingId, 'bindingId'));
   const workspaceId = text(input.workspaceId, 'workspaceId');
   const response = await request(input.connection, 'GET', `/api/v1/collaboration/deployment-bindings/${id}`, undefined, { 'x-uar-workspace-id': workspaceId });
-  return catalogOnly('binding-status', response);
+  return collaborationBoundary('binding-status', response, true);
 }
 
 export function refuseUarActivation(): never {
-  throw new Error('UAR team activation is not implemented in I1. Install definitions and an inactive or ready binding, then wait for the durable local-team I2 runtime.');
+  throw new Error('This authoring client does not invoke team activation. Use the selected UAR instance through a host supporting its negotiated execution profile.');
 }

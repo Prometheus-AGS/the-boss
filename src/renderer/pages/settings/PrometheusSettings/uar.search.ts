@@ -18,10 +18,12 @@ export const entries: SettingsSearchEntry[] = [
   },
   ...[
     ['overview', ['health', 'readiness', 'metrics', 'capabilities']],
+    ['instances', ['runtime instance', 'external UAR', 'endpoint', 'placement', 'binding', 'credential']],
     ['providers-models', ['provider', 'model', 'routing', 'catalog', 'API key', 'default model', 'model source']],
     ['runtime-settings', ['configuration', 'namespace', 'drift', 'policy', 'saved value', 'effective value']],
     ['agents', ['agent catalog', 'agent definition', 'registry']],
     ['collaboration-catalog', ['collaboration catalog', 'teams', 'subagents']],
+    ['teams', ['team instances', 'team planning', 'members', 'task dependencies', 'task board']],
     [
       'durable-agent-instances',
       ['durable instance', 'deployment binding', 'activate', 'passivate', 'drain', 'restart']

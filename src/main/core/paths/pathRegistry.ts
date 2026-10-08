@@ -18,7 +18,7 @@ import { loggerService } from '@logger'
 import { isMac, isWin } from '@main/core/platform'
 import { PRODUCT_DIRNAME } from '@shared/utils/branding'
 
-import { CHERRY_HOME, LOGS_DIR } from './constants'
+import { CHERRY_HOME, DEV_PROFILE_ROOT, LOGS_DIR } from './constants'
 
 const logger = loggerService.withContext('PathRegistry')
 
@@ -61,7 +61,7 @@ export function buildPathRegistry() {
   const appRootResources = path.join(app.getAppPath(), 'resources')
 
   return Object.freeze({
-    // -- A. cherry.* — ~/.cherrystudio infrastructure --
+    // -- A. cherry.* — CHERRY_HOME infrastructure --
     'cherry.home': CHERRY_HOME,
     'cherry.bin': path.join(CHERRY_HOME, 'bin'),
     'cherry.config': path.join(CHERRY_HOME, 'config'),
@@ -101,6 +101,8 @@ export function buildPathRegistry() {
 
     // -- D. feature.* — grouped by feature, physical location is irrelevant --
 
+    'feature.remote_access.identity_file': path.join(appUserDataRuntime, 'remote-identity.enc'),
+
     // Provider registry data (models.json, providers.json, etc.)
     'feature.provider_registry.data': app.isPackaged
       ? path.join(appExtraResources, 'provider-registry')
@@ -122,6 +124,9 @@ export function buildPathRegistry() {
 
     // BabelDOC runtime cache (layout model, fonts, CMap/tiktoken assets)
     'feature.pdf_translation.babeldoc': path.join(appUserDataRuntime, 'models', 'babeldoc'),
+
+    'feature.pdfjs.cmaps': path.join(app.getAppPath(), 'node_modules', 'pdfjs-dist', 'cmaps'),
+    'feature.pdfjs.standard_fonts': path.join(app.getAppPath(), 'node_modules', 'pdfjs-dist', 'standard_fonts'),
 
     // BinaryManager (tool manager)
     'feature.binary.data': appUserDataToolchainMise,
@@ -200,6 +205,7 @@ export function buildPathRegistry() {
     'feature.agents.dsh.root': path.join(appUserDataData, 'Agents', '.dsh'), // Cherry-owned dsh home (DSH_HOME) + per-connection compositions
     'feature.agents.dsh.sessions': path.join(appUserDataData, 'Agents', '.dsh', 'sessions'), // JSONL session-persistence root
     'feature.agents.uar.data': path.join(appUserDataData, 'Agents', '.uar'), // supervised UAR sidecar persistence
+    'feature.agents.bossfang.data': path.join(appUserDataData, 'Agents', '.bossfang'),
     'feature.agents.data': path.join(appUserDataData, 'Agents'), // per-agent identity + memory data
     'feature.agents.forks': path.join(appUserDataData, 'Agents', '.forks'), // owned fork snapshots; retained for Pi lineage
     'feature.agents.system_workspaces': path.join(appUserDataData, 'Agents', 'system'), // app-owned session workspaces
@@ -214,7 +220,10 @@ export function buildPathRegistry() {
       : path.join(__dirname, '../../build/prometheus-payload'),
     'feature.prometheus.pack.runtime': path.join(appUserDataData, 'PrometheusPack'),
     'feature.prometheus.state': path.join(appUserDataData, 'Prometheus'),
-    'feature.prometheus.commands': path.join(appUserData, 'commands'),
+    'feature.prometheus.commands': path.join(CHERRY_HOME, 'commands'),
+    'feature.prometheus.commands.legacy': path.join(appUserData, 'commands'),
+    'feature.prometheus.commands.registration_file': path.join(CHERRY_HOME, 'config', 'path-registration.json'),
+    'feature.prometheus.commands.rc_backups': path.join(CHERRY_HOME, 'rc-backups'),
     'feature.prometheus.toml_editor_wasm': app.isPackaged
       ? path.join(appExtraResources, 'toml-edit-js', 'index_bg.wasm')
       : path.join(__dirname, '../../node_modules/@rainbowatcher/toml-edit-js/index_bg.wasm'),
@@ -291,6 +300,7 @@ export function buildPathRegistry() {
     'v1.agents.claude': path.join(appUserData, '.claude'),
 
     // -- F. external.* — third-party tool paths (Cherry reads/writes, does NOT own) --
+    'external.shell.home': DEV_PROFILE_ROOT ? path.join(DEV_PROFILE_ROOT, 'home') : sysHome,
     'external.claude.config': path.join(sysHome, '.claude'),
     'external.browser.chrome': isMac
       ? path.join(sysHome, 'Library/Application Support/Google/Chrome')
@@ -389,6 +399,8 @@ const NO_ENSURE = [
   'app.session.webview',
   'app.database.migrations',
   'feature.provider_registry.data',
+  'feature.pdfjs.cmaps',
+  'feature.pdfjs.standard_fonts',
   'feature.webview.preload_file',
   'feature.code_cli.skills.builtin',
   'feature.agents.builtin',
@@ -396,6 +408,9 @@ const NO_ENSURE = [
   'feature.agents.skills.builtin',
   'feature.prometheus.pack.builtin',
   'feature.prometheus.toml_editor_wasm',
+  // The shell writer must create private backups with mode 0700 itself.
+  'feature.prometheus.commands.rc_backups',
+  'feature.prometheus.commands.legacy',
   'feature.mini_app.builtin',
   // AgentSessionService stores this path through DataApi. The runtime creates
   // the concrete session directory later, keeping database writes filesystem-free.

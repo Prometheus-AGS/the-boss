@@ -4,6 +4,7 @@ import { type ApiGatewayEventSchemas, apiGatewayRequestSchemas } from './apiGate
 import { type AppEventSchemas, appRequestSchemas } from './app'
 import { type BackupEventSchemas, backupRequestSchemas } from './backup'
 import { type BinaryEventSchemas, binaryRequestSchemas } from './binary'
+import { type BossFangEventSchemas, bossFangRequestSchemas } from './bossFang'
 import { type BrowserEventSchemas, browserRequestSchemas } from './browser'
 import { type ChannelEventSchemas, channelRequestSchemas } from './channel'
 import { type CherryCloudEventSchemas, cherryCloudRequestSchemas } from './cherryCloud'
@@ -27,6 +28,7 @@ import { type NotificationEventSchemas, notificationRequestSchemas } from './not
 import { oauthRequestSchemas } from './oauth'
 import { openclawRequestSchemas } from './openclaw'
 import { ovmsRequestSchemas } from './ovms'
+import { pdfjsRequestSchemas } from './pdfjs'
 import { printRequestSchemas } from './print'
 import { profileRequestSchemas } from './profile'
 import { type PrometheusEventSchemas, prometheusRequestSchemas } from './prometheus'
@@ -55,6 +57,7 @@ export const ipcRequestSchemas = {
   ...apiGatewayRequestSchemas,
   ...appRequestSchemas,
   ...backupRequestSchemas,
+  ...bossFangRequestSchemas,
   ...binaryRequestSchemas,
   ...browserRequestSchemas,
   ...channelRequestSchemas,
@@ -80,6 +83,7 @@ export const ipcRequestSchemas = {
   ...oauthRequestSchemas,
   ...openclawRequestSchemas,
   ...ovmsRequestSchemas,
+  ...pdfjsRequestSchemas,
   ...printRequestSchemas,
   ...profileRequestSchemas,
   ...providerRequestSchemas,
@@ -105,7 +109,8 @@ export type IpcRoute = keyof IpcRequestSchemas
  * the renderer trusts them and never re-parses). Each migrated domain intersects
  * its own `*EventSchemas` type here.
  */
-export type IpcEventSchemas = AiEventSchemas &
+export type IpcEventSchemas = BossFangEventSchemas &
+  AiEventSchemas &
   ApiGatewayEventSchemas &
   AppEventSchemas &
   BackupEventSchemas &

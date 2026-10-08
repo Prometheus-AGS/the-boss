@@ -14,7 +14,12 @@ import type {
 } from '@shared/types/uarDurableAdministration'
 
 import { readUarAdministrationSnapshot } from './UarAdministrationAdapter'
+import { projectBinding, rawBinding } from './uarBindingPosture'
+import { projectInstance, projectObserver } from './uarDurableProjections'
 import { uarPrincipalForSession } from './uarPrincipal'
+import type { UarSidecarEndpoint } from './UarSidecarService'
+
+export { rawBinding } from './uarBindingPosture'
 
 const instancePath = '/api/uar/agent-instances/v1'
 const observerPath = '/api/uar/observers/v1'
@@ -45,81 +50,13 @@ const operations = [
   'observers.gap.acknowledge'
 ] as const satisfies readonly UarDurableOperation[]
 
-export const rawBinding = z.object({
-  id: z.string(),
-  workspaceId: z.string(),
-  revision: z.number().int().nonnegative(),
-  activationSupported: z.boolean(),
-  package: z.object({ id: z.string(), version: z.string(), digest: z.string() })
-})
-
-const rawInstance = z.object({
-  instanceId: z.string(),
-  workspaceId: z.string(),
-  definitionId: z.string(),
-  definitionVersion: z.string(),
-  bindingId: z.string(),
-  bindingRevision: z.number().int().nonnegative(),
-  profile: z.enum(['request', 'on_demand', 'resident']),
-  lifecycle: z.enum(['dormant', 'active', 'draining', 'disabled', 'failed']),
-  recovery: z.enum(['ready', 'pending_reconciliation', 'effect_uncertain']),
-  revision: z.number().int().nonnegative(),
-  epoch: z.number().int().nonnegative(),
-  queueDepth: z.number().int().nonnegative(),
-  activeRunId: z.string().nullable(),
-  activeCommandId: z.string().nullable(),
-  restartAttempts: z.number().int().nonnegative(),
-  lastErrorCode: z.string().nullable(),
-  nextEventSequence: z.number().int().nonnegative(),
-  commands: z.array(
-    z.object({
-      commandId: z.string(),
-      kind: z.enum(['turn', 'activate', 'passivate', 'drain', 'disable', 'restart', 'cancel']),
-      status: z.enum(['accepted', 'running', 'completed', 'failed', 'cancelled', 'uncertain'])
-    })
-  )
-})
-
-const rawObserver = z.object({
-  subscription: z.object({
-    subscription_id: z.string(),
-    workspace_id: z.string(),
-    observer_instance_id: z.string(),
-    source_instance_ids: z.array(z.string()),
-    conversation_ids: z.array(z.string()).nullable(),
-    revision: z.number().int().nonnegative(),
-    paused: z.boolean(),
-    revoked: z.boolean(),
-    gaps: z.array(
-      z.object({
-        source_instance_id: z.string(),
-        missing_from: z.number().int().nonnegative(),
-        missing_through: z.number().int().nonnegative(),
-        detected_at: z.string(),
-        acknowledged_at: z.string().nullable()
-      })
-    )
-  }),
-  sources: z.array(
-    z.object({
-      sourceInstanceId: z.string(),
-      cursor: z.number().int().nonnegative().nullable(),
-      retainedLow: z.number().int().nonnegative().nullable(),
-      sourceHigh: z.number().int().nonnegative().nullable()
-    })
-  ),
-  backlogDepth: z.number().int().nonnegative(),
-  deadLetterCount: z.number().int().nonnegative(),
-  recoveryActions: z.array(z.string())
-})
-
 export function workspace(workspaceId: string): string {
   // The renderer supplies a selector. Main resolves it against Boss's user-workspace store.
   return agentWorkspaceService.getById(workspaceId).id
 }
 
-export async function capabilityState() {
-  const snapshot = await readUarAdministrationSnapshot()
+export async function capabilityState(endpoint?: UarSidecarEndpoint) {
+  const snapshot = await readUarAdministrationSnapshot(endpoint)
   const entries = operations.map((id) => {
     const surface = snapshot.surfaces.find((candidate) => candidate.methods.some((method) => method.id === id))
     const method = surface?.methods.find((candidate) => candidate.id === id)
@@ -151,6 +88,7 @@ export async function capabilityState() {
   const starterAvailable = starterRequired.every((id) => advertised[id].available)
   return {
     generation: snapshot.generation,
+    surfaces: snapshot.surfaces,
     operations: {
       ...advertised,
       'starter.setup': {
@@ -165,26 +103,52 @@ function requireOperation(state: Awaited<ReturnType<typeof capabilityState>>, id
   if (!state.operations[id].available) throw new Error(`UAR operation ${id} is unavailable`)
 }
 
+const pendingScopedReads = new Map<string, Promise<unknown>>()
+
 export async function scopedRequest(
   workspaceId: string,
   pathname: string,
   generation: number,
   method = 'GET',
-  payload?: object
+  payload?: object,
+  endpoint?: UarSidecarEndpoint
 ): Promise<unknown> {
-  const response = await application.get('UarSidecarService').request(
-    pathname,
-    uarPrincipalForSession('durable-administration'),
-    {
-      method,
-      headers: {
-        'x-uar-workspace-id': workspaceId,
-        ...(payload ? { 'content-type': 'application/json' } : {})
-      },
-      ...(payload ? { body: JSON.stringify(payload) } : {})
+  if (endpoint && (method.toUpperCase() !== 'GET' || payload !== undefined)) {
+    throw new Error('Explicit UAR administration targets support read requests only')
+  }
+  if (method.toUpperCase() !== 'GET' || payload !== undefined) {
+    return sendScopedRequest(workspaceId, pathname, generation, method, payload)
+  }
+  const key = JSON.stringify([endpoint?.instanceId ?? null, workspaceId, generation, pathname])
+  const pending = pendingScopedReads.get(key)
+  if (pending) return structuredClone(await pending)
+  const request = sendScopedRequest(workspaceId, pathname, generation, method, undefined, endpoint).finally(() => {
+    if (pendingScopedReads.get(key) === request) pendingScopedReads.delete(key)
+  })
+  pendingScopedReads.set(key, request)
+  return structuredClone(await request)
+}
+
+async function sendScopedRequest(
+  workspaceId: string,
+  pathname: string,
+  generation: number,
+  method = 'GET',
+  payload?: object,
+  endpoint?: UarSidecarEndpoint
+): Promise<unknown> {
+  const sidecar = application.get('UarSidecarService')
+  const init = {
+    method,
+    headers: {
+      'x-uar-workspace-id': workspaceId,
+      ...(payload ? { 'content-type': 'application/json' } : {})
     },
-    generation
-  )
+    ...(payload ? { body: JSON.stringify(payload) } : {})
+  }
+  const response = endpoint
+    ? await sidecar.requestInstance(endpoint, pathname, uarPrincipalForSession('durable-administration'), init)
+    : await sidecar.request(pathname, uarPrincipalForSession('durable-administration'), init, generation)
   if (!response.ok) {
     const error = z.object({ error: z.object({ code: z.string() }) }).safeParse(await response.json().catch(() => null))
     throw new Error(
@@ -194,67 +158,48 @@ export async function scopedRequest(
   return response.json()
 }
 
-function projectInstance(value: unknown, workspaceId: string): UarDurableInstance {
-  const instance = rawInstance.parse(value)
-  if (instance.workspaceId !== workspaceId) throw new Error('UAR instance workspace scope mismatch')
-  return instance
-}
-
-function projectObserver(value: unknown, workspaceId: string): UarDurableObserver {
-  const status = rawObserver.parse(value)
-  const subscription = status.subscription
-  if (subscription.workspace_id !== workspaceId) throw new Error('UAR observer workspace scope mismatch')
-  return {
-    subscriptionId: subscription.subscription_id,
-    workspaceId: subscription.workspace_id,
-    observerInstanceId: subscription.observer_instance_id,
-    sourceInstanceIds: subscription.source_instance_ids,
-    conversationIds: subscription.conversation_ids,
-    revision: subscription.revision,
-    paused: subscription.paused,
-    revoked: subscription.revoked,
-    gaps: subscription.gaps.map((gap) => ({
-      sourceInstanceId: gap.source_instance_id,
-      missingFrom: gap.missing_from,
-      missingThrough: gap.missing_through,
-      detectedAt: gap.detected_at,
-      acknowledgedAt: gap.acknowledged_at
-    })),
-    sources: status.sources,
-    backlogDepth: status.backlogDepth,
-    deadLetterCount: status.deadLetterCount,
-    recoveryActions: status.recoveryActions
-  }
-}
-
-async function scopedBindings(workspaceId: string, generation: number): Promise<UarDurableBinding[]> {
-  const bindings = z.array(rawBinding).parse(await scopedRequest(workspaceId, bindingPath, generation))
+async function scopedBindings(
+  workspaceId: string,
+  generation: number,
+  endpoint?: UarSidecarEndpoint
+): Promise<UarDurableBinding[]> {
+  const bindings = z
+    .array(rawBinding)
+    .parse(await scopedRequest(workspaceId, bindingPath, generation, 'GET', undefined, endpoint))
   return bindings.map((binding) => {
     if (binding.workspaceId !== workspaceId) throw new Error('UAR binding workspace scope mismatch')
+    if (endpoint) return projectBinding(binding)
     return { id: binding.id, revision: binding.revision, activationSupported: binding.activationSupported }
   })
 }
 
-async function scopedInstances(workspaceId: string, generation: number): Promise<UarDurableInstance[]> {
+async function scopedInstances(
+  workspaceId: string,
+  generation: number,
+  endpoint?: UarSidecarEndpoint
+): Promise<UarDurableInstance[]> {
   return z
     .array(z.unknown())
-    .parse(await scopedRequest(workspaceId, instancePath, generation))
+    .parse(await scopedRequest(workspaceId, instancePath, generation, 'GET', undefined, endpoint))
     .map((value) => projectInstance(value, workspaceId))
 }
 
-export async function readUarDurableWorkspace(workspaceId: string): Promise<UarDurableWorkspaceSnapshot> {
+export async function readUarDurableWorkspace(
+  workspaceId: string,
+  endpoint?: UarSidecarEndpoint
+): Promise<UarDurableWorkspaceSnapshot> {
   const resolved = workspace(workspaceId)
-  const state = await capabilityState()
+  const state = await capabilityState(endpoint)
   const bindings = state.operations['collaboration.deployment_bindings.list'].available
-    ? await scopedBindings(resolved, state.generation)
+    ? await scopedBindings(resolved, state.generation, endpoint)
     : []
   const instances = state.operations['agent-instances.list'].available
-    ? await scopedInstances(resolved, state.generation)
+    ? await scopedInstances(resolved, state.generation, endpoint)
     : []
   const observers = state.operations['observers.list'].available
     ? z
         .array(z.unknown())
-        .parse(await scopedRequest(resolved, observerPath, state.generation))
+        .parse(await scopedRequest(resolved, observerPath, state.generation, 'GET', undefined, endpoint))
         .map((value) => projectObserver(value, resolved))
     : []
   return {

@@ -16,6 +16,8 @@ import type {
 } from '@shared/types/prometheusIntegration'
 import { uarPresentationSelectionSchema } from '@shared/types/prometheusIntegration'
 
+import type { UarSidecarEndpoint } from './UarSidecarService'
+
 const rawArtifactSchema = z
   .object({
     version: z.string(),
@@ -117,8 +119,8 @@ async function responseBody(response: Response): Promise<unknown> {
 
 async function adminRequest(path: string, init: RequestInit = {}): Promise<{ body: unknown; generation: number }> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
-  const response = await sidecar.adminRequest(path, init, endpoint.generation)
+  const endpoint = await sidecar.resolveSelected()
+  const response = await sidecar.adminRequestInstance(endpoint, path, init)
   return { body: await responseBody(response), generation: endpoint.generation }
 }
 
@@ -145,8 +147,16 @@ function projectArtifact(input: z.infer<typeof rawArtifactSchema>): UarAgentCata
     model: input.policy.provider.default.model,
     fallbackModels: input.policy.provider.fallbacks,
     skillIds: input.policy.skills.prefer,
-    definition: input as Record<string, unknown>
+    definition: input
   }
+}
+
+export async function readUarAgentDefinitions(endpoint: UarSidecarEndpoint): Promise<UarAgentCatalogItem[]> {
+  const response = await application
+    .get('UarSidecarService')
+    .adminRequestInstance(endpoint, '/api/uar/discovery/agents')
+  const catalog = z.object({ runtime_agents: z.array(rawArtifactSchema) }).parse(await responseBody(response))
+  return catalog.runtime_agents.map(projectArtifact)
 }
 
 export async function readUarCatalog(): Promise<UarCatalogSnapshot> {

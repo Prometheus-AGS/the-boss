@@ -8,6 +8,10 @@ description: Use to resume a paused KBD run after validating its checkpoint and 
 Resume an explicitly paused KBD run. A normal assistant response is never a
 resume signal.
 
+## OpenSpec lifecycle preflight
+
+Before this stage, follow the [orchestrator preflight](../kbd-process-orchestrator/SKILL.md#openspec-lifecycle-preflight): refresh existing KBD/OpenSpec projects with the managed latest-stable CLI, then use that same runner for OpenSpec commands. Retry a pending startup refresh before OpenSpec work; preserve authored specs and task state. Phase scripts run this automatically, including canonical-runtime paths.
+
 ## Progress Signals (MANDATORY)
 
 Before validation, emit:

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "kind": "actual-corrective-packaging-build",
+  "command": "pnpm build:mac:arm64",
+  "root": "/Users/gqadonis/.claude/worktrees/afc-c14-approval-lifecycle",
+  "bossSource": "4cae06d65ec05cc156274cf6ba53e68f3fe3c472",
+  "uarSource": "36f096dbda0f17c6e15c71b284ce89cb04f04502",
+  "startedAt": "2026-10-07T20:28:20.050Z",
+  "finishedAt": "2026-10-07T20:35:34.768Z",
+  "exitCode": 0,
+  "status": "success",
+  "log": "/Users/gqadonis/Projects/prometheus/worktrees/agent-fabric-c06/librefang/docs/plans/agent-fabric-convergence/.prometheus/cadence/artifacts/c14-corrective-mac-arm64-build-20261007.log",
+  "reason": "Observed approval cancellation failed its completed packaged operation",
+  "cadencePromotion": "pending",
+  "testsRun": false
+}

@@ -11,7 +11,7 @@
  * path the same way.
  */
 
-const GROK_CLIENT_VERSION = '0.2.16'
+import { GROK_CLI_COMPATIBILITY_VERSION } from '@shared/data/presets/grokCli'
 
 export interface GrokCliCredentials {
   accessToken: string
@@ -91,9 +91,11 @@ export function rewriteGrokCliResponsesBody(json: Record<string, any>): Record<s
 export function buildGrokCliRequestHeaders(base: HeadersInit | undefined, creds: GrokCliCredentials): Headers {
   const headers = new Headers(base)
   headers.set('Authorization', `Bearer ${creds.accessToken}`)
-  headers.set('x-grok-client-identifier', 'cherry-studio')
-  headers.set('x-grok-client-version', GROK_CLIENT_VERSION)
+  headers.set('x-grok-client-identifier', 'the-boss')
+  headers.set('x-grok-client-version', GROK_CLI_COMPATIBILITY_VERSION)
   headers.set('x-xai-token-auth', 'xai-grok-cli')
+  headers.set('x-authenticateresponse', 'authenticate-response')
+  headers.set('x-grok-client-mode', 'interactive')
   const modelOverride = normalizeGrokModelId(creds.modelId)
   if (modelOverride) headers.set('x-grok-model-override', modelOverride)
   return headers

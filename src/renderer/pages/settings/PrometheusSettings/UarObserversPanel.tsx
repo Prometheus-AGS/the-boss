@@ -17,6 +17,7 @@ import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/compon
 import { ipcApi } from '@renderer/ipc'
 import type { UarDurableObserver, UarDurableOperation, UarObserverAction } from '@shared/types/uarDurableAdministration'
 
+import { UarChannelObserversPanel } from './UarChannelObserversPanel'
 import { useUarDurableWorkspace } from './useUarDurableWorkspace'
 
 export function UarObserversPanel({ workspaceId }: { workspaceId: string }) {
@@ -236,12 +237,29 @@ export function UarObserversPanel({ workspaceId }: { workspaceId: string }) {
                     <div className="mt-3">
                       <h4 className="text-xs font-medium">{tr('sourceProgress')}</h4>
                       <div className="mt-1 space-y-1">
-                        {observer.sources.map((source) => (
-                          <p key={source.sourceInstanceId} className="break-all text-xs text-muted-foreground">
-                            {source.sourceInstanceId} · {tr('cursor')}: {source.cursor ?? '—'} · {tr('retainedLow')}:{' '}
-                            {source.retainedLow ?? '—'} · {tr('sourceHigh')}: {source.sourceHigh ?? '—'}
-                          </p>
-                        ))}
+                        {observer.sources.map((source) => {
+                          const openGap = observer.gaps.some(
+                            (gap) => gap.sourceInstanceId === source.sourceInstanceId && !gap.acknowledgedAt
+                          )
+                          return (
+                            <div
+                              key={source.sourceInstanceId}
+                              className="flex flex-wrap items-center gap-2 border-b border-border-subtle py-1.5 text-xs last:border-0">
+                              <span className="min-w-0 break-all font-medium">{source.sourceInstanceId}</span>
+                              <span className="text-muted-foreground">
+                                {tr('cursor')}: {source.cursor ?? tr('unknown')}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {tr('retainedLow')}: {source.retainedLow ?? tr('unknown')}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {tr('sourceHigh')}: {source.sourceHigh ?? tr('unknown')}
+                              </span>
+                              {openGap && <Badge variant="outline">{tr('retentionGaps')}</Badge>}
+                              <span className="text-muted-foreground">{tr('lagUnknown')}</span>
+                            </div>
+                          )
+                        })}
                       </div>
                     </div>
                     {observer.gaps.length > 0 && (
@@ -302,6 +320,7 @@ export function UarObserversPanel({ workspaceId }: { workspaceId: string }) {
           </SettingGroup>
         </>
       )}
+      <UarChannelObserversPanel key={workspaceId} workspaceId={workspaceId} />
     </div>
   )
 }

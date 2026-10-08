@@ -21,6 +21,7 @@ import {
   type ModelLabels,
   TextInputField
 } from '@renderer/components/resourceCatalog/dialogs/components/EditDialogShared'
+import { UarModelAssignmentField } from '@renderer/components/resourceCatalog/dialogs/components/UarModelAssignmentField'
 import { getPermissionModeCards } from '@renderer/utils/agent'
 import { AGENT_RUNTIME_CAPABILITIES } from '@shared/ai/agentRuntimeCapabilities'
 import type { AgentType } from '@shared/data/types/agent'
@@ -82,6 +83,7 @@ function AgentRuntimeModelFields({
     // A model compatible with one runtime may be unsupported by another, so
     // clear the current pick to force a re-select against the new filter.
     form.setValue('modelId', null, { shouldDirty: true })
+    form.setValue('uarModelAssignment', undefined, { shouldDirty: true })
     setModelLabels(EMPTY_MODEL_LABELS)
   }
 
@@ -132,7 +134,7 @@ function AgentRuntimeModelFields({
         form={form}
         name="modelId"
         includeAgentOnlyModels
-        label={t('common.model')}
+        label={t(agentType === 'uar' ? 'library.config.agent.uar_model.boss_catalog_label' : 'common.model')}
         labelClassName="font-medium"
         filter={modelFilter}
         isModelDisabled={isModelDisabled}
@@ -142,6 +144,18 @@ function AgentRuntimeModelFields({
         onSettingsNavigate={onSettingsNavigate}
         triggerClassName="h-9 rounded-md border border-input bg-transparent px-3 hover:bg-accent/50 aria-expanded:bg-accent/50"
       />
+      {agentType === 'uar' ? (
+        <>
+          <p className="text-xs text-muted-foreground">{t('library.config.agent.uar_model.boss_catalog_help')}</p>
+          <UarModelAssignmentField
+            value={form.watch('uarModelAssignment')}
+            onChange={(assignment) => form.setValue('uarModelAssignment', assignment, { shouldDirty: true })}
+            portalContainer={portalContainer}
+            autoSelect
+            onSettingsNavigate={onSettingsNavigate}
+          />
+        </>
+      ) : null}
     </>
   )
 }

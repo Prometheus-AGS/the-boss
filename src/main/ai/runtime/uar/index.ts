@@ -12,9 +12,31 @@ export {
   createUarDurableObserver,
   readUarDurableWorkspace
 } from './UarDurableAdministrationAdapter'
-export { setupUarStarterAgent } from './UarStarterAdministrationAdapter'
+export {
+  addUarTeamTask,
+  assignUarTeamReviewer,
+  claimUarTeamTask,
+  createUarTeam,
+  readUarTeamMailbox,
+  readUarTeams,
+  reassignUarTeamTask,
+  sendUarTeamMailboxMessage,
+  updateUarTeamTaskState
+} from './UarTeamsAdministrationAdapter'
+export {
+  admitUarTeamTask,
+  queueUarTeamTask,
+  dispatchUarTeamAttempt,
+  cancelUarTeamAttempt,
+  readUarTeamArtifacts,
+  readUarTeamExecution,
+  recoverUarTeamExecution,
+  revokeUarTeamMember
+} from './UarTeamExecutionAdapter'
+export { setupUarStarterAgent, setupUarStarterTeam, rebindUarStarterTeam } from './UarStarterAdministrationAdapter'
 export {
   deleteUarProvider,
+  providerResponseSchema,
   readUarModelSources,
   saveUarProvider,
   setDefaultUarProvider,
@@ -53,5 +75,50 @@ export {
   toggleUarSkill
 } from './UarCatalogAdministrationAdapter'
 export { UarRuntimeDriver } from './UarRuntimeDriver'
+export { UarTeamHostService } from './UarTeamHostService'
+export { modelSnapshotForUarAssignment } from './uarModelAssignments'
 export { UarSidecarService, type UarSidecarEndpoint } from './UarSidecarService'
 export { readAppliedUarStorage } from './uarStorageProfile'
+export {
+  decodeUarSessionPlacement,
+  encodeUarSessionPlacement,
+  isStructuredUarSessionPlacement
+} from './uarSessionPlacement'
+
+export {
+  readUarExecutionOwner,
+  reclaimUarExecutionOwner,
+  quiesceUarExecutionOwner
+} from './UarExecutionOwnershipAdapter'
+
+export { readUarTeamContext, readUarTeamPeerMessages } from './UarTeamContextAdapter'
+export { readUarTeamRunEvents } from './UarTeamRunEventsAdapter'
+
+export {
+  readUarChannelObservers,
+  actOnUarChannelObserver,
+  readUarChannelDeliveries
+} from './uarChannelObserverAdministration'
+
+export {
+  readUarWorkflows,
+  readUarWorkflow,
+  startUarWorkflow,
+  decideUarWorkflow,
+  cancelUarWorkflow,
+  recoverUarWorkflow
+} from './UarWorkflowExecutionAdapter'
+
+export { setupUarCodingTeam } from './UarCodingTeamAdministrationAdapter'
+export {
+  readUarTeamAuthoring,
+  saveUarTeamAuthoring,
+  deployUarAuthoredTeam,
+  selectUarTeamKnowledge
+} from './UarTeamAuthoringAdapter'
+export { reviewUarTeamModelPolicy } from './uarTeamReviewedModelPolicy'
+export { reviewUarTeamGuidance } from './uarTeamGuidance'
+export { readUarTeamSkillCatalog } from './UarTeamSkillCatalogAdapter'
+export { submitUarTeamTask, readUarTeamApprovals, decideUarTeamApproval } from './UarTeamWorkAdapter'
+
+export { readUarLifecycleSnapshot } from './UarLifecycleAdministrationAdapter'

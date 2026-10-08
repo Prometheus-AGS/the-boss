@@ -6,7 +6,7 @@ on:
       release_version:
         description: Frozen application version (must match package.json)
         required: true
-        default: 2.2.4
+        default: 2.2.8
         type: string
       release_profile:
         description: Customer release profile
@@ -44,7 +44,7 @@ on:
   repository_dispatch:
     types: [boss_release_platform_published]
 concurrency:
-  group: ${{ github.event_name == 'repository_dispatch' && 'the-boss-release-publication' || format('the-boss-release-{0}', github.ref) }}
+  group: ${{ github.event_name == 'repository_dispatch' && 'the-boss-release-publication' || format('the-boss-release-{0}-{1}', github.ref, inputs.platforms) }}
   cancel-in-progress: false
 env:
   NODE_OPTIONS: --max-old-space-size=8192
@@ -76,6 +76,8 @@ jobs:
         run: node scripts/release-preflight.cjs
       - name: Import complete UAR sidecar payload
         if: env.THE_BOSS_UAR_ENABLED == '1'
+        env:
+          RELEASE_PLATFORMS: ${{ inputs.platforms }}
         run: node scripts/import-uar-sidecar-payloads.cjs
       - id: select
         env:
@@ -125,6 +127,8 @@ jobs:
           node-version-file: .node-version
       - name: Import complete UAR sidecar payload
         if: env.THE_BOSS_UAR_ENABLED == '1'
+        env:
+          RELEASE_PLATFORMS: ${{ matrix.platform }}-${{ matrix.arch }}
         run: node scripts/import-uar-sidecar-payloads.cjs
       - name: Report native release capacity and payloads
         run: node scripts/release-capacity.cjs --platform ${{ matrix.platform }}-${{ matrix.arch }} --report-only
@@ -168,9 +172,6 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          if (-not (Get-Command makensis.exe -ErrorAction SilentlyContinue)) {
-            choco install nsis --no-progress -y
-          }
           node scripts/nsis-preflight.cjs
       - name: Enable configured macOS signing
         if: runner.os == 'macOS' && env.HAS_MAC_SIGNING == 'true'

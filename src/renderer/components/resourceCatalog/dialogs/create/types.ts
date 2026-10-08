@@ -1,5 +1,5 @@
 import type { ResourceCreateValues } from '@renderer/types/resourceCatalog'
-import type { AgentPermissionMode } from '@shared/data/api/schemas/agents'
+import type { AgentPermissionMode, UarModelAssignment } from '@shared/data/api/schemas/agents'
 import type { AgentType } from '@shared/data/types/agent'
 import type { UniqueModelId } from '@shared/data/types/model'
 
@@ -22,6 +22,7 @@ export type ResourceCreateWizardFormValues = {
   /** Agent permission policy. Ignored for the assistant kind. */
   permissionMode: AgentPermissionMode
   modelId: UniqueModelId | null
+  uarModelAssignment?: UarModelAssignment
   prompt: string
   // assistant step 3 / agent step 4
   knowledgeBaseIds: string[]

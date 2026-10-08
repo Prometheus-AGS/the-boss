@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prometheus-ags.github.io/schemas/agent-team/uar-workspace/v1",
+  "title": "UAR draft.2 team-scoped authoring workspace index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "revision", "profile", "teamId", "packageId", "packageVersion", "manifest", "definitions", "questionState"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "revision": { "type": "integer", "minimum": 1 },
+    "profile": { "const": "urn:prometheus:uar:collaboration:0.1.0-draft.2" },
+    "teamId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,62}$" },
+    "packageId": { "type": "string", "minLength": 1 },
+    "packageVersion": { "$ref": "#/$defs/semver" },
+    "manifest": { "$ref": "#/$defs/relativeFile" },
+    "definitions": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/relativeFile" } },
+    "migrationReceipt": { "$ref": "#/$defs/relativeFile" },
+    "bindingIntent": { "enum": ["package-only", "package-and-binding"] },
+    "base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["teamId", "revision", "packageVersion"],
+      "properties": {
+        "teamId": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,62}$" },
+        "revision": { "type": "integer", "minimum": 1 },
+        "packageVersion": { "$ref": "#/$defs/semver" }
+      }
+    },
+    "questionState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currentQuestionId", "questions"],
+      "properties": {
+        "currentQuestionId": { "type": ["string", "null"] },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "document", "pointer", "prompt", "required", "state"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "document": { "$ref": "#/$defs/relativeFile" },
+              "pointer": { "type": "string", "pattern": "^/" },
+              "prompt": { "type": "string", "minLength": 1 },
+              "required": { "const": true },
+              "state": { "enum": ["pending", "answered"] },
+              "answer": {}
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "semver": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$" },
+    "relativeFile": { "type": "string", "pattern": "^(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$" }
+  }
+}

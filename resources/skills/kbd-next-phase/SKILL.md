@@ -7,6 +7,10 @@ description: Continue to the next KBD phase, automatically seeded from the previ
 
 Seed and initialize the next KBD phase from the previous phase's reflection.
 
+## OpenSpec lifecycle preflight
+
+Before this stage, follow the [orchestrator preflight](../kbd-process-orchestrator/SKILL.md#openspec-lifecycle-preflight): refresh existing KBD/OpenSpec projects with the managed latest-stable CLI, then use that same runner for OpenSpec commands. Retry a pending startup refresh before OpenSpec work; preserve authored specs and task state. Phase scripts run this automatically, including canonical-runtime paths.
+
 ## What this does
 
 1. Reads `current-waypoint.json` to find the completed phase name and stage.

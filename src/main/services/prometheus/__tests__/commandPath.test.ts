@@ -12,8 +12,9 @@ vi.mock('@application', () => ({
       const map: Record<string, string> = {
         'feature.prometheus.commands': `${paths.root}/commands`,
         'cherry.bin': `${paths.root}/bin`,
-        'sys.home': `${paths.root}/home`,
-        'app.exe_file': `${paths.root}/app/The Boss`
+        'external.shell.home': `${paths.root}/home`,
+        'feature.prometheus.commands.registration_file': `${paths.root}/state/path-registration.json`,
+        'feature.prometheus.commands.rc_backups': `${paths.root}/state/rc-backups`
       }
       return map[key]
     }

@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -11,7 +12,7 @@ import {
 import { useTheme } from '@renderer/hooks/useTheme'
 import { getSettingDomId } from '@renderer/pages/settings/settingsSearch/types'
 
-import { IntegrationChoice, IntegrationField } from './IntegrationFields'
+import { IntegrationChoice, IntegrationField, IntegrationToggle } from './IntegrationFields'
 import { IntegrationPage, IntegrationSecretField, integrationText } from './IntegrationPage'
 import { UarAdministrationWorkspace } from './UarAdministrationWorkspace'
 import { UarIntegrationStatus } from './UarIntegrationStatus'
@@ -44,6 +45,12 @@ export default function UarSettings() {
             onReady={() => void controller.load()}
             overview={
               <>
+                <SettingGroup>
+                  <Link data-ui="bossfang-settings-entry" to="/settings/bossfang" className="text-link">
+                    {t('bossfang.settingsLink')}
+                  </Link>
+                  <SettingHelpText>{t('bossfang.connectionIndependent')}</SettingHelpText>
+                </SettingGroup>
                 <UarIntegrationStatus
                   snapshot={snapshot}
                   busy={controller.busy}
@@ -110,18 +117,24 @@ export default function UarSettings() {
                         <IntegrationField
                           label={integrationText(t, 'endpoint')}
                           value={controller.draft.uar.endpoint}
-                          onChange={(endpoint) => controller.update('uar', { endpoint })}
+                          onChange={(endpoint) =>
+                            controller.update('uar', { endpoint, remoteDurabilityAttested: false })
+                          }
                           disabled={storageSelection !== 'manual'}
                         />
                         <IntegrationField
                           label={integrationText(t, 'namespace')}
                           value={controller.draft.uar.namespace}
-                          onChange={(namespace) => controller.update('uar', { namespace })}
+                          onChange={(namespace) =>
+                            controller.update('uar', { namespace, remoteDurabilityAttested: false })
+                          }
                         />
                         <IntegrationField
                           label={integrationText(t, 'database')}
                           value={controller.draft.uar.database}
-                          onChange={(database) => controller.update('uar', { database })}
+                          onChange={(database) =>
+                            controller.update('uar', { database, remoteDurabilityAttested: false })
+                          }
                         />
                         <IntegrationField
                           label={integrationText(t, 'username')}
@@ -138,6 +151,18 @@ export default function UarSettings() {
                           }))}
                         />
                         <IntegrationSecretField controller={controller} secret="uarPassword" />
+                        <div className="sm:col-span-2">
+                          <IntegrationToggle
+                            label={integrationText(t, 'uarRemoteDurabilityAttestation')}
+                            checked={controller.draft.uar.remoteDurabilityAttested}
+                            onChange={(remoteDurabilityAttested) =>
+                              controller.update('uar', { remoteDurabilityAttested })
+                            }>
+                            <SettingHelpText>
+                              {integrationText(t, 'uarRemoteDurabilityAttestationHelp')}
+                            </SettingHelpText>
+                          </IntegrationToggle>
+                        </div>
                       </div>
                     )}
                     <SettingHelpText>{integrationText(t, 'uarStorageHelp')}</SettingHelpText>

@@ -16,6 +16,11 @@ const sources: Record<Target, { source: string; version: string }> = {
   bossfang: { source: 'crates/librefang-types/src/agent.rs; crates/librefang-hands/src/lib.rs; crates/librefang-api/src/routes/workflows/workflow.rs', version: '2026.7.11 / c719a4d683e4d3fb42e436f812e0193f865c9d2c' },
 };
 
+function codexNameCheck(value: unknown, pattern: RegExp): string {
+  if (typeof value !== 'string' || !pattern.test(value)) throw new Error(`Native agent name must match ${pattern.source}.`);
+  return value;
+}
+
 function safePath(path: string): string {
   if (!path || path.includes('\\') || path.startsWith('/') || /[\x00-\x1f\x7f:]/.test(path)) {
     throw new Error(`Unsafe native export path: ${JSON.stringify(path)}`);
@@ -59,8 +64,8 @@ export function exportTeam(team: Team, target: Target): ExportResult {
       paths.add(key);
       files[path] = content;
     },
-    claimName(value: unknown): string {
-      const name = identifier(value, 'Native agent name');
+    claimName(value: unknown, pattern?: RegExp): string {
+      const name = pattern ? codexNameCheck(value, pattern) : identifier(value, 'Native agent name');
       if (names.has(name)) throw new Error(`Native agent name collision: ${name}`);
       names.add(name);
       return name;

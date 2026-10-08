@@ -12,6 +12,8 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
+import { renderPackSkillText } from './package-prometheus'
+
 const ROOT_DIR = path.join(__dirname, '..')
 const SOURCE_DIR = path.join(ROOT_DIR, 'resources', 'prometheus-skills-mini', 'skills')
 const TARGET_DIR = path.join(ROOT_DIR, 'resources', 'skills')
@@ -55,10 +57,10 @@ function filesUnder(dir: string, prefix = '', shippedOnly = false): FileEntry[] 
   return out.sort((a, b) => a.relative.localeCompare(b.relative))
 }
 
-/** Byte-for-byte: a same-length edit must still count as drift. */
-function differs(source: string, target: string): boolean {
+/** Compare the exact packaged bytes: a same-length edit must still count as drift. */
+function differs(source: Buffer, target: string): boolean {
   if (!fs.existsSync(target)) return true
-  return !fs.readFileSync(source).equals(fs.readFileSync(target))
+  return !source.equals(fs.readFileSync(target))
 }
 
 function syncSkill(name: string, check: boolean): string[] {
@@ -68,14 +70,18 @@ function syncSkill(name: string, check: boolean): string[] {
 
   for (const file of filesUnder(sourceSkill, '', true)) {
     const target = path.join(targetSkill, ...file.relative.split('/'))
-    if (!differs(file.absolute, target)) continue
+    const source = fs.readFileSync(file.absolute)
+    const rendered = file.relative.endsWith('.md')
+      ? Buffer.from(renderPackSkillText(source.toString('utf8'), sourceSkill), 'utf8')
+      : source
+    if (!differs(rendered, target)) continue
 
     if (check) {
       problems.push(`${path.relative(ROOT_DIR, target)} is missing or out of date`)
       continue
     }
     fs.mkdirSync(path.dirname(target), { recursive: true })
-    fs.copyFileSync(file.absolute, target)
+    fs.writeFileSync(target, rendered)
   }
 
   // A file the pack no longer ships must not linger in the target: it would keep being

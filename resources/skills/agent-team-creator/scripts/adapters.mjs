@@ -13,6 +13,11 @@ const sources = {
     uar: { source: 'https://github.com/Prometheus-AGS/universal-agent-runtime/blob/ba12845138104d3c8c3b8bca8bc7c5be24004e91/src/uar/domain/artifact.rs', version: '1.0.0 / ba12845138104d3c8c3b8bca8bc7c5be24004e91' },
     bossfang: { source: 'crates/librefang-types/src/agent.rs; crates/librefang-hands/src/lib.rs; crates/librefang-api/src/routes/workflows/workflow.rs', version: '2026.7.11 / c719a4d683e4d3fb42e436f812e0193f865c9d2c' },
 };
+function codexNameCheck(value, pattern) {
+    if (typeof value !== 'string' || !pattern.test(value))
+        throw new Error(`Native agent name must match ${pattern.source}.`);
+    return value;
+}
 function safePath(path) {
     if (!path || path.includes('\\') || path.startsWith('/') || /[\x00-\x1f\x7f:]/.test(path)) {
         throw new Error(`Unsafe native export path: ${JSON.stringify(path)}`);
@@ -59,8 +64,8 @@ export function exportTeam(team, target) {
             paths.add(key);
             files[path] = content;
         },
-        claimName(value) {
-            const name = identifier(value, 'Native agent name');
+        claimName(value, pattern) {
+            const name = pattern ? codexNameCheck(value, pattern) : identifier(value, 'Native agent name');
             if (names.has(name))
                 throw new Error(`Native agent name collision: ${name}`);
             names.add(name);

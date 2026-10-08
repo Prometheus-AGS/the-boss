@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometheus-ags.dev/uar/collaboration/0.1.0-draft.2/package-manifest.schema.json",
+  "title": "UAR collaboration package-manifest — official draft.2 contract checkpoint",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "urn:prometheus:uar:collaboration:0.1.0-draft.2"
+    },
+    "kind": {
+      "const": "PackageManifest"
+    },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "version": {
+      "$ref": "common.schema.json#/$defs/semver"
+    },
+    "contentDigest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "provenance": {
+      "$ref": "common.schema.json#/$defs/provenance"
+    },
+    "requiredCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "extensions": {
+      "$ref": "common.schema.json#/$defs/extensions"
+    },
+    "entrypoints": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/immutableRef"
+      },
+      "minItems": 1
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"
+          },
+          "kind": {
+            "enum": [
+              "AgentDefinition",
+              "TeamDefinition",
+              "WorkflowDefinition"
+            ]
+          },
+          "definition": {
+            "$ref": "common.schema.json#/$defs/immutableRef"
+          },
+          "byteDigest": {
+            "$ref": "common.schema.json#/$defs/digest"
+          }
+        },
+        "required": [
+          "path",
+          "kind",
+          "definition",
+          "byteDigest"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "lock": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "requestedBy": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "reference": {
+            "$ref": "common.schema.json#/$defs/immutableRef"
+          },
+          "resolvedPath": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "requestedBy",
+          "reference",
+          "resolvedPath"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "capabilityDeclarations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "capability": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "capability",
+          "required"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "resolution": {
+      "const": "exact-version-and-digest"
+    }
+  },
+  "required": [
+    "profile",
+    "kind",
+    "id",
+    "version",
+    "contentDigest",
+    "provenance",
+    "requiredCapabilities",
+    "extensions",
+    "entrypoints",
+    "files",
+    "lock",
+    "capabilityDeclarations",
+    "resolution"
+  ],
+  "additionalProperties": false
+}

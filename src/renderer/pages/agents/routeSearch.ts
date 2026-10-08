@@ -1,4 +1,7 @@
 export type AgentRouteSearch = {
+  mode?: 'teams'
+  workspaceId?: string
+  teamInstanceId?: string
   agentId?: string
   intent?: 'feedback' | 'skill'
   sessionId?: string
@@ -14,6 +17,13 @@ export function parseAgentRouteSearch(search: Record<string, unknown>): AgentRou
   const skillId = intent === 'skill' && typeof search.skillId === 'string' ? search.skillId : undefined
 
   return {
+    ...(search.mode === 'teams'
+      ? {
+          mode: 'teams' as const,
+          ...(typeof search.workspaceId === 'string' ? { workspaceId: search.workspaceId } : {}),
+          ...(typeof search.teamInstanceId === 'string' ? { teamInstanceId: search.teamInstanceId } : {})
+        }
+      : {}),
     agentId,
     intent,
     sessionId,

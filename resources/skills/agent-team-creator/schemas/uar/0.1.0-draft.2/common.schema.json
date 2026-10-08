@@ -1,0 +1,510 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometheus-ags.dev/uar/collaboration/0.1.0-draft.2/common.schema.json",
+  "title": "UAR collaboration common definitions — official draft.2 contract checkpoint",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9:._/-]*$"
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "immutableRef": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "version": {
+          "$ref": "common.schema.json#/$defs/semver"
+        },
+        "digest": {
+          "$ref": "common.schema.json#/$defs/digest"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "digest"
+      ],
+      "additionalProperties": false
+    },
+    "extension": {
+      "type": "object",
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "value": {}
+      },
+      "required": [
+        "required",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "extensions": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9-]*(?:[.:/][A-Za-z0-9_-]+)+$"
+      },
+      "additionalProperties": {
+        "$ref": "common.schema.json#/$defs/extension"
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "source",
+        "authors"
+      ],
+      "additionalProperties": false
+    },
+    "contract": {
+      "type": "object",
+      "description": "JSON Schema 2020-12 input/output contract. Semantic validation must apply the official metaschema."
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "enum": [
+            "none",
+            "selected",
+            "authorized-fork"
+          ]
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "history": {
+          "enum": [
+            "none",
+            "selected",
+            "authorized-summary"
+          ]
+        },
+        "memoryScopes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "mode",
+        "artifacts",
+        "history",
+        "memoryScopes"
+      ],
+      "additionalProperties": false
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "concurrentTurns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "maxMembers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "maxDepth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "maxPendingTasks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "concurrentTurns",
+        "maxMembers",
+        "maxDepth",
+        "maxPendingTasks"
+      ],
+      "additionalProperties": false
+    },
+    "budget": {
+      "type": "object",
+      "properties": {
+        "maxTokens": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxCostMicrounits": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "maxElapsedSeconds": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "maxTokens",
+        "maxCostMicrounits",
+        "currency",
+        "maxElapsedSeconds"
+      ],
+      "additionalProperties": false
+    },
+    "skill": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "version": {
+          "$ref": "common.schema.json#/$defs/semver"
+        },
+        "digest": {
+          "$ref": "common.schema.json#/$defs/digest"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "config": {
+          "type": "object"
+        },
+        "entrypoint": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "requiredTools": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "digest",
+        "required",
+        "config",
+        "entrypoint",
+        "requiredTools"
+      ],
+      "additionalProperties": false
+    },
+    "model": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        },
+        "preferredAliases": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "role",
+        "capabilities",
+        "preferredAliases"
+      ],
+      "additionalProperties": false
+    },
+    "taskState": {
+      "enum": [
+        "queued",
+        "ready",
+        "running",
+        "awaiting_input",
+        "awaiting_approval",
+        "reconciling",
+        "succeeded",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "instanceState": {
+      "enum": [
+        "inactive",
+        "ready",
+        "active",
+        "suspended",
+        "draining",
+        "stopped"
+      ]
+    },
+    "artifact": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "mediaType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "$ref": "common.schema.json#/$defs/digest"
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri-reference"
+        }
+      },
+      "required": [
+        "id",
+        "mediaType",
+        "digest",
+        "uri"
+      ],
+      "additionalProperties": false
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "receipt": {
+      "enum": [
+        "accepted",
+        "delivered",
+        "processed",
+        "rejected"
+      ]
+    },
+    "jsonPointer": {
+      "type": "string",
+      "pattern": "^(?:/(?:[^~/]|~[01])*)*$"
+    },
+    "semanticRequirement": {
+      "type": "object",
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "value": {}
+      },
+      "required": [
+        "required",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "sourceIdentity": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "version": {
+          "$ref": "#/$defs/semver"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "revision": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/revision"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "profile",
+        "id",
+        "version",
+        "digest",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "renameMapping": {
+      "type": "object",
+      "properties": {
+        "sourceId": {
+          "$ref": "#/$defs/id"
+        },
+        "targetId": {
+          "$ref": "#/$defs/id"
+        },
+        "reason": {
+          "enum": [
+            "unchanged",
+            "heading-slug",
+            "explicit-rename"
+          ]
+        }
+      },
+      "required": [
+        "sourceId",
+        "targetId",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "representationGrantRef": {
+      "type": "object",
+      "properties": {
+        "grantId": {
+          "$ref": "#/$defs/id"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "constraintDigest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "grantId",
+        "revision",
+        "constraintDigest"
+      ],
+      "additionalProperties": false
+    },
+    "privateRevisionRef": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "revision": {
+          "$ref": "#/$defs/revision"
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        }
+      },
+      "required": [
+        "id",
+        "revision",
+        "digest"
+      ],
+      "additionalProperties": false
+    },
+    "diagnostic": {
+      "type": "object",
+      "properties": {
+        "pointer": {
+          "$ref": "#/$defs/jsonPointer"
+        },
+        "disposition": {
+          "enum": [
+            "exact",
+            "translated",
+            "optional-unsupported",
+            "required-unsupported"
+          ]
+        },
+        "reasonCode": {
+          "type": "string",
+          "pattern": "^(?:[a-z][a-z0-9.-]*|TEAM_[A-Z0-9_]+)$"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effectiveBindingRef": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/privateRevisionRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sourceKind": {
+          "enum": [
+            "AgentDefinition",
+            "TeamDefinition",
+            "WorkflowDefinition",
+            "PackageManifest",
+            "DeploymentBinding",
+            "RepresentationGrant",
+            "ConversionReport",
+            "EffectiveBindingReceipt",
+            "DeploymentBindingTemplate"
+          ]
+        },
+        "sourceDefinition": {
+          "$ref": "#/$defs/immutableRef"
+        }
+      },
+      "required": [
+        "pointer",
+        "disposition",
+        "reasonCode",
+        "message",
+        "effectiveBindingRef"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

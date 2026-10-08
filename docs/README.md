@@ -16,6 +16,7 @@
 | [Release Workflow Operations](./contrib/release-workflow.md) | Maintainer runbook for preparing, validating, hotfixing, publishing, and synchronizing release branches |
 | [Test Plan](./contrib/test-plan.md) | The Test Plan process for beta and rc testing, covering user participation and maintainer PR workflow |
 | [The Boss integration release](./contrib/the-boss-release.md) | Native integration payloads, serialized publication, and installed acceptance for The Boss |
+| [UAR workflow consumption and pending acceptance](./contrib/uar-workflow-acceptance.md) | Merged UAR workflow source and the installed-app acceptance still required |
 | [UI/UX routing and team adoption](./contrib/ui-ux-routing.md) | The Boss UI/UX catalog, project-team adoption, portable helpers, and completed-phase evidence limits |
 | [Upstream merge log](./contrib/upstream-merge-log.md) | Dated record of every upstream CherryHQ/cherry-studio merge into The Boss fork, plus open branding items carried between merges |
 | [Consuming upstream](./contrib/upstream-merges.md) | How this fork consumes upstream CherryHQ/cherry-studio releases without losing The Boss branding |
@@ -48,6 +49,10 @@
 | [Params Pipeline](./references/ai/params-pipeline.md) | buildAgentParams and the RequestFeature model composing plugins, tools, hooks, and provider quirks per request |
 | [Provider Resolution](./references/ai/provider-resolution.md) | Endpoint resolution chain from provider.endpointConfigs and adapterFamily to the AI SDK provider id and variants |
 | [Provider State Ownership](./references/ai/provider-state-ownership.md) | Ownership rules for provider facts, endpoint dialects, user connection overrides, and per-request controls |
+| [Remote Agent API Design](./references/ai/remote-agent-access.md) | JSON-RPC 2.0 remote API with Agent contracts, incremental events, resumable subscriptions, command receipts, and portable package exports |
+| [Remote Protocol and Desktop Implementation Design](./references/ai/remote-agent-implementation.md) | Proposed remote-protocol files and Desktop function contracts for RPC dispatch, atomic admission, journals, checkpoints, and lifecycle ownership |
+| [Remote Agent Sequences and Modules](./references/ai/remote-agent-sequences.md) | Target remote Agent sequence diagrams, connection states, module ownership, and failure-recovery acceptance scenarios |
+| [Remote Agent Testing Specification](./references/ai/remote-agent-testing.md) | Local WebSocket client acceptance specification for remote protocol conformance, real Desktop execution, recovery, security, and weak-network budgets |
 | [AiStreamManager](./references/ai/stream-manager.md) | AiStreamManager active-stream registry — listener fan-out, reconnect replay, abort, steering, and persistence triggers |
 | [Tool Approval](./references/ai/tool-approval.md) | Main-as-writer tool approval through ai.tool.respond_approval, approval-requested parts, and persistent MCP decisions |
 | [Tool Registry](./references/ai/tool-registry.md) | Unified aiSdk ToolEntry registry — built-in web/kb tools, MCP sync, meta-tools, and deferred exposition |
@@ -58,6 +63,8 @@
 | Document | Description |
 |----------|-------------|
 | [API Gateway Reference](./references/api-gateway/README.md) | Local HTTP gateway for OpenAI, Anthropic, Gemini, Cherry REST, and MCP-compatible clients |
+| [Remote Agent Access (Design)](./references/api-gateway/remote-agent-access.md) | JSON-RPC remote access architecture, device-level authorization, shared protocol package, and staged desktop/mobile implementation plan |
+| [Remote Connectivity Design](./references/api-gateway/remote-connectivity.md) | Identity-based remote connectivity design and first implementation boundaries for DNS-SD discovery, configured endpoints and serial reconnect |
 
 ### Architecture
 
@@ -245,7 +252,7 @@
 
 | Document | Description |
 |----------|-------------|
-| [Testing Reference](./references/testing/README.md) | Frontend and SQLite testing references |
+| [Testing Reference](./references/testing/README.md) | Frontend, SQLite, and remote Agent protocol testing references |
 | [Database Testing Guide](./references/testing/database-testing.md) | How to test SQLite-backed main-process code with the setupTestDatabase harness and production migrations |
 | [Frontend Testing Guidelines](./references/testing/frontend-testing.md) | Normative test rules for renderer, packages/ui, and E2E code covering layer choice, mocking, and review gates |
 

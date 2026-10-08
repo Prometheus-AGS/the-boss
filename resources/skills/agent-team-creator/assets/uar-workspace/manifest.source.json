@@ -1,0 +1,29 @@
+{
+  "profile": "urn:prometheus:uar:collaboration:0.1.0-draft.2",
+  "kind": "PackageManifest",
+  "id": "urn:prometheus:mini:example:package",
+  "version": "1.0.0",
+  "provenance": {
+    "source": "agent-team-creator split workspace example",
+    "authors": [
+      "Prometheus-AGS"
+    ]
+  },
+  "requiredCapabilities": [
+    "collaboration_definition_packages_v2"
+  ],
+  "extensions": {},
+  "entrypoints": [
+    {
+      "id": "urn:prometheus:mini:example:team:root",
+      "version": "1.0.0"
+    }
+  ],
+  "capabilityDeclarations": [
+    {
+      "capability": "collaboration_definition_packages_v2",
+      "required": true
+    }
+  ],
+  "resolution": "exact-version-and-digest"
+}

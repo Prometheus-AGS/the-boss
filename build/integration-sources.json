@@ -12,27 +12,41 @@
     },
     "prometheus": {
       "repository": "Prometheus-AGS/prometheus-skill-system",
-      "revision": "e57421a86fae08ac4d1e3a625a213cf3f3eb98bc"
+      "revision": "3e8a891bcd472e18cc1c097c04b208cb93f7f78f"
     },
     "pk": {
       "repository": "Prometheus-AGS/prometheus-knowledge-rs",
-      "revision": "abb6745e31da7577611d7c32005af26a72254484"
+      "revision": "4b3a6744a4211512ff88a1cb96cf1e2a7db4c3ef"
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "f38a98a6ed064f9e5b8b9837e8b91781af570d22"
+      "revision": "3a8a78c8a993401a67983c97bf9baac1835c1175"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "ba7233875f8df3b2add68fc487d364428432c07d"
+      "revision": "b0070b42e7d39d06dca83094cd7868920760cbed",
+      "platformRevisions": {
+        "darwin-arm64": "b0070b42e7d39d06dca83094cd7868920760cbed",
+        "win32-x64": "b0070b42e7d39d06dca83094cd7868920760cbed",
+        "darwin-x64": "b0070b42e7d39d06dca83094cd7868920760cbed",
+        "win32-arm64": "b0070b42e7d39d06dca83094cd7868920760cbed"
+      }
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
-      "revision": "6acb60565949334beda22f52bcd36b33895b1db6"
+      "revision": "bfb6d49a7fe25d82ef4ad55f49c8f97e6e82c54a"
     },
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
-      "revision": "4f25d39f0075656b70bf945880d6033beda6d663"
+      "revision": "a6047386cc9fae4258b4a8577f6a016022095586"
+    },
+    "bossfang": {
+      "repository": "GQAdonis/librefang",
+      "revision": "0899e4993ebfede3f91366b22cfe9310b2e58f69"
+    },
+    "skill-pack": {
+      "repository": "Prometheus-AGS/prometheus-skill-system",
+      "revision": "a414e81e4310ed9140ef29f4e5a1ee1eaa54fbbd"
     }
   },
   "tools": {
@@ -51,29 +65,35 @@
       "source": "prometheus",
       "package": "prometheus-cli",
       "directory": "tools/prometheus-cli",
-      "version": "1.10.0"
+      "version": "1.11.3"
     },
     "pk": {
       "source": "pk",
       "package": "pk-cli",
-      "version": "1.9.0"
+      "version": "1.11.0"
     },
     "uar-sidecar": {
       "source": "uar",
       "package": "universal-agent-runtime",
       "version": "1.0.0",
-      "features": "minimal,a2a-transport,local-models,document-intelligence,wasm-runtime"
+      "features": "server-full"
     },
     "liter-llm": {
       "source": "liter-llm",
       "package": "liter-llm-cli",
       "version": "2.1.1"
+    },
+    "bossfang": {
+      "source": "bossfang",
+      "package": "librefang-cli",
+      "version": "2026.9.19+0899e4993",
+      "features": "telemetry,surreal-backend,uar-driver"
     }
   },
   "catalogs": {
     "liter-llm": {
       "providers": "568d741ee4e4771b7fd4191cde974d743c834fc1db7bbf27fcde45d0521b67b4",
-      "models": "d6d57171617705eb9611cbfb62ff28a3d26fdaf85b4f38f4b2e4361fcfd153dd"
+      "models": "05fb5c701bf1a27c371b83224fb188154e873fd6aad5cb9f8222ac1518656963"
     }
   },
   "parser": {
