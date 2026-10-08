@@ -173,7 +173,8 @@ export function UarTeamMemberEditor({
           </p>
         )}
         {catalog?.entries.map((entry) => {
-          const selected = entry.skillRef && member.skills.find((skill) => sameSkillRef(skill, entry.skillRef))
+          const skillRef = entry.skillRef
+          const selected = skillRef && member.skills.find((skill) => sameSkillRef(skill, skillRef))
           const reviewed = entry.reviewedCoverage.status === 'reviewed'
           return (
             <div
