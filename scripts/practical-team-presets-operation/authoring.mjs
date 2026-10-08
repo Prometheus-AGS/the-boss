@@ -2,6 +2,23 @@ import { click, fill, choose, ipc, openAuthoring } from '../reusable-team-operat
 import { requireFact, route, same, waitFor } from '../reusable-team-operation/io.mjs'
 import { fields, memberSelector, fieldSelector, readOnlyInstructions, readTools } from './contracts.mjs'
 
+async function selectMemberModel(evaluate, signal, role, model) {
+  const trigger = memberSelector(role) + ' [data-ui~="teams-model"]'
+  await click(evaluate, signal, trigger)
+  const menu = await waitFor(signal, () => evaluate('document.querySelector(' + JSON.stringify(trigger) +
+    ')?.getAttribute("aria-controls")'), 'C16_PRACTICAL_MODEL_MENU_UNAVAILABLE')
+  const option = '[role="option"][data-model-source="gateway"][data-provider-id="' + model.providerId +
+    '"][data-model-id="' + model.modelId + '"]'
+  await waitFor(signal, () => evaluate('(()=>{const node=document.getElementById(' + JSON.stringify(menu) +
+    ')?.querySelector(' + JSON.stringify(option) + ');if(!node||!node.getClientRects().length)return false;' +
+    'node.focus();node.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter",bubbles:true}));return true})()'),
+  'C16_PRACTICAL_MEMBER_MODEL_OPTION_UNAVAILABLE')
+  await waitFor(signal, () => evaluate('(()=>{const node=document.querySelector(' +
+    JSON.stringify(memberSelector(role) + ' [data-ui~="uar-team-model-picker"]') +
+    ');return node?.getAttribute("data-selected-model")===' + JSON.stringify(model.modelId) +
+    '&&node?.getAttribute("data-selected-source")==="gateway"})()'), 'C16_PRACTICAL_MEMBER_MODEL_NOT_SELECTED')
+}
+
 export async function authorPreset({ evaluate, signal, selected, configuration, preset, skill, evidence }) {
   const authoring = () => ipc(evaluate, route('authoring'), {})
   const title = configuration.marker + ' ' + preset.template
@@ -22,9 +39,7 @@ export async function authorPreset({ evaluate, signal, selected, configuration, 
     'Prepare and independently review bounded ' + preset.template + ' artifacts from the supplied README.md brief.')
   await fill(evaluate, signal, '[data-ui~="team-authoring-shared"]', readOnlyInstructions)
   for (const role of preset.roles) {
-    await choose(evaluate, signal, memberSelector(role) + ' [data-ui~="teams-model"]',
-      '[role="option"][data-model-source="gateway"][data-provider-id="' + selected.model.providerId +
-      '"][data-model-id="' + selected.model.modelId + '"]')
+    await selectMemberModel(evaluate, signal, role, selected.model)
     await fill(evaluate, signal, fieldSelector(role, 'projectScope'), 'README.md')
     const original = template.members.find((member) => member.role === role)
     const section = preset.sections?.[role] ?? (role === 'coordinator' ? 'TEAM_SYNTHESIS' : 'BOUNDED_ARTIFACT')

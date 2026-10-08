@@ -18,6 +18,9 @@ reviewed `builtin::better-writing` artifact for independent text review, and set
 README scope. It preserves preset deliverables while adding output markers. Every
 team saves a second immutable revision with only reviewer evidence text changed;
 prior revisions and explicit models/skills/tools/knowledge must remain intact.
+Model selection waits for each enabled member picker, scopes the option to that
+picker's `aria-controls` menu and waits for its selected source/model to commit
+before advancing to the next member.
 
 Three real Work runs cover product research, marketing/brand and logo/design.
 Successful members must return domain deliverables and reviewer findings with
