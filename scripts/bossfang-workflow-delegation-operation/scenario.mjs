@@ -22,6 +22,10 @@ export async function scenario({ evaluate, signal }, configuration) {
   let stage = 'actual-isolated-workspace-and-selected-runtime'
   try {
     const prepared = await prepare(evaluate, signal, configuration, resources)
+    if (prepared.modelContext) evidence.modelContextConfiguration = {
+      ...prepared.modelContext, route: 'prometheus.uar.providers.save',
+      providerModelId: prepared.modelId, credentialsChanged: false
+    }
     evidence.effectScope = { workspaceId: prepared.workspace.workspaceId,
       workspaceSha256: configuration.workspaceSha256, selectedServiceInstanceId: prepared.initial.selectedInstanceId,
       runtimeId: prepared.runtimeId, generation: prepared.generation, bindingId: prepared.binding.id,

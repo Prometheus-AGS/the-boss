@@ -32,6 +32,18 @@ export async function prepare(evaluate, signal, configuration, resources) {
       provider.models.some(model=>model.enabled&&model.id===gateway.alias&&
         model.pricingIdentity?.providerId===gateway.providerId&&model.pricingIdentity?.modelId===gateway.modelId)))
   requireFact(providers.length === 1, 'C14W_CONFIGURED_NATIVE_MODEL_AMBIGUOUS_OR_UNAVAILABLE')
+  if (configuration.modelContext) {
+    const provider = providers[0]
+    await ipc(evaluate, 'prometheus.uar.providers.save', {
+      mode: 'update', id: provider.id, displayName: provider.name, baseUrl: provider.baseUrl,
+      protocol: provider.protocol, defaultModel: provider.defaultModel, enabled: provider.enabled,
+      credential: { operation: 'unchanged' },
+      models: provider.models.map(({ effectiveIdentity, name, ...model }) => ({
+        ...model, displayName: name,
+        ...(model.id === gateway.alias ? { contextWindow: configuration.modelContext.contextWindow } : {})
+      }))
+    })
+  }
   await ipc(evaluate, 'prometheus.uar.providers.default', { id: providers[0].id })
   const binding = await ipc(evaluate, 'prometheus.uar.durable.setup_starter', { workspaceId: workspace.workspaceId })
   requireFact(binding.activationSupported, 'C14W_REAL_AGENT_BINDING_UNAVAILABLE')
@@ -57,5 +69,6 @@ export async function prepare(evaluate, signal, configuration, resources) {
   requireFact(connected.connection === 'connected' && connected.effective?.uarInstanceId,
     'C14W_SCOPED_SELECTED_UAR_CONNECTION_UNAVAILABLE')
   return { workspace, binding, identityRecord, initial, runtimeId: connected.effective.uarInstanceId,
-    generation: connected.effective.uarGeneration, modelId: providers[0].id + '/' + gateway.alias }
+    generation: connected.effective.uarGeneration, modelId: providers[0].id + '/' + gateway.alias,
+    modelContext: configuration.modelContext }
 }

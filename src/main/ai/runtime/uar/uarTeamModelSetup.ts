@@ -4,7 +4,7 @@ import * as z from 'zod'
 
 import { application } from '@application'
 import { readIntegrationConfig, readSecrets } from '@main/services/prometheus/integrationConfig'
-import { configuredModelForLiterAlias } from '@main/services/prometheus/literGatewayCatalog'
+import { configuredModelForLiterAlias, contextWindowForLiterAlias } from '@main/services/prometheus/literGatewayCatalog'
 import type { UarExecutionProfile } from '@shared/types/uarTeamProfiles'
 import type { UarTeamModelSelection } from '@shared/types/uarTeams'
 
@@ -50,6 +50,7 @@ export async function configureTeamModel(
     (pricingIdentity.providerId !== reviewedTarget.providerId || pricingIdentity.modelId !== reviewedTarget.modelId)
   )
     throw new Error('UAR_TEAM_MODEL_POLICY_TARGET_MISMATCH')
+  const contextWindow = await contextWindowForLiterAlias(config, model.id)
   const secrets = await readSecrets()
   if (!secrets.literKey?.trim())
     throw new Error('Configure the liter-llm gateway credential before setting up the team')
@@ -104,6 +105,7 @@ export async function configureTeamModel(
           {
             id: model.id,
             enabled: true,
+            ...(contextWindow ? { context_window: contextWindow } : {}),
             execution_profile: {
               profile: { id: 'uar.openai-compatible-chat.settings-v1', revision: 1 },
               settingsRevision: 1,
