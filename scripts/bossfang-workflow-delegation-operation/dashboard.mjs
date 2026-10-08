@@ -46,6 +46,18 @@ export async function openDashboard(evaluate, signal) {
   const status = await ipc(evaluate, 'bossfang.status')
   requireFact(status.ownership === 'managed' && status.status === 'running' && status.effective?.origin,
     'C14W_OWNED_DASHBOARD_UNAVAILABLE')
+  const ready = await waitFor(signal, () => evaluate(`(() => {
+    const guest=[...document.querySelectorAll('webview[data-mini-app-id="bossfang-dashboard"]')]
+      .find(node=>node.getClientRects().length);
+    if(!guest)return false;
+    if(guest.getAttribute('partition')!=='persist:bossfang-dashboard')return {isolated:false};
+    let url;
+    // Initial attachment has a visible element before Electron exposes its URL.
+    try { url=guest.getURL();if(!url||guest.isLoading())return false; }
+    catch { return false; }
+    return {isolated:new URL(url).origin===${JSON.stringify(status.effective.origin)}};
+  })()`), 'C14W_DASHBOARD_GUEST_ATTACHMENT_UNAVAILABLE', 60000)
+  requireFact(ready.isolated, 'C14W_ISOLATED_GUEST_UNAVAILABLE')
   const guest = guestEvaluate(evaluate, status.effective.origin)
   const authenticated = await waitFor(signal, () => guest(`(async()=>{
     const response=await fetch('/api/authz/whoami',{credentials:'include',redirect:'error',
