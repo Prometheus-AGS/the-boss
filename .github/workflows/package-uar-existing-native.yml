@@ -1,0 +1,79 @@
+name: Package existing UAR native binaries
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: Ready platforms from native run 37794439269
+        required: true
+        default: win32-x64,darwin-arm64
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  select:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.targets.outputs.matrix }}
+    steps:
+      - id: targets
+        env:
+          PLATFORMS: ${{ inputs.platforms }}
+        run: |
+          node <<'NODE'
+          const targets = [
+            { platform: 'win32-x64', runner: 'windows-2025', target: 'x86_64-pc-windows-msvc' },
+            { platform: 'darwin-arm64', runner: 'macos-15', target: 'aarch64-apple-darwin' },
+            { platform: 'win32-arm64', runner: 'windows-11-arm', target: 'aarch64-pc-windows-msvc' },
+            { platform: 'darwin-x64', runner: 'macos-15-intel', target: 'x86_64-apple-darwin' }
+          ]
+          const requested = process.env.PLATFORMS.split(',').map(value => value.trim())
+          if (!requested.length || new Set(requested).size !== requested.length || requested.some(value => !targets.some(target => target.platform === value)))
+            throw new Error('Select unique supported UAR platforms')
+          require('fs').appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({ include: targets.filter(target => requested.includes(target.platform)) })}\n`)
+          NODE
+  package:
+    needs: select
+    name: Reuse UAR (${{ matrix.platform }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.select.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+      - uses: actions/checkout@v7
+        with:
+          repository: Prometheus-AGS/universal-agent-runtime
+          ref: b0070b42e7d39d06dca83094cd7868920760cbed
+          path: build/integration-source/uar
+          token: ${{ secrets.SUBMODULES_TOKEN || github.token }}
+      - uses: actions/cache/restore@v6
+        id: native-cache
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            build/integration-source/**/target
+          key: native-${{ matrix.platform }}-uar-sidecar-8742f8fea7d979905789948ba7c5680810680330345220773ef77c7b380b6d44
+      - name: Require exact completed native build cache
+        if: steps.native-cache.outputs.cache-hit != 'true'
+        run: exit 1
+      - uses: actions/download-artifact@v6
+        with:
+          run-id: 37794439269
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: native-tools-${{ matrix.platform }}
+          path: build/integration-output
+      - name: Package existing binary without compilation
+        run: node scripts/package-uar-from-native-artifact.cjs ${{ matrix.platform }} ${{ matrix.target }}
+      - uses: actions/upload-artifact@v5
+        with:
+          name: uar-sidecar-${{ matrix.platform }}
+          path: |
+            build/integration-source/uar/dist/boss-sidecar/uar-sidecar-${{ matrix.platform }}.tar.gz
+            build/integration-source/uar/dist/boss-sidecar/uar-sidecar-${{ matrix.platform }}.json
+          if-no-files-found: error
+          retention-days: 90
