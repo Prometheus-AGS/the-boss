@@ -9,7 +9,8 @@ export function operate(args = process.argv.slice(2)) {
   const scenario = new URL('./team-guidance-operation/scenario.mjs', import.meta.url)
   return operateTeam(args, scenario, {
     creationTaskRef: 'C16.3',
-    operationDriverSources: [import.meta.url, scenario.href].map((url) => ({
+    operationDriverSources: [import.meta.url, scenario.href,
+      new URL('./practical-team-presets-operation/authoring.mjs', import.meta.url).href].map((url) => ({
       path: fileURLToPath(url), sha256: digest(fs.readFileSync(new URL(url)))
     })),
     async prepareLauncher({ resources, configuration }) {
