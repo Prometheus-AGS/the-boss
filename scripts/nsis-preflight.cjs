@@ -2,6 +2,8 @@ const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
 const { spawnSync } = require('node:child_process')
+const { createRequire } = require('node:module')
+const { parse } = require('yaml')
 
 const root = path.resolve(__dirname, '..')
 const include = fs.readFileSync(path.join(root, 'build', 'nsis-installer.nsh'), 'utf8')
@@ -24,16 +26,22 @@ SectionEnd
 `
 )
 
-const candidates = [
-  'makensis.exe',
-  path.join(process.env['ProgramFiles(x86)'] || '', 'NSIS', 'makensis.exe'),
-  path.join(process.env.ProgramFiles || '', 'NSIS', 'makensis.exe')
-]
-const executable =
-  candidates.find((candidate) => candidate !== 'makensis.exe' && fs.existsSync(candidate)) || 'makensis.exe'
-const result = spawnSync(executable, ['/WX', '/V4', source], { encoding: 'utf8' })
-process.stdout.write(result.stdout || '')
-process.stderr.write(result.stderr || '')
-fs.rmSync(work, { recursive: true, force: true })
-if (result.error) throw result.error
-if (result.status !== 0) throw new Error(`NSIS preflight failed with exit code ${result.status}`)
+async function compile() {
+  const builderRequire = createRequire(require.resolve('electron-builder'))
+  const { getMakeNsisPath } = builderRequire('app-builder-lib/out/toolsets/windows')
+  const config = parse(fs.readFileSync(path.join(root, 'electron-builder.yml'), 'utf8'))
+  const compiler = await getMakeNsisPath(config.toolsets?.nsis, config.nsis?.customNsisBinary)
+  const result = spawnSync(compiler.path, ['/WX', '/V4', source], {
+    encoding: 'utf8',
+    env: { ...process.env, ...compiler.env }
+  })
+  process.stdout.write(result.stdout || '')
+  process.stderr.write(result.stderr || '')
+  if (result.error) throw result.error
+  if (result.status !== 0) throw new Error(`NSIS preflight failed with exit code ${result.status}`)
+}
+
+compile().catch((error) => {
+  process.stderr.write(`${error.stack || error}\n`)
+  process.exitCode = 1
+}).finally(() => fs.rmSync(work, { recursive: true, force: true }))
