@@ -30,4 +30,12 @@ Size new compiled definitions for the initial coordinator reservation plus one m
 
 The failed operation remains failed. Rebuild the repaired source and rerun only this affected packaged author/deploy/run/reopen procedure before claiming C16.1 completion.
 
+## Observed coordinator reference repair — 2026-10-08
+
+The budget-corrected packaged operation at Boss `a91577f66551c5fde0acdba6ccac728e7e8b7556` completed product, UI/UX, mobile and security. Coordinator attempt `ea2e6d43-cf25-4c6f-9d3c-35a6106e0b2e` then supplied a nonexistent UI/UX artifact ID to `team_wait`: `artifact-51abdfa4-2440-472e-8625-165e05bac0e6518ca0` instead of the actual `artifact-51abdfa4-2440-472e-8625-165e05bac0e8`. Its security target and exact-attempt delegation were valid. UAR correctly refused the payload with `TEAM_SCOPE_DENIED`; the coordinator ended before documentation and review.
+
+Compiled coordinator guidance now requires opaque references to be copied exactly from attributed context or accepted receipts, explains automatic target-artifact selection, and permits correcting only an unaccepted wait with a new command identity. An accepted delegation must never be repeated to recover that wait. Native artifact, task, actor and workspace authorization remains unchanged. Existing immutable packages remain unchanged; corrected guidance applies to newly compiled revisions.
+
+The operation records incomplete coordinator termination immediately instead of waiting fifteen minutes for work that will not be delegated. Preserve the cancelled failed attempt and original delivery clock, rebuild the changed production package, and repeat only the affected author/deploy/run/reopen procedure.
+
 The generic openspec-propose planning pause does not revoke the explicitly approved implementation assignment. The task's Assisted-by-only signed commits supersede CLAUDE.md's DCO signoff instruction. Compass has no exact compileAuthoredTeam node and incomplete published coverage; direct source establishes the affected path.

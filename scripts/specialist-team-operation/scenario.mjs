@@ -126,9 +126,14 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
       await approvals.handle()
       const current = (await snapshot()).instances.find((item) => item.id === instance.id)
       const finished = value.attempts.filter((item) => item.status === 'succeeded' || item.executionOutcome === 'succeeded')
-      return current?.tasks.some((item) => item.role === 'coordinator' && item.status === 'succeeded') &&
-        !value.attempts.some((item) => ['queued', 'running', 'cancellation_requested'].includes(item.status)) &&
-        roles.slice(1).every((role) => finished.some((item) => memberRoles[item.memberId] === role)) ? value : false
+      const coordinatorFinished = current?.tasks.some((item) => item.role === 'coordinator' && item.status === 'succeeded')
+      const active = value.attempts.some((item) => ['queued', 'running', 'cancellation_requested'].includes(item.status))
+      const specialistsFinished = roles.slice(1).every((role) => finished.some((item) => memberRoles[item.memberId] === role))
+      if (coordinatorFinished && !active && !specialistsFinished) {
+        evidence.failedExecution = value.attempts.map(attemptFailureEvidence)
+        requireFact(false, 'C16_COORDINATOR_ENDED_WITH_INCOMPLETE_SPECIALISTS')
+      }
+      return coordinatorFinished && !active && specialistsFinished ? value : false
     }, 'C16_REAL_SPECIALIST_WORK_UNAVAILABLE', 900000, 3000)
     const attempts = completed.attempts.filter((item) => roles.slice(1).includes(memberRoles[item.memberId]) &&
       (item.status === 'succeeded' || item.executionOutcome === 'succeeded'))
