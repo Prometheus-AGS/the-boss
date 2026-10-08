@@ -22,4 +22,12 @@ Root executes the operation once after all next-increment production source and 
 
 ## Instruction reconciliation
 
+## Observed specialist budget repair — 2026-10-08
+
+Packaged 2.2.19 at Boss `8bdca9ac3b7ee1c98592bee4f97d8749829cf555` and UAR `b0070b42e7d39d06dca83094cd7868920760cbed` completed five specialists, then blocked its coordinator wait with `TEAM_BUDGET_EXHAUSTED`. Retained reservations reached 61,440 tokens, 7,500,000 cost microunits and the entire 2,400-second budget. Usage was unknown, so UAR conservatively retained completed/yielded reservations; no native accounting change is warranted.
+
+Size new compiled definitions for the initial coordinator reservation plus one member reservation and one coordinator continuation per non-coordinator. Preserve the existing floors for smaller teams. Six specialists require 77,824 tokens, a 10,000,000 cost-microunit cap and 3,060 reserved seconds. These are aggregate reservation caps, not an execution-time promise. Deployment consumes the exact budget of the immutable compiled root document; old revisions and bindings retain their original caps. Native admission and effect authorization remain unchanged.
+
+The failed operation remains failed. Rebuild the repaired source and rerun only this affected packaged author/deploy/run/reopen procedure before claiming C16.1 completion.
+
 The generic openspec-propose planning pause does not revoke the explicitly approved implementation assignment. The task's Assisted-by-only signed commits supersede CLAUDE.md's DCO signoff instruction. Compass has no exact compileAuthoredTeam node and incomplete published coverage; direct source establishes the affected path.
