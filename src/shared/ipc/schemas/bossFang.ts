@@ -1,6 +1,7 @@
 import * as z from 'zod'
 
 import { bossFangConfigSchema, bossFangDiagnosticSchema, bossFangStatusSchema } from '@shared/types/bossFang'
+import { bossFangDelegatedApprovalInspectionSchema } from '@shared/types/bossFangDelegatedApproval'
 
 import { defineRoute } from '../define'
 
@@ -27,6 +28,10 @@ export const bossFangRequestSchemas = {
   }),
   'bossfang.connect': defineRoute({ input: z.void(), output: bossFangStatusSchema }),
   'bossfang.disconnect': defineRoute({ input: z.void(), output: bossFangStatusSchema }),
+  'bossfang.delegated_approval.inspect': defineRoute({
+    input: z.object({ bossTaskId: z.string().min(1).max(512) }).strict(),
+    output: bossFangDelegatedApprovalInspectionSchema
+  }),
   'bossfang.models': defineRoute({
     input: z.void(),
     output: z.array(z.object({ id: z.string(), name: z.string(), provider: z.string(), modelId: z.string() }))

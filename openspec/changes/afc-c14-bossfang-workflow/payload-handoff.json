@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "kind": "bossfang-workflow-payload-handoff",
+  "status": "complete-source-procedure-awaiting-immutable-package",
+  "nativeSource": "/Users/gqadonis/Projects/prometheus/worktrees/afc-c14-workflow-delegation",
+  "bossSource": "/Users/gqadonis/Projects/prometheus/worktrees/afc-c14-bossfang-workflow",
+  "rootOwned": [
+    "build/integration-sources.json",
+    "build/integration-artifacts.json",
+    "native source freeze and immutable platform records",
+    "compiled embedded dashboard assets",
+    "one completed-boundary package and actual operation"
+  ],
+  "requiredRecordFields": [
+    "sourceCommit",
+    "target",
+    "executable",
+    "asset",
+    "bytes",
+    "sha256",
+    "features",
+    "dashboard.embedded",
+    "dashboard.basePath",
+    "dashboard.files",
+    "uarLifecycle"
+  ],
+  "requiredBossPackageMetadata": [
+    "source",
+    "url",
+    "sha256",
+    "dashboard.embedded",
+    "dashboard.basePath",
+    "dashboard.files",
+    "uarLifecycle"
+  ],
+  "expectedNativeSource": null,
+  "builtPlatformRecord": null,
+  "payloadPinsChangedByOperationWriter": false,
+  "priorBoundary": "bossfang-remaining-boundary-20261006-v10/composite-operation-evidence.json",
+  "executionProfile": "ordinary bound agent; no inline diagnostic or experimental opt-in",
+  "operationEntrypoint": "scripts/operate-bossfang-workflow-delegation.mjs",
+  "arguments": [
+    "--boss",
+    "--launcher",
+    "--output",
+    "--bossfang-source",
+    "--prior-receipt"
+  ],
+  "gatewayEnvironment": "Existing inherited BOSS_C142_* references; credential values are never persisted in this handoff or evidence.",
+  "boundDefinitionIdentityProcedure": "Configure the existing real gateway model, select its native provider default, call durable.setup_starter, and read definitionId/definitionVersion/definitionDigest from an inert native on_demand durable.create_instance record. Submit no durable turn or activation; disable the owned identity resource during cleanup.",
+  "authoredProcedure": [
+    "Authenticate the actual compiled isolated embedded dashboard using the existing BossFang session.",
+    "Existing protected Boss Connect host-registers private resources and supplies safe context inventory. Canvas auto-selects exactly one matching workspace/binding/package definition context and persists its opaque identity with run:{}.",
+    "Create one disposable ordinary workflow and run from its actual dashboard UI. Read original native workflow/step/delegation/task/thread/root/run/context identities.",
+    "Before any approval inspect the owning host pending challenge and prepared write through bossfang.delegated_approval.inspect; require exact disposable path/content hashes and durable paired-host canonical history.",
+    "Approve approved.txt through the original dashboard control. Require the canonical human decision, exact file hash, visible output and ordinary-engine completion.",
+    "Deny denied.txt through the original dashboard control. Require canonical denial, original run/engine terminal state and absence of the denied file.",
+    "Cancel cancelled.txt while the actual exact approval is pending through original two-step dashboard confirmation. Require canonical cancelled/no-decision history, original native acknowledgment/terminal cleanup, ordinary-engine cancellation and absence of the cancelled file.",
+    "Cancel remaining owned disposable runs if necessary, disable inert identity resource, stop only the managed BossFang process this procedure started, and retain original Work selection/UAR PID/start/port."
+  ],
+  "remainingPrerequisite": "Root must freeze and adopt the complete Native context/ordinary workflow/dashboard, UAR delegated_host_context_v1 source and Boss private context/inspection implementation in one exact immutable package. Existing payload records remain pending; no source-only claim is runtime acceptance.",
+  "checksOrOperationsRunByAuthor": false,
+  "fullRequestedAcceptanceImplemented": true,
+  "nativeWindowsInstalledAcceptance": "separate-unclaimed",
+  "publication": "separate-unclaimed",
+  "nativeContextPlumbingCommit": "fce7c149d",
+  "nativeUarContextCommit": "0870539a",
+  "priorPartialDriverCommit": "968c058fcf",
+  "runtimeAcceptance": "pending-not-operated",
+  "runtimePrerequisites": [
+    "One original Boss-managed selected UAR with real storage supporting existing durable.create_instance identity read; do not attest memory durability.",
+    "UAR full-harness advertises delegated_host_context_v1 and accepts private Boss host-context registration for the exact installed agent binding.",
+    "Boss includes original retained context ownership, host-first canonical approval recording and bossfang.delegated_approval.inspect.",
+    "Native compiled dashboard includes exact context selection, ordinary bound execution and original owning approval/denial/cancellation projections."
+  ],
+  "effectScope": {
+    "registeredDisposableWorkspaceOnly": true,
+    "approvedFile": "approved.txt",
+    "deniedFile": "denied.txt",
+    "cancelledFile": "cancelled.txt",
+    "approvalDecisions": 2,
+    "externalEffects": false
+  }
+}
