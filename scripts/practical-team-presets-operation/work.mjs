@@ -74,7 +74,7 @@ export async function reopenRun({ evaluate, signal, selected, run, accepted }) {
   await openWork(evaluate, signal)
   await choose(evaluate, signal, '[data-ui~="teams-workspace"]', '[data-option-id="' + selected.workspaceId + '"]')
   await choose(evaluate, signal, '[data-ui~="teams-instance"]', '[role="option"][data-team-id="' + run.instance.id + '"]')
-  await waitFor(signal, () => evaluate('(()=>{const n=document.querySelector("[data-ui~=teams-run]");return n?.dataset.teamId===' +
+  await waitFor(signal, () => evaluate('(()=>{const n=[...document.querySelectorAll("[data-ui~=teams-run]")].find(node=>node.getClientRects().length);return n?.dataset.teamId===' +
     JSON.stringify(run.instance.id) + '&&n.dataset.definitionDigest===' + JSON.stringify(accepted.definition.digest) + '})()'),
   'C16_PRACTICAL_REOPEN_PINNED_RUN_UNAVAILABLE')
   const current = await ipc(evaluate, route('execution'), run.selector)
