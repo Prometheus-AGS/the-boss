@@ -55,7 +55,12 @@ export function UarDurableInstancesPanel({ workspaceId }: { workspaceId: string 
   }
 
   return (
-    <div className="space-y-4">
+    <div
+      data-ui="uar-durable-panel"
+      data-workspace-id={workspaceId}
+      data-loading={loading}
+      data-capability-instances={snapshot?.capabilities.instances ?? 'unknown'}
+      className="space-y-4">
       <SettingGroup>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -139,6 +144,20 @@ export function UarDurableInstancesPanel({ workspaceId }: { workspaceId: string 
               </div>
             </div>
             {snapshot.bindings.length === 0 && <p className="mt-3 text-sm text-muted-foreground">{tr('noBindings')}</p>}
+            {snapshot.bindings.length > 0 && (
+              <ul className="mt-3 space-y-1 text-xs" aria-label={tr('deploymentBinding')}>
+                {snapshot.bindings.map((binding) => (
+                  <li key={binding.id} className="flex flex-wrap items-center gap-2">
+                    <span className="break-all">
+                      {binding.id} · {tr('revision')} {binding.revision}
+                    </span>
+                    <Badge variant={binding.activationSupported ? 'secondary' : 'outline'}>
+                      {binding.activationSupported ? tr('bindingReady') : tr('bindingActivationUnavailable')}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
             {needsStarter && (
               <div className="mt-4 rounded-lg border border-border bg-background/40 p-4">
                 <p className="text-sm text-muted-foreground">{tr('setupStarterDescription')}</p>
@@ -189,7 +208,11 @@ export function UarDurableInstancesPanel({ workspaceId }: { workspaceId: string 
             )}
             <div className="mt-4 space-y-3">
               {snapshot.instances.map((instance) => (
-                <article key={instance.instanceId} className="rounded-lg border border-border bg-card p-4">
+                <article
+                  key={instance.instanceId}
+                  data-ui="uar-durable-instance"
+                  data-instance-id={instance.instanceId}
+                  className="rounded-lg border border-border bg-card p-4">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0">
                       <h3 className="break-all text-sm font-medium">{instance.instanceId}</h3>
@@ -234,11 +257,14 @@ export function UarDurableInstancesPanel({ workspaceId }: { workspaceId: string 
                     )}
                   </dl>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {ACTIONS.map((action) => {
+                    {ACTIONS.filter((action) => canUse(`agent-instances.${action}` as UarDurableOperation)).map((action) => {
                       const operation = `agent-instances.${action}` as UarDurableOperation
                       return (
                         <Button
                           key={action}
+                          data-ui="uar-durable-action"
+                          data-instance-id={instance.instanceId}
+                          data-instance-action={action}
                           variant="outline"
                           size="sm"
                           title={canUse(operation) ? undefined : (reason(operation) ?? tr('capabilityDisabled'))}

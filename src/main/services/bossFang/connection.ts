@@ -46,7 +46,8 @@ export class BossFangConnection {
         body: JSON.stringify({
           instance: this.retained.instance(candidate),
           bearer: candidate.bearer,
-          workspaceId: config.workspaceId
+          workspaceId: config.workspaceId,
+          delegatedHostContexts: candidate.contexts.map((context) => context.safe)
         })
       })
       if (!response.ok)
@@ -151,5 +152,12 @@ export class BossFangConnection {
   redact(text: string) {
     if (this.current) text = text.split(this.current.bearer).join('<redacted>')
     return this.retained.redact(text)
+  }
+  async inspectDelegatedApproval(bossTaskId: string) {
+    try {
+      return await this.retained.inspectDelegatedApproval(bossTaskId)
+    } catch {
+      throw new Error(`${t('bossfang.retainedAuthentication')} [DELEGATED_APPROVAL_INSPECTION_UNAVAILABLE]`)
+    }
   }
 }

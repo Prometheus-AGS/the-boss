@@ -20,11 +20,17 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "e3fed05944e6b365ad74af30926b875e6857190f"
+      "revision": "4ec4838d3ed6a5e610a2b2f6313b832373aa4abb"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "e4efce59601c93e834a3d58c6b6489aec6149cf1"
+      "revision": "0870539aace96a4e47b5a4718e0205f7850f9010",
+      "platformRevisions": {
+        "darwin-arm64": "0870539aace96a4e47b5a4718e0205f7850f9010",
+        "darwin-x64": "0870539aace96a4e47b5a4718e0205f7850f9010",
+        "win32-x64": "0870539aace96a4e47b5a4718e0205f7850f9010",
+        "win32-arm64": "0870539aace96a4e47b5a4718e0205f7850f9010"
+      }
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
@@ -36,7 +42,7 @@
     },
     "bossfang": {
       "repository": "GQAdonis/librefang",
-      "revision": "295ff50201fbb09a6e22390de85d9b374c3d9edd"
+      "revision": "3282e40815c36b60897ca55b2e5691bae9984940"
     }
   },
   "tools": {
@@ -76,7 +82,7 @@
     "bossfang": {
       "source": "bossfang",
       "package": "librefang-cli",
-      "version": "2026.9.19+295ff5020",
+      "version": "2026.9.19+3282e4081",
       "features": "telemetry,surreal-backend,uar-driver"
     }
   },

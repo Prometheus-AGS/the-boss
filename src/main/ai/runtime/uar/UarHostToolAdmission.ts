@@ -117,6 +117,8 @@ export interface UarHostToolAdmissionOptions {
   persistLifecycle?(snapshot: UarHostAdmissionSnapshot): void
   onLifecycle?(snapshot: UarHostAdmissionSnapshot): void
   verifyTeamInvocation?(invocation: UarPreparedInvocation): Promise<boolean>
+  verifyInvocation?(invocation: UarPreparedInvocation): Promise<boolean>
+  recordDelegatedApproval?(body: unknown): Promise<Record<string, unknown>>
 }
 
 export class UarHostToolAdmission {
@@ -142,6 +144,14 @@ export class UarHostToolAdmission {
     if (method === 'POST' && operation === 'cancel') return this.cancel(body, response)
     if (method === 'POST' && operation === 'finish') return this.finish(body, response)
     if (method === 'POST' && operation === 'inspect') return this.inspect(body, response)
+    if (method === 'POST' && operation === 'delegated-approval' && this.options.recordDelegatedApproval) {
+      try {
+        this.respond(response, 200, await this.options.recordDelegatedApproval(body))
+      } catch {
+        this.respond(response, 409, { error: 'delegated_host_approval_mismatch' })
+      }
+      return true
+    }
     this.respond(response, 404, { error: 'Unknown tool admission operation' })
     return true
   }
@@ -255,7 +265,7 @@ export class UarHostToolAdmission {
     }
     if (
       !this.binds(invocation) ||
-      (this.options.verifyTeamInvocation && !(await this.options.verifyTeamInvocation(invocation)))
+      (this.scopeVerifier && !(await this.scopeVerifier(invocation)))
     ) {
       this.respond(response, 409, { error: 'Prepared tool invocation belongs to another host binding' })
       return true
@@ -363,7 +373,7 @@ export class UarHostToolAdmission {
       return true
     }
     const currentDisposition = this.options.disposition(invocation.providerToolName)
-    if (this.options.verifyTeamInvocation && !(await this.options.verifyTeamInvocation(invocation))) {
+    if (this.scopeVerifier && !(await this.scopeVerifier(invocation))) {
       this.respond(response, 409, { error: 'Team tool authority changed before claim' })
       return true
     }
@@ -488,18 +498,22 @@ export class UarHostToolAdmission {
       invocation.version !== UAR_TOOL_ADMISSION_VERSION ||
       invocation.hostEpoch !== this.hostEpoch ||
       invocation.ownerId !== this.options.ownerId ||
-      (!this.options.verifyTeamInvocation && invocation.principalId !== this.options.principalId) ||
+      (!this.scopeVerifier && invocation.principalId !== this.options.principalId) ||
       invocation.workspace !== this.options.workspace ||
       invocation.attempt !== 1
     ) {
       return false
     }
     this.runtimeEpoch ??= invocation.runtimeEpoch
-    if (!this.options.verifyTeamInvocation) this.rootRunId ??= invocation.rootRunId
+    if (!this.scopeVerifier) this.rootRunId ??= invocation.rootRunId
     return (
       this.runtimeEpoch === invocation.runtimeEpoch &&
-      (Boolean(this.options.verifyTeamInvocation) || this.rootRunId === invocation.rootRunId)
+      (Boolean(this.scopeVerifier) || this.rootRunId === invocation.rootRunId)
     )
+  }
+
+  private get scopeVerifier() {
+    return this.options.verifyInvocation ?? this.options.verifyTeamInvocation
   }
 
   private receipt(record: AdmissionRecord): Record<string, unknown> {
@@ -563,7 +577,7 @@ export class UarHostToolAdmission {
       effectId,
       invocation,
       trustedPrincipal: this.options.ownerId,
-      trustedActor: this.options.verifyTeamInvocation ? invocation.principalId : this.options.principalId,
+      trustedActor: this.scopeVerifier ? invocation.principalId : this.options.principalId,
       trustedSessionId: this.options.sessionId ?? this.options.ownerId,
       trustedWorkspace: this.options.workspace,
       hostDisposition

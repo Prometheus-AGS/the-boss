@@ -7,6 +7,8 @@ import type { UarSidecarEndpoint } from '@main/ai/runtime/uar/UarSidecarService'
 import { t } from '@main/i18n'
 import { readIntegrationConfig, readUarInstanceCredentials } from '@main/services/prometheus/integrationConfig'
 
+import { DelegatedHostContext, registerDelegatedHostContexts } from './DelegatedHostContext'
+
 const failure = (code: string) => new Error(`${t('bossfang.retainedAuthentication')} [${code}]`)
 async function decode<T>(response: Response, schema: z.ZodType<T>, code: string): Promise<T> {
   const body = await response.json().catch(() => {
@@ -52,6 +54,7 @@ const projectionSchema = z.object({
   runtimeEpoch: z.string().nullish(),
   executionState: z.string(),
   admissionState: z.string(),
+  delegatedHostContextId: z.string().nullish(),
   cancellation: z.object({
     requested: z.boolean(),
     acknowledged: z.boolean(),
@@ -70,6 +73,7 @@ export type PrivateUarAuthorization = {
   bearer: string
   grant: z.infer<typeof grantSchema> | null
   runtimeEpoch: string | null
+  contexts: DelegatedHostContext[]
 }
 const sameEndpoints = (left: z.infer<typeof endpointsSchema>, right: z.infer<typeof endpointsSchema>) =>
   ['runtime', 'administration', 'models', 'console'].every(
@@ -138,13 +142,14 @@ export class RetainedUarAuthorizations {
       if (!credentials.runtimeBearer) throw failure('ORIGINAL_EXTERNAL_CREDENTIAL_REQUIRED')
       bearer = credentials.runtimeBearer
     }
-    const authorization = {
+    const authorization: PrivateUarAuthorization = {
       endpoint,
       inventoryId,
       workspaceId,
       bearer,
       grant,
-      runtimeEpoch: grant?.runtime_epoch ?? original?.runtimeEpoch ?? null
+      runtimeEpoch: grant?.runtime_epoch ?? original?.runtimeEpoch ?? null,
+      contexts: []
     }
     this.records.add(authorization)
     if (
@@ -160,7 +165,13 @@ export class RetainedUarAuthorizations {
       await this.revoke(authorization)
       throw failure('ORIGINAL_GRANT_IDENTITY_SCOPE_EPOCH_MISMATCH')
     }
-    return authorization
+    try {
+      authorization.contexts = await registerDelegatedHostContexts(authorization)
+      return authorization
+    } catch (error) {
+      await this.revoke(authorization)
+      throw error
+    }
   }
   instance(authorization: PrivateUarAuthorization, original?: OriginalConnection) {
     const configured = readIntegrationConfig().uar.instances.find(
@@ -182,7 +193,7 @@ export class RetainedUarAuthorizations {
       required_capabilities: configured.requiredCapabilities
     }
   }
-  private matches(authorization: PrivateUarAuthorization, run: OriginalConnection) {
+  private matches(authorization: PrivateUarAuthorization, run: z.infer<typeof projectionSchema>) {
     return (
       authorization.workspaceId === run.workspaceId &&
       authorization.endpoint.observed.id === run.selectedInstanceId &&
@@ -252,7 +263,8 @@ export class RetainedUarAuthorizations {
               bossTaskId: run.bossTaskId,
               workspaceId: run.workspaceId,
               instance: this.instance(authorization, run),
-              bearer: authorization.bearer
+              bearer: authorization.bearer,
+              delegatedHostContexts: authorization.contexts.map((context) => context.safe)
             })
           })
           if (!response.ok) throw failure(`ORIGINAL_REPLACEMENT_HTTP_${response.status}`)
@@ -266,14 +278,36 @@ export class RetainedUarAuthorizations {
           )
             throw failure('ORIGINAL_REPLACEMENT_BINDING_MISMATCH')
         }
-        for (const old of existing) if (old !== authorization && old !== selected) await this.revoke(old)
+        for (const old of existing)
+          if (old !== authorization && old !== selected && !this.hasOriginalContext(old, runs)) await this.revoke(old)
       }
     }
     for (const authorization of [...this.records])
-      if (authorization !== selected && !runs.some((run) => this.matches(authorization, run)))
+      if (authorization !== selected && !this.hasOriginalContext(authorization, runs) && !runs.some((run) => this.matches(authorization, run)))
         await this.revoke(authorization)
   }
+  private hasOriginalContext(authorization: PrivateUarAuthorization, runs: OriginalConnection[]) {
+    return runs.some((run) => authorization.contexts.some((context) => context.id === run.delegatedHostContextId))
+  }
+  async inspectDelegatedApproval(bossTaskId: string) {
+    const response = await this.request('/api/uar/delegations/' + encodeURIComponent(bossTaskId))
+    if (!response.ok) throw failure('DELEGATED_APPROVAL_OWNER_UNAVAILABLE')
+    const projection = await decode(response, projectionSchema.extend({
+      uarTaskId: z.string(), uarRunId: z.string()
+    }), 'DELEGATED_APPROVAL_PROJECTION_MISMATCH')
+    if (projection.bossTaskId !== bossTaskId || !projection.delegatedHostContextId)
+      throw failure('DELEGATED_APPROVAL_OWNER_MISMATCH')
+    const context = [...this.records].flatMap((record) => record.contexts).find(
+      (candidate) => candidate.id === projection.delegatedHostContextId
+    )
+    if (
+      !context || !this.matches(context.authorization, projection) ||
+      context.safe.workspaceId !== projection.workspaceId || context.safe.runtimeEpoch !== projection.runtimeEpoch
+    ) throw failure('DELEGATED_APPROVAL_CONTEXT_UNAVAILABLE')
+    return context.inspect(projection.uarTaskId, projection.uarRunId, bossTaskId)
+  }
   async revoke(authorization: PrivateUarAuthorization) {
+    await Promise.allSettled(authorization.contexts.map((context) => context.release()))
     const grant = authorization.grant
     if (grant) {
       const response = application
@@ -299,7 +333,10 @@ export class RetainedUarAuthorizations {
     for (const authorization of [...this.records]) await this.revoke(authorization)
   }
   redact(text: string) {
-    for (const authorization of this.records) text = text.split(authorization.bearer).join('<redacted>')
+    for (const authorization of this.records) {
+      text = text.split(authorization.bearer).join('<redacted>')
+      for (const context of authorization.contexts) text = context.redact(text)
+    }
     return text
   }
 }

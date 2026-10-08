@@ -374,6 +374,9 @@ export class BossFangService extends BaseService {
     await this.connection.disconnect()
     return this.getStatus()
   }
+  inspectDelegatedApproval(bossTaskId: string) {
+    return this.connection.inspectDelegatedApproval(bossTaskId)
+  }
   async models() {
     await this.connection.refresh()
     const endpoint = this.connection.endpoint

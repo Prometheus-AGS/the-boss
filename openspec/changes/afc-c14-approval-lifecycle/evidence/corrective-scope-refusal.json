@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "kind": "approval-cancellation-corrective-operation",
+  "creationTaskRef": "C14.2",
+  "complete": false,
+  "startedAt": "2026-10-07T20:35:58.518Z",
+  "priorDirectory": "/Users/gqadonis/Projects/prometheus/worktrees/agent-fabric-c06/librefang/docs/plans/agent-fabric-convergence/.prometheus/cadence/artifacts/c142-1f9c19b4-941c-4b85-be4e-8f3fa5ecc2be",
+  "isolatedProfile": "/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/cadence-boss-b5vrdX",
+  "scope": "one new pending write; visible stop; runtime restart; retained decision and cancellation",
+  "credentialValueRecorded": false,
+  "checks": [],
+  "stage": "new-pending-write-and-visible-stop",
+  "sourceRefs": {
+    "boss": "4cae06d65ec05cc156274cf6ba53e68f3fe3c472",
+    "bossDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uar": "36f096dbda0f17c6e15c71b284ce89cb04f04502",
+    "sourcePinSha256": "cea1f22a1e5add6c6e059fc8d7042600151fba1715e8fd9ba1279df428193ab9",
+    "appAsarSha256": "f17ec40c7121bb45e3f4bba1965484a399641f384f132b164c0e7990bb1c12f2",
+    "sidecarSha256": "55aa70562c14da856e607cce5a9a5c51e3cbd0f4754288779edabab262256f96",
+    "priorEvidenceSha256": "a580ee7539b165d7f3190702277ca6638f2e21ded948c26df17bea94ecad829f",
+    "scenarioFiles": {
+      "resume-cancellation.mjs": "ac6e2269e3ca8b5f3d1ad0f14ea75b1922820c03fe12a7b96015bb19ed5fab44",
+      "corrective-scenario.mjs": "9dc2be9777f6579ab30d7a60b608e8de7aa1e215465bbc6ceec433a5199e23a1",
+      "clients.mjs": "0e48e470af95568664351c5c337da0723c6dc33a6d40e8a0b2c4aecff99e6775",
+      "scenario.mjs": "e6e1a698335d20ea9b205c0291d8fd1ac751ae6ba476642b238499ade8acbdf9",
+      "io.mjs": "4d4a63101723e46ebd848ee6d720fac844bf8d00819fafa8b7b6a208f206c662",
+      "../cadence/uar-team-operation-tools.mjs": "c9ec7796ee8163d2617724fe516de1f8de5266f577c772139b76dcb1141abfeb"
+    }
+  },
+  "clientTarget": "50BCF89FDC2AE57B8FB6E1A790220C58",
+  "selector": {
+    "workspaceId": "ea9ede2f-0308-4980-a7ee-e4af3b1e3984",
+    "teamInstanceId": "386e6e37-7411-47d1-9c6c-d085c2a8e09a"
+  },
+  "failureCode": "C142_EFFECT_OUTSIDE_EXACT_OPERATION_SCOPE",
+  "finishedAt": "2026-10-07T20:36:28.106Z"
+}

@@ -209,16 +209,16 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.13 - Reusable team configuration
+    The Boss 2.2.15 - BossFang with the shared UAR
 
-    - [Teams] Create named coding and product/design teams with role-specific models, tools, knowledge and skills.
-    - [Work] Deploy versioned team definitions and keep existing runs bound to their original definitions.
-    - [Runtime] Package the updated UAR skill deployment catalog with exact per-role skill bindings.
+    - [BossFang] Open the embedded BossFang dashboard from Apps and its dedicated settings page.
+    - [Workflows] Delegate workflows to the selected UAR instance using scoped credentials and one approval authority.
+    - [Runtime] Keep UAR process ownership in The Boss and preserve correlated workflow output, approvals and cancellation.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.13 - 可复用的团队配置
+    The Boss 2.2.15 - BossFang 与共享 UAR
 
-    - [团队] 创建命名的编程与产品设计团队，并为各角色配置模型、工具、知识和技能。
-    - [工作] 部署版本化的团队定义，并保留现有运行所绑定的原始定义。
-    - [运行时] 打包更新后的 UAR 技能部署目录，并准确绑定各角色的技能。
+    - [BossFang] 从应用列表和专属设置页面打开内嵌的 BossFang 控制台。
+    - [工作流] 使用限定权限的凭证和统一审批机制，将工作流委派给选定的 UAR 实例。
+    - [运行时] 由 The Boss 管理 UAR 进程，并保留关联的工作流输出、审批和取消状态。
     <!--LANG:END-->

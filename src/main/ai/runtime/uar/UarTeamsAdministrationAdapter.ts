@@ -19,7 +19,9 @@ import type {
 } from '@shared/types/uarTeams'
 
 import { UAR_TEAM_HOST_CAPABILITY } from './uarCodingTeamPackage'
+import { projectBinding } from './uarBindingPosture'
 import { capabilityState, rawBinding, scopedRequest, workspace } from './UarDurableAdministrationAdapter'
+import type { UarSidecarEndpoint } from './UarSidecarService'
 
 const basePath = '/api/v1/collaboration/team-instances'
 const identity = z.object({ id: z.string(), version: z.string(), digest: z.string() })
@@ -132,9 +134,9 @@ export function scopedTeam(value: unknown, workspaceId: string): UarTeamInstance
   return team
 }
 
-export async function planningState(workspaceId: string) {
+export async function planningState(workspaceId: string, selectedEndpoint?: UarSidecarEndpoint) {
   const resolved = workspace(workspaceId)
-  const state = await capabilityState()
+  const state = await capabilityState(selectedEndpoint)
   const capabilities = z
     .object({
       executionProfile: z.string().optional(),
@@ -149,8 +151,17 @@ export async function planningState(workspaceId: string) {
         })
       })
     })
-    .parse(await scopedRequest(resolved, '/api/v1/collaboration/capabilities', state.generation))
-  const endpoint = await application.get('UarSidecarService').resolveSelected()
+    .parse(
+      await scopedRequest(
+        resolved,
+        '/api/v1/collaboration/capabilities',
+        state.generation,
+        'GET',
+        undefined,
+        selectedEndpoint
+      )
+    )
+  const endpoint = selectedEndpoint ?? (await application.get('UarSidecarService').resolveSelected())
   const coding =
     endpoint.ownership === 'managed' &&
     capabilities.executionProfile === UAR_TEAM_EXECUTION_PROFILE &&
@@ -184,8 +195,11 @@ export async function planningState(workspaceId: string) {
   }
 }
 
-export async function readUarTeams(workspaceId: string): Promise<UarTeamsSnapshot> {
-  const state = await planningState(workspaceId)
+export async function readUarTeams(
+  workspaceId: string,
+  endpoint?: UarSidecarEndpoint
+): Promise<UarTeamsSnapshot> {
+  const state = await planningState(workspaceId, endpoint)
   if (!state.planning) {
     return {
       schemaVersion: 1,
@@ -206,9 +220,23 @@ export async function readUarTeams(workspaceId: string): Promise<UarTeamsSnapsho
     }
   }
   const [definitions, bindings, instances] = await Promise.all([
-    scopedRequest(state.workspaceId, '/api/v1/collaboration/team-definitions', state.generation),
-    scopedRequest(state.workspaceId, '/api/v1/collaboration/deployment-bindings', state.generation),
-    scopedRequest(state.workspaceId, basePath, state.generation)
+    scopedRequest(
+      state.workspaceId,
+      '/api/v1/collaboration/team-definitions',
+      state.generation,
+      'GET',
+      undefined,
+      endpoint
+    ),
+    scopedRequest(
+      state.workspaceId,
+      '/api/v1/collaboration/deployment-bindings',
+      state.generation,
+      'GET',
+      undefined,
+      endpoint
+    ),
+    scopedRequest(state.workspaceId, basePath, state.generation, 'GET', undefined, endpoint)
   ])
   const scopedBindings = z.array(rawBinding).parse(bindings)
   if (scopedBindings.some((binding) => binding.workspaceId !== state.workspaceId)) {
@@ -231,7 +259,7 @@ export async function readUarTeams(workspaceId: string): Promise<UarTeamsSnapsho
     executionProfileStage: state.executionProfileStage,
     executionCapabilities: state.executionCapabilities,
     definitions: z.array(definition).parse(definitions),
-    bindings: scopedBindings,
+    bindings: scopedBindings.map(projectBinding),
     instances: z
       .array(z.unknown())
       .parse(instances)

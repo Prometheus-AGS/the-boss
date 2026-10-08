@@ -1,0 +1,11 @@
+# Design
+
+Baseline UAR e23348760b776f058f704e2fe965833353005a90; Boss 4973789f1bf36b316b0fc48baf12d56d309d63e7 plus parent compiler repair b892a19992. Source ownership is isolated to the assigned worktrees.
+
+UAR owns the broker challenge and authoritative human resolution. The host captures tenant-aware owner identity, optional admitted workspace and runtime issuer epoch before publication. The challenge stores correlation and safe tool identity, never raw tool arguments or credentials. An atomic pending-to-terminal storage transition allows one decision, with actor derived from authenticated context. Human allow/deny and cancellation/expiry/interruption remain distinct. A persisted decision does not authorize replay or prove effect execution. Preserve old resolver payload compatibility. Owner-scoped reads retain decisions after the live waiter disappears without inferring interruption from a foreign issuer epoch. The read-time resolvable projection is true only for the matching live issuing waiter; pending records from other epochs remain pending and nonresolvable.
+
+Existing persistence backends gain additive approval storage: src/uar/persistence/approval_decisions.rs, persistence/mod.rs, providers/{memory,postgres,surreal}.rs and focused helper modules; migrations/20261006000000_approval_records.sql and any required Surreal schema registration. Runtime changes are limited to thread/approvals, focused ledger helpers, manager approval wiring, existing approval handlers and necessary event projection.
+
+Boss uses its existing typed IPC, main-process scope resolution and paired-host approval boundary. Work renders issuer challenge separately from decision and effect state. Detached observation preserves the local cursor and stops only that client's output polling; reattach resumes from that cursor. Executor stop calls the existing authoritative attempt cancellation route; cancel and drain retain their current semantics. UI stays within existing semantic tokens and shared controls; all added strings are translated.
+
+The uncomfortable limitation: source inspection cannot establish durability, race correctness or packaged behavior. Finish all source and operation procedure before the root-owned build/operation. No test/compiler/lint/build/operation is authorized in this implementation pass.

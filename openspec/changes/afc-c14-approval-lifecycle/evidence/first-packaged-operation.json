@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "approval-lifecycle-packaged-operation",
+  "creationTaskRef": "C14.2",
+  "complete": false,
+  "startedAt": "2026-10-07T20:13:38.720Z",
+  "sourceRefs": {
+    "boss": "4db1b4dd5c7f9e842f84f8f7be481ac47814dca4",
+    "uar": "a464c1e7790ba8b29294d3e1a7fb350736f5a4b6",
+    "bossDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sourcePinSha256": "79f7fa0111f732aa8a8c1dfc07e016851a136a1476c12a00ca6127b2d5754cc5",
+    "appAsarSha256": "0a5c1d2b5b4df1cf8c1e4e1ef843112a514ac9b7d726ff8afb0a5b580417706c",
+    "sidecarSha256": "ae447a1641343ddea651a5cca3e0c17aac6d04dc82e98a8d0ac4cd36a7ad4eed",
+    "launcherSha256": "1d7ae203035e956aa47c4ac44acdc6894a5eced2a0213f3291fef7213e82e3d2",
+    "scenarioFiles": {
+      "operate-approval-lifecycle.mjs": "c56043e0a7e9aaa1d30949b6dabcc6c6ccefdac982ff8909ae9a467f6aef1338",
+      "approval-lifecycle-operation/scenario.mjs": "0b2a652d8b3b6f9337683a5319685c76af5a8c73d8514065bf1c6d5a40c74978",
+      "approval-lifecycle-operation/io.mjs": "4d4a63101723e46ebd848ee6d720fac844bf8d00819fafa8b7b6a208f206c662",
+      "approval-lifecycle-operation/clients.mjs": "c569ff0a404ccf3db65774710efc35f6e8f283772ec33ace6a7fd513c71cc2b7",
+      "approval-lifecycle-operation/setup.mjs": "2445f502abb0559a3381743b11f612e4565be66c5eb04b5756232e8a5c4fcbc8",
+      "cadence/uar-team-operation-tools.mjs": "c9ec7796ee8163d2617724fe516de1f8de5266f577c772139b76dcb1141abfeb"
+    }
+  },
+  "clientScope": "two distinct packaged renderer windows sharing one authenticated application owner",
+  "reopenScope": "both renderer reloads and UAR runtime restart; no application-process relaunch",
+  "credentialValueRecorded": false,
+  "checks": [
+    "two-distinct-packaged-renderer-clients",
+    "same-canonical-pending-issuer-challenge-on-both-clients",
+    "local-detach-preserves-executor-and-output-cursor",
+    "one-authenticated-decision-shared-by-both-clients",
+    "stale-opposite-decision-refused",
+    "reattach-retains-cursor",
+    "actual-effect-checked-separately-from-decision"
+  ],
+  "clientTargets": [
+    "780099CF4959C7A89F7FBC6ACEADDEF7",
+    "8A2A87A202BE70925F1A329A1760F977"
+  ],
+  "selector": {
+    "workspaceId": "ea9ede2f-0308-4980-a7ee-e4af3b1e3984",
+    "teamInstanceId": "386e6e37-7411-47d1-9c6c-d085c2a8e09a"
+  },
+  "challenge": {
+    "issuerId": "e9cba02f-016f-4999-9234-254414432007",
+    "challengeId": "6a7a6372-06e0-4249-bc0a-873be3b63fbd",
+    "runId": "e68993a9-3314-4a6b-9e86-1bbf6c51e74f",
+    "admissionId": "e39e28bc-0b95-49d9-99c0-b384065b3529",
+    "admissionOwner": "paired-host"
+  },
+  "decision": {
+    "decisionId": "49d9eb19-a751-4af2-922a-c221d5117c0e",
+    "actorSha256": "15cbe47251abb91ac2b07f7b8a6c0d07a67140dff0d5e2be3ced308c2fcf32a0",
+    "approved": true,
+    "state": "approved"
+  },
+  "effectState": null,
+  "failureStage": "executor-stop",
+  "failureCode": "C142_EXECUTOR_CANCELLATION_NOT_OBSERVED",
+  "finishedAt": "2026-10-07T20:15:52.109Z"
+}

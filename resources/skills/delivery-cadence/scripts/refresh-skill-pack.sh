@@ -9,6 +9,12 @@
 #   --mode full|verify|auto                                               (REFRESH_MODE)
 #   --services <a,b,...>  launchd labels to `launchctl kickstart -k`      (REFRESH_SERVICES)
 #   --receipt <file>      also write the JSON summary to this file        (REFRESH_RECEIPT)
+#   --kbd-root <repo>     repo whose .kbd-orchestrator ledger to check    (REFRESH_KBD_ROOT)
+#   --reconcile-phase <phase|auto>  run `kbd-apply reconcile` read-only and report it in the
+#                         summary's "reconcile" field; auto = "phase" in <kbd-root>/
+#                         .kbd-orchestrator/current-waypoint.json        (REFRESH_RECONCILE_PHASE)
+#                         Reads files only; never calls the cadence CLI. Drift does not change the
+#                         exit code: it is reported, not enforced here.
 #
 # Exit 0 done; 1 operational failure (dirty/diverged worktree, failed step);
 # 2 unusable input (bad flags, unreadable state, non-numeric iteration). Never
@@ -23,17 +29,20 @@ STATE="${REFRESH_STATE:-}"
 MODE="${REFRESH_MODE:-}"
 SERVICES="${REFRESH_SERVICES:-}"
 RECEIPT="${REFRESH_RECEIPT:-}"
+KBD_ROOT="${REFRESH_KBD_ROOT:-}"
+RECONCILE_PHASE="${REFRESH_RECONCILE_PHASE:-}"
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --deploy|--state|--mode|--services|--receipt)
+    --deploy|--state|--mode|--services|--receipt|--kbd-root|--reconcile-phase)
       [ $# -ge 2 ] || die 2 "$1 needs a value"
       case "$1" in
         --deploy) DEPLOY="$2" ;; --state) STATE="$2" ;; --mode) MODE="$2" ;;
         --services) SERVICES="$2" ;; --receipt) RECEIPT="$2" ;;
+        --kbd-root) KBD_ROOT="$2" ;; --reconcile-phase) RECONCILE_PHASE="$2" ;;
       esac
       shift 2 ;;
-    -h|--help) sed -n '2,17p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,24p' "$0"; exit 0 ;;
     *) die 2 "unknown argument: $1" ;;
   esac
 done
@@ -44,6 +53,10 @@ case "$MODE" in
   "") die 2 "--mode full|verify|auto (or REFRESH_MODE) is required" ;;
   *) die 2 "unknown mode '$MODE' (expected full, verify or auto)" ;;
 esac
+if [ -n "$RECONCILE_PHASE" ]; then
+  [ -n "$KBD_ROOT" ] || die 2 "--reconcile-phase needs --kbd-root <repo> (or REFRESH_KBD_ROOT)"
+  [ -d "$KBD_ROOT" ] || die 2 "kbd root not found: $KBD_ROOT"
+fi
 [ -d "$DEPLOY" ] || die 2 "deploy worktree not found: $DEPLOY"
 git -C "$DEPLOY" rev-parse --git-dir >/dev/null 2>&1 || die 2 "not a git worktree: $DEPLOY"
 DEPLOY="$(cd "$DEPLOY" && pwd)"
@@ -102,8 +115,10 @@ if [ "$MODE" = "full" ]; then
   git -C "$DEPLOY" submodule update --init --recursive >&2 || die 1 "git submodule update failed"
 
   if [ "$TEST_MODE" -eq 0 ]; then
+    WAIT_LIMIT="${REFRESH_CARGO_WAIT_SECONDS:-1800}"; WAITED=0
     while pgrep -x cargo >/dev/null 2>&1 || pgrep -x rustc >/dev/null 2>&1; do
-      echo "waiting for running cargo build" >&2; sleep 20
+      [ "$WAITED" -ge "$WAIT_LIMIT" ] && die 1 "a cargo build is still running after ${WAIT_LIMIT}s; refusing to start a competing build"
+      echo "waiting for running cargo build" >&2; sleep 20; WAITED=$((WAITED + 20))
     done
     # Reuse a certified prometheus-exec build when its hash matches the pinned one.
     CERT="${CERT_EXEC:-}"
@@ -131,10 +146,43 @@ if [ "$MODE" = "full" ]; then
   IFS="$OLDIFS"
 fi
 
+# --- ledger reconcile (read-only; reads files, never the cadence CLI)
+RECON_STATUS="skipped"; RECON_PHASE=""; RECON_RC=""; RECON_OUT=""
+if [ -n "$RECONCILE_PHASE" ]; then
+  RECON_PHASE="$RECONCILE_PHASE"
+  if [ "$RECON_PHASE" = "auto" ]; then
+    RECON_PHASE="$(python3 - "$KBD_ROOT/.kbd-orchestrator/current-waypoint.json" <<'PY' 2>/dev/null || true
+import json, sys
+try:
+    p = json.load(open(sys.argv[1])).get("phase")
+    print(p if isinstance(p, str) else "")
+except Exception:
+    print("")
+PY
+    )"
+  fi
+  KBD_APPLY="$(command -v kbd-apply 2>/dev/null || true)"
+  if [ -z "$KBD_APPLY" ] && [ -x "$HOME/.claude/skills/kbd-apply/kbd-apply.sh" ]; then
+    KBD_APPLY="$HOME/.claude/skills/kbd-apply/kbd-apply.sh"
+  fi
+  if [ -z "$RECON_PHASE" ]; then
+    RECON_STATUS="no-phase"
+  elif [ -z "$KBD_APPLY" ]; then
+    RECON_STATUS="kbd-apply-unavailable"
+  else
+    set +e
+    RECON_OUT="$(cd "$KBD_ROOT" && "$KBD_APPLY" reconcile "$RECON_PHASE" --json 2>/dev/null)"
+    RECON_RC=$?
+    set -e
+    case "$RECON_RC" in 0) RECON_STATUS="clean" ;; 1) RECON_STATUS="drift" ;; *) RECON_STATUS="error" ;; esac
+  fi
+  [ "$RECON_STATUS" = "clean" ] || echo "refresh-skill-pack: reconcile $RECON_STATUS (phase ${RECON_PHASE:-none})" >&2
+fi
+
 # --- JSON summary (verify and full share it; verify changes nothing)
-SUMMARY="$(python3 - "$DEPLOY" "$MODE" "$ITERATION" <<'PY'
+SUMMARY="$(python3 - "$DEPLOY" "$MODE" "$ITERATION" "$RECON_STATUS" "$RECON_PHASE" "$RECON_RC" "$RECON_OUT" <<'PY'
 import json, os, subprocess, sys, urllib.request
-deploy, mode, iteration = sys.argv[1:4]
+deploy, mode, iteration, r_status, r_phase, r_rc, r_out = sys.argv[1:8]
 def run(cmd, cwd=None):
     try:
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=10, cwd=cwd)
@@ -152,8 +200,19 @@ try:
     manifest = json.load(open(os.path.expanduser("~/.prometheus/plugins/prometheus-skill-pack/current/manifest.json")))
 except Exception as e:
     manifest = {"error": str(e)}
+reconcile = {"status": r_status}
+if r_status != "skipped":
+    reconcile["phase"] = r_phase or None
+    reconcile["exitCode"] = int(r_rc) if r_rc != "" else None
+    try:
+        parsed = json.loads(r_out) if r_out else {}
+    except Exception:
+        parsed = {}
+    reconcile["drifted"] = parsed.get("drifted")
+    reconcile["drift"] = parsed.get("drift", [])
 print(json.dumps({
     "mode": mode,
+    "reconcile": reconcile,
     "iteration": int(iteration) if iteration else None,
     "sourceCommit": run(["git", "-C", deploy, "rev-parse", "HEAD"]),
     "versions": {

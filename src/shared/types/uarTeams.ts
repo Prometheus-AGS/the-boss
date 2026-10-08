@@ -1,7 +1,7 @@
 import * as z from 'zod'
 
+import type { UarBindingPosture, UarBindingPreflightDiagnostic } from './uarBindingPosture'
 import { uarReviewedModelPolicySchema } from './uarTeamModelPolicy'
-
 import type {
   UarTeamCommandReceipt,
   UarTeamContextReceipt,
@@ -37,6 +37,8 @@ export interface UarTeamBinding {
   revision: number
   activationSupported: boolean
   package: UarTeamIdentity
+  posture?: UarBindingPosture | null
+  preflightDiagnostics?: UarBindingPreflightDiagnostic[]
 }
 
 export interface UarTeamTask {
@@ -319,6 +321,8 @@ export interface UarTeamPreparedEffect {
 }
 
 export interface UarTeamApproval {
+  issuerId: string
+  challengeId: string
   admissionOwner: 'uar-runtime' | 'paired-host'
   attemptId: string
   runId: string
@@ -336,6 +340,8 @@ export interface UarTeamApproval {
 }
 
 export interface UarTeamApprovalDecision extends UarTeamExecutionSelector {
+  issuerId?: string
+  challengeId?: string
   attemptId: string
   approvalId: string
   eventId: string

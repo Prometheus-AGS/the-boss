@@ -16,6 +16,8 @@ import type {
 } from '@shared/types/prometheusIntegration'
 import { uarPresentationSelectionSchema } from '@shared/types/prometheusIntegration'
 
+import type { UarSidecarEndpoint } from './UarSidecarService'
+
 const rawArtifactSchema = z
   .object({
     version: z.string(),
@@ -147,6 +149,14 @@ function projectArtifact(input: z.infer<typeof rawArtifactSchema>): UarAgentCata
     skillIds: input.policy.skills.prefer,
     definition: input
   }
+}
+
+export async function readUarAgentDefinitions(endpoint: UarSidecarEndpoint): Promise<UarAgentCatalogItem[]> {
+  const response = await application
+    .get('UarSidecarService')
+    .adminRequestInstance(endpoint, '/api/uar/discovery/agents')
+  const catalog = z.object({ runtime_agents: z.array(rawArtifactSchema) }).parse(await responseBody(response))
+  return catalog.runtime_agents.map(projectArtifact)
 }
 
 export async function readUarCatalog(): Promise<UarCatalogSnapshot> {

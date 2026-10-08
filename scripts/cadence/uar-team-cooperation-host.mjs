@@ -63,14 +63,15 @@ async function stopProcess(owned, graceful = true) {
 }
 
 /** Trusted completed-boundary fixture. Credentials never enter the receipt. */
-export async function startCooperationHost({ evaluate, signal, repository }) {
+export async function startCooperationHost({ evaluate, signal, repository, selectInstance = true, experimentalStage = true,
+  durableStorage = false }) {
   const root = await mkdtemp(path.join(os.tmpdir(), 'boss-c094-host-'))
   const platform = `${process.platform}-${process.arch}`
   const { getPackagedBinaryDirectory } = createRequire(import.meta.url)(
     path.join(repository, 'scripts', 'uar-payload-integrity.cjs')
   )
   const payload = getPackagedBinaryDirectory(
-    path.join(repository, 'dist', 'mac-arm64', 'The Boss.app', 'Contents', 'Resources'),
+    path.join(repository, 'dist', process.arch === 'arm64' ? 'mac-arm64' : 'mac', 'The Boss.app', 'Contents', 'Resources'),
     platform
   )
   const binary = path.join(payload, process.platform === 'win32' ? 'uar-sidecar.exe' : 'uar-sidecar')
@@ -78,6 +79,8 @@ export async function startCooperationHost({ evaluate, signal, repository }) {
     process.env.BOSS_CADENCE_SURREAL_BINARY ?? path.join(os.homedir(), '.prometheus', 'bin', 'surreal-3.3.0')
   const instanceId = 'cadence-c094-' + randomUUID().slice(0, 8)
   const databasePort = await freePort()
+  const databaseStoragePath = durableStorage ? path.join(root, 'database') : null
+  const databaseStorage = durableStorage ? 'surrealkv://' + databaseStoragePath : 'memory'
   const port = await freePort()
   const endpoint = `http://127.0.0.1:${port}`
   const token = randomBytes(32).toString('hex')
@@ -95,7 +98,7 @@ export async function startCooperationHost({ evaluate, signal, repository }) {
   await writeFile(path.join(cwd, '.env'), '', { mode: 0o600 })
   const env = {
     ...process.env,
-    UAR_TEAM_EXECUTION_PROFILE_STAGE: 'operation',
+    ...(experimentalStage ? { UAR_TEAM_EXECUTION_PROFILE_STAGE: 'operation' } : {}),
     UAR_TEAM_EXECUTION_MAX_ACTIVE: '1',
     UAR_SERVICE_INSTANCE__INSTANCE_ID: instanceId,
     UAR_SERVICE_INSTANCE__OWNERSHIP: 'external',
@@ -110,6 +113,7 @@ export async function startCooperationHost({ evaluate, signal, repository }) {
     CREDENTIAL_ENCRYPTION_KEY: encryptionKey,
     UAR_PERSISTENCE__PROVIDER: 'surreal',
     UAR_PERSISTENCE__DATABASE_URL: `ws://127.0.0.1:${databasePort}`,
+    UAR_REMOTE_SURREAL_DURABILITY_ATTESTED: durableStorage ? '1' : '0',
     UAR_PERSISTENCE__SURREAL_USER: 'root',
     UAR_PERSISTENCE__SURREAL_PASS: password,
     UAR_PERSISTENCE__SURREAL_AUTH_LEVEL: 'root',
@@ -179,7 +183,7 @@ export async function startCooperationHost({ evaluate, signal, repository }) {
     }
   }
   try {
-    database = launch(surrealBinary, ['start', '--bind', `127.0.0.1:${databasePort}`, 'memory'], root, {
+    database = launch(surrealBinary, ['start', '--bind', `127.0.0.1:${databasePort}`, databaseStorage], root, {
       ...process.env,
       SURREAL_USER: 'root',
       SURREAL_PASS: password,
@@ -223,11 +227,13 @@ export async function startCooperationHost({ evaluate, signal, repository }) {
       runtimeCredential: { operation: 'set', value: token },
       adminCredential: { operation: 'set', value: admin }
     })
-    const inventoryAfterSelection = await ipc(evaluate, 'prometheus.uar.instances.select', {
-      expectedRevision: installed.revision,
-      instanceId
-    })
-    selected = true
+    const inventoryAfterSelection = selectInstance
+      ? await ipc(evaluate, 'prometheus.uar.instances.select', {
+          expectedRevision: installed.revision,
+          instanceId
+        })
+      : installed
+    selected = selectInstance
     const tested = await ipc(evaluate, 'prometheus.uar.instances.test', { instanceId })
     if (!tested.instances.some((item) => item.id === instanceId && item.checks.operational)) {
       throw new Error('The packaged cooperation instance did not pass actual Boss connection negotiation')
@@ -257,8 +263,11 @@ export async function startCooperationHost({ evaluate, signal, repository }) {
         platform,
         payload,
         databaseVersion: version.trim(),
+        databaseStorageBackend: durableStorage ? 'surrealkv' : 'memory',
+        databaseStoragePath,
+        databaseDurabilityAttested: durableStorage,
         configuredTeamCapacity: 1,
-        stage: 'operation',
+        stage: experimentalStage ? 'operation' : 'normal',
         selectionRevision: inventoryAfterSelection.revision
       }
     }

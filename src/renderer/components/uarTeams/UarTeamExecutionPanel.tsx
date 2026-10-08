@@ -38,7 +38,22 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, cooper
   const inFlight = useRef(false)
   const mounted = useRef(true)
   const intents = useRef<Record<string, { fingerprint: string; commandId: string }>>({})
-  const liveOutputs = useUarTeamLiveOutput(workspaceId, instance.id, summary?.attempts ?? [], available)
+  const [detachedAttempts, setDetachedAttempts] = useState<ReadonlySet<string>>(new Set())
+  const liveOutputs = useUarTeamLiveOutput(
+    workspaceId,
+    instance.id,
+    summary?.attempts ?? [],
+    available,
+    detachedAttempts
+  )
+  const toggleObservation = (attemptId: string) => {
+    setDetachedAttempts((previous) => {
+      const next = new Set(previous)
+      if (next.has(attemptId)) next.delete(attemptId)
+      else next.add(attemptId)
+      return next
+    })
+  }
 
   const refresh = useCallback(
     async (quiet = false) => {
@@ -360,6 +375,25 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, cooper
                         attemptId={attempt.id}
                       />
                     )}
+                    <div
+                      className="mt-3 space-y-2"
+                      data-output-cursor={liveOutputs[attempt.id]?.cursor ?? 0}
+                      data-observation={detachedAttempts.has(attempt.id) ? 'detached' : 'attached'}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        data-ui="teams-observation-toggle"
+                        aria-pressed={detachedAttempts.has(attempt.id)}
+                        onClick={() => toggleObservation(attempt.id)}>
+                        {t('work.teams.lifecycle.' + (detachedAttempts.has(attempt.id) ? 'reattach' : 'detach'))}
+                      </Button>
+                      <p className="text-xs text-muted-foreground" role="status">
+                        {t(
+                          'work.teams.lifecycle.' +
+                            (detachedAttempts.has(attempt.id) ? 'detachedHelp' : 'observationHelp')
+                        )}
+                      </p>
+                    </div>
                     <UarTeamAttemptOutput
                       attempt={attempt}
                       live={liveOutputs[attempt.id]}
@@ -385,13 +419,13 @@ export function UarTeamExecutionPanel({ workspaceId, instance, available, cooper
                         ))) && (
                       <Button
                         className="mt-3"
-                        variant="outline"
+                        variant={attempt.status === 'running' ? 'destructive' : 'outline'}
                         size="sm"
                         disabled={Boolean(busy) || !reason.trim()}
                         aria-describedby={id + 'reasonHelp'}
-                        data-ui="teams-cancel"
+                        data-ui={attempt.status === 'running' ? 'teams-cancel teams-stop-executor' : 'teams-cancel'}
                         onClick={() => void control('cancel', attempt.id)}>
-                        {tr('execution.cancel')}
+                        {attempt.status === 'running' ? t('work.teams.lifecycle.stopExecutor') : tr('execution.cancel')}
                       </Button>
                     )}
                   </li>

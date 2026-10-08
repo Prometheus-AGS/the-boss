@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next'
 
 import { Button } from '@cherrystudio/ui'
 import { ipcApi } from '@renderer/ipc'
+import type { UarTeamApprovalHistory } from '@shared/types/uarApprovalRecords'
 import type { UarTeamApproval } from '@shared/types/uarTeams'
 
+import { UarTeamApprovalRecord } from './UarTeamApprovalRecord'
 import { uarTeamError } from './uarTeamError'
 
 export function UarTeamApprovals({
@@ -18,6 +20,7 @@ export function UarTeamApprovals({
 }) {
   const { t } = useTranslation()
   const [approvals, setApprovals] = useState<UarTeamApproval[]>([])
+  const [history, setHistory] = useState<UarTeamApprovalHistory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>()
   const [commandError, setCommandError] = useState<string>()
@@ -28,6 +31,7 @@ export function UarTeamApprovals({
     try {
       const snapshot = await ipcApi.request('prometheus.uar.teams.approvals', { workspaceId, teamInstanceId })
       setApprovals(snapshot.approvals)
+      setHistory(snapshot.history)
       setError(undefined)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
@@ -53,6 +57,8 @@ export function UarTeamApprovals({
         teamInstanceId,
         attemptId: approval.attemptId,
         approvalId: approval.approvalId,
+        issuerId: approval.issuerId,
+        challengeId: approval.challengeId,
         eventId: approval.eventId,
         cursor: approval.cursor,
         approved
@@ -61,6 +67,7 @@ export function UarTeamApprovals({
       await refresh()
     } catch (cause) {
       setCommandError(cause instanceof Error ? cause.message : String(cause))
+      await refresh()
     } finally {
       setBusy(undefined)
     }
@@ -77,7 +84,9 @@ export function UarTeamApprovals({
           {t('common.refresh')}
         </Button>
       </div>
-      <p className="text-xs text-muted-foreground">{t('work.teams.approvalHelp')}</p>
+      <p className="text-xs text-muted-foreground">
+        {t('work.teams.approvalHelp')} {t('work.teams.lifecycle.historyHelp')}
+      </p>
       {!available && (
         <p role="status" className="text-sm text-muted-foreground">
           {t('work.teams.approvalsUnavailable')}
@@ -88,42 +97,55 @@ export function UarTeamApprovals({
           {t('common.loading')}
         </p>
       )}
-      {available && !loading && !error && approvals.length === 0 && (
+      {available && !loading && !error && history.length === 0 && (
         <p className="text-sm text-muted-foreground">{t('work.teams.noApprovals')}</p>
       )}
       <ul className="space-y-3">
-        {approvals.map((approval) => (
-          <li
-            key={approval.attemptId + ':' + approval.approvalId}
-            className="min-w-0 rounded-md border border-border p-3"
-            data-approval-id={approval.approvalId}
-            data-attempt-id={approval.attemptId}
-            data-run-id={approval.runId}
-            data-tool-name={approval.toolName}>
-            <h3 className="break-words text-sm font-medium">{approval.toolName}</h3>
-            <p className="mt-1 break-words text-xs text-muted-foreground">{approval.riskReason}</p>
-            <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-md bg-background-subtle p-2 text-xs">
-              {approval.argumentsJson}
-            </pre>
-            <div className="mt-3 flex flex-wrap gap-3">
-              <Button
-                size="sm"
-                data-ui="teams-approve"
-                disabled={Boolean(busy) || Boolean(error)}
-                onClick={() => void decide(approval, true)}>
-                {t('work.teams.approve')}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                data-ui="teams-deny"
-                disabled={Boolean(busy) || Boolean(error)}
-                onClick={() => void decide(approval, false)}>
-                {t('work.teams.deny')}
-              </Button>
-            </div>
-          </li>
-        ))}
+        {history.map((record) => {
+          const approval = approvals.find(
+            (pending) =>
+              pending.attemptId === record.attemptId &&
+              pending.issuerId === record.issuerId &&
+              pending.challengeId === record.challengeId
+          )
+          const actionable = available && record.state === 'pending' && record.resolvable && approval
+          return (
+            <li
+              key={record.issuerId + ':' + record.challengeId}
+              className="min-w-0 rounded-md border border-border p-3"
+              data-approval-id={approval?.approvalId}
+              data-attempt-id={record.attemptId}
+              data-run-id={record.runId}
+              data-tool-name={record.toolName}>
+              <UarTeamApprovalRecord record={record} />
+              {approval && record.state === 'pending' && (
+                <>
+                  <p className="mt-2 break-words text-xs text-muted-foreground">{approval.riskReason}</p>
+                  <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-md bg-background-subtle p-2 text-xs">
+                    {approval.argumentsJson}
+                  </pre>
+                  <div className="mt-3 flex flex-wrap gap-3">
+                    <Button
+                      size="sm"
+                      data-ui="teams-approve"
+                      disabled={!actionable || Boolean(busy) || Boolean(error)}
+                      onClick={() => void decide(approval, true)}>
+                      {t('work.teams.approve')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      data-ui="teams-deny"
+                      disabled={!actionable || Boolean(busy) || Boolean(error)}
+                      onClick={() => void decide(approval, false)}>
+                      {t('work.teams.deny')}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </li>
+          )
+        })}
       </ul>
       {error && (
         <p role="alert" className="break-words text-sm text-error">

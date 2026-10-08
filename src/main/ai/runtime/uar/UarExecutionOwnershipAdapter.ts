@@ -7,6 +7,8 @@ import type {
   UarExecutionReclaimReceipt
 } from '@shared/types/uarTeamProfiles'
 
+import type { UarSidecarEndpoint } from './UarSidecarService'
+
 const fence = z.object({
   catalogId: z.string(),
   serviceInstanceId: z.string(),
@@ -26,9 +28,14 @@ const ownership = z.object({
   ownsExecution: z.boolean()
 })
 
-async function request(path: string, input?: UarExecutionReclaimInput, method = 'GET'): Promise<unknown> {
+async function request(
+  path: string,
+  input?: UarExecutionReclaimInput,
+  method = 'GET',
+  selectedEndpoint?: UarSidecarEndpoint
+): Promise<unknown> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.resolveSelected()
+  const endpoint = selectedEndpoint ?? (await sidecar.resolveSelected())
   const response = await sidecar.adminRequestInstance(
     endpoint,
     path,
@@ -47,13 +54,15 @@ async function request(path: string, input?: UarExecutionReclaimInput, method = 
       error.success && /^TEAM_[A-Z_]+$/.test(error.data.error.code) ? error.data.error.code : 'TEAM_SCOPE_DENIED'
     throw new Error(code)
   }
-  const current = await sidecar.resolveSelected()
+  const current = selectedEndpoint
+    ? await sidecar.resolveInstance(selectedEndpoint.instanceId)
+    : await sidecar.resolveSelected()
   if (current.generation !== endpoint.generation) throw new Error('TEAM_REVISION_CONFLICT')
   return body
 }
 
-export async function readUarExecutionOwner(): Promise<UarExecutionOwnerSnapshot> {
-  return ownership.parse(await request('/api/v1/collaboration/execution-owner'))
+export async function readUarExecutionOwner(endpoint?: UarSidecarEndpoint): Promise<UarExecutionOwnerSnapshot> {
+  return ownership.parse(await request('/api/v1/collaboration/execution-owner', undefined, 'GET', endpoint))
 }
 
 export async function reclaimUarExecutionOwner(input: UarExecutionReclaimInput): Promise<UarExecutionReclaimReceipt> {

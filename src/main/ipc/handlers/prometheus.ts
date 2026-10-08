@@ -1,5 +1,6 @@
 import { application } from '@application'
 import {
+  readUarLifecycleSnapshot,
   readUarWorkflows,
   readUarWorkflow,
   startUarWorkflow,
@@ -129,6 +130,7 @@ async function withIntegrationRevision<T>(run: () => Promise<T>): Promise<T> {
 }
 
 const prometheusHandlerImplementations: IpcHandlersFor<typeof prometheusRequestSchemas> = {
+  'prometheus.uar.lifecycle.snapshot': async (input) => readUarLifecycleSnapshot(input),
   'prometheus.liter_config.select_local': async () => selectLocalLiterConfig(),
   'prometheus.liter_config.read': async ({ source }) => readLiterConfig(source),
   'prometheus.liter_config.preview': async ({ source, expectedRevision, edits }) =>

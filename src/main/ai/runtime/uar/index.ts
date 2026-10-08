@@ -119,3 +119,5 @@ export {
 export { reviewUarTeamModelPolicy } from './uarTeamReviewedModelPolicy'
 export { readUarTeamSkillCatalog } from './UarTeamSkillCatalogAdapter'
 export { submitUarTeamTask, readUarTeamApprovals, decideUarTeamApproval } from './UarTeamWorkAdapter'
+
+export { readUarLifecycleSnapshot } from './UarLifecycleAdministrationAdapter'
