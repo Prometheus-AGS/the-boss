@@ -14,6 +14,7 @@ import {
 } from '@cherrystudio/ui'
 import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/components/SettingsPrimitives'
 import { UarTeamGuidance } from '@renderer/components/uarTeams/UarTeamGuidance'
+import { uarTeamAuthoringError } from '@renderer/components/uarTeams/uarTeamError'
 import { ipcApi } from '@renderer/ipc'
 import { uarGuidanceRoles, type UarGuidanceMapping } from '@shared/types/uarTeamGuidance'
 import {
@@ -45,7 +46,8 @@ export function UarTeamAuthoringPanel({
   const [error, setError] = useState<string>()
   const [skillError, setSkillError] = useState<string>()
   const [deployed, setDeployed] = useState<string>()
-  const report = (cause: unknown) => setError(cause instanceof Error ? cause.message : String(cause))
+  const report = (cause: unknown) =>
+    setError(uarTeamAuthoringError(cause instanceof Error ? cause.message : String(cause), tr))
   const refresh = useCallback(async () => {
     try {
       setSnapshot(await ipcApi.request('prometheus.uar.teams.authoring', {}))

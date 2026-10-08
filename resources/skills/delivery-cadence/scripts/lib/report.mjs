@@ -223,6 +223,8 @@ export function makeReport(state) {
   const recommendation = optimize(state);
   const iterations = (state.iterations ?? []).map(iteration => iterationReport(iteration, {
     publications: publicationObservations(state), recommendation: iteration.id === state.iterations.at(-1)?.id ? recommendation : null,
+  })).map((report, index) => ({ ...report,
+    frozenSourceReconciliation: (state.frozenSourceReconciliations ?? []).findLast(item => item.iterationId === state.iterations[index].id) ?? null
   }));
   const progress = accounting(iterations.flatMap(iteration => iteration.completionTimeline));
   return {

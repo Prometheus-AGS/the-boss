@@ -1,6 +1,6 @@
 ---
 name: kbd-apply
-description: KBD-owned spec-apply driver. Wraps a spec backend (openspec; native-kbd as the always-available fallback) and drives it ONE task at a time, so KBD stays the source of truth — every task boundary fires KBD hooks, emits a plain-text position signal, and syncs progress.json and the waypoint. Replaces the broken pattern of handing the turn to a bare "implement everything" command that runs outside KBD.
+description: KBD-owned spec-apply driver. Wraps a spec backend — openspec (the default engine), speckit (GitHub Spec Kit), or native-kbd (the always-available fallback) — and drives it ONE task at a time, so KBD stays the source of truth — every task boundary fires KBD hooks, emits a plain-text position signal, and syncs progress.json and the waypoint. Replaces the broken pattern of handing the turn to a bare "implement everything" command that runs outside KBD.
 ---
 
 # /kbd-apply
@@ -49,8 +49,8 @@ $APPLY end-task "$CHANGE" "$ID" "$I" "$TOTAL" "$TITLE"
 #   → on the final task, closes change:after
 
 # 3. Only at the complete production delivery boundary, run this repo's final QA gate, then:
-$APPLY verify  "$CHANGE"   # backend verify (openspec validate)
-$APPLY archive "$CHANGE"   # backend archive (openspec archive)
+$APPLY verify  "$CHANGE"   # backend verify (openspec validate; speckit structural check)
+$APPLY archive "$CHANGE"   # backend archive
 ```
 
 The plain-text "Starting/Completed task i of n" lines are the **user-facing
@@ -93,17 +93,40 @@ for *why* this phase is running, never an answer to *what to run next*.
 | `begin-task <change> <id> <i> <n> <title>` | open a missing `change:before`, then fire `task:before` + position signals |
 | `end-task <change> <id> <i> <n> <title>` | mark done + sync + close `task:after`; the final task also closes `change:after` |
 | `mark-done <change> <id>` | flip one task done (no hooks) |
-| `verify <change>` | backend verify; non-zero exit = fail |
-| `archive <change>` | backend archive |
+| `verify <change>` | backend verify (openspec `validate`; speckit/native-kbd structural check); non-zero exit = fail |
+| `archive <change>` | backend archive (openspec `archive`; speckit/native-kbd move under `archive/`) |
 
 ## Backends
 
-Two adapters are implemented: **openspec** (via the real `openspec` CLI,
-spawned with no shell) and **native-kbd** (the always-available fallback
-backed by `.kbd-orchestrator/changes/<change>/tasks.json`). `speckit` is
-detected but not yet adapted in this port — `verify`/`archive` treat it as a
-no-op, matching the upstream contract for a backend with no CLI verify step
-and no archive step.
+Three engines are implemented, dispatched through the extensible `specEngines`
+registry in `lib/kbd/spec-backend.mjs` (metadata and version pins live in
+`config/spec-engines.json`):
+
+| Engine | Adapter | Notes |
+|---|---|---|
+| **openspec** (default) | `os*` — via the real `openspec` CLI, spawned with no shell | The default engine: when a repo carries more than one backend's evidence and nothing is pinned, detection resolves to openspec |
+| **speckit** | `sk*` — pure filesystem markdown parsing of `specs/<change>/{spec,plan,tasks}.md`; the `specify` CLI is never invoked | `verify` = all checkboxes checked AND `specs/<change>/spec.md` exists; `archive` moves `specs/<change>` → `specs/archive/<date>-<change>` |
+| **native-kbd** | `nk*` — `.kbd-orchestrator/changes/<change>/tasks.json` | The always-available fallback |
+
+Detection order: **pinned > openspec > speckit > native-kbd**. Pin a specific
+engine via `.kbd-orchestrator/project.json`:
+
+```json
+{ "specBackend": "speckit" }
+```
+
+Valid pin values: `openspec`, `speckit`, `native-kbd` (`auto`/absent = detect).
+
+**Engine version pins.** Each engine's pinned upstream version (openspec
+1.14.0 from `package.json`; spec-kit 1.1.2) is recorded in
+`config/spec-engines.json` with its rationale. The speckit adapter is
+markdown-based, so the pin exists for *layout* conformance: when a new Spec Kit
+release ships, check whether `specs/<slug>/{spec.md,plan.md,tasks.md}` or the
+tasks.md checklist shape changed. If unchanged, bump `pinnedVersion` in
+`config/spec-engines.json` to the new release. If the layout changed, update
+the `sk*` adapter and `lib/kbd/spec-backend-speckit.test.mjs` first, then bump
+the pin — never bump the pin ahead of a verified adapter. To add a new engine,
+see the `customEngines.hint` in that file.
 
 ## Progress Signals (MANDATORY)
 

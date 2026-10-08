@@ -63,12 +63,13 @@ export function candidateStatus(state, input = {}) {
     : { current: state.candidates.find(c => c.id === iteration?.candidateId) ?? null, candidates: state.candidates };
 }
 
-export async function assertCandidateCurrent(root, state, iteration) {
+export async function assertCandidateCurrent(root, state, iteration, reconciliation = null) {
   const candidate = state.candidates.find(c => c.id === iteration.candidateId);
   if (!candidate) throw new Error('Freeze a candidate for this completed increment before delivery');
   const bytes = JSON.parse(await fs.readFile(candidate.manifestPath, 'utf8'));
   if (digest(bytes) !== candidate.manifestHash) throw new Error('Frozen candidate manifest bytes changed');
-  if (!sameSources(candidate.sourceRefs, iteration.sourceRefs) || !sameSources(await captureSources(candidate.sourceRefs, root), candidate.sourceRefs)) {
+  if (!sameSources(candidate.sourceRefs, iteration.sourceRefs) ||
+      (!reconciliation && !sameSources(await captureSources(candidate.sourceRefs, root), candidate.sourceRefs))) {
     throw new Error('Frozen candidate no longer matches release inputs; repair and freeze again');
   }
   const previous = [...state.iterations].reverse().find(i => i.id !== iteration.id && i.workOutcome === 'success');

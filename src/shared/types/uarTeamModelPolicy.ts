@@ -40,6 +40,7 @@ export const uarReviewedModelPolicySchema = z.object({
   sourceJson: z.string().min(1).max(8 * 1024 * 1024),
   digest: z.string().regex(/^sha256:[a-f0-9]{64}$/),
   result: uarReviewedModelResultSchema,
+  issuanceId: z.uuid().optional(),
   bindingTarget: z.object({
     source: z.literal('enabled-configured-gateway-alias'),
     providerId: text,

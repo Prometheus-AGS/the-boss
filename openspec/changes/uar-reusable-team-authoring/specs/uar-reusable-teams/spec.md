@@ -46,6 +46,18 @@ The existing reusable-team editor SHALL import the supported agent-team-creator 
 - **WHEN** the existing selector selects an unmapped served alias under declared constraints that permit unknown metadata
 - **THEN** import retains its nullable catalog identity, unknown capabilities/prices and original policy/rationale without filling them; a separate private receipt freezes its exact enabled configured provider/model target, and reviewed deployment rejects a changed target while preserving existing pricing/accounting checks.
 
+#### Scenario: Authenticate the main-issued target receipt
+- **WHEN** the existing model-review import captures an enabled alias target
+- **THEN** main persists an immutable credential-free receipt and returns its issuance UUID; save authenticates the complete receipt against that private record, and reviewed deployment resolves its target from that record.
+
+#### Scenario: Refuse a rewritten issued target
+- **WHEN** renderer input changes an issued receipt's target, selection, source or result while retaining its issuance UUID
+- **THEN** save refuses the issuance mismatch before creating a revision, even if the configured alias has since changed to the submitted target.
+
+#### Scenario: Preserve legacy inspection and manual choice
+- **WHEN** an older receipt has no main issuance UUID
+- **THEN** it remains readable and usable with explicit manual selection; reviewed save or deployment derives only a complete non-null raw provider/catalog-model identity, and otherwise requires reimport without rewriting the older revision or claiming unknown policy compliance.
+
 ### Requirement: Apply existing reviewed role guidance explicitly
 The existing reusable-team editor SHALL import the supported creator guide result, retain its exact source and complete planning metadata, and let the operator apply explicitly selected proposals to existing editable members. Guide metadata SHALL confer no native dependency graph, skill installation, tool grant or model policy compliance.
 
