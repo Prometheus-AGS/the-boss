@@ -11,23 +11,12 @@
     "darwin-x64"
   ],
   "source": "59d512b6450989783369e2bbe8e3f555dd4c3712",
-  "publishedAt": "2026-10-08T21:12:36.843Z",
+  "publishedAt": "2026-10-08T21:32:52.728Z",
   "pendingPlatforms": [
     "darwin-arm64",
     "darwin-x64"
   ],
   "artifacts": [
-    {
-      "name": "The-Boss-2.2.19-win-arm64-setup.exe",
-      "size": 494504700,
-      "sha256": "abf0cbb12e54e88babebc004deb85fbcd97ed5b9891341c9a31ac9a406865da6",
-      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.19/The-Boss-2.2.19-win-arm64-setup.exe",
-      "signing": "unsigned",
-      "profile": "uar-enabled",
-      "platform": "win32",
-      "arch": "arm64",
-      "source": "59d512b6450989783369e2bbe8e3f555dd4c3712"
-    },
     {
       "name": "The-Boss-2.2.19-win-x64-setup.exe",
       "size": 531207885,
@@ -37,6 +26,17 @@
       "profile": "uar-enabled",
       "platform": "win32",
       "arch": "x64",
+      "source": "59d512b6450989783369e2bbe8e3f555dd4c3712"
+    },
+    {
+      "name": "The-Boss-2.2.19-win-arm64-setup.exe",
+      "size": 494504700,
+      "sha256": "abf0cbb12e54e88babebc004deb85fbcd97ed5b9891341c9a31ac9a406865da6",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.19/The-Boss-2.2.19-win-arm64-setup.exe",
+      "signing": "unsigned",
+      "profile": "uar-enabled",
+      "platform": "win32",
+      "arch": "arm64",
       "source": "59d512b6450989783369e2bbe8e3f555dd4c3712"
     }
   ]
