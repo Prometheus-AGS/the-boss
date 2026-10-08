@@ -5,6 +5,8 @@ import { Button, Textarea } from '@cherrystudio/ui'
 import { ipcApi } from '@renderer/ipc'
 import type { UarReviewedModelPolicy } from '@shared/types/uarTeamModelPolicy'
 
+import { UarTeamModelCost } from './UarTeamModelCost'
+
 export function UarTeamReviewedModelPolicy({
   value,
   mode,
@@ -75,6 +77,7 @@ export function UarTeamReviewedModelPolicy({
             {t('recommendation')}: {value.selection.modelId}
           </p>
           <p>{value.result.explanation}</p>
+          <UarTeamModelCost value={value} />
           <details>
             <summary className="cursor-pointer">{t('details')}</summary>
             <pre className="mt-2 whitespace-pre-wrap break-all">{JSON.stringify(value.bindingTarget ? { result: value.result, bindingTarget: value.bindingTarget } : value.result, null, 2)}</pre>

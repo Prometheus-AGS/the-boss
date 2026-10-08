@@ -24,7 +24,9 @@ export const uarGuideResultSchema = z
     team: z.object({ roles: z.array(role) }).catchall(z.json()).optional(),
     proposedRoles: z.array(role).optional(),
     reasons: z.array(text).optional(),
-    missing: z.array(text).optional()
+    missing: z.array(text).optional(),
+    alternatives: z.array(text).optional(),
+    skillDiscovery: text.optional()
   })
   .catchall(z.json())
   .superRefine((value, context) => {

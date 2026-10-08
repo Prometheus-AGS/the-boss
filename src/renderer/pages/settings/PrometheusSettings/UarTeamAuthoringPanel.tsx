@@ -14,6 +14,7 @@ import {
 } from '@cherrystudio/ui'
 import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/components/SettingsPrimitives'
 import { UarTeamGuidance } from '@renderer/components/uarTeams/UarTeamGuidance'
+import { UarTeamAuthoringGuide } from '@renderer/components/uarTeams/UarTeamAuthoringGuide'
 import { uarTeamAuthoringError } from '@renderer/components/uarTeams/uarTeamError'
 import { ipcApi } from '@renderer/ipc'
 import { uarGuidanceRoles, type UarGuidanceMapping } from '@shared/types/uarTeamGuidance'
@@ -125,6 +126,8 @@ export function UarTeamAuthoringPanel({
     <SettingGroup data-ui="team-authoring">
       <SettingTitle>{tr('title')}</SettingTitle>
       <SettingDescription>{tr('help')}</SettingDescription>
+      <UarTeamAuthoringGuide disabled={busy} onSingleAgent={() =>
+        void navigate({ to: '/app/agents', search: { workspaceId } })} />
       <div className="mt-4 flex flex-wrap gap-2">
         {snapshot?.templates.map((template) => (
           <Button
@@ -146,7 +149,7 @@ export function UarTeamAuthoringPanel({
           {t('common.refresh')}
         </Button>
       </div>
-      {draft && !['coding', 'product-design', 'specialist-delivery'].includes(draft.template) && (
+      {draft && (
         <div className="mt-3 space-y-1 text-sm text-muted-foreground" data-ui="team-authoring-preset-help">
           <p>{tr('presetHelp.' + draft.template)}</p>
           <p>{tr('presetResources')}</p>

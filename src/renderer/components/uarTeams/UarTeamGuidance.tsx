@@ -83,6 +83,20 @@ export function UarTeamGuidance({
             {t(value.result.ready ? 'ready' : 'incomplete')}
           </p>
           <p className="text-xs text-muted-foreground">{t('planning')}</p>
+          {value.result.alternatives && (
+            <div className="space-y-1 text-xs" data-ui="team-authoring-guidance-alternatives">
+              <h4 className="font-medium">{t('alternatives')}</h4>
+              <ul className="list-disc space-y-1 pl-4">
+                {value.result.alternatives.map((alternative, index) => <li key={index}>{alternative}</li>)}
+              </ul>
+            </div>
+          )}
+          {value.result.skillDiscovery && (
+            <div className="space-y-1 text-xs" data-ui="team-authoring-guidance-discovery">
+              <h4 className="font-medium">{t('discovery')}</h4>
+              <p>{value.result.skillDiscovery}</p>
+            </div>
+          )}
           {value.result.reasons?.map((reason, index) => (
             <p key={index} className="text-xs">{reason}</p>
           ))}
@@ -100,7 +114,18 @@ export function UarTeamGuidance({
               <fieldset key={role.id} className="space-y-2" data-ui="team-authoring-guidance-role" data-source-role={role.id}>
                 <legend className="text-sm font-medium">{role.id}</legend>
                 <p className="text-xs">{role.description}</p>
-                <pre className="whitespace-pre-wrap break-all text-xs">{JSON.stringify(role, null, 2)}</pre>
+                <dl className="space-y-1 break-words text-xs">
+                  {(['owns', 'inputs', 'outputs', 'skills', 'dependsOn'] as const).map((field) => (
+                    <div key={field}>
+                      <dt className="font-medium">{t('roleFields.' + field)}</dt>
+                      <dd>{role[field].length ? role[field].join(' · ') : t('roleFields.unassigned')}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <details>
+                  <summary className="cursor-pointer text-xs">{t('details')}</summary>
+                  <pre className="mt-2 whitespace-pre-wrap break-all text-xs">{JSON.stringify(role, null, 2)}</pre>
+                </details>
                 <label className="flex items-center gap-2 text-xs">
                   <Checkbox
                     data-ui="team-authoring-guidance-select"

@@ -209,18 +209,18 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.20 - Practical team presets
+    The Boss 2.2.21 - Practical team guidance
     
-    - [Teams] Add product research, marketing/brand, logo/design, mobile design and customer-feedback presets with bounded deliverables and a separate reviewer.
-    - [Configuration] Preserve explicit models, reviewed skills, knowledge, tools and project scope through existing immutable team authoring.
-    - [Feedback] Prepare issue drafts and connector requirements only; presets do not create GitHub issues or grant publishing authority.
-    - [Delivery] Local delivery preparation only; practical-team packaged operation and native Windows acceptance remain pending.
+    - [Teams] Follow an outcome-first setup guide, inspect creator alternatives and choose single-agent Work for sequential tasks.
+    - [Models] Show reviewed strength, unknown prices and source provenance without claiming measured savings.
+    - [Configuration] Preserve role guidance and explicit resources in immutable team revisions; include guidance for all practical presets.
+    - [Delivery] Source preparation only; packaged operation and native Windows acceptance remain pending.
     
     <!--LANG:zh-CN-->
-    The Boss 2.2.20 - 实用团队预设
+    The Boss 2.2.21 - 实用团队指导
     
-    - [团队] 添加产品研究、营销／品牌、标志／设计、移动设计和客户反馈预设，包含有界交付内容和独立审查角色。
-    - [配置] 通过现有不可变团队创作流程，保留明确选择的模型、已审阅技能、知识、工具和项目范围。
-    - [反馈] 仅准备问题草稿和连接器要求；预设不会创建 GitHub 问题，也不会授予发布权限。
-    - [交付] 仅完成本地交付准备；实用团队打包操作和原生 Windows 验收仍待完成。
+    - [团队] 按目标优先的设置流程操作，查看创建工具的替代方案，并为顺序任务选择单代理 Work。
+    - [模型] 显示已审阅能力等级、未知价格及来源信息，不宣称已测量的成本节省。
+    - [配置] 在不可变团队修订中保留角色指导和明确选择的资源，并提供所有实用预设的指导。
+    - [交付] 仅完成源码准备；打包操作和原生 Windows 验收仍待完成。
     <!--LANG:END-->
