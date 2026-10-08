@@ -46,7 +46,7 @@
     },
     "skill-pack": {
       "repository": "Prometheus-AGS/prometheus-skill-system",
-      "revision": "75f9429f34875d85ececcbdd347a8973393adee4"
+      "revision": "14011e5386e3d7302187609949673817fe59b03a"
     }
   },
   "tools": {

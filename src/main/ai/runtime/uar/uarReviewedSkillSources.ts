@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { readFile } from 'node:fs/promises'
+import { readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
 
 import { application } from '@application'
@@ -22,10 +22,14 @@ export async function reviewedSkillSources(): Promise<string> {
       inventoryDigest
     })
   try {
+    const pointer = (await readFile(path.join(pluginRoot, 'pointers', 'current'), 'utf8')).trim()
+    if (!/^generations\/[a-f0-9]{64}$/.test(pointer)) throw new Error('invalid signed generation pointer')
+    const generationRoot = path.join(pluginRoot, pointer)
+    if (!(await stat(generationRoot)).isDirectory()) throw new Error('signed generation is unavailable')
     const trustRootDigest = `sha256:${createHash('sha256').update(await readFile(trustStore)).digest('hex')}`
     sources.push({
       source: 'signed-full-generation',
-      root: path.join(pluginRoot, 'pointers', 'current'),
+      root: generationRoot,
       verifier: {
         executable: process.execPath,
         script: toAsarUnpackedPath(
