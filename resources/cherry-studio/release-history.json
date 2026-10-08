@@ -1,5 +1,9 @@
 [
   {
+    "version": "2.2.16",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.16 - Reviewed team role guidance\n\n- [Teams] Import creator role proposals and explicitly map them to existing coding-team members.\n- [Configuration] Preserve manual models and resources, original guidance and immutable team revisions.\n- [Policy] Show requested model policies without claiming unknown strength-tier compliance.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.16 - 已审阅的团队角色建议\n\n- [团队] 导入创建工具的角色建议，并明确映射到现有编码团队成员。\n- [配置] 保留手动选择的模型和资源、原始建议及不可变的团队修订。\n- [策略] 显示所请求的模型策略，不宣称未知的能力等级已满足要求。\n<!--LANG:END-->"
+  },
+  {
     "version": "2.2.15",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.15 - BossFang with the shared UAR\n\n- [BossFang] Open the embedded BossFang dashboard from Apps and its dedicated settings page.\n- [Workflows] Delegate workflows to the selected UAR instance using scoped credentials and one approval authority.\n- [Runtime] Keep UAR process ownership in The Boss and preserve correlated workflow output, approvals and cancellation.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.15 - BossFang 与共享 UAR\n\n- [BossFang] 从应用列表和专属设置页面打开内嵌的 BossFang 控制台。\n- [工作流] 使用限定权限的凭证和统一审批机制，将工作流委派给选定的 UAR 实例。\n- [运行时] 由 The Boss 管理 UAR 进程，并保留关联的工作流输出、审批和取消状态。\n<!--LANG:END-->"
   },
