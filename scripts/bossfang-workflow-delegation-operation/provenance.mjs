@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { digest, requireFact } from './io.mjs'
+import { binaryProvenance } from './signed-provenance.mjs'
 
 export function provenance(options) {
   const platform = 'darwin-' + process.arch
@@ -20,8 +21,8 @@ export function provenance(options) {
   requireFact(bossfang.dashboard?.embedded && bossfang.dashboard.basePath === '/dashboard/' &&
     bossfang.dashboard.files.some(asset=>/WorkflowsPage/.test(asset.path)&&asset.size>0),
   'C14W_COMPILED_WORKFLOW_DASHBOARD_MANIFEST_REQUIRED')
-  requireFact(fileHash(path.join(payload, 'bossfang')) === bossfang.sha256,
-    'C14W_PACKAGED_BOSSFANG_DIGEST_MISMATCH')
+  const bossfangBinaryProvenance = binaryProvenance(path.join(options.boss, 'resources/binaries', platform, 'bossfang'),
+    path.join(payload, 'bossfang'), app, bossfang)
   const localPinFile = path.join(options.boss, 'build/local-uar-source.json')
   const pin = JSON.parse(fs.readFileSync(localPinFile, 'utf8'))
   const markerFile = path.join(payload, '.uar-local-payload.json')
@@ -29,6 +30,7 @@ export function provenance(options) {
     'C14W_UAR_SOURCE_PIN_MISMATCH')
   const files = ['operate-bossfang-workflow-delegation.mjs',
     'bossfang-workflow-delegation-operation/io.mjs', 'bossfang-workflow-delegation-operation/provenance.mjs',
+    'bossfang-workflow-delegation-operation/signed-provenance.mjs',
     'bossfang-workflow-delegation-operation/setup.mjs', 'bossfang-workflow-delegation-operation/dashboard.mjs',
     'bossfang-workflow-delegation-operation/workflow.mjs', 'bossfang-workflow-delegation-operation/scenario.mjs',
     'bossfang-workflow-delegation-operation/effects.mjs',
@@ -43,6 +45,7 @@ export function provenance(options) {
     uarPayloadManifestSha256: fileHash(path.join(payload, 'payload-manifest.json')),
     appAsarSha256: fileHash(path.join(resources, 'app.asar')),
     bossfangSha256: fileHash(path.join(payload, 'bossfang')), uarSha256: fileHash(path.join(payload, 'uar-sidecar')),
+    bossfangBinaryProvenance,
     bossfangPayload: { source: bossfang.source, url: bossfang.url, sha256: bossfang.sha256,
       uarLifecycle: bossfang.uarLifecycle, dashboard: bossfang.dashboard },
     launcher: options.launcher, launcherSha256: fileHash(options.launcher),
