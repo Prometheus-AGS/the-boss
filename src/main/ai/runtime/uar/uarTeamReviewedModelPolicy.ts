@@ -11,6 +11,7 @@ import {
 } from '@shared/types/uarTeamModelPolicy'
 
 import { readUarModelSources } from './UarModelSourceAdapter'
+import { assertIssuedReviewedModelPolicy, issueReviewedModelPolicy } from './uarTeamReviewedModelPolicyStore'
 
 const digest = (value: string) => 'sha256:' + createHash('sha256').update(value).digest('hex')
 
@@ -42,6 +43,7 @@ export async function assertUarTeamArtifactCredentialFree(value: unknown) {
 
 export async function assertReviewedModelPolicy(policy: UarReviewedModelPolicy) {
   await assertUarTeamArtifactCredentialFree(policy)
+  assertIssuedReviewedModelPolicy(policy)
   const sourceResult = uarReviewedModelResultSchema.safeParse(readSource(policy.sourceJson))
   if (
     !sourceResult.success ||
@@ -51,20 +53,23 @@ export async function assertReviewedModelPolicy(policy: UarReviewedModelPolicy) 
     policy.selection.modelId !== policy.result.selected.id
   )
     throw new Error('UAR_TEAM_MODEL_POLICY_IDENTITY_MISMATCH')
-  reviewedModelBindingTarget(policy)
 }
 
 export function reviewedModelBindingTarget(policy: UarReviewedModelPolicy): { providerId: string; modelId: string } {
   const selected = policy.result.selected
-  const target = policy.bindingTarget ?? (
-    selected.provider !== null && selected.catalogId !== null
+  const issued = assertIssuedReviewedModelPolicy(policy)
+  const target = issued
+    ? issued.bindingTarget
+    : selected.provider !== null && selected.catalogId !== null
       ? { providerId: selected.provider, modelId: selected.catalogId }
       : undefined
-  )
+  if (!target) throw new Error('UAR_TEAM_MODEL_POLICY_REIMPORT_REQUIRED')
   if (
-    !target ||
     (selected.provider !== null && selected.provider !== target.providerId) ||
-    (selected.catalogId !== null && selected.catalogId !== target.modelId)
+    (selected.catalogId !== null && selected.catalogId !== target.modelId) ||
+    (!issued &&
+      policy.bindingTarget !== undefined &&
+      (policy.bindingTarget.providerId !== target.providerId || policy.bindingTarget.modelId !== target.modelId))
   )
     throw new Error('UAR_TEAM_MODEL_POLICY_TARGET_MISMATCH')
   return { providerId: target.providerId, modelId: target.modelId }
@@ -95,6 +100,11 @@ export async function reviewUarTeamModelPolicy(source: string): Promise<UarRevie
     bindingTarget: { source: 'enabled-configured-gateway-alias', ...target },
     selection: { source: 'gateway', providerId: provider.id, modelId: result.selected.id }
   }
-  reviewedModelBindingTarget(policy)
-  return policy
+  if (
+    (result.selected.provider !== null && result.selected.provider !== target.providerId) ||
+    (result.selected.catalogId !== null && result.selected.catalogId !== target.modelId)
+  )
+    throw new Error('UAR_TEAM_MODEL_POLICY_TARGET_MISMATCH')
+  await assertUarTeamArtifactCredentialFree(policy)
+  return issueReviewedModelPolicy(policy)
 }

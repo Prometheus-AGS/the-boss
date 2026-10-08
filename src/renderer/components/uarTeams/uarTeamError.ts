@@ -47,3 +47,10 @@ export function uarTeamError(
       : undefined
   return code ? translate('diagnostic.' + (stageReason ?? reasons[code] ?? 'other')) + ' (' + code + ')' : message
 }
+
+export function uarTeamAuthoringError(message: string, translate: (key: string) => string): string {
+  const code = message.match(/UAR_TEAM_MODEL_POLICY_(ISSUANCE_MISMATCH|REIMPORT_REQUIRED)/)?.[0]
+  if (!code) return message
+  const key = code === 'UAR_TEAM_MODEL_POLICY_ISSUANCE_MISMATCH' ? 'issuanceMismatch' : 'reimportRequired'
+  return translate('modelPolicy.' + key) + ' (' + code + ')'
+}

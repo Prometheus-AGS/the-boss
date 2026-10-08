@@ -51,7 +51,10 @@ export async function saveUarTeamAuthoring(input: { team: UarAuthoredTeam; expec
   const team = uarAuthoredTeamSchema.parse(input.team)
   if (team.reviewedGuidance) await assertUarTeamGuidance(team.reviewedGuidance)
   for (const member of team.members) {
-    if (member.reviewedModelPolicy) await assertReviewedModelPolicy(member.reviewedModelPolicy)
+    if (member.reviewedModelPolicy) {
+      await assertReviewedModelPolicy(member.reviewedModelPolicy)
+      if (member.modelPolicyMode === 'reviewed') reviewedModelBindingTarget(member.reviewedModelPolicy)
+    }
     if (member.knowledge.length && !member.tools.includes('filesystem__read'))
       throw new Error('UAR_TEAM_KNOWLEDGE_READ_REQUIRED: ' + member.role)
     if (
