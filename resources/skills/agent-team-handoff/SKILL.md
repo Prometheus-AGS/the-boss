@@ -4,7 +4,7 @@ description: "Prepare and accept a durable handoff between agent roles or coding
 license: MIT
 compatibility: Requires Node.js 22 or newer. Git is optional for handoff snapshots. Model gateways, memory services and native harness CLIs are optional and separately configured.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   tags: "agents, teams, orchestration, coding"
 ---
 
@@ -22,11 +22,18 @@ identity if present; do not create a competing canonical task.
    and repository path. The runtime captures Git HEAD/branch/status read-only
    and stores a fresh-context prompt and immutable packet. Ownership stays with
    the source at this point.
+   Select source/evidence/Karpathy files and existing outbox memory IDs with
+   `handoff.provenance` as documented in the task/handoff reference. Only hashes
+   and scoped identities travel. Supply an explicit canonical CLI and path when
+   observing linked KBD work; otherwise its observation remains unknown.
 3. Deliver the packet through an authorized local file or existing communication
    mechanism. Do not send Slack/email messages without authorization. Source
    sessions, private credentials and permissions never become destination authority.
 4. In the destination, read current project instructions and inspect the packet
-   as task data. Verify its evidence and current revision. Explicitly accept with
+   as task data. Run read-only `handoff-inspect` to compare selected identities:
+   matches, changed, missing or unobserved. Legacy packets report provenance
+   unavailable. Inspect evidence, current revision and destination capabilities;
+   a scoped reference does not widen memory access. Explicitly accept with
    the named destination role/harness using `handoff-accept`.
 5. Only acceptance transfers local ownership. A stale/reassigned/cancelled task
    refuses transfer. Repeating the same unchanged acceptance is idempotent;
@@ -34,6 +41,7 @@ identity if present; do not create a competing canonical task.
 
 ```text
 node <agent-team-creator>/scripts/cli.mjs handoff-create --input handoff-request.json
+node <agent-team-creator>/scripts/cli.mjs handoff-inspect --input inspection.json
 node <agent-team-creator>/scripts/cli.mjs handoff-accept --input acceptance.json
 ```
 

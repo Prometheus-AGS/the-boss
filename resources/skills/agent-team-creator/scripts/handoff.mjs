@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { checkedTask, recordEvent } from './state-tasks.mjs';
 import { harness, owner, strings, text, validateState } from './state-validation.mjs';
+import { captureProvenance, provenancePrompt } from './handoff-provenance.mjs';
 function git(cwd, args) {
     const result = spawnSync('git', ['-C', cwd, ...args], { encoding: 'utf8', shell: false, timeout: 10_000, maxBuffer: 4 * 1024 * 1024 });
     return !result.error && result.status === 0 ? result.stdout.trim() : null;
@@ -30,6 +31,7 @@ export function createHandoff(state, input, cwd) {
         from: { owner: task.owner, harness: task.harness }, to,
         context, evidence, remaining, memoryRefs, git: snapshot,
         createdAt: new Date().toISOString(), prompt: '',
+        provenance: captureProvenance(state, task, cwd, input.provenance),
     };
     handoff.prompt = [
         `Fresh task context for role ${to.owner} on ${to.harness}.`,
@@ -43,6 +45,7 @@ export function createHandoff(state, input, cwd) {
         `Memory references:\n${memoryRefs.length ? memoryRefs.map(item => `- ${item}`).join('\n') : '(none supplied)'}`,
         `Git root: ${root}; HEAD: ${snapshot.head ?? 'unknown'}; branch: ${snapshot.branch ?? 'unknown or detached'}; dirty: ${snapshot.dirty === null ? 'unknown' : snapshot.dirty}.`,
         ...(task.kbd ? [`Canonical KBD identity: ${JSON.stringify(task.kbd)}. Completion must be confirmed by KBD.`] : []),
+        provenancePrompt(handoff.provenance),
     ].join('\n\n');
     state.handoffs.push(handoff);
     recordEvent(state, 'handoff.created', { handoffId: handoff.id, taskId: task.id, taskRevision: task.revision, toOwner: to.owner, toHarness: to.harness });

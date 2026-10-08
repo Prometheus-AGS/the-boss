@@ -31,6 +31,29 @@ function verifyIdentity(state, identity) {
         throw new Error('Canonical phase/change/task identity mismatch');
     return task;
 }
+/** Read-only observation for handoffs; reader errors never expose CLI output. */
+export function observeCanonicalTask(identity, binary, cwd) {
+    const snapshot = {
+        path: resolve(cwd),
+        identity: identity ? structuredClone(identity) : null, observation: 'unknown',
+        revision: null, eventId: null, taskStatus: null, receiptSha256: null,
+        reason: identity ? 'reader-not-supplied' : 'task-not-linked',
+    };
+    if (!identity || !binary)
+        return snapshot;
+    try {
+        const directory = resolve(cwd);
+        const result = execute(binary, ['kbd', '--path', directory, 'status', '--json'], directory);
+        const task = verifyIdentity(result.value, identity);
+        const taskStatus = text(task.status, 'canonical task status');
+        return { ...snapshot, observation: 'observed', revision: integer(result.value.revision, 'canonical revision'),
+            eventId: typeof result.value.lastEventId === 'string' ? result.value.lastEventId : null,
+            taskStatus, receiptSha256: createHash('sha256').update(result.stdout).digest('hex'), reason: null };
+    }
+    catch {
+        return { ...snapshot, reason: 'reader-unavailable-or-identity-mismatch' };
+    }
+}
 /**
  * Source contract: prometheus-cli main.rs KbdAction::Status / KbdTaskAction::Transition.
  *   <kbdCli> kbd --path <cwd> status --json
