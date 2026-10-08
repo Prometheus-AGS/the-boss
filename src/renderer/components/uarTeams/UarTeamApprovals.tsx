@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@cherrystudio/ui'
@@ -26,8 +26,10 @@ export function UarTeamApprovals({
   const [commandError, setCommandError] = useState<string>()
   const [busy, setBusy] = useState<string>()
   const [status, setStatus] = useState<string>()
+  const inFlight = useRef(false)
   const refresh = useCallback(async () => {
-    if (!available) return
+    if (!available || inFlight.current) return
+    inFlight.current = true
     try {
       const snapshot = await ipcApi.request('prometheus.uar.teams.approvals', { workspaceId, teamInstanceId })
       setApprovals(snapshot.approvals)
@@ -36,6 +38,7 @@ export function UarTeamApprovals({
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
     } finally {
+      inFlight.current = false
       setLoading(false)
     }
   }, [available, workspaceId, teamInstanceId])

@@ -108,6 +108,26 @@ export function UarTeamMemberEditor({
         value={member.instructions}
         onChange={(event) => onChange({ ...member, instructions: event.target.value })}
       />
+      {(['projectScope', 'outputInstructions', 'evidenceInstructions'] as const).map((field) => (
+        <div key={field} className="space-y-1">
+          <label htmlFor={id + '-' + field} className="block text-sm">
+            {tr(field)}
+          </label>
+          <Textarea.Input
+            id={id + '-' + field}
+            data-ui={'team-authoring-' + field}
+            rows={2}
+            value={member[field] ?? ''}
+            aria-describedby={field === 'projectScope' ? id + '-project-scope-help' : undefined}
+            onChange={(event) => onChange({ ...member, [field]: event.target.value })}
+          />
+          {field === 'projectScope' && (
+            <p id={id + '-project-scope-help'} className="text-xs text-muted-foreground">
+              {tr('projectScopeHelp')}
+            </p>
+          )}
+        </div>
+      ))}
       <UarTeamReviewedModelPolicy
         value={member.reviewedModelPolicy}
         mode={member.modelPolicyMode}

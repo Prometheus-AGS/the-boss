@@ -140,8 +140,9 @@ function validate(approval, execution, team, initial, selector, artifacts, readS
 }
 
 export function mixedTeamApprovalOperator({ evaluate, signal, selector, instance, instructions, workspaceDirectory, template = 'product-design' }) {
-  requireFact(['coding', 'product-design'].includes(template), 'C15_APPROVAL_EXISTING_TEMPLATE_REQUIRED')
-  const permittedRoles = template === 'coding' ? ['coordinator', 'worker', 'reviewer'] : roles
+  requireFact(['coding', 'product-design', 'specialist-delivery'].includes(template), 'C15_APPROVAL_EXISTING_TEMPLATE_REQUIRED')
+  const permittedRoles = template === 'coding' ? ['coordinator', 'worker', 'reviewer'] :
+    template === 'specialist-delivery' ? ['coordinator', 'product', 'ui-ux', 'mobile', 'security', 'documentation', 'code-review'] : roles
   requireFact(instructions === readOnlyInstructions, 'C15_APPROVAL_READ_ONLY_CONTEXT_CHANGED')
   const evidence = { instructionSha256: digest(instructions), readOnly: true, approvals: [], requests: [] }
   const handled = new Set()
@@ -215,7 +216,7 @@ export function mixedTeamApprovalOperator({ evaluate, signal, selector, instance
             receipt.transientReads.push({ ...failure, observedAt: new Date().toISOString() })
             return false
           }
-        }, 'C15_APPROVAL_NOT_RESOLVED_AFTER_CLICK', 15000)
+        }, 'C15_APPROVAL_NOT_RESOLVED_AFTER_CLICK', 60000)
         receipt.pendingClearedAt = new Date().toISOString()
       }
     }

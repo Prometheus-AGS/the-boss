@@ -190,7 +190,7 @@ export async function deployUarAuthoredTeam(input: {
     modelBindings,
     skillBindings,
     requiredCapabilities: [...fields.requiredCapabilities, UAR_TEAM_HOST_CAPABILITY],
-    effectiveBudget: { maxTokens: 65536, maxCostMicrounits: 10000000, currency: 'USD', maxElapsedSeconds: 2400 },
+    effectiveBudget: JSON.parse(preset.files['teams/root.json']).budget,
     extensions: {
       [UAR_TEAM_HOST_EXTENSION]: {
         required: true,

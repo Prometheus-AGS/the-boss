@@ -366,7 +366,7 @@ export const uarAuthoredTeamSchema = z
   .object({
     id: z.uuid(),
     title: z.string().trim().min(1).max(128),
-    template: z.enum(['coding', 'product-design']),
+    template: z.enum(['coding', 'product-design', 'specialist-delivery']),
     purpose: z.string().trim().min(1).max(4096),
     instructions: z.string().max(16384),
     reviewedGuidance: uarReviewedGuidanceSchema.optional(),
@@ -378,6 +378,9 @@ export const uarAuthoredTeamSchema = z
             role: z.string().regex(/^[a-z][a-z0-9-]{0,63}$/),
             responsibility: z.string().trim().min(1).max(4096),
             instructions: z.string().trim().min(1).max(16384),
+            projectScope: z.string().max(4096).optional(),
+            outputInstructions: z.string().max(4096).optional(),
+            evidenceInstructions: z.string().max(4096).optional(),
             model: z
               .object({
                 source: z.enum(['uar', 'gateway']),
@@ -404,7 +407,7 @@ export const uarAuthoredTeamSchema = z
           .strict()
       )
       .min(2)
-      .max(6)
+      .max(7)
   })
   .strict()
   .superRefine((value, context) => {
