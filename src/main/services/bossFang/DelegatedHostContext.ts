@@ -169,7 +169,8 @@ export class DelegatedHostContext {
     if (result.runId !== runId || history.runId !== runId) throw failure('DELEGATED_APPROVAL_RUN_MISMATCH')
     if (history.records.some((record) => record.workspaceId !== this.authorization.workspaceId || record.rootRunId !== runId))
       throw failure('DELEGATED_APPROVAL_OWNER_MISMATCH')
-    let pending = result.pending
+    const pending = result.pending
+    let actionablePending = pending
     if (pending) {
       const challenge = history.records.find((record) => record.issuerId === pending.issuerId && record.challengeId === pending.challengeId)
       if (
@@ -178,9 +179,9 @@ export class DelegatedHostContext {
         challenge.admissionId !== pending.admissionId || challenge.toolCallId !== pending.toolCallId ||
         challenge.toolName !== pending.name || challenge.admissionOwner !== 'paired-host'
       ) throw failure('DELEGATED_APPROVAL_STALE')
-      if (challenge.state !== 'pending' || !challenge.resolvable) pending = null
+      if (challenge.state !== 'pending' || !challenge.resolvable) actionablePending = null
     }
-    return { task, pending, history }
+    return { task, pending: actionablePending, history }
   }
 
   private async recordApproval(body: unknown): Promise<Record<string, unknown>> {
