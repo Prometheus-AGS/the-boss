@@ -32,7 +32,7 @@
       "revision": "36f096dbda0f17c6e15c71b284ce89cb04f04502",
       "platformRevisions": {
         "darwin-arm64": "36f096dbda0f17c6e15c71b284ce89cb04f04502",
-        "darwin-x64": "8e647589c42c73488dd5e56523a797bfa6e4a36b",
+        "darwin-x64": "36f096dbda0f17c6e15c71b284ce89cb04f04502",
         "win32-x64": "36f096dbda0f17c6e15c71b284ce89cb04f04502",
         "win32-arm64": "36f096dbda0f17c6e15c71b284ce89cb04f04502"
       }
@@ -504,11 +504,13 @@
           ]
         },
         "darwin-x64": {
-          "source": "8e647589c42c73488dd5e56523a797bfa6e4a36b",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.0.0-team-catalog-8e647589-20261006/uar-sidecar-darwin-x64.tar.gz",
-          "sha256": "d785eef235d1dfa3eb1ab9064e638110ff7be46958177d985e91f1e8afb67ca0",
+          "source": "36f096dbda0f17c6e15c71b284ce89cb04f04502",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.0.0-c14-approvals-36f096d/uar-sidecar-darwin-x64.tar.gz",
+          "sha256": "d964926986e3332554496b809db0f7cd82c60675e8d7830ac856ca7b580ce9c3",
           "archive": "tar.gz",
           "binaries": [
+            "libcrc_fast-83ccf4684c30d646.dylib",
+            "libsevenz_rust2-1192d4db71fe5529.dylib",
             "LICENSE",
             "policies/default.cedar",
             "policies/skill-mutation.cedar",

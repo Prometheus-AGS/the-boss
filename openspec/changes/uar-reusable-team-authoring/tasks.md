@@ -4,7 +4,7 @@
 - [x] 2. Add workspace-scoped preflight/install and private binding deployment with per-role model and reviewed skill choices; retain immutable previous packages/runs.
 - [x] 3. Add guided team administration UI and Work entrypoint using established components; translate all new strings.
 - [x] 4. Add the packaged real-path create/deploy/run/revise/reopen operation procedure.
-- [ ] 5. At the completed boundary, build Mac ARM64, launch, operate the delivered feature, and repair only observed failures (lead-owned delivery gate).
+- [x] 5. At the completed boundary, build Mac ARM64, launch, operate the delivered feature, and repair only observed failures (lead-owned delivery gate).
 
 Production work 1–4 is authorized in the isolated work-ahead scope. Task 5 cannot begin before the preceding Teams in Work delivery succeeds and the lead promotes this frozen source.
 
@@ -53,3 +53,18 @@ Source inspection identified the narrower profile identifier validator rejecting
 Operation `c15-0b065f2e-02ae-4c1d-8c78-deb6279a29ab` completed product, designer and reviewer attempts with correlated artifacts/model provenance and observed public live output. It persisted the second immutable revision, reloaded, and reached authoring successfully before failing `C15_ONBOARDING_UNAVAILABLE` in `reopen-persisted-authoring-and-run`. Source confirms `AppShell` intentionally hides `#app-sidebar` for Settings and `SettingsPage` renders `data-ui="settings.view"`. The procedure incorrectly required the home sidebar before its existing navigation could execute.
 
 Change only `openWork` readiness to accept that visible Settings root alongside the normal sidebar; preserve navigation through the existing IPC and the subsequent visible Work-control wait. All identity, artifact, model, saved-output, read-only workspace and no-repeated-attempt assertions remain intact. No model rerun or build has been performed for this source correction. The lead owns the required application candidate build and failed-boundary operation; no native rebuild is required. Task 5 remains pending, and the original failure receipt is preserved. The authorized per-command hook override avoids automatic install/build/lint while creating this source checkpoint.
+
+### 2026-10-07: lead-owned local delivery gate completed
+
+The lead confirmed task 5 complete after the full Mac ARM64 build, packaged launch and real feature operation succeeded. This completion entry supersedes earlier pending-gate statements while preserving the failure history. Frozen candidate `b245400b-e25e-42c9-8faa-653cda21c1fa` contains Boss `505b46c43b00a2bc9a739f6ba2944c62f6c480bf` and UAR `e4efce59601c93e834a3d58c6b6489aec6149cf1`; this subsequent documentation commit is not the packaged application source.
+
+Receipt root: `/Users/gqadonis/Projects/prometheus/worktrees/agent-fabric-c06/librefang/docs/plans/agent-fabric-convergence/.prometheus/cadence/`. Exact evidence under that root:
+
+- `inputs/c15-reopen-navigation-mac-build-20261007-receipt.json`: build attempt `9782e4a9-1d81-4eca-897c-45edceb038f9`, success at `2026-10-07T14:55:01.279Z`.
+- `inputs/c15-reopen-navigation-launch-20261007-receipt.json`: launch attempt `43170d98-d2b8-4da8-96d5-706e5873d560`, success at `2026-10-07T14:55:12.887Z`.
+- `artifacts/c15-0d8d8c74-92cb-48a1-9059-80f9ca46db16/operation.json`: success / scenario-confirmed at `2026-10-07T14:59:55.539Z`; sibling `evidence.json` records complete=true and all seven feature assertions, and `launch.json` records successful scenario acceptance.
+- `artifacts/c15-reusable-mixed-team-delivery-20261007.json`: consolidated source, installer, build, launch, operation and completion provenance. The lead finalized Cadence iteration 2 successfully at `2026-10-07T15:03:07Z`.
+
+The real operation completed product, designer and reviewer attempts with correlated artifacts and validated model provenance; public live samples covered all three roles. Revision and renderer reload preserved pinned definition/package/binding identities and existing attempts/artifact hashes, and displayed correlated saved final output. Packaged app.asar SHA-256 is `1a78f6dccbaffddea6ff445461957b6e79aff5768c0ac1898a96e5552dcae18c`; native sidecar SHA-256 is `8852edd43c20b737d1fb8f5cb08ff704e59f88805e6e9904d94be64397e1d1a6`.
+
+Limits remain explicit: this operation exercised renderer reload, not a full application-process restart; native Windows operation is pending. Induced retention-gap recovery and successful-poll concurrency/terminal-stop telemetry were not demonstrated by this operation. The local 2.2.13 candidate is Developer-ID signed but not notarized; public release remains 2.2.12. Broader C15/C16 phase criteria and the parent task remain unfinished. This local OpenSpec completion awards no parent/main-task count and changes no generated KBD or Cadence ledger. No tests, builds or reviews were rerun for this documentation checkpoint.
