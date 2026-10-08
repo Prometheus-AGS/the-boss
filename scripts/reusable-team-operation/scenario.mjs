@@ -61,7 +61,7 @@ async function openWork(evaluate, signal) {
 async function openAuthoring(evaluate, signal, workspaceId) {
   await waitFor(signal, () => evaluate(`(() => {
     const event=new CustomEvent('cherry:open-main-route', {
-      cancelable:true,detail:{path:'/settings/uar?panel=teams'}
+      cancelable:true,detail:{path:${JSON.stringify('/settings/uar?panel=teams&adminWorkspaceId=' + encodeURIComponent(workspaceId))}}
     });window.dispatchEvent(event);return event.defaultPrevented;
   })()`), 'C15_AUTHORING_NAVIGATION_NOT_ACKNOWLEDGED')
   await choose(
