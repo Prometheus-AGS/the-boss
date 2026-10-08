@@ -14,7 +14,7 @@ export function operate(args = process.argv.slice(2)) {
       path: fileURLToPath(url), sha256: digest(fs.readFileSync(new URL(url)))
     })),
     async prepareLauncher({ resources, configuration }) {
-      const runtime = path.join(resources, 'skills/agent-team-creator/scripts')
+      const runtime = path.join(resources, 'app.asar.unpacked/resources/prometheus-skills-mini/skills/agent-team-creator/scripts')
       const { guide } = await import(pathToFileURL(path.join(runtime, 'guidance.mjs')).href)
       const { selectModel } = await import(pathToFileURL(path.join(runtime, 'models.mjs')).href)
       const guidance = guide({ id: 'guidance-operation', outcome: 'Research the supplied project brief.',
