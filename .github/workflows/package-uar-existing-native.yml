@@ -3,9 +3,17 @@ on:
   workflow_dispatch:
     inputs:
       platforms:
-        description: Ready platforms from native run 37794439269
+        description: Ready platforms from the exact native run
         required: true
         default: win32-x64,darwin-arm64
+        type: string
+      native_run_id:
+        description: Completed integration-payload run containing the native UAR artifacts
+        required: true
+        type: string
+      source_revision:
+        description: Exact UAR source revision pinned in build/integration-sources.json
+        required: true
         type: string
 permissions:
   contents: read
@@ -50,7 +58,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           repository: Prometheus-AGS/universal-agent-runtime
-          ref: b0070b42e7d39d06dca83094cd7868920760cbed
+          ref: ${{ inputs.source_revision }}
           path: build/integration-source/uar
           token: ${{ secrets.SUBMODULES_TOKEN || github.token }}
       - uses: actions/cache/restore@v6
@@ -60,13 +68,13 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             build/integration-source/**/target
-          key: native-${{ matrix.platform }}-uar-sidecar-8742f8fea7d979905789948ba7c5680810680330345220773ef77c7b380b6d44
+          key: native-${{ matrix.platform }}-uar-sidecar-${{ hashFiles('build/integration-sources.json') }}
       - name: Require exact completed native build cache
         if: steps.native-cache.outputs.cache-hit != 'true'
         run: exit 1
       - uses: actions/download-artifact@v6
         with:
-          run-id: 37794439269
+          run-id: ${{ inputs.native_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           name: native-tools-${{ matrix.platform }}
           path: build/integration-output
