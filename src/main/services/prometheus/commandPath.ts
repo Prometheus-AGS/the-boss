@@ -30,8 +30,13 @@ export async function installCommandPath(): Promise<void> {
   // Stable, application-owned executables survive versioned installation directory changes.
   for (const tool of ['compass', 'rust-mcp-filesystem', 'prometheus', 'pk', 'node']) {
     const filename = process.platform === 'win32' ? `${tool}.exe` : tool
-    await fs.copyFile(path.join(application.getPath('cherry.bin'), filename), path.join(directory, filename))
-    if (process.platform !== 'win32') await fs.chmod(path.join(directory, filename), 0o755)
+    // Copy to a temp name and rename over the target. Overwriting a signed executable in place keeps its inode, and
+    // macOS then SIGKILLs it on launch (stale cached code signature), so the new file must be a fresh inode.
+    const target = path.join(directory, filename)
+    const temporary = `${target}.${process.pid}.tmp`
+    await fs.copyFile(path.join(application.getPath('cherry.bin'), filename), temporary)
+    if (process.platform !== 'win32') await fs.chmod(temporary, 0o755)
+    await fs.rename(temporary, target)
   }
   await installMiniCommands(directory)
   let registration: Registration = { directory, added: false, files: [] }
