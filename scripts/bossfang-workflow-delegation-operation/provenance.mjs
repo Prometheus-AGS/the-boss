@@ -18,7 +18,7 @@ export function provenance(options) {
     pins.sources.bossfang.revision === options['bossfang-source'] && bossfang?.source === options['bossfang-source'],
   'C14W_NEW_NATIVE_SOURCE_RECORD_REQUIRED')
   requireFact(bossfang.dashboard?.embedded && bossfang.dashboard.basePath === '/dashboard/' &&
-    bossfang.dashboard.configurationAssets?.some(asset=>/WorkflowsPage/.test(asset.path)&&asset.size>0),
+    bossfang.dashboard.files.some(asset=>/WorkflowsPage/.test(asset.path)&&asset.size>0),
   'C14W_COMPILED_WORKFLOW_DASHBOARD_MANIFEST_REQUIRED')
   requireFact(fileHash(path.join(payload, 'bossfang')) === bossfang.sha256,
     'C14W_PACKAGED_BOSSFANG_DIGEST_MISMATCH')

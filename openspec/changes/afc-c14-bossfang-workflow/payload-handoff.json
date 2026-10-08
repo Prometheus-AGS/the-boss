@@ -30,7 +30,7 @@
     "sha256",
     "dashboard.embedded",
     "dashboard.basePath",
-    "dashboard.configurationAssets",
+    "dashboard.files",
     "uarLifecycle"
   ],
   "expectedNativeSource": null,
