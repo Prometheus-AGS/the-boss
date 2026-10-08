@@ -31,7 +31,8 @@ async function compile() {
   const { getMakeNsisPath } = builderRequire('app-builder-lib/out/toolsets/windows')
   const config = parse(fs.readFileSync(path.join(root, 'electron-builder.yml'), 'utf8'))
   const compiler = await getMakeNsisPath(config.toolsets?.nsis, config.nsis?.customNsisBinary)
-  const result = spawnSync(compiler.path, ['/WX', '/V4', source], {
+  const prefix = process.platform === 'win32' ? '/' : '-'
+  const result = spawnSync(compiler.path, [`${prefix}WX`, `${prefix}V4`, source], {
     encoding: 'utf8',
     env: { ...process.env, ...compiler.env }
   })
