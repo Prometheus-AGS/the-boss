@@ -169,15 +169,16 @@ export class DelegatedHostContext {
     if (result.runId !== runId || history.runId !== runId) throw failure('DELEGATED_APPROVAL_RUN_MISMATCH')
     if (history.records.some((record) => record.workspaceId !== this.authorization.workspaceId || record.rootRunId !== runId))
       throw failure('DELEGATED_APPROVAL_OWNER_MISMATCH')
-    const pending = result.pending
+    let pending = result.pending
     if (pending) {
       const challenge = history.records.find((record) => record.issuerId === pending.issuerId && record.challengeId === pending.challengeId)
       if (
         !pending.admissionId || !pending.issuerId || !pending.challengeId || pending.rootRunId !== runId ||
-        pending.admissionOwner !== 'paired-host' || !challenge || challenge.state !== 'pending' || !challenge.resolvable ||
+        pending.admissionOwner !== 'paired-host' || !challenge ||
         challenge.admissionId !== pending.admissionId || challenge.toolCallId !== pending.toolCallId ||
         challenge.toolName !== pending.name || challenge.admissionOwner !== 'paired-host'
       ) throw failure('DELEGATED_APPROVAL_STALE')
+      if (challenge.state !== 'pending' || !challenge.resolvable) pending = null
     }
     return { task, pending, history }
   }
@@ -202,7 +203,7 @@ export class DelegatedHostContext {
   }
 
   async inspect(taskId: string, runId: string, bossTaskId: string): Promise<BossFangDelegatedApprovalInspection> {
-    const current = await this.readApproval(taskId, runId, bossTaskId)
+    let current = await this.readApproval(taskId, runId, bossTaskId)
     let preparedEffect: BossFangDelegatedApprovalInspection['preparedEffect'] = null
     if (current.pending) {
       const pending = current.pending
@@ -216,11 +217,12 @@ export class DelegatedHostContext {
         } })
       })
       if (!response.ok) throw failure('DELEGATED_APPROVAL_STALE')
-      preparedEffect = z.object({ preparedEffect: bossFangPreparedEffectSchema }).parse(await response.json()).preparedEffect
+      preparedEffect = z.object({ preparedEffect: bossFangPreparedEffectSchema.optional() }).parse(await response.json()).preparedEffect ?? null
       const rechecked = await this.readApproval(taskId, runId, bossTaskId)
-      if (!same(rechecked.pending, pending)) throw failure('DELEGATED_APPROVAL_STALE')
+      if (!same(rechecked.pending, pending)) preparedEffect = null
+      current = rechecked
     }
-    const pending = current.pending
+    const pending = preparedEffect ? current.pending : null
     return {
       ...this.safe, bossTaskId, taskId, runId, history: current.history, preparedEffect,
       pending: pending ? {

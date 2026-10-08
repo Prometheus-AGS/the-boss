@@ -468,17 +468,18 @@ export class UarHostToolAdmission {
         inspection.callIndex !== invocation.callIndex ||
         inspection.toolName !== invocation.providerToolName ||
         !isRecord(inspection.actionDisplay) ||
-        argumentDigest(inspection.actionDisplay) !== argumentDigest(record.actionDisplay) ||
-        !['prepared', 'awaiting-human'].includes(record.state)
+        argumentDigest(inspection.actionDisplay) !== argumentDigest(record.actionDisplay)
       ) {
         this.respond(response, 409, { error: 'Prepared effect does not match its pending approval' })
         return true
       }
-      try {
-        preparedEffect = await inspectPreparedEffect(record)
-      } catch {
-        this.respond(response, 409, { error: 'Prepared effect target is unavailable' })
-        return true
+      if (['prepared', 'awaiting-human'].includes(record.state)) {
+        try {
+          preparedEffect = await inspectPreparedEffect(record)
+        } catch {
+          this.respond(response, 409, { error: 'Prepared effect target is unavailable' })
+          return true
+        }
       }
     }
     this.respond(response, 200, {
