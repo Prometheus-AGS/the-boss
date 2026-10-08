@@ -11,6 +11,7 @@ export async function operate(
   scenarioUrl = new URL('./reusable-team-operation/scenario.mjs', import.meta.url),
   scenarioConfiguration = {}
 ) {
+  const { prepareLauncher, ...scenarioOptions } = scenarioConfiguration
   const options = {}
   for (let index = 0; index < args.length; index++) {
     requireFact(
@@ -28,7 +29,7 @@ export async function operate(
   const operation = {
     schemaVersion: 1,
     kind: 'completed-feature-operation',
-    creationTaskRef: 'C15.1',
+    creationTaskRef: scenarioConfiguration.creationTaskRef ?? 'C15.1',
     status: 'blocked',
     startedAt: new Date().toISOString(),
     evidenceLevel: 'real-packaged-authoring-and-work-ui',
@@ -88,7 +89,7 @@ export async function operate(
     execFileSync('git', ['init', '--quiet', workspaceDirectory], { stdio: 'ignore' })
     const evidence = path.join(output, 'evidence.json')
     const configuration = {
-      ...scenarioConfiguration,
+      ...scenarioOptions,
       sourceRefs,
       gateway,
       evidence,
@@ -96,6 +97,10 @@ export async function operate(
       marker,
       workspaceSha256: digest(bytes)
     }
+    const prepared = prepareLauncher
+      ? await prepareLauncher({ output, app, resources, configuration })
+      : undefined
+    if (prepared?.configuration) Object.assign(configuration, prepared.configuration)
     const scenarioFile = path.join(output, 'packaged-scenario.mjs')
     fs.writeFileSync(
       scenarioFile,
@@ -104,14 +109,26 @@ export async function operate(
     )
     const { launchBoss } = await import(pathToFileURL(options.launcher).href)
     requireFact(typeof launchBoss === 'function', 'C15_MAINTAINED_LAUNCHER_UNAVAILABLE')
-    const launch = await launchBoss({
-      repository: options.boss,
-      app,
-      scenario: scenarioFile,
-      'require-scenario': true,
-      'timeout-ms': 1200000,
-      receipt: path.join(output, 'launch.json')
-    })
+    const previousEnvironment = new Map()
+    for (const [name, value] of Object.entries(prepared?.environment ?? {})) {
+      previousEnvironment.set(name, process.env[name])
+      process.env[name] = value
+    }
+    let launch
+    try {
+      launch = await launchBoss({
+        repository: options.boss,
+        app,
+        scenario: scenarioFile,
+        'require-scenario': true,
+        'timeout-ms': 1200000,
+        receipt: path.join(output, 'launch.json')
+      })
+    } finally {
+      for (const [name, value] of previousEnvironment)
+        if (value === undefined) delete process.env[name]
+        else process.env[name] = value
+    }
     const observed = fs.existsSync(evidence) ? JSON.parse(fs.readFileSync(evidence, 'utf8')) : null
     Object.assign(operation, {
       sourceRefs,

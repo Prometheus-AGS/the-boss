@@ -4,7 +4,7 @@ description: "Create, revise, package, and deploy agent-team definitions with st
 license: MIT
 compatibility: Requires Node.js 22 or newer. Git is optional for handoff snapshots. Model gateways, memory services and native harness CLIs are optional and separately configured.
 metadata:
-  version: "1.3.0"
+  version: "1.3.1"
   tags: "agents, teams, orchestration, coding"
 ---
 

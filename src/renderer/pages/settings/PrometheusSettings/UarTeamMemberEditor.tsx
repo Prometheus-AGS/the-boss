@@ -9,6 +9,7 @@ import type { uarGuidanceRoles } from '@shared/types/uarTeamGuidance'
 import type { UarAuthoredTeam, UarTeamSkillCatalog } from '@shared/types/uarTeams'
 
 type Member = UarAuthoredTeam['members'][number]
+type SkillRef = Member['skills'][number]
 const tools: Member['tools'] = [
   'filesystem__glob',
   'filesystem__ls',
@@ -17,6 +18,17 @@ const tools: Member['tools'] = [
   'filesystem__edit',
   'filesystem__write'
 ]
+
+function sameSkillRef(left: SkillRef, right: SkillRef) {
+  return (
+    left.id === right.id &&
+    left.version === right.version &&
+    left.digest === right.digest &&
+    left.entrypoint === right.entrypoint &&
+    JSON.stringify(left.config) === JSON.stringify(right.config) &&
+    JSON.stringify([...left.requiredTools].sort()) === JSON.stringify([...right.requiredTools].sort())
+  )
+}
 
 export function UarTeamMemberEditor({
   member,
@@ -161,12 +173,9 @@ export function UarTeamMemberEditor({
           </p>
         )}
         {catalog?.entries.map((entry) => {
-          const selected = member.skills.find(
-            (skill) =>
-              skill.id === entry.skillRef?.id &&
-              skill.version === entry.skillRef.version &&
-              skill.digest === entry.skillRef.digest
-          )
+          const skillRef = entry.skillRef
+          const selected = skillRef && member.skills.find((skill) => sameSkillRef(skill, skillRef))
+          const reviewed = entry.reviewedCoverage.status === 'reviewed'
           return (
             <div
               key={entry.skillId}
@@ -177,7 +186,12 @@ export function UarTeamMemberEditor({
               <label className="flex items-start gap-2">
                 <Checkbox
                   size="sm"
-                  disabled={disabled || entry.availability !== 'available' || !entry.skillRef}
+                  disabled={
+                    disabled ||
+                    entry.availability !== 'available' ||
+                    entry.reviewedCoverage.status === 'blocked' ||
+                    !entry.skillRef
+                  }
                   checked={Boolean(selected)}
                   onCheckedChange={(checked) => {
                     if (!entry.skillRef) return
@@ -185,7 +199,7 @@ export function UarTeamMemberEditor({
                       ...member,
                       skills:
                         checked === true
-                          ? [...member.skills, entry.skillRef]
+                          ? [...member.skills, { ...entry.skillRef, required: reviewed && entry.skillRef.required }]
                           : member.skills.filter((skill) => skill !== selected)
                     })
                   }}
@@ -200,6 +214,23 @@ export function UarTeamMemberEditor({
                   {entry.reasons.map((reason) => tr('reason.' + reason)).join(' · ')}
                 </p>
               )}
+              <p
+                className={
+                  reviewed
+                    ? 'text-success-subtle-foreground'
+                    : entry.reviewedCoverage.status === 'blocked'
+                      ? 'text-error-subtle-foreground'
+                      : 'text-warning-subtle-foreground'
+                }
+                role="status"
+                data-skill-coverage={entry.reviewedCoverage.status}>
+                {tr('reviewedSkill.' + entry.reviewedCoverage.status)}
+              </p>
+              {!reviewed && (
+                <p className="text-muted-foreground">
+                  {tr('reviewedSkill.' + entry.reviewedCoverage.reason)}
+                </p>
+              )}
               {selected && (
                 <div className="ms-6 space-y-1">
                   <p className="break-all text-muted-foreground">{selected.digest}</p>
@@ -207,7 +238,7 @@ export function UarTeamMemberEditor({
                     <Checkbox
                       size="sm"
                       checked={selected.required}
-                      disabled={disabled}
+                      disabled={disabled || (!reviewed && !selected.required)}
                       onCheckedChange={(checked) =>
                         onChange({
                           ...member,
@@ -237,7 +268,7 @@ export function UarTeamMemberEditor({
           .filter(
             (skill) =>
               !catalog?.entries.some(
-                (entry) => entry.skillRef?.id === skill.id && entry.skillRef.digest === skill.digest
+                (entry) => entry.skillRef && sameSkillRef(entry.skillRef, skill)
               )
           )
           .map((skill) => (

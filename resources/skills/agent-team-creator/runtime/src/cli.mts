@@ -8,6 +8,7 @@ import { installProject } from './project-install.mjs';
 import { bindUiRoles } from './ui-bindings.mjs';
 import { readState, initState, mutateState, mutateStateAsync, taskAction, completeKbdTask } from './state.mjs';
 import { createHandoff, acceptHandoff } from './handoff.mjs';
+import { inspectHandoff } from './handoff-provenance.mjs';
 import { discoverModels, selectModel } from './models.mjs';
 import { queueMemory, publishMemory } from './memory.mjs';
 import { dispatchUarAuthoring, isUarAuthoringCommand, uarAuthoringCommands } from './uar-package/commands.mjs';
@@ -51,6 +52,7 @@ async function dispatch(command: string, input: ObjectValue): Promise<unknown> {
     case 'handoff-create': return mutateState(stateFile(input), revision(input), state => {
       createHandoff(state, object(input.handoff, 'handoff'), text(input.cwd, 'cwd'));
     });
+    case 'handoff-inspect': return inspectHandoff(readState(stateFile(input)), text(input.id, 'handoff id'), text(input.cwd, 'cwd'), input);
     case 'handoff-accept': return mutateState(stateFile(input), revision(input), state => {
       const destination = object(input.destination, 'destination');
       const harness = target(destination.harness);
@@ -77,7 +79,7 @@ async function dispatch(command: string, input: ObjectValue): Promise<unknown> {
   }
 }
 
-const commands = ['guide','validate','init','status','team-update','export','install-project','task','complete-kbd','handoff-create','handoff-accept','models-discover','models-select','memory-queue','memory-publish',...uarAuthoringCommands,'uar-capabilities','uar-package-preflight','uar-package-install','uar-package-status','uar-binding-preflight','uar-binding-install','uar-binding-status','uar-activate'];
+const commands = ['guide','validate','init','status','team-update','export','install-project','task','complete-kbd','handoff-create','handoff-inspect','handoff-accept','models-discover','models-select','memory-queue','memory-publish',...uarAuthoringCommands,'uar-capabilities','uar-package-preflight','uar-package-install','uar-package-status','uar-binding-preflight','uar-binding-install','uar-binding-status','uar-activate'];
 async function main(): Promise<void> {
   if (Number(process.versions.node.split('.')[0]) < 22) throw Error('Node.js 22 or newer is required');
   const [command, ...args] = process.argv.slice(2);

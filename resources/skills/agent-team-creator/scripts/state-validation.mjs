@@ -1,5 +1,6 @@
 import { harnesses } from './types.mjs';
 import { validateTeam } from './validation.mjs';
+import { validateProvenance } from './handoff-provenance-validation.mjs';
 export function object(value, label) {
     if (!value || typeof value !== 'object' || Array.isArray(value))
         throw new Error(`${label} must be an object`);
@@ -147,6 +148,8 @@ export function validateState(value) {
         timestamp(handoff.createdAt, 'handoff.createdAt');
         if (handoff.acceptedAt !== undefined)
             timestamp(handoff.acceptedAt, 'handoff.acceptedAt');
+        if (handoff.provenance !== undefined)
+            validateProvenance(handoff.provenance);
     }
     for (const memory of uniqueIds(raw.outbox, 'memory')) {
         text(memory.content, 'memory.content');

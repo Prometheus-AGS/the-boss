@@ -16,7 +16,7 @@ The harness owns execution. This skill owns inspectable delivery metadata and pr
 
 Read project instructions and current work first. Reuse existing choices. Configure iteration duration, build and functional-run commands, human review, publication frequency and explicit optimization bounds in a profile. See [profile and commands](references/profile.md).
 
-For refreshing an installed skill pack from merged `main` at a checkpoint, use `scripts/refresh-skill-pack.sh` (profile inputs, odd/even parity from `state.json`, fail-loud); see [the refresh procedure](references/profile.md#skill-pack-refresh-procedure).
+The installed skill-pack refresh procedure is UNAVAILABLE IN THIS PROJECT: no refresh scripts ship in this mini payload, and installed/service refresh is out of scope. See [unavailable capabilities](references/profile.md#unavailable-capabilities); tracked as a follow-up in .prometheus/decisions.md and the dated mini adaptation record under .prometheus/.
 
 Invoke `node <this-skill>/scripts/cadence.mjs <command> --root <state-directory> --input <request.json>`. The default state directory is `.prometheus/cadence` in the current project. Use a stable `--command-id` when retrying a mutation.
 

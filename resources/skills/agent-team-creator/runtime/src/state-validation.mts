@@ -1,5 +1,6 @@
 import { harnesses, type Harness, type ObjectValue, type TeamState } from './types.mjs';
 import { validateTeam } from './validation.mjs';
+import { validateProvenance } from './handoff-provenance-validation.mjs';
 
 export function object(value: unknown, label: string): ObjectValue {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label} must be an object`);
@@ -123,6 +124,7 @@ export function validateState(value: unknown): TeamState {
     if (git.dirty !== null && typeof git.dirty !== 'boolean') throw new Error('handoff.git.dirty must be boolean or null');
     timestamp(handoff.createdAt, 'handoff.createdAt');
     if (handoff.acceptedAt !== undefined) timestamp(handoff.acceptedAt, 'handoff.acceptedAt');
+    if (handoff.provenance !== undefined) validateProvenance(handoff.provenance);
   }
   for (const memory of uniqueIds(raw.outbox, 'memory')) {
     text(memory.content, 'memory.content');

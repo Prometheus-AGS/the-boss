@@ -1,6 +1,6 @@
 ---
 name: kbd-bottleneck-detector
-description: Evaluate or repair canonical KBD task and phase boundaries. Use when progress receipts, projections, or build gates may be stale, or when the user mentions "bottleneck detector". Do NOT use for creating or advancing phases (see kbd-new-child and kbd-next-phase).
+description: Evaluate or repair canonical KBD task, change and phase boundaries. Use when progress receipts, projections, or build gates may be stale, or when the user mentions "bottleneck detector". Do NOT use for creating or advancing phases (see kbd-new-child and kbd-next-phase).
 ---
 
 # /kbd-bottleneck-detector

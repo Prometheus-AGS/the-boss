@@ -14,6 +14,11 @@ import {
 } from './uarCodingTeamPackage'
 import { rawBinding, scopedRequest } from './UarDurableAdministrationAdapter'
 import { readAuthoredTeamRecords } from './uarTeamAuthoringStore'
+import {
+  reviewedSkillCoverageEntries,
+  sameUarTeamSkillRef,
+  UAR_REVIEWED_SKILL_COVERAGE_EXTENSION
+} from './UarTeamSkillCatalogAdapter'
 
 /** A discovered definition is not host authority. Resolve the exact installed private binding and authored bytes. */
 export async function resolveTeamHostScope(team: UarTeamInstance, generation: number) {
@@ -64,6 +69,17 @@ export async function resolveTeamHostScope(team: UarTeamInstance, generation: nu
     (item) => same(item.definition, team.definition) && same(item.package, team.package)
   )
   if (!record) throw new Error('TEAM_SCOPE_DENIED')
+  const coverageExtension = (binding.document.extensions as Record<string, unknown> | undefined)?.[
+    UAR_REVIEWED_SKILL_COVERAGE_EXTENSION
+  ]
+  const coverage = coverageExtension ? reviewedSkillCoverageEntries(coverageExtension) : undefined
+  for (const member of record.team.members)
+    for (const skill of member.skills) {
+      if (coverage && skill.required && !coverage.some((entry) => sameUarTeamSkillRef(entry.skillRef, skill)))
+        throw new Error('TEAM_SCOPE_DENIED')
+      if (skill.requiredTools.some((tool) => !member.tools.includes(tool as (typeof member.tools)[number])))
+        throw new Error('TEAM_SCOPE_DENIED')
+    }
   for (const member of team.members) {
     const source = record.compiled.files['agents/' + member.role + '.json']
     if (!source) throw new Error('TEAM_SCOPE_DENIED')

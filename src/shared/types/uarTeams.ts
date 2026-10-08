@@ -484,5 +484,12 @@ export interface UarTeamSkillCatalog {
     availability: 'available' | 'unavailable'
     reasons: string[]
     skillRef: UarTeamSkillRef | null
+    reviewedCoverage: {
+      status: 'reviewed' | 'unreviewed' | 'blocked'
+      reason:
+        | 'verified-current-closure'
+        | 'trusted-source-unavailable'
+        | 'reviewed-closure-verification-failed'
+    }
   }>
 }

@@ -77,6 +77,50 @@ export interface Handoff {
   createdAt: string;
   acceptedAt?: string;
   prompt: string;
+  provenance?: HandoffProvenance;
+}
+export interface HandoffFileIdentity {
+  path: string;
+  observation: 'observed' | 'missing' | 'unknown';
+  bytes: number | null;
+  sha256: string | null;
+}
+export interface HandoffCanonicalIdentity {
+  path: string;
+  identity: KbdIdentity | null;
+  observation: 'observed' | 'unknown';
+  revision: number | null;
+  eventId: string | null;
+  taskStatus: string | null;
+  receiptSha256: string | null;
+  reason: string | null;
+}
+export interface HandoffMemoryIdentity {
+  id: string;
+  status: 'queued' | 'published' | null;
+  observation: 'observed' | 'unknown';
+  projectId: string | null;
+  teamId: string;
+  scope: string | null;
+  contentSha256: string | null;
+  provenanceSha256: string | null;
+  kbd: KbdIdentity | null;
+  publication: {
+    outcome: string | null;
+    publicationKey: string | null;
+    remoteIdSha256: string | null;
+    receiptSha256: string;
+    uncertain: boolean | null;
+  } | null;
+}
+export interface HandoffProvenance {
+  schemaVersion: 1;
+  capturedAt: string;
+  canonical: HandoffCanonicalIdentity;
+  sources: HandoffFileIdentity[];
+  evidence: HandoffFileIdentity[];
+  karpathy: HandoffFileIdentity[];
+  memory: HandoffMemoryIdentity[];
 }
 export interface MemoryEntry {
   id: string;

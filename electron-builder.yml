@@ -209,16 +209,16 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.16 - Reviewed team role guidance
-
-    - [Teams] Import creator role proposals and explicitly map them to existing coding-team members.
-    - [Configuration] Preserve manual models and resources, original guidance and immutable team revisions.
-    - [Policy] Show requested model policies without claiming unknown strength-tier compliance.
-
+    The Boss 2.2.18 - Reviewed team skills
+    
+    - [Teams] Select reviewed skills from the packaged mini payload and trusted signed full-pack generations.
+    - [Integrity] Refuse changed skill dependencies and required tools outside the selected member scope.
+    - [Handoff] Preserve source and evidence hashes without transferring credentials or bypassing tool approvals.
+    
     <!--LANG:zh-CN-->
-    The Boss 2.2.16 - 已审阅的团队角色建议
-
-    - [团队] 导入创建工具的角色建议，并明确映射到现有编码团队成员。
-    - [配置] 保留手动选择的模型和资源、原始建议及不可变的团队修订。
-    - [策略] 显示所请求的模型策略，不宣称未知的能力等级已满足要求。
+    The Boss 2.2.18 - 已审阅的团队技能
+    
+    - [团队] 从随应用提供的精简技能包和可信的已签名完整技能包中选择已审阅技能。
+    - [完整性] 拒绝依赖文件已更改的技能，以及超出所选成员权限范围的必需工具。
+    - [交接] 保留源文件和证据的哈希，不转移凭据，也不绕过工具审批。
     <!--LANG:END-->
