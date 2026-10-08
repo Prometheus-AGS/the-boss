@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
+import { isDeepStrictEqual } from 'node:util'
 
 import { click, fill, choose, ipc, openAuthoring, openWork, setup, selectTeam } from './scenario.mjs'
 import { digest, requireFact, route, same, waitFor, write } from './io.mjs'
@@ -37,6 +38,8 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
   try {
     requireFact(targets.some((target) => target.type === 'page' && target.url.includes('/windows/main/index.html') && !/^https?:/i.test(target.url)), 'C15_PACKAGED_MAIN_TARGET_UNAVAILABLE')
     requireFact(mappings.every((mapping) => roles.includes(mapping.memberRole)), 'C15_GUIDANCE_EXISTING_TEMPLATE_MAPPING_REQUIRED')
+    stage = 'fresh-profile-onboarding'
+    await openWork(evaluate, signal)
     stage = 'configured-manual-model'
     const selected = await setup(evaluate, configuration)
     const authoring = () => ipc(evaluate, route('authoring'), {})
@@ -78,7 +81,7 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     await click(evaluate, signal, '[data-ui~="team-authoring-guidance-apply"]')
     await click(evaluate, signal, '[data-ui~="team-authoring-save"]')
     const guided = await waitFor(signal, async () => (await authoring()).revisions.find((item) => item.team.id === first.team.id && item.revision === first.revision + 1), 'C15_GUIDANCE_APPLIED_SAVE_UNAVAILABLE')
-    requireFact(guided.team.reviewedGuidance?.source === 'agent-team-creator/guide' && guided.team.reviewedGuidance.sourceJson === configuration.guidanceSource && guided.team.reviewedGuidance.sourceDigest === evidence.guidanceSourceDigest && guided.team.reviewedGuidance.digest === imported.digest && same(guided.team.reviewedGuidance.result, result) && same(guided.team.guidanceMappings, mappings), 'C15_GUIDANCE_PROVENANCE_NOT_PERSISTED')
+    requireFact(guided.team.reviewedGuidance?.source === 'agent-team-creator/guide' && guided.team.reviewedGuidance.sourceJson === configuration.guidanceSource && guided.team.reviewedGuidance.sourceDigest === evidence.guidanceSourceDigest && guided.team.reviewedGuidance.digest === imported.digest && isDeepStrictEqual(guided.team.reviewedGuidance.result, result) && same(guided.team.guidanceMappings, mappings), 'C15_GUIDANCE_PROVENANCE_NOT_PERSISTED')
     for (const member of guided.team.members) {
       const prior = first.team.members.find((item) => item.role === member.role)
       const mapping = mappings.find((item) => item.memberRole === member.role)
