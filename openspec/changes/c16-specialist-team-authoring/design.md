@@ -38,4 +38,12 @@ Compiled coordinator guidance now requires opaque references to be copied exactl
 
 The operation records incomplete coordinator termination immediately instead of waiting fifteen minutes for work that will not be delegated. Preserve the cancelled failed attempt and original delivery clock, rebuild the changed production package, and repeat only the affected author/deploy/run/reopen procedure.
 
-The generic openspec-propose planning pause does not revoke the explicitly approved implementation assignment. The task's Assisted-by-only signed commits supersede CLAUDE.md's DCO signoff instruction. Compass has no exact compileAuthoredTeam node and incomplete published coverage; direct source establishes the affected path.
+## Observed approval-observation repair — 2026-10-08
+
+The packaged operation at Boss `74f08137152204a4bcf7267ff54bf9ecb52bca92` completed five specialists and reached code review. Approval clearance grew from four seconds to twenty-five seconds as history grew. Its code-review read was clicked at 19:21:11Z, but the operation stopped after its fifteen-second observation deadline. Reopening the same isolated profile established that this exact read approval was durably approved, pending approvals were empty, and no UI error was present. The full approval read took 8,659 milliseconds after reopening. This is an observation failure, not evidence of rejected authorization.
+
+The approval component now permits only one refresh in flight, matching the existing execution component. The operation allows sixty seconds to observe the exact approval's disappearance, retaining its immutable invocation and scope checks. No approval authority, protocol, model, schema, locale text or previously stored definition changes. Retain the failed receipt, rebuild the complete package and repeat only the affected packaged author/deploy/run/reopen operation.
+
+The separate native history path still reads all owner effect evidence for every attempt before filtering by run; growing team histories can therefore be expensive. A future scoped native query must preserve owner/run authorization and recovery reconciliation. This bounded polling repair does not claim to fix that backend cost.
+
+The generic openspec-propose planning pause does not revoke the explicitly approved implementation assignment. The task's Assisted-by-only signed commits supersede CLAUDE.md's DCO signoff instruction. Compass search on this checkout reports a missing graph; direct source establishes the affected path.

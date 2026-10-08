@@ -216,7 +216,7 @@ export function mixedTeamApprovalOperator({ evaluate, signal, selector, instance
             receipt.transientReads.push({ ...failure, observedAt: new Date().toISOString() })
             return false
           }
-        }, 'C15_APPROVAL_NOT_RESOLVED_AFTER_CLICK', 15000)
+        }, 'C15_APPROVAL_NOT_RESOLVED_AFTER_CLICK', 60000)
         receipt.pendingClearedAt = new Date().toISOString()
       }
     }
