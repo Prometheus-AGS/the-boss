@@ -22,7 +22,7 @@ function readSource(source: string): unknown {
   }
 }
 
-async function credentialFree(value: unknown) {
+export async function assertUarTeamArtifactCredentialFree(value: unknown) {
   const url = pathToFileURL(
     toAsarUnpackedPath(
       application.getPath('feature.prometheus.pack.builtin', 'skills/agent-team-creator/scripts/models-http.mjs')
@@ -41,7 +41,7 @@ async function credentialFree(value: unknown) {
 }
 
 export async function assertReviewedModelPolicy(policy: UarReviewedModelPolicy) {
-  await credentialFree(policy)
+  await assertUarTeamArtifactCredentialFree(policy)
   const sourceResult = uarReviewedModelResultSchema.safeParse(readSource(policy.sourceJson))
   if (
     !sourceResult.success ||
@@ -73,7 +73,7 @@ export function reviewedModelBindingTarget(policy: UarReviewedModelPolicy): { pr
 /** Bridge an operator-reviewed skill result; selection and inference remain in their existing owners. */
 export async function reviewUarTeamModelPolicy(source: string): Promise<UarReviewedModelPolicy> {
   const raw = readSource(source)
-  await credentialFree(raw)
+  await assertUarTeamArtifactCredentialFree(raw)
   const parsed = uarReviewedModelResultSchema.safeParse(raw)
   if (!parsed.success) throw new Error('UAR_TEAM_MODEL_POLICY_RESULT_INVALID')
   const result = parsed.data

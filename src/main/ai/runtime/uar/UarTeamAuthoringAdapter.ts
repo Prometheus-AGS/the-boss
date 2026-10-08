@@ -20,6 +20,7 @@ import { compileAuthoredTeam, teamAuthoringTemplates } from './uarTeamAuthoringP
 import { readAuthoredTeamRecords, projectAuthoredTeam, saveAuthoredTeamRecord } from './uarTeamAuthoringStore'
 import { configureTeamModel } from './uarTeamModelSetup'
 import { assertReviewedModelPolicy, reviewedModelBindingTarget } from './uarTeamReviewedModelPolicy'
+import { assertUarTeamGuidance } from './uarTeamGuidance'
 import { planningState } from './UarTeamsAdministrationAdapter'
 import { resolveAuthoredTeamSkills } from './UarTeamSkillCatalogAdapter'
 
@@ -48,6 +49,7 @@ export async function selectUarTeamKnowledge(workspaceId: string): Promise<strin
 
 export async function saveUarTeamAuthoring(input: { team: UarAuthoredTeam; expectedRevision: number }) {
   const team = uarAuthoredTeamSchema.parse(input.team)
+  if (team.reviewedGuidance) await assertUarTeamGuidance(team.reviewedGuidance)
   for (const member of team.members) {
     if (member.reviewedModelPolicy) await assertReviewedModelPolicy(member.reviewedModelPolicy)
     if (member.knowledge.length && !member.tools.includes('filesystem__read'))

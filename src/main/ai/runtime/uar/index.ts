@@ -117,6 +117,7 @@ export {
   selectUarTeamKnowledge
 } from './UarTeamAuthoringAdapter'
 export { reviewUarTeamModelPolicy } from './uarTeamReviewedModelPolicy'
+export { reviewUarTeamGuidance } from './uarTeamGuidance'
 export { readUarTeamSkillCatalog } from './UarTeamSkillCatalogAdapter'
 export { submitUarTeamTask, readUarTeamApprovals, decideUarTeamApproval } from './UarTeamWorkAdapter'
 

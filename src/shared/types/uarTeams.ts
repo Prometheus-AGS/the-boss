@@ -1,6 +1,7 @@
 import * as z from 'zod'
 
 import type { UarBindingPosture, UarBindingPreflightDiagnostic } from './uarBindingPosture'
+import { uarGuidanceMappingSchema, uarGuidanceRoles, uarReviewedGuidanceSchema } from './uarTeamGuidance'
 import { uarReviewedModelPolicySchema } from './uarTeamModelPolicy'
 import type {
   UarTeamCommandReceipt,
@@ -368,6 +369,8 @@ export const uarAuthoredTeamSchema = z
     template: z.enum(['coding', 'product-design']),
     purpose: z.string().trim().min(1).max(4096),
     instructions: z.string().max(16384),
+    reviewedGuidance: uarReviewedGuidanceSchema.optional(),
+    guidanceMappings: z.array(uarGuidanceMappingSchema).optional(),
     members: z
       .array(
         z
@@ -405,6 +408,27 @@ export const uarAuthoredTeamSchema = z
   })
   .strict()
   .superRefine((value, context) => {
+    const mappings = value.guidanceMappings ?? []
+    const proposals = value.reviewedGuidance ? uarGuidanceRoles(value.reviewedGuidance) : []
+    if (
+      mappings.length &&
+      (
+        !value.reviewedGuidance?.result.ready ||
+        new Set(mappings.map((mapping) => mapping.sourceRole)).size !== mappings.length ||
+        new Set(mappings.map((mapping) => mapping.memberRole)).size !== mappings.length ||
+        mappings.some(
+          (mapping) =>
+            mapping.memberRole === 'coordinator' ||
+            !proposals.some((proposal) => proposal.id === mapping.sourceRole) ||
+            !value.members.some((member) => member.role === mapping.memberRole)
+        )
+      )
+    )
+      context.addIssue({
+        code: 'custom',
+        path: ['guidanceMappings'],
+        message: 'Guidance requires unique explicit non-coordinator mappings from a ready result'
+      })
     if (
       value.members.filter((member) => member.role === 'coordinator').length !== 1 ||
       new Set(value.members.map((member) => member.role)).size !== value.members.length

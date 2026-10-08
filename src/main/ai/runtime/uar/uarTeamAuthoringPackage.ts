@@ -131,6 +131,13 @@ export async function compileAuthoredTeam(team: UarAuthoredTeam, revision: numbe
               instructions,
               skills: member.skills,
               tools: member.tools,
+              ...(team.reviewedGuidance
+                ? {
+                    reviewedGuidance: team.reviewedGuidance.digest,
+                    reviewedGuidanceSource: team.reviewedGuidance.sourceDigest,
+                    guidanceMappings: team.guidanceMappings ?? []
+                  }
+                : {}),
               ...(member.reviewedModelPolicy
                 ? {
                     reviewedModelPolicy: member.reviewedModelPolicy.digest,
