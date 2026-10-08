@@ -46,7 +46,7 @@ export async function createAndExerciseDisposableFullGeneration({
   requireFact(descendant(isolated, output) && !descendant(output, verifier),
     'C15_IMMUTABLE_EXTERNAL_VERIFIER_REQUIRED')
   const home = path.join(output, 'home')
-  const pluginRoot = path.join(output, 'plugin-root')
+  const pluginRoot = path.join(home, '.prometheus', 'plugins', 'prometheus-skill-pack')
   const trustStore = path.join(pluginRoot, 'trust', 'allowed-signers.json')
   fs.mkdirSync(home, { mode: 0o700 })
   signal.throwIfAborted()

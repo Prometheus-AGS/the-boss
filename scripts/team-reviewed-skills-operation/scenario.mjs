@@ -5,7 +5,6 @@ import { mixedTeamApprovalOperator } from '../reusable-team-operation/approvals.
 import { attemptFailureEvidence } from '../reusable-team-operation/attempt-diagnostics.mjs'
 import { digest, requireFact, route, same, waitFor, write } from '../reusable-team-operation/io.mjs'
 import { click, fill, choose, ipc, openAuthoring, openWork, selectTeam, setup } from '../reusable-team-operation/scenario.mjs'
-import { createAndExerciseDisposableFullGeneration } from './full-generation.mjs'
 import { runCoverageScenarios } from './runtime-scenarios.mjs'
 
 const roles = ['coordinator', 'worker', 'reviewer']
@@ -45,6 +44,31 @@ function reviewedMiniSkill(catalog, packRoot) {
   return skill
 }
 
+function signedGenerationRoot(home) {
+  const pluginRoot = path.join(home, '.prometheus', 'plugins', 'prometheus-skill-pack')
+  const pointer = fs.readFileSync(path.join(pluginRoot, 'pointers', 'current'), 'utf8').trim()
+  requireFact(/^generations\/[a-f0-9]{64}$/.test(pointer), 'C15_FULL_GENERATION_POINTER_UNAVAILABLE')
+  const root = path.join(pluginRoot, pointer)
+  requireFact(fs.statSync(root).isDirectory(), 'C15_FULL_GENERATION_UNAVAILABLE')
+  return root
+}
+
+function reviewedFullSkill(catalog, miniRoot, fullRoot) {
+  const mini = JSON.parse(fs.readFileSync(path.join(miniRoot, 'reviewed-skill-closures.json'), 'utf8'))
+  const full = JSON.parse(fs.readFileSync(path.join(fullRoot, 'reviewed-skill-closures.json'), 'utf8'))
+  requireFact(full.schemaVersion === 'prometheus-reviewed-skill-closures-v1' &&
+    full.inventoryDigest !== mini.inventoryDigest, 'C15_DISTINCT_FULL_SKILL_INVENTORY_UNAVAILABLE')
+  const miniArtifacts = new Set(mini.skills.map((item) => item.identity.artifactDigest))
+  const skill = catalog.entries.find((entry) => {
+    const ref = entry.skillRef
+    return entry.availability === 'available' && entry.reviewedCoverage?.status === 'reviewed' && ref?.required === true &&
+      ref.requiredTools.every((tool) => readOnly.includes(tool)) &&
+      full.skills.some((item) => item.identity.artifactDigest === ref.digest) && !miniArtifacts.has(ref.digest)
+  })
+  requireFact(skill, 'C15_REQUIRED_REVIEWED_FULL_READ_ONLY_SKILL_UNAVAILABLE')
+  return { skill, inventoryDigest: full.inventoryDigest }
+}
+
 function artifactFor(attempt, artifacts, marker) {
   return artifacts.find((artifact) => artifact.attemptId === attempt.id && artifact.memberId === attempt.memberId &&
     artifact.taskId === attempt.taskId && JSON.stringify(artifact.content).includes(marker))
@@ -75,6 +99,9 @@ export async function scenario({ evaluate, signal, targets, trustedRequest }, co
     const app = await ipc(evaluate, 'app.get_info', {})
     const { isolatedUserData, packRoot } = disposablePackRoot(app.appDataPath)
     requireFact(app.resourcesPath === configuration.appResources, 'C15_REVIEWED_SKILL_APP_RESOURCE_IDENTITY_MISMATCH')
+    requireFact(app.homePath === configuration.fullHome && configuration.preparedFullGeneration?.complete === true,
+      'C15_PREPARED_FULL_HOME_NOT_USED_BY_PACKAGED_APP')
+    const fullGenerationRoot = signedGenerationRoot(app.homePath)
     const snapshot = () => ipc(evaluate, route('snapshot'), { workspaceId: selected.workspaceId })
     const authoring = () => ipc(evaluate, route('authoring'), {})
     const initial = await snapshot()
@@ -85,21 +112,9 @@ export async function scenario({ evaluate, signal, targets, trustedRequest }, co
     evidence.credentialReference = configuration.gateway.credentialEnv
     evidence.isolatedUserData = isolatedUserData
     evidence.packRoot = packRoot
-
-    stage = 'disposable-signed-full-generation'
-    const fullGenerationRoot = path.join(isolatedUserData, 'c15-full-generation')
-    await createAndExerciseDisposableFullGeneration({
-      executable: process.execPath,
-      fullSourceRoot: configuration.fullSourceRoot,
-      outputRoot: fullGenerationRoot,
-      isolatedUserData,
-      verifierScript: path.join(configuration.appResources, 'app.asar.unpacked', 'resources', 'prometheus-skills-mini',
-        'reviewed-verifier', 'scripts', 'verify-reviewed-skill-coverage.js'),
-      signal,
-      evidence
-    })
-    requireFact(evidence.fullGeneration?.complete === true, 'C15_DISPOSABLE_FULL_GENERATION_INCOMPLETE')
-    evidence.checks.push('isolated-signed-full-generation-and-target-receipt-verification-exercised')
+    evidence.fullGeneration = configuration.preparedFullGeneration
+    evidence.fullGenerationRoot = fullGenerationRoot
+    evidence.checks.push('prelaunch-isolated-signed-full-generation-used-as-packaged-application-home')
 
     stage = 'author-required-reviewed-mini-skill'
     await openAuthoring(evaluate, signal, selected.workspaceId)
@@ -115,17 +130,24 @@ export async function scenario({ evaluate, signal, targets, trustedRequest }, co
         '"][data-model-id="' + selected.model.modelId + '"]')
       if (role !== 'coordinator') await setReadOnlyTools(evaluate, signal, role)
     }
-    const skill = reviewedMiniSkill(await ipc(evaluate, route('skills'), {}), packRoot)
-    const skillSelector = memberSelector('reviewer') + ' [data-ui~="team-authoring-skill"][data-skill-digest="' +
-      skill.skillRef.digest + '"] [role="checkbox"]'
-    await click(evaluate, signal, skillSelector)
+    const catalog = await ipc(evaluate, route('skills'), {})
+    const miniSkill = reviewedMiniSkill(catalog, packRoot)
+    const fullSkill = reviewedFullSkill(catalog, packRoot, fullGenerationRoot)
+    await click(evaluate, signal, memberSelector('reviewer') + ' [data-ui~="team-authoring-skill"][data-skill-digest="' +
+      miniSkill.skillRef.digest + '"] [role="checkbox"]')
+    await click(evaluate, signal, memberSelector('worker') + ' [data-ui~="team-authoring-skill"][data-skill-digest="' +
+      fullSkill.skill.skillRef.digest + '"] [role="checkbox"]')
     await click(evaluate, signal, '[data-ui~="team-authoring-save"]')
     const revision = await waitFor(signal, async () => (await authoring()).revisions.find((item) =>
       item.team.title === configuration.marker), 'C15_REVIEWED_SKILL_REVISION_UNAVAILABLE')
     const reviewer = revision.team.members.find((member) => member.role === 'reviewer')
-    requireFact(reviewer?.skills.some((item) => item.required && same(item, skill.skillRef)) &&
-      reviewer.tools.every((tool) => readOnly.includes(tool)), 'C15_REQUIRED_REVIEWED_SKILL_NOT_PERSISTED')
-    evidence.selectedSkill = skill.skillRef
+    const worker = revision.team.members.find((member) => member.role === 'worker')
+    requireFact(reviewer?.skills.some((item) => item.required && same(item, miniSkill.skillRef)) &&
+      worker?.skills.some((item) => item.required && same(item, fullSkill.skill.skillRef)) &&
+      reviewer.tools.every((tool) => readOnly.includes(tool)) && worker.tools.every((tool) => readOnly.includes(tool)),
+    'C15_REQUIRED_REVIEWED_SKILLS_NOT_PERSISTED')
+    evidence.selectedSkills = { mini: miniSkill.skillRef, full: fullSkill.skill.skillRef,
+      fullInventoryDigest: fullSkill.inventoryDigest }
     evidence.savedRevision = { teamId: revision.team.id, revision: revision.revision, definition: revision.definition,
       package: revision.package }
 
@@ -134,7 +156,7 @@ export async function scenario({ evaluate, signal, targets, trustedRequest }, co
     const binding = await waitFor(signal, async () => (await snapshot()).bindings.find((item) =>
       item.activationSupported && same(item.package, revision.package)), 'C15_REVIEWED_SKILL_DEPLOYMENT_UNAVAILABLE', 60000)
     evidence.binding = binding
-    evidence.checks.push('required-reviewed-mini-skill-selected-for-read-only-reviewer-and-exact-revision-deployed')
+    evidence.checks.push('required-reviewed-mini-and-full-skills-selected-for-read-only-members-and-exact-revision-deployed')
 
     stage = 'reviewed-closure-and-host-scope-refusals'
     await runCoverageScenarios({ evaluate, signal, workspaceId: selected.workspaceId, revision, binding, packRoot,

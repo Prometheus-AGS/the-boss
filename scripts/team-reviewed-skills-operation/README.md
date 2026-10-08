@@ -4,6 +4,15 @@ These helpers prepare Delivery11's completed-boundary operation. They have not
 been executed merely because their source exists. Root owns the entrypoint,
 packaged launcher, UI scenario, application receipt and final acceptance.
 
+The operation prepares a disposable signed full generation before launching the
+packaged application. Its plugin store is under the same
+`HOME/.prometheus/plugins/prometheus-skill-pack` path that the application
+discovers, and that disposable home is passed only to the child application.
+The rendered coding team then selects required reviewed, read-only mini and
+full-only skills from the real catalog and deploys them together. The full
+generation is signed and verified through the immutable packaged verifier;
+this local disposable signer does not represent an operator trust store.
+
 `runCoverageScenarios` receives the real renderer `evaluate`, cancellation
 `signal`, `workspaceId`, saved authored `revision`, deployed public `binding`,
 `packRoot`, `isolatedUserData`, and the caller's mutable `evidence` object.
@@ -40,8 +49,8 @@ Without the callback this subcase is explicitly `not-exercised` and
 the completed catalog/deployment and required-tool IPC subset separately;
 it does not upgrade unavailable native preflight evidence to a pass.
 
-`runFullSignatureScenarios` is a separate optional helper for an **already
-installed, disposable signed full generation**. Supply trusted `executable` and
+`runFullSignatureScenarios` is a helper for the **pre-launch installed,
+disposable signed full generation**. Supply trusted `executable` and
 external packaged verifier `script`, plus isolated `pluginRoot`, `home`,
 `trustStore`, `isolatedUserData`, `signal` and `evidence`. The ordinary installed
 full verifier must pass first. The helper alters the generation signature and
@@ -50,8 +59,9 @@ restores exact bytes, and requires the original generation to verify again.
 It does not manufacture a signer, trust store, target receipts or installed
 generation, and it must never run against the operator's actual installation.
 
-These checks do not run skill scripts or certify effect approval. Root's live
-team operation must separately observe selected-skill execution, unchanged
-existing-run identity and the existing approval path. Delivery10 handoff evidence
-is reused. Missing trusted host access, an isolated signed generation, or a
-native Windows environment remains missing evidence, never a simulated pass.
+The private binding preflight callback is not exposed by the maintained launcher,
+so its forged-claim subcase remains explicitly `not-exercised`; the operation
+records coverage-core evidence separately. These checks do not run skill scripts
+or certify effect approval. The live Work operation separately observes selected
+skill execution and the existing approval path. Delivery10 handoff evidence is
+reused. Native Windows acceptance remains missing evidence.

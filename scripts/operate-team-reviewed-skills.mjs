@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { operate as operateTeam } from './operate-reusable-team.mjs'
 import { digest, requireFact } from './reusable-team-operation/io.mjs'
+import { createAndExerciseDisposableFullGeneration } from './team-reviewed-skills-operation/full-generation.mjs'
 
 export async function operate(args = process.argv.slice(2)) {
   const values = [...args]
@@ -21,6 +22,26 @@ export async function operate(args = process.argv.slice(2)) {
     creationTaskRef: 'C15.3',
     fullSourceRoot: source,
     appResources,
+    prepareLauncher: async ({ output, resources }) => {
+      const fullGenerationRoot = path.join(output, 'c15-full-generation')
+      const fullHome = path.join(fullGenerationRoot, 'home')
+      const preparation = {}
+      const preparedFullGeneration = await createAndExerciseDisposableFullGeneration({
+        executable: process.execPath,
+        fullSourceRoot: source,
+        outputRoot: fullGenerationRoot,
+        isolatedUserData: output,
+        verifierScript: path.join(resources, 'app.asar.unpacked', 'resources', 'prometheus-skills-mini',
+          'reviewed-verifier', 'scripts', 'verify-reviewed-skill-coverage.js'),
+        signal: new AbortController().signal,
+        evidence: preparation
+      })
+      requireFact(preparedFullGeneration.complete === true, 'C15_PRELAUNCH_FULL_GENERATION_INCOMPLETE')
+      return {
+        environment: { HOME: fullHome },
+        configuration: { fullHome, preparedFullGeneration }
+      }
+    },
     operationDriverSources: [import.meta.url, driver.href,
       new URL('./team-reviewed-skills-operation/runtime-scenarios.mjs', import.meta.url).href,
       new URL('./team-reviewed-skills-operation/full-generation.mjs', import.meta.url).href]
