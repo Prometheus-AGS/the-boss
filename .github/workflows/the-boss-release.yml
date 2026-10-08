@@ -172,9 +172,6 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          if (-not (Get-Command makensis.exe -ErrorAction SilentlyContinue)) {
-            choco install nsis --no-progress -y
-          }
           node scripts/nsis-preflight.cjs
       - name: Enable configured macOS signing
         if: runner.os == 'macOS' && env.HAS_MAC_SIGNING == 'true'
