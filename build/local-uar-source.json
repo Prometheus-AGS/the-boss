@@ -2,6 +2,6 @@
   "schema": 1,
   "platform": "darwin-arm64",
   "repository": "Prometheus-AGS/universal-agent-runtime",
-  "revision": "d51991589c45cc0378ddc78a4a0e00f0d61e9aa2",
+  "revision": "49ffa8e008b6c46b67729416654c2778cf2b6216",
   "version": "1.0.0"
 }

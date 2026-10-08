@@ -15,6 +15,12 @@ export function writeInput(filename, content, marker) {
 export async function pending(evaluate, guest, signal, observed, prepared, directory, filename, content) {
   const current = await waitFor(signal, async () => {
     const delegation = await retainedDelegation(guest, observed.current.workflow.workflowRunId, observed.current.bossTaskId)
+    if (delegation.executionState === 'failed') {
+      const nativeCode = delegation.remoteDiagnostics?.find(item => item.eventType === 'agui.error')?.code
+      throw Object.assign(new Error('C14W_NATIVE_EXECUTION_FAILED'), {
+        code: 'C14W_NATIVE_EXECUTION_FAILED', nativeCode
+      })
+    }
     return delegation.executionState === 'input_required' &&
       delegation.pendingApproval?.type === 'agui.tool_call.approval_required' ? delegation : false
   }, 'C14W_REAL_PENDING_EFFECT_UNAVAILABLE', 120000, 1000)
