@@ -47,7 +47,7 @@
     },
     "bossfang": {
       "repository": "GQAdonis/librefang",
-      "revision": "3282e40815c36b60897ca55b2e5691bae9984940"
+      "revision": "dab625b6802c3ad03f3a00b365647c698cf3036b"
     }
   },
   "tools": [
@@ -529,13 +529,13 @@
     },
     {
       "name": "bossfang",
-      "version": "2026.9.19+3282e4081",
+      "version": "2026.9.19+dab625b68",
       "packages": {
         "darwin-arm64": {
-          "source": "3282e40815c36b60897ca55b2e5691bae9984940",
-          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-3282e4081/bossfang-darwin-arm64",
-          "sha256": "97b2549bb249408318ce5f0d4c6fc09d4f65eef44c4af63d7b5d679df194a3d5",
-          "size": 158921056,
+          "source": "dab625b6802c3ad03f3a00b365647c698cf3036b",
+          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-dab625b68/bossfang-darwin-arm64",
+          "sha256": "baf53a3633fec1d7a530658d969c6e2916ece2e6d938ae0987984af45106b32b",
+          "size": 158901296,
           "archive": "none",
           "binaries": [
             "bossfang"
