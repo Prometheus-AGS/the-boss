@@ -24,6 +24,6 @@ None. Existing active reusable-team and specialist-authoring changes remain inta
 
 ## Impact
 
-`src/shared/types/uarTeams.ts`, `src/main/ai/runtime/uar/uarTeamAuthoringPackage.ts`, the existing Settings authoring panel, renderer locales and `scripts/practical-team-presets-operation`. No new executor, service, dependency, version, submodule pin, grant or connector operation.
+`src/shared/types/uarTeams.ts`, the narrowly extracted `src/shared/types/uarTeamPresets.ts` ID tuple, `src/main/ai/runtime/uar/uarTeamAuthoringPackage.ts`, the existing Settings authoring panel, renderer locales, `scripts/operate-practical-team-presets.mjs` and `scripts/practical-team-presets-operation`. Root also approved the exact-roster extension in `scripts/reusable-team-operation/approvals.mjs`; it preserves the existing tool, filesystem and identity checks. No new executor, service, dependency, version, submodule pin, grant or connector operation.
 
 Work-ahead ID `c16-practical-team-presets-work-ahead-20261008` contributes to initiative `afc-c16-specialist-marketing-product-and-design-teams`, task C16.2. Root owns KBD/Cadence, build, packaged execution, review and publication. Customer-feedback prepares issue-ready artifacts and connector requirements only; C10 GitHub effect acceptance remains pending.

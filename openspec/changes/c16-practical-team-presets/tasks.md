@@ -2,9 +2,9 @@
 
 ## Source preparation
 
-- [ ] 1. Add bounded product research, marketing/brand, logo/design, mobile design and customer-feedback templates through the existing schema/compiler.
-- [ ] 2. Add localized preset guidance and labels while preserving all explicit resource controls.
-- [ ] 3. Prepare one packaged author/save/revise/deploy/run/reopen operation with exact readonly approvals and correlated artifacts; do not execute.
+- [x] 1. Add bounded product research, marketing/brand, logo/design, mobile design and customer-feedback templates through the existing schema/compiler.
+- [x] 2. Add localized preset guidance and labels while preserving all explicit resource controls.
+- [x] 3. Prepare one packaged author/save/revise/deploy/run/reopen operation with exact readonly approvals and correlated artifacts; do not execute.
 
 ## Root-owned completed delivery
 
