@@ -4,7 +4,7 @@ description: Operate timed usable deliveries with frozen delivery candidates, bo
 license: MIT
 compatibility: Node.js 22 or newer. Build tools belong to the selected project. Optional KBD, Compass, memory and native goal capabilities are detected, never assumed.
 metadata:
-  version: "1.2.4"
+  version: "1.2.5"
   tags: "delivery, cadence, kbd, recovery"
 ---
 

@@ -10,6 +10,7 @@ import { handleHooksCommand } from './hooks.mjs';
 import { dispatchCheckpoint, dispatchJob } from './jobs.mjs';
 import { adoptCheckpoint } from './checkpoint-receipts.mjs';
 import { freezeCandidate, candidateStatus, assertCandidateCurrent } from './candidates.mjs';
+import { reconcileFrozenSource, assertFrozenReconciliation } from './frozen-source-reconciliation.mjs';
 import { handleWorkAhead } from './work-ahead.mjs';
 import { handlePublication, publicationAdmission } from './publication.mjs';
 import { dispatchPublication } from './publication-effects.mjs';
@@ -208,10 +209,15 @@ async function execute(root, state, command, input, args) {
         assertChildrenResolved(iteration);
         if ((iteration.activities ?? []).some(a => !a.finishedAt)) fail('Stop open activities before successful finish');
         validateDelivery(iteration);
-        if (iteration.contractVersion >= 3) await assertCandidateCurrent(root,state,iteration);
+        const candidate = state.candidates.find(c => c.id === iteration.candidateId);
+        const reconciliation = candidate ? await assertFrozenReconciliation(root,state,candidate,iteration) : null;
+        if (iteration.contractVersion >= 3) await assertCandidateCurrent(root,state,iteration,reconciliation);
         const reason = budgetReason(state); if (reason) fail(reason);
         if (iteration.status !== 'ready') fail('A completed build and runnable increment is required');
-        if (!sameSources(await captureSources(iteration.sourceRefs, root), iteration.sourceRefs)) fail('Sources changed since ready; rebuild before delivery');
+        if (!reconciliation && !sameSources(await captureSources(iteration.sourceRefs, root), iteration.sourceRefs)) fail('Sources changed since ready; rebuild before delivery');
+        if (reconciliation && !iteration.checkpoints.some(r => r.id === iteration.featureOperation.checkpointId &&
+          r.status === 'success' && r.frozenSourceReconciliation === reconciliation.sha256))
+          fail('Frozen source reconciliation needs a successful matching feature operation receipt');
         const missing = iteration.profile.checkpoints.filter((step) => {
           if (step.required === false) return false;
           const receipt = iteration.checkpoints.filter((item) => item.id === step.id).at(-1);
@@ -302,6 +308,7 @@ export async function dispatch(root, command, input = {}, args = {}) {
     }
   }
   if (command === 'checkpoint') return (args._?.[1] ?? input.action) === 'adopt' ? adoptCheckpoint(root,input,args) : dispatchCheckpoint(root,input,args);
+  if (command === 'candidate' && action === 'reconcile-frozen') return reconcileFrozenSource(root,input,args);
   if (command === 'job') return dispatchJob(root,args._?.[1] ?? input.action ?? 'status',input,args);
   if (command === 'hooks' && args._?.[1] === 'retry') return handleHooksCommand(root,args);
   const result = await withLock(root, async () => {

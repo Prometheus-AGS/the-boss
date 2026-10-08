@@ -1,10 +1,11 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
-import { artifactReceipts, sameSources } from './checkpoints.mjs';
+import { artifactReceipts, captureSources, sameSources } from './checkpoints.mjs';
 import { checkpointPurpose } from './delivery-contract.mjs';
 import { jobTransaction, claimCommand, digest, immutableJson, now } from './jobs.mjs';
 import { saveEvent } from './storage.mjs';
+import { assertFrozenReconciliation } from './frozen-source-reconciliation.mjs';
 
 export async function adoptCheckpoint(root, input = {}, args = {}) {
   const bytes = input.receiptPath ? await fs.readFile(path.resolve(input.receiptPath)) : Buffer.from(JSON.stringify(input.receipt));
@@ -44,6 +45,14 @@ export async function adoptCheckpoint(root, input = {}, args = {}) {
     if (receipt.recipeDigest !== digest(step)) throw new Error('Receipt recipe digest differs from frozen checkpoint');
     if ((step.platform && step.platform !== receipt.platform) || (step.architecture && step.architecture !== receipt.architecture)) throw new Error('Receipt platform/architecture differs from checkpoint');
     const purpose = checkpointPurpose(iteration, step);
+    const reconciliation = purpose === 'feature' ? await assertFrozenReconciliation(root, state, candidate, iteration) : null;
+    if (purpose === 'feature' && !reconciliation &&
+        !sameSources(await captureSources(candidate.sourceRefs, root), candidate.sourceRefs))
+      throw new Error('Changed feature-operation source needs frozen artifact reconciliation');
+    if (reconciliation && (receipt.operatedSource?.dirtyDiffSha256 !== reconciliation.operatedSource.dirtyDiffSha256 ||
+        receipt.operatedSource?.driverSha256 !== reconciliation.operatedSource.driverSha256 ||
+        receipt.operationEvidenceSha256 !== reconciliation.operationEvidence.sha256))
+      throw new Error('Feature receipt lacks the reconciled operation-time driver and evidence identity');
     if (step.kind === 'run') {
       const preceding = checkpoint => iteration.checkpoints.some(r => r.id === checkpoint.id && r.status === 'success' && !r.invalidatedAt && sameSources(r.sourceRefs, candidate.sourceRefs) && Date.parse(r.finishedAt) <= start);
       if (!iteration.profile.checkpoints.filter(c => c.kind === 'build' && c.required !== false).every(preceding)) throw new Error('Adopt build evidence before run evidence, with ordered operation timestamps');
@@ -57,7 +66,8 @@ export async function adoptCheckpoint(root, input = {}, args = {}) {
     const file = path.join(root, 'adopted-receipts', `${receiptDigest}.json`);
     await immutableJson(file, receipt);
     const record = { ...receipt, id: step.id, attemptId: randomUUID(), kind: step.kind, purpose, ...(purpose === 'feature' ? { featureOperationId: iteration.featureOperation.id } : {}),
-      receiptDigest, receiptPath: file, adoptedAt: now(), artifacts, commandId: args.commandId, sourceRefs: candidate.sourceRefs };
+      receiptDigest, receiptPath: file, adoptedAt: now(), artifacts, commandId: args.commandId, sourceRefs: candidate.sourceRefs,
+      ...(reconciliation ? { frozenSourceReconciliation: reconciliation.sha256, operatedSource: reconciliation.operatedSource } : {}) };
     state.adoptedReceipts.push(record); iteration.checkpoints.push(record); iteration.status = 'ready';
     state.commandResults[args.commandId] = structuredClone(record);
     await saveEvent(root, state, 'checkpoint.adopted', { receiptId: receipt.receiptId, candidateId: receipt.candidateId }); return record;
