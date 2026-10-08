@@ -8,7 +8,8 @@ const entries = fs
   .readdirSync(directory)
   .filter((name) => (selectedManifest ? name === selectedManifest : /^installers-.*\.json$/.test(name)))
   .map((name) => JSON.parse(fs.readFileSync(path.join(directory, name))))
-const version = require('../package.json').version
+const packageVersion = require('../package.json').version
+const version = process.env.RELEASE_VERSION || packageVersion
 const profile = assertPublicReleaseProfile()
 const platforms = profile.supportedPlatforms
 const selected = (process.env.RELEASE_PLATFORMS || platforms.join(',')).split(',')
@@ -35,6 +36,9 @@ const previousMatchesRelease =
   previous.profile === profile.id &&
   previous.features?.uar === profile.uarEnabled &&
   [...(previous.supportedPlatforms || [])].sort().join(',') === [...platforms].sort().join(',')
+if (version !== packageVersion && (!previousMatchesRelease || previous.source !== releaseSource)) {
+  throw new Error('Backfill requires the already-current release version, source and feature profile')
+}
 if (previous?.version === version && !previousMatchesRelease && selected.length !== platforms.length) {
   throw new Error('Existing release metadata does not match the frozen feature profile')
 }

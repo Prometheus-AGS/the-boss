@@ -76,7 +76,15 @@ try {
     run('git', ['reset', '--hard', `origin/${branch}`])
     const packageVersion = require(path.join(root, 'package.json')).version
     if (packageVersion !== expectedVersion) {
-      throw new Error(`Publication branch version ${packageVersion} does not match ${expectedVersion}`)
+      const currentManifest = JSON.parse(fs.readFileSync(path.join(root, 'release-manifest.json'), 'utf8'))
+      if (
+        currentManifest.version !== expectedVersion ||
+        currentManifest.source !== platformManifest.source ||
+        currentManifest.profile !== expectedProfile ||
+        currentManifest.features?.uar !== (expectedProfile === 'uar-enabled')
+      ) {
+        throw new Error(`Publication branch version ${packageVersion} cannot backfill release ${expectedVersion}`)
+      }
     }
     const manifestsDirectory = path.join(root, 'manifests')
     fs.rmSync(manifestsDirectory, { recursive: true, force: true })
@@ -85,6 +93,7 @@ try {
     const baseSha = run('git', ['rev-parse', 'HEAD']).trim()
     const releaseEnvironment = {
       ...process.env,
+      RELEASE_VERSION: expectedVersion,
       RELEASE_BASE_SHA: baseSha,
       RELEASE_MANIFEST_FILE: manifestAsset,
       RELEASE_PLATFORMS: platformKey,
