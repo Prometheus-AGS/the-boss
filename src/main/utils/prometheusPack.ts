@@ -36,6 +36,7 @@ export const PACK_ENTRIES = [
 /** Single files, copied alongside the directories above. */
 const PACK_FILES = [
   'package.json',
+  'package-lock.json',
   'versions.toml',
   'skill-system.json',
   'reviewed-skill-closures.json',
