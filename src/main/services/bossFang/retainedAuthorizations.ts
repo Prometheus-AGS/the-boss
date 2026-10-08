@@ -193,7 +193,7 @@ export class RetainedUarAuthorizations {
       required_capabilities: configured.requiredCapabilities
     }
   }
-  private matches(authorization: PrivateUarAuthorization, run: OriginalConnection) {
+  private matches(authorization: PrivateUarAuthorization, run: z.infer<typeof projectionSchema>) {
     return (
       authorization.workspaceId === run.workspaceId &&
       authorization.endpoint.observed.id === run.selectedInstanceId &&
