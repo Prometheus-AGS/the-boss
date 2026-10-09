@@ -11,11 +11,20 @@ export function requireFact(condition, code) {
   if (!condition) throw Object.assign(new Error(code), { code })
 }
 export function nativeIpcFailure(channel, error) {
-  // Preserve symbolic diagnostics only; free-form messages may contain request values.
-  const codes = String(error?.message ?? '').match(/\b(?:prometheus\.error\.[A-Za-z0-9.]+|(?:UAR|TEAM|CONNECTOR|FEEDBACK|LITER|IPC|ERR)_[A-Z0-9_]+)\b/g)
+  let message = String(error?.message ?? '')
+  const credentialNames = [process.env.BOSS_C15_GATEWAY_CREDENTIAL_ENV,
+    process.env.BOSS_C10_GITHUB_CREDENTIAL_ENV,
+    ...Object.keys(process.env).filter((name) => /TOKEN|KEY|SECRET|PASSWORD|CREDENTIAL/i.test(name))].filter(Boolean)
+  const values = [...new Set(credentialNames.map((name) => process.env[name]).filter(Boolean))]
+    .sort((left, right) => right.length - left.length)
+  for (const value of values) message = message.split(value).join('[credential redacted]')
+  message = message.replace(/Bearer\s+[^\s"',;]+/gi, 'Bearer [redacted]')
+    .replace(/((?:token|password|secret|api[_-]?key|authorization)\s*[=:]\s*)[^\s,;]+/gi, '$1[redacted]')
+    .replace(/https?:\/\/[^\s"'<>]+/gi, (value) => value
+      .replace(/(https?:\/\/)[^/]*@/i, '$1[redacted]@').replace(/[?#].*/, '?[redacted]'))
   return { channel,
     code: /^[A-Z][A-Z0-9_]{0,100}$/.test(error?.code ?? '') ? error.code : 'UNAVAILABLE',
-    message: codes?.join(' ') || '[non-code message redacted]' }
+    message: message.slice(0,500) || '[no native message]' }
 }
 export async function waitFor(signal, read, code, timeout = 30000, interval = 250) {
   const deadline = Date.now() + timeout
