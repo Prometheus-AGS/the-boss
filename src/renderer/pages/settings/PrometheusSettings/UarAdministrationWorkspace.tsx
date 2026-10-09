@@ -23,7 +23,9 @@ import type { UarInstanceInventorySnapshot } from '@shared/types/uarServiceInsta
 import { UarAgentsPanel } from './UarAgentsPanel'
 import { UarApprovalLifecyclePanel } from './UarApprovalLifecyclePanel'
 import { UarCompilerPanel } from './UarCompilerPanel'
+import { UarConnectorAdministrationPanel } from './UarConnectorAdministrationPanel'
 import { UarDurableInstancesPanel } from './UarDurableInstancesPanel'
+import { UarFeedbackGovernancePanel } from './UarFeedbackGovernancePanel'
 import { UarInstancesPanel } from './UarInstancesPanel'
 import { UarLifecyclePanel } from './UarLifecyclePanel'
 import { UarObserversPanel } from './UarObserversPanel'
@@ -45,7 +47,9 @@ const BOSS_DURABLE_SURFACES: NavigationSurface[] = [
   { id: 'lifecycle', group: 'agents' },
   { id: 'teams', group: 'agents' },
   { id: 'durable-agent-instances', group: 'agents' },
-  { id: 'local-scoped-observers', group: 'agents' }
+  { id: 'local-scoped-observers', group: 'agents' },
+  { id: 'connectors', group: 'administration' },
+  { id: 'feedback-governance', group: 'administration' }
 ]
 const HOST_INSTANCE_SURFACE: SurfaceProjection = {
   id: 'instances',
@@ -218,7 +222,7 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
   const selectedId = navigationSurfaces.some((surface) => surface.id === requestedPanel) ? requestedPanel! : 'overview'
   const selected = surfaces.find((surface) => surface.id === selectedId)
   useEffect(() => {
-    if (['lifecycle', 'local-scoped-observers'].includes(selectedId)) void refetchWorkspaces()
+    if (['lifecycle', 'local-scoped-observers', 'connectors', 'feedback-governance'].includes(selectedId)) void refetchWorkspaces()
     void loadInventory()
   }, [selectedId, refetchWorkspaces, loadInventory])
   useEffect(() => {
@@ -363,7 +367,7 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
             <UarPresentationsPanel />
           ) : selectedId === 'approvals' ? (
             <UarApprovalLifecyclePanel />
-          ) : ['lifecycle', 'teams', 'durable-agent-instances', 'local-scoped-observers'].includes(selectedId) ? (
+          ) : ['lifecycle', 'teams', 'durable-agent-instances', 'local-scoped-observers', 'connectors', 'feedback-governance'].includes(selectedId) ? (
             <div id={getSettingDomId('/settings/uar', selectedId)} className="scroll-mt-6">
               <SettingGroup className="mb-4">
                 <SettingTitle>{navText(t, 'durable.workspaceTitle')}</SettingTitle>
@@ -460,6 +464,10 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
                   )
                 ) : selectedId === 'teams' ? (
                   <UarTeamsPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
+                ) : selectedId === 'feedback-governance' ? (
+                  <UarFeedbackGovernancePanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
+                ) : selectedId === 'connectors' ? (
+                  <UarConnectorAdministrationPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
                 ) : selectedId === 'durable-agent-instances' ? (
                   <UarDurableInstancesPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
                 ) : (
