@@ -132,3 +132,5 @@ export {
 } from './uarFeedbackAdministration'
 
 export { readUarRepresentation, readUarRepresentationHistory, saveUarRepresentation, revokeUarRepresentation } from './uarRepresentationAdministration'
+
+export { readUarDurableRun, decideUarDurableApproval } from './UarDurableRunAdapter'

@@ -1,3 +1,28 @@
+import type { UarTeamApprovalHistory } from './uarApprovalRecords'
+import type { UarTeamApproval } from './uarTeams'
+import type { uarTeamRunEventsSchema } from './uarTeamRunEvents'
+import type * as z from 'zod'
+
+export interface UarDurableRunSnapshot {
+  instanceId: string
+  events: z.infer<typeof uarTeamRunEventsSchema>
+  approval: UarTeamApproval | null
+  effects: Array<{ toolName: string; state: string; admissionId: string | null; invocationId: string }>
+  history: UarTeamApprovalHistory[]
+}
+
+export interface UarDurableApprovalDecision {
+  workspaceId: string
+  instanceId: string
+  runId: string
+  approvalId: string
+  issuerId: string
+  challengeId: string
+  eventId: string
+  cursor: number
+  approved: boolean
+}
+
 export type UarInstanceProfile = 'request' | 'on_demand' | 'resident'
 export type UarInstanceAction = 'activate' | 'passivate' | 'drain' | 'disable' | 'restart' | 'cancel'
 export type UarObserverAction = 'pause' | 'resume'

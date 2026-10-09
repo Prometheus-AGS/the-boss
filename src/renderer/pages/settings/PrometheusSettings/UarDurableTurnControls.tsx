@@ -5,6 +5,8 @@ import { Button, Textarea } from '@cherrystudio/ui'
 import { ipcApi } from '@renderer/ipc'
 import type { UarDurableCommand, UarDurableInstance } from '@shared/types/uarDurableAdministration'
 
+import { UarDurableRunPanel } from './UarDurableRunPanel'
+
 export function UarDurableTurnControls({ workspaceId, instance, disabled, refresh }: {
   workspaceId: string
   instance: UarDurableInstance
@@ -32,6 +34,7 @@ export function UarDurableTurnControls({ workspaceId, instance, disabled, refres
     } catch (cause) { setError(cause instanceof Error ? cause.message : String(cause)) }
     finally { setBusy(false) }
   }
+  const runId = current?.rootRunId ?? instance.activeRunId ?? instance.commands.findLast((command) => command.kind === 'turn' && command.rootRunId)?.rootRunId
   return <div className="mt-4 space-y-2" data-ui="uar-durable-turn" data-instance-id={instance.instanceId}>
     <label htmlFor={id} className="block text-sm font-medium">{tr('durable.turnPrompt')}</label>
     <Textarea.Input id={id} value={prompt} disabled={disabled || busy || Boolean(request)}
@@ -46,6 +49,7 @@ export function UarDurableTurnControls({ workspaceId, instance, disabled, refres
         current.status === 'accepted' ? tr('teams.messageStatus.accepted') : tr('teams.execution.status.' + current.status)}
       {current.rootRunId && <p>{tr('lifecycle.detail.rootRun')}: {current.rootRunId}</p>}
     </div>}
+    {runId && <UarDurableRunPanel key={workspaceId + ":" + instance.instanceId + ":" + runId} workspaceId={workspaceId} instanceId={instance.instanceId} runId={runId} />}
     {error && <p className="break-words text-sm text-error" role="alert">{error}</p>}
   </div>
 }
