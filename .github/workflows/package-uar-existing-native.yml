@@ -60,6 +60,7 @@ jobs:
         if: runner.os == 'Windows'
         run: git config --global core.longpaths true
       - name: Prepare the exact pinned UAR source
+        shell: bash
         env:
           INTEGRATION_TOOLS: uar-sidecar
           SELECTED_NATIVE_RUN: ${{ inputs.native_run || inputs.native_run_id }}
