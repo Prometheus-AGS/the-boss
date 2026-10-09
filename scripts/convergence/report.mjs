@@ -44,8 +44,14 @@ export async function runtime(url, credential) {
 }
 export async function report(options) {
   const sources = await json(options.sources)
-  const operations = options.operations ? await json(options.operations) : []
-  if (!Array.isArray(operations)) throw new Error('Operation receipts must be an array')
+  const input = options.operations ? await json(options.operations) : []
+  if (!Array.isArray(input)) throw new Error('Operation receipts must be an array')
+  const fields = ['operationId', 'sourceRevision', 'profileId', 'evidenceRef', 'outcome',
+    'acceptedTasks', 'humanCorrections', 'costMicrounits', 'latencyMs',
+    'duplicateEffects', 'unknownEffects', 'administrationMs']
+  const operations = input.map(row => Object.fromEntries(fields.filter(key =>
+    typeof row[key] === 'string' || (Number.isFinite(row[key]) && row[key] >= 0)).map(key => [key, row[key]])))
+
   const result = { schemaVersion: 1, recordedAt: new Date().toISOString(),
     sources, supportedProfiles: supported, operations, measurements: measures(operations),
     baseline: options.baseline ? measures(await json(options.baseline)) : null,

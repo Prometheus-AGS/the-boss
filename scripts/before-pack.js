@@ -240,6 +240,11 @@ exports.default = async function (context) {
   // Fail the build rather than ship a half-empty resources/binaries/<platform>.
   require('./download-binaries').verifyBundledBinaries(platform, arch)
   require('./package-prometheus').packagePrometheus()
+  // Package the source-bound supported profile; operation/acceptance is recorded separately.
+  const { report } = await import('./convergence/report.mjs')
+  await report({ sources: path.join(__dirname, '..', 'build', 'integration-sources.json'),
+    artifacts: [], out: path.join(__dirname, '..', 'resources', 'convergence-supported-profile.json') })
+
 
   const excludePackages = async (packagesToExclude) => {
     // 从项目根目录的 electron-builder.yml 读取 files 配置，避免多次覆盖配置导致出错
