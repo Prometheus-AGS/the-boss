@@ -25,10 +25,13 @@ export async function readUarRepresentationHistory(input: { workspaceId: string;
     `${path}/${encodeURIComponent(input.grantId)}/history`))
 }
 export async function saveUarRepresentation(input: UarRepresentationSaveInput) {
+  return installRepresentation(input, false)
+}
+async function installRepresentation(input: UarRepresentationSaveInput, revokingExisting: boolean) {
   const scope = await feedbackScope(input.workspaceId)
   const issuerPrincipalId = uarPrincipalForSession('durable-administration')
   const { instances } = await readUarDurableWorkspace(scope.workspaceId)
-  if (!instances.some((instance) => instance.instanceId === input.grant.granteeAgentInstanceId)) {
+  if (!revokingExisting && !instances.some((instance) => instance.instanceId === input.grant.granteeAgentInstanceId)) {
     throw new Error('REPRESENTATION_INSTANCE_SCOPE_DENIED')
   }
   const content = { ...input.grant, issuerPrincipalId }
@@ -48,7 +51,7 @@ export async function revokeUarRepresentation(input: UarRepresentationRevokeInpu
     `${path}/${encodeURIComponent(input.grantId)}`))
   if (current.revision !== input.expectedRevision) throw new Error('REPRESENTATION_REVISION_CONFLICT')
   const { issuerPrincipalId: _issuer, constraintDigest: _digest, ...grant } = current
-  return saveUarRepresentation({ workspaceId: scope.workspaceId, commandId: randomUUID(),
+  return installRepresentation({ workspaceId: scope.workspaceId, commandId: randomUUID(),
     expectedRevision: current.revision, grant: { ...grant, revision: current.revision + 1, status: 'revoked',
-      revocation: { revision: current.revision + 1, revokedAt: new Date().toISOString(), reason: input.reason } } })
+      revocation: { revision: current.revision + 1, revokedAt: new Date().toISOString(), reason: input.reason } } }, true)
 }
