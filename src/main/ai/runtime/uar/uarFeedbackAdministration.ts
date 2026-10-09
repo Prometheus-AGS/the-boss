@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import * as z from 'zod'
 
+import { application } from '@application'
 import { readFeedbackGithubCredential, writeFeedbackGithubCredential } from '@main/services/prometheus/integrationConfig'
 import {
   uarFeedbackEffectSchema, uarFeedbackIssueSchema,
@@ -78,6 +79,7 @@ export async function startUarFeedback(input: UarFeedbackStartInput): Promise<Ua
   if (intake.workflowRunId) return detail(scope, intake)
   const team = scopedTeam(await feedbackRequest(scope, '/team-instances/' + encodeURIComponent(input.teamId)), scope.workspaceId)
   if (team.id !== input.teamId || team.ownerId !== intake.ownerId) throw new Error('FEEDBACK_WORKFLOW_SCOPE_DENIED')
+  await application.get('UarTeamHostService').ensure(team, scope.endpoint.generation)
   const { workspaceId: _workspaceId, target: _target, sourceEventId: _sourceEventId, ...workflowInput } = input
   void _workspaceId; void _target; void _sourceEventId
   const run = uarWorkflowRunSchema.parse(await feedbackRequest(scope, '/workflow-runs', workflowInput))
