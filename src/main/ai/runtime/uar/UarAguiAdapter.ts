@@ -2,6 +2,7 @@ import { loggerService } from '@logger'
 
 import type { AgentRuntimeEvent } from '../types'
 import type { UarHostMcpBridge } from './UarHostMcpBridge'
+import { createUarSecretProjection, type UarSecretProjection, type UarSecretStream } from './uarSecretProjection'
 import { UarToolApprovalController } from './UarToolApprovalController'
 
 const logger = loggerService.withContext('UarAguiAdapter')
@@ -37,12 +38,16 @@ interface UarAguiAdapterOptions {
   principal: string
   signal: AbortSignal
   bridge: UarHostMcpBridge
+  projection?: UarSecretProjection
   emit(event: AgentRuntimeEvent): void
   isClosed(): boolean
 }
 
 export class UarAguiAdapter {
   private readonly approvals: UarToolApprovalController
+  private readonly projection: UarSecretProjection
+  private readonly textStream: UarSecretStream
+  private readonly reasoningStream: UarSecretStream
   private readonly startedTools = new Set<string>()
   private readonly completedInputs = new Set<string>()
   private readonly completedTools = new Set<string>()
@@ -60,7 +65,10 @@ export class UarAguiAdapter {
   private terminal = false
 
   constructor(private readonly options: UarAguiAdapterOptions) {
-    this.approvals = new UarToolApprovalController(options)
+    this.projection = options.projection ?? createUarSecretProjection([])
+    this.textStream = this.projection.stream()
+    this.reasoningStream = this.projection.stream()
+    this.approvals = new UarToolApprovalController({ ...options, projection: this.projection })
   }
 
   isTerminal(): boolean {
@@ -94,6 +102,7 @@ export class UarAguiAdapter {
   }
 
   private handleFrame(frame: string): void {
+    if (this.terminal) return
     const lines = frame.split('\n')
     const data = lines
       .filter((line) => line.startsWith('data:'))
@@ -106,9 +115,16 @@ export class UarAguiAdapter {
       .trim()
     if (!sourceEventId) throw new Error('UAR emitted an AG-UI event without an SSE event ID')
     this.noteSourceEvent(sourceEventId)
-    const event = JSON.parse(data) as AguiEvent
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(data)
+    } catch {
+      throw new Error('UAR emitted invalid AG-UI JSON')
+    }
+    if (!isRecord(parsed)) throw new Error('UAR emitted an invalid AG-UI event')
+    const event = parsed as AguiEvent
     if (typeof event.runId === 'string' && event.runId !== this.options.runId) {
-      throw new Error(`UAR emitted an event for the wrong run: ${event.runId}`)
+      throw new Error('UAR emitted an event for the wrong run')
     }
     if (!this.acceptEvent(event)) return
     switch (event.type) {
@@ -121,8 +137,15 @@ export class UarAguiAdapter {
       case 'TEXT_MESSAGE_CONTENT':
         this.handleText(event)
         break
+      case 'TEXT_MESSAGE_END':
+        this.closeText()
+        break
       case 'REASONING_MESSAGE_CONTENT':
         this.handleReasoning(event)
+        break
+      case 'REASONING_MESSAGE_END':
+      case 'REASONING_END':
+        this.closeReasoning()
         break
       case 'MESSAGES_SNAPSHOT':
         this.handleMessagesSnapshot(event)
@@ -164,7 +187,8 @@ export class UarAguiAdapter {
       this.options.emit({ type: 'chunk', chunk: { type: 'text-start', id } })
     }
     this.hasText = true
-    this.options.emit({ type: 'chunk', chunk: { type: 'text-delta', id, delta: event.delta } })
+    const delta = this.textStream.push(event.delta)
+    if (delta) this.options.emit({ type: 'chunk', chunk: { type: 'text-delta', id, delta } })
   }
 
   private handleReasoning(event: AguiEvent): void {
@@ -177,7 +201,8 @@ export class UarAguiAdapter {
       this.reasoningId = id
       this.options.emit({ type: 'chunk', chunk: { type: 'reasoning-start', id } })
     }
-    this.options.emit({ type: 'chunk', chunk: { type: 'reasoning-delta', id, delta: event.delta } })
+    const delta = this.reasoningStream.push(event.delta)
+    if (delta) this.options.emit({ type: 'chunk', chunk: { type: 'reasoning-delta', id, delta } })
   }
 
   private handleMessagesSnapshot(event: AguiEvent): void {
@@ -192,7 +217,7 @@ export class UarAguiAdapter {
   private handleStepStarted(event: AguiEvent): void {
     const stepId = stepIdentity(event)
     if (!stepId) throw new Error('UAR emitted a step without a stable identifier')
-    if (this.activeStepId) throw new Error(`UAR started ${stepId} before ${this.activeStepId} finished`)
+    if (this.activeStepId) throw new Error('UAR started a step before the active step finished')
     this.closeBlocks()
     this.activeStepId = stepId
     this.options.emit({ type: 'chunk', chunk: { type: 'start-step' } })
@@ -201,7 +226,7 @@ export class UarAguiAdapter {
   private handleStepFinished(event: AguiEvent): void {
     const stepId = stepIdentity(event)
     if (!stepId || stepId !== this.activeStepId) {
-      throw new Error(`UAR finished an unexpected step: ${String(stepId)}`)
+      throw new Error('UAR finished an unexpected step')
     }
     this.closeBlocks()
     this.options.emit({ type: 'chunk', chunk: { type: 'finish-step' } })
@@ -214,7 +239,7 @@ export class UarAguiAdapter {
     const toolCallId = this.ensureToolInput(event.toolCallId, toolName, {})
     if (this.completedTools.has(toolCallId)) return
     this.completedTools.add(toolCallId)
-    const output = parseToolOutput(event.content)
+    const output = this.projection.value(parseToolOutput(event.content))
     this.options.emit({
       type: 'chunk',
       chunk:
@@ -247,7 +272,9 @@ export class UarAguiAdapter {
     void this.approvals
       .handle(event.value, (rawToolCallId, toolName, input) => this.ensureToolInput(rawToolCallId, toolName, input))
       .catch((error) => {
-        if (!this.options.signal.aborted && !this.options.isClosed()) this.options.emit({ type: 'error', error })
+        if (!this.options.signal.aborted && !this.options.isClosed()) {
+          this.options.emit({ type: 'error', error: this.projection.error(error) })
+        }
       })
   }
 
@@ -270,7 +297,9 @@ export class UarAguiAdapter {
     this.closeStep()
     this.options.emit({
       type: 'error',
-      error: new Error(typeof event.message === 'string' ? event.message : `UAR run failed (${String(event.code)})`)
+      error: new Error(this.projection.text(
+        typeof event.message === 'string' ? event.message : `UAR run failed (${String(event.code)})`
+      ))
     })
   }
 
@@ -289,7 +318,10 @@ export class UarAguiAdapter {
       this.completedInputs.add(toolCallId)
       this.options.emit({
         type: 'chunk',
-        chunk: { type: 'tool-input-available', toolCallId, toolName, input, dynamic: true, providerExecuted: true }
+        chunk: {
+          type: 'tool-input-available', toolCallId, toolName,
+          input: this.projection.value(input), dynamic: true, providerExecuted: true
+        }
       })
     }
     return toolCallId
@@ -302,7 +334,9 @@ export class UarAguiAdapter {
     this.closeInterruptedTools('Tool result indeterminate because the UAR stream was interrupted')
     this.closeBlocks()
     this.closeStep()
-    logger.warn('UAR stream interrupted', { runId: this.options.runId, error })
+    logger.warn('UAR stream interrupted', {
+      runId: this.options.runId, error: this.projection.error(error)
+    })
   }
 
   private closeInterruptedTools(reason: string): void {
@@ -343,12 +377,16 @@ export class UarAguiAdapter {
 
   private closeText(): void {
     if (!this.textOpen) return
+    const delta = this.textStream.finish()
+    if (delta) this.options.emit({ type: 'chunk', chunk: { type: 'text-delta', id: this.textId, delta } })
     this.options.emit({ type: 'chunk', chunk: { type: 'text-end', id: this.textId } })
     this.textOpen = false
   }
 
   private closeReasoning(): void {
     if (!this.reasoningOpen) return
+    const delta = this.reasoningStream.finish()
+    if (delta) this.options.emit({ type: 'chunk', chunk: { type: 'reasoning-delta', id: this.reasoningId, delta } })
     this.options.emit({ type: 'chunk', chunk: { type: 'reasoning-end', id: this.reasoningId } })
     this.reasoningOpen = false
   }
@@ -389,7 +427,7 @@ export class UarAguiAdapter {
 
   private acceptEvent(event: AguiEvent): boolean {
     if (event.profile !== 'uar.agui/1')
-      throw new Error(`UAR emitted an unsupported AG-UI profile: ${String(event.profile)}`)
+      throw new Error('UAR emitted an unsupported AG-UI profile')
     if (
       typeof event.eventId !== 'string' ||
       typeof event.sequence !== 'number' ||

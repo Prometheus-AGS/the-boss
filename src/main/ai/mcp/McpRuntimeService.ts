@@ -45,7 +45,7 @@ import { createTransport, isMcpOAuthEnabled } from './mcpTransport'
 import { CallBackServer } from './oauth/callback'
 import { McpOAuthClientProvider } from './oauth/provider'
 import { ServerLogBuffer } from './ServerLogBuffer'
-import type { GetResourceResponse, McpCallToolResponse } from './types'
+import { type GetResourceResponse, type McpCallToolResponse, type McpOutputProjection, projectMcpToolResult } from './types'
 
 function getAbortReason(signal: AbortSignal): Error {
   return signal.reason instanceof Error ? signal.reason : new DOMException('MCP tool call aborted', 'AbortError')
@@ -55,6 +55,7 @@ function getAbortReason(signal: AbortSignal): Error {
 type CachedFunction<T extends unknown[], R> = (...args: T) => Promise<R>
 
 type CallToolArgs = {
+  projection?: McpOutputProjection
   serverId: string
   name: string
   args: any
@@ -70,6 +71,7 @@ type CallToolArgs = {
   onProgress?: ProgressCallback
 }
 type RuntimeCallToolArgs = {
+  projection?: McpOutputProjection
   server: McpServer
   name: string
   args: any
@@ -129,14 +131,15 @@ const MCP_LIST_PAGE_LIMIT = 50
 const PING_TIMEOUT_MS = 5_000
 
 // Create a context-aware logger for a server
-function getServerLogger(server: McpServer, extra?: Record<string, any>) {
+function getServerLogger(server: McpServer, extra?: Record<string, any>, projection?: McpOutputProjection) {
   const base = {
     serverName: server?.name,
     serverId: server?.id,
     baseUrl: server?.baseUrl,
     type: server?.type || (server?.command ? 'stdio' : server?.baseUrl ? 'http' : 'inmemory')
   }
-  return loggerService.withContext('McpRuntimeService', { ...base, ...extra })
+  const context = { ...base, ...extra }
+  return loggerService.withContext('McpRuntimeService', projection ? projection.value(context) as typeof context : context)
 }
 
 /**
@@ -146,7 +149,8 @@ function getServerLogger(server: McpServer, extra?: Record<string, any>) {
  */
 async function clampToolResultImages(
   response: McpCallToolResponse,
-  serverLogger: ReturnType<typeof getServerLogger>
+  serverLogger: ReturnType<typeof getServerLogger>,
+  projection?: McpOutputProjection
 ): Promise<McpCallToolResponse> {
   const content = await Promise.all(
     response.content.map(async (part) => {
@@ -155,7 +159,8 @@ async function clampToolResultImages(
         const clamped = await clampImageForModel(Buffer.from(part.data, 'base64'))
         return clamped ? { ...part, data: Buffer.from(clamped).toString('base64') } : part
       } catch (error) {
-        serverLogger.warn('Dropping unprocessable tool-result image', { mimeType: part.mimeType, error })
+        const context = { mimeType: part.mimeType, error }
+        serverLogger.warn('Dropping unprocessable tool-result image', projection ? projection.value(context) as Record<string, unknown> : context)
         return { type: 'text' as const, text: `[image (${part.mimeType ?? 'unknown'}) could not be processed]` }
       }
     })
@@ -1052,10 +1057,11 @@ export class McpRuntimeService extends BaseService {
     callId,
     scope,
     signal,
-    onProgress
+    onProgress,
+    projection
   }: CallToolArgs): Promise<McpCallToolResponse> {
     const server = this.getServerById(serverId)
-    return this.callToolByServer({ server, name, args, callId, scope, signal, onProgress })
+    return this.callToolByServer({ server, name, args, callId, scope, signal, onProgress, projection })
   }
 
   public async callToolByServer({
@@ -1065,9 +1071,11 @@ export class McpRuntimeService extends BaseService {
     callId,
     scope,
     signal,
-    onProgress
+    onProgress,
+    projection
   }: RuntimeCallToolArgs): Promise<McpCallToolResponse> {
     const toolCallId = callId || uuidv4()
+    const serverLogger = getServerLogger(server, { tool: name, callId: toolCallId }, projection)
     const registrationKey = toolCallKey(toolCallId, scope)
     const abortController = new AbortController()
     const effectiveSignal = signal ? AbortSignal.any([abortController.signal, signal]) : abortController.signal
@@ -1081,8 +1089,8 @@ export class McpRuntimeService extends BaseService {
         if (effectiveSignal.aborted) {
           throw getAbortReason(effectiveSignal)
         }
-        getServerLogger(server, { tool: name, callId: toolCallId }).debug(`Calling tool`, {
-          args: redactDeep(args)
+        serverLogger.debug(`Calling tool`, {
+          args: redactDeep(projection ? projection.value(args) : args)
         })
         if (typeof args === 'string') {
           if (args.trim() === '') {
@@ -1121,7 +1129,7 @@ export class McpRuntimeService extends BaseService {
         })
         const result = await client.callTool({ name, arguments: args }, undefined, {
           onprogress: (process) => {
-            getServerLogger(server, { tool: name, callId: toolCallId }).debug(`Progress`, {
+            serverLogger.debug(`Progress`, {
               ratio: process.progress / (process.total || 1)
             })
             application.get('IpcApiService').broadcastToType(WindowType.Main, 'mcp.tool.call_progress', {
@@ -1131,10 +1139,12 @@ export class McpRuntimeService extends BaseService {
             // Additional consumer outside the renderer; must not break the call or the
             // broadcast above if it throws.
             try {
-              onProgress?.(process)
+              onProgress?.(projection && process.message !== undefined
+                ? { ...process, message: projection.text(process.message) }
+                : process)
             } catch (error) {
-              getServerLogger(server, { tool: name, callId: toolCallId }).warn('Progress listener threw', {
-                error
+              serverLogger.warn('Progress listener threw', {
+                error: projection ? projection.error(error) : error
               })
             }
           },
@@ -1144,18 +1154,22 @@ export class McpRuntimeService extends BaseService {
           signal: effectiveSignal
         })
         const response = result as McpCallToolResponse
-        // Error results never carry model-bound media, so leave their payload untouched.
-        if (response.isError) return response
-        return clampToolResultImages(response, getServerLogger(server, { tool: name, callId: toolCallId }))
+        const safeResponse = projection ? projectMcpToolResult(response, projection) : response
+        if (safeResponse.isError) return safeResponse
+        const clamped = await clampToolResultImages(safeResponse, serverLogger, projection)
+        return projection ? projectMcpToolResult(clamped, projection) : clamped
       } catch (error) {
-        if (isMcpCancellation(error, effectiveSignal)) {
+        const cancelled = isMcpCancellation(error, effectiveSignal)
+        const safeError = projection ? projection.error(error) : error
+        if (cancelled) {
+          if (projection && safeError instanceof Error) safeError.name = 'AbortError'
           // Expected cancellation (user stop / stream abort) — keep it out of error logs.
           // A genuine failure that merely raced the abort does not match and stays error-level.
-          getServerLogger(server, { tool: name, callId: toolCallId }).debug(`Tool call aborted`)
+          serverLogger.debug(`Tool call aborted`)
         } else {
-          getServerLogger(server, { tool: name, callId: toolCallId }).error(`Error calling tool`, error as Error)
+          serverLogger.error(`Error calling tool`, safeError as Error)
         }
-        throw error
+        throw safeError
       } finally {
         // Remove only this call's controller — a concurrent call sharing the key must stay abortable.
         const controllers = this.activeToolCalls.get(registrationKey)
@@ -1174,11 +1188,11 @@ export class McpRuntimeService extends BaseService {
       args
     }
     return await withSpanFunc(
-      `${server.name}.${name}`,
+      projection ? projection.text(`${server.name}.${name}`) : `${server.name}.${name}`,
       `MCP`,
       // oxlint-disable-next-line no-unused-vars
       (_recorded: typeof tracedInput) => callToolFunc({ server, name, args }),
-      [tracedInput]
+      [projection ? projection.value(tracedInput) as typeof tracedInput : tracedInput]
     )
   }
 
