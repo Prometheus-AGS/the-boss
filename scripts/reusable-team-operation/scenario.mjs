@@ -21,7 +21,7 @@ async function click(evaluate, signal, selector) {
     else if(node.getAttribute('data-slot')==='select-item')node.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
     else node.click();return true;})()`),
     'C15_VISIBLE_CONTROL_UNAVAILABLE'
-  )
+  ).catch((error) => { throw Object.assign(error, { failureSelector: selector }) })
 }
 async function fill(evaluate, signal, selector, value) {
   await waitFor(
@@ -31,7 +31,7 @@ async function fill(evaluate, signal, selector, value) {
     Object.getOwnPropertyDescriptor(node.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype,'value').set.call(node,${JSON.stringify(value)});
     node.dispatchEvent(new Event('input',{bubbles:true}));node.dispatchEvent(new Event('change',{bubbles:true}));return true;})()`),
     'C15_VISIBLE_INPUT_UNAVAILABLE'
-  )
+  ).catch((error) => { throw Object.assign(error, { failureSelector: selector }) })
 }
 async function choose(evaluate, signal, selector, option) {
   await click(evaluate, signal, selector)

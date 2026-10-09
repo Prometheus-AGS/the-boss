@@ -10,11 +10,14 @@ import { authorFeedback } from './author.mjs'
 
 export async function prepare(context, configuration, evidence) {
   const { evaluate, signal } = context
+  evidence.stage = 'open-work'
   await openWork(evaluate, signal)
+  evidence.stage = 'configure-workspace-and-model'
   const selected = await setup(evaluate, configuration)
   evidence.workspaceId = selected.workspaceId
   evidence.selectedModel = selected.model
   evidence.credentialReference = configuration.gateway.credentialEnv
+  evidence.stage = 'load-execution-profile-and-reviewed-skill'
   const snapshot = () => ipc(evaluate, route('snapshot'), { workspaceId: selected.workspaceId })
   const profile = await snapshot()
   requireFact(profile.executionProfileStage === 'qualified' && profile.capabilities.execution,
@@ -25,6 +28,7 @@ export async function prepare(context, configuration, evidence) {
     entry.skillRef.requiredTools.every((tool) => readTools.includes(tool)))
   requireFact(skill, 'C10_REVIEWED_CUSTOMER_FEEDBACK_SKILL_REQUIRED')
   const authored = await authorFeedback({ evaluate, signal, selected, configuration, skill, evidence })
+  evidence.stage = 'deploy-feedback-team'
   await click(evaluate, signal, '[data-ui~="team-authoring-deploy"]')
   const binding = await waitFor(signal, async () => (await snapshot()).bindings.find((item) =>
     item.activationSupported && same(item.package, authored.accepted.package)), 'C10_FEEDBACK_TEAM_DEPLOYMENT_REQUIRED', 60000)

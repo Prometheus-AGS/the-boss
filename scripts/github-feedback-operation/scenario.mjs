@@ -20,6 +20,8 @@ export async function scenario(context, configuration) {
     evidence.publication = evidence.publishedFeatureComplete ? 'confirmed-real-github' :
       evidence.status === 'pending-reconciliation' ? 'unknown-outcome' : 'not-performed'
   } catch (error) {
+    evidence.failureStage = evidence.stage
+    if (error.failureSelector) evidence.failureSelector = error.failureSelector
     evidence.failureCode = context.signal.aborted ? 'C10_OPERATION_CANCELLED_OR_TIMED_OUT' :
       /^C(?:10|15|16)_[A-Z0-9_]+$/.test(error.code ?? '') ? error.code : 'C10_APPLICATION_OPERATION_UNAVAILABLE'
   } finally {

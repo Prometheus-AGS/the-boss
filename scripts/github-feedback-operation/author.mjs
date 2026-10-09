@@ -3,12 +3,15 @@ import { requireFact, route, same, waitFor } from '../reusable-team-operation/io
 import { readOnlyInstructions } from '../practical-team-presets-operation/contracts.mjs'
 
 export async function authorFeedback({ evaluate, signal, selected, configuration, skill, evidence }) {
+  evidence.stage = 'open-authoring-workspace'
   await openAuthoring(evaluate, signal, selected.workspaceId)
+  evidence.stage = 'select-customer-feedback-preset'
   const authoring = () => ipc(evaluate, route('authoring'), {})
   const preset = (await authoring()).templates.find((item) => item.template === 'customer-feedback')
   const roles = ['coordinator', 'product', 'documentation', 'reviewer']
   requireFact(preset && same(preset.members.map((member) => member.role), roles), 'C10_CUSTOMER_FEEDBACK_PRESET_REQUIRED')
   await click(evaluate, signal, '[data-ui~="team-authoring-new-customer-feedback"]')
+  evidence.stage = 'configure-feedback-team'
   await fill(evaluate, signal, '[data-ui~="team-authoring-name"]', configuration.marker + ' customer feedback')
   await fill(evaluate, signal, '[data-ui~="team-authoring-purpose"]',
     'Classify supplied customer feedback and draft an evidence-based GitHub issue for separate explicit approval.')
@@ -25,6 +28,7 @@ export async function authorFeedback({ evaluate, signal, selected, configuration
   await click(evaluate, signal, '[data-ui~="team-authoring-member"][data-role="reviewer"] ' +
     `[data-ui~="team-authoring-skill"][data-skill-digest="${skill.skillRef.digest}"] [role="checkbox"]`)
   await click(evaluate, signal, '[data-ui~="team-authoring-save"]')
+  evidence.stage = 'persist-feedback-team'
   const accepted = await waitFor(signal, async () => (await authoring()).revisions.find((item) =>
     item.team.title === configuration.marker + ' customer feedback'), 'C10_IMMUTABLE_CUSTOMER_FEEDBACK_TEAM_REQUIRED')
   requireFact(accepted.team.template === 'customer-feedback' && same(accepted.team.members.map((member) => member.role), roles) &&
