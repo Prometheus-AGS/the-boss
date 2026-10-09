@@ -275,8 +275,28 @@ export async function compileAuthoredTeam(team: UarAuthoredTeam, revision: numbe
     delete value.contentDigest
     return value
   }
+  const feedbackWorkflow =
+    team.template === 'customer-feedback'
+      ? { path: 'workflows/feedback.json', document: feedbackWorkflowDocument(base + ':workflow:feedback', version) }
+      : undefined
   const members = team.members.map((member) => {
     const source = clean(preset.files[member.role === 'coordinator' ? 'coordinator.json' : 'worker.json'])
+    const step = feedbackWorkflow?.document.steps.find((step) => step.role === member.role)
+    if (feedbackWorkflow && step) {
+      source.input = {
+        ...feedbackWorkflow.document.input,
+        ...(step.id === 'draft'
+          ? {
+              properties: {
+                ...feedbackWorkflow.document.input.properties,
+                classification: feedbackWorkflow.document.steps[0].output
+              },
+              required: ['feedback', 'classification']
+            }
+          : {})
+      } as Json
+      source.output = step.output as Json
+    }
     const id = base + ':agent:' + member.role
     const guidance =
       member.role === 'coordinator'
@@ -369,10 +389,6 @@ export async function compileAuthoredTeam(team: UarAuthoredTeam, revision: numbe
   const root = clean(preset.files['team.json'])
   const teamId = base + ':team'
   const nonCoordinators = team.members.filter((member) => member.role !== 'coordinator')
-  const feedbackWorkflow =
-    team.template === 'customer-feedback'
-      ? { path: 'workflows/feedback.json', document: feedbackWorkflowDocument(base + ':workflow:feedback', version) }
-      : undefined
   const definition = {
     ...root,
     id: teamId,
