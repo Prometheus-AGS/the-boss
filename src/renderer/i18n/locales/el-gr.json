@@ -7419,6 +7419,8 @@
   "work.teams.feedback.reopen": "Άνοιγμα προηγούμενων σχολίων",
   "work.teams.feedback.repository": "Αποθετήριο GitHub",
   "work.teams.feedback.repositoryHelp": "Εισαγάγετε owner/repository. Είναι ο προορισμός, όχι άδεια δημοσίευσης.",
+  "work.teams.feedback.retryApprove": "Έγκριση νέας προσπάθειας για αυτό το ζήτημα",
+  "work.teams.feedback.retryHelp": "Διορθώστε τα διαπιστευτήρια του GitHub και ελέγξτε το παρακάτω ζήτημα, το οποίο παραμένει αμετάβλητο. Η απορριφθείσα προσπάθεια διατηρείται. Με αυτήν την ενέργεια παρέχετε μια νέα έγκριση μίας χρήσης για τη δημοσίευση αυτού του ζητήματος.",
   "work.teams.feedback.setupHelp": "Πρώτα δημιουργήστε και αναπτύξτε ομάδα σχολίων πελατών με ρυθμισμένα μοντέλα σε αυτόν τον χώρο.",
   "work.teams.feedback.start": "Έναρξη σύνταξης ομάδας",
   "work.teams.feedback.state": "Κατάσταση: {{state}}",

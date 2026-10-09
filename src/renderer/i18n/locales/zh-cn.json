@@ -7419,6 +7419,8 @@
   "work.teams.feedback.reopen": "重新打开反馈",
   "work.teams.feedback.repository": "GitHub 仓库",
   "work.teams.feedback.repositoryHelp": "输入 owner/repository。这是发布目标，不代表发布授权。",
+  "work.teams.feedback.retryApprove": "批准重新发布此议题",
+  "work.teams.feedback.retryHelp": "修正 GitHub 凭据，然后检查下方未更改的议题。被拒绝的尝试记录会保留。此操作将授予新的单次批准，用于发布此议题。",
   "work.teams.feedback.setupHelp": "请先在此工作区创建并部署已配置模型的客户反馈团队。",
   "work.teams.feedback.start": "开始团队起草",
   "work.teams.feedback.state": "状态：{{state}}",

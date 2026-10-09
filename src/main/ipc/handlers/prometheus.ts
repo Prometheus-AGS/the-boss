@@ -1,7 +1,7 @@
 import { application } from '@application'
 import {
   readUarFeedbackSnapshot, readUarFeedback, startUarFeedback, previewUarFeedback,
-  approvePublishUarFeedback, controlUarFeedback, reconcileUarFeedback, configureUarFeedbackCredential,
+  approvePublishUarFeedback, retryPublishUarFeedback, controlUarFeedback, reconcileUarFeedback, configureUarFeedbackCredential,
   readUarLifecycleSnapshot,
   readUarWorkflows,
   readUarWorkflow,
@@ -138,6 +138,7 @@ const prometheusHandlerImplementations: IpcHandlersFor<typeof prometheusRequestS
   'prometheus.uar.feedback.start': async (input) => startUarFeedback(input),
   'prometheus.uar.feedback.preview': async (input) => previewUarFeedback(input),
   'prometheus.uar.feedback.approve_publish': async (input) => approvePublishUarFeedback(input),
+  'prometheus.uar.feedback.retry_publish': async (input) => retryPublishUarFeedback(input),
   'prometheus.uar.feedback.reject': async (input) => controlUarFeedback(input, 'reject'),
   'prometheus.uar.feedback.cancel': async (input) => controlUarFeedback(input, 'cancel'),
   'prometheus.uar.feedback.reconcile': async (input) => reconcileUarFeedback(input),

@@ -5,7 +5,7 @@ import { application } from '@application'
 import { readFeedbackGithubCredential, writeFeedbackGithubCredential } from '@main/services/prometheus/integrationConfig'
 import {
   uarFeedbackEffectSchema, uarFeedbackIssueSchema,
-  type UarFeedbackApprovalInput, type UarFeedbackControlInput, type UarFeedbackCredentialInput,
+  type UarFeedbackApprovalInput, type UarFeedbackRetryApprovalInput, type UarFeedbackControlInput, type UarFeedbackCredentialInput,
   type UarFeedbackDetail, type UarFeedbackIntake, type UarFeedbackSelector, type UarFeedbackStartInput
 } from '@shared/types/uarFeedback'
 import { uarWorkflowRunSchema } from '@shared/types/uarWorkflows'
@@ -130,6 +130,16 @@ export async function previewUarFeedback(input: UarFeedbackSelector) {
 }
 
 export async function approvePublishUarFeedback(input: UarFeedbackApprovalInput): Promise<UarFeedbackDetail> {
+  return approveFeedbackIssue(input)
+}
+
+export async function retryPublishUarFeedback(input: UarFeedbackRetryApprovalInput): Promise<UarFeedbackDetail> {
+  return approveFeedbackIssue(input, input)
+}
+
+async function approveFeedbackIssue(
+  input: UarFeedbackApprovalInput, retry?: UarFeedbackRetryApprovalInput
+): Promise<UarFeedbackDetail> {
   const scope = await feedbackScope(input.workspaceId)
   let intake = await getIntake(scope, input.intakeId)
   const draft = intake.issueDraft
@@ -142,6 +152,16 @@ export async function approvePublishUarFeedback(input: UarFeedbackApprovalInput)
   const token = await readFeedbackGithubCredential(binding.credentialRef)
   if (!token) throw new Error('FEEDBACK_GITHUB_CREDENTIAL_REQUIRED')
   if (JSON.stringify(draft.sanitizedIssue).includes(token)) throw new Error('FEEDBACK_CREDENTIAL_IN_DRAFT')
+  if (retry) {
+    intake = feedbackIntake(await feedbackRequest(scope, intakePath(intake.id) + '/retry-issue-approval', {
+      commandId: input.commandId, expectedRevision: input.expectedRevision,
+      expectedEffectId: retry.expectedEffectId, expectedDispatchId: retry.expectedDispatchId,
+      connectorBindingId: binding.id, expectedBindingRevision: binding.revision,
+      target: draft.target, artifactId: draft.artifactId, artifactDigest: draft.artifactDigest,
+      payloadDigest: draft.payloadDigest, sanitizedIssue: draft.sanitizedIssue,
+      sanitizationRef: draft.sanitizationRef, egressLabel: draft.egressLabel
+    }), scope, intake.id)
+  }
   if (!intake.issueApproval) {
     if (intake.revision !== input.expectedRevision) throw new Error('FEEDBACK_REVISION_CHANGED')
     intake = feedbackIntake(await feedbackRequest(scope, intakePath(intake.id) + '/explicit-issue-approval', {

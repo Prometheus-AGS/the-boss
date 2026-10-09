@@ -7419,6 +7419,8 @@
   "work.teams.feedback.reopen": "Reabrir comentarios",
   "work.teams.feedback.repository": "Repositorio de GitHub",
   "work.teams.feedback.repositoryHelp": "Introduzca owner/repository. Es el destino de publicación, no una autorización.",
+  "work.teams.feedback.retryApprove": "Aprobar otro intento de publicar esta incidencia",
+  "work.teams.feedback.retryHelp": "Corrige las credenciales de GitHub y revisa la incidencia sin cambios que aparece a continuación. Se conserva el intento rechazado. Esta acción concede una nueva autorización de un solo uso para publicar esta incidencia.",
   "work.teams.feedback.setupHelp": "Primero cree y despliegue un equipo de comentarios de clientes con modelos configurados en este espacio.",
   "work.teams.feedback.start": "Iniciar redacción del equipo",
   "work.teams.feedback.state": "Estado: {{state}}",

@@ -124,5 +124,5 @@ export { submitUarTeamTask, readUarTeamApprovals, decideUarTeamApproval } from '
 export { readUarLifecycleSnapshot } from './UarLifecycleAdministrationAdapter'
 export {
   readUarFeedbackSnapshot, readUarFeedback, startUarFeedback, previewUarFeedback,
-  approvePublishUarFeedback, controlUarFeedback, reconcileUarFeedback, configureUarFeedbackCredential
+  approvePublishUarFeedback, retryPublishUarFeedback, controlUarFeedback, reconcileUarFeedback, configureUarFeedbackCredential
 } from './uarFeedbackAdministration'

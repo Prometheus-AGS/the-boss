@@ -7419,6 +7419,8 @@
   "work.teams.feedback.reopen": "Geri bildirimi yeniden aç",
   "work.teams.feedback.repository": "GitHub deposu",
   "work.teams.feedback.repositoryHelp": "owner/repository girin. Bu yayın hedefidir; yayınlama izni değildir.",
+  "work.teams.feedback.retryApprove": "Bu sorunun yeniden yayımlanmasını onayla",
+  "work.teams.feedback.retryHelp": "GitHub kimlik bilgilerini düzeltin, ardından aşağıdaki değişmemiş sorunu inceleyin. Reddedilen deneme kaydı korunur. Bu işlem, bu sorunu yayımlamak için yeni ve tek kullanımlık bir onay verir.",
   "work.teams.feedback.setupHelp": "Önce bu çalışma alanında modelleri yapılandırılmış bir müşteri geri bildirim ekibi oluşturup dağıtın.",
   "work.teams.feedback.start": "Ekip taslağını başlat",
   "work.teams.feedback.state": "Durum: {{state}}",

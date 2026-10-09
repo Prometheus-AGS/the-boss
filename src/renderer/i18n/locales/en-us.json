@@ -7419,6 +7419,8 @@
   "work.teams.feedback.reopen": "Reopen feedback",
   "work.teams.feedback.repository": "GitHub repository",
   "work.teams.feedback.repositoryHelp": "Enter owner/repository. This is the publication destination, not permission to publish.",
+  "work.teams.feedback.retryApprove": "Approve retry of this issue",
+  "work.teams.feedback.retryHelp": "Correct the GitHub credential, then review the unchanged issue below. The rejected attempt is retained. This grants a new, single-use approval to publish this issue.",
   "work.teams.feedback.setupHelp": "Create and deploy a customer feedback team with configured models in this workspace first.",
   "work.teams.feedback.start": "Start team drafting",
   "work.teams.feedback.state": "State: {{state}}",

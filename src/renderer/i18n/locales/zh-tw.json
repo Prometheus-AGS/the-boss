@@ -7419,6 +7419,8 @@
   "work.teams.feedback.reopen": "重新開啟回饋",
   "work.teams.feedback.repository": "GitHub 儲存庫",
   "work.teams.feedback.repositoryHelp": "輸入 owner/repository。這是發布目標，不代表發布授權。",
+  "work.teams.feedback.retryApprove": "核准重新發布此議題",
+  "work.teams.feedback.retryHelp": "修正 GitHub 憑證，然後檢查下方未變更的議題。遭拒的嘗試紀錄會保留。此操作將授予新的單次核准，用於發布此議題。",
   "work.teams.feedback.setupHelp": "請先在此工作區建立並部署已設定模型的客戶回饋團隊。",
   "work.teams.feedback.start": "開始團隊草擬",
   "work.teams.feedback.state": "狀態：{{state}}",

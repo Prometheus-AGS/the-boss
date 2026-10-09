@@ -26,6 +26,10 @@ export const uarFeedbackApprovalSchema = uarFeedbackSelectorSchema.extend({
   payloadDigest: digest,
   target: uarFeedbackTargetSchema
 })
+export const uarFeedbackRetryApprovalSchema = uarFeedbackApprovalSchema.extend({
+  expectedEffectId: selector,
+  expectedDispatchId: selector
+})
 export const uarFeedbackControlSchema = uarFeedbackSelectorSchema.extend({ commandId: z.uuid(), expectedRevision: revision })
 export const uarFeedbackCredentialSchema = uarFeedbackWorkspaceSchema.extend({
   target: uarFeedbackTargetSchema,
@@ -74,6 +78,7 @@ export const uarFeedbackIntakeSchema = z.object({
   duplicateOf: z.string().nullable(),
   issueDraft: uarFeedbackDraftSchema.nullable(),
   issueApproval: approval.nullable(),
+  issueApprovalHistory: z.array(approval).default([]),
   connectorEffectId: z.string().nullable(),
   externalIssueId: z.string().nullable(),
   createdAt: z.string(),
@@ -131,5 +136,6 @@ export type UarFeedbackDetail = z.infer<typeof uarFeedbackDetailSchema>
 export type UarFeedbackSelector = z.infer<typeof uarFeedbackSelectorSchema>
 export type UarFeedbackStartInput = z.infer<typeof uarFeedbackStartSchema>
 export type UarFeedbackApprovalInput = z.infer<typeof uarFeedbackApprovalSchema>
+export type UarFeedbackRetryApprovalInput = z.infer<typeof uarFeedbackRetryApprovalSchema>
 export type UarFeedbackControlInput = z.infer<typeof uarFeedbackControlSchema>
 export type UarFeedbackCredentialInput = z.infer<typeof uarFeedbackCredentialSchema>

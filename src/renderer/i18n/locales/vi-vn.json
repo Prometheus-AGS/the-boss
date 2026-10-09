@@ -7419,6 +7419,8 @@
   "work.teams.feedback.reopen": "Mở lại phản hồi",
   "work.teams.feedback.repository": "Kho GitHub",
   "work.teams.feedback.repositoryHelp": "Nhập owner/repository. Đây là nơi đăng, không phải quyền cho phép đăng.",
+  "work.teams.feedback.retryApprove": "Phê duyệt thử lại việc đăng vấn đề này",
+  "work.teams.feedback.retryHelp": "Sửa thông tin xác thực GitHub, rồi xem lại vấn đề không thay đổi bên dưới. Lần thử bị từ chối vẫn được lưu giữ. Thao tác này cấp quyền phê duyệt mới, chỉ dùng một lần, để đăng vấn đề này.",
   "work.teams.feedback.setupHelp": "Trước tiên hãy tạo và triển khai nhóm phản hồi khách hàng với mô hình đã cấu hình trong không gian này.",
   "work.teams.feedback.start": "Bắt đầu nhóm soạn thảo",
   "work.teams.feedback.state": "Trạng thái: {{state}}",

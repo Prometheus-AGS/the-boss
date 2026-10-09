@@ -7419,6 +7419,8 @@
   "work.teams.feedback.reopen": "Feedback erneut öffnen",
   "work.teams.feedback.repository": "GitHub-Repository",
   "work.teams.feedback.repositoryHelp": "Geben Sie owner/repository ein. Das ist das Ziel, keine Erlaubnis zur Veröffentlichung.",
+  "work.teams.feedback.retryApprove": "Erneuten Versuch für dieses Issue genehmigen",
+  "work.teams.feedback.retryHelp": "Korrigieren Sie die GitHub-Zugangsdaten und prüfen Sie anschließend das unveränderte Issue unten. Der abgelehnte Versuch bleibt erhalten. Sie erteilen damit eine neue, einmalige Genehmigung zur Veröffentlichung dieses Issues.",
   "work.teams.feedback.setupHelp": "Erstellen Sie zuerst ein Kundenfeedback-Team mit konfigurierten Modellen und stellen Sie es in diesem Arbeitsbereich bereit.",
   "work.teams.feedback.start": "Team-Entwurf starten",
   "work.teams.feedback.state": "Status: {{state}}",

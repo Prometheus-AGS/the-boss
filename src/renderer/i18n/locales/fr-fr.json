@@ -7419,6 +7419,8 @@
   "work.teams.feedback.reopen": "Rouvrir un retour",
   "work.teams.feedback.repository": "Dépôt GitHub",
   "work.teams.feedback.repositoryHelp": "Saisissez owner/repository. Cette destination ne constitue pas une autorisation de publication.",
+  "work.teams.feedback.retryApprove": "Autoriser une nouvelle tentative pour ce ticket",
+  "work.teams.feedback.retryHelp": "Corrigez les identifiants GitHub, puis vérifiez le ticket inchangé ci-dessous. La tentative rejetée est conservée. Cette action accorde une nouvelle autorisation à usage unique pour publier ce ticket.",
   "work.teams.feedback.setupHelp": "Créez et déployez d’abord une équipe de retours clients avec des modèles configurés dans cet espace.",
   "work.teams.feedback.start": "Lancer la rédaction en équipe",
   "work.teams.feedback.state": "État : {{state}}",

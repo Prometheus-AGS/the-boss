@@ -7419,6 +7419,8 @@
   "work.teams.feedback.reopen": "Открыть сохранённый отзыв",
   "work.teams.feedback.repository": "Репозиторий GitHub",
   "work.teams.feedback.repositoryHelp": "Введите owner/repository. Это место публикации, а не разрешение на неё.",
+  "work.teams.feedback.retryApprove": "Одобрить повторную публикацию этой задачи",
+  "work.teams.feedback.retryHelp": "Исправьте учётные данные GitHub, затем проверьте неизменённую задачу ниже. Отклонённая попытка сохраняется. Это действие выдаёт новое одноразовое разрешение на публикацию этой задачи.",
   "work.teams.feedback.setupHelp": "Сначала создайте и разверните в этой рабочей области команду отзывов с настроенными моделями.",
   "work.teams.feedback.start": "Начать подготовку командой",
   "work.teams.feedback.state": "Состояние: {{state}}",

@@ -7419,6 +7419,8 @@
   "work.teams.feedback.reopen": "Reabrir feedback",
   "work.teams.feedback.repository": "Repositório GitHub",
   "work.teams.feedback.repositoryHelp": "Introduza owner/repository. Este é o destino, não uma autorização para publicar.",
+  "work.teams.feedback.retryApprove": "Aprovar nova tentativa para esta ocorrência",
+  "work.teams.feedback.retryHelp": "Corrija as credenciais do GitHub e reveja a ocorrência abaixo, que permanece inalterada. A tentativa rejeitada é conservada. Esta ação concede uma nova autorização de utilização única para publicar esta ocorrência.",
   "work.teams.feedback.setupHelp": "Primeiro crie e implemente uma equipa de feedback de clientes com modelos configurados neste espaço.",
   "work.teams.feedback.start": "Iniciar redação da equipa",
   "work.teams.feedback.state": "Estado: {{state}}",

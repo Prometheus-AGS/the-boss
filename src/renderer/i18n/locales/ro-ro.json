@@ -7419,6 +7419,8 @@
   "work.teams.feedback.reopen": "Redeschide feedbackul",
   "work.teams.feedback.repository": "Depozit GitHub",
   "work.teams.feedback.repositoryHelp": "Introduceți owner/repository. Aceasta este destinația, nu permisiunea de publicare.",
+  "work.teams.feedback.retryApprove": "Aprobă o nouă încercare pentru această problemă",
+  "work.teams.feedback.retryHelp": "Corectează datele de autentificare GitHub, apoi verifică problema neschimbată de mai jos. Încercarea respinsă este păstrată. Această acțiune acordă o nouă aprobare, valabilă o singură dată, pentru publicarea acestei probleme.",
   "work.teams.feedback.setupHelp": "Mai întâi creați și implementați o echipă de feedback cu modele configurate în acest spațiu.",
   "work.teams.feedback.start": "Începe redactarea în echipă",
   "work.teams.feedback.state": "Stare: {{state}}",

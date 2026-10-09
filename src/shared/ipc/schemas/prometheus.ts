@@ -1,7 +1,7 @@
 import * as z from 'zod'
 import {
   uarFeedbackWorkspaceSchema, uarFeedbackSelectorSchema, uarFeedbackStartSchema,
-  uarFeedbackApprovalSchema, uarFeedbackControlSchema, uarFeedbackCredentialSchema,
+  uarFeedbackApprovalSchema, uarFeedbackRetryApprovalSchema, uarFeedbackControlSchema, uarFeedbackCredentialSchema,
   uarFeedbackSnapshotSchema, uarFeedbackDetailSchema, uarFeedbackPreviewSchema
 } from '@shared/types/uarFeedback'
 
@@ -169,6 +169,7 @@ export const prometheusRequestSchemas = {
   'prometheus.uar.feedback.start': defineRoute({ input: uarFeedbackStartSchema, output: uarFeedbackDetailSchema }),
   'prometheus.uar.feedback.preview': defineRoute({ input: uarFeedbackSelectorSchema, output: uarFeedbackPreviewSchema }),
   'prometheus.uar.feedback.approve_publish': defineRoute({ input: uarFeedbackApprovalSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.retry_publish': defineRoute({ input: uarFeedbackRetryApprovalSchema, output: uarFeedbackDetailSchema }),
   'prometheus.uar.feedback.reject': defineRoute({ input: uarFeedbackControlSchema, output: uarFeedbackDetailSchema }),
   'prometheus.uar.feedback.cancel': defineRoute({ input: uarFeedbackControlSchema, output: uarFeedbackDetailSchema }),
   'prometheus.uar.feedback.reconcile': defineRoute({ input: uarFeedbackSelectorSchema, output: uarFeedbackDetailSchema }),
