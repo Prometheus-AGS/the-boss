@@ -1,4 +1,4 @@
-import { harnesses } from './types.mjs';
+import { exportCapabilityNames, harnesses } from './types.mjs';
 export function object(value, label = 'input') {
     if (!value || typeof value !== 'object' || Array.isArray(value))
         throw Error(`${label} must be an object`);
@@ -117,10 +117,16 @@ export function validateTeam(value) {
             target(key);
             const n = object(v, `native.${key}`);
             for (const field of Object.keys(n))
-                if (!['version', 'source', 'options', 'files'].includes(field))
+                if (!['version', 'source', 'options', 'files', 'requiredCapabilities'].includes(field))
                     throw Error(`Unknown native wrapper field ${field}; put native settings in options or files`);
             text(n.version, 'native version');
             text(n.source, 'native source');
+            if (n.requiredCapabilities !== undefined) {
+                const required = strings(n.requiredCapabilities, 'native.requiredCapabilities');
+                for (const capability of required)
+                    if (!exportCapabilityNames.includes(capability))
+                        throw Error(`Unknown export capability: ${capability}`);
+            }
             if (n.options !== undefined)
                 object(n.options, 'native options');
             if (n.files !== undefined)

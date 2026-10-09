@@ -46,7 +46,8 @@
       "type": "object", "additionalProperties": false, "required": ["version", "source"],
       "properties": {
         "version": { "type": "string", "minLength": 1 }, "source": { "type": "string", "minLength": 1 },
-        "options": { "type": "object" }, "files": { "type": "object", "additionalProperties": { "type": "string" } }
+        "options": { "type": "object" }, "files": { "type": "object", "additionalProperties": { "type": "string" } },
+        "requiredCapabilities": { "type": "array", "items": { "enum": ["agent-definition","role-model","team-options","agent-plugin","agent-marketplace","static-team-roster","model-policy-resolution"] } }
       }
     }
   }

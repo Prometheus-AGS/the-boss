@@ -1,4 +1,13 @@
 import * as z from 'zod'
+import { uarRepresentationWorkspaceSchema, uarRepresentationSaveSchema, uarRepresentationHistorySchema,
+  uarRepresentationRevokeSchema, uarRepresentationInstallSchema, uarRepresentationSnapshotSchema,
+  uarRepresentationGrantSchema } from '@shared/types/uarRepresentation'
+import { uarFeedbackPolicySchema, uarFeedbackPolicySaveSchema, uarFeedbackPolicyAuthorizeSchema,
+  uarFeedbackReviewSchema, uarFeedbackImplementationSchema } from '@shared/types/uarFeedbackPolicy'
+import {
+  uarConnectorWorkspaceSchema, uarConnectorSelectorSchema, uarConnectorSaveSchema, uarConnectorReconcileSchema,
+  uarConnectorPrepareSchema, uarConnectorSnapshotSchema, uarConnectorPublicBindingSchema, uarConnectorEffectSchema
+} from '@shared/types/uarConnectors'
 import {
   uarFeedbackWorkspaceSchema, uarFeedbackSelectorSchema, uarFeedbackStartSchema,
   uarFeedbackApprovalSchema, uarFeedbackRetryApprovalSchema, uarFeedbackControlSchema, uarFeedbackCredentialSchema,
@@ -164,6 +173,21 @@ const teamControlSchema = teamExecutionSelectorSchema.extend({
  * process cannot report.
  */
 export const prometheusRequestSchemas = {
+  'prometheus.uar.representation.snapshot': defineRoute({ input: uarRepresentationWorkspaceSchema, output: uarRepresentationSnapshotSchema }),
+  'prometheus.uar.representation.save': defineRoute({ input: uarRepresentationSaveSchema, output: uarRepresentationInstallSchema }),
+  'prometheus.uar.representation.history': defineRoute({ input: uarRepresentationHistorySchema, output: z.array(uarRepresentationGrantSchema) }),
+  'prometheus.uar.representation.revoke': defineRoute({ input: uarRepresentationRevokeSchema, output: uarRepresentationInstallSchema }),
+  'prometheus.uar.connectors.reconcile': defineRoute({ input: uarConnectorReconcileSchema, output: uarConnectorEffectSchema }),
+  'prometheus.uar.feedback.policies': defineRoute({ input: uarFeedbackWorkspaceSchema, output: z.array(uarFeedbackPolicySchema) }),
+  'prometheus.uar.feedback.save_policy': defineRoute({ input: uarFeedbackPolicySaveSchema, output: uarFeedbackPolicySchema }),
+  'prometheus.uar.feedback.authorize_policy': defineRoute({ input: uarFeedbackPolicyAuthorizeSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.attach_review': defineRoute({ input: uarFeedbackReviewSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.implementation': defineRoute({ input: uarFeedbackImplementationSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.connectors.snapshot': defineRoute({ input: uarConnectorWorkspaceSchema, output: uarConnectorSnapshotSchema }),
+  'prometheus.uar.connectors.save': defineRoute({ input: uarConnectorSaveSchema, output: uarConnectorPublicBindingSchema }),
+  'prometheus.uar.connectors.prepare': defineRoute({ input: uarConnectorPrepareSchema, output: uarConnectorEffectSchema }),
+  'prometheus.uar.connectors.dispatch': defineRoute({ input: uarConnectorSelectorSchema, output: uarConnectorEffectSchema }),
+  'prometheus.uar.connectors.cancel': defineRoute({ input: uarConnectorSelectorSchema, output: uarConnectorEffectSchema }),
   'prometheus.uar.feedback.snapshot': defineRoute({ input: uarFeedbackWorkspaceSchema, output: uarFeedbackSnapshotSchema }),
   'prometheus.uar.feedback.read': defineRoute({ input: uarFeedbackSelectorSchema, output: uarFeedbackDetailSchema }),
   'prometheus.uar.feedback.start': defineRoute({ input: uarFeedbackStartSchema, output: uarFeedbackDetailSchema }),

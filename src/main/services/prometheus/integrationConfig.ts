@@ -330,6 +330,23 @@ export async function writeFeedbackGithubCredential(
   await replaceSecrets(secrets)
 }
 
+/** Connector credentials remain protected in main; references are scoped by instance and workspace. */
+export async function readUarConnectorCredential(credentialRef: string): Promise<string | undefined> {
+  if (!/^host:\/\/connector-(github|notion|slack|jira)-[a-f0-9]{64}$/.test(credentialRef)) {
+    throw new Error('FEEDBACK_CREDENTIAL_SCOPE_DENIED')
+  }
+  return ((await readSecrets()) as Record<string, string | undefined>)[credentialRef]
+}
+
+export async function writeUarConnectorCredential(credentialRef: string, value: string): Promise<void> {
+  if (!/^host:\/\/connector-(github|notion|slack|jira)-[a-f0-9]{64}$/.test(credentialRef)) {
+    throw new Error('FEEDBACK_CREDENTIAL_SCOPE_DENIED')
+  }
+  const secrets = (await readSecrets()) as Record<string, string | undefined>
+  secrets[credentialRef] = value
+  await replaceSecrets(secrets)
+}
+
 export async function stageLiterConnectionCredential(
   providerConnectionId: string,
   mutation: LiterCredentialMutation

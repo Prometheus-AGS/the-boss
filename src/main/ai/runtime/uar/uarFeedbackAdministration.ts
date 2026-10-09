@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import * as z from 'zod'
 
 import { application } from '@application'
-import { readFeedbackGithubCredential, writeFeedbackGithubCredential } from '@main/services/prometheus/integrationConfig'
+import { readFeedbackGithubCredential, readUarConnectorCredential, writeFeedbackGithubCredential } from '@main/services/prometheus/integrationConfig'
 import {
   uarFeedbackEffectSchema, uarFeedbackIssueSchema,
   type UarFeedbackApprovalInput, type UarFeedbackRetryApprovalInput, type UarFeedbackControlInput, type UarFeedbackCredentialInput,
@@ -12,7 +12,7 @@ import { uarWorkflowRunSchema } from '@shared/types/uarWorkflows'
 
 import {
   feedbackBinding, feedbackBindings, feedbackCredentialRef, feedbackIntake, feedbackPayloadDigest,
-  feedbackRequest, feedbackScope, type FeedbackScope
+  feedbackRequest, feedbackScope, type FeedbackBinding, type FeedbackScope
 } from './uarFeedbackBoundary'
 import { publishFeedbackIssue, reconcileFeedbackIssue } from './uarFeedbackGithub'
 import { scopedTeam } from './UarTeamsAdministrationAdapter'
@@ -92,7 +92,7 @@ export async function startUarFeedback(input: UarFeedbackStartInput): Promise<Ua
   return detail(scope, intake)
 }
 
-export async function previewUarFeedback(input: UarFeedbackSelector) {
+export async function previewUarFeedback(input: UarFeedbackSelector, selectedBinding?: FeedbackBinding) {
   const scope = await feedbackScope(input.workspaceId)
   let intake = await getIntake(scope, input.intakeId)
   let state = await detail(scope, intake)
@@ -109,9 +109,11 @@ export async function previewUarFeedback(input: UarFeedbackSelector) {
       (run.wait && (run.wait.artifactId !== artifact.id || run.wait.artifactDigest !== artifact.digest)) ||
       !intake.requestedTarget) throw new Error('FEEDBACK_DRAFT_ARTIFACT_MISMATCH')
     const issue = uarFeedbackIssueSchema.parse(artifact.content)
-    const binding = await feedbackBinding(scope, intake.requestedTarget)
+    const binding = selectedBinding ?? await feedbackBinding(scope, intake.requestedTarget)
+    if (binding.target !== intake.requestedTarget || binding.workspaceId !== scope.workspaceId) throw new Error('FEEDBACK_SCOPE_DENIED')
     if (binding.ownerId !== intake.ownerId) throw new Error('FEEDBACK_SCOPE_DENIED')
-    const token = await readFeedbackGithubCredential(binding.credentialRef)
+    const token = selectedBinding ? await readUarConnectorCredential(binding.credentialRef)
+      : await readFeedbackGithubCredential(binding.credentialRef)
     if (token && JSON.stringify(issue).includes(token)) throw new Error('FEEDBACK_CREDENTIAL_IN_DRAFT')
     intake = feedbackIntake(await feedbackRequest(scope, intakePath(intake.id) + '/issue-draft', {
       commandId: 'draft-' + intake.id, expectedRevision: intake.revision, connectorBindingId: binding.id,

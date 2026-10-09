@@ -12,7 +12,8 @@ export const feedbackBase = '/api/v1/collaboration'
 export const feedbackBindingSchema = z.object({
   id: z.string(), ownerId: z.string(), workspaceId: z.string(), revision: z.number().int().nonnegative(),
   provider: z.literal('github'), target: uarFeedbackTargetSchema, credentialRef: z.string(), revoked: z.boolean(),
-  allowedActions: z.array(z.string()), allowedEgressLabels: z.array(z.string())
+  allowedActions: z.array(z.string()), allowedEgressLabels: z.array(z.string()),
+  approvalMode: z.enum(['explicit_customer', 'standing_policy']).default('explicit_customer')
 })
 export type FeedbackBinding = z.infer<typeof feedbackBindingSchema>
 export type FeedbackScope = { workspaceId: string; endpoint: UarSidecarEndpoint }
@@ -65,7 +66,7 @@ export async function feedbackBinding(scope: FeedbackScope, target: string): Pro
   const credentialRef = feedbackCredentialRef(scope, target)
   const existing = (await feedbackBindings(scope)).find((binding) => binding.credentialRef === credentialRef)
   if (existing) {
-    if (existing.revoked || existing.target !== target || !existing.allowedActions.includes('publish') ||
+    if (existing.approvalMode !== 'explicit_customer' || existing.revoked || existing.target !== target || !existing.allowedActions.includes('publish') ||
       !existing.allowedEgressLabels.includes('public')) throw new Error('FEEDBACK_CONNECTOR_AUTHORITY_CHANGED')
     return existing
   }

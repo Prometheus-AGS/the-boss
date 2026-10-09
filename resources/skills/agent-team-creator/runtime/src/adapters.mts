@@ -3,6 +3,7 @@ import { identifier, json } from './adapters-codecs.mjs';
 import { exportLocal } from './adapters-local.mjs';
 import { exportService } from './adapters-services.mjs';
 import { bindUiRoles } from './ui-bindings.mjs';
+import { adapterCapabilities, requireAdapterCapabilities } from './adapters-capabilities.mjs';
 
 const sources: Record<Target, { source: string; version: string }> = {
   codex: { source: 'https://learn.chatgpt.com/docs/agent-configuration/subagents', version: 'documentation inspected 2026-09-24' },
@@ -72,6 +73,8 @@ export function exportTeam(team: Team, target: Target): ExportResult {
     },
   };
   const native = team.native?.[target];
+  const capabilities = adapterCapabilities(target);
+  requireAdapterCapabilities(target, native?.requiredCapabilities, capabilities);
   if (native && (!native.source?.trim() || !native.version?.trim())) {
     throw new Error('Native configuration requires a nonempty source and version receipt.');
   }
@@ -83,7 +86,10 @@ export function exportTeam(team: Team, target: Target): ExportResult {
   if (native?.options) context.add('native-options.json', json(native.options));
   const verification: ExportResult['verification'] = { level: 'source-verified', ...sources[target], live: 'unverified' };
   context.add('export-receipt.json', json({
-    target, verification, nativeProvenance: native ? { source: native.source, version: native.version } : null,
+    target, verification, capabilities, requiredCapabilities: native?.requiredCapabilities ?? [],
+    portableModelPolicies: { team: team.modelPolicy ?? null, skills: team.skillPolicies ?? null,
+      roles: Object.fromEntries(team.roles.filter(role => role.modelPolicy).map(role => [role.id, role.modelPolicy])) },
+    nativeProvenance: native ? { source: native.source, version: native.version } : null,
     nativeOptions: native?.options ?? null,
     roleOverrides: Object.fromEntries(team.roles.filter(role => role.native?.[target]).map(role => [role.id, role.native?.[target]])),
     diagnostics, instructions,
@@ -94,5 +100,5 @@ export function exportTeam(team: Team, target: Target): ExportResult {
     }
     context.add(path, content);
   }
-  return { target, files, verification, diagnostics, instructions };
+  return { target, files, verification, capabilities, diagnostics, instructions };
 }

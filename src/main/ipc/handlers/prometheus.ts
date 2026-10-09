@@ -1,5 +1,9 @@
 import { application } from '@application'
 import {
+  readUarConnectors, saveUarConnector, prepareUarConnector, controlUarConnector, reconcileUarConnector,
+  readUarRepresentation, readUarRepresentationHistory, saveUarRepresentation, revokeUarRepresentation,
+  readUarFeedbackPolicies, saveUarFeedbackPolicy, authorizeUarFeedbackPolicy,
+  attachUarFeedbackReview, admitUarFeedbackImplementation,
   readUarFeedbackSnapshot, readUarFeedback, startUarFeedback, previewUarFeedback,
   approvePublishUarFeedback, retryPublishUarFeedback, controlUarFeedback, reconcileUarFeedback, configureUarFeedbackCredential,
   readUarLifecycleSnapshot,
@@ -133,6 +137,21 @@ async function withIntegrationRevision<T>(run: () => Promise<T>): Promise<T> {
 }
 
 const prometheusHandlerImplementations: IpcHandlersFor<typeof prometheusRequestSchemas> = {
+  'prometheus.uar.representation.snapshot': async ({ workspaceId }) => readUarRepresentation(workspaceId),
+  'prometheus.uar.representation.history': async (input) => readUarRepresentationHistory(input),
+  'prometheus.uar.representation.save': async (input) => saveUarRepresentation(input),
+  'prometheus.uar.representation.revoke': async (input) => revokeUarRepresentation(input),
+  'prometheus.uar.connectors.reconcile': async (input) => reconcileUarConnector(input),
+  'prometheus.uar.feedback.policies': async ({ workspaceId }) => readUarFeedbackPolicies(workspaceId),
+  'prometheus.uar.feedback.save_policy': async (input) => saveUarFeedbackPolicy(input),
+  'prometheus.uar.feedback.authorize_policy': async (input) => authorizeUarFeedbackPolicy(input),
+  'prometheus.uar.feedback.attach_review': async (input) => attachUarFeedbackReview(input),
+  'prometheus.uar.feedback.implementation': async (input) => admitUarFeedbackImplementation(input),
+  'prometheus.uar.connectors.snapshot': async ({ workspaceId }) => readUarConnectors(workspaceId),
+  'prometheus.uar.connectors.save': async (input) => saveUarConnector(input),
+  'prometheus.uar.connectors.prepare': async (input) => prepareUarConnector(input),
+  'prometheus.uar.connectors.dispatch': async (input) => controlUarConnector(input, 'dispatch'),
+  'prometheus.uar.connectors.cancel': async (input) => controlUarConnector(input, 'cancel'),
   'prometheus.uar.feedback.snapshot': async ({ workspaceId }) => readUarFeedbackSnapshot(workspaceId),
   'prometheus.uar.feedback.read': async (input) => readUarFeedback(input),
   'prometheus.uar.feedback.start': async (input) => startUarFeedback(input),

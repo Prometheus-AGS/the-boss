@@ -17,7 +17,7 @@ export function writeExport(out: string, result: ExportResult): { directory: str
     names.add(lower);
   }
   for (const file of names) for (const other of names) if (file !== other && other.startsWith(file + '/')) throw Error(`File/directory collision: ${file}`);
-  files[reserved] = JSON.stringify({ target: result.target, verification: result.verification, diagnostics: result.diagnostics,
+  files[reserved] = JSON.stringify({ target: result.target, verification: result.verification, capabilities: result.capabilities, diagnostics: result.diagnostics,
     instructions: result.instructions, files: Object.entries(files).map(([file, content]) => ({ file, sha256: createHash('sha256').update(content).digest('hex') })) }, null, 2) + '\n';
   const directory = path.resolve(out);
   fs.mkdirSync(path.dirname(directory), { recursive: true });
