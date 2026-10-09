@@ -1,4 +1,9 @@
 import * as z from 'zod'
+import {
+  uarFeedbackWorkspaceSchema, uarFeedbackSelectorSchema, uarFeedbackStartSchema,
+  uarFeedbackApprovalSchema, uarFeedbackControlSchema, uarFeedbackCredentialSchema,
+  uarFeedbackSnapshotSchema, uarFeedbackDetailSchema, uarFeedbackPreviewSchema
+} from '@shared/types/uarFeedback'
 
 import {
   literConfigEditSchema,
@@ -159,6 +164,15 @@ const teamControlSchema = teamExecutionSelectorSchema.extend({
  * process cannot report.
  */
 export const prometheusRequestSchemas = {
+  'prometheus.uar.feedback.snapshot': defineRoute({ input: uarFeedbackWorkspaceSchema, output: uarFeedbackSnapshotSchema }),
+  'prometheus.uar.feedback.read': defineRoute({ input: uarFeedbackSelectorSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.start': defineRoute({ input: uarFeedbackStartSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.preview': defineRoute({ input: uarFeedbackSelectorSchema, output: uarFeedbackPreviewSchema }),
+  'prometheus.uar.feedback.approve_publish': defineRoute({ input: uarFeedbackApprovalSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.reject': defineRoute({ input: uarFeedbackControlSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.cancel': defineRoute({ input: uarFeedbackControlSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.reconcile': defineRoute({ input: uarFeedbackSelectorSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.credential': defineRoute({ input: uarFeedbackCredentialSchema, output: z.object({ configured: z.boolean() }).strict() }),
   'prometheus.uar.lifecycle.snapshot': defineRoute({
     input: uarLifecycleSelectorSchema,
     output: z.custom<UarLifecycleSnapshot>()

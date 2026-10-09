@@ -1,5 +1,7 @@
 import { application } from '@application'
 import {
+  readUarFeedbackSnapshot, readUarFeedback, startUarFeedback, previewUarFeedback,
+  approvePublishUarFeedback, controlUarFeedback, reconcileUarFeedback, configureUarFeedbackCredential,
   readUarLifecycleSnapshot,
   readUarWorkflows,
   readUarWorkflow,
@@ -131,6 +133,15 @@ async function withIntegrationRevision<T>(run: () => Promise<T>): Promise<T> {
 }
 
 const prometheusHandlerImplementations: IpcHandlersFor<typeof prometheusRequestSchemas> = {
+  'prometheus.uar.feedback.snapshot': async ({ workspaceId }) => readUarFeedbackSnapshot(workspaceId),
+  'prometheus.uar.feedback.read': async (input) => readUarFeedback(input),
+  'prometheus.uar.feedback.start': async (input) => startUarFeedback(input),
+  'prometheus.uar.feedback.preview': async (input) => previewUarFeedback(input),
+  'prometheus.uar.feedback.approve_publish': async (input) => approvePublishUarFeedback(input),
+  'prometheus.uar.feedback.reject': async (input) => controlUarFeedback(input, 'reject'),
+  'prometheus.uar.feedback.cancel': async (input) => controlUarFeedback(input, 'cancel'),
+  'prometheus.uar.feedback.reconcile': async (input) => reconcileUarFeedback(input),
+  'prometheus.uar.feedback.credential': async (input) => configureUarFeedbackCredential(input),
   'prometheus.uar.lifecycle.snapshot': async (input) => readUarLifecycleSnapshot(input),
   'prometheus.liter_config.select_local': async () => selectLocalLiterConfig(),
   'prometheus.liter_config.read': async ({ source }) => readLiterConfig(source),
