@@ -39,6 +39,11 @@ export function UarConnectorAdministrationPanel({ workspaceId }: { workspaceId: 
   const [body, setBody] = useState('')
   const [issue, setIssue] = useState('')
   const [properties, setProperties] = useState('{}')
+  const [reconcileId, setReconcileId] = useState('')
+  const [disposition, setDisposition] = useState<'confirmed' | 'not_applied'>('confirmed')
+  const [externalId, setExternalId] = useState('')
+  const [evidenceRef, setEvidenceRef] = useState('')
+  const [independentlyChecked, setIndependentlyChecked] = useState(false)
   const binding = snapshot?.bindings.find((item) => item.id === selectedId)
 
   const load = useCallback(async () => {
@@ -151,6 +156,25 @@ export function UarConnectorAdministrationPanel({ workspaceId }: { workspaceId: 
   }
 
   const requiresDecision = binding && binding.provider !== 'github' && !['read', 'draft'].includes(action)
+  const reconciliation = snapshot?.effects.find((effect) => effect.id === reconcileId)
+  const reconcile = async () => {
+    if (!reconciliation || !independentlyChecked) return
+    setBusy(true)
+    setError(undefined)
+    try {
+      await ipcApi.request('prometheus.uar.connectors.reconcile', {
+        workspaceId, effectId: reconciliation.id, expectedPayloadDigest: reconciliation.payloadDigest,
+        disposition, ...(externalId.trim() ? { externalId: externalId.trim() } : {}),
+        evidenceRef: evidenceRef.trim(), independentlyChecked: true
+      })
+      setReconcileId('')
+      setEvidenceRef('')
+      setExternalId('')
+      setIndependentlyChecked(false)
+      await load()
+    } catch (cause) { setError(cause instanceof Error ? cause.message : String(cause)) }
+    finally { setBusy(false) }
+  }
   return (
     <div className="space-y-5" data-ui="uar-connectors" aria-busy={busy}>
       <SettingGroup>
@@ -262,12 +286,29 @@ export function UarConnectorAdministrationPanel({ workspaceId }: { workspaceId: 
                 {effect.receipt?.evidenceRef && <div><dt className="font-medium">{tr('evidence')}</dt><dd>{effect.receipt.evidenceRef}</dd></div>}
               </dl>
             </details>
-            {effect.status === 'prepared' && <div className="flex flex-wrap justify-end gap-2">
+            {['prepared', 'draft'].includes(effect.status) && <div className="flex flex-wrap justify-end gap-2">
               <Button variant="outline" size="sm" disabled={busy} onClick={() => void changeEffect(effect, 'cancel')}>{t('common.cancel')}</Button>
-              <Button size="sm" disabled={busy} onClick={() => void changeEffect(effect, 'dispatch')}>{tr('dispatch')}</Button>
+              {effect.status === 'prepared' && <Button size="sm" disabled={busy} onClick={() => void changeEffect(effect, 'dispatch')}>{tr('dispatch')}</Button>}
             </div>}
+            {['uncertain', 'dispatched'].includes(effect.status) && <Button variant="outline" size="sm" disabled={busy}
+              onClick={() => { setReconcileId(effect.id); setIndependentlyChecked(false); setExternalId(''); setEvidenceRef('') }}>{tr('reconcile')}</Button>}
           </article>
         ))}</div>
+        {reconciliation && <div className="mt-4 space-y-4 border-t border-border pt-4" data-ui="uar-connector-reconcile">
+          <h3 className="text-sm font-medium">{tr('reconcile')} · {reconciliation.target}</h3>
+          <p className="text-xs text-muted-foreground">{tr('reconcileHelp')}</p>
+          <IntegrationChoice label={tr('disposition')} value={disposition} onChange={setDisposition} disabled={busy}
+            options={['confirmed', 'not_applied'].map((value) => ({ value: value as typeof disposition, label: tr(`state.${value}`) }))} />
+          <IntegrationField label={tr('externalId')} value={externalId} onChange={setExternalId} disabled={busy} />
+          <IntegrationField label={tr('evidence')} value={evidenceRef} onChange={setEvidenceRef} disabled={busy} />
+          <label className="flex min-h-6 items-center gap-2 text-sm"><Checkbox checked={independentlyChecked} disabled={busy}
+            onCheckedChange={(value) => setIndependentlyChecked(value === true)} />{tr('independentlyChecked')}</label>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" disabled={busy} onClick={() => setReconcileId('')}>{t('common.cancel')}</Button>
+            <Button disabled={busy || !independentlyChecked || !evidenceRef.trim() || (disposition === 'confirmed' && !externalId.trim())}
+              onClick={() => void reconcile()}>{tr('recordReconciliation')}</Button>
+          </div>
+        </div>}
       </SettingGroup>
     </div>
   )
