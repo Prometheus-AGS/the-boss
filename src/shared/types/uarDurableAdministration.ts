@@ -2,6 +2,16 @@ export type UarInstanceProfile = 'request' | 'on_demand' | 'resident'
 export type UarInstanceAction = 'activate' | 'passivate' | 'drain' | 'disable' | 'restart' | 'cancel'
 export type UarObserverAction = 'pause' | 'resume'
 
+export interface UarDurableCommand {
+  commandId: string
+  kind: 'turn' | UarInstanceAction
+  status: 'accepted' | 'running' | 'completed' | 'failed' | 'cancelled' | 'uncertain'
+  attemptId: string | null
+  rootRunId: string | null
+  acceptedAt: string
+  updatedAt: string
+}
+
 export interface UarDurableBinding {
   id: string
   revision: number
@@ -21,6 +31,8 @@ export interface UarDurableInstance {
   bindingId: string
   bindingRevision: number
   bindingDigest?: string
+  representationRevision?: number
+  representationGrantRefs?: Array<{ grantId: string; revision: number; constraintDigest: string }>
   sessionId?: string
   limits?: {
     maxInbox: number
@@ -124,6 +136,7 @@ export type UarDurableOperation =
   | 'agent-instances.list'
   | 'agent-instances.read'
   | 'agent-instances.create'
+  | 'agent-instances.turn'
   | `agent-instances.${UarInstanceAction}`
   | 'observers.list'
   | 'observers.read'

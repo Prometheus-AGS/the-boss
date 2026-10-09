@@ -7642,5 +7642,11 @@
   "xlsx_preview.formula_not_evaluated": "Не удалось вычислить формулу",
   "xlsx_preview.sheet_tabs_label": "Листы",
   "xlsx_preview.too_large.description": "Размер файла {{size}} превышает ограничение предварительного просмотра {{limit}}.",
-  "xlsx_preview.too_large.title": "Файл слишком велик для предварительного просмотра"
+  "xlsx_preview.too_large.title": "Файл слишком велик для предварительного просмотра",
+  "settings.prometheus.integration.uarAdmin.durable.turnPrompt": "Задача экземпляра",
+  "settings.prometheus.integration.uarAdmin.durable.turnHelp": "Отправьте задачу этому экземпляру с настроенной моделью и текущими полномочиями. Обновите для просмотра завершения или ошибки; история команд сохраняется после повторного открытия.",
+  "settings.prometheus.integration.uarAdmin.durable.submitTurn": "Отправить задачу",
+  "settings.prometheus.integration.uarAdmin.representation.resources": "Области ресурсов",
+  "settings.prometheus.integration.uarAdmin.representation.applied": "Эта точная редакция разрешения привязана к выбранному экземпляру. Каждое действие по-прежнему регулируется текущей политикой, сроком действия и отзывом.",
+  "settings.prometheus.integration.uarAdmin.representation.notApplied": "Эта редакция разрешения не привязана к выбранному экземпляру. Сохраните проверенную редакцию, чтобы применить её."
 }

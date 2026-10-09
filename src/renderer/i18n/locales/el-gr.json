@@ -7642,5 +7642,11 @@
   "xlsx_preview.formula_not_evaluated": "Δεν ήταν δυνατή η αξιολόγηση του τύπου",
   "xlsx_preview.sheet_tabs_label": "Φύλλα",
   "xlsx_preview.too_large.description": "Το μέγεθος αρχείου {{size}} υπερβαίνει το όριο προεπισκόπησης {{limit}}.",
-  "xlsx_preview.too_large.title": "Το αρχείο είναι πολύ μεγάλο για προεπισκόπηση"
+  "xlsx_preview.too_large.title": "Το αρχείο είναι πολύ μεγάλο για προεπισκόπηση",
+  "settings.prometheus.integration.uarAdmin.durable.turnPrompt": "Εργασία παρουσίας",
+  "settings.prometheus.integration.uarAdmin.durable.turnHelp": "Υποβολή σε αυτή την παρουσία με το ρυθμισμένο μοντέλο και την τρέχουσα εξουσιοδότηση. Ανανεώστε για ολοκλήρωση ή αποτυχία· το ιστορικό εντολών διατηρείται μετά το άνοιγμα.",
+  "settings.prometheus.integration.uarAdmin.durable.submitTurn": "Υποβολή εργασίας",
+  "settings.prometheus.integration.uarAdmin.representation.resources": "Πεδία πόρων",
+  "settings.prometheus.integration.uarAdmin.representation.applied": "Αυτή η ακριβής αναθεώρηση εξουσιοδότησης συνδέεται με την επιλεγμένη παρουσία. Η τρέχουσα πολιτική, η ισχύς και η ανάκληση εξακολουθούν να διέπουν κάθε ενέργεια.",
+  "settings.prometheus.integration.uarAdmin.representation.notApplied": "Αυτή η αναθεώρηση εξουσιοδότησης δεν συνδέεται με την επιλεγμένη παρουσία. Αποθηκεύστε την ελεγμένη αναθεώρηση για εφαρμογή."
 }

@@ -4,6 +4,7 @@ import { application } from '@application'
 import { agentWorkspaceService } from '@data/services/AgentWorkspaceService'
 import type {
   UarDurableBinding,
+  UarDurableCommand,
   UarDurableInstance,
   UarDurableObserver,
   UarDurableOperation,
@@ -36,6 +37,7 @@ const operations = [
   'agent-instances.list',
   'agent-instances.read',
   'agent-instances.create',
+  'agent-instances.turn',
   'agent-instances.activate',
   'agent-instances.passivate',
   'agent-instances.drain',
@@ -257,6 +259,29 @@ export async function actOnUarDurableInstance(input: {
     }),
     resolved
   )
+}
+
+/** Submit through the native owner/workspace boundary; never accept a renderer endpoint or principal. */
+export async function submitUarDurableTurn(input: {
+  workspaceId: string
+  instanceId: string
+  commandId: string
+  prompt: string
+}): Promise<UarDurableCommand> {
+  const resolved = workspace(input.workspaceId)
+  const state = await capabilityState()
+  requireOperation(state, 'agent-instances.turn')
+  requireOperation(state, 'agent-instances.read')
+  const path = `${instancePath}/${encodeURIComponent(input.instanceId)}`
+  projectInstance(await scopedRequest(resolved, path, state.generation), resolved)
+  return z.object({
+    commandId: z.string(), kind: z.enum(['turn', 'activate', 'passivate', 'drain', 'disable', 'restart', 'cancel']),
+    status: z.enum(['accepted', 'running', 'completed', 'failed', 'cancelled', 'uncertain']),
+    attemptId: z.string().nullable(), rootRunId: z.string().nullable(),
+    acceptedAt: z.string(), updatedAt: z.string()
+  }).parse(await scopedRequest(resolved, `${path}/turns`, state.generation, 'POST', {
+    commandId: input.commandId, prompt: input.prompt
+  }))
 }
 
 export async function createUarDurableObserver(input: {

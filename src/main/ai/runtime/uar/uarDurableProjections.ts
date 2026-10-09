@@ -13,6 +13,9 @@ const rawInstance = z.object({
   bindingId: z.string(),
   bindingRevision: count,
   bindingDigest: z.string().optional(),
+  representationRevision: count.optional(),
+  representationGrantRefs: z.array(z.object({ grantId: z.string(), revision: count,
+    constraintDigest: z.string() })).optional(),
   sessionId: z.string().optional(),
   limits: z
     .object({

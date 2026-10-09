@@ -94,6 +94,7 @@ import {
 } from '@shared/types/uarChannelObservers'
 import type {
   UarDurableBinding,
+  UarDurableCommand,
   UarDurableInstance,
   UarDurableObserver,
   UarDurableWorkspaceSnapshot
@@ -706,6 +707,11 @@ export const prometheusRequestSchemas = {
       })
       .strict(),
     output: z.custom<UarDurableInstance>()
+  }),
+  'prometheus.uar.durable.submit_turn': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256), instanceId: z.string().min(1).max(256),
+      commandId: z.uuid(), prompt: z.string().trim().min(1).max(16000) }).strict(),
+    output: z.custom<UarDurableCommand>()
   }),
   'prometheus.uar.durable.instance_action': defineRoute({
     input: z

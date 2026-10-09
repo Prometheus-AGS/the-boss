@@ -7642,5 +7642,11 @@
   "xlsx_preview.formula_not_evaluated": "Formula couldn't be evaluated",
   "xlsx_preview.sheet_tabs_label": "Sheets",
   "xlsx_preview.too_large.description": "File size {{size}} exceeds the {{limit}} preview limit.",
-  "xlsx_preview.too_large.title": "File too large to preview"
+  "xlsx_preview.too_large.title": "File too large to preview",
+  "settings.prometheus.integration.uarAdmin.durable.turnPrompt": "Instance task",
+  "settings.prometheus.integration.uarAdmin.durable.turnHelp": "Submit to this instance using its configured model and current authority. Refresh to see completion or failure; retained command history remains available after reopening.",
+  "settings.prometheus.integration.uarAdmin.durable.submitTurn": "Submit task",
+  "settings.prometheus.integration.uarAdmin.representation.resources": "Resource scopes",
+  "settings.prometheus.integration.uarAdmin.representation.applied": "This exact grant revision is attached to the selected instance. Current policy, validity and revocation still govern every action.",
+  "settings.prometheus.integration.uarAdmin.representation.notApplied": "This grant revision is not attached to the selected instance. Save the reviewed revision to apply it."
 }

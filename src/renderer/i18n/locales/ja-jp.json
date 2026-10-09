@@ -7642,5 +7642,11 @@
   "xlsx_preview.formula_not_evaluated": "数式を評価できませんでした",
   "xlsx_preview.sheet_tabs_label": "シート",
   "xlsx_preview.too_large.description": "ファイルサイズ {{size}} はプレビュー上限の {{limit}} を超えています。",
-  "xlsx_preview.too_large.title": "ファイルが大きすぎてプレビューできません"
+  "xlsx_preview.too_large.title": "ファイルが大きすぎてプレビューできません",
+  "settings.prometheus.integration.uarAdmin.durable.turnPrompt": "インスタンスのタスク",
+  "settings.prometheus.integration.uarAdmin.durable.turnHelp": "設定済みのモデルと現在の権限で、このインスタンスに送信します。更新すると完了または失敗を確認できます。コマンド履歴は再度開いた後も保持されます。",
+  "settings.prometheus.integration.uarAdmin.durable.submitTurn": "タスクを送信",
+  "settings.prometheus.integration.uarAdmin.representation.resources": "リソースの範囲",
+  "settings.prometheus.integration.uarAdmin.representation.applied": "この権限の正確なリビジョンが選択したインスタンスに関連付けられています。各操作には引き続き現在のポリシー、有効期限、失効状態が適用されます。",
+  "settings.prometheus.integration.uarAdmin.representation.notApplied": "この権限のリビジョンは選択したインスタンスに関連付けられていません。確認済みのリビジョンを保存して適用してください。"
 }

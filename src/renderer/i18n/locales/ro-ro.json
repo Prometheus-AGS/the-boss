@@ -7642,5 +7642,11 @@
   "xlsx_preview.formula_not_evaluated": "Formula nu a putut fi evaluată",
   "xlsx_preview.sheet_tabs_label": "Foi",
   "xlsx_preview.too_large.description": "Dimensiunea fișierului {{size}} depășește limita de previzualizare de {{limit}}.",
-  "xlsx_preview.too_large.title": "Fișier prea mare pentru previzualizare"
+  "xlsx_preview.too_large.title": "Fișier prea mare pentru previzualizare",
+  "settings.prometheus.integration.uarAdmin.durable.turnPrompt": "Sarcina instanței",
+  "settings.prometheus.integration.uarAdmin.durable.turnHelp": "Trimiteți către această instanță folosind modelul configurat și autoritatea curentă. Reîmprospătați pentru a vedea finalizarea sau eroarea; istoricul comenzilor rămâne disponibil după redeschidere.",
+  "settings.prometheus.integration.uarAdmin.durable.submitTurn": "Trimite sarcina",
+  "settings.prometheus.integration.uarAdmin.representation.resources": "Domeniile resurselor",
+  "settings.prometheus.integration.uarAdmin.representation.applied": "Această revizie exactă a autorizării este atașată instanței selectate. Politica actuală, valabilitatea și revocarea guvernează în continuare fiecare acțiune.",
+  "settings.prometheus.integration.uarAdmin.representation.notApplied": "Această revizie a autorizării nu este atașată instanței selectate. Salvați revizia examinată pentru a o aplica."
 }

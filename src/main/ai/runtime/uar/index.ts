@@ -10,7 +10,8 @@ export {
   actOnUarDurableObserver,
   createUarDurableInstance,
   createUarDurableObserver,
-  readUarDurableWorkspace
+  readUarDurableWorkspace,
+  submitUarDurableTurn
 } from './UarDurableAdministrationAdapter'
 export {
   addUarTeamTask,
