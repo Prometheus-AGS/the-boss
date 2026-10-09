@@ -75,7 +75,9 @@ const safeTeamProviderRetry = z.object({
     delay_ms: z.number().int().nonnegative()
   })
 })
-const START_TIMEOUT_MS = 30_000
+// C10 packaged cold-start receipt (2026-10-09): READY after skill initialization took 34,651 ms.
+// This startup deadline is separate from capability and model request timeouts.
+const START_TIMEOUT_MS = 60_000
 const STOP_TIMEOUT_MS = 5_000
 const PROVIDER_CREDENTIAL_ENV_PATTERNS = [/_API_KEY$/i, /_API_TOKEN$/i, /_ACCESS_TOKEN$/i, /_SECRET_KEY$/i]
 const LEGACY_UAR_ENV_KEYS = new Set([

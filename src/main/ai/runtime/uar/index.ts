@@ -122,3 +122,7 @@ export { readUarTeamSkillCatalog } from './UarTeamSkillCatalogAdapter'
 export { submitUarTeamTask, readUarTeamApprovals, decideUarTeamApproval } from './UarTeamWorkAdapter'
 
 export { readUarLifecycleSnapshot } from './UarLifecycleAdministrationAdapter'
+export {
+  readUarFeedbackSnapshot, readUarFeedback, startUarFeedback, previewUarFeedback,
+  approvePublishUarFeedback, retryPublishUarFeedback, controlUarFeedback, reconcileUarFeedback, configureUarFeedbackCredential
+} from './uarFeedbackAdministration'

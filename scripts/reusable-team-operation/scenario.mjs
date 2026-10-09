@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 
-import { digest, write, same, route, requireFact, waitFor } from './io.mjs'
+import { digest, write, same, route, requireFact, waitFor, nativeIpcFailure } from './io.mjs'
 import { liveOutputObserver } from './live-output.mjs'
 import { attemptFailureEvidence } from './attempt-diagnostics.mjs'
 import { mixedTeamApprovalOperator } from './approvals.mjs'
@@ -21,7 +21,7 @@ async function click(evaluate, signal, selector) {
     else if(node.getAttribute('data-slot')==='select-item')node.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
     else node.click();return true;})()`),
     'C15_VISIBLE_CONTROL_UNAVAILABLE'
-  )
+  ).catch((error) => { throw Object.assign(error, { failureSelector: selector }) })
 }
 async function fill(evaluate, signal, selector, value) {
   await waitFor(
@@ -31,7 +31,7 @@ async function fill(evaluate, signal, selector, value) {
     Object.getOwnPropertyDescriptor(node.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype,'value').set.call(node,${JSON.stringify(value)});
     node.dispatchEvent(new Event('input',{bubbles:true}));node.dispatchEvent(new Event('change',{bubbles:true}));return true;})()`),
     'C15_VISIBLE_INPUT_UNAVAILABLE'
-  )
+  ).catch((error) => { throw Object.assign(error, { failureSelector: selector }) })
 }
 async function choose(evaluate, signal, selector, option) {
   await click(evaluate, signal, selector)
@@ -39,7 +39,7 @@ async function choose(evaluate, signal, selector, option) {
 }
 async function ipc(evaluate, name, input) {
   const result = await evaluate(`window.api.ipcApi.request(${JSON.stringify(name)},${JSON.stringify(input)})`)
-  requireFact(result?.ok, 'C15_SUPPORTED_APPLICATION_API_UNAVAILABLE')
+  if (!result?.ok) throw Object.assign(new Error('C15_SUPPORTED_APPLICATION_API_UNAVAILABLE'), { code: 'C15_SUPPORTED_APPLICATION_API_UNAVAILABLE', nativeIpcFailure: nativeIpcFailure(name, result?.error) })
   return result.data
 }
 async function openWork(evaluate, signal) {

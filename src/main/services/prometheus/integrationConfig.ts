@@ -312,6 +312,24 @@ export async function readLiterConnectionCredential(providerConnectionId: string
   return secrets[literConnectionSecretKey(providerConnectionId)]
 }
 
+/** Only the trusted GitHub host resolves this reference; responses expose presence alone. */
+export async function readFeedbackGithubCredential(credentialRef: string): Promise<string | undefined> {
+  if (!/^host:\/\/feedback-github-[a-f0-9]{64}$/.test(credentialRef)) throw new Error('FEEDBACK_CREDENTIAL_SCOPE_DENIED')
+  const secrets = (await readSecrets()) as Record<string, string | undefined>
+  return secrets[credentialRef]
+}
+
+export async function writeFeedbackGithubCredential(
+  credentialRef: string,
+  mutation: { operation: 'set'; value: string } | { operation: 'clear' }
+): Promise<void> {
+  if (!/^host:\/\/feedback-github-[a-f0-9]{64}$/.test(credentialRef)) throw new Error('FEEDBACK_CREDENTIAL_SCOPE_DENIED')
+  const secrets = (await readSecrets()) as Record<string, string | undefined>
+  if (mutation.operation === 'set') secrets[credentialRef] = mutation.value
+  else delete secrets[credentialRef]
+  await replaceSecrets(secrets)
+}
+
 export async function stageLiterConnectionCredential(
   providerConnectionId: string,
   mutation: LiterCredentialMutation
