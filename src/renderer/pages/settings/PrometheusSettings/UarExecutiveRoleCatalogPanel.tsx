@@ -58,8 +58,8 @@ export function UarExecutiveRoleCatalogPanel({ workspaceId }: { workspaceId: str
       <IntegrationField label={tr('purpose')} value={purpose} onChange={change(setPurpose)} disabled={busy} />
     </div>
     <label htmlFor={id} className="mt-4 block text-sm font-medium">{tr('catalog.instructions')}</label>
-    <Textarea id={id} className="mt-2" value={instructions} disabled={busy}
-      onChange={(event) => change(setInstructions)(event.target.value)} />
+    <Textarea.Input id={id} className="mt-2" value={instructions} disabled={busy}
+      onValueChange={change(setInstructions)} />
     <p className="mt-2 text-xs text-muted-foreground">{tr('catalog.authoringHelp')}</p>
     <Button className="mt-4" variant="outline" disabled={busy || !purpose.trim() || !office.trim() ||
       (preset === 'custom' && (!title.trim() || !instructions.trim()))} onClick={() => void review()}>{tr('catalog.review')}</Button>
