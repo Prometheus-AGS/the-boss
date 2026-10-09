@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
+import { isDeepStrictEqual } from 'node:util'
 
 import { digest, write, same, route, requireFact, waitFor, nativeIpcFailure } from './io.mjs'
 import { liveOutputObserver } from './live-output.mjs'
@@ -249,6 +250,10 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
         unavailableEntries: skills.entries.map((entry) => ({ skillId: entry.skillId, reasons: entry.reasons }))
       }
     requireFact(skill, 'C15_EXACT_INSTALLED_READ_ONLY_SKILL_UNAVAILABLE')
+    const selectedSkillRef = {
+      ...skill.skillRef,
+      required: skill.reviewedCoverage.status === 'reviewed' && skill.skillRef.required
+    }
     const skillSelector = `[data-ui~="team-authoring-member"][data-role="reviewer"] [data-ui~="team-authoring-skill"][data-skill-digest="${skill.skillRef.digest}"] [role="checkbox"]`
     await click(evaluate, signal, skillSelector)
     await click(evaluate, signal, '[data-ui~="team-authoring-save"]')
@@ -258,10 +263,15 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
       'C15_PERSISTED_AUTHORING_UNAVAILABLE'
     )
     requireFact(
-      first.team.members.find((member) => member.role === 'reviewer').skills.some((item) => same(item, skill.skillRef)),
+      first.team.members.find((member) => member.role === 'reviewer').skills.some((item) => isDeepStrictEqual(item, selectedSkillRef)),
       'C15_EXACT_SELECTED_SKILL_NOT_PERSISTED'
     )
-    evidence.skill = skill.skillRef
+    evidence.skill = selectedSkillRef
+    evidence.skillSelection = {
+      catalogRequired: skill.skillRef.required,
+      reviewedCoverageStatus: skill.reviewedCoverage.status,
+      requiredReviewedQualification: selectedSkillRef.required && skill.reviewedCoverage.status === 'reviewed'
+    }
     stage = 'deploy-immutable-package-and-private-binding'
     await click(evaluate, signal, '[data-ui~="team-authoring-deploy"]')
     const binding = await waitFor(
