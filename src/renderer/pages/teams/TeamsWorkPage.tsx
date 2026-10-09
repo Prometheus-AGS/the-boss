@@ -13,6 +13,7 @@ import { ipcApi } from '@renderer/ipc'
 import type { UarTeamsSnapshot } from '@shared/types/uarTeams'
 
 import { TeamWorkLaunch } from './TeamWorkLaunch'
+import { TeamFeedbackPanel } from './TeamFeedbackPanel'
 
 interface Props {
   workspaceId?: string
@@ -135,6 +136,7 @@ function TeamWorkspace({
             onCreated={onInstanceChange}
             onChanged={refresh}
           />
+          <TeamFeedbackPanel workspaceId={workspaceId} teams={snapshot} onTeamChanged={refresh} />
           <section className="space-y-2" aria-label={t('work.teams.reopen')}>
             <h2 className="text-sm font-medium">{t('work.teams.reopen')}</h2>
             <p className="text-xs text-muted-foreground">{t('work.teams.reopenHelp')}</p>
