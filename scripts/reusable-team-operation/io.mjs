@@ -10,6 +10,13 @@ export const route = (name) => 'prometheus.uar.teams.' + name
 export function requireFact(condition, code) {
   if (!condition) throw Object.assign(new Error(code), { code })
 }
+export function nativeIpcFailure(channel, error) {
+  // Preserve symbolic diagnostics only; free-form messages may contain request values.
+  const codes = String(error?.message ?? '').match(/\b(?:prometheus\.error\.[A-Za-z0-9.]+|(?:UAR|TEAM|CONNECTOR|FEEDBACK|LITER|IPC|ERR)_[A-Z0-9_]+)\b/g)
+  return { channel,
+    code: /^[A-Z][A-Z0-9_]{0,100}$/.test(error?.code ?? '') ? error.code : 'UNAVAILABLE',
+    message: codes?.join(' ') || '[non-code message redacted]' }
+}
 export async function waitFor(signal, read, code, timeout = 30000, interval = 250) {
   const deadline = Date.now() + timeout
   while (Date.now() < deadline) {

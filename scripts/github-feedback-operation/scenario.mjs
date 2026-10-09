@@ -22,6 +22,7 @@ export async function scenario(context, configuration) {
   } catch (error) {
     evidence.failureStage = evidence.stage
     if (error.failureSelector) evidence.failureSelector = error.failureSelector
+    if (error.nativeIpcFailure) evidence.nativeIpcFailure = error.nativeIpcFailure
     evidence.failureCode = context.signal.aborted ? 'C10_OPERATION_CANCELLED_OR_TIMED_OUT' :
       /^C(?:10|15|16)_[A-Z0-9_]+$/.test(error.code ?? '') ? error.code : 'C10_APPLICATION_OPERATION_UNAVAILABLE'
   } finally {

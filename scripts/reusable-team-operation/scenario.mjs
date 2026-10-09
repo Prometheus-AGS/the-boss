@@ -3,7 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 
-import { digest, write, same, route, requireFact, waitFor } from './io.mjs'
+import { digest, write, same, route, requireFact, waitFor, nativeIpcFailure } from './io.mjs'
 import { liveOutputObserver } from './live-output.mjs'
 import { attemptFailureEvidence } from './attempt-diagnostics.mjs'
 import { mixedTeamApprovalOperator } from './approvals.mjs'
@@ -39,7 +39,7 @@ async function choose(evaluate, signal, selector, option) {
 }
 async function ipc(evaluate, name, input) {
   const result = await evaluate(`window.api.ipcApi.request(${JSON.stringify(name)},${JSON.stringify(input)})`)
-  requireFact(result?.ok, 'C15_SUPPORTED_APPLICATION_API_UNAVAILABLE')
+  if (!result?.ok) throw Object.assign(new Error('C15_SUPPORTED_APPLICATION_API_UNAVAILABLE'), { code: 'C15_SUPPORTED_APPLICATION_API_UNAVAILABLE', nativeIpcFailure: nativeIpcFailure(name, result?.error) })
   return result.data
 }
 async function openWork(evaluate, signal) {
