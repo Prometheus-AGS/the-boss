@@ -28,7 +28,7 @@ export async function authorFeedback({ evaluate, signal, selected, configuration
   }
   evidence.stage = 'select-exact-reviewed-skill'
   const skillSelector = '[data-ui~="team-authoring-member"][data-role="reviewer"] ' +
-    `[data-ui~="team-authoring-skill"][data-skill-digest="${skill.skillRef.digest}"] [role="checkbox"]`
+    `[data-ui~="team-authoring-skill"][data-skill-id="${skill.skillId}"][data-skill-digest="${skill.skillRef.digest}"] [role="checkbox"]`
   try {
     await click(evaluate, signal, skillSelector)
   } catch (error) {
