@@ -295,7 +295,7 @@ export async function compileAuthoredTeam(team: UarAuthoredTeam, revision: numbe
             }
           : {})
       } as Json
-      source.output = step.output as Json
+      source.output = step.output as unknown as Json
     }
     const id = base + ':agent:' + member.role
     const guidance =
