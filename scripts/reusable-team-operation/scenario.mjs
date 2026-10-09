@@ -171,7 +171,20 @@ async function setup(evaluate, configuration) {
   const provider = sources.sources
     .find((item) => item.source === 'gateway' && item.operational)
     ?.providers.find((item) => item.enabled && item.models.some((model) => model.enabled && model.id === gateway.alias))
-  requireFact(provider, 'C15_ADVERTISED_MODEL_UNAVAILABLE')
+  if (!provider) throw Object.assign(new Error('C15_ADVERTISED_MODEL_UNAVAILABLE'), {
+    code: 'C15_ADVERTISED_MODEL_UNAVAILABLE',
+    modelSourceDiagnostics: sources.sources.map((source) => ({
+      source: source.source,
+      operational: source.operational,
+      errorStatus: source.error?.match(/HTTP \d{3}/)?.[0],
+      providers: source.providers.map((entry) => ({
+        id: entry.id,
+        enabled: entry.enabled,
+        credentialConfigured: entry.credentialConfigured,
+        models: entry.models.map((model) => ({ id: model.id, enabled: model.enabled }))
+      }))
+    }))
+  })
   return {
     workspaceId: registered.data.id,
     model: { source: 'gateway', providerId: provider.id, modelId: gateway.alias }
@@ -504,6 +517,7 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     evidence.complete = true
   } catch (error) {
     evidence.failureStage = stage
+    if (error.modelSourceDiagnostics) evidence.modelSourceDiagnostics = error.modelSourceDiagnostics
     if (error.approvalIpcFailure) evidence.approvalIpcFailure = error.approvalIpcFailure
     if (error.approvalScopeFailure) evidence.approvalScopeFailure = error.approvalScopeFailure
     evidence.failureCode = signal.aborted
