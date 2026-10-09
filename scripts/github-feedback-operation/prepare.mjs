@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import { setTimeout as delay } from 'node:timers/promises'
 
-import { click, choose, fill, ipc, setup, selectTeam } from '../reusable-team-operation/scenario.mjs'
+import { click, choose, fill, ipc, openWork, setup, selectTeam } from '../reusable-team-operation/scenario.mjs'
 import { digest, requireFact, route, same, waitFor } from '../reusable-team-operation/io.mjs'
 import { readTools } from '../practical-team-presets-operation/contracts.mjs'
 import { mixedTeamApprovalOperator } from '../reusable-team-operation/approvals.mjs'
@@ -10,6 +10,7 @@ import { authorFeedback } from './author.mjs'
 
 export async function prepare(context, configuration, evidence) {
   const { evaluate, signal } = context
+  await openWork(evaluate, signal)
   const selected = await setup(evaluate, configuration)
   evidence.workspaceId = selected.workspaceId
   evidence.selectedModel = selected.model
