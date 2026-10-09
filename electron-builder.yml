@@ -209,24 +209,20 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.24 - Governed GitHub feedback teams
+    The Boss 2.2.25 - Convergence administration and portable teams
 
-    - [Feedback] Run a customer-feedback team in Work and inspect its classification and exact GitHub issue draft.
-    - [Approval] Separately approve the repository and draft before publication, or reject and cancel without posting.
-    - [Recovery] Reopen retained drafts and issue receipts; reconcile unknown outcomes without automatically posting again.
-    - [Runtime] Package the pinned UAR approval/effect contract, model and policy assets, and translated feedback controls.
-    - [Workflow] Enable the implemented classify/draft workflow in the normal customer profile, with existing execution ownership and separate publication approval.
-    - [Startup] Allow 60 seconds for first UAR startup while bundled and installed skills initialize.
-    - [Delivery] Native Windows installed acceptance is tracked separately from release publication.
+    - [Teams] Preserve execution options and model intent in portable team handoffs with explicit adapter capability reporting.
+    - [Feedback] Configure protected connector credentials and inspect scoped external-effect outcomes without automatically replaying unknown effects.
+    - [Administration] Author and preview executive-role agent packages; administer consented human-representation grants and revocation.
+    - [Runtime] Package the current pinned UAR persistence, representation and authenticated delegation contracts.
+    - [Delivery] Record supported desktop profiles and artifact provenance; installed acceptance remains separate from publication.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.24 - 受控的 GitHub 反馈团队
+    The Boss 2.2.25 - 融合管理与可移植团队
 
-    - [反馈] 在 Work 中运行客户反馈团队，查看分类结果和完整的 GitHub 问题草稿。
-    - [审批] 发布前单独确认目标仓库和草稿，也可拒绝或取消而不发布。
-    - [恢复] 重新打开保留的草稿和问题回执；核对结果不确定的操作，不自动重复发布。
-    - [运行时] 打包固定版本的 UAR 审批与外部操作协议、模型和策略资源，以及已翻译的反馈界面。
-    - [工作流] 在正常客户配置中启用分类和草稿流程，保留执行所有权和独立发布审批。
-    - [启动] 首次启动 UAR 时允许 60 秒，以完成内置和已安装技能的初始化。
-    - [交付] 原生 Windows 安装验收与版本发布分别跟踪。
+    - [团队] 在可移植团队交接中保留执行选项和模型意图，并明确显示适配器支持的能力。
+    - [反馈] 配置受保护的连接器凭据，查看限定范围的外部操作结果，不自动重放结果不确定的操作。
+    - [管理] 编写和预览高管角色代理包，管理经本人同意的代表授权及撤销。
+    - [运行时] 打包固定版本的 UAR 持久化、代表授权和经认证的委派协议。
+    - [交付] 记录支持的桌面配置及产物来源；安装验收与版本发布分别跟踪。
     <!--LANG:END-->
