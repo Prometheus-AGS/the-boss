@@ -4,7 +4,15 @@ on:
     inputs:
       native_run:
         description: Completed integration-payload native build run matching this branch's source pins
-        required: true
+        required: false
+        type: string
+      native_run_id:
+        description: Existing caller alias for native_run
+        required: false
+        type: string
+      source_revision:
+        description: Optional exact UAR revision assertion; must match the source pin
+        required: false
         type: string
       platforms:
         description: Ready Mac/Windows platforms from the selected native run
@@ -54,7 +62,18 @@ jobs:
       - name: Prepare the exact pinned UAR source
         env:
           INTEGRATION_TOOLS: uar-sidecar
-        run: node scripts/integration-source.cjs
+          SELECTED_NATIVE_RUN: ${{ inputs.native_run || inputs.native_run_id }}
+          EXPECTED_UAR_REVISION: ${{ inputs.source_revision }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs')
+          const { execFileSync } = require('node:child_process')
+          if (!process.env.SELECTED_NATIVE_RUN) throw new Error('Supply native_run or native_run_id')
+          const pin = JSON.parse(fs.readFileSync('build/integration-sources.json', 'utf8')).sources.uar.revision
+          if (process.env.EXPECTED_UAR_REVISION && process.env.EXPECTED_UAR_REVISION !== pin)
+            throw new Error('source_revision must match the pinned UAR revision')
+          execFileSync(process.execPath, ['scripts/integration-source.cjs'], { stdio: 'inherit' })
+          NODE
       - uses: actions/cache/restore@v6
         id: native-cache
         with:
@@ -68,7 +87,7 @@ jobs:
         run: exit 1
       - uses: actions/download-artifact@v6
         with:
-          run-id: ${{ inputs.native_run }}
+          run-id: ${{ inputs.native_run || inputs.native_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           name: native-tools-${{ matrix.platform }}
           path: build/integration-output

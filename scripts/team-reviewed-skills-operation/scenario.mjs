@@ -51,6 +51,8 @@ async function setReadOnlyTools(evaluate, signal, role) {
 
 async function selectMemberModel(evaluate, signal, role, model) {
   const trigger = memberSelector(role) + ' [data-ui~="teams-model"]'
+  await waitFor(signal, () => evaluate('(()=>{const node=document.querySelector(' + JSON.stringify(trigger) +
+    ');return Boolean(node&&!node.disabled)})()'), 'C15_REVIEWED_SKILL_MODEL_CONTROL_NOT_READY')
   await click(evaluate, signal, trigger)
   const menu = await waitFor(signal, () => evaluate('document.querySelector(' + JSON.stringify(trigger) +
     ')?.getAttribute("aria-controls")'), 'C15_REVIEWED_SKILL_MODEL_MENU_UNAVAILABLE')
@@ -239,7 +241,15 @@ export async function scenario({ evaluate, signal, targets, trustedRequest }, co
     evidence.checks.push('required-reviewed-mini-and-full-skills-selected-for-read-only-members-and-exact-revision-deployed')
 
     stage = 'reviewed-closure-and-host-scope-refusals'
-    await runCoverageScenarios({ evaluate, signal, workspaceId: selected.workspaceId, revision, binding, packRoot,
+    const authoringRead = 'window.api.ipcApi.request(' + JSON.stringify(route('authoring')) + ','
+    const evaluateCoverage = async (expression) => {
+      const result = await evaluate(expression)
+      // Refusal must preserve saved revisions; unsaved templates receive fresh draft IDs on every read.
+      return expression.startsWith(authoringRead) && result?.ok
+        ? { ...result, data: { schemaVersion: result.data.schemaVersion, revisions: result.data.revisions } }
+        : result
+    }
+    await runCoverageScenarios({ evaluate: evaluateCoverage, signal, workspaceId: selected.workspaceId, revision, binding, packRoot,
       isolatedUserData, evidence, trustedRequest })
     requireFact(evidence.coverageCoreComplete === true, 'C15_REVIEWED_SKILL_CORE_COVERAGE_INCOMPLETE')
     evidence.privatePreflight = evidence.coverageScenarios?.find((record) => record.scenario === 'private-coverage-claim') ??
