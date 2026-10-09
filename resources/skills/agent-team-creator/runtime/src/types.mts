@@ -23,11 +23,15 @@ export interface Role {
   modelPolicy?: ModelPolicy;
   native?: Partial<Record<Target, ObjectValue>>;
 }
+export const exportCapabilityNames = ["agent-definition","role-model","team-options","agent-plugin","agent-marketplace","static-team-roster","model-policy-resolution"] as const;
+export type ExportCapability = typeof exportCapabilityNames[number];
+export type AdapterCapabilities = Record<ExportCapability, 'emitted' | 'preserved-only' | 'not-emitted'>;
 export interface NativeConfig {
   version: string;
   source: string;
   options?: ObjectValue;
   files?: Record<string, string>;
+  requiredCapabilities?: ExportCapability[];
 }
 export interface Team {
   schemaVersion: 1;
@@ -147,6 +151,7 @@ export interface TeamState {
 }
 export interface ExportResult {
   target: Target;
+  capabilities: AdapterCapabilities;
   files: Record<string, string>;
   verification: { level: 'source-verified'; source: string; version: string; live: 'unverified' };
   diagnostics: string[];

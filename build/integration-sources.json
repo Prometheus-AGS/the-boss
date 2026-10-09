@@ -20,16 +20,16 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "3a8a78c8a993401a67983c97bf9baac1835c1175"
+      "revision": "3a7c0d245cb8a412b62e287872e23c694d20348b"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "6b2ad902c82a17c5f0b44759e1f7c38c90265e89",
+      "revision": "60b5922e3e11dd73bfd8a47e5bc28f3c16332889",
       "platformRevisions": {
-        "darwin-arm64": "6b2ad902c82a17c5f0b44759e1f7c38c90265e89",
-        "win32-x64": "6b2ad902c82a17c5f0b44759e1f7c38c90265e89",
-        "darwin-x64": "6b2ad902c82a17c5f0b44759e1f7c38c90265e89",
-        "win32-arm64": "6b2ad902c82a17c5f0b44759e1f7c38c90265e89"
+        "darwin-arm64": "60b5922e3e11dd73bfd8a47e5bc28f3c16332889",
+        "win32-x64": "60b5922e3e11dd73bfd8a47e5bc28f3c16332889",
+        "darwin-x64": "60b5922e3e11dd73bfd8a47e5bc28f3c16332889",
+        "win32-arm64": "60b5922e3e11dd73bfd8a47e5bc28f3c16332889"
       }
     },
     "surreal-memory": {
@@ -46,7 +46,7 @@
     },
     "skill-pack": {
       "repository": "Prometheus-AGS/prometheus-skill-system",
-      "revision": "a414e81e4310ed9140ef29f4e5a1ee1eaa54fbbd"
+      "revision": "fd1e2c2de05f67dcb773d4710d5457588d2fe39b"
     }
   },
   "tools": {

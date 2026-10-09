@@ -43,7 +43,7 @@ async function dispatch(command: string, input: ObjectValue): Promise<unknown> {
       const team = validateTeam(input.team ?? readState(stateFile(input)).team);
       const result = exportTeam(team, target(input.target ?? team.harness));
       for (const role of team.roles) if (!role.owns.length) result.diagnostics.push(`${role.id}: file ownership is not yet assigned; resolve it before parallel edits.`);
-      return { ...writeExport(text(input.out, 'out'), result), verification: result.verification, diagnostics: result.diagnostics, instructions: result.instructions };
+      return { ...writeExport(text(input.out, 'out'), result), verification: result.verification, capabilities: result.capabilities, diagnostics: result.diagnostics, instructions: result.instructions };
     }
     case 'task': return mutateState(stateFile(input), revision(input), state => taskAction(state, object(input.task, 'task action')));
     case 'complete-kbd': return mutateState(stateFile(input), revision(input), state => {
