@@ -35,3 +35,18 @@ export const uarRepresentationSnapshotSchema = z.object({ workspaceId: id, issue
 export type UarRepresentationGrant = z.infer<typeof uarRepresentationGrantSchema>
 export type UarRepresentationSaveInput = z.infer<typeof uarRepresentationSaveSchema>
 export type UarRepresentationRevokeInput = z.infer<typeof uarRepresentationRevokeSchema>
+
+export const uarExecutiveRoleAuthoringSchema = uarRepresentationWorkspaceSchema.extend({
+  office: z.string().min(1).max(80).regex(/^[a-z][a-z0-9-]*$/),
+  title: z.string().max(160), purpose: z.string().min(1).max(2048), instructions: z.string().max(16000)
+}).strict()
+const identity = z.object({ id: z.string(), version: z.string(), digest: z.string() })
+export const uarExecutiveRolePreviewSchema = z.object({ identity, definition: identity,
+  manifest: z.string(), files: z.record(z.string(), z.string()) })
+export const uarExecutiveRoleInstallSchema = uarExecutiveRoleAuthoringSchema.extend({
+  reviewedDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/),
+  model: z.object({ source: z.literal('uar'), providerId: z.string().min(1).max(128),
+    modelId: z.string().min(1).max(256) }).strict()
+}).strict()
+export type UarExecutiveRoleAuthoringInput = z.infer<typeof uarExecutiveRoleAuthoringSchema>
+export type UarExecutiveRoleInstallInput = z.infer<typeof uarExecutiveRoleInstallSchema>

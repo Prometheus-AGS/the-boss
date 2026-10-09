@@ -5,6 +5,7 @@ import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/compon
 import { ipcApi } from '@renderer/ipc'
 import type { UarRepresentationGrant, UarRepresentationSaveInput } from '@shared/types/uarRepresentation'
 import { IntegrationChoice, IntegrationField } from './IntegrationFields'
+import { UarExecutiveRoleCatalogPanel } from './UarExecutiveRoleCatalogPanel'
 
 type Snapshot = Awaited<ReturnType<typeof ipcApi.request<'prometheus.uar.representation.snapshot'>>>
 type Grant = UarRepresentationSaveInput['grant']
@@ -87,6 +88,7 @@ export function UarRepresentationAdministrationPanel({ workspaceId }: { workspac
     finally { setBusy(false) }
   }
   return <div className="space-y-4">
+    <UarExecutiveRoleCatalogPanel workspaceId={workspaceId} />
     <SettingGroup>
       <SettingTitle>{tr('title')}</SettingTitle>
       <SettingDescription>{tr('help')}</SettingDescription>

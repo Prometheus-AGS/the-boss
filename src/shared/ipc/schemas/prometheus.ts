@@ -1,4 +1,5 @@
 import * as z from 'zod'
+import { uarExecutiveRoleAuthoringSchema, uarExecutiveRolePreviewSchema, uarExecutiveRoleInstallSchema } from '@shared/types/uarRepresentation'
 import { uarRepresentationWorkspaceSchema, uarRepresentationSaveSchema, uarRepresentationHistorySchema,
   uarRepresentationRevokeSchema, uarRepresentationInstallSchema, uarRepresentationSnapshotSchema,
   uarRepresentationGrantSchema } from '@shared/types/uarRepresentation'
@@ -174,6 +175,8 @@ const teamControlSchema = teamExecutionSelectorSchema.extend({
  */
 export const prometheusRequestSchemas = {
   'prometheus.uar.representation.snapshot': defineRoute({ input: uarRepresentationWorkspaceSchema, output: uarRepresentationSnapshotSchema }),
+  'prometheus.uar.representation.preview_role': defineRoute({ input: uarExecutiveRoleAuthoringSchema, output: uarExecutiveRolePreviewSchema }),
+  'prometheus.uar.representation.install_role': defineRoute({ input: uarExecutiveRoleInstallSchema, output: z.custom<UarDurableBinding>() }),
   'prometheus.uar.representation.save': defineRoute({ input: uarRepresentationSaveSchema, output: uarRepresentationInstallSchema }),
   'prometheus.uar.representation.history': defineRoute({ input: uarRepresentationHistorySchema, output: z.array(uarRepresentationGrantSchema) }),
   'prometheus.uar.representation.revoke': defineRoute({ input: uarRepresentationRevokeSchema, output: uarRepresentationInstallSchema }),

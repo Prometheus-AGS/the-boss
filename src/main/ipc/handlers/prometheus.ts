@@ -1,4 +1,5 @@
 import { application } from '@application'
+import { previewUarExecutiveRole, installUarExecutiveRole } from '@main/ai/runtime/uar/uarExecutiveRoleAdministration'
 import {
   readUarConnectors, saveUarConnector, prepareUarConnector, controlUarConnector, reconcileUarConnector,
   readUarRepresentation, readUarRepresentationHistory, saveUarRepresentation, revokeUarRepresentation,
@@ -138,6 +139,8 @@ async function withIntegrationRevision<T>(run: () => Promise<T>): Promise<T> {
 
 const prometheusHandlerImplementations: IpcHandlersFor<typeof prometheusRequestSchemas> = {
   'prometheus.uar.representation.snapshot': async ({ workspaceId }) => readUarRepresentation(workspaceId),
+  'prometheus.uar.representation.preview_role': async (input) => previewUarExecutiveRole(input),
+  'prometheus.uar.representation.install_role': async (input) => installUarExecutiveRole(input),
   'prometheus.uar.representation.history': async (input) => readUarRepresentationHistory(input),
   'prometheus.uar.representation.save': async (input) => saveUarRepresentation(input),
   'prometheus.uar.representation.revoke': async (input) => revokeUarRepresentation(input),
