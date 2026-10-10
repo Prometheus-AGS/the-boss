@@ -83,7 +83,7 @@ export function UarDurableRunPanel({ workspaceId, instanceId, runId }: {
       {snapshot.history.map((record) => {
         const pending = snapshot.approval
         const matched = pending?.issuerId === record.issuerId && pending?.challengeId === record.challengeId
-        const actionable = matched && pending && pending.admissionOwner === 'uar-runtime' && record.state === 'pending' && record.resolvable
+        const actionable = matched && pending && (pending.decisionOwner ?? pending.admissionOwner) === 'uar-runtime' && record.state === 'pending' && record.resolvable
         return <div className="rounded-md border border-border p-3" key={record.issuerId + ':' + record.challengeId}
           data-approval-id={matched && pending ? pending.approvalId : undefined}>
           <UarTeamApprovalRecord record={record} />

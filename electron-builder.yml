@@ -209,20 +209,22 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.26 - Durable UAR execution and scoped representation
+    The Boss 2.2.30 - Durable approval history after runtime restart
 
-    - [Administration] Submit durable agent turns, follow their scoped output and decide pending native approvals.
-    - [Representation] Correct authenticated grant attachment and display applied grant revisions; recheck current authority during execution.
-    - [Runtime] Apply saved native-tool configuration on restart and current resilience settings to newly admitted team turns.
-    - [Skills] Preserve the host user identity needed by Claude Code subscription authentication.
-    - [Delivery] Retain exact source and artifact provenance; installed acceptance remains separate from publication.
+    - [UAR] Preserve completed conversation history when admitting a new turn after runtime restart; interrupted execution retains its explicit recovery path.
+    - [UAR] Admit fresh input after a tool-free cancelled conversation survives a runtime restart; unresolved tool effects remain on explicit recovery.
+    - [UAR] Preserve scoped approval and effect history after a finished run loses its process-local events; old approvals stay non-actionable.
+    - [BossFang] Permit scoped model discovery through the selected UAR instance without sharing the host launch token.
+    - [Runtime] Resolve gateway alias context capacity from its captured model identity while retaining explicitly configured limits.
+    - [Diagnostics] Retain the static context-budget failure code in private runtime diagnostics.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.26 - 持久化 UAR 执行与限定范围的代表授权
+    The Boss 2.2.30 - 运行时重启后的持久审批历史
 
-    - [管理] 提交持久化代理任务，查看限定范围的运行输出，并处理待决的原生审批。
-    - [代表授权] 修复经认证的授权绑定，显示已应用的授权版本，并在执行过程中重新检查当前权限。
-    - [运行时] 重启时应用已保存的原生工具配置，并为新接纳的团队任务应用当前弹性设置。
-    - [技能] 保留 Claude Code 订阅认证所需的主机用户身份。
-    - [交付] 保留准确的源代码和产物来源；安装验收与版本发布分别跟踪。
+    - [UAR] 运行时重启后，接纳新一轮对话时保留已完成的会话历史；中断的执行仍使用明确的恢复路径。
+    - [UAR] 取消不涉及工具的对话并重启运行时后，允许通过保留的历史接纳新输入；未确定的工具操作仍须显式恢复。
+    - [UAR] 已结束的运行丢失进程内事件后，仍可查看限定范围的审批和操作历史；旧审批不可重新执行。
+    - [BossFang] 允许通过选定的 UAR 实例在授权范围内发现模型，不共享宿主启动令牌。
+    - [运行时] 根据捕获的模型标识解析网关别名的上下文容量，同时保留显式配置的限制。
+    - [诊断] 在私有运行时诊断中保留静态的上下文预算失败代码。
     <!--LANG:END-->

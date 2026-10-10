@@ -18,6 +18,7 @@ export const rawPendingApproval = z.object({
       challengeId: z.string().optional(),
       admissionId: z.string().nullable().optional(),
       admissionOwner: z.enum(['uar-runtime', 'paired-host']).default('paired-host'),
+      decisionOwner: z.enum(['uar-runtime', 'paired-host']).optional(),
       callIndex: z.number(),
       toolCallId: z.string(),
       name: z.string(),

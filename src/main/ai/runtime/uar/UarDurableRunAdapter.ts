@@ -15,7 +15,8 @@ async function target(input: { workspaceId: string; instanceId: string; runId: s
     '/api/uar/agent-instances/v1/' + encodeURIComponent(input.instanceId), state.generation), workspaceId)
   const command = instance.commands.find((entry) => entry.kind === 'turn' && entry.rootRunId === input.runId)
   if (instance.instanceId !== input.instanceId || !command) throw new Error('TEAM_SCOPE_DENIED')
-  return { workspaceId, generation: state.generation, command, path: '/api/uar/runs/' + encodeURIComponent(input.runId) }
+  return { workspaceId, generation: state.generation, command, activeRunId: instance.activeRunId,
+    path: '/api/uar/runs/' + encodeURIComponent(input.runId) }
 }
 
 export async function readUarDurableRun(input: {
@@ -23,8 +24,15 @@ export async function readUarDurableRun(input: {
 }): Promise<UarDurableRunSnapshot> {
   const state = await target(input)
   const after = input.after ?? 0
+  const eventsPath = state.path + '/events?after=' + after
   const [events, pending, history, effects] = await Promise.all([
-    scopedRequest(state.workspaceId, state.path + '/events?after=' + after, state.generation).then((value) => uarTeamRunEventsSchema.parse(value)),
+    scopedRequest(state.workspaceId, eventsPath, state.generation).catch((cause) => {
+      const terminal = ['completed', 'failed', 'cancelled'].includes(state.command.status)
+      if (!terminal || state.activeRunId === input.runId || !(cause instanceof Error) ||
+        cause.message !== `UAR request GET ${eventsPath} failed with HTTP 404`) throw cause
+      return { version: 1, runId: input.runId, after, cursor: after, retention: 'process-local-bounded',
+        firstAvailableEventId: null, gapReason: 'retention-gap', events: [] }
+    }).then((value) => uarTeamRunEventsSchema.parse(value)),
     scopedRequest(state.workspaceId, state.path + '/tool-approval/pending', state.generation).then((value) => rawPendingApproval.parse(value)),
     scopedRequest(state.workspaceId, state.path + '/tool-approval', state.generation).then((value) => uarApprovalHistorySchema.parse(value)),
     scopedRequest(state.workspaceId, state.path + '/tool-admission-evidence', state.generation).then((value) => rawAdmissionEvidence.parse(value))
@@ -50,6 +58,7 @@ export async function readUarDurableRun(input: {
     approval: approval ? { attemptId, runId: input.runId, approvalId: approval.approvalId,
       issuerId: approval.issuerId!, challengeId: approval.challengeId!, rootRunId: approval.rootRunId,
       toolCallId: approval.toolCallId, callIndex: approval.callIndex, admissionOwner: approval.admissionOwner,
+      decisionOwner: approval.decisionOwner ?? approval.admissionOwner,
       eventId: approval.eventId, cursor: approval.cursor, toolName: approval.name,
       argumentsJson: approval.argumentsJson, riskReason: approval.riskReason } : null,
     effects: effects.records.map((effect) => ({ toolName: effect.tool_name, state: effect.state, admissionId: effect.admission_id ?? null, invocationId: effect.invocation_id })),
@@ -62,7 +71,7 @@ export async function decideUarDurableApproval(input: UarDurableApprovalDecision
   const state = await target(input)
   const pending = rawPendingApproval.parse(await scopedRequest(state.workspaceId, state.path + '/tool-approval/pending', state.generation))
   const approval = pending.pending
-  if (pending.runId !== input.runId || !approval || approval.admissionOwner !== 'uar-runtime' ||
+  if (pending.runId !== input.runId || !approval || (approval.decisionOwner ?? approval.admissionOwner) !== 'uar-runtime' ||
     approval.rootRunId !== input.runId || approval.approvalId !== input.approvalId ||
     approval.issuerId !== input.issuerId || approval.challengeId !== input.challengeId ||
     approval.eventId !== input.eventId || approval.cursor !== input.cursor) throw new Error('UAR_APPROVAL_STALE')
