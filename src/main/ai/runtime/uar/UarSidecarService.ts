@@ -101,6 +101,7 @@ const safeInstanceTurnDiagnostic = z.object({
       'mcp_preflight_failed',
       'approval_channel_unavailable',
       'world_state_load_failed',
+      'world_state_budget_exceeded',
       'tool_admission_context_failed',
       'provider_model_unavailable',
       'thread_attachment_failed',
