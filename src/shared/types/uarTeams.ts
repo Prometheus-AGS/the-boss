@@ -326,6 +326,7 @@ export interface UarTeamApproval {
   issuerId: string
   challengeId: string
   admissionOwner: 'uar-runtime' | 'paired-host'
+  decisionOwner?: 'uar-runtime' | 'paired-host'
   attemptId: string
   runId: string
   approvalId: string
