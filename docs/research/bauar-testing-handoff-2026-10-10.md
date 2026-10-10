@@ -4,6 +4,27 @@ The operator stopped further tests and dependency diagnosis and requested source
 publication. Testing continues in the operator's other session. This handoff
 does not certify completed desktop acceptance, signing, or release readiness.
 
+## Publication and merge boundary
+
+The complete source is retained on
+`codex/bauar-release-integration-2026-10-09`. The acceptance implementation
+checkpoint is `c2990da0497c500268a73b9a904e685fe04434ef`; prior BAUAR intake
+and local payload checkpoints are `bda3715df5` and `7a5bdb4b7c`.
+
+Fetched `origin/main` was `38d9be7524`. A fresh topic attempted to replay only
+BAUAR commits, excluding earlier unrelated command-path commits. The intake
+conflicted in ten files: the integration payload manifest, exact admission gate,
+UAR AG-UI adapter, host MCP bridge, host tool admission, runtime connection,
+sidecar service, approval controller, tool-name mapping, and shared integration
+types. Current main has newer authority-provider/principal contracts, session
+placement and instance routing, claim revalidation, and released payloads.
+These conflicts require a deliberate forward port; accepting old code would
+discard newer behavior. The replay was aborted normally, without resetting or
+rewriting either branch. Publication preserves the full original source branch,
+including its two earlier command-path commits, for the other session. Main
+integration is not complete; no force push, architecture replacement, or new
+forward-port implementation was attempted.
+
 ## Delivered behavior
 
 The BAUAR intake supplies scoped host tool admission, exact approval identities,
