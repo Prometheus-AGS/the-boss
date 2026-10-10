@@ -209,16 +209,18 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.27 - Team delegation identities and private runtime diagnostics
+    The Boss 2.2.28 - Runtime follow-up recovery and scoped delegation repairs
 
-    - [Teams] Clarify coordinator instructions: use fresh command and task identities for new delegations, and preserve existing identities for retries and references.
-    - [Diagnostics] Retain bounded, redacted native failure details in private runtime diagnostics without exposing credentials.
-    - [Delivery] Record this corrective release separately; represented execution and installed acceptance remain pending their operational evidence.
+    - [UAR] Preserve completed conversation history when admitting a new turn after runtime restart; interrupted execution retains its explicit recovery path.
+    - [BossFang] Permit scoped model discovery through the selected UAR instance without sharing the host launch token.
+    - [Runtime] Resolve gateway alias context capacity from its captured model identity while retaining explicitly configured limits.
+    - [Diagnostics] Retain the static context-budget failure code in private runtime diagnostics.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.27 - 团队委派标识与私有运行时诊断
+    The Boss 2.2.28 - 运行时续聊恢复与限定范围的委派修复
 
-    - [团队] 明确协调代理指令：新委派使用新的命令和任务标识，重试及引用保留已有标识。
-    - [诊断] 在私有运行时诊断中保留长度受限、经过脱敏的原生失败详情，不暴露凭据。
-    - [交付] 单独记录此修复版本；代表执行与安装验收仍等待实际操作证据。
+    - [UAR] 运行时重启后，接纳新一轮对话时保留已完成的会话历史；中断的执行仍使用明确的恢复路径。
+    - [BossFang] 允许通过选定的 UAR 实例在授权范围内发现模型，不共享宿主启动令牌。
+    - [运行时] 根据捕获的模型标识解析网关别名的上下文容量，同时保留显式配置的限制。
+    - [诊断] 在私有运行时诊断中保留静态的上下文预算失败代码。
     <!--LANG:END-->
