@@ -150,5 +150,6 @@
   "settings.title": "设置",
   "tray.quit": "退出",
   "tray.show_quick_assistant": "快捷助手",
-  "tray.show_window": "显示窗口"
+  "tray.show_window": "显示窗口",
+  "uar.toolAdmissionV2Required": "UAR {{version}} 不支持工具准入协议 v2。请更新此实例或选择兼容的实例。目录更改和运行已被阻止。"
 }

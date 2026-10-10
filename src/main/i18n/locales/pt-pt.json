@@ -150,5 +150,6 @@
   "settings.title": "Configurações",
   "tray.quit": "Sair",
   "tray.show_quick_assistant": "Assistente rápido",
-  "tray.show_window": "Mostrar janela"
+  "tray.show_window": "Mostrar janela",
+  "uar.toolAdmissionV2Required": "O UAR {{version}} não suporta a autorização de ferramentas v2. Atualize esta instância ou selecione uma instância compatível. As alterações do catálogo e as execuções estão bloqueadas."
 }

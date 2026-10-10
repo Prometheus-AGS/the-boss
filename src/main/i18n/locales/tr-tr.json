@@ -150,5 +150,6 @@
   "settings.title": "Ayarlar",
   "tray.quit": "Çıkış",
   "tray.show_quick_assistant": "Hızlı Asistan",
-  "tray.show_window": "Pencereyi Göster"
+  "tray.show_window": "Pencereyi Göster",
+  "uar.toolAdmissionV2Required": "UAR {{version}}, araç kabulü v2 protokolünü desteklemiyor. Bu örneği güncelleyin veya uyumlu bir örnek seçin. Katalog değişiklikleri ve çalıştırmalar engellendi."
 }
