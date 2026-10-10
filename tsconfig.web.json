@@ -35,7 +35,6 @@
       "@cherrystudio/ui/icons/providers": ["./packages/ui/src/components/icons/providers/index.ts"],
       "@data/*": ["./src/renderer/data/*"],
       "@logger": ["./src/renderer/services/LoggerService"],
-      "@main/*": ["./src/main/*"],
       "@renderer/*": ["./src/renderer/*"],
       "@shared/*": ["./src/shared/*"],
       "@test-mocks/*": ["./tests/__mocks__/*"]
