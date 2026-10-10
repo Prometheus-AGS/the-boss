@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path'
 
 import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test'
 
+import { approvalCases, runApprovalClientCase, type ApprovalCase } from './bauarApprovalClientFixture'
 import { sendGateVCompletion } from './support/uarExperienceProvider'
 
 const sidecarPath = process.env.THE_BOSS_UAR_SIDECAR_PATH
@@ -12,7 +13,7 @@ const evidencePath = process.env.GATE_V_EVIDENCE_PATH
 const screenshotDirectory = process.env.GATE_V_SCREENSHOT_DIRECTORY
 
 type Catalog = {
-  agents: Array<{ id: string; revision: string; definition: Record<string, any> }>
+  agents: Array<{ id: string; revision: string; skillIds: string[]; definition: Record<string, any> }>
   skills: Array<{ id: string; enabled: boolean }>
 }
 type PresentationSnapshot = {
@@ -305,6 +306,7 @@ test('Gate V: a configured catalog agent runs through Boss with A2UI, approval r
         agentId: 'gate-v-agent',
         skillIds: [selectedSkill.id]
       })
+      expect(catalog.agents.find((agent) => agent.id === 'gate-v-agent')?.skillIds).toEqual([selectedSkill.id])
     }
     const target = await ipc<any>(page, 'prometheus.uar.catalog.prepare_run', {
       agentId: 'gate-v-agent',
@@ -329,6 +331,24 @@ test('Gate V: a configured catalog agent runs through Boss with A2UI, approval r
     })
     expect(secondarySession.session.id).not.toBe(session.session.id)
     const topicId = `agent-session:${session.session.id}`
+
+    const approvalCase = process.env.BAUAR_APPROVAL_CASE
+    if (approvalCase) {
+      if (!approvalCases.includes(approvalCase as ApprovalCase)) throw new Error('Unknown BAUAR approval case')
+      const receipt = await runApprovalClientCase(app, page, {
+        scenario: approvalCase as ApprovalCase,
+        topicId,
+        bossModelId,
+        agentId: target.bossAgentId,
+        workspaceId: workspaceEntity.id,
+        effectPath: join(workspace, 'gate-v-approved.txt')
+      })
+      await test.info().attach(`bauar-${approvalCase}`, {
+        body: JSON.stringify(receipt, null, 2),
+        contentType: 'application/json'
+      })
+      return
+    }
 
     await page.evaluate(
       async ({ topicId, bossModelId }) => {

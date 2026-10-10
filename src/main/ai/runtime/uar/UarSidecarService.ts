@@ -30,6 +30,7 @@ import { redactSecretText } from '@shared/utils/redaction'
 
 import { inspectUarPayload, requireUarPayload, type UarPayload } from './uarPayload'
 import { uarPrincipalForSession } from './uarPrincipal'
+import { UarStartupDiagnostic } from './uarStartupDiagnostic'
 import { reviewedSkillSources } from './uarReviewedSkillSources'
 import { type AppliedUarStorage, readAppliedUarStorage, writeAppliedUarStorage } from './uarStorageProfile'
 
@@ -777,11 +778,15 @@ export class UarSidecarService extends BaseService {
   private waitForReady(child: ChildProcess): Promise<number> {
     return new Promise((resolve, reject) => {
       const output = readline.createInterface({ input: child.stdout! })
+      const diagnostic = new UarStartupDiagnostic()
       let startupDiagnostic = ''
       const appendDiagnostic = (value: string) => {
         startupDiagnostic = `${startupDiagnostic}${redactSecretText(value)}`.slice(-2_000)
       }
-      const timeout = setTimeout(() => settle(new Error('UAR sidecar readiness timed out')), START_TIMEOUT_MS)
+      const timeout = setTimeout(() => {
+        const summary = diagnostic.timeoutSummary(child.exitCode !== null, child.signalCode !== null)
+        settle(new Error(`UAR sidecar readiness timed out: ${summary}`))
+      }, START_TIMEOUT_MS)
       timeout.unref()
       const settle = (error?: Error, port?: number) => {
         clearTimeout(timeout)
@@ -793,6 +798,7 @@ export class UarSidecarService extends BaseService {
         else resolve(port!)
       }
       const onStderr = (chunk: Buffer | string) => {
+        diagnostic.observeStderr(String(chunk))
         appendDiagnostic(String(chunk))
       }
       const onError = (error: Error) => settle(new Error(`Failed to launch UAR sidecar: ${error.message}`))
@@ -806,6 +812,7 @@ export class UarSidecarService extends BaseService {
       child.once('error', onError)
       child.once('exit', onExit)
       output.on('line', (line) => {
+        diagnostic.observeLine(line)
         const match = /^READY:(\d{1,5})$/.exec(line)
         if (!match) {
           appendDiagnostic(`${line}\n`)

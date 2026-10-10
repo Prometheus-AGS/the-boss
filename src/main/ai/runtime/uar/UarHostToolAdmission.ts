@@ -7,58 +7,22 @@ import type { UarTeamPreparedEffect } from '@shared/types/uarTeams'
 import type { UarAuthorityDecision, UarAuthorityEffect, UarAuthorityProvider } from './UarAuthorityProvider'
 import { sanitizeUarProviderToolName } from './uarToolNames'
 
-export const UAR_TOOL_ADMISSION_VERSION = 1
-export const UAR_TOOL_ADMISSION_PATH = '/uar/admission/v1'
-export const UAR_TOOL_ADMISSION_META_KEY = 'tools.know-me.the-boss/admission'
+import {
+  argumentDigest,
+  isPreparedInvocation,
+  isRecord,
+  type PreparedInvocation as UarPreparedInvocation,
+  UAR_TOOL_ADMISSION_META_KEY,
+  UAR_TOOL_ADMISSION_PATH,
+  UAR_TOOL_ADMISSION_VERSION,
+  type UarHostToolDisposition,
+  type UarToolExecutionKind,
+  validAuthorityEnvelope
+} from './toolAdmission/wire'
+import { hasLiveHostClaimFacts, revalidateHostClaim } from './uarHostClaimRevalidation'
 
-export type UarHostToolDisposition = 'auto' | 'ask' | 'deny'
-
-export type UarPreparedInvocation = {
-  version: number
-  invocationId: string
-  modelToolCallId: string
-  attempt: number
-  rootRunId: string
-  executingRunId: string
-  ownerId: string
-  principalId: string
-  workspace: string
-  runtimeEpoch: string
-  hostEpoch: string
-  catalogRevision: string
-  mountedServerId: string
-  nativeToolName: string
-  providerToolName: string
-  runPolicyRevision: string
-  governancePolicyRevision: string
-  toolPolicyRevision: string
-  resourceRevision: string
-  payloadRevision: string
-  grantRevision: string
-  leaseRevision: string
-  budgetRevision: string
-  lease: {
-    leaseId: string
-    task: string
-    attempt: number
-    epoch: string
-    holder: string
-    expiresAt: number
-    active: boolean
-  }
-  budgetReservation: {
-    reservationId: string
-    budgetId: string
-    revision: string
-    amount: number
-    unit: string
-    expiresAt: number
-    active: boolean
-  }
-  authorityRevision: string
-  callIndex: number
-  validatedArguments: Record<string, unknown>
-}
+export { UAR_TOOL_ADMISSION_META_KEY, UAR_TOOL_ADMISSION_PATH, UAR_TOOL_ADMISSION_VERSION } from './toolAdmission/wire'
+export type { PreparedInvocation as UarPreparedInvocation, UarHostToolDisposition } from './toolAdmission/wire'
 
 export type UarHostAdmissionState =
   | 'prepared'
@@ -83,6 +47,8 @@ export type UarHostAdmissionSnapshot = {
   ownerId: string
   workspace: string
   hostEpoch: string
+  authorityRevision?: string
+  executionKind?: UarToolExecutionKind
   toolName: string
   state: UarHostAdmissionState
   hostDisposition: UarHostToolDisposition
@@ -140,7 +106,8 @@ export class UarHostToolAdmission {
     const operation = path.slice(UAR_TOOL_ADMISSION_PATH.length + 1)
     if (method === 'POST' && operation === 'prepare') return this.prepare(body, response)
     if (method === 'POST' && operation === 'resolve') return this.resolve(body, response)
-    if (method === 'POST' && operation === 'claim') return this.claim(body, response)
+    if (method === 'POST' && operation === 'claim') return this.claim(body, response, false)
+    if (method === 'POST' && operation === 'claim-native') return this.claim(body, response, true)
     if (method === 'POST' && operation === 'cancel') return this.cancel(body, response)
     if (method === 'POST' && operation === 'finish') return this.finish(body, response)
     if (method === 'POST' && operation === 'inspect') return this.inspect(body, response)
@@ -171,10 +138,13 @@ export class UarHostToolAdmission {
     const invocationId = meta.invocationId
     const record = typeof admissionId === 'string' ? this.records.get(admissionId) : undefined
     if (!record || typeof invocationId !== 'string') return { call, error: 'Managed tool admission is unknown' }
+    if (record.state !== 'authorized') return { call, error: 'Managed tool admission is not executable' }
     const invocation = record.invocation
     const providerName = sanitizeUarProviderToolName(`${serverName}__${name}`)
     const matches =
       meta.version === UAR_TOOL_ADMISSION_VERSION &&
+      invocation.executionKind === 'host_mcp' &&
+      meta.executionKind === invocation.executionKind &&
       meta.runtimeEpoch === invocation.runtimeEpoch &&
       meta.hostEpoch === this.hostEpoch &&
       meta.authorityRevision === invocation.authorityRevision &&
@@ -192,9 +162,14 @@ export class UarHostToolAdmission {
       this.transition(record, 'invalidated')
       return { call, error: 'Managed tool policy changed before dispatch' }
     }
-    if (record.state !== 'claimed') return { call, error: 'Managed tool admission is not executable' }
     if (!record.claimRevalidated) return { call, error: 'Managed tool admission was not revalidated before dispatch' }
     if (record.managedDispatchClaimed) return { call, error: 'Managed tool admission was already dispatched' }
+    if (!hasLiveHostClaimFacts(invocation)) return { call, error: 'Managed tool lease or budget is not executable' }
+    try {
+      this.transition(record, 'claimed')
+    } catch {
+      return { call, error: 'Managed tool claim evidence could not be persisted; dispatch was blocked' }
+    }
     record.managedDispatchClaimed = true
     return { call, admissionId: record.admissionId }
   }
@@ -210,6 +185,7 @@ export class UarHostToolAdmission {
     ) {
       return false
     }
+    if (!['prepared', 'awaiting-human'].includes(record.state)) return false
     this.transition(record, approved ? 'awaiting-ack' : 'denied')
     record.decision = approved
     return true
@@ -356,20 +332,19 @@ export class UarHostToolAdmission {
     return true
   }
 
-  private async claim(body: unknown, response: ServerResponse): Promise<true> {
+  private async claim(body: unknown, response: ServerResponse, consumeNative: boolean): Promise<true> {
     const admissionId = isRecord(body) && typeof body.admissionId === 'string' ? body.admissionId : ''
-    const invocation = isRecord(body) && isPreparedInvocation(body.invocation) ? body.invocation : undefined
-    const receipt = isRecord(body) && isRecord(body.receipt) ? body.receipt : undefined
     const record = this.records.get(admissionId)
-    if (
-      !record ||
-      !invocation ||
-      !receipt ||
-      record.state !== 'authorized' ||
-      !sameInvocation(record.invocation, invocation) ||
-      !matchesReceipt(record, receipt)
-    ) {
-      this.respond(response, 409, { error: 'Tool admission claim does not match its authorized binding' })
+    const result = revalidateHostClaim(body, record, record ? this.receipt(record) : undefined, (name) =>
+      this.options.disposition(name)
+    )
+    if (result.status !== 200 || !record) {
+      this.respond(response, result.status, result.body)
+      return true
+    }
+    const invocation = record.invocation
+    if (consumeNative && invocation.executionKind !== 'runtime_native') {
+      this.respond(response, 409, { error: 'Tool admission does not authorize native execution' })
       return true
     }
     const currentDisposition = this.options.disposition(invocation.providerToolName)
@@ -398,11 +373,22 @@ export class UarHostToolAdmission {
       this.respond(response, 409, { error: `Tool authority revalidation denied: ${authority.reason}` })
       return true
     }
-    try {
-      this.transition(record, 'claimed')
-    } catch {
-      this.respond(response, 503, { error: 'Tool claim evidence could not be persisted' })
+    const finalClaim = revalidateHostClaim(body, record, this.receipt(record), (name) => this.options.disposition(name))
+    if (finalClaim.status !== 200) {
+      this.respond(response, finalClaim.status, finalClaim.body)
       return true
+    }
+    if (consumeNative) {
+      if (!record.claimRevalidated) {
+        this.respond(response, 409, { error: 'Native tool admission was not revalidated before dispatch' })
+        return true
+      }
+      try {
+        this.transition(record, 'claimed')
+      } catch {
+        this.respond(response, 503, { error: 'Tool claim evidence could not be persisted; dispatch was blocked' })
+        return true
+      }
     }
     record.claimRevalidated = true
     this.respond(response, 200, this.receipt(record))
@@ -439,7 +425,7 @@ export class UarHostToolAdmission {
     }
     if (record.state === 'claimed') this.transition(record, outcome)
     if (record.state !== outcome) {
-      this.respond(response, 409, { error: 'Tool admission is not awaiting a terminal receipt' })
+      this.respond(response, 409, { error: 'terminal_state_conflict', state: record.state, outcome })
       return true
     }
     response.writeHead(204)
@@ -485,6 +471,7 @@ export class UarHostToolAdmission {
     this.respond(response, 200, {
       admissionId,
       invocationId: record.invocation.invocationId,
+      executionKind: record.invocation.executionKind,
       toolName: record.invocation.providerToolName,
       state: record.state,
       hostDisposition: record.hostDisposition,
@@ -520,6 +507,7 @@ export class UarHostToolAdmission {
   private receipt(record: AdmissionRecord): Record<string, unknown> {
     return {
       version: UAR_TOOL_ADMISSION_VERSION,
+      executionKind: record.invocation.executionKind,
       admissionId: record.admissionId,
       invocationId: record.invocation.invocationId,
       runtimeEpoch: record.invocation.runtimeEpoch,
@@ -556,6 +544,8 @@ export class UarHostToolAdmission {
       ownerId: record.invocation.ownerId,
       workspace: record.invocation.workspace,
       hostEpoch: this.hostEpoch,
+      authorityRevision: record.invocation.authorityRevision,
+      executionKind: record.invocation.executionKind,
       toolName: record.invocation.providerToolName,
       state,
       hostDisposition: record.hostDisposition,
@@ -631,143 +621,6 @@ function textDigest(value: string): string {
   return createHash('sha256').update(value).digest('hex')
 }
 
-function isPreparedInvocation(value: unknown): value is UarPreparedInvocation {
-  if (
-    !isRecord(value) ||
-    !isRecord(value.validatedArguments) ||
-    !isRecord(value.lease) ||
-    !isRecord(value.budgetReservation)
-  ) {
-    return false
-  }
-  const strings = [
-    'invocationId',
-    'modelToolCallId',
-    'rootRunId',
-    'executingRunId',
-    'ownerId',
-    'principalId',
-    'workspace',
-    'runtimeEpoch',
-    'hostEpoch',
-    'catalogRevision',
-    'mountedServerId',
-    'nativeToolName',
-    'providerToolName',
-    'runPolicyRevision',
-    'governancePolicyRevision',
-    'toolPolicyRevision',
-    'resourceRevision',
-    'payloadRevision',
-    'grantRevision',
-    'leaseRevision',
-    'budgetRevision',
-    'authorityRevision'
-  ]
-  const lease = value.lease
-  const budget = value.budgetReservation
-  return (
-    value.version === UAR_TOOL_ADMISSION_VERSION &&
-    value.attempt === 1 &&
-    Number.isSafeInteger(value.callIndex) &&
-    typeof lease.leaseId === 'string' &&
-    typeof lease.task === 'string' &&
-    lease.attempt === value.attempt &&
-    typeof lease.epoch === 'string' &&
-    typeof lease.holder === 'string' &&
-    typeof lease.active === 'boolean' &&
-    Number.isSafeInteger(lease.expiresAt) &&
-    typeof budget.reservationId === 'string' &&
-    typeof budget.budgetId === 'string' &&
-    typeof budget.revision === 'string' &&
-    Number.isSafeInteger(budget.amount) &&
-    typeof budget.unit === 'string' &&
-    typeof budget.active === 'boolean' &&
-    Number.isSafeInteger(budget.expiresAt) &&
-    strings.every((key) => typeof value[key] === 'string' && value[key].length > 0)
-  )
-}
-
-function argumentDigest(value: Record<string, unknown>): string {
-  return createHash('sha256')
-    .update(JSON.stringify(canonicalize(value)))
-    .digest('hex')
-}
-
-function validAuthorityEnvelope(invocation: UarPreparedInvocation): boolean {
-  if (revisionDigest(invocation.validatedArguments) !== invocation.payloadRevision) return false
-  const now = Math.floor(Date.now() / 1_000)
-  if (
-    !invocation.lease.active ||
-    invocation.lease.attempt !== invocation.attempt ||
-    invocation.lease.epoch !== invocation.runtimeEpoch ||
-    invocation.lease.holder !== invocation.principalId ||
-    invocation.lease.expiresAt <= now ||
-    !invocation.budgetReservation.active ||
-    invocation.budgetReservation.amount !== 1 ||
-    invocation.budgetReservation.unit !== 'tool_call' ||
-    invocation.budgetReservation.revision !== invocation.budgetRevision ||
-    invocation.budgetReservation.expiresAt <= now
-  ) {
-    return false
-  }
-  return (
-    revisionDigest({
-      principalId: invocation.principalId,
-      ownerId: invocation.ownerId,
-      rootRunId: invocation.rootRunId,
-      executingRunId: invocation.executingRunId,
-      runtimeEpoch: invocation.runtimeEpoch,
-      hostEpoch: invocation.hostEpoch,
-      catalogRevision: invocation.catalogRevision,
-      runPolicyRevision: invocation.runPolicyRevision,
-      expectedGovernancePolicyRevision: invocation.governancePolicyRevision,
-      toolPolicyRevision: invocation.toolPolicyRevision,
-      resourceRevision: invocation.resourceRevision,
-      payloadRevision: invocation.payloadRevision,
-      grantRevision: invocation.grantRevision,
-      leaseRevision: invocation.leaseRevision,
-      budgetRevision: invocation.budgetRevision,
-      lease: invocation.lease,
-      budgetReservation: invocation.budgetReservation
-    }) === invocation.authorityRevision
-  )
-}
-
-function sameInvocation(left: UarPreparedInvocation, right: UarPreparedInvocation): boolean {
-  return (
-    left.invocationId === right.invocationId &&
-    left.runtimeEpoch === right.runtimeEpoch &&
-    left.hostEpoch === right.hostEpoch &&
-    left.authorityRevision === right.authorityRevision &&
-    left.payloadRevision === right.payloadRevision &&
-    left.leaseRevision === right.leaseRevision &&
-    left.budgetRevision === right.budgetRevision &&
-    argumentDigest({ lease: left.lease, budgetReservation: left.budgetReservation }) ===
-      argumentDigest({ lease: right.lease, budgetReservation: right.budgetReservation }) &&
-    argumentDigest(left.validatedArguments) === argumentDigest(right.validatedArguments) &&
-    validAuthorityEnvelope(right)
-  )
-}
-
-function matchesReceipt(record: AdmissionRecord, receipt: Record<string, unknown>): boolean {
-  return (
-    receipt.version === UAR_TOOL_ADMISSION_VERSION &&
-    receipt.admissionId === record.admissionId &&
-    receipt.invocationId === record.invocation.invocationId &&
-    receipt.runtimeEpoch === record.invocation.runtimeEpoch &&
-    receipt.hostEpoch === record.invocation.hostEpoch &&
-    receipt.authorityRevision === record.invocation.authorityRevision &&
-    receipt.managedMcpMetadata === true
-  )
-}
-
-function revisionDigest(value: unknown): string {
-  return `sha256:${createHash('sha256')
-    .update(JSON.stringify(canonicalize(value)))
-    .digest('hex')}`
-}
-
 function composeDisposition(
   local: UarHostToolDisposition,
   authority: UarAuthorityDecision['disposition']
@@ -811,16 +664,3 @@ function safeTarget(argumentsValue: Record<string, unknown>): string | undefined
   return undefined
 }
 
-function canonicalize(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(canonicalize)
-  if (!isRecord(value)) return value
-  return Object.fromEntries(
-    Object.entries(value)
-      .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
-      .map(([key, entry]) => [key, canonicalize(entry)])
-  )
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
-}

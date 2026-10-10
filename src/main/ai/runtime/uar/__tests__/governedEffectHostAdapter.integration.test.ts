@@ -171,7 +171,7 @@ describe('AFC C02 governed-effect host integration gate', () => {
     })
     expect(changedPolicyClaim).toMatchObject({
       status: 409,
-      value: { error: expect.stringMatching(/revalidation denied/) }
+      value: { error: expect.stringMatching(/not executable/) }
     })
 
     const untrustedEffect = {
@@ -214,7 +214,7 @@ async function postAdmission(
       return this
     }
   } as unknown as ServerResponse
-  await admission.handleHttp('POST', `/uar/admission/v1/${operation}`, body, response)
+  await admission.handleHttp('POST', `/uar/admission/v2/${operation}`, body, response)
   return capture
 }
 
@@ -257,8 +257,9 @@ function preparedInvocation(hostEpoch: string): UarPreparedInvocation {
     expiresAt: unixTime() + 300,
     active: true
   }
-  const invocation = {
-    version: 1,
+  const invocation: UarPreparedInvocation = {
+    version: 2,
+    executionKind: 'host_mcp',
     invocationId,
     modelToolCallId: 'call-1',
     attempt: 1,
@@ -301,6 +302,7 @@ function nextInvocation(invocation: UarPreparedInvocation): UarPreparedInvocatio
 
 function authorityRevision(invocation: UarPreparedInvocation): string {
   return revision({
+    executionKind: invocation.executionKind,
     principalId: invocation.principalId,
     ownerId: invocation.ownerId,
     rootRunId: invocation.rootRunId,
