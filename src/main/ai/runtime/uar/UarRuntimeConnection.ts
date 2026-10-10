@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto'
 import { realpathSync } from 'node:fs'
 
+import { isToolUIPart } from 'ai'
+
 import { application } from '@application'
 import { agentService } from '@data/services/AgentService'
 import { agentSessionMessageService } from '@data/services/AgentSessionMessageService'
@@ -137,7 +139,9 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
       this.input.nativeSessionId ?? this.input.sessionId
     )
     if (!placement.instanceId) placement.instanceId = config.selectedInstanceId
-    this.reattaching = Boolean(this.input.resumeToken && placement.sourceRunId)
+    this.reattaching = Boolean(
+      this.input.resumeToken && placement.sourceRunId && !this.hasCompletedSourceRun(placement.sourceRunId)
+    )
     this.placement = placement
     this.endpoint = await application.get('UarSidecarService').resolveInstance(placement.instanceId)
     const agent = agentService.getAgent(this.input.agentId)
@@ -688,7 +692,29 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
     }
   }
 
+  private hasCompletedSourceRun(sourceRunId: string): boolean {
+    const completed = this.loadSessionMessages().some(
+      (message) =>
+        message.role === 'assistant' &&
+        message.status === 'success' &&
+        message.runtimeResumeToken === this.input.resumeToken &&
+        !(message.data.parts ?? []).some(
+          (part) => isToolUIPart(part) && !['output-available', 'output-error', 'output-denied'].includes(part.state)
+        )
+    )
+    if (!completed) return false
+    return !uarApprovalLifecycleStore.snapshot(this.input.sessionId).some(
+      (admission) =>
+        (admission.rootRunId === sourceRunId || admission.executingRunId === sourceRunId) &&
+        !['succeeded', 'failed', 'denied', 'cancelled', 'invalidated'].includes(admission.state)
+    )
+  }
+
   private loadHistory(excludeMessageId: string): UarHistoryMessage[] {
+    return buildUarHostHistory(this.loadSessionMessages(), excludeMessageId)
+  }
+
+  private loadSessionMessages(): AgentSessionMessageEntity[] {
     const newestFirst: AgentSessionMessageEntity[] = []
     let cursor: string | undefined
     do {
@@ -700,8 +726,7 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
       cursor = page.nextCursor
     } while (cursor && newestFirst.length < HISTORY_LIMIT)
 
-    const chronological = newestFirst.slice(0, HISTORY_LIMIT).reverse()
-    return buildUarHostHistory(chronological, excludeMessageId)
+    return newestFirst.slice(0, HISTORY_LIMIT).reverse()
   }
 
   private async resolveSkillIds(agentId: string): Promise<string[]> {
