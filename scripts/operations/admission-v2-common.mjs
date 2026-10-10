@@ -29,7 +29,9 @@ export function save(file, evidence) {
 // The launcher owns this disposable profile. Read only the sanitized admission
 // document; credentials and unrelated application state never leave SQLite.
 export async function profile(evaluate, configuration) {
-  const info = await ipc(evaluate, 'app.get_info')
+  const result = await evaluate('window.api.ipcApi.request("app.get_info")')
+  requireFact(result?.ok, 'ADMISSION_V2_IPC_REFUSED')
+  const info = result.data
   requireFact(info.isPackaged && info.version === configuration.version, 'ADMISSION_V2_PACKAGE_VERSION_MISMATCH')
   const root = fs.realpathSync(info.appDataPath)
   requireFact(path.dirname(root) === fs.realpathSync(os.tmpdir()) &&

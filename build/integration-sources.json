@@ -36,7 +36,7 @@
     },
     "bossfang": {
       "repository": "GQAdonis/librefang",
-      "revision": "4971458c70543b592cc534986737a9d045164547"
+      "revision": "95719eaefc491e6d19c84ed7bf0b7d62632d8d0b"
     },
     "skill-pack": {
       "repository": "Prometheus-AGS/prometheus-skill-system",
@@ -80,7 +80,7 @@
     "bossfang": {
       "source": "bossfang",
       "package": "librefang-cli",
-      "version": "2026.9.19+4971458c7",
+      "version": "2026.9.19+95719eaef",
       "features": "telemetry,surreal-backend,uar-driver"
     }
   },
