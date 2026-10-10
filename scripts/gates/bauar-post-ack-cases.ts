@@ -148,7 +148,7 @@ async function createSession(page: Page, agentId: string, workspaceId: string): 
 }
 
 export async function exercisePostAckCases(input: {
-  launch(profile: string, sidecar: string): Promise<{ app: ElectronApplication; page: Page }>
+  launch(profile: string, sidecar: string): Promise<{ app: ElectronApplication; page: Page; mainDirectory?: string }>
   gateSidecar: string; gateArtifactManifest: string; baseUrl: string; canary: string; mcpUrl: string
   targetEffects(): number
   conversation(value: NativeFaultConversation | ProjectionProviderConversation | undefined): void
@@ -161,6 +161,7 @@ export async function exercisePostAckCases(input: {
     let sessionId: string | undefined
     let running: Promise<Awaited<ReturnType<typeof runTurn>>> | undefined
     let controls = false
+    let mainDirectory: string | undefined
     let registrationCapture = false
     let released = false
     let correlation: Correlation | undefined
@@ -175,6 +176,7 @@ export async function exercisePostAckCases(input: {
       receipt.stage = 'bootstrap'
       let launched = await input.launch(profile, input.gateSidecar)
       app = launched.app
+      mainDirectory = launched.mainDirectory
       await launched.page.evaluate(() => window.api.preference.setMultiple({ 'app.language': 'en-US',
         'app.onboarding.provider_setup.status': 'skipped', 'app.privacy.data_collection.enabled': false,
         'app.developer_mode.enabled': true }))
@@ -183,6 +185,7 @@ export async function exercisePostAckCases(input: {
       assert.deepEqual(await verifyArtifact(input.gateSidecar, input.gateArtifactManifest), binding)
       launched = await input.launch(profile, input.gateSidecar)
       app = launched.app
+      mainDirectory = launched.mainDirectory
       const page = launched.page
       receipt.stage = 'configuration'
       const configuration = await setup(page, workspace, input)
@@ -204,7 +207,7 @@ export async function exercisePostAckCases(input: {
       await restoreCapture(app)
       registrationCapture = false
       receipt.registration.operation = 'warm_session_close'
-      await closeProjectionHistorySession(app, sessionId)
+      await closeProjectionHistorySession(app, sessionId, mainDirectory)
       receipt.registration.operation = 'tool_agent_setup'
       const agent = await prepareProjectionToolAgent(page, configuration.sourceAgent, configuration.modelId, configuration.serverId, 'deferred')
       receipt.registration.operation = 'tool_session_create'
@@ -217,7 +220,7 @@ export async function exercisePostAckCases(input: {
       assert.equal(await realpath(directory), directory)
       const controlId = randomUUID()
       const deadlineUnixMs = Date.now() + 120_000
-      await installNativeControls(app, profile, 'observe', [], { workspace, controlId, deadlineUnixMs })
+      await installNativeControls(app, profile, 'observe', [], { workspace, controlId, deadlineUnixMs }, mainDirectory)
       controls = true
       const before = input.targetEffects()
       running = runTurn(page, `agent-session:${sessionId}`, configuration.modelId, { approve: true })
@@ -267,7 +270,7 @@ export async function exercisePostAckCases(input: {
       receipt.stage = 'outcomes'
       await expect.poll(async () => (await postAckControl(app!, 'terminal')).runStatus, { timeout: 30_000 })
         .toBe(cancel ? 'cancelled' : 'done')
-      await closeProjectionHistorySession(app, sessionId)
+      await closeProjectionHistorySession(app, sessionId, mainDirectory)
       const completedControl = await postAckControl(app, 'read')
       assert.equal(completedControl.finalizationFailed, false)
       assert.equal(completedControl.streamObserved, true)
@@ -327,7 +330,7 @@ export async function exercisePostAckCases(input: {
                 }
               }
             }
-            if (sessionId) await closeProjectionHistorySession(app, sessionId)
+            if (sessionId) await closeProjectionHistorySession(app, sessionId, mainDirectory)
             await running?.catch(() => undefined)
           } finally {
             try {

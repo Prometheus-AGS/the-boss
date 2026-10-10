@@ -19,7 +19,7 @@ export type PostAckControlState = {
 }
 
 export async function installNativeControls(app: ElectronApplication, profile: string, mode: NativeFault,
-  replay: NativeReplay[] = [], postAck?: PostAckArmConfig): Promise<void> {
+  replay: NativeReplay[] = [], postAck?: PostAckArmConfig, mainDirectory = join(process.cwd(), 'out/main')): Promise<void> {
   await app.evaluate((_, input) => {
     const { createRequire } = process.getBuiltinModule('node:module')
     const { readdirSync, realpathSync, lstatSync, writeFileSync, renameSync } = process.getBuiltinModule('node:fs')
@@ -284,7 +284,7 @@ export async function installNativeControls(app: ElectronApplication, profile: s
       }
       return response
     }
-  }, { mainDirectory: join(process.cwd(), 'out/main'), profile, mode, replay, postAck })
+  }, { mainDirectory, profile, mode, replay, postAck })
 }
 
 export async function nativeObservation(app: ElectronApplication, inspect = false): Promise<NativeObservation> {

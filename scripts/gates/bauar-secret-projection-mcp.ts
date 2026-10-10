@@ -14,8 +14,8 @@ import type { ElectronApplication, Page } from '@playwright/test'
 
 import type { ProjectionResultDiagnostic } from './bauar-secret-projection-provider'
 
-import { createUarHostMcpBridge } from '../../src/main/ai/runtime/uar/UarHostMcpBridge'
-import { UAR_TOOL_ADMISSION_META_KEY, UAR_TOOL_ADMISSION_VERSION } from '../../src/main/ai/runtime/uar/UarHostToolAdmission'
+import { UAR_TOOL_ADMISSION_META_KEY, UAR_TOOL_ADMISSION_VERSION,
+  type UarHostAdmissionSnapshot, type UarHostToolAdmissionOptions } from '../../src/main/ai/runtime/uar/UarHostToolAdmission'
 import { createUarSecretProjection } from '../../src/main/ai/runtime/uar/uarSecretProjection'
 
 export type ProjectionCatalogProfile = 'eager' | 'deferred'
@@ -143,10 +143,27 @@ export async function startProjectionMcp(canary: string, profile: ProjectionCata
   }
 }
 
+type ProjectionClaimBridge = {
+  servers: readonly { name: string; url: string; headers: Record<string, string> }[]
+  toolAdmission: { version: number; hostEpoch: string; url: string; headers: Record<string, string> }
+  redactions: readonly string[]
+  approvalSnapshot(): UarHostAdmissionSnapshot[]
+  close(): Promise<void>
+}
+type ProjectionClaimBridgeFactory = (
+  servers: Record<string, { name: string; instance: McpServer }>,
+  admissionOptions: UarHostToolAdmissionOptions,
+  onError: (error: unknown) => void,
+  getProjection: () => ReturnType<typeof createUarSecretProjection>
+) => Promise<ProjectionClaimBridge>
+
 /** Exercise the production bridge over authenticated HTTP, including its exact admission store. */
 export async function exerciseProjectedClaims(canary: string) {
+  // The packaged gate needs the external fixture only; load this source bridge for its separate claim exercise.
+  const bridgeUrl = pathToFileURL(join(process.cwd(), 'src/main/ai/runtime/uar/UarHostMcpBridge.ts')).href
+  const createUarHostMcpBridge: ProjectionClaimBridgeFactory = (await import(bridgeUrl)).createUarHostMcpBridge
   const calls: Call[] = []
-  let bridge: Awaited<ReturnType<typeof createUarHostMcpBridge>>
+  let bridge: ProjectionClaimBridge
   const server = toolServer(canary, calls, (request) => {
     const meta = request.params._meta[UAR_TOOL_ADMISSION_META_KEY]
     assert.equal(bridge.approvalSnapshot().find((entry) => entry.admissionId === meta.admissionId)?.state, 'claimed')

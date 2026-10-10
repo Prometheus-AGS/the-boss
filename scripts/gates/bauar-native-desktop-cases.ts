@@ -113,7 +113,7 @@ async function beforeApprovalCancellation(page: Page, topicId: string, modelId: 
 }
 
 export async function exerciseNativeDesktopCases(input: {
-  app: ElectronApplication; page: Page; profile: string; sourceAgent: string; modelId: string
+  app: ElectronApplication; page: Page; profile: string; mainDirectory?: string; sourceAgent: string; modelId: string
   workspaceId: string; serverId: string; targetName: string; canary: string
   targetEffects(): number
   conversation(value: NativeFaultConversation | ProjectionProviderConversation | undefined): void
@@ -129,7 +129,7 @@ export async function exerciseNativeDesktopCases(input: {
     const conversation = new NativeFaultConversation(input.targetName)
     input.conversation(conversation)
     const before = input.targetEffects()
-    await installNativeControls(input.app, input.profile, mode === 'before_approval' ? 'observe' : mode)
+    await installNativeControls(input.app, input.profile, mode === 'before_approval' ? 'observe' : mode, [], undefined, input.mainDirectory)
     let running: Promise<Awaited<ReturnType<typeof runTurn>>> | undefined
     try {
       let error = ''
@@ -155,7 +155,7 @@ export async function exerciseNativeDesktopCases(input: {
         assert.equal(turn.approvals.requests.length, 1)
         assert.equal(turn.approvals.accepted.length, 1)
       }
-      await closeProjectionHistorySession(input.app, sessionId)
+      await closeProjectionHistorySession(input.app, sessionId, input.mainDirectory)
       const observed = await nativeObservation(input.app, true)
       assert.equal(observed.observationFailed, false)
       assert.equal(observed.preparations, 1)
@@ -191,7 +191,7 @@ export async function exerciseNativeDesktopCases(input: {
       await request(input.page, 'ai.stream.abort', { topicId }).catch(() => undefined)
       await releaseNativeAck(input.app, true)
       await running?.catch(() => undefined)
-      try { await closeProjectionHistorySession(input.app, sessionId) }
+      try { await closeProjectionHistorySession(input.app, sessionId, input.mainDirectory) }
       finally { await restoreNativeControls(input.app); input.conversation(undefined) }
     }
   }
@@ -221,7 +221,7 @@ async function storageFixture(root: string, mode: 'seed-claim-intent' | 'seed-te
   return receipt
 }
 
-async function storageRoot(app: ElectronApplication, profile: string): Promise<string> {
+async function storageRoot(app: ElectronApplication, profile: string, mainDirectory = join(process.cwd(), 'out/main')): Promise<string> {
   return app.evaluate((_, input) => {
     const { createRequire } = process.getBuiltinModule('node:module')
     const { readdirSync } = process.getBuiltinModule('node:fs')
@@ -240,11 +240,11 @@ async function storageRoot(app: ElectronApplication, profile: string): Promise<s
       throw new Error('Native storage seed refused non-isolated profile')
     }
     return root
-  }, { mainDirectory: join(process.cwd(), 'out/main'), profile })
+  }, { mainDirectory, profile })
 }
 
 export async function exerciseNativeStorageCases(input: {
-  launch(profile: string): Promise<{ app: ElectronApplication; page: Page }>
+  launch(profile: string): Promise<{ app: ElectronApplication; page: Page; mainDirectory?: string }>
   baseUrl: string; canary: string; mcpUrl: string
   targetEffects(): number
   conversation(value: NativeFaultConversation | ProjectionProviderConversation | undefined): void
@@ -258,13 +258,15 @@ export async function exerciseNativeStorageCases(input: {
     let app: ElectronApplication | undefined
     let sessionId: string | undefined
     let controls = false
+    let mainDirectory: string | undefined
     try {
       let launched = await input.launch(profile)
       app = launched.app
+      mainDirectory = launched.mainDirectory
       await launched.page.evaluate(() => window.api.preference.setMultiple({ 'app.language': 'en-US',
         'app.onboarding.provider_setup.status': 'skipped', 'app.privacy.data_collection.enabled': false,
         'app.developer_mode.enabled': true }))
-      const root = await realpath(await storageRoot(app, profile))
+      const root = await realpath(await storageRoot(app, profile, mainDirectory))
       await app.close()
       app = undefined
       await mkdir(root, { recursive: true })
@@ -303,16 +305,16 @@ export async function exerciseNativeStorageCases(input: {
       const registrationSession = await session(page, setup.agentId, setup.workspaceId)
       const registration = await runTurn(page, `agent-session:${registrationSession}`, modelId)
       assert.equal(registration.error, '')
-      await closeProjectionHistorySession(app, registrationSession)
+      await closeProjectionHistorySession(app, registrationSession, mainDirectory)
       const agent = await prepareProjectionToolAgent(page, `the-boss:${setup.agentId}`, modelId, setup.serverId, 'deferred')
       const conversation = new NativeFaultConversation(encodeUarProviderToolName(`${setup.serverId}__read_projection`))
       input.conversation(conversation)
       sessionId = await session(page, agent.id, setup.workspaceId)
-      await installNativeControls(app, profile, 'observe')
+      await installNativeControls(app, profile, 'observe', [], undefined, mainDirectory)
       controls = true
       const before = input.targetEffects()
       const turn = await runTurn(page, `agent-session:${sessionId}`, modelId, { approve: true })
-      await closeProjectionHistorySession(app, sessionId)
+      await closeProjectionHistorySession(app, sessionId, mainDirectory)
       const observed = await nativeObservation(app, true)
       assert.equal(observed.observationFailed, false)
       assert.equal(observed.preparations, 1)
@@ -343,7 +345,7 @@ export async function exerciseNativeStorageCases(input: {
     } finally {
       input.conversation(undefined)
       if (app) {
-        try { if (sessionId) await closeProjectionHistorySession(app, sessionId) }
+        try { if (sessionId) await closeProjectionHistorySession(app, sessionId, mainDirectory) }
         finally {
           try { if (controls) await restoreNativeControls(app) }
           finally { await app.close() }
@@ -355,7 +357,7 @@ export async function exerciseNativeStorageCases(input: {
 }
 
 export async function exerciseNativeRestart(input: {
-  app: ElectronApplication; page: Page; profile: string; agentId: string; workspaceId: string; modelId: string
+  app: ElectronApplication; page: Page; profile: string; mainDirectory?: string; agentId: string; workspaceId: string; modelId: string
   replay: NativeReplay[]; targetName: string; canary: string
   targetEffects(): number
   conversation(value: NativeFaultConversation | ProjectionProviderConversation | undefined): void
@@ -368,7 +370,7 @@ export async function exerciseNativeRestart(input: {
   const prior = history.approvals.filter((entry: any) => oldIds.has(entry.admissionId))
   assert.equal(prior.length, 3)
   assert(prior.every((entry: any) => entry.state === 'outcome-unknown'))
-  await installNativeControls(input.app, input.profile, 'observe', input.replay)
+  await installNativeControls(input.app, input.profile, 'observe', input.replay, undefined, input.mainDirectory)
   const sessionId = await session(input.page, input.agentId, input.workspaceId)
   const conversation = new ProjectionProviderConversation('success', input.targetName, input.canary)
   input.conversation(conversation)
@@ -379,7 +381,7 @@ export async function exerciseNativeRestart(input: {
     assert.equal(result.approvals.requests.length, 2)
     assert.equal(new Set(result.approvals.accepted).size, 2)
     assert.equal(input.targetEffects() - before, 1)
-    await closeProjectionHistorySession(input.app, sessionId)
+    await closeProjectionHistorySession(input.app, sessionId, input.mainDirectory)
     const observed = await nativeObservation(input.app, true)
     assert.deepEqual(observed.replayStatuses, [404, 404, 404])
     assert.equal(observed.durableConsumes, 1)
@@ -391,7 +393,7 @@ export async function exerciseNativeRestart(input: {
       priorReceiptRefused: true, legacyVersionKindlessReplayRefused: true, observed }
   } finally {
     await request(input.page, 'ai.stream.abort', { topicId: `agent-session:${sessionId}` }).catch(() => undefined)
-    try { await closeProjectionHistorySession(input.app, sessionId) }
+    try { await closeProjectionHistorySession(input.app, sessionId, input.mainDirectory) }
     finally { await restoreNativeControls(input.app); input.conversation(undefined) }
   }
 }

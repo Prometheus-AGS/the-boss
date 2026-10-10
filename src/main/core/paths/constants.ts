@@ -13,16 +13,60 @@
 //   - src/main/core/paths/pathRegistry.ts            → re-exposes LOGS_DIR as 'app.logs'
 //   - src/main/core/preboot/userDataLocation.ts      → uses resolveDevUserDataPath
 
+import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
 import { app } from 'electron'
 
+type PrivateProfilePaths = Readonly<{
+  root: string
+  config: string
+  userData: string
+  sessionData: string
+  logs: string
+  temp: string
+}>
+
+function resolvePrivateProfilePaths(): PrivateProfilePaths | undefined {
+  const configured = process.env.THE_BOSS_PROFILE_ROOT
+  if (configured === undefined) return undefined
+
+  try {
+    if (!path.isAbsolute(configured)) throw new Error()
+    const root = fs.realpathSync(configured)
+    if (!fs.statSync(root).isDirectory()) throw new Error()
+    fs.accessSync(root, fs.constants.W_OK | fs.constants.X_OK)
+
+    const paths = Object.freeze({
+      root,
+      config: path.join(root, 'config'),
+      userData: path.join(root, 'user-data'),
+      sessionData: path.join(root, 'session-data'),
+      logs: path.join(root, 'logs'),
+      temp: path.join(root, 'temp')
+    })
+    for (const directory of [paths.config, paths.userData, paths.sessionData, paths.logs, paths.temp]) {
+      fs.mkdirSync(directory, { recursive: true })
+    }
+    app.setPath('userData', paths.userData)
+    app.setPath('sessionData', paths.sessionData)
+    app.setPath('temp', paths.temp)
+    app.setAppLogsPath(paths.logs)
+    return paths
+  } catch {
+    fs.writeSync(process.stderr.fd, 'THE_BOSS_PROFILE_ROOT is invalid or unavailable.\n')
+    process.exit(2)
+  }
+}
+
+export const PRIVATE_PROFILE_PATHS: PrivateProfilePaths | undefined = resolvePrivateProfilePaths()
+
 // Duplicated from HOME_DIRNAME in @shared/utils/branding: this layer loads
 // before app.whenReady() and may not import business modules (see CONSTRAINTS
 // above). Change both together.
 export const CHERRY_HOME_DIRNAME = '.the-boss'
-export const CHERRY_HOME = path.join(os.homedir(), CHERRY_HOME_DIRNAME)
+export const CHERRY_HOME = PRIVATE_PROFILE_PATHS?.config ?? path.join(os.homedir(), CHERRY_HOME_DIRNAME)
 export const BOOT_CONFIG_PATH = path.join(CHERRY_HOME, 'boot-config.json')
 
 const DEFAULT_DEV_USER_DATA_SUFFIX = 'Dev'
@@ -73,7 +117,7 @@ export function resolveDevUserDataPath(): string {
 // derives from the app *name* (~/Library/Logs/CherryStudio), elsewhere from
 // the not-yet-suffixed userData — so without this a dev run would interleave
 // its logs with a packaged install's.
-if (!app.isPackaged) {
+if (!PRIVATE_PROFILE_PATHS && !app.isPackaged) {
   app.setAppLogsPath(
     process.platform === 'darwin'
       ? app.getPath('logs') + resolveDevUserDataSuffix()
@@ -82,7 +126,8 @@ if (!app.isPackaged) {
 }
 
 /**
- * Logs directory. Resolves to Electron's platform-standard location:
+ * Logs directory. Uses the private root when selected; otherwise resolves
+ * to Electron's platform-standard location:
  *   - macOS:   ~/Library/Logs/<App>/
  *   - Windows: %APPDATA%/<App>/logs
  *   - Linux:   ~/.config/<App>/logs

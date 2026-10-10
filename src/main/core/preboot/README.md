@@ -135,9 +135,48 @@ preboot/
 The directory is intentionally flat. New domains add a sibling file rather
 than a subdirectory.
 
+### Optional private profile root
+
+Set `THE_BOSS_PROFILE_ROOT` to an existing absolute, writable and
+searchable directory to select a private profile for packaged or development
+runs. `core/paths/constants.ts` reads the variable once and canonicalizes it
+with filesystem `realpath` before creating application-owned directories.
+An explicitly empty, relative, missing, file or inaccessible selection aborts
+startup before configuration, logger or profile writes. It synchronously writes
+`THE_BOSS_PROFILE_ROOT is invalid or unavailable.` to stderr and exits with
+status 2. The supplied value and underlying filesystem error are not included
+in that message.
+
+For the canonical root `R`, startup selects:
+
+| Consumer | Location |
+| --- | --- |
+| `CHERRY_HOME` / application configuration | `R/config` |
+| Boot configuration | `R/config/boot-config.json` |
+| Electron `userData` | `R/user-data` |
+| Electron `sessionData` | `R/session-data` |
+| Application logs | `R/logs` |
+| Electron `temp` | `R/temp` |
+| Registry `app.temp` | `R/temp` plus the existing product directory suffix |
+| Supervised UAR persistence | `R/user-data/Data/Agents/.uar` |
+
+The five directories are created after root validation. Electron paths and
+the log override bind before boot-config/logger singletons consume constants;
+the log override also precedes the `LOGS_DIR` snapshot. Private selection
+returns immediately from `resolveUserDataLocation()`, ahead of development
+suffixes, boot mappings, portable selection, branded appData fallback and
+legacy-directory inspection. A private boot mapping cannot redirect the
+selected profile. Electron `appData` is not overridden.
+
+Omitting the variable retains the existing selection paths described below.
+This option selects application-owned roots; it is not a universal OS or
+keychain sandbox and does not isolate external browser/provider imports.
+Default-profile runtime compatibility is not certified by private-profile
+acceptance; acceptance does not launch the live default profile.
+
 ### Development userData suffix
 
-Unpackaged development runs never read the BootConfig userData mapping
+Without a private profile root, unpackaged development runs never read the BootConfig userData mapping
 (`app.user_data_path`).
 Instead, `userDataLocation.ts` appends a suffix to Electron's default
 userData directory before the path registry and single-instance lock are
