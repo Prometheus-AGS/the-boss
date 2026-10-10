@@ -27,9 +27,9 @@
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "25c542c77f41abcec605dd8ae372b04f68a1801e",
+      "revision": "74194623b17e5db127534b0f0469f8557794d4bc",
       "platformRevisions": {
-        "darwin-arm64": "25c542c77f41abcec605dd8ae372b04f68a1801e",
+        "darwin-arm64": "74194623b17e5db127534b0f0469f8557794d4bc",
         "win32-x64": "25c542c77f41abcec605dd8ae372b04f68a1801e"
       }
     },
@@ -43,11 +43,7 @@
     },
     "bossfang": {
       "repository": "GQAdonis/librefang",
-      "revision": "95719eaefc491e6d19c84ed7bf0b7d62632d8d0b",
-      "platformRevisions": {
-        "win32-x64": "95719eaefc491e6d19c84ed7bf0b7d62632d8d0b",
-        "darwin-arm64": "95719eaefc491e6d19c84ed7bf0b7d62632d8d0b"
-      }
+      "revision": "92bc005f3e7cc110715272b744830d2e3ccfe0d7"
     },
     "skill-pack": {
       "repository": "Prometheus-AGS/prometheus-skill-system",
@@ -217,7 +213,7 @@
     },
     {
       "name": "bossfang",
-      "version": "2026.9.19+95719eaef",
+      "version": "2026.9.19+92bc005f3",
       "packages": {
         "win32-x64": {
           "source": {
@@ -1650,16 +1646,14 @@
           "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-approval-repair-20261010-95719eae/bossfang-win32-x64.exe"
         },
         "darwin-arm64": {
-          "source": {
-            "repository": "GQAdonis/librefang",
-            "revision": "95719eaefc491e6d19c84ed7bf0b7d62632d8d0b"
-          },
-          "size": 176557456,
-          "sha256": "e1690b6d5c389a9bddd4a04eeee71d3b626000ca2a11d920ccc732ca11cee95a",
+          "source": "92bc005f3e7cc110715272b744830d2e3ccfe0d7",
+          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-92bc005f3/bossfang-darwin-arm64",
+          "sha256": "0cac6b62b4b8cf39063d35227c04048752243eea7da01b1a78395cf8bae51a0f",
+          "size": 176573952,
+          "archive": "none",
           "binaries": [
             "bossfang"
           ],
-          "archive": "none",
           "dashboard": {
             "embedded": true,
             "basePath": "/dashboard/",
@@ -3071,13 +3065,7 @@
               }
             ]
           },
-          "features": [
-            "telemetry",
-            "surreal-backend",
-            "uar-driver"
-          ],
-          "uarLifecycle": "connection-only",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-approval-repair-20261010-95719eae/bossfang-darwin-arm64"
+          "uarLifecycle": "connection-only"
         }
       }
     },
@@ -3146,9 +3134,9 @@
       "version": "1.0.0",
       "packages": {
         "darwin-arm64": {
-          "source": "25c542c77f41abcec605dd8ae372b04f68a1801e",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-2.2.31-25c542c7/uar-sidecar-darwin-arm64.tar.gz",
-          "sha256": "2e1470b59c8f12a563540b3a5d795f22d0ada7a2ceb8a7c2017a4a1d73d38eab",
+          "source": "74194623b17e5db127534b0f0469f8557794d4bc",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-2.2.31-74194623/uar-sidecar-darwin-arm64.tar.gz",
+          "sha256": "969e1d59d9f90a27e4a50a5defd65949a86d570903db146ece8ba9c25c7d161b",
           "archive": "tar.gz",
           "binaries": [
             "libcrc_fast-c9544bfaf069c5bc.dylib",
@@ -3166,7 +3154,7 @@
             "uar-sidecar",
             "payload-manifest.json"
           ],
-          "size": 126371082
+          "size": 126361802
         },
         "win32-x64": {
           "source": "25c542c77f41abcec605dd8ae372b04f68a1801e",
