@@ -90,6 +90,12 @@ Use the canonical phase name from the argument or `current-waypoint.json`. Emit 
 1. **Discover project identity**
 2. **Confirm the active phase** — from argument or waypoint
 3. **Read `progress.json`** — incorporate work done by all tools
+   Run `boss-mini kbd-apply.mjs reconcile <phase> --json`. Exit 0 establishes
+   task consistency; exit 1 identifies drift to resolve; exit 2 means the scan
+   was incomplete and must not be described as clean. Archived changes are
+   inspected directly, without reopening or replaying their tasks. Use
+   `--repair` only for supported active-phase drift. Keep separately waived or
+   deferred acceptance and certification visible; reconciliation does not pass them.
 4. **Read artifact-refiner logs** — aggregate QA results, when installed
 5. **Load all change data** — from `openspec/changes/archive/` if OpenSpec,
    or `.kbd-orchestrator/changes/archive/` if native KBD

@@ -68,6 +68,9 @@ export async function assertCandidateCurrent(root, state, iteration, reconciliat
   if (!candidate) throw new Error('Freeze a candidate for this completed increment before delivery');
   const bytes = JSON.parse(await fs.readFile(candidate.manifestPath, 'utf8'));
   if (digest(bytes) !== candidate.manifestHash) throw new Error('Frozen candidate manifest bytes changed');
+  if (digest(candidate.profile.publication) !== digest(iteration.profile.publication)) {
+    throw new Error('Publication policy changed; freeze a new candidate while preserving the prior manifest');
+  }
   if (!sameSources(candidate.sourceRefs, iteration.sourceRefs) ||
       (!reconciliation && !sameSources(await captureSources(candidate.sourceRefs, root), candidate.sourceRefs))) {
     throw new Error('Frozen candidate no longer matches release inputs; repair and freeze again');

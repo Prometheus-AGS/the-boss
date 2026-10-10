@@ -1,0 +1,63 @@
+{
+  "runId": "existing-run-id",
+  "authorityRefs": [
+    "operator-approved-historical-publication"
+  ],
+  "reason": "Reconcile existing externally published bytes with original scope-bound debt",
+  "release": {
+    "id": "the-boss-v2.2.30",
+    "version": "2.2.30",
+    "targetId": "the-boss-customer-release",
+    "publishedAt": "2026-10-10T05:49:28.142Z",
+    "sourceRefs": [
+      {
+        "repository": "Prometheus-AGS/the-boss",
+        "revision": "aef2ec2cda68605efab9dddf33b46e726e752c2d"
+      }
+    ],
+    "evidence": {
+      "source": {
+        "path": "/reviewed/evidence/source.json",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "build": {
+        "path": "/reviewed/evidence/build.json",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "launch": {
+        "path": "/reviewed/evidence/launch.json",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "feature": {
+        "path": "/reviewed/evidence/feature.json",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "metadata": {
+        "path": "/reviewed/evidence/metadata.json",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "website": {
+        "path": "/reviewed/evidence/website.json",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "platforms": [
+        {
+          "path": "/reviewed/evidence/darwin-arm64.json",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    }
+  },
+  "expectedPredecessor": null,
+  "mappings": [
+    {
+      "obligationId": "original-debt-id",
+      "candidateId": "original-candidate-id",
+      "contentManifestDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": {
+        "path": "/reviewed/evidence/debt-scope.json",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    }
+  ]
+}

@@ -4,7 +4,7 @@ description: Operate timed usable deliveries with frozen delivery candidates, bo
 license: MIT
 compatibility: Node.js 22 or newer. Build tools belong to the selected project. Optional KBD, Compass, memory and native goal capabilities are detected, never assumed.
 metadata:
-  version: "1.2.5"
+  version: "1.2.7"
   tags: "delivery, cadence, kbd, recovery"
 ---
 
@@ -26,7 +26,7 @@ Invoke `node <this-skill>/scripts/cadence.mjs <command> --root <state-directory>
 4. `ready` records completed production scope; `candidate freeze` pins its inputs and operation contract. `checkpoint` builds the frozen deliverable, then launches it and exercises its actual function. These are product operations, **not test-suite execution**. Read [pipeline contracts](references/pipeline-contract.md) when admitting work-ahead or adopting existing receipts.
 5. Once the current candidate is frozen, `work-ahead admit` may authorize one independent scope in isolated source/output roots while the current build or publication runs. It is not another active iteration or KBD phase. Fix current delivery failures before promotion; only disjoint authorized edits continue during repair. Repeat only failed boundary procedures.
 6. `finish` records the work outcome, dispatches approved hooks and emits the final report. If the last candidate failed, start an evidence-linked corrective iteration, or finalize and explicitly retire that failed iteration with `failure resolve` before unrelated work. Retirement records a failed outcome, never a successful delivery or phase completion. `review` records actual operator approval when a human boundary is due. Never fabricate approval.
-7. `tick` evaluates configured publication opportunities without a daemon. Use `publication attempt/reconcile` for candidate-specific obligations and immutable platform/metadata/site receipts. A dispatch is not publication. Keep one full release in flight and one pending candidate; preserve old debt and separately pending installed acceptance.
+7. `tick` evaluates configured publication opportunities without a daemon. Use `publication attempt/reconcile` for candidate-specific obligations and immutable platform/metadata/site receipts. For an already published release with scope-bound historical debt, use `publication adopt-historical`; read [historical publication](references/historical-publication.md). A dispatch is not publication. Keep one full release in flight and one pending candidate; preserve old debt and separately pending installed acceptance.
 
 New state/reports use schema version 3; profiles and public hook events retain version 1. Use explicit `migrate` for existing v1/v2 state after stopping old mutators, preserving backups and historical receipts. `history` links earlier untracked child evidence without counting it as a new delivery.
 

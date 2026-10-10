@@ -13,6 +13,8 @@ import { freezeCandidate, candidateStatus, assertCandidateCurrent } from './cand
 import { reconcileFrozenSource, assertFrozenReconciliation } from './frozen-source-reconciliation.mjs';
 import { handleWorkAhead } from './work-ahead.mjs';
 import { handlePublication, publicationAdmission } from './publication.mjs';
+import { adoptHistoricalPublication } from './historical-publication.mjs';
+import { amendActivePublication } from './publication-policy.mjs';
 import { dispatchPublication } from './publication-effects.mjs';
 import { digest } from './pipeline-data.mjs';
 import { evaluateOpportunities } from './opportunities.mjs';
@@ -103,6 +105,7 @@ async function execute(root, state, command, input, args) {
     case 'child': return handleChild(state, current(state, input.iterationId), args._?.[1] ?? input.action, input);
     case 'activity': return handleActivity(current(state, input.iterationId), args._?.[1] ?? input.action, input);
     case 'configure': {
+      if (state.activeIterationId && input.activePublication) return amendActivePublication(state, input);
       if (state.activeIterationId) fail('Configure profiles between iterations; current checkpoint contracts are frozen');
       const previous = state.profile;
       state.profile = mergeProfile(previous, input.profile ?? input);
@@ -270,6 +273,7 @@ async function execute(root, state, command, input, args) {
       return { acknowledgedAt: state.reviewAcknowledgedAt, iterationId: state.iterations.at(-1)?.id };
     }
     case 'publication': {
+      if ((args._?.[1] ?? input.action) === 'adopt-historical') return adoptHistoricalPublication(root, state, input);
       const result=handlePublication(state,args._?.[1] ?? input.action ?? 'reconcile',input);
       const attempt=result.attempt;
       if(attempt && ['succeeded','failed','cancelled'].includes(attempt.state)) {
