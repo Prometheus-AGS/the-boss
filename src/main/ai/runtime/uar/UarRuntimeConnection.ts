@@ -696,7 +696,8 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
     const completed = this.loadSessionMessages().some(
       (message) =>
         message.role === 'assistant' &&
-        message.status === 'success' &&
+        (message.status === 'success' ||
+          (message.status === 'paused' && !(message.data.parts ?? []).some((part) => isToolUIPart(part)))) &&
         message.runtimeResumeToken === this.input.resumeToken &&
         !(message.data.parts ?? []).some(
           (part) => isToolUIPart(part) && !['output-available', 'output-error', 'output-denied'].includes(part.state)
