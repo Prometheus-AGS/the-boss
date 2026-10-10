@@ -58,7 +58,7 @@ export async function capture(evaluate, topicId, marker) {
     const topicId=${JSON.stringify(topicId)}, marker=${JSON.stringify(marker)};
     const state=window[${JSON.stringify(key)}]={chunks:0,textChunks:0,textCharacters:0,done:false,error:false,
       terminalStatus:null,anchorMessageId:null,executionIds:[],approvals:[],toolResultContainsMarker:false,
-      admissionCompatibilityError:false,off:[]};
+      admissionCompatibilityError:false,toolInputs:new Map(),off:[]};
     for(const name of ['ai.stream.chunk','ai.stream.done','ai.stream.error']) {
       state.off.push(window.api.ipcApi.on(name,event=>{
         if(event.topicId!==topicId)return;
@@ -69,8 +69,9 @@ export async function capture(evaluate, topicId, marker) {
           const c=event.chunk;
           if(c?.type==='text-delta'&&typeof c.delta==='string'&&c.delta.length){state.textChunks++;state.textCharacters+=c.delta.length;}
           if(c?.type==='tool-output-available'&&JSON.stringify(c.output).includes(marker))state.toolResultContainsMarker=true;
+          if(c?.type==='tool-input-available')state.toolInputs.set(c.toolCallId,{toolName:c.toolName,input:c.input});
           if(c?.type==='tool-approval-request')state.approvals.push({approvalId:c.approvalId,toolCallId:c.toolCallId,
-            toolName:c.toolName,input:c.input});
+            ...state.toolInputs.get(c.toolCallId)});
         } else if(name==='ai.stream.error') {
           state.error=true;
           state.admissionCompatibilityError=String(event.error?.message??'').includes('does not support tool admission v2');
@@ -81,7 +82,7 @@ export async function capture(evaluate, topicId, marker) {
     }
   })()`)
   return {
-    read: () => evaluate(`(() => {const {off,...value}=window[${JSON.stringify(key)}];return value})()`),
+    read: () => evaluate(`(() => {const {off,toolInputs,...value}=window[${JSON.stringify(key)}];return value})()`),
     close: () => evaluate(`(() => {const s=window[${JSON.stringify(key)}];if(s){for(const off of s.off)off();delete window[${JSON.stringify(key)}];}})()`)
   }
 }
