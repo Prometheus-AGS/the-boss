@@ -209,20 +209,16 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.26 - Durable UAR execution and scoped representation
+    The Boss 2.2.27 - Team delegation identities and private runtime diagnostics
 
-    - [Administration] Submit durable agent turns, follow their scoped output and decide pending native approvals.
-    - [Representation] Correct authenticated grant attachment and display applied grant revisions; recheck current authority during execution.
-    - [Runtime] Apply saved native-tool configuration on restart and current resilience settings to newly admitted team turns.
-    - [Skills] Preserve the host user identity needed by Claude Code subscription authentication.
-    - [Delivery] Retain exact source and artifact provenance; installed acceptance remains separate from publication.
+    - [Teams] Clarify coordinator instructions: use fresh command and task identities for new delegations, and preserve existing identities for retries and references.
+    - [Diagnostics] Retain bounded, redacted native failure details in private runtime diagnostics without exposing credentials.
+    - [Delivery] Record this corrective release separately; represented execution and installed acceptance remain pending their operational evidence.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.26 - 持久化 UAR 执行与限定范围的代表授权
+    The Boss 2.2.27 - 团队委派标识与私有运行时诊断
 
-    - [管理] 提交持久化代理任务，查看限定范围的运行输出，并处理待决的原生审批。
-    - [代表授权] 修复经认证的授权绑定，显示已应用的授权版本，并在执行过程中重新检查当前权限。
-    - [运行时] 重启时应用已保存的原生工具配置，并为新接纳的团队任务应用当前弹性设置。
-    - [技能] 保留 Claude Code 订阅认证所需的主机用户身份。
-    - [交付] 保留准确的源代码和产物来源；安装验收与版本发布分别跟踪。
+    - [团队] 明确协调代理指令：新委派使用新的命令和任务标识，重试及引用保留已有标识。
+    - [诊断] 在私有运行时诊断中保留长度受限、经过脱敏的原生失败详情，不暴露凭据。
+    - [交付] 单独记录此修复版本；代表执行与安装验收仍等待实际操作证据。
     <!--LANG:END-->
