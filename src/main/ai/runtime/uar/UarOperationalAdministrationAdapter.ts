@@ -11,8 +11,6 @@ import type {
   UarRunInspection
 } from '@shared/types/prometheusIntegration'
 
-import { uarPrincipalForSession } from './uarPrincipal'
-import { uarApprovalLifecycleStore } from './UarApprovalLifecycleStore'
 import {
   latestApprovals,
   projectHostApproval,
@@ -21,6 +19,9 @@ import {
   rawAdmissionEvidence,
   rawPendingApproval
 } from './uarApprovalLifecycle'
+import { uarApprovalLifecycleStore } from './UarApprovalLifecycleStore'
+import { uarPrincipalForSession } from './uarPrincipal'
+import type { UarSidecarEndpoint } from './UarSidecarService'
 
 const optionalSessionId = z.string().nullable().optional()
 export const rawRun = z.object({
@@ -170,16 +171,16 @@ export function attributedOwnerSessionId(
 }
 
 export async function ownerRequest(
+  endpoint: UarSidecarEndpoint,
   sessionId: string,
   path: string,
-  init: RequestInit = {},
-  expectedGeneration?: number
+  init: RequestInit = {}
 ): Promise<Response> {
   const current = sessionId === UNATTRIBUTED_UAR_OWNER_SESSION_ID ? owners()[0] : owner(sessionId)
   if (!current) throw new Error('No UAR conversation is available for the shared installation owner')
   return application
     .get('UarSidecarService')
-    .request(path, uarPrincipalForSession(current.sessionId), init, expectedGeneration)
+    .requestInstance(endpoint, path, uarPrincipalForSession(current.sessionId), init)
 }
 
 export function projectRun(run: z.infer<typeof rawRun>, ownerSessionId: string): UarRunInspection {
@@ -212,7 +213,7 @@ async function optional<T>(
 
 export async function readUarOperations(): Promise<UarOperationalSnapshot> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
+  const endpoint = await sidecar.resolveSelected()
   const availableOwners = owners()
   const failures: UarOperationalSnapshot['failures'] = []
   const hostApprovals = uarApprovalLifecycleStore.snapshot().map(projectHostApproval)
@@ -226,10 +227,7 @@ export async function readUarOperations(): Promise<UarOperationalSnapshot> {
             z
               .array(rawRun)
               .parse(
-                await body(
-                  await ownerRequest(sharedRequestOwner.sessionId, '/api/uar/runs', {}, endpoint.generation),
-                  'Run inventory'
-                )
+                await body(await ownerRequest(endpoint, sharedRequestOwner.sessionId, '/api/uar/runs'), 'Run inventory')
               ),
           []
         ),
@@ -241,7 +239,7 @@ export async function readUarOperations(): Promise<UarOperationalSnapshot> {
               .array(rawKnowledgeBase)
               .parse(
                 await body(
-                  await ownerRequest(sharedRequestOwner.sessionId, '/api/uar/knowledge-bases', {}, endpoint.generation),
+                  await ownerRequest(endpoint, sharedRequestOwner.sessionId, '/api/uar/knowledge-bases'),
                   'Knowledge inventory'
                 )
               ),
@@ -255,7 +253,7 @@ export async function readUarOperations(): Promise<UarOperationalSnapshot> {
               .array(rawCredential)
               .parse(
                 await body(
-                  await ownerRequest(sharedRequestOwner.sessionId, '/api/uar/credentials', {}, endpoint.generation),
+                  await ownerRequest(endpoint, sharedRequestOwner.sessionId, '/api/uar/credentials'),
                   'Credential inventory'
                 )
               ),
@@ -277,10 +275,10 @@ export async function readUarOperations(): Promise<UarOperationalSnapshot> {
               .parse(
                 await body(
                   await ownerRequest(
+                    endpoint,
                     sharedRequestOwner.sessionId,
                     `/api/uar/knowledge-bases/${encodeURIComponent(kb.id)}/documents`,
-                    {},
-                    endpoint.generation
+                    {}
                   ),
                   'Knowledge documents'
                 )
@@ -299,10 +297,10 @@ export async function readUarOperations(): Promise<UarOperationalSnapshot> {
               rawPendingApproval.parse(
                 await body(
                   await ownerRequest(
+                    endpoint,
                     sharedRequestOwner.sessionId,
                     `/api/uar/runs/${encodeURIComponent(run.run_id)}/tool-approval/pending`,
-                    {},
-                    endpoint.generation
+                    {}
                   ),
                   'Pending approval snapshot'
                 )
@@ -316,10 +314,10 @@ export async function readUarOperations(): Promise<UarOperationalSnapshot> {
               rawAdmissionEvidence.parse(
                 await body(
                   await ownerRequest(
+                    endpoint,
                     sharedRequestOwner.sessionId,
                     `/api/uar/runs/${encodeURIComponent(run.run_id)}/tool-admission-evidence`,
-                    {},
-                    endpoint.generation
+                    {}
                   ),
                   'Tool-admission evidence'
                 )
@@ -345,18 +343,14 @@ export async function readUarOperations(): Promise<UarOperationalSnapshot> {
         async () =>
           z
             .object({ enabled: z.boolean().default(true), total: z.number(), items: z.array(rawMemory) })
-            .parse(
-              await body(await sidecar.adminRequest('/api/admin/memories', {}, endpoint.generation), 'Memory inventory')
-            ),
+            .parse(await body(await sidecar.adminRequestInstance(endpoint, '/api/admin/memories'), 'Memory inventory')),
         { enabled: false, total: 0, items: [] }
       ),
       optional(
         'tools',
         failures,
         async () =>
-          rawToolCatalog.parse(
-            await body(await sidecar.adminRequest('/api/tools', {}, endpoint.generation), 'Tool catalog')
-          ),
+          rawToolCatalog.parse(await body(await sidecar.adminRequestInstance(endpoint, '/api/tools'), 'Tool catalog')),
         { tools: [], built_in_tools: [] }
       ),
       optional(
@@ -364,7 +358,7 @@ export async function readUarOperations(): Promise<UarOperationalSnapshot> {
         failures,
         async () =>
           rawMcpHealth.parse(
-            await body(await sidecar.adminRequest('/api/uar/mcp/health', {}, endpoint.generation), 'MCP health')
+            await body(await sidecar.adminRequestInstance(endpoint, '/api/uar/mcp/health'), 'MCP health')
           ),
         { total_tools: 0, servers: [] }
       ),
@@ -377,7 +371,7 @@ export async function readUarOperations(): Promise<UarOperationalSnapshot> {
             .passthrough()
             .parse(
               await body(
-                await sidecar.adminRequest('/api/uar/settings/governance/status', {}, endpoint.generation),
+                await sidecar.adminRequestInstance(endpoint, '/api/uar/settings/governance/status'),
                 'Governance status'
               )
             ),
@@ -389,9 +383,7 @@ export async function readUarOperations(): Promise<UarOperationalSnapshot> {
         async () =>
           z
             .array(rawFederatedAgent)
-            .parse(
-              await body(await sidecar.adminRequest('/a2a/registry/agents', {}, endpoint.generation), 'A2A registry')
-            ),
+            .parse(await body(await sidecar.adminRequestInstance(endpoint, '/a2a/registry/agents'), 'A2A registry')),
         []
       ),
       optional(
@@ -400,22 +392,19 @@ export async function readUarOperations(): Promise<UarOperationalSnapshot> {
         async () =>
           z
             .array(z.unknown())
-            .parse(
-              await body(await sidecar.adminRequest('/a2a/registry/skills', {}, endpoint.generation), 'A2A skills')
-            ),
+            .parse(await body(await sidecar.adminRequestInstance(endpoint, '/a2a/registry/skills'), 'A2A skills')),
         []
       ),
       optional(
         'protocols',
         failures,
-        async () => body(await sidecar.adminRequest('/.well-known/agent.json', {}, endpoint.generation), 'A2A card'),
+        async () => body(await sidecar.adminRequestInstance(endpoint, '/.well-known/agent.json'), 'A2A card'),
         undefined
       ),
       optional(
         'protocols',
         [],
-        async () =>
-          body(await sidecar.adminRequest('/api/uar/settings/acp', {}, endpoint.generation), 'ACP configuration'),
+        async () => body(await sidecar.adminRequestInstance(endpoint, '/api/uar/settings/acp'), 'ACP configuration'),
         undefined
       )
     ])

@@ -11,19 +11,37 @@ The complete source is retained on
 checkpoint is `c2990da0497c500268a73b9a904e685fe04434ef`; prior BAUAR intake
 and local payload checkpoints are `bda3715df5` and `7a5bdb4b7c`.
 
-Fetched `origin/main` was `38d9be7524`. A fresh topic attempted to replay only
-BAUAR commits, excluding earlier unrelated command-path commits. The intake
-conflicted in ten files: the integration payload manifest, exact admission gate,
-UAR AG-UI adapter, host MCP bridge, host tool admission, runtime connection,
-sidecar service, approval controller, tool-name mapping, and shared integration
-types. Current main has newer authority-provider/principal contracts, session
-placement and instance routing, claim revalidation, and released payloads.
-These conflicts require a deliberate forward port; accepting old code would
-discard newer behavior. The replay was aborted normally, without resetting or
-rewriting either branch. Publication preserves the full original source branch,
-including its two earlier command-path commits, for the other session. Main
-integration is not complete; no force push, architecture replacement, or new
-forward-port implementation was attempted.
+On 2026-10-10 the operator explicitly authorized resolving all conflicts in PR #70
+and merging it into main, while keeping tests deferred. The bounded merge starts
+from PR head `4da8eae9d29843a100e8a1d7f5f3ed20c9081e66` and main
+`38d9be7524a2719a0aa060943aaf4ce61af3282a`. It has fifteen conflict paths:
+two payload/source manifests, nine runtime/admission/shared-contract paths, and
+four preboot/path/command-path files (including the preboot README).
+
+Resolution preserves main authority-provider/principal identity, instance routing,
+session placement, catalog ownership, claim revalidation and released payload
+provenance while adapting BAUAR admission, approvals, projections and supporting
+scenarios to those contracts. Desktop resolution retains current private-profile
+startup and command installation behavior. Required caller changes are part of
+this merge; unrelated features and dependency upgrades are outside its scope.
+
+The four published UAR payloads and local source manifest retain source
+`308aea46ff26e7f61340281bb51f67ebe5351569` from main. UAR PR #368 merged
+at `fe77af32d38cc1ffcd0fdf5c34336943825e000d`; that newer source is not
+represented as the source of existing binaries. The receiving testing session
+must choose/build its actual candidate and bind fresh artifact/source evidence.
+No new build, installer, dependency download, test, formatter, runtime gate or
+release certification runs for this merge. Static source/caller inspection and
+Git conflict/publication checks do not establish runtime acceptance.
+
+The Compass graph returned no match for UarHostToolAdmission with incomplete
+coverage; graph freshness metadata was absent. Bounded source inspection supplies
+caller/interface evidence. A fresh-context native gpt-6-astra/high verifier
+completed a bounded static review with no merge-specific critical finding and
+recorded the protocol-v1 artifact dependency below as a release warning. This
+is a same-family fallback, not cross-model or runtime certification. Automated
+sycophancy screening was unavailable; the report was manually screened.
+Runtime quality gates remain deferred; no protected-branch checks are bypassed.
 
 ## Delivered behavior
 
@@ -41,6 +59,31 @@ The packaged acceptance gate uses the actual loaded ASAR main directory and
 bundled server-full sidecar for its package claim. Instrumented storage and
 post-ack cases remain separate supporting fixtures. Diagnostic evidence excludes
 raw secrets, logs, screenshots, traces, and videos.
+
+## Required sidecar version before acceptance
+
+Static inspection found a concrete dependency: published UAR source
+`308aea46ff26e7f61340281bb51f67ebe5351569` advertises admission protocol 1
+and has no native-consumption endpoint or executionKind contract. This source
+merge preserves BAUAR admission protocol 2, exact approvals and the native/host
+execution distinction. Those v1 bundles cannot exercise the merged v2
+admission path. Unsupported admission must refuse rather than downgrade.
+Both source versions advertise administration schema 5 and the same admission
+capabilities without an admission-version discriminator. Existing capability
+checks cannot detect this difference before catalog synchronization; a v1 server
+rejects the protocol-v2 host admission at run admission. No pre-write fail-fast
+capability or successful packaged execution is claimed.
+
+Before runtime acceptance or shipping this integration, the receiving session
+must build/select real server-full protocol-v2 artifacts from UAR
+`fe77af32d38cc1ffcd0fdf5c34336943825e000d` or a compatible newer source.
+Then update actual platform artifact URLs, source revisions, sizes and SHA256
+evidence together using the existing packaging workflow; update the local
+source selection accordingly. Do not point the existing binaries at the new
+source revision or claim that a rebuild already happened. Until then, source
+merge is complete but packaged BAUAR runtime acceptance is blocked by the
+version dependency. Binary publication and release certification are not part
+of this conflict-resolution task.
 
 ## Results actually obtained
 
@@ -88,5 +131,6 @@ The retained phase evidence includes `boss-package-02.json` (SHA256
 and `desktop-startup-environment-diagnosis-01.json` (SHA256
 `a3c84688af8e725aefcbcea5e2e8df83b17d70e52bb152d84733613a3fa84178`).
 Private profiles, binaries, logs, and local evidence are deliberately excluded
-from source publication. No new tests, formatter, review, or certification gate
-were run for this publication at the operator's direction.
+from source publication. No new tests, builds, formatter or runtime
+certification gate ran for this merge at the operator's direction. The bounded
+static review does not certify completed execution or packaged acceptance.

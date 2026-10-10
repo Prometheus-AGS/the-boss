@@ -13,6 +13,7 @@ import { loggerService } from '@logger'
 import { AgentSessionForkOperations } from '@main/ai/agentSession/fork'
 import type { NotifyChannel } from '@main/ai/runtime/agentMcpServers'
 import type { RuntimeForkAnchor } from '@main/ai/runtime/fork'
+import { modelSnapshotForUarAssignment } from '@main/ai/runtime/uar'
 import { resolveKnowledgeBaseScope } from '@main/ai/utils/knowledgeScope'
 import { serializeError } from '@main/ai/utils/serializeError'
 import { createAiUsageCaptureContext } from '@main/ai/utils/usageCapture'
@@ -73,6 +74,7 @@ import type {
   AgentRuntimeUserInput,
   AgentSessionUsageCapture
 } from '../runtime/types'
+import { decodeUarSessionPlacement, isStructuredUarSessionPlacement } from '../runtime/uar'
 import {
   finalizeInterruptedParts,
   PersistenceListener,
@@ -367,12 +369,12 @@ export class AgentSessionRuntimeService extends BaseService {
   }
 
   assertSessionWritable(sessionId: string): void {
-    if (this.failedClosures.has(sessionId)) throw new AgentSessionEditError('close_failed')
     if (this.forks.edits.has(sessionId)) throw new AgentSessionEditError('busy')
   }
 
   assertSessionEditable(sessionId: string, ownEdit = false): void {
-    if (!ownEdit || this.failedClosures.has(sessionId)) this.assertSessionWritable(sessionId)
+    if (this.failedClosures.has(sessionId)) throw new AgentSessionEditError('close_failed')
+    if (!ownEdit) this.assertSessionWritable(sessionId)
     const entry = this.entries.get(sessionId)
     if (
       this.isShuttingDown ||
@@ -421,6 +423,7 @@ export class AgentSessionRuntimeService extends BaseService {
   }
 
   forkSession(sourceSessionId: string, messageId: string): Promise<string> {
+    if (this.failedClosures.has(sourceSessionId)) throw new AgentSessionEditError('close_failed')
     this.assertSessionWritable(sourceSessionId)
     if (this.isShuttingDown || this.isWriteQuiesced) return Promise.reject(new Error('Session writes are paused'))
     return this.forks.fork(sourceSessionId, messageId)
@@ -722,7 +725,7 @@ export class AgentSessionRuntimeService extends BaseService {
    * entry idles under the same TTL as a post-turn one, so it self-tears-down if never used.
    */
   async primeConnection(sessionId: string): Promise<void> {
-    if (this.forks.edits.has(sessionId) || this.failedClosures.has(sessionId)) return
+    if (this.forks.edits.has(sessionId)) return
     try {
       const existing = this.entries.get(sessionId)
       if (existing) {
@@ -1220,7 +1223,7 @@ export class AgentSessionRuntimeService extends BaseService {
    * `beginTurn`.
    */
   isSessionBusy(sessionId: string): boolean {
-    if (this.forks.edits.has(sessionId) || this.failedClosures.has(sessionId)) return true
+    if (this.forks.edits.has(sessionId)) return true
     const entry = this.entries.get(sessionId)
     if (!entry) return false
     return isAgentSessionRuntimeBusy(entry.runtimeState)
@@ -1295,6 +1298,35 @@ export class AgentSessionRuntimeService extends BaseService {
       resumeToken: entry.lastResumeToken,
       activeToolCount: turn?.activeToolIds.size ?? 0
     }
+  }
+
+  listRuntimePlacements(agentType: string): Array<{ sessionId: string; instanceId: string; nativeSessionId: string }> {
+    const placements: Array<{ sessionId: string; instanceId: string; nativeSessionId: string }> = []
+    const claimedTokens = new Set<string>()
+    for (const entry of this.entries.values()) {
+      if (entry.agentType !== agentType || !entry.lastResumeToken) continue
+      if (agentType === 'uar') {
+        claimedTokens.add(entry.lastResumeToken)
+        const placement = decodeUarSessionPlacement(entry.lastResumeToken, entry.sessionId)
+        placements.push({
+          sessionId: entry.sessionId,
+          instanceId: placement.instanceId,
+          nativeSessionId: placement.nativeSessionId
+        })
+      }
+    }
+    if (agentType === 'uar') {
+      for (const token of agentSessionMessageService.listAllRuntimeResumeTokens()) {
+        if (claimedTokens.has(token) || !isStructuredUarSessionPlacement(token)) continue
+        const placement = decodeUarSessionPlacement(token, token)
+        placements.push({
+          sessionId: token,
+          instanceId: placement.instanceId,
+          nativeSessionId: placement.nativeSessionId
+        })
+      }
+    }
+    return placements
   }
 
   // ── Write quiesce (backup restore) ───────────────────────────────
@@ -2801,7 +2833,17 @@ export class AgentSessionRuntimeService extends BaseService {
     // actually runs — otherwise a mid-queue model switch leaves `messageSnapshot.model` disagreeing with the
     // row's `modelId`, and the header/exports (which prefer the snapshot model) would show the wrong model.
     const frozenSnapshot = pendingTurn.messageSnapshot ?? entry.messageSnapshot
-    const messageSnapshot = reconcileSnapshotModel(frozenSnapshot, entry.modelId, liveAgent.modelName)
+    const bossSnapshot = reconcileSnapshotModel(frozenSnapshot, entry.modelId, liveAgent.modelName)
+    const messageSnapshot =
+      liveAgent.type === 'uar' &&
+      liveAgent.configuration?.uar_catalog_link?.authority !== 'catalog' &&
+      liveAgent.configuration?.uar_model_assignment &&
+      bossSnapshot
+        ? {
+            ...bossSnapshot,
+            model: modelSnapshotForUarAssignment(liveAgent.configuration.uar_model_assignment, bossSnapshot.model)
+          }
+        : bossSnapshot
     let assistantMessage: Awaited<ReturnType<typeof agentSessionMessageService.saveMessage>>
     try {
       assistantMessage = agentSessionMessageService.saveMessage({

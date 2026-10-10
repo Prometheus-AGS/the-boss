@@ -1,0 +1,71 @@
+{
+  "profile": "urn:prometheus:uar:collaboration:0.1.0-draft.2",
+  "kind": "WorkflowDefinition",
+  "id": "urn:prometheus:mini:example:workflow:specialist",
+  "version": "1.0.0",
+  "provenance": {
+    "source": "UAR collaboration draft.2 contract checkpoint fixtures",
+    "authors": [
+      "Prometheus-AGS"
+    ]
+  },
+  "requiredCapabilities": [],
+  "extensions": {},
+  "title": "Produce a bounded specialist artifact",
+  "input": {
+    "type": "object",
+    "properties": {
+      "brief": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "brief"
+    ],
+    "additionalProperties": false
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "artifact": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "artifact"
+    ],
+    "additionalProperties": false
+  },
+  "steps": [
+    {
+      "id": "specialist-artifact",
+      "role": "specialist",
+      "dependsOn": [],
+      "inputMapping": {
+        "brief": "workflow-input:brief"
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "artifact": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact"
+        ],
+        "additionalProperties": false
+      },
+      "effect": "read",
+      "approval": "current-authority",
+      "retry": {
+        "maxAttempts": 1,
+        "onUnknownEffect": "reconcile-before-retry"
+      },
+      "completion": "artifact",
+      "instructions": "Produce one bounded specialist artifact from the brief."
+    }
+  ],
+  "failurePolicy": "stop-dependent",
+  "maxActivations": 1
+}

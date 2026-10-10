@@ -1,6 +1,17 @@
 const fs = require('node:fs')
 const { execFileSync } = require('node:child_process')
-const version = require('../package.json').version
+const { assertPublicReleaseProfile } = require('./public-release-profile.cjs')
+const version = process.env.RELEASE_VERSION || require('../package.json').version
+const profile = assertPublicReleaseProfile()
+const manifest = JSON.parse(fs.readFileSync('release-manifest.json', 'utf8'))
+if (
+  manifest.version !== version ||
+  manifest.source !== (process.env.RELEASE_SOURCE_SHA || process.env.GITHUB_SHA) ||
+  manifest.profile !== profile.id ||
+  manifest.features?.uar !== profile.uarEnabled
+) {
+  throw new Error('Release metadata does not match the explicit publication identity')
+}
 const repository = process.env.GITHUB_REPOSITORY
 const branch = process.env.RELEASE_BRANCH || process.env.GITHUB_REF_NAME
 const expectedHead =

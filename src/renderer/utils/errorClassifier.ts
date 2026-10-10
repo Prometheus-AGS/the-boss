@@ -1,5 +1,7 @@
 import type { SerializedError } from '@renderer/types/error'
 import { isSerializedAiSdkRetryError, isSerializedAiSdkToolCallRepairError } from '@renderer/types/error'
+import { diagnoseGrokCliError } from '@shared/ai/grokCliError'
+import { GROK_CLI_PROVIDER_ID } from '@shared/data/presets/grokCli'
 import { classifyErrorCategory, type ErrorCategory, isErrorCategory } from '@shared/utils/errorCategory'
 
 export type { ErrorCategory } from '@shared/utils/errorCategory'
@@ -99,9 +101,6 @@ export function classifyError(error?: SerializedError, providerId?: string): Err
   if (claudeCodeExitCategory) return classify(claudeCodeExitCategory)
 
   const errorBag = error as Record<string, unknown>
-  if (isErrorCategory(errorBag.providerErrorCategory) && errorBag.providerErrorCategory !== 'unknown') {
-    return classify(errorBag.providerErrorCategory)
-  }
   const status = errorBag.statusCode ?? errorBag.status
   const numStatus = typeof status === 'number' ? status : typeof status === 'string' ? parseInt(status, 10) : undefined
 
@@ -115,8 +114,17 @@ export function classifyError(error?: SerializedError, providerId?: string): Err
     }
   }
 
+  const diagnosticText = [error.message ?? '', responseBodyText, dataText].filter(Boolean).join('\n')
+  if (providerId === GROK_CLI_PROVIDER_ID || errorBag.providerId === GROK_CLI_PROVIDER_ID) {
+    const grokDiagnosis = diagnoseGrokCliError(diagnosticText, numStatus)
+    if (grokDiagnosis) return { ...grokDiagnosis, navTarget: navTargetFor(grokDiagnosis.category, providerSuffix) }
+  }
+  if (isErrorCategory(errorBag.providerErrorCategory) && errorBag.providerErrorCategory !== 'unknown') {
+    return classify(errorBag.providerErrorCategory)
+  }
+
   const category = classifyErrorCategory({
-    text: [error.message ?? '', responseBodyText, dataText].filter(Boolean).join('\n'),
+    text: diagnosticText,
     status: numStatus,
     finishReason: String(errorBag.finishReason ?? '')
   })

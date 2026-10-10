@@ -1,10 +1,9 @@
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import { CheckCircle2, CircleSlash2, RefreshCw } from 'lucide-react'
+import { CircleSlash2, RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
-  Badge,
   Button,
   Select,
   SelectContent,
@@ -18,17 +17,25 @@ import { useQuery } from '@renderer/data/hooks/useDataApi'
 import { ipcApi } from '@renderer/ipc'
 import { getSettingDomId } from '@renderer/pages/settings/settingsSearch/types'
 import type { UarAdministrationSnapshot } from '@shared/types/prometheusIntegration'
+import type { UarInstanceInventorySnapshot } from '@shared/types/uarServiceInstance'
 
+import { CapabilitySurface, MethodCoverage } from './UarAdministrationCoverage'
 import { UarAgentsPanel } from './UarAgentsPanel'
 import { UarApprovalLifecyclePanel } from './UarApprovalLifecyclePanel'
 import { UarCompilerPanel } from './UarCompilerPanel'
+import { UarConnectorAdministrationPanel } from './UarConnectorAdministrationPanel'
+import { UarDurableInstancesPanel } from './UarDurableInstancesPanel'
+import { UarFeedbackGovernancePanel } from './UarFeedbackGovernancePanel'
 import { UarInstancesPanel } from './UarInstancesPanel'
+import { UarLifecyclePanel } from './UarLifecyclePanel'
 import { UarObserversPanel } from './UarObserversPanel'
 import { UarOperationalPanel } from './UarOperationalPanel'
+import { UarRepresentationAdministrationPanel } from './UarRepresentationAdministrationPanel'
 import { UarPresentationsPanel } from './UarPresentationsPanel'
 import { UarProvidersModelsPanel } from './UarProvidersModelsPanel'
 import { UarRuntimeSettingsPanel } from './UarRuntimeSettingsPanel'
 import { UarSkillsPanel } from './UarSkillsPanel'
+import { UarTeamsPanel } from './UarTeamsPanel'
 
 const GROUPS = ['runtime', 'agents', 'experience', 'administration'] as const
 
@@ -38,85 +45,23 @@ type NavigationSurface = Pick<SurfaceProjection, 'id' | 'group'> & {
 }
 const EMPTY_SURFACES: UarAdministrationSnapshot['surfaces'] = []
 const BOSS_DURABLE_SURFACES: NavigationSurface[] = [
+  { id: 'lifecycle', group: 'agents' },
+  { id: 'teams', group: 'agents' },
   { id: 'durable-agent-instances', group: 'agents' },
-  { id: 'local-scoped-observers', group: 'agents' }
+  { id: 'local-scoped-observers', group: 'agents' },
+  { id: 'connectors', group: 'administration' },
+  { id: 'feedback-governance', group: 'administration' },
+  { id: 'representation', group: 'administration' }
 ]
+const HOST_INSTANCE_SURFACE: SurfaceProjection = {
+  id: 'instances',
+  group: 'runtime',
+  availability: 'host_controlled',
+  methods: []
+}
 
 function navText(translate: ReturnType<typeof useTranslation>['t'], key: string) {
   return translate('settings.prometheus.integration.uarAdmin.' + key)
-}
-
-function SurfaceStatus({ surface }: { surface: SurfaceProjection }) {
-  const { t } = useTranslation()
-  const available = surface.availability === 'available'
-  return (
-    <Badge variant={available ? 'secondary' : 'outline'} className="shrink-0 font-normal">
-      {navText(t, `availability.${surface.availability}`)}
-    </Badge>
-  )
-}
-
-function MethodCoverage({ surface }: { surface: SurfaceProjection }) {
-  const { t } = useTranslation()
-  return (
-    <details className="border-t border-border pt-4">
-      <summary className="cursor-pointer text-sm font-medium text-foreground focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-        {navText(t, 'apiCoverage')} · {surface.methods.length}
-      </summary>
-      <div className="mt-3 divide-y divide-border-subtle overflow-hidden rounded-lg border border-border">
-        {surface.methods.map((method) => (
-          <div key={method.id} className="grid min-w-0 gap-2 px-3 py-2.5 sm:grid-cols-[4rem_minmax(0,1fr)_auto]">
-            <span className="font-mono text-xs font-medium text-foreground">{method.method}</span>
-            <code className="min-w-0 break-all text-xs text-muted-foreground">{method.path}</code>
-            <div className="flex flex-wrap items-center gap-1.5 text-xs">
-              <Badge variant="outline" className="font-normal">
-                {navText(t, `scope.${method.scope}`)}
-              </Badge>
-              <Badge variant="outline" className="font-normal">
-                {navText(t, `apply.${method.apply}`)}
-              </Badge>
-              <span
-                className={method.adapter === 'available' ? 'text-success' : 'text-error'}
-                title={navText(t, `adapter.${method.adapter}`)}>
-                {method.adapter === 'available' ? (
-                  <CheckCircle2 size={15} aria-hidden="true" />
-                ) : (
-                  <CircleSlash2 size={15} aria-hidden="true" />
-                )}
-                <span className="sr-only">{navText(t, `adapter.${method.adapter}`)}</span>
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </details>
-  )
-}
-
-function CapabilitySurface({ surface }: { surface: SurfaceProjection }) {
-  const { t } = useTranslation()
-  const adapterFailures = surface.methods.filter((method) => method.adapter === 'unavailable').length
-  return (
-    <SettingGroup id={getSettingDomId('/settings/uar', surface.id)} className="min-w-0 scroll-mt-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <SettingTitle>{navText(t, `surface.${surface.id}`)}</SettingTitle>
-          <SettingDescription>{navText(t, 'surfaceDescription')}</SettingDescription>
-        </div>
-        <SurfaceStatus surface={surface} />
-      </div>
-      {adapterFailures > 0 && (
-        <div
-          className="mt-4 rounded-lg border border-error-border bg-error-subtle px-3 py-2 text-sm text-error-subtle-foreground"
-          role="alert">
-          {navText(t, 'adapterMismatch')}
-        </div>
-      )}
-      <div className="mt-4">
-        <MethodCoverage surface={surface} />
-      </div>
-    </SettingGroup>
-  )
 }
 
 function LoadingWorkspace() {
@@ -143,7 +88,8 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
   const [snapshot, setSnapshot] = useState<UarAdministrationSnapshot>()
   const [error, setError] = useState<string>()
   const [loading, setLoading] = useState(true)
-  const [workspaceId, setWorkspaceId] = useState<string>()
+  const [inventory, setInventory] = useState<UarInstanceInventorySnapshot>()
+  const [inventoryError, setInventoryError] = useState<string>()
   const {
     data: workspaces,
     error: workspaceError,
@@ -169,20 +115,53 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
     }
   }, [])
 
+  const loadInventory = useCallback(async () => {
+    setInventoryError(undefined)
+    try {
+      setInventory(await ipcApi.request('prometheus.uar.instances.read', {}))
+    } catch (cause) {
+      setInventoryError(cause instanceof Error ? cause.message : String(cause))
+    }
+  }, [])
+
   useEffect(() => {
     void load()
   }, [load])
 
-  const surfaces = snapshot?.surfaces ?? EMPTY_SURFACES
+  const advertisedSurfaces = snapshot?.surfaces ?? EMPTY_SURFACES
+  const surfaces = useMemo(
+    () =>
+      advertisedSurfaces.some((surface) => surface.id === HOST_INSTANCE_SURFACE.id)
+        ? advertisedSurfaces
+        : [HOST_INSTANCE_SURFACE, ...advertisedSurfaces],
+    [advertisedSurfaces]
+  )
   const navigationSurfaces = useMemo(
     () => [...surfaces, ...BOSS_DURABLE_SURFACES.filter((item) => !surfaces.some((surface) => surface.id === item.id))],
     [surfaces]
   )
   const userWorkspaces = workspaces?.filter((workspace) => workspace.type === 'user') ?? []
-  const selectedWorkspaceId = userWorkspaces.some((workspace) => workspace.id === workspaceId) ? workspaceId : undefined
+  const selectedWorkspaceId = userWorkspaces.some((workspace) => workspace.id === search.adminWorkspaceId)
+    ? search.adminWorkspaceId
+    : undefined
+  const administrationInstanceId = search.adminInstanceId ?? inventory?.selectedInstanceId
+  const administrationInstance = inventory?.instances.find((instance) => instance.id === administrationInstanceId)
+  const detailScopeMatches = Boolean(inventory && administrationInstanceId === inventory.selectedInstanceId)
   const requestedPanel = typeof search.panel === 'string' ? search.panel : undefined
   const selectedId = navigationSurfaces.some((surface) => surface.id === requestedPanel) ? requestedPanel! : 'overview'
   const selected = surfaces.find((surface) => surface.id === selectedId)
+  useEffect(() => {
+    if (['lifecycle', 'local-scoped-observers', 'connectors', 'feedback-governance', 'representation'].includes(selectedId)) void refetchWorkspaces()
+    void loadInventory()
+  }, [selectedId, refetchWorkspaces, loadInventory])
+  useEffect(() => {
+    if (selectedId === 'lifecycle' && !search.adminInstanceId && inventory?.selectedInstanceId) {
+      void navigate({
+        search: (previous) => ({ ...previous, adminInstanceId: inventory.selectedInstanceId }),
+        replace: true
+      })
+    }
+  }, [selectedId, search.adminInstanceId, inventory?.selectedInstanceId, navigate])
   const grouped = useMemo(
     () =>
       GROUPS.map((group) => ({
@@ -195,22 +174,35 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
     void navigate({ search: (previous) => ({ ...previous, panel }), replace: false })
   }
 
-  if (loading) return <LoadingWorkspace />
-  if (error || !snapshot) {
+  if (loading && selectedId !== 'lifecycle') return <LoadingWorkspace />
+  if ((error || !snapshot) && selectedId === 'overview') {
     return (
-      <SettingGroup>
-        <SettingTitle>{navText(t, 'loadFailed')}</SettingTitle>
-        <SettingDescription>{error ?? navText(t, 'loadFailedDescription')}</SettingDescription>
-        <Button variant="outline" size="sm" className="mt-4" onClick={() => void load()}>
-          <RefreshCw size={14} aria-hidden="true" />
-          {navText(t, 'retry')}
+      <div className="space-y-5">
+        <SettingGroup>
+          <SettingTitle>{navText(t, 'loadFailed')}</SettingTitle>
+          <SettingDescription>{error ?? navText(t, 'loadFailedDescription')}</SettingDescription>
+          <Button variant="outline" size="sm" className="mt-4" onClick={() => void load()}>
+            <RefreshCw size={14} aria-hidden="true" />
+            {navText(t, 'retry')}
+          </Button>
+        </SettingGroup>
+        <Button variant="outline" size="sm" onClick={() => selectSurface('lifecycle')}>
+          {navText(t, 'surface.lifecycle')}
         </Button>
-      </SettingGroup>
+        <UarInstancesPanel />
+      </div>
     )
   }
 
   return (
     <div className="min-w-0">
+      {search.adminInstanceId && selectedId !== 'lifecycle' && selectedId !== 'instances' && (
+        <p
+          className="mb-4 rounded-md border border-warning-border bg-warning-subtle p-3 text-sm text-warning-subtle-foreground"
+          role="status">
+          {navText(t, 'lifecycle.detailScope')}
+        </p>
+      )}
       <div className="mb-4 lg:hidden">
         <Select value={selectedId} onValueChange={selectSurface}>
           <SelectTrigger aria-label={navText(t, 'destination')} className="w-full">
@@ -277,8 +269,21 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
               {overview}
               {selected && <CapabilitySurface surface={selected} />}
             </>
+          ) : search.adminInstanceId &&
+            !detailScopeMatches &&
+            selectedId !== 'instances' &&
+            selectedId !== 'lifecycle' ? (
+            <SettingGroup>
+              <SettingTitle>{navText(t, 'lifecycle.detailBlocked')}</SettingTitle>
+              <SettingDescription>{navText(t, 'lifecycle.detailScope')}</SettingDescription>
+              <Button variant="outline" size="sm" className="mt-4" onClick={() => selectSurface('lifecycle')}>
+                {navText(t, 'surface.lifecycle')}
+              </Button>
+            </SettingGroup>
           ) : selectedId === 'runtime-settings' ? (
             <UarRuntimeSettingsPanel />
+          ) : selectedId === 'instances' ? (
+            <UarInstancesPanel />
           ) : selectedId === 'providers-models' ? (
             <UarProvidersModelsPanel />
           ) : selectedId === 'agents' ? (
@@ -291,18 +296,68 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
             <UarPresentationsPanel />
           ) : selectedId === 'approvals' ? (
             <UarApprovalLifecyclePanel />
-          ) : selectedId === 'durable-agent-instances' || selectedId === 'local-scoped-observers' ? (
+          ) : ['lifecycle', 'teams', 'durable-agent-instances', 'local-scoped-observers', 'connectors', 'feedback-governance', 'representation'].includes(selectedId) ? (
             <div id={getSettingDomId('/settings/uar', selectedId)} className="scroll-mt-6">
               <SettingGroup className="mb-4">
                 <SettingTitle>{navText(t, 'durable.workspaceTitle')}</SettingTitle>
                 <SettingDescription>{navText(t, 'durable.workspaceDescription')}</SettingDescription>
-                <Select value={selectedWorkspaceId} onValueChange={setWorkspaceId} disabled={workspacesLoading}>
-                  <SelectTrigger className="mt-4" aria-label={navText(t, 'durable.workspaceTitle')}>
+                {selectedId === 'lifecycle' && (
+                  <div className="mt-4">
+                    <label htmlFor="uar-administration-instance" className="mb-1.5 block text-sm font-medium">
+                      {navText(t, 'lifecycle.service')}
+                    </label>
+                    <Select
+                      value={administrationInstance?.id}
+                      onValueChange={(adminInstanceId) => {
+                        void navigate({ search: (previous) => ({ ...previous, adminInstanceId }), replace: false })
+                      }}>
+                      <SelectTrigger id="uar-administration-instance" data-ui="uar-administration-instance">
+                        <SelectValue placeholder={navText(t, 'lifecycle.chooseService')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {inventory?.instances.map((instance) => (
+                          <SelectItem key={instance.id} value={instance.id} disabled={!instance.enabled}>
+                            {instance.name} · {instance.id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="mt-2 text-xs text-muted-foreground">{navText(t, 'lifecycle.selectionHelp')}</p>
+                    {inventoryError && (
+                      <p className="mt-2 break-words text-sm text-error" role="alert">
+                        {inventoryError}
+                      </p>
+                    )}
+                    {search.adminInstanceId && !administrationInstance && inventory && (
+                      <p className="mt-2 text-sm text-warning-subtle-foreground" role="status">
+                        {navText(t, 'lifecycle.missingService')}
+                      </p>
+                    )}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button variant="outline" size="sm" onClick={() => void loadInventory()}>
+                        {t('common.refresh')}
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => selectSurface('instances')}>
+                        {navText(t, 'surface.instances')}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                <Select
+                  value={selectedWorkspaceId}
+                  onValueChange={(adminWorkspaceId) => {
+                    void navigate({ search: (previous) => ({ ...previous, adminWorkspaceId }), replace: false })
+                  }}
+                  disabled={workspacesLoading}>
+                  <SelectTrigger
+                    data-ui="uar-teams-workspace"
+                    className="mt-4"
+                    aria-label={navText(t, 'durable.workspaceTitle')}>
                     <SelectValue placeholder={navText(t, 'durable.workspacePlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {userWorkspaces.map((workspace) => (
-                      <SelectItem key={workspace.id} value={workspace.id}>
+                      <SelectItem key={workspace.id} value={workspace.id} data-workspace-id={workspace.id}>
                         {workspace.name}
                       </SelectItem>
                     ))}
@@ -326,12 +381,30 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
                 )}
               </SettingGroup>
               {selectedWorkspaceId &&
-                (selectedId === 'durable-agent-instances' ? (
-                  <UarInstancesPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
+                (selectedId === 'representation' ? (
+                  <UarRepresentationAdministrationPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
+                ) : selectedId === 'lifecycle' ? (
+                  administrationInstance?.enabled && (
+                    <UarLifecyclePanel
+                      key={selectedWorkspaceId + ':' + administrationInstance.id}
+                      workspaceId={selectedWorkspaceId}
+                      serviceInstanceId={administrationInstance.id}
+                      detailScopeMatches={detailScopeMatches}
+                      onNavigate={selectSurface}
+                    />
+                  )
+                ) : selectedId === 'teams' ? (
+                  <UarTeamsPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
+                ) : selectedId === 'feedback-governance' ? (
+                  <UarFeedbackGovernancePanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
+                ) : selectedId === 'connectors' ? (
+                  <UarConnectorAdministrationPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
+                ) : selectedId === 'durable-agent-instances' ? (
+                  <UarDurableInstancesPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
                 ) : (
                   <UarObserversPanel key={selectedWorkspaceId} workspaceId={selectedWorkspaceId} />
                 ))}
-              {selected && <MethodCoverage surface={selected} />}
+              {selected && selectedId !== 'lifecycle' && <MethodCoverage surface={selected} />}
             </div>
           ) : ['runs', 'knowledge', 'tools', 'security', 'protocols'].includes(selectedId) ? (
             <>
@@ -345,9 +418,11 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
           )}
         </section>
       </div>
-      <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-        {navText(t, 'runtimeVersion')} {snapshot.uarVersion}
-      </div>
+      {selectedId !== 'lifecycle' && (
+        <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+          {navText(t, 'runtimeVersion')} {snapshot?.uarVersion ?? navText(t, 'durable.unknown')}
+        </div>
+      )}
     </div>
   )
 }

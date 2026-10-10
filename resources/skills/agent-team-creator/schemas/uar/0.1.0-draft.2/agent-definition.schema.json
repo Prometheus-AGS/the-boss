@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometheus-ags.dev/uar/collaboration/0.1.0-draft.2/agent-definition.schema.json",
+  "title": "UAR AgentDefinition — official collaboration draft.2 contract checkpoint",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "urn:prometheus:uar:collaboration:0.1.0-draft.2"
+    },
+    "kind": {
+      "const": "AgentDefinition"
+    },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "version": {
+      "$ref": "common.schema.json#/$defs/semver"
+    },
+    "contentDigest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "provenance": {
+      "$ref": "common.schema.json#/$defs/provenance"
+    },
+    "requiredCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "extensions": {
+      "$ref": "common.schema.json#/$defs/extensions"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "whenToUse": {
+      "type": "string",
+      "minLength": 1
+    },
+    "instructions": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input": {
+      "$ref": "common.schema.json#/$defs/contract"
+    },
+    "output": {
+      "$ref": "common.schema.json#/$defs/contract"
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/skill"
+      },
+      "minItems": 0
+    },
+    "models": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/model"
+      },
+      "minItems": 1
+    },
+    "permittedChildren": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/immutableRef"
+      },
+      "minItems": 0
+    },
+    "context": {
+      "$ref": "common.schema.json#/$defs/context"
+    },
+    "requestedLimits": {
+      "$ref": "common.schema.json#/$defs/limits"
+    },
+    "legacySections": {
+      "type": "object"
+    },
+    "sourceDescriptor": {
+      "type": "object"
+    },
+    "sourceIdentity": {
+      "$ref": "common.schema.json#/$defs/sourceIdentity"
+    },
+    "renameMapping": {
+      "$ref": "common.schema.json#/$defs/renameMapping"
+    },
+    "authoredFields": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/jsonPointer"
+      },
+      "uniqueItems": true
+    },
+    "modelRequirements": {
+      "$ref": "common.schema.json#/$defs/semanticRequirement"
+    },
+    "promptDialect": {
+      "$ref": "common.schema.json#/$defs/semanticRequirement"
+    },
+    "ragConfiguration": {
+      "$ref": "common.schema.json#/$defs/semanticRequirement"
+    },
+    "contextStrategy": {
+      "$ref": "common.schema.json#/$defs/semanticRequirement"
+    },
+    "apiHarness": {
+      "$ref": "common.schema.json#/$defs/semanticRequirement"
+    }
+  },
+  "required": [
+    "profile",
+    "kind",
+    "id",
+    "version",
+    "contentDigest",
+    "provenance",
+    "requiredCapabilities",
+    "extensions",
+    "title",
+    "role",
+    "whenToUse",
+    "instructions",
+    "input",
+    "output",
+    "skills",
+    "models",
+    "permittedChildren",
+    "context",
+    "requestedLimits",
+    "sourceIdentity",
+    "renameMapping",
+    "authoredFields",
+    "modelRequirements",
+    "promptDialect",
+    "ragConfiguration",
+    "contextStrategy",
+    "apiHarness",
+    "legacySections",
+    "sourceDescriptor"
+  ],
+  "additionalProperties": false
+}

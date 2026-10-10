@@ -114,7 +114,7 @@ node <skill>/scripts/cli.mjs <command> --input request.json
 
 | Command | Request |
 |---|---|
-| `guide` | `operation=create|revise|deploy` plus the staged intake fields returned for that operation. Create remains the default for schema-v1 callers. |
+| `guide` | `operation=create|author|revise|deploy`; `author` reads `project` plus `workspace` and returns one next question with bounded status. Create remains the default for schema-v1 callers. |
 | `validate` | `team` manifest |
 | `init` | `team`, new `state` filename |
 | `status` | `state` |
@@ -124,31 +124,50 @@ node <skill>/scripts/cli.mjs <command> --input request.json
 | `handoff-create`, `handoff-accept` | See `task-handoff.md` |
 | `models-discover`, `models-select` | See `models-memory.md` |
 | `memory-queue`, `memory-publish` | See `models-memory.md` |
-| `uar-package-validate` | `package` authoring envelope from `schemas/uar-package-authoring.schema.json` |
-| `uar-package-build` | `package`, new `out` directory |
-| `uar-package-diff` | `before` and `after` authoring packages with the same package ID |
+| `uar-workspace-init` | `project`, portable team ID in `workspace`, `expectedRevision: 0`, package identity/version, and declared source paths; state is written under `.agent-team/<team-id>/authoring`; `source` may instead carry an inline, flat-team, AgentArtifact, or draft.1 migration input |
+| `uar-workspace-migrate` | Same request as workspace initialization, with `source` or a contained compiled `sourceDirectory`; writes a field-level migration receipt beside the source documents |
+| `uar-workspace-status` | `project`, `workspace`, optional numeric `cursor` and `pageSize` from 1 through 50 |
+| `uar-workspace-answer` | `project`, team ID in `workspace`, current `expectedRevision`, stable `questionId`, and one `answer` value |
+| `uar-workspace-update` | `project`, team ID in `workspace`, current `expectedRevision`, one declared relative `path`, and one identity-preserving `document` object |
+| `uar-workspace-revise` | `project`, source and destination team IDs in `workspace` and `out`, current `expectedRevision`, strictly greater `nextVersion`, and optional explicit definition `edits` |
+| `uar-package-schema-info` | Empty request; reports the accepted profile and provider source revision |
+| `uar-package-validate` | Existing inline `package`, or `project` plus `workspace`; draft.1 inputs migrate explicitly |
+| `uar-package-build` | Inline `package` or selected workspace, plus a new `out` directory |
+| `uar-package-diff` | Inline `before`/`after`, compiled `beforeDirectory`/`afterDirectory`, or `project` with `beforeWorkspace`/`afterWorkspace` |
 | `uar-capabilities` | `connection` with base URL and optional `env:VARIABLE` credential reference |
 | `uar-package-preflight`, `uar-package-install` | `connection`, `packageDirectory`, `commandId`, optional `expectedCatalogRevision` |
 | `uar-package-status` | `connection`, `packageId`, `version` |
 | `uar-binding-preflight`, `uar-binding-install` | `connection`, `commandId`, complete `binding`, optional `expectedRevision` |
 | `uar-binding-status` | `connection`, `bindingId`, explicit `workspaceId` |
-| `uar-activate` | Always refuses until durable local-team execution is implemented in I2 |
+| `uar-activate` | Always refuses; the accepted draft.2 checkpoint does not claim durable team runtime conformance |
 
 Native harness exports are proposals, never in-place installation. If a write fails partway,
 the incomplete directory remains inspectable and lacks its final receipt. Choose
 a new output directory for a retry. UAR collaboration commands are the deliberate
 exception: after capability and package preflight they install an atomic immutable
 catalog package and optional private deployment binding through the routes in
-`uar-deployment.md`. They never activate or execute a team.
+`uar-deployment.md`. Package installation confers no private authority. They never
+activate or execute a team.
 
 ## Building and distributing
 
 `runtime/package.json` pins TypeScript 7.0.2 and Node type declarations. Run
 `npm ci --prefix <skill>/runtime` then `npm run build --prefix <skill>/runtime`
-when maintaining source. Runtime consumers need only Node.js 22+ and the copied
-skill files; they do not need npm, TypeScript or the repository checkout. Full
-and mini distribute identical source and emitted `.mjs` files. Each sibling skill
-declares its dependency on this creator companion in its instructions.
+at the completed-production boundary when maintaining source. Consumers run
+the emitted skill files with Node.js 22+ without npm or TypeScript dependencies;
+optional integrations still require their configured services and helper executables.
+
+Full and mini share portable team/schema contracts and selected provider
+provenance. They do not distribute an identical runtime or emitted payload.
+Full alone provides `team-publish`, `team-discover`, `team-request` and
+`team-intake`, plus the full pack’s Python learning hooks, durable writer outbox
+and optional Cortex mirror. Mini uses a reduced file-backed queue and optional
+configured publication with its own project-identity resolution. The memory
+contracts are documented in [models-memory.md](models-memory.md); a matching
+filename or schema does not prove byte, service or execution parity. Rebuild
+changed source and record exact payload provenance at the final local boundary
+before claiming the copied `.mjs` implements it. Each sibling skill declares
+its dependency on this creator companion in its instructions.
 
 The four SKILL.md frontmatters follow the
 [AgentSkills specification](https://agentskills.io/specification): version and

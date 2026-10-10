@@ -1,13 +1,19 @@
-# UAR collaboration schema snapshot
+# UAR collaboration schema snapshots
 
-These files are byte-for-byte copies of the official Draft 0.1.0-draft.1 schemas
-from Universal Agent Runtime commit
-`cbb511ac61eb6b2928d7a80c67324baeb913ca11`:
+This directory retains the draft.1 provider schema family and the separate
+`0.1.0-draft.2/` family. They are distinct snapshots; retaining an older reader or
+migration path does not relabel its documents as the newer profile.
 
-`docs/agents/collaboration/v0.1.0-draft.1/schemas/`
+The draft.2 source repository, exact provider commit, source paths and hashes are
+recorded in [the consumer source receipt](0.1.0-draft.2/consumer-source-receipt.json).
+Use that receipt for the selected identity rather than a separately maintained
+commit in this README. A consumer receipt is provenance, not a provider schema or
+proof of live runtime conformance.
 
-They describe canonical compiled documents. The adjacent
-`uar-package-authoring.schema.json` describes the pre-digest authoring envelope.
-Update both full and mini mirrors together when UAR publishes a new profile; never
-silently reinterpret an installed package under a newer schema.
-
+Provider schemas describe canonical compiled documents. Adjacent authoring and
+workspace schemas describe the skill's input carriers. Preserve provider-owned
+schema bytes and attribution; updates require a deliberate new snapshot and
+compatible consumer changes. Full and mini source mirrors must retain the same
+selected provider identity, and their generated payloads are reconciled at the
+final production boundary. Schema validity alone does not certify registration,
+communication or execution by a real UAR host.

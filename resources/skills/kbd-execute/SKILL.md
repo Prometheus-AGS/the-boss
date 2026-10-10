@@ -7,6 +7,10 @@ description: Use to select an execution backend for the active KBD phase, write 
 
 Run the **Execute** phase of the KBD lifecycle.
 
+## OpenSpec lifecycle preflight
+
+Before this stage, follow the [orchestrator preflight](../kbd-process-orchestrator/SKILL.md#openspec-lifecycle-preflight): refresh existing KBD/OpenSpec projects with the managed latest-stable CLI, then use that same runner for OpenSpec commands. Retry a pending startup refresh before OpenSpec work; preserve authored specs and task state. Phase scripts run this automatically, including canonical-runtime paths.
+
 ## What this does
 
 Reads `.kbd-orchestrator/phases/<phase-name>/plan.md`, selects the best
@@ -139,6 +143,12 @@ Use the canonical phase name from the argument or `current-waypoint.json`. Phase
 11. Verify and archive changes through `kbd-apply` after the final phase gates pass
 12. **Complete Execute only at the phase boundary** — use the checklist below; dispatch is not completion
 
+## Task model handoff
+
+Read the phase plan's **Task model assignments** and [task model selection](../kbd-plan/references/task-model-selection.md). Carry each scoped assignment reference, concrete model and supported route into `execution.md` and the worker handoff. Resolve the exact phase/change/backend task ID; do not replace task-level choices with a change-level model class or the session default.
+
+Recheck availability and policy before dispatch. Changed task requirements, harness or model evidence require an explicit revised assignment; legacy plans receive an assignment through the same protocol. Unavailable routes remain unresolved with their native alternative recorded separately. `kbd-apply` retains task hooks and completion ownership; a liter-llm response alone is not a tool-enabled worker result. Planning prerequisites do not authorize installing or configuring providers.
+
 ## Backend Types
 
 | Backend       | When to use                                                |
@@ -243,3 +253,9 @@ A missing required handoff fails with remediation: complete the predecessor
 stage, or record an explicit skip with its reason under project policy.
 A deliberate stage skip is recorded with
 `stageHandoffSkip('execute', '<reason>', { cwd })`.
+
+## Delivery cadence profiles
+
+When a delivery-cadence profile is selected, include its path, state root, iteration scope, required build/run actions and publication interval in the authored execution dispatch contract. The harness remains continuation owner; kbd-apply remains canonical task owner. Do not edit generated waypoints.
+
+Finish the complete independently usable increment, then BUILD and RUN its actual function. Do not run test suites, per-task verification or reviewer loops at iteration boundaries. Fix build, launch or functional failures before beginning another increment. A timer never certifies partial work. Apply the profile's human review and publication policy; keep architecture approvals separate. See the delivery-cadence skill only for cadence-enabled work.

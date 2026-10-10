@@ -2,6 +2,9 @@ const fs = require('node:fs')
 const path = require('node:path')
 const crypto = require('node:crypto')
 const { execFileSync } = require('node:child_process')
+const { checkoutIntegrationSource } = require('./integration-source.cjs')
+const { resolveReleaseProfile } = require('./release-profile.cjs')
+const { loadLocalLiterRecord } = require('./local-liter-payload.cjs')
 
 const root = path.join(__dirname, '..')
 const source = path.join(root, 'resources', 'prometheus-skills-mini')
@@ -24,7 +27,31 @@ const entries = [
   'config',
   '.agents/skills'
 ]
-const files = ['package.json', 'package-lock.json', 'versions.toml']
+const files = ['package.json', 'package-lock.json', 'versions.toml', 'skill-system.json']
+
+/** Ship the existing full-pack verifier independently of the writable generation it verifies. */
+function packageReviewedVerifier(payload) {
+  const verifierSource = checkoutIntegrationSource('skill-pack')
+  const verifierRoot = path.join(payload, 'reviewed-verifier')
+  const modules = [
+    'scripts/verify-reviewed-skill-coverage.js',
+    'scripts/install-plugin-generation.js',
+    'scripts/lib/capabilities.js',
+    'scripts/lib/jcs.js',
+    'scripts/lib/key-protection.js',
+    'scripts/lib/payload-manifest.js',
+    'scripts/lib/reviewed-skill-closures.js',
+    'scripts/lib/skill-system.js',
+    'scripts/lib/store-paths.js',
+    'skill-system.json'
+  ]
+  for (const module of modules) {
+    const target = path.join(verifierRoot, module)
+    fs.mkdirSync(path.dirname(target), { recursive: true })
+    fs.copyFileSync(path.join(verifierSource, module), target)
+  }
+  fs.writeFileSync(path.join(verifierRoot, 'package.json'), JSON.stringify({ private: true, type: 'module' }) + '\n')
+}
 
 function inventory(directory, prefix = '') {
   return fs.readdirSync(path.join(directory, prefix), { withFileTypes: true }).flatMap((entry) => {
@@ -42,6 +69,13 @@ function inventory(directory, prefix = '') {
   })
 }
 
+/** Preserve skill-local helpers while routing pack-level helpers through the installed CLI. */
+function renderPackSkillText(text, skillDirectory) {
+  return text.replace(/\bnode scripts\/([a-zA-Z0-9_./-]+\.mjs)\b/g, (command, helper) =>
+    fs.existsSync(path.join(skillDirectory, 'scripts', helper)) ? command : `boss-mini ${helper}`
+  )
+}
+
 function renderPackSkills(payload) {
   const skillRoot = path.join(payload, 'skills')
   if (!fs.existsSync(skillRoot)) return
@@ -49,11 +83,7 @@ function renderPackSkills(payload) {
     if (!file.path.endsWith('.md')) continue
     const filename = path.join(skillRoot, file.path)
     const skill = file.path.split('/')[0]
-    const text = fs
-      .readFileSync(filename, 'utf8')
-      .replace(/\bnode scripts\/([a-zA-Z0-9_./-]+\.mjs)\b/g, (command, helper) =>
-        fs.existsSync(path.join(skillRoot, skill, 'scripts', helper)) ? command : `boss-mini ${helper}`
-      )
+    const text = renderPackSkillText(fs.readFileSync(filename, 'utf8'), path.join(skillRoot, skill))
     fs.writeFileSync(filename, text)
   }
 }
@@ -78,6 +108,16 @@ function copyPrometheusPayload(sourceRoot, destinationRoot) {
 
 function packagePrometheus() {
   const artifacts = JSON.parse(fs.readFileSync(path.join(root, 'build', 'integration-artifacts.json'), 'utf8'))
+  const pins = require('../build/integration-sources.json')
+  const profile = resolveReleaseProfile()
+  const platform = process.env.THE_BOSS_PACKAGE_PLATFORM || `${process.platform}-${process.arch}`
+  const localLiter = profile.localUar ? loadLocalLiterRecord(platform).record : undefined
+  if (
+    profile.uarEnabled &&
+    !profile.localUar &&
+    artifacts.imageProvenance?.['liter-llm']?.source?.revision !== pins.sources['liter-llm'].revision
+  )
+    throw new Error('Publish and import the pinned Liter managed image before public UAR packaging')
   const revision = execFileSync('git', ['-C', source, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
   const gitlink = execFileSync('git', ['ls-tree', 'HEAD', 'resources/prometheus-skills-mini'], {
     cwd: root,
@@ -90,10 +130,11 @@ function packagePrometheus() {
     throw new Error('The packaged mini revision does not match the pinned integration revision')
   fs.rmSync(destination, { recursive: true, force: true })
   copyPrometheusPayload(source, destination)
-  const literSource = path.join(source, 'tools', 'liter-llm')
+  packageReviewedVerifier(destination)
+  const literSource = checkoutIntegrationSource('liter-llm')
   const literCatalogDestination = path.join(destination, 'catalogs', 'liter-llm')
   const literRevision = execFileSync('git', ['-C', literSource, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
-  if (literRevision !== artifacts.sources['liter-llm'].revision)
+  if (literRevision !== pins.sources['liter-llm'].revision)
     throw new Error('The liter-llm catalog source does not match the pinned integration revision')
   fs.mkdirSync(literCatalogDestination, { recursive: true })
   for (const [sourceName, artifactName] of [
@@ -102,7 +143,7 @@ function packagePrometheus() {
   ]) {
     const sourceFile = path.join(literSource, 'schemas', sourceName)
     const checksum = crypto.createHash('sha256').update(fs.readFileSync(sourceFile)).digest('hex')
-    if (checksum !== artifacts.catalogs['liter-llm'][artifactName])
+    if (checksum !== pins.catalogs['liter-llm'][artifactName])
       throw new Error(`The liter-llm ${artifactName} catalog checksum does not match the integration manifest`)
     fs.copyFileSync(sourceFile, path.join(literCatalogDestination, sourceName))
   }
@@ -111,10 +152,10 @@ function packagePrometheus() {
     `${JSON.stringify(
       {
         schema: 1,
-        repository: artifacts.sources['liter-llm'].repository,
+        repository: pins.sources['liter-llm'].repository,
         revision: literRevision,
-        providersSha256: artifacts.catalogs['liter-llm'].providers,
-        catalogSha256: artifacts.catalogs['liter-llm'].models
+        providersSha256: pins.catalogs['liter-llm'].providers,
+        catalogSha256: pins.catalogs['liter-llm'].models
       },
       null,
       2
@@ -144,7 +185,6 @@ function packagePrometheus() {
   if (!fs.existsSync(path.join(destination, 'node_modules', '@fission-ai', 'openspec', 'bin', 'openspec.js')))
     throw new Error('npm ci did not install the OpenSpec backend')
   // electron-builder drops a top-level node_modules from extraResources; the installer restores the name.
-  fs.renameSync(path.join(destination, 'node_modules'), path.join(destination, 'pack_modules'))
   const compass = path.join(root, 'build', 'compass-skills')
   const archive = path.join(root, 'build', 'compass-skills.download')
   if (!artifacts.compassSkills?.sha256 || !artifacts.compassSkills?.url)
@@ -164,6 +204,22 @@ function packagePrometheus() {
     .map((entry) => entry.name)
     .sort()
   renderPackSkills(destination)
+  // Review the bytes that will actually execute after installation, including
+  // shared runtime dependencies. The runtime restores pack_modules to node_modules.
+  const sharedRoots = [...entries.filter((entry) => entry !== 'skills'), ...files, 'catalogs', 'node_modules']
+    .filter((entry) => fs.existsSync(path.join(destination, entry)))
+  execFileSync(
+    process.execPath,
+    [
+      path.join(source, 'scripts', 'generate-reviewed-skill-closures.mjs'),
+      '--payload',
+      destination,
+      ...sharedRoots.flatMap((entry) => ['--shared-root', entry])
+    ],
+    { stdio: 'inherit' }
+  )
+  const reviewedSkills = JSON.parse(fs.readFileSync(path.join(destination, 'reviewed-skill-closures.json'), 'utf8'))
+  fs.renameSync(path.join(destination, 'node_modules'), path.join(destination, 'pack_modules'))
   // The existing builtin synchronizer discovers this directory and registers every
   // skill for agent runtimes. Keep the runnable dependencies in the adjacent pack.
   for (const skill of skills)
@@ -177,11 +233,24 @@ function packagePrometheus() {
     tools: Object.fromEntries(artifacts.tools.map((tool) => [tool.name, tool.version])),
     sources: artifacts.sources,
     images: artifacts.images,
+    imageProvenance: artifacts.imageProvenance,
+    sourceIntent: pins.sources,
+    catalogSources: { 'liter-llm': pins.sources['liter-llm'] },
+    catalogs: pins.catalogs,
+    reviewedSkills: { schemaVersion: reviewedSkills.schemaVersion, inventoryDigest: reviewedSkills.inventoryDigest },
+    ...(profile.localUar
+      ? {
+          localNativePayloads: {
+            'liter-llm': localLiter,
+            'uar-sidecar': require('./local-uar-payload.cjs').inspectLocalUarRecord().record
+          }
+        }
+      : {}),
     files: inventory(destination)
   }
   fs.writeFileSync(path.join(destination, 'release-manifest.json'), JSON.stringify(manifest, null, 2) + '\n')
   console.log(`Packaged mini ${revision}: ${skills.length} skills and ${manifest.files.length} runtime files`)
 }
 
-module.exports = { packagePrometheus, copyPrometheusPayload }
+module.exports = { packagePrometheus, copyPrometheusPayload, renderPackSkillText }
 if (require.main === module) packagePrometheus()

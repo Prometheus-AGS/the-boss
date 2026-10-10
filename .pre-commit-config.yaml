@@ -1,4 +1,6 @@
 default_install_hook_types: [pre-commit, post-checkout, post-merge]
+# These managed payloads are copied from the pinned mini pack; edit their source there.
+exclude: "^resources/skills/(agent-team-creator|delivery-cadence)/"
 
 repos:
   - repo: local

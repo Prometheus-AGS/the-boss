@@ -24,3 +24,6 @@ export const GROK_CLI_PROVIDER_ID = 'grok-cli' as const
 export function isGrokCliProviderId(providerId: string): boolean {
   return providerId === GROK_CLI_PROVIDER_ID
 }
+
+/** Published @xai-official/grok compatibility target; not a bundled CLI runtime. */
+export const GROK_CLI_COMPATIBILITY_VERSION = '1.0.46' as const

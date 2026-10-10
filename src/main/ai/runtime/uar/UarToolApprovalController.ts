@@ -5,6 +5,7 @@ import { toolApprovalRegistry, type DispatchDecision } from '@main/ai/toolApprov
 import type { AgentRuntimeEvent } from '../types'
 import type { UarHostMcpBridge } from './UarHostMcpBridge'
 import { createUarSecretProjection, type UarSecretProjection } from './uarSecretProjection'
+import type { UarSidecarEndpoint } from './UarSidecarService'
 
 const logger = loggerService.withContext('UarToolApprovalController')
 
@@ -22,6 +23,7 @@ interface UarToolApprovalOptions {
   agentId: string
   runId: string
   generation: number
+  endpoint: UarSidecarEndpoint
   principal: string
   signal: AbortSignal
   bridge: UarHostMcpBridge
@@ -135,23 +137,25 @@ export class UarToolApprovalController {
   }
 
   private async recordAndResolve(input: PendingApproval, approved: boolean): Promise<void> {
-    if (!this.options.bridge.recordHumanDecision(input.admissionId, approved)) {
+    if (!(await this.options.bridge.recordHumanDecision(input.admissionId, approved))) {
       throw new Error('uar_approval_stale')
     }
     await this.resolve(input.rawApprovalId, approved)
   }
 
   private async resolve(approvalId: string, approved: boolean): Promise<void> {
-    const response = await application.get('UarSidecarService').requestCurrent(
-      `/api/uar/runs/${encodeURIComponent(this.options.runId)}/tool-approval`,
-      this.options.principal,
-      {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ approved, approval_id: approvalId })
-      },
-      this.options.generation
-    )
+    const response = await application
+      .get('UarSidecarService')
+      .requestInstanceCurrent(
+        this.options.endpoint,
+        `/api/uar/runs/${encodeURIComponent(this.options.runId)}/tool-approval`,
+        this.options.principal,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ approved, approval_id: approvalId })
+        }
+      )
     if (!response) throw new Error('UAR restarted before the tool approval was resolved')
     if (!response.ok) {
       const detail = this.projection.text(await response.text()).slice(0, 1_000).trim()

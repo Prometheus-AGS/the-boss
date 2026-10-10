@@ -6,6 +6,11 @@ const root = path.resolve(__dirname, '..')
 const manifestPath = path.join(root, 'build', 'integration-artifacts.json')
 const sourcesPath = path.join(root, 'build', 'integration-sources.json')
 const requiredPlatforms = new Set(UAR_RELEASE_PLATFORM_KEYS)
+const selectedPlatforms = new Set(
+  process.env.RELEASE_PLATFORMS
+    ? process.env.RELEASE_PLATFORMS.split(',').map((value) => value.trim())
+    : requiredPlatforms
+)
 const cliRecordUrls = process.argv.slice(2)
 const recordUrls =
   cliRecordUrls.length > 0
@@ -15,11 +20,16 @@ const recordUrls =
         process.env.UAR_WIN32_ARM64_RECORD_URL,
         process.env.UAR_DARWIN_ARM64_RECORD_URL,
         process.env.UAR_DARWIN_X64_RECORD_URL
-      ]
+      ].filter(Boolean)
 
-if (recordUrls.length !== requiredPlatforms.size || recordUrls.some((recordUrl) => !recordUrl)) {
+if (
+  selectedPlatforms.size === 0 ||
+  [...selectedPlatforms].some((platform) => !requiredPlatforms.has(platform)) ||
+  recordUrls.length === 0 ||
+  recordUrls.some((recordUrl) => !recordUrl)
+) {
   throw new Error(
-    'usage: node scripts/import-uar-sidecar-payloads.cjs <win32-x64-record-url> <win32-arm64-record-url> <darwin-arm64-record-url> <darwin-x64-record-url>, or set all four UAR_*_RECORD_URL values'
+    'usage: node scripts/import-uar-sidecar-payloads.cjs <selected-platform-record-url>..., or set selected UAR_*_RECORD_URL values and RELEASE_PLATFORMS'
   )
 }
 
@@ -122,8 +132,9 @@ async function loadRecord(recordUrl, pins, expectedVersion) {
   if (record.version !== expectedVersion) {
     throw new Error(`UAR sidecar ${record.platform} version ${record.version} does not match ${expectedVersion}`)
   }
-  if (record.source !== pins.revision) {
-    throw new Error(`UAR sidecar ${record.platform} source ${record.source} does not match ${pins.revision}`)
+  const expectedSource = pins.platformRevisions?.[record.platform] ?? pins.revision
+  if (record.source !== expectedSource) {
+    throw new Error(`UAR sidecar ${record.platform} source ${record.source} does not match ${expectedSource}`)
   }
 
   const expectedAsset = `uar-sidecar-${record.platform}.tar.gz`
@@ -140,6 +151,7 @@ async function loadRecord(recordUrl, pins, expectedVersion) {
   return {
     platform: record.platform,
     package: {
+      source: record.source,
       url: `https://${url.host}/${pins.repository}/releases/download/${tag}/${expectedAsset}`,
       sha256: record.sha256,
       archive: record.archive,
@@ -155,6 +167,11 @@ async function main() {
   const expectedVersion = pins.tools?.['uar-sidecar']?.version
 
   if (!/^[a-f0-9]{40}$/.test(uarSource.revision ?? '')) throw new Error('Integration UAR source revision is not pinned')
+  for (const [platform, revision] of Object.entries(uarSource.platformRevisions ?? {})) {
+    if (!requiredPlatforms.has(platform) || !/^[a-f0-9]{40}$/.test(revision)) {
+      throw new Error(`Invalid integration UAR source revision for ${platform}`)
+    }
+  }
   if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(uarSource.repository ?? '')) {
     throw new Error('Integration UAR source repository is invalid')
   }
@@ -173,7 +190,7 @@ async function main() {
   const records = await Promise.all(recordUrls.map((recordUrl) => loadRecord(recordUrl, uarSource, expectedVersion)))
   const platforms = new Set(records.map((record) => record.platform))
   if (platforms.size !== records.length) throw new Error('Duplicate UAR sidecar platform release records')
-  for (const platform of requiredPlatforms) {
+  for (const platform of selectedPlatforms) {
     if (!platforms.has(platform)) throw new Error(`Missing UAR sidecar release record for ${platform}`)
   }
 
@@ -183,12 +200,20 @@ async function main() {
   const uarTool = { ...existing, version: expectedVersion, packages: nextPackages }
   const nextManifest = {
     ...manifest,
-    sources: { ...manifest.sources, uar: { ...uarSource } },
+    sources: {
+      ...manifest.sources,
+      uar: {
+        ...uarSource,
+        platformRevisions: Object.fromEntries(Object.entries(nextPackages).map(([platform, asset]) => [platform, asset.source]))
+      }
+    },
     tools: matches.length === 0 ? [...tools, uarTool] : tools.map((tool) => (tool === existing ? uarTool : tool))
   }
   fs.writeFileSync(manifestPath, `${JSON.stringify(nextManifest, null, 2)}\n`)
 
-  console.log(`Imported UAR sidecar payloads for ${[...requiredPlatforms].join(', ')} from ${uarSource.revision}`)
+  console.log(
+    `Imported UAR sidecar payloads: ${records.map(({ platform, package: asset }) => `${platform} from ${asset.source}`).join(', ')}`
+  )
 }
 
 main().catch((error) => {

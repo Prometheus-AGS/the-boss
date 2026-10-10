@@ -1,4 +1,4 @@
-import { harnesses } from './types.mjs';
+import { exportCapabilityNames, harnesses } from './types.mjs';
 export function object(value, label = 'input') {
     if (!value || typeof value !== 'object' || Array.isArray(value))
         throw Error(`${label} must be an object`);
@@ -48,7 +48,7 @@ export function relativeFile(file) {
 }
 export function validateTeam(value) {
     const t = object(value, 'team');
-    const allowed = ['schemaVersion', 'id', 'outcome', 'scope', 'harness', 'roles', 'modelPolicy', 'skillPolicies', 'native'];
+    const allowed = ['schemaVersion', 'id', 'outcome', 'scope', 'harness', 'roles', 'modelPolicy', 'skillPolicies', 'native', 'agentMemory'];
     for (const key of Object.keys(t))
         if (!allowed.includes(key))
             throw Error(`Unknown team field ${key}; use native.<target>.options or files for harness-specific configuration`);
@@ -99,6 +99,14 @@ export function validateTeam(value) {
         visited.add(key);
     }
     ids.forEach(visit);
+    if (t.agentMemory !== undefined) {
+        const m = object(t.agentMemory, 'agentMemory');
+        for (const key of Object.keys(m))
+            if (key !== 'claude')
+                throw Error(`Unknown agentMemory field ${key}`);
+        if (m.claude !== undefined && m.claude !== 'local')
+            throw Error("agentMemory.claude must be 'local'");
+    }
     if (t.modelPolicy !== undefined)
         policy(t.modelPolicy, 'modelPolicy');
     if (t.skillPolicies !== undefined)
@@ -109,10 +117,16 @@ export function validateTeam(value) {
             target(key);
             const n = object(v, `native.${key}`);
             for (const field of Object.keys(n))
-                if (!['version', 'source', 'options', 'files'].includes(field))
+                if (!['version', 'source', 'options', 'files', 'requiredCapabilities'].includes(field))
                     throw Error(`Unknown native wrapper field ${field}; put native settings in options or files`);
             text(n.version, 'native version');
             text(n.source, 'native source');
+            if (n.requiredCapabilities !== undefined) {
+                const required = strings(n.requiredCapabilities, 'native.requiredCapabilities');
+                for (const capability of required)
+                    if (!exportCapabilityNames.includes(capability))
+                        throw Error(`Unknown export capability: ${capability}`);
+            }
             if (n.options !== undefined)
                 object(n.options, 'native options');
             if (n.files !== undefined)

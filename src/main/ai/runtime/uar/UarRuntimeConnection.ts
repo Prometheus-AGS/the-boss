@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto'
 import { realpathSync } from 'node:fs'
 
+import { isToolUIPart } from 'ai'
+
 import { application } from '@application'
 import { agentService } from '@data/services/AgentService'
 import { agentSessionMessageService } from '@data/services/AgentSessionMessageService'
@@ -19,10 +21,12 @@ import { warmMcpToolCatalogs } from '@main/ai/runtime/pi/piMcpToolAdapter'
 import { skillService } from '@main/ai/skills/SkillService'
 import { wrapSteerReminder } from '@main/ai/steerReminder'
 import { toolApprovalRegistry } from '@main/ai/toolApproval/ToolApprovalRegistry'
+import { readIntegrationConfig } from '@main/services/prometheus/integrationConfig'
 import type { AgentEntity } from '@shared/data/api/schemas/agents'
 import type { UarCatalogLink } from '@shared/data/api/schemas/agents'
 import type { AgentSessionMessageEntity } from '@shared/data/api/schemas/agentSessionMessages'
 import type { AgentSessionEntity } from '@shared/data/api/schemas/agentSessions'
+import type { UarSessionPlacement } from '@shared/types/uarServiceInstance'
 
 import { AsyncEventQueue } from '../AsyncEventQueue'
 import type {
@@ -35,12 +39,19 @@ import type {
 } from '../types'
 import { UarAguiAdapter } from './UarAguiAdapter'
 import { uarApprovalLifecycleStore } from './UarApprovalLifecycleStore'
+import { createUarAuthorityProvider } from './UarAuthorityProvider'
 import { buildUarHostHistory, type UarHistoryMessage } from './uarHostHistory'
 import { createUarHostMcpBridge, type UarHostMcpBridge } from './UarHostMcpBridge'
 import { resolveUarHostToolDisposition } from './uarHostToolPolicy'
-import { resolveUarModelAssignment, type ResolvedUarModelAssignment } from './uarModelAssignments'
+import {
+  assertUarModelAvailable,
+  resolveUarModelAssignment,
+  type ResolvedUarModelAssignment
+} from './uarModelAssignments'
 import { uarPrincipalForSession } from './uarPrincipal'
 import { collectUarMcpSecrets, createUarSecretProjection, type UarSecretProjection } from './uarSecretProjection'
+import { decodeUarSessionPlacement, encodeUarSessionPlacement } from './uarSessionPlacement'
+import type { UarSidecarEndpoint } from './UarSidecarService'
 import { toUarToolName } from './uarToolNames'
 
 const logger = loggerService.withContext('UarRuntimeConnection')
@@ -82,7 +93,21 @@ type CatalogCandidate = {
   sourceRevision: string
 }
 
-type CreateRunResponse = { run_id?: unknown; stream_url?: unknown }
+type CreateRunResponse = {
+  run_id?: unknown
+  stream_url?: unknown
+  effective_service_binding?: {
+    bindingId?: unknown
+    bindingRevision?: unknown
+    instanceId?: unknown
+    profile?: unknown
+    workspaceLocation?: unknown
+    endpoints?: unknown
+    capabilities?: unknown
+    intent?: unknown
+    credentialRef?: unknown
+  }
+}
 
 export class UarRuntimeConnection implements AgentRuntimeConnection {
   private readonly eventQueue = new AsyncEventQueue<AgentRuntimeEvent>()
@@ -91,7 +116,10 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
   private runningTurn?: { runId: string; generation: number; abort: AbortController }
   private turnPromise: Promise<void> = Promise.resolve()
   private attachedGeneration?: number
-  private resumeTokenEmitted = false
+  private emittedResumeToken?: string
+  private placement?: UarSessionPlacement
+  private endpoint?: UarSidecarEndpoint
+  private reattaching = false
   private initialSignature = ''
   private _usageCapture?: AgentSessionUsageCapture
 
@@ -106,12 +134,23 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
   }
 
   async start(): Promise<this> {
-    await application.get('UarSidecarService').ensureReady()
+    const config = readIntegrationConfig().uar
+    const placement = decodeUarSessionPlacement(
+      this.input.resumeToken,
+      this.input.nativeSessionId ?? this.input.sessionId
+    )
+    if (!placement.instanceId) placement.instanceId = config.selectedInstanceId
+    this.reattaching = Boolean(
+      this.input.resumeToken && placement.sourceRunId && !this.hasCompletedSourceRun(placement.sourceRunId)
+    )
+    this.placement = placement
+    this.endpoint = await application.get('UarSidecarService').resolveInstance(placement.instanceId)
     const agent = agentService.getAgent(this.input.agentId)
     if (!agent) throw new Error(`UAR agent ${this.input.agentId} is unavailable`)
-    this._usageCapture = (
-      await resolveUarModelAssignment(agent.configuration?.uar_model_assignment, this.input.modelId)
-    ).usageCapture
+    this._usageCapture =
+      agent.configuration?.uar_catalog_link?.authority === 'catalog'
+        ? undefined
+        : (await resolveUarModelAssignment(agent.configuration?.uar_model_assignment, this.input.modelId)).usageCapture
     this.initialSignature = await this.signature()
     return this
   }
@@ -153,14 +192,16 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
     const running = this.runningTurn
     if (running) {
       await (
-        application
-          .get('UarSidecarService')
-          .requestCurrent(
-            `/api/uar/runs/${encodeURIComponent(running.runId)}/cancel`,
-            this.principal,
-            { method: 'POST' },
-            running.generation
-          ) ?? Promise.resolve()
+        this.endpoint
+          ? (application
+              .get('UarSidecarService')
+              .requestInstanceCurrent(
+                this.endpoint,
+                `/api/uar/runs/${encodeURIComponent(running.runId)}/cancel`,
+                this.principal,
+                { method: 'POST' }
+              ) ?? Promise.resolve())
+          : Promise.resolve()
       ).catch(() => undefined)
       running.abort.abort()
     }
@@ -172,7 +213,14 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
     let projection = createUarSecretProjection([])
     let bridge: UarHostMcpBridge | undefined
     try {
-      const sidecar = await application.get('UarSidecarService').ensureReady()
+      const placement = this.placement
+      if (!placement) throw new Error('UAR session placement is unavailable')
+      const sidecar = await application.get('UarSidecarService').resolveInstance(placement.instanceId)
+      this.endpoint = sidecar
+      const configuredInstance = readIntegrationConfig().uar.instances.find(
+        (instance) => instance.id === placement.instanceId
+      )
+      if (!configuredInstance) throw new Error(`UAR instance ${placement.instanceId} is no longer configured`)
       const session = agentSessionService.getById(this.input.sessionId)
       const storedAgent = agentService.getAgent(this.input.agentId)
       if (!storedAgent || !storedAgent.model) {
@@ -185,59 +233,108 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
         (agent.mcps ?? []).map((idOrName) => [idOrName, mcpServerService.findByIdOrName(idOrName)] as const)
       )
       projection = projection.withValues(collectUarMcpSecrets(snapshots.values()))
-      const desiredAssignment = await resolveUarModelAssignment(
-        storedAgent.configuration?.uar_model_assignment,
-        this.input.modelId
-      )
-      if (desiredAssignment.credential) {
+      const desiredAssignment =
+        storedAgent.configuration?.uar_catalog_link?.authority === 'catalog'
+          ? undefined
+          : await resolveUarModelAssignment(storedAgent.configuration?.uar_model_assignment, this.input.modelId)
+      if (desiredAssignment?.credential) {
         projection = projection.withValues([desiredAssignment.credential.api_key, desiredAssignment.credential.base_url])
       }
       const skillIds = await this.resolveSkillIds(agent.id)
       bridge = await this.createMcpBridge(session, agent, workspace, snapshots, () => projection)
       projection = projection.withValues(bridge.redactions)
       const catalog = await this.ensureCatalogAgent(storedAgent, desiredAssignment, skillIds, projection)
-      const assignment = this.resolveCatalogAssignment(catalog, desiredAssignment)
+      const assignment = desiredAssignment
+        ? this.resolveCatalogAssignment(catalog, desiredAssignment)
+        : this.catalogOwnedAssignment(catalog)
+      await assertUarModelAvailable(assignment, sidecar)
       this._usageCapture = assignment.usageCapture
-      const artifact = this.projectRunArtifact(catalog, projection)
+      const placementIntent = this.reattaching ? 'reattach' : 'new'
       const body = {
-        artifact,
+        agent_id: catalog.id,
         input: projection.text(this.buildInput(input)),
-        session_id: this.input.sessionId,
+        session_id: placement.nativeSessionId,
         ...(assignment.credential ? { run_credentials: [assignment.credential] } : {}),
         working_directory: workspace,
         ...(bridge.servers.length > 0 ? { mcp_servers: bridge.servers } : {}),
         tool_admission: bridge.toolAdmission,
         presentation_mode: 'auto',
         client_rendering: { a2ui_profiles: [UAR_A2UI_PROFILE] },
+        service_placement: {
+          intent: placementIntent,
+          expectedInstanceId: configuredInstance.expectedRuntimeId,
+          expectedProfile: configuredInstance.profile,
+          expectedWorkspaceLocation: sidecar.observed.workspaceLocation,
+          requiredCapabilities: configuredInstance.requiredCapabilities,
+          expectedEndpoints: sidecar.observed.endpoints,
+          ...(placement.bindingId ? { bindingId: placement.bindingId } : {}),
+          ...(placement.bindingRevision === undefined ? {} : { bindingRevision: placement.bindingRevision }),
+          ...(configuredInstance.runtimeCredentialRef ? { credentialRef: configuredInstance.runtimeCredentialRef } : {})
+        },
         ...(this.mapReasoningEffort() ? { reasoning_effort: this.mapReasoningEffort() } : {}),
-        ...(coldSession
-          ? {
-              history: {
-                session_id: this.input.sessionId,
-                messages: projection.history(this.loadHistory(input.message.id))
-              }
-            }
+        ...(coldSession && placementIntent === 'new'
+          ? { history: { session_id: placement.nativeSessionId, messages: projection.history(this.loadHistory(input.message.id)) } }
           : {})
       }
-      const response = await application.get('UarSidecarService').request(
-        '/api/uar/runs',
-        this.principal,
-        {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(body)
-        },
-        sidecar.generation
-      )
+      const runPath = this.reattaching
+        ? `/api/uar/runs/${encodeURIComponent(placement.sourceRunId!)}/resume`
+        : '/api/uar/runs'
+      const response = await application.get('UarSidecarService').requestInstance(sidecar, runPath, this.principal, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body)
+      })
       if (!response.ok) throw await this.responseError(response, 'UAR rejected the run', projection)
       const created = (await response.json()) as CreateRunResponse
       if (typeof created.run_id !== 'string' || typeof created.stream_url !== 'string') {
         throw new Error('UAR returned an invalid run response')
       }
+      const binding = created.effective_service_binding
+      if (!binding) throw new Error('UAR omitted the effective service binding for the admitted run')
+      if (binding.intent !== placementIntent) throw new Error('UAR admitted the run with a different placement intent')
+      if (
+        binding.instanceId !== configuredInstance.expectedRuntimeId ||
+        binding.profile !== configuredInstance.profile
+      ) {
+        throw new Error('UAR admitted the run on a different service instance or execution profile')
+      }
+      if (binding.workspaceLocation !== sidecar.observed.workspaceLocation) {
+        throw new Error('UAR admitted the run with a different workspace location')
+      }
+      const bindingEndpoints =
+        typeof binding.endpoints === 'object' && binding.endpoints !== null
+          ? (binding.endpoints as Record<string, unknown>)
+          : undefined
+      if (
+        !bindingEndpoints ||
+        (['runtime', 'administration', 'models', 'console'] as const).some(
+          (role) => bindingEndpoints[role] !== sidecar.observed.endpoints[role]
+        )
+      ) {
+        throw new Error('UAR admitted the run with different endpoint roles')
+      }
+      const bindingCapabilities = Array.isArray(binding.capabilities) ? binding.capabilities : undefined
+      if (
+        !bindingCapabilities ||
+        configuredInstance.requiredCapabilities.some((capability) => !bindingCapabilities.includes(capability))
+      ) {
+        throw new Error('UAR admitted the run without the configured capabilities')
+      }
+      if (
+        configuredInstance.runtimeCredentialRef &&
+        binding.credentialRef !== configuredInstance.runtimeCredentialRef
+      ) {
+        throw new Error('UAR admitted the run with a different credential reference')
+      }
+      if (typeof binding.bindingId === 'string') placement.bindingId = binding.bindingId
+      if (typeof binding.bindingRevision === 'number') placement.bindingRevision = binding.bindingRevision
+      placement.sourceRunId = created.run_id
+      this.reattaching = false
       this.attachedGeneration = sidecar.generation
-      if (!this.resumeTokenEmitted) {
-        this.resumeTokenEmitted = true
-        this.eventQueue.push({ type: 'resume-token', token: this.input.sessionId })
+      const resumeToken = encodeUarSessionPlacement(placement)
+      if (this.emittedResumeToken !== resumeToken) {
+        this.emittedResumeToken = resumeToken
+        this.eventQueue.push({ type: 'resume-token', token: resumeToken })
       }
       const abort = new AbortController()
       this.runningTurn = { runId: created.run_id, generation: sidecar.generation, abort }
@@ -248,6 +345,7 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
           agentId: this.input.agentId,
           runId: created.run_id,
           generation: sidecar.generation,
+          endpoint: sidecar,
           principal: this.principal,
           signal: abort.signal,
           bridge,
@@ -262,15 +360,12 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
           const replayCursor = adapter.replayCursor()
           if (attempt > 0) adapter.prepareReconnect()
           try {
-            const stream = await application.get('UarSidecarService').request(
-              `${created.stream_url}?stream_mode=agui_spec`,
-              this.principal,
-              {
+            const stream = await application
+              .get('UarSidecarService')
+              .requestInstance(sidecar, `${created.stream_url}?stream_mode=agui_spec`, this.principal, {
                 signal: abort.signal,
                 headers: { 'last-event-id': attempt > 0 ? replayCursor : '0' }
-              },
-              sidecar.generation
-            )
+              })
             if (!stream.ok) throw await this.responseError(stream, 'UAR stream failed', projection)
             await adapter.consume(stream)
             streamError = new Error('UAR stream ended before a terminal event')
@@ -334,7 +429,9 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
       {
         sessionId: session.id,
         ownerId: this.principal,
+        principalId: agent.id,
         workspace,
+        authorityProvider: await createUarAuthorityProvider(),
         persistLifecycle: (snapshot) => uarApprovalLifecycleStore.persist(snapshot),
         disposition: (toolName) => resolveUarHostToolDisposition(session.id, agent.id, toolName)
       },
@@ -418,13 +515,12 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
 
   private async ensureCatalogAgent(
     agent: NonNullable<ReturnType<typeof agentService.getAgent>>,
-    assignment: ResolvedUarModelAssignment,
+    assignment: ResolvedUarModelAssignment | undefined,
     skillIds: readonly string[],
     projection: UarSecretProjection
   ): Promise<UarAgentArtifact> {
     const linked = agent.configuration?.uar_catalog_link
     const catalogId = linked?.agentId ?? `the-boss:${agent.id}`
-    const desired = this.catalogCandidate(agent, catalogId, assignment, skillIds, projection)
     let current = await this.fetchCatalogAgent(catalogId, projection)
 
     if (linked?.authority === 'catalog') {
@@ -438,6 +534,9 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
       }
       return current
     }
+
+    if (!assignment) throw new Error(`UAR model assignment is required for The Boss agent "${agent.id}"`)
+    const desired = this.catalogCandidate(agent, catalogId, assignment, skillIds, projection)
 
     if (!current) {
       current = await this.createCatalogAgent(desired.artifact, projection)
@@ -513,23 +612,6 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
     return { artifact, sourceRevision }
   }
 
-  private projectRunArtifact(catalog: UarAgentArtifact, projection: UarSecretProjection): UarAgentArtifact {
-    const artifact = structuredClone(catalog)
-    artifact.prompt = {
-      ...artifact.prompt,
-      system: projection.text(artifact.prompt.system),
-      instructions: artifact.prompt.instructions.map((instruction) => projection.text(instruction))
-    }
-    const assignment = artifact.extensions['the-boss.model-assignment']
-    if (assignment && typeof assignment === 'object' && 'connected_instance' in assignment &&
-      typeof assignment.connected_instance === 'string') {
-      assignment.connected_instance = projection.text(assignment.connected_instance)
-    }
-    // Preserve catalog source provenance; UAR normalizes this inline snapshot's
-    // revision before run inspection and tool admission consume it.
-    return artifact
-  }
-
   private definitionRevision(artifact: UarAgentArtifact): string {
     const value = structuredClone(artifact)
     delete value.extensions['uar.catalog']
@@ -570,16 +652,14 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
   }
 
   private async fetchCatalogAgent(agentId: string, projection: UarSecretProjection): Promise<UarAgentArtifact | null> {
-    const response = await application
-      .get('UarSidecarService')
-      .request(`/api/agents/${encodeURIComponent(agentId)}`, this.principal)
+    const response = await this.runtimeRequest(`/api/agents/${encodeURIComponent(agentId)}`)
     if (response.status === 404) return null
     if (!response.ok) throw await this.responseError(response, 'UAR catalog lookup failed', projection)
     return (await response.json()) as UarAgentArtifact
   }
 
   private async createCatalogAgent(artifact: UarAgentArtifact, projection: UarSecretProjection): Promise<UarAgentArtifact> {
-    const response = await application.get('UarSidecarService').request('/api/agents', this.principal, {
+    const response = await this.runtimeRequest('/api/agents', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(artifact)
@@ -594,13 +674,11 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
     expectedRevision: string,
     projection: UarSecretProjection
   ): Promise<UarAgentArtifact> {
-    const response = await application
-      .get('UarSidecarService')
-      .request(`/api/agents/${encodeURIComponent(agentId)}`, this.principal, {
-        method: 'PUT',
-        headers: { 'content-type': 'application/json', 'if-match': `"${expectedRevision}"` },
-        body: JSON.stringify(artifact)
-      })
+    const response = await this.runtimeRequest(`/api/agents/${encodeURIComponent(agentId)}`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json', 'if-match': `"${expectedRevision}"` },
+      body: JSON.stringify(artifact)
+    })
     if (response.status === 409) {
       throw new Error(
         `UAR catalog agent "${agentId}" changed while The Boss was updating it; reload and resolve the conflict`
@@ -632,7 +710,43 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
     }
   }
 
+  private catalogOwnedAssignment(artifact: UarAgentArtifact): ResolvedUarModelAssignment {
+    const selection = artifact.policy.provider.default
+    return {
+      source: 'uar',
+      providerId: selection.provider,
+      modelId: selection.model,
+      providerName: selection.provider,
+      modelName: selection.model,
+      effectiveIdentity: `${selection.provider}/${selection.model}`,
+      connectedInstance: 'Universal Agent Runtime'
+    }
+  }
+
+  private hasCompletedSourceRun(sourceRunId: string): boolean {
+    const completed = this.loadSessionMessages().some(
+      (message) =>
+        message.role === 'assistant' &&
+        (message.status === 'success' ||
+          (message.status === 'paused' && !(message.data.parts ?? []).some((part) => isToolUIPart(part)))) &&
+        message.runtimeResumeToken === this.input.resumeToken &&
+        !(message.data.parts ?? []).some(
+          (part) => isToolUIPart(part) && !['output-available', 'output-error', 'output-denied'].includes(part.state)
+        )
+    )
+    if (!completed) return false
+    return !uarApprovalLifecycleStore.snapshot(this.input.sessionId).some(
+      (admission) =>
+        (admission.rootRunId === sourceRunId || admission.executingRunId === sourceRunId) &&
+        !['succeeded', 'failed', 'denied', 'cancelled', 'invalidated'].includes(admission.state)
+    )
+  }
+
   private loadHistory(excludeMessageId: string): UarHistoryMessage[] {
+    return buildUarHostHistory(this.loadSessionMessages(), excludeMessageId)
+  }
+
+  private loadSessionMessages(): AgentSessionMessageEntity[] {
     const newestFirst: AgentSessionMessageEntity[] = []
     let cursor: string | undefined
     do {
@@ -644,8 +758,7 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
       cursor = page.nextCursor
     } while (cursor && newestFirst.length < HISTORY_LIMIT)
 
-    const chronological = newestFirst.slice(0, HISTORY_LIMIT).reverse()
-    return buildUarHostHistory(chronological, excludeMessageId)
+    return newestFirst.slice(0, HISTORY_LIMIT).reverse()
   }
 
   private async resolveSkillIds(agentId: string): Promise<string[]> {
@@ -708,10 +821,16 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
           skillIds,
           linkedChannel,
           application.get('PreferenceService').get('app.browser.agent_control.enabled'),
-          [...(this.input.knowledgeBaseIds ?? [])].sort()
+          [...(this.input.knowledgeBaseIds ?? [])].sort(),
+          this.placement?.instanceId
         ])
       )
       .digest('hex')
+  }
+
+  private runtimeRequest(pathname: string, init: RequestInit = {}): Promise<Response> {
+    if (!this.endpoint) return Promise.reject(new Error('UAR session placement is unavailable'))
+    return application.get('UarSidecarService').requestInstance(this.endpoint, pathname, this.principal, init)
   }
 
   private async responseError(response: Response, prefix: string, projection: UarSecretProjection): Promise<Error> {

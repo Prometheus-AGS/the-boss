@@ -64,6 +64,9 @@ files:
   - "!node_modules/@tavily/core/node_modules/js-tiktoken"
   - "!node_modules/pdf-parse/lib/pdf.js/{v1.9.426,v1.10.88,v2.0.550}"
   - "!node_modules/mammoth/{mammoth.browser.js,mammoth.browser.min.js}"
+  - "!**/node_modules/better-sqlite3/{bin,deps,src}/**"
+  - "!**/node_modules/better-sqlite3/build/{Debug,Release/obj}/**"
+  - "!**/node_modules/{selection-hook,@earendil-works/pi-coding-agent}/docs/**"
   # node-gyp-build prefers build/Release over prebuilds/, so ship the prebuilds and drop the
   # host-arch rebuild — a cross-built arm64 package would otherwise load the x86-64 binary (#20530).
   - "!node_modules/selection-hook/build/**"
@@ -80,6 +83,7 @@ files:
   - "resources/**/*" # include all files in resources, and unpack them from asar for runtime access
   - "!resources/prometheus-skills-mini/**" # ship the complete prepared payload below
   - "!resources/devtools/**" # dev-only extensions are loaded from source in development
+  - "node_modules/@deepseek-ai/dsh-sandbox-windows-acl/assets/**"
 asarUnpack:
   - resources/**
   - "!resources/devtools/**"
@@ -96,7 +100,16 @@ asarUnpack:
   - "node_modules/@koromix/koffi-*/**"
   - "node_modules/@deepseek-ai/dsh-sandbox-windows-acl/**"
   - "node_modules/@deepseek-ai/dsh-win32-process/**"
-  - "node_modules/@deepseek-ai/node-addon-landlock-run*/**"
+  - "node_modules/@deepseek-ai/dsh-lazy-require/**"
+  - "node_modules/@deepseek-ai/dsh-subprocess/**"
+  - "node_modules/@deepseek-ai/dsh-skill/**"
+  - "node_modules/@deepseek-ai/dsh-scope/**"
+  - "node_modules/@deepseek-ai/dsh-util-values/**"
+  - "node_modules/@deepseek-ai/cordis/**"
+  - "node_modules/@deepseek-ai/cosmokit/**"
+  - "node_modules/@deepseek-ai/schemastery/**"
+  - "node_modules/yaml/**"
+  - "node_modules/@deepseek-ai/node-addon-system*/**"
   - "node_modules/@anthropic-ai/claude-agent-sdk-*/**" # native CLI binary must live on disk to be spawned
   - "node_modules/@silvia-odwyer/photon-node/**" # pi SDK WASM dep: photon_rs.js does fs.readFileSync(__dirname/photon_rs_bg.wasm)
   - "node_modules/@aiany/sqlite-vec-*/**" # sqlite-vec extension (.dylib/.so/.dll) is dlopen'd at runtime — must live on disk
@@ -196,30 +209,22 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.4 - Agent inference and integration reliability
+    The Boss 2.2.30 - Durable approval history after runtime restart
 
-    - [Agents] Include the native Claude Code executable and verify its presence in each macOS and Windows installer.
-    - [Compass] Continue indexing very large projects without community clustering when its node limit is reached.
-    - [Settings] Show localized integration operation results and actionable secret-storage errors.
-
-    - [UAR] Package the supervised Universal Agent Runtime sidecar for Windows x64 and Apple Silicon, with configurable port fallback, visible listening status, dedicated administration, restart recovery, and operational diagnostics.
-    - [Storage] Let UAR use embedded storage or a configured SurrealDB service, including existing installations discovered outside The Boss.
-    - [Services] Show durable progress, results, recovery actions, cancellation, and complete logs for Docker, SurrealDB, surreal-memory-server, and liter-llm operations.
-    - [Compass] Add per-project enablement, indexing, drift detection, update controls, isolated graphs, and streaming project logs.
-    - [Models] Add liter-llm provider and model catalogs, editable connections, role assignments, configuration diagnostics, and gateway model refresh.
-    - [Skills] Bundle the complete pinned Prometheus mini runtime, Compass skills, OpenSpec, Prometheus, pk, Node.js, and their required assets.
+    - [UAR] Preserve completed conversation history when admitting a new turn after runtime restart; interrupted execution retains its explicit recovery path.
+    - [UAR] Admit fresh input after a tool-free cancelled conversation survives a runtime restart; unresolved tool effects remain on explicit recovery.
+    - [UAR] Preserve scoped approval and effect history after a finished run loses its process-local events; old approvals stay non-actionable.
+    - [BossFang] Permit scoped model discovery through the selected UAR instance without sharing the host launch token.
+    - [Runtime] Resolve gateway alias context capacity from its captured model identity while retaining explicitly configured limits.
+    - [Diagnostics] Retain the static context-budget failure code in private runtime diagnostics.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.4 - 智能体推理与集成可靠性
+    The Boss 2.2.30 - 运行时重启后的持久审批历史
 
-    - [智能体] 在每个 macOS 和 Windows 安装包中包含 Claude Code 原生可执行文件，并验证其存在。
-    - [Compass] 当社区聚类达到节点上限时，继续为大型项目建立无聚类代码索引。
-    - [设置] 显示本地化的集成操作结果和可采取措施的凭据存储错误。
-
-    - [UAR] 为 Windows x64 和 Apple 芯片打包受监管的通用智能体运行时辅助进程，并提供可配置端口回退、可见监听状态、独立管理、重启恢复和运行诊断。
-    - [存储] UAR 可使用嵌入式存储或已配置的 SurrealDB 服务，包括在 The Boss 外部发现的现有安装。
-    - [服务] Docker、SurrealDB、surreal-memory-server 和 liter-llm 操作显示持久进度、结果、恢复操作、取消功能和完整日志。
-    - [Compass] 新增按项目启用、索引、漂移检测、更新控制、独立图数据库和项目流式日志。
-    - [模型] 新增 liter-llm 服务商与模型目录、可编辑连接、角色分配、配置诊断和网关模型刷新。
-    - [技能] 打包完整且锁定版本的 Prometheus mini 运行环境、Compass 技能、OpenSpec、Prometheus、pk、Node.js 及其所需资源。
+    - [UAR] 运行时重启后，接纳新一轮对话时保留已完成的会话历史；中断的执行仍使用明确的恢复路径。
+    - [UAR] 取消不涉及工具的对话并重启运行时后，允许通过保留的历史接纳新输入；未确定的工具操作仍须显式恢复。
+    - [UAR] 已结束的运行丢失进程内事件后，仍可查看限定范围的审批和操作历史；旧审批不可重新执行。
+    - [BossFang] 允许通过选定的 UAR 实例在授权范围内发现模型，不共享宿主启动令牌。
+    - [运行时] 根据捕获的模型标识解析网关别名的上下文容量，同时保留显式配置的限制。
+    - [诊断] 在私有运行时诊断中保留静态的上下文预算失败代码。
     <!--LANG:END-->

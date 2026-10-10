@@ -9,7 +9,7 @@ import { application } from '@application'
 import { loggerService } from '@logger'
 import { installDevtoolsExtensions } from '@main/core/devtools'
 import { BaseService, Emitter, type Event, Injectable, Phase, ServicePhase } from '@main/core/lifecycle'
-import { isLinux, isMac, isWin } from '@main/core/platform'
+import { isLinux, isLinuxWayland, isMac, isWin } from '@main/core/platform'
 import { isAppRendererUrl } from '@main/core/security/validateSender'
 import { WindowType } from '@main/core/window/types'
 import { isMiniAppPartition } from '@main/features/miniApp/runtime/partition'
@@ -28,7 +28,12 @@ import { IpcChannel } from '@shared/IpcChannel'
 import type { MainWindowInitData } from '@shared/types/mainWindow'
 import { normalizeBrowserEntryUrl, normalizeBrowserUrl } from '@shared/utils/browserUrl'
 import { HTML_ARTIFACT_PREVIEW_DATA_URL_PREFIX, HTML_ARTIFACT_PREVIEW_PARTITION } from '@shared/utils/htmlArtifact'
-import { getWebviewPartition, getWebviewSecurityProfile, WebviewSecurityProfile } from '@shared/utils/webviewSecurity'
+import {
+  BOSSFANG_DASHBOARD_PARTITION,
+  getWebviewPartition,
+  getWebviewSecurityProfile,
+  WebviewSecurityProfile
+} from '@shared/utils/webviewSecurity'
 import { MIN_WINDOW_HEIGHT, MIN_WINDOW_WIDTH } from '@shared/utils/window'
 
 import iconPath from '../../../build/icon.png?asset'
@@ -430,11 +435,14 @@ export class MainWindowService extends BaseService {
 
     mainWindow.webContents.on('will-attach-webview', (event, webPreferences, params) => {
       const securityProfile = getWebviewSecurityProfile(params.partition ?? '')
-      // Mini app partitions carry their own gate (installMiniAppWebviewHost) and the
-      // shared `persist:webview` lockdown lives in WebviewService.attachWebviewPreload.
+      // Installed mini apps carry their own gate. The dedicated BossFang guest uses
+      // this host's hardened preferences and its loopback-only session request gate.
       if (!securityProfile) {
-        if (!isMiniAppPartition(params.partition)) event.preventDefault()
-        return
+        if (isMiniAppPartition(params.partition)) return
+        if (params.partition !== BOSSFANG_DASHBOARD_PARTITION) {
+          event.preventDefault()
+          return
+        }
       }
       if (securityProfile === WebviewSecurityProfile.MiniApp) return
 
@@ -452,7 +460,10 @@ export class MainWindowService extends BaseService {
         return
       }
 
-      if (securityProfile === WebviewSecurityProfile.HtmlArtifactPreview) {
+      if (
+        securityProfile === WebviewSecurityProfile.HtmlArtifactPreview ||
+        params.partition === BOSSFANG_DASHBOARD_PARTITION
+      ) {
         delete webPreferences.preload
       } else {
         webPreferences.preload = application.getPath('feature.webview.preload_file')
@@ -468,6 +479,10 @@ export class MainWindowService extends BaseService {
     })
 
     mainWindow.webContents.on('did-attach-webview', (_, webContents) => {
+      if (webContents.session === session.fromPartition(BOSSFANG_DASHBOARD_PARTITION)) {
+        application.get('BossFangService').attachDashboardGuest(webContents)
+        return
+      }
       if (
         webContents.session === agentBrowserSession ||
         webContents.session === agentDevSession ||
@@ -766,8 +781,10 @@ export class MainWindowService extends BaseService {
        * When the window is visible but covered by other windows, simply calling show() and focus()
        * is not enough to bring it to the front. We need to hide it first, then show it again.
        * This mimics the "close to tray and reopen" behavior which works correctly.
+       * X11 only: on Wayland hide() destroys the xdg_toplevel and the re-created one is
+       * denied activation, so the window ends up buried; plain show()+focus() works there.
        */
-      if (isLinux && mainWindow.isVisible() && !mainWindow.isFocused()) {
+      if (isLinux && !isLinuxWayland && mainWindow.isVisible() && !mainWindow.isFocused()) {
         mainWindow.hide()
         setImmediate(() => {
           // Re-check through the field — the window may have been destroyed
@@ -782,18 +799,9 @@ export class MainWindowService extends BaseService {
         return
       }
 
-      /**
-       * About setVisibleOnAllWorkspaces
-       *
-       * [macOS] Known Issue
-       *  setVisibleOnAllWorkspaces true/false will NOT bring window to current desktop in Mac (works fine with Windows)
-       *  AppleScript may be a solution, but it's not worth
-       *
-       * [Linux] Known Issue
-       *  setVisibleOnAllWorkspaces 在 Linux 环境下（特别是 KDE Wayland）会导致窗口进入"假弹出"状态
-       *  因此在 Linux 环境下不执行这两行代码
-       */
-      if (!isLinux) {
+      // Windows uses this toggle to raise covered windows. On macOS it briefly hides the window
+      // and Dock while transforming the process type; Linux compositors also handle it poorly.
+      if (isWin) {
         mainWindow.setVisibleOnAllWorkspaces(true)
       }
 
@@ -810,7 +818,7 @@ export class MainWindowService extends BaseService {
 
       mainWindow.show()
       mainWindow.focus()
-      if (!isLinux) {
+      if (isWin) {
         mainWindow.setVisibleOnAllWorkspaces(false)
       }
       this.pushMainWindowInitData(initData)

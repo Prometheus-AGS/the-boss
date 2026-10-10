@@ -45,6 +45,18 @@ export function identifier(value: unknown, context: string): string {
   return value;
 }
 
+/** Codex agent names are underscore identifiers: `role-id` becomes `role_id`. */
+export const CODEX_NAME = /^[a-z0-9_]{1,128}$/;
+export const codexName = (value: unknown): string =>
+  typeof value === 'string' ? value.replace(/-/g, '_') : '';
+
+/** Minimal per-role MEMORY.md for Claude `memory: local`; lessons arrive via SubagentStart, not this file. */
+export function roleMemoryIndex(team: Team, role: Role): string {
+  return `# ${role.id} (${team.id}) - local agent memory\n\n` +
+    `Role-private notes for ${role.id}. Keep this index under 4 KB.\n` +
+    `Team and role lessons are delivered at SubagentStart from the learning store; do not copy them here.\n`;
+}
+
 export function model(team: Team, role: Role): string | undefined {
   return role.modelPolicy?.model ?? team.modelPolicy?.model;
 }
@@ -59,7 +71,7 @@ export function prompt(team: Team, role: Role): string {
 
 export interface ExportContext {
   add(path: string, content: string): void;
-  claimName(name: unknown): string;
+  claimName(name: unknown, pattern?: RegExp): string;
   diagnostics: string[];
   instructions: string[];
 }

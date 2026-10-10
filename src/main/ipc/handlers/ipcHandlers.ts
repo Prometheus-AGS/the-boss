@@ -5,6 +5,7 @@ import { aiHandlers } from './ai'
 import { apiGatewayHandlers } from './apiGateway'
 import { appHandlers } from './app'
 import { backupHandlers } from './backup'
+import { bossFangHandlers } from './bossFang'
 import { binaryHandlers } from './binary'
 import { browserHandlers } from './browser'
 import { channelHandlers } from './channel'
@@ -29,6 +30,7 @@ import { notificationHandlers } from './notification'
 import { oauthHandlers } from './oauth'
 import { openclawHandlers } from './openclaw'
 import { ovmsHandlers } from './ovms'
+import { pdfjsHandlers } from './pdfjs'
 import { printHandlers } from './print'
 import { profileHandlers } from './profile'
 import { prometheusHandlers } from './prometheus'
@@ -59,6 +61,7 @@ export const ipcHandlers: IpcHandlersFor<IpcRequestSchemas> = {
   ...apiGatewayHandlers,
   ...appHandlers,
   ...backupHandlers,
+  ...bossFangHandlers,
   ...binaryHandlers,
   ...browserHandlers,
   ...channelHandlers,
@@ -84,6 +87,7 @@ export const ipcHandlers: IpcHandlersFor<IpcRequestSchemas> = {
   ...oauthHandlers,
   ...openclawHandlers,
   ...ovmsHandlers,
+  ...pdfjsHandlers,
   ...printHandlers,
   ...profileHandlers,
   ...providerHandlers,

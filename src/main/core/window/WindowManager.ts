@@ -17,6 +17,7 @@ import {
   ServicePhase
 } from '@main/core/lifecycle'
 import { isDev, isMac } from '@main/core/platform'
+import { isAppRendererUrl } from '@main/core/security/validateSender'
 import { applyWindowBehavior, BehaviorController } from '@main/core/window/behavior'
 import { applyWindowQuirks } from '@main/core/window/quirks'
 import type { WindowType } from '@main/core/window/types'
@@ -61,6 +62,7 @@ type WarmupOp =
   | 'pool-release'
   | 'pool-release-destroy-disabled'
   | 'pool-release-destroy-overcap'
+  | 'pool-release-destroy-fullscreen'
   | 'pool-decay'
   | 'pool-lazy-backfill'
   | 'pool-suspend'
@@ -979,6 +981,16 @@ export class WindowManager extends BaseService {
     // registry-declared defaults rather than the previous consumer's pin.
     this.behavior.clearForWindow(windowId)
 
+    // Never hide a fullscreen window: on macOS `orderOut:` orphans its fullscreen Space as an
+    // undismissable black screen (electron#20263). Drop the instance — standby replenishes it.
+    if (!managed.window.isDestroyed() && managed.window.isFullScreen()) {
+      this.destroyWindow(managed.window)
+      this.initDataStore.delete(windowId)
+      this.logWarmupEvent('pool-release-destroy-fullscreen', type, state, { windowId })
+      this.updateDockVisibility()
+      return
+    }
+
     const recycleMax = poolConfig.recycleMaxSize ?? 0
     const standby = poolConfig.standbySize ?? 0
 
@@ -1365,14 +1377,14 @@ export class WindowManager extends BaseService {
     window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
 
     window.webContents.on('will-navigate', (event, url) => {
+      if (isAppRendererUrl(url)) return
       if (url.startsWith('http:') || url.startsWith('https:')) {
         const currentURL = window.webContents.getURL()
         if (currentURL && new URL(url).origin !== new URL(currentURL).origin) {
           event.preventDefault()
         }
       } else {
-        // Non-web schemes (file:, custom protocols) have no legitimate in-window
-        // navigation path; deny like the window-open handler denies non-http(s) popups.
+        // Non-web navigation outside the trusted app root remains denied.
         event.preventDefault()
         logger.warn(`Blocked navigation to untrusted URL scheme: ${url}`)
       }
@@ -1618,6 +1630,9 @@ export class WindowManager extends BaseService {
         const metadata = getWindowTypeMetadata(type)
         if (metadata.lifecycle === 'pooled') {
           if (state.suspended) return // let native close proceed
+          // A fullscreen window is closed natively, never hidden — the same rule as
+          // releaseToPool()'s fullscreen guard; cancelling here would orphan its Space.
+          if (window.isFullScreen()) return
           event.preventDefault()
           if (state.idle.includes(windowId)) return // already idle
           const managed = this.windows.get(windowId)

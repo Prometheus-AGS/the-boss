@@ -3,10 +3,10 @@ import { agentService } from '@data/services/AgentService'
 import { mcpServerService } from '@data/services/McpServerService'
 import { resolveMountedMcpServers } from '@main/ai/agents/builtin/builtinAgentCapabilities'
 import { resolveLinkedNotifyChannel } from '@main/ai/runtime/agentMcpServers'
-import { findBuiltinToolPolicy } from '@main/ai/toolApproval/builtinToolPolicy'
+import { listBuiltinToolPolicies } from '@main/ai/toolApproval/builtinToolPolicy'
 
 import type { UarHostToolDisposition } from './UarHostToolAdmission'
-import { toUarToolName } from './uarToolNames'
+import { sanitizeUarProviderToolName, toUarToolName } from './uarToolNames'
 
 export function resolveUarHostToolDisposition(
   sessionId: string,
@@ -24,7 +24,9 @@ export function resolveUarHostToolDisposition(
     browserEnabled: application.get('PreferenceService').get('app.browser.agent_control.enabled'),
     channelLinked: linkedChannel !== null
   })
-  const builtin = findBuiltinToolPolicy(`mcp__${toolName}`, mountedServers)
+  const builtin = listBuiltinToolPolicies({ mountedServers }).find(
+    (entry) => sanitizeUarProviderToolName(`${entry.serverName}__${entry.toolName}`) === toolName
+  )
   if (builtin?.approval === 'auto') return 'auto'
   if (builtin?.approval === 'required') {
     return mode === 'bypassPermissions' && builtin.bypassApproval === 'lift' ? 'auto' : 'ask'
@@ -35,9 +37,14 @@ export function resolveUarHostToolDisposition(
 }
 
 function isManagedFilesystemTool(toolName: string): boolean {
+  const catalog = application.get('McpCatalogService')
   return mcpServerService
     .list({})
     .items.some(
-      (server) => server.reference?.startsWith('filesystem:') && toolName.startsWith(toUarToolName(`${server.id}__`))
+      (server) =>
+        server.reference?.startsWith('filesystem:') &&
+        catalog
+          .listTools(server.id, { includeDisabled: false })
+          .some((tool) => sanitizeUarProviderToolName(`${server.id}__${tool.name}`) === toolName)
     )
 }

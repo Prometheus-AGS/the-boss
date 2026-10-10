@@ -15,3 +15,5 @@ export function encodeUarProviderToolName(rawName: string): string {
   }
   return name
 }
+
+export const sanitizeUarProviderToolName = encodeUarProviderToolName

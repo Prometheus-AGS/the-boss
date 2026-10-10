@@ -379,3 +379,100 @@ Use a local filesystem with reliable exclusive creation and same-directory atomi
 There is no automatic lock timeout, retry takeover, or stale-lock stealing. A crash may leave the lock behind. To recover, inspect its recorded `pid`, `at`, and `token`; verify no writer still owns it, including another session, then remove only that abandoned lock manually. Do not remove a live writer's lock. Inspect current state and any uncertain external KBD/memory operation before retrying. Temporary files are not authority and must not be renamed over state as an improvised recovery procedure.
 
 Source contracts: [CLI dispatcher](../runtime/src/cli.mts), [state transactions](../runtime/src/state.mts), [task actions](../runtime/src/state-tasks.mts), [handoff operations](../runtime/src/handoff.mts), [KBD completion](../runtime/src/state-kbd.mts), and [boundary validation](../runtime/src/state-validation.mts).
+
+## Selected handoff provenance (C15.3)
+
+New `handoff-create` packets retain schemaVersion 1 and always add optional,
+versioned `provenance`. Older packets without that field remain readable and
+immutable. The selection is inside `handoff.provenance`; it contains requests
+to observe existing records, not caller-supplied observations:
+
+```json
+{
+  "state": "/private/team-state.json",
+  "expectedRevision": 4,
+  "cwd": "/private/source-workspace",
+  "handoff": {
+    "taskId": "coding-task",
+    "owner": "implementer",
+    "expectedTaskRevision": 1,
+    "toOwner": "reviewer",
+    "toHarness": "codex",
+    "context": "Continue from the selected checkpoint.",
+    "evidence": ["Existing operation receipt"],
+    "remaining": ["Inspect changes before continuing"],
+    "memoryRefs": ["Existing human-readable reference"],
+    "provenance": {
+      "sourceFiles": ["src/feature.ts"],
+      "evidenceFiles": ["artifacts/operation.json"],
+      "karpathyFiles": ["/private/project/.prometheus/progress-receipt.json"],
+      "memoryIds": ["existing-outbox-entry-id"],
+      "kbdCli": "/configured/prometheus",
+      "kbdPath": "/private/canonical-project"
+    }
+  }
+}
+```
+
+All selection fields are optional. Omitted lists are empty. File paths resolve
+against `cwd` and are stored as absolute private references; destination inspection
+uses those exact paths, without copying or relocating files. Capture stores path,
+observation (`observed | missing | unknown`), byte length and SHA-256 only. A
+missing path has null length/hash; an unreadable file remains unknown. Dirty Git
+state still includes untracked files. Selected hashes describe the actual current
+bytes, including uncommitted bytes; they do not certify a build or feature.
+
+The canonical snapshot stores the linked five-field identity, read path,
+`observation`, canonical `revision`, `eventId`, `taskStatus`,
+`receiptSha256` and `reason`. Only an explicitly supplied `kbdCli` invokes
+the existing read-only `kbd --path <kbdPath> status --json` contract. The
+canonical path defaults to `cwd`; it may differ from the source workspace.
+Absent linkage/reader or reader/identity failure stays unknown with null observed
+fields. No completion command, hook or canonical mutation runs during capture.
+
+Selected memory IDs resolve only against this existing state's outbox. Each
+snapshot contains ID, queued/published status, project/team identity, scope,
+normalized content hash, provenance hash, projected canonical identity and
+publication identity. Publication contains outcome, publication key, remote-ID
+hash, receipt hash and uncertainty only. No memory content or arbitrary provenance,
+receipt body, credentials or grants are copied. Missing IDs remain unknown.
+Scope retains the existing access boundary: a selected role-private reference does
+not grant another role access, and a publication receipt does not prove server
+authorization or exactly-once delivery. Capture never publishes memory.
+
+Karpathy selections are hashes of existing log/event/receipt files. They remain
+references to their actual historical boundary; capture neither records progress
+nor treats a log as completion authority.
+
+### Destination inspection
+
+```text
+node <agent-team-creator>/scripts/cli.mjs handoff-inspect --input inspection.json
+```
+
+The request is `{state,id,cwd,kbdCli?,kbdPath?}`. It needs no expected revision
+because it does not mutate anything. Supply the reader again for a fresh canonical
+observation; its path defaults to the captured canonical path.
+
+The response contains `id,taskId,taskRevision,legacy,ownership,captured,current`.
+`ownership` reports current owner/harness/revision, acceptedAt and whether the
+original acceptance receipt is stale. Legacy packets return `captured:null` and
+`current:null`. Other responses preserve the captured provenance and expose
+current `sources,evidence,karpathy,memory` comparison rows and one canonical row.
+Each row is `{captured,current,comparison}`, with comparison
+`matches | changed | missing | unobserved`. Unknown capture/current observations
+remain unobserved. Inspection outputs metadata only, never prompts or memory bodies.
+The existing create/accept/status commands still return their existing full state,
+which may contain private task context and outbox content; do not publish that output.
+
+Inspect current references and destination capabilities before explicitly accepting.
+A mismatch reports changed context; it neither edits the saved packet nor transfers
+ownership. `handoff-accept` retains its original request shape, atomic ownership
+transfer, destination check, stale revision refusal and idempotent unchanged receipt.
+Neither inspection nor acceptance marks canonical execution complete.
+
+Full alone also supports `team-request`. Its local handoff route accepts the same
+selection as top-level `provenance`, retains the original snapshot on repeated
+requests, and embeds its metadata in the saved/returned prompt. Its issue route
+cannot carry this structured packet and refuses a supplied provenance selection.
+This does not add team-request to mini or qualify arbitrary external harnesses.

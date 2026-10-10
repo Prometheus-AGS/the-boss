@@ -15,6 +15,7 @@ import { AgentSessionEditError } from '@data/services/AgentSessionEditError'
 import { AgentSessionDeliveryRoutingError, agentSessionMessageService } from '@data/services/AgentSessionMessageService'
 import { agentSessionService } from '@data/services/AgentSessionService'
 import type { NotifyChannel } from '@main/ai/runtime/agentMcpServers'
+import { modelSnapshotForUarAssignment } from '@main/ai/runtime/uar'
 import { topicNamingService } from '@main/services/TopicNamingService'
 import { DataApiErrorFactory, ErrorCode, isDataApiError } from '@shared/data/api/errors'
 import type { AgentSessionMessageEntity } from '@shared/data/api/schemas/agentSessionMessages'
@@ -162,7 +163,14 @@ export class AgentChatContextProvider implements ChatContextProvider {
         name: agent.name,
         // Normalized effective avatar (mirrors renderer `getAgentAvatar`).
         emoji: agent.configuration?.avatar?.trim() || '🤖',
-        model: { id: rawModelId, name: agent.modelName ?? rawModelId, provider: providerId }
+        model:
+          agent.type === 'uar' && agent.configuration?.uar_catalog_link?.authority !== 'catalog'
+            ? modelSnapshotForUarAssignment(agent.configuration?.uar_model_assignment, {
+                id: rawModelId,
+                name: agent.modelName ?? rawModelId,
+                provider: providerId
+              })
+            : { id: rawModelId, name: agent.modelName ?? rawModelId, provider: providerId }
       },
       userMessageId: deliveryMessage?.id ?? uuidv7(),
       userMessageParts: deliveryMessage?.data.parts ?? req.userMessageParts ?? [],
@@ -304,7 +312,8 @@ export class AgentChatContextProvider implements ChatContextProvider {
     subscriber: StreamListener,
     req: MainDispatchRequest,
     authority: AgentSessionTurnAuthority,
-    ctx?: DispatchContext
+    ctx?: DispatchContext,
+    onPersist?: (tx: DbOrTx, messages: { assistantMessageId: string; userMessageId: string }) => void
   ): Promise<PreparedDispatch> {
     const validated = await this.validateDispatch(req, authority)
     const runtime = application.get('AgentSessionRuntimeService')
@@ -367,9 +376,12 @@ export class AgentChatContextProvider implements ChatContextProvider {
       }
     }
 
-    const persisted = application
-      .get('DbService')
-      .withWriteTx((tx) => this.persistDispatchTx(tx, validated, ctx?.expectedAgentId))
+    const persisted = application.get('DbService').withWriteTx((tx) => {
+      ctx?.beforePersist?.()
+      const reserved = this.persistDispatchTx(tx, validated, ctx?.expectedAgentId)
+      onPersist?.(tx, { assistantMessageId: reserved.assistantMessageId, userMessageId: reserved.userMessage.id })
+      return reserved
+    })
     return this.activateDispatch(persisted, subscriber)
   }
 }

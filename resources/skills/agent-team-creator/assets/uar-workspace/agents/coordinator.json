@@ -1,0 +1,179 @@
+{
+  "profile": "urn:prometheus:uar:collaboration:0.1.0-draft.2",
+  "kind": "AgentDefinition",
+  "id": "urn:prometheus:mini:example:agent:coordinator",
+  "version": "1.0.0",
+  "provenance": {
+    "source": "UAR collaboration draft.2 contract checkpoint fixtures",
+    "authors": [
+      "Prometheus-AGS"
+    ]
+  },
+  "requiredCapabilities": [
+    "collaboration_definition_packages_v2"
+  ],
+  "extensions": {
+    "example.optional": {
+      "required": false,
+      "value": {
+        "retained": true
+      }
+    }
+  },
+  "title": "Coordinator",
+  "role": "coordinator",
+  "whenToUse": "Use for the coordinator responsibility in the example team.",
+  "instructions": "Complete the bounded coordinator responsibility and return the declared output.",
+  "input": {
+    "type": "object",
+    "properties": {
+      "brief": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "brief"
+    ],
+    "additionalProperties": false
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "artifact": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "artifact"
+    ],
+    "additionalProperties": false
+  },
+  "skills": [
+    {
+      "id": "urn:uar:skill:review",
+      "version": "2.1.0",
+      "digest": "sha256:3b3816290748ea6b1f71c43c34e4043e2aed44ff4b7a462e7b212bf88cf0b65f",
+      "required": true,
+      "config": {
+        "mode": "strict",
+        "output": "json"
+      },
+      "entrypoint": "review",
+      "requiredTools": [
+        "read-artifact"
+      ]
+    }
+  ],
+  "models": [
+    {
+      "role": "primary",
+      "capabilities": [
+        "text",
+        "tool-calling"
+      ],
+      "preferredAliases": [
+        "team-default"
+      ]
+    }
+  ],
+  "permittedChildren": [
+    {
+      "id": "urn:prometheus:mini:example:agent:child",
+      "version": "1.0.0"
+    }
+  ],
+  "context": {
+    "mode": "selected",
+    "artifacts": [
+      "task-input"
+    ],
+    "history": "authorized-summary",
+    "memoryScopes": []
+  },
+  "requestedLimits": {
+    "concurrentTurns": 1,
+    "maxMembers": 2,
+    "maxDepth": 1,
+    "maxPendingTasks": 8
+  },
+  "sourceIdentity": {
+    "profile": "urn:prometheus:uar:agent-md:1.1",
+    "id": "urn:prometheus:mini:legacy:coordinator",
+    "version": "1.0.0",
+    "digest": "sha256:ae80029bfd3fff39253a18d76f5e628fcf6e8fcea8e22013a59bc2ef388f5ae2",
+    "revision": null
+  },
+  "renameMapping": {
+    "sourceId": "urn:prometheus:mini:legacy:coordinator",
+    "targetId": "urn:prometheus:mini:example:agent:coordinator",
+    "reason": "explicit-rename"
+  },
+  "authoredFields": [
+    "/metadata/id",
+    "/metadata/version",
+    "/skills/0",
+    "/model_requirements",
+    "/prompt_dialect",
+    "/rag_configuration",
+    "/context_strategy",
+    "/api_harness"
+  ],
+  "modelRequirements": {
+    "required": true,
+    "value": {
+      "capabilities": [
+        "text",
+        "tool-calling"
+      ]
+    }
+  },
+  "promptDialect": {
+    "required": true,
+    "value": {
+      "id": "uar.prompt/plain-v1"
+    }
+  },
+  "ragConfiguration": {
+    "required": false,
+    "value": {
+      "mode": "disabled"
+    }
+  },
+  "contextStrategy": {
+    "required": true,
+    "value": {
+      "mode": "selected"
+    }
+  },
+  "apiHarness": {
+    "required": false,
+    "value": {
+      "id": "uar.ordinary-agent/1"
+    }
+  },
+  "legacySections": {
+    "skills": "review@2.1.0"
+  },
+  "sourceDescriptor": {
+    "metadata": {
+      "id": "urn:uar:legacy:reviewer",
+      "version": "1.0.0"
+    },
+    "skills": [
+      {
+        "id": "urn:uar:skill:review",
+        "version": "2.1.0",
+        "digest": "sha256:3b3816290748ea6b1f71c43c34e4043e2aed44ff4b7a462e7b212bf88cf0b65f",
+        "required": true,
+        "config": {
+          "mode": "strict",
+          "output": "json"
+        },
+        "entrypoint": "review",
+        "requiredTools": [
+          "read-artifact"
+        ]
+      }
+    ]
+  }
+}

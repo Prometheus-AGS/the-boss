@@ -3,11 +3,15 @@ import * as z from 'zod'
 import { application } from '@application'
 import { modelService } from '@data/services/ModelService'
 import { providerService } from '@data/services/ProviderService'
+import { resolveEffectiveEndpoint } from '@main/ai/provider/endpoint'
 import { readIntegrationConfig, readSecrets } from '@main/services/prometheus/integrationConfig'
+import { ENDPOINT_TYPE, type Model } from '@shared/data/types/model'
+import type { Provider } from '@shared/data/types/provider'
 import type { UarModelSourceSnapshot, UarProviderMutation } from '@shared/types/prometheusIntegration'
+import { uarExecutionProfileSchema } from '@shared/types/uarTeamProfiles'
 import { getRawModelId } from '@shared/utils/model'
 
-const providerResponseSchema = z.object({
+export const providerResponseSchema = z.object({
   default_id: z.string().nullable().optional(),
   providers: z.array(
     z.object({
@@ -19,6 +23,7 @@ const providerResponseSchema = z.object({
       models: z.array(
         z.object({
           id: z.string(),
+          pricing_identity: z.object({ provider_id: z.string(), model_id: z.string() }).nullish(),
           display_name: z.string().nullable().optional(),
           context_window: z.number().nullable().optional(),
           supports_vision: z.boolean(),
@@ -27,6 +32,7 @@ const providerResponseSchema = z.object({
           supports_structured_output: z.boolean(),
           supports_streaming: z.boolean(),
           max_output_tokens: z.number().nullable().optional(),
+          execution_profile: uarExecutionProfileSchema.nullish(),
           enabled: z.boolean()
         })
       ),
@@ -35,7 +41,19 @@ const providerResponseSchema = z.object({
     })
   )
 })
-const gatewayResponseSchema = z.object({ data: z.array(z.object({ id: z.string().min(1) })).default([]) })
+export const gatewayResponseSchema = z.object({ data: z.array(z.object({ id: z.string().min(1) })).default([]) })
+
+function isExecutableBossModel(provider: Provider, model: Model): boolean {
+  if (!model.isEnabled) return false
+  const endpoint = resolveEffectiveEndpoint(provider, model)
+  return (
+    Boolean(endpoint.baseUrl) &&
+    (endpoint.endpointType === ENDPOINT_TYPE.ANTHROPIC_MESSAGES ||
+      endpoint.endpointType === ENDPOINT_TYPE.OPENAI_CHAT_COMPLETIONS ||
+      endpoint.endpointType === ENDPOINT_TYPE.OPENAI_RESPONSES ||
+      endpoint.endpointType === ENDPOINT_TYPE.OLLAMA_CHAT)
+  )
+}
 
 function gatewayModelsEndpoint(endpoint: string): string {
   const url = new URL(endpoint)
@@ -58,8 +76,8 @@ async function responseBody(response: Response): Promise<unknown> {
  * presence flags before the result crosses IPC. */
 export async function readUarModelSources(): Promise<UarModelSourceSnapshot> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
-  const uarResponse = await sidecar.adminRequest('/api/uar/providers', {}, endpoint.generation)
+  const endpoint = await sidecar.resolveSelected()
+  const uarResponse = await sidecar.modelRequestInstance(endpoint, '/api/uar/providers')
   const uar = providerResponseSchema.parse(await responseBody(uarResponse))
   const config = readIntegrationConfig()
   const secrets = await readSecrets()
@@ -92,14 +110,16 @@ export async function readUarModelSources(): Promise<UarModelSourceSnapshot> {
         providers: bossProviders.map((provider) => ({
           id: provider.id,
           name: provider.name ?? provider.id,
-          credentialConfigured: provider.apiKeys.length > 0 || Boolean(provider.authOptional),
-          enabled: provider.isEnabled,
+          credentialConfigured:
+            provider.authType === 'api-key' &&
+            (provider.apiKeys.some((key) => key.isEnabled) || Boolean(provider.authOptional)),
+          enabled: provider.isEnabled && provider.authType === 'api-key',
           models: bossModels
             .filter((model) => model.providerId === provider.id)
             .map((model) => ({
               id: model.id,
               name: model.name ?? model.id,
-              enabled: model.isEnabled,
+              enabled: isExecutableBossModel(provider, model),
               effectiveIdentity: `${provider.id}/${getRawModelId(model)}`
             }))
         }))
@@ -128,7 +148,7 @@ export async function readUarModelSources(): Promise<UarModelSourceSnapshot> {
       },
       {
         source: 'uar',
-        instanceId: `uar:${endpoint.generation}`,
+        instanceId: endpoint.instanceId,
         instanceName: 'Universal Agent Runtime',
         connectedInstance: endpoint.baseUrl,
         operational: true,
@@ -146,6 +166,15 @@ export async function readUarModelSources(): Promise<UarModelSourceSnapshot> {
             name: model.display_name || model.id,
             enabled: model.enabled,
             effectiveIdentity: `${provider.id}/${model.id}`,
+            ...(model.pricing_identity
+              ? {
+                  pricingIdentity: {
+                    providerId: model.pricing_identity.provider_id,
+                    modelId: model.pricing_identity.model_id
+                  }
+                }
+              : {}),
+            ...(model.execution_profile ? { executionProfile: model.execution_profile } : {}),
             ...(model.context_window ? { contextWindow: model.context_window } : {}),
             supportsVision: model.supports_vision,
             supportsTools: model.supports_tools,
@@ -217,6 +246,12 @@ function providerPayload(input: UarProviderMutation): Record<string, unknown> {
       supports_structured_output: model.supportsStructuredOutput,
       supports_streaming: model.supportsStreaming,
       max_output_tokens: model.maxOutputTokens,
+      ...(model.pricingIdentity
+        ? {
+            pricing_identity: { provider_id: model.pricingIdentity.providerId, model_id: model.pricingIdentity.modelId }
+          }
+        : {}),
+      ...(model.executionProfile ? { execution_profile: model.executionProfile } : {}),
       enabled: model.enabled
     })),
     enabled: input.enabled,
@@ -227,40 +262,34 @@ function providerPayload(input: UarProviderMutation): Record<string, unknown> {
 
 export async function saveUarProvider(input: UarProviderMutation): Promise<UarModelSourceSnapshot> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
+  const endpoint = await sidecar.resolveSelected()
   const pathname = input.mode === 'create' ? '/api/uar/providers' : `/api/uar/providers/${encodeURIComponent(input.id)}`
-  const response = await sidecar.adminRequest(
-    pathname,
-    {
-      method: input.mode === 'create' ? 'POST' : 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(providerPayload(input))
-    },
-    endpoint.generation
-  )
+  const response = await sidecar.modelRequestInstance(endpoint, pathname, {
+    method: input.mode === 'create' ? 'POST' : 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(providerPayload(input))
+  })
   await responseBody(response)
   return readUarModelSources()
 }
 
 export async function deleteUarProvider(id: string): Promise<UarModelSourceSnapshot> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
-  const response = await sidecar.adminRequest(
-    `/api/uar/providers/${encodeURIComponent(id)}`,
-    { method: 'DELETE' },
-    endpoint.generation
-  )
+  const endpoint = await sidecar.resolveSelected()
+  const response = await sidecar.modelRequestInstance(endpoint, `/api/uar/providers/${encodeURIComponent(id)}`, {
+    method: 'DELETE'
+  })
   if (!response.ok) await responseBody(response)
   return readUarModelSources()
 }
 
 export async function setDefaultUarProvider(id: string): Promise<UarModelSourceSnapshot> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
-  const response = await sidecar.adminRequest(
+  const endpoint = await sidecar.resolveSelected()
+  const response = await sidecar.modelRequestInstance(
+    endpoint,
     `/api/uar/providers/${encodeURIComponent(id)}/default`,
-    { method: 'POST' },
-    endpoint.generation
+    { method: 'POST' }
   )
   if (!response.ok) await responseBody(response)
   return readUarModelSources()
@@ -271,16 +300,12 @@ export async function testUarProvider(
   modelId: string
 ): Promise<{ ok: boolean; providerId: string; modelId: string; latencyMs: number }> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
-  const response = await sidecar.adminRequest(
-    `/api/uar/providers/${encodeURIComponent(id)}/test`,
-    {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ model: modelId })
-    },
-    endpoint.generation
-  )
+  const endpoint = await sidecar.resolveSelected()
+  const response = await sidecar.modelRequestInstance(endpoint, `/api/uar/providers/${encodeURIComponent(id)}/test`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ model: modelId })
+  })
   const body = z
     .object({
       ok: z.boolean(),

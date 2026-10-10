@@ -1,0 +1,108 @@
+{
+  "profile": "urn:prometheus:uar:collaboration:0.1.0-draft.2",
+  "kind": "TeamDefinition",
+  "id": "urn:prometheus:mini:example:team:root",
+  "version": "1.0.0",
+  "provenance": {
+    "source": "UAR collaboration draft.2 contract checkpoint fixtures",
+    "authors": [
+      "Prometheus-AGS"
+    ]
+  },
+  "requiredCapabilities": [],
+  "extensions": {},
+  "title": "Root collaboration team",
+  "purpose": "Demonstrate multiple agents, a permitted child, a nested subteam, and a workflow.",
+  "members": [
+    {
+      "role": "coordinator",
+      "kind": "agent",
+      "definition": {
+        "id": "urn:prometheus:mini:example:agent:coordinator",
+        "version": "1.0.0"
+      },
+      "min": 1,
+      "max": 1,
+      "responsibility": "Coordinate the bounded workflow."
+    },
+    {
+      "role": "research",
+      "kind": "team",
+      "definition": {
+        "id": "urn:prometheus:mini:example:team:subteam",
+        "version": "1.0.0"
+      },
+      "min": 1,
+      "max": 1,
+      "responsibility": "Produce the nested specialist review."
+    }
+  ],
+  "coordinatorRole": "coordinator",
+  "communication": [
+    {
+      "fromRole": "coordinator",
+      "toRole": "research",
+      "modes": [
+        "queue-only",
+        "trigger-turn"
+      ]
+    },
+    {
+      "fromRole": "research",
+      "toRole": "coordinator",
+      "modes": [
+        "queue-only"
+      ]
+    }
+  ],
+  "taskAcceptance": {
+    "mode": "operator",
+    "allowedWorkflows": [
+      {
+        "id": "urn:prometheus:mini:example:workflow:review",
+        "version": "1.0.0"
+      }
+    ]
+  },
+  "routing": {
+    "eligibilityFirst": true,
+    "strategy": "operator-role-capacity-cost-stable-id",
+    "explain": true
+  },
+  "limits": {
+    "concurrentTurns": 2,
+    "maxMembers": 4,
+    "maxDepth": 2,
+    "maxPendingTasks": 16
+  },
+  "budget": {
+    "maxTokens": 10000,
+    "maxCostMicrounits": 1000000,
+    "currency": "USD",
+    "maxElapsedSeconds": 300
+  },
+  "input": {
+    "type": "object",
+    "properties": {
+      "brief": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "brief"
+    ],
+    "additionalProperties": false
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "artifact": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "artifact"
+    ],
+    "additionalProperties": false
+  }
+}

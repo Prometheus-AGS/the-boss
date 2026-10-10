@@ -9,6 +9,7 @@ export function createUarProjectedMcpTransport(
   projection: () => McpOutputProjection
 ): Transport {
   const toolRequests = new Set<RequestId>()
+  const onClose = transport.onclose
   const wrapped: Transport = {
     start: () => transport.start(),
     close: () => transport.close(),
@@ -49,6 +50,7 @@ export function createUarProjectedMcpTransport(
   transport.onerror = (error) => wrapped.onerror?.(projection().error(error) as Error)
   transport.onclose = () => {
     toolRequests.clear()
+    onClose?.()
     wrapped.onclose?.()
   }
   return wrapped

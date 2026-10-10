@@ -1,4 +1,4 @@
-import { harnesses, type Team, type Json, type ObjectValue, type Target } from './types.mjs';
+import { exportCapabilityNames, harnesses, type Team, type Json, type ObjectValue, type Target } from './types.mjs';
 
 export function object(value: unknown, label = 'input'): ObjectValue {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw Error(`${label} must be an object`);
@@ -37,7 +37,7 @@ export function relativeFile(file: string): string {
 }
 export function validateTeam(value: unknown): Team {
   const t = object(value, 'team');
-  const allowed = ['schemaVersion','id','outcome','scope','harness','roles','modelPolicy','skillPolicies','native'];
+  const allowed = ['schemaVersion','id','outcome','scope','harness','roles','modelPolicy','skillPolicies','native','agentMemory'];
   for (const key of Object.keys(t)) if (!allowed.includes(key)) throw Error(`Unknown team field ${key}; use native.<target>.options or files for harness-specific configuration`);
   if (t.schemaVersion !== 1) throw Error('team.schemaVersion must be 1');
   id(t.id, 'team.id'); text(t.outcome, 'team.outcome');
@@ -64,12 +64,21 @@ export function validateTeam(value: unknown): Team {
     visiting.add(key); r.dependsOn.forEach(visit); visiting.delete(key); visited.add(key);
   }
   ids.forEach(visit);
+  if (t.agentMemory !== undefined) {
+    const m = object(t.agentMemory, 'agentMemory');
+    for (const key of Object.keys(m)) if (key !== 'claude') throw Error(`Unknown agentMemory field ${key}`);
+    if (m.claude !== undefined && m.claude !== 'local') throw Error("agentMemory.claude must be 'local'");
+  }
   if (t.modelPolicy !== undefined) policy(t.modelPolicy, 'modelPolicy');
   if (t.skillPolicies !== undefined) for (const [key, v] of Object.entries(object(t.skillPolicies))) policy(v, `skillPolicies.${key}`);
   if (t.native !== undefined) for (const [key, v] of Object.entries(object(t.native))) {
     target(key); const n = object(v, `native.${key}`);
-    for (const field of Object.keys(n)) if (!['version','source','options','files'].includes(field)) throw Error(`Unknown native wrapper field ${field}; put native settings in options or files`);
+    for (const field of Object.keys(n)) if (!['version','source','options','files','requiredCapabilities'].includes(field)) throw Error(`Unknown native wrapper field ${field}; put native settings in options or files`);
     text(n.version, 'native version'); text(n.source, 'native source');
+    if (n.requiredCapabilities !== undefined) {
+      const required = strings(n.requiredCapabilities, 'native.requiredCapabilities');
+      for (const capability of required) if (!(exportCapabilityNames as readonly string[]).includes(capability)) throw Error(`Unknown export capability: ${capability}`);
+    }
     if (n.options !== undefined) object(n.options, 'native options');
     if (n.files !== undefined) for (const [file, content] of Object.entries(object(n.files))) {
       relativeFile(file); if (typeof content !== 'string') throw Error('Native file content must be a string');

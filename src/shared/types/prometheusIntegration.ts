@@ -5,6 +5,14 @@ import type { McpRuntimeStatus } from '@shared/data/cache/cacheValueTypes'
 import type { IntegrationDiagnostic, IntegrationOperation } from './integrationOperation'
 import { literAliasConfigSchema, literConnectionConfigSchema } from './literGateway'
 import { literRoleAssignmentsSchema } from './literRoles'
+import {
+  MANAGED_UAR_INSTANCE_ID,
+  managedUarRuntimeInstance,
+  uarRuntimeInstanceSchema,
+  type UarInstanceCompatibilityState,
+  type UarObservedInstance
+} from './uarServiceInstance'
+import { uarExecutionProfileSchema, type UarExecutionProfile } from './uarTeamProfiles'
 
 export {
   integrationActionSchema,
@@ -34,6 +42,10 @@ const uarEndpoint = z
     const url = new URL(value)
     return /^(https?|wss?):$/.test(url.protocol) && !url.username && !url.password
   }, 'HTTP(S) or WS(S) endpoint without embedded credentials required')
+const authorityEndpoint = endpoint.refine((value) => {
+  const url = new URL(value)
+  return url.protocol === 'https:' || ['127.0.0.1', '::1', 'localhost'].includes(url.hostname)
+}, 'HTTPS or a loopback HTTP endpoint is required for protected authority requests')
 const model = z.object({ name: z.string().default(''), baseUrl: z.string().default('') })
 const serviceOwnershipSchema = z.enum(['managed', 'external'])
 const serviceSourceSchema = z.enum(['application', 'full-pack', 'manual'])
@@ -74,24 +86,47 @@ const filesystemConfigSchema = z.object({
     .transform((roots) => roots.map((root) => root.trim()).filter(Boolean))
     .default([])
 })
-export const uarStorageConfigSchema = z.object({
-  backend: z.enum(['embedded', 'remote']).default('embedded'),
-  port: z.number().int().min(1).max(65535).default(1906),
-  endpoint: uarEndpoint.default('http://127.0.0.1:28000'),
-  namespace: z
-    .string()
-    .regex(/^[a-zA-Z][a-zA-Z0-9_]*$/)
-    .default('uar'),
-  database: z
-    .string()
-    .regex(/^[a-zA-Z][a-zA-Z0-9_]*$/)
-    .default('main'),
-  username: z
-    .string()
-    .regex(/^[a-zA-Z][a-zA-Z0-9_]*$/)
-    .default('uar'),
-  authLevel: z.enum(['root', 'namespace', 'database']).default('namespace')
-})
+export const uarStorageConfigSchema = z
+  .object({
+    backend: z.enum(['embedded', 'remote']).default('embedded'),
+    remoteDurabilityAttested: z.boolean().default(false),
+    port: z.number().int().min(1).max(65535).default(1906),
+    endpoint: uarEndpoint.default('http://127.0.0.1:28000'),
+    namespace: z
+      .string()
+      .regex(/^[a-zA-Z][a-zA-Z0-9_]*$/)
+      .default('uar'),
+    database: z
+      .string()
+      .regex(/^[a-zA-Z][a-zA-Z0-9_]*$/)
+      .default('main'),
+    username: z
+      .string()
+      .regex(/^[a-zA-Z][a-zA-Z0-9_]*$/)
+      .default('uar'),
+    authLevel: z.enum(['root', 'namespace', 'database']).default('namespace'),
+    authorityProvider: z.enum(['local', 'flint']).default('local'),
+    authorityEndpoint: authorityEndpoint.default('http://127.0.0.1:4457'),
+    selectedInstanceId: z.string().min(1).max(128).default(MANAGED_UAR_INSTANCE_ID),
+    instances: z.array(uarRuntimeInstanceSchema).max(64).default([managedUarRuntimeInstance()])
+  })
+  .superRefine((config, context) => {
+    const ids = new Set<string>()
+    for (const [index, instance] of config.instances.entries()) {
+      if (ids.has(instance.id)) {
+        context.addIssue({ code: 'custom', path: ['instances', index, 'id'], message: 'Instance IDs must be unique' })
+      }
+      ids.add(instance.id)
+    }
+    const managed = config.instances.filter((instance) => instance.ownership === 'managed')
+    if (managed.length !== 1 || managed[0]?.id !== MANAGED_UAR_INSTANCE_ID) {
+      context.addIssue({ code: 'custom', path: ['instances'], message: 'The managed local instance is required' })
+    }
+    const selected = config.instances.find((instance) => instance.id === config.selectedInstanceId)
+    if (!selected?.enabled) {
+      context.addIssue({ code: 'custom', path: ['selectedInstanceId'], message: 'Default instance must be enabled' })
+    }
+  })
 export type UarStorageConfig = z.infer<typeof uarStorageConfigSchema>
 const servicesConfigSchema = z
   .object({
@@ -216,6 +251,7 @@ export const secretNames = [
   'compassPassword',
   'uarPassword',
   'memoryToken',
+  'uarAuthorityToken',
   'literKey',
   'judgeKey',
   'criticKey'
@@ -260,9 +296,28 @@ export const uarAdministrationCapabilitiesSchema = z.object({
 })
 export const uarCapabilitiesResponseSchema = z.object({
   uar_version: z.string().min(1),
+  authentication: z.object({ principalMode: z.enum(['host-asserted', 'token-subject']) }).optional(),
   agui: z.object({ profile: z.literal('uar.agui/1'), profile_revision: z.literal(1) }),
   capabilities: z.array(z.string()),
-  administration: uarAdministrationCapabilitiesSchema
+  administration: uarAdministrationCapabilitiesSchema,
+  instance: z.object({
+    id: z.string().min(1),
+    profile: z.string().min(1),
+    workspace_location: z.enum(['local', 'remote'])
+  }),
+  endpoints: z.object({
+    runtime: endpoint,
+    administration: endpoint,
+    models: endpoint,
+    console: endpoint.nullable()
+  }),
+  ownership: z.enum(['managed', 'external']),
+  references: z.object({
+    lifecycle_owner: z.string().nullable(),
+    credential: z.string().nullable(),
+    workspace: z.string().nullable()
+  }),
+  placement: z.object({ new: z.boolean(), reattach: z.boolean(), migrate: z.boolean() })
 })
 export type UarAdministrationCapabilities = z.infer<typeof uarAdministrationCapabilitiesSchema>
 export type UarAdministrationMethod = z.infer<typeof uarAdministrationMethodSchema>
@@ -760,6 +815,8 @@ export type UarModelSourceSnapshot = {
         supportsStructuredOutput?: boolean
         supportsStreaming?: boolean
         maxOutputTokens?: number
+        pricingIdentity?: { providerId: string; modelId: string }
+        executionProfile?: UarExecutionProfile
       }>
     }>
   }>
@@ -782,6 +839,11 @@ export const uarProviderModelInputSchema = z
     supportsStructuredOutput: z.boolean().optional(),
     supportsStreaming: z.boolean().optional(),
     maxOutputTokens: z.number().int().positive().optional(),
+    pricingIdentity: z
+      .object({ providerId: z.string().min(1), modelId: z.string().min(1) })
+      .strict()
+      .optional(),
+    executionProfile: uarExecutionProfileSchema.optional(),
     enabled: z.boolean().default(true)
   })
   .strict()
@@ -880,5 +942,29 @@ export type IntegrationSnapshot = {
     database?: string
     authLevel?: 'root' | 'namespace' | 'database'
     lastApplyError?: string
+    selectedInstanceId: string
+    instances: Array<{
+      id: string
+      name: string
+      ownership: 'managed' | 'external'
+      selected: boolean
+      enabled: boolean
+      runtimeCredentialRef?: string
+      adminCredentialRef?: string
+      credentialConfigured: boolean
+      runtimeCredentialConfigured: boolean
+      adminCredentialConfigured: boolean
+      boundSessions: number
+      compatibility: UarInstanceCompatibilityState
+      checks: {
+        configured: true
+        reachable: boolean | null
+        authenticated: boolean | null
+        compatible: boolean | null
+        operational: boolean
+      }
+      observed?: UarObservedInstance
+      diagnostic?: string
+    }>
   }
 }

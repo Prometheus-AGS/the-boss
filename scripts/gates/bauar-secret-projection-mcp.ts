@@ -12,6 +12,8 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { CallToolRequestSchema, isInitializeRequest, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 import type { ElectronApplication, Page } from '@playwright/test'
 
+import { sealHostInvocation } from './bauar-native-host-cases'
+
 import type { ProjectionResultDiagnostic } from './bauar-secret-projection-provider'
 
 import { UAR_TOOL_ADMISSION_META_KEY, UAR_TOOL_ADMISSION_VERSION,
@@ -162,6 +164,8 @@ export async function exerciseProjectedClaims(canary: string) {
   // The packaged gate needs the external fixture only; load this source bridge for its separate claim exercise.
   const bridgeUrl = pathToFileURL(join(process.cwd(), 'src/main/ai/runtime/uar/UarHostMcpBridge.ts')).href
   const createUarHostMcpBridge: ProjectionClaimBridgeFactory = (await import(bridgeUrl)).createUarHostMcpBridge
+  const authorityUrl = pathToFileURL(join(process.cwd(), 'src/main/ai/runtime/uar/UarAuthorityProvider.ts')).href
+  const { createLocalUarAuthorityProvider } = await import(authorityUrl)
   const calls: Call[] = []
   let bridge: ProjectionClaimBridge
   const server = toolServer(canary, calls, (request) => {
@@ -171,7 +175,8 @@ export async function exerciseProjectedClaims(canary: string) {
   const projection = createUarSecretProjection([canary])
   bridge = await createUarHostMcpBridge(
     { fixture: { name: 'fixture', instance: server } },
-    { ownerId: 'projection-owner', workspace: '/projection', disposition: () => 'auto' },
+    { ownerId: 'projection-owner', principalId: 'projection-owner', workspace: '/projection',
+      authorityProvider: createLocalUarAuthorityProvider(), disposition: () => 'auto' },
     () => undefined, () => projection
   )
   const mounted = bridge.servers[0]!
@@ -193,7 +198,7 @@ export async function exerciseProjectedClaims(canary: string) {
     for (const mode of ['success', 'isError', 'error', 'cancel'] as const) {
       ordinal += 1
       const args = { echo: canary, mode }
-      const invocation = {
+      const invocation = sealHostInvocation({
         version: UAR_TOOL_ADMISSION_VERSION, executionKind: 'host_mcp', invocationId: `projection-${ordinal}`, modelToolCallId: `call-${ordinal}`,
         attempt: 1, rootRunId: 'projection-root', executingRunId: 'projection-root', ownerId: 'projection-owner',
         workspace: '/projection', runtimeEpoch: 'projection-runtime', hostEpoch: bridge.toolAdmission.hostEpoch,
@@ -205,7 +210,7 @@ export async function exerciseProjectedClaims(canary: string) {
         catalogRevision: 'catalog-v1', mountedServerId: 'fixture', nativeToolName: 'read_projection',
         providerToolName: 'fixture__read_projection', runPolicyRevision: 'policy-v1', toolPolicyRevision: 'tools-v1',
         approvalClass: 'not_required', callIndex: ordinal, validatedArguments: args
-      }
+      })
       const prepared = await post('prepare', { invocation })
       const receipt = await post('resolve', { admissionId: prepared.admissionId, invocationId: prepared.invocationId, localDisposition: 'allowed', approved: true })
       assert.deepEqual(await post('claim', { admissionId: prepared.admissionId, invocation, receipt }), receipt)

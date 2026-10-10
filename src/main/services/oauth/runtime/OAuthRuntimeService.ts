@@ -303,6 +303,31 @@ export class OAuthRuntimeService extends BaseService {
     }
   }
 
+  public submitAuthorizationCode = (
+    senderId: WindowId | null,
+    providerId: string,
+    requestId: string,
+    code: string
+  ): void => {
+    const definition = this.getDefinition(providerId)
+    const active = this.activeSignIns.get(providerId)
+    if (
+      !definition.supportsManualCode ||
+      !senderId ||
+      this.stopping ||
+      !active ||
+      active.operation.initiatorWindowId !== senderId ||
+      !active.operation.requestIdsByWindow.get(senderId)?.has(requestId) ||
+      active.operation.phase !== 'callback' ||
+      active.operation.controller.signal.aborted
+    ) {
+      throw new OAuthServiceError('No matching sign-in is awaiting an authorization code')
+    }
+    const transport = this.transports.get(providerId)
+    if (!transport) throw new OAuthServiceError('No authorization callback is pending')
+    transport.submitAuthorizationCode(code)
+  }
+
   public getAccount = async (providerId: string): Promise<OAuthAccount> => {
     this.getDefinition(providerId)
     const config = await this.tokenStore.get(providerId)

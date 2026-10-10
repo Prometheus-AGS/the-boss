@@ -1,4 +1,19 @@
 import * as z from 'zod'
+import { uarExecutiveRoleAuthoringSchema, uarExecutiveRolePreviewSchema, uarExecutiveRoleInstallSchema } from '@shared/types/uarRepresentation'
+import { uarRepresentationWorkspaceSchema, uarRepresentationSaveSchema, uarRepresentationHistorySchema,
+  uarRepresentationRevokeSchema, uarRepresentationInstallSchema, uarRepresentationSnapshotSchema,
+  uarRepresentationGrantSchema } from '@shared/types/uarRepresentation'
+import { uarFeedbackPolicySchema, uarFeedbackPolicySaveSchema, uarFeedbackPolicyAuthorizeSchema,
+  uarFeedbackReviewSchema, uarFeedbackImplementationSchema } from '@shared/types/uarFeedbackPolicy'
+import {
+  uarConnectorWorkspaceSchema, uarConnectorSelectorSchema, uarConnectorSaveSchema, uarConnectorReconcileSchema,
+  uarConnectorPrepareSchema, uarConnectorSnapshotSchema, uarConnectorPublicBindingSchema, uarConnectorEffectSchema
+} from '@shared/types/uarConnectors'
+import {
+  uarFeedbackWorkspaceSchema, uarFeedbackSelectorSchema, uarFeedbackStartSchema,
+  uarFeedbackApprovalSchema, uarFeedbackRetryApprovalSchema, uarFeedbackControlSchema, uarFeedbackCredentialSchema,
+  uarFeedbackSnapshotSchema, uarFeedbackDetailSchema, uarFeedbackPreviewSchema
+} from '@shared/types/uarFeedback'
 
 import {
   literConfigEditSchema,
@@ -24,6 +39,8 @@ import {
   type LiterRoleSnapshot,
   type LiterRoleSourceSelection
 } from '@shared/types/literRoles'
+import { uarReviewedModelPolicySchema } from '@shared/types/uarTeamModelPolicy'
+import { uarReviewedGuidanceSchema } from '@shared/types/uarTeamGuidance'
 import type { PrometheusDoctorReport, PrometheusFixOutcome, PrometheusPushState } from '@shared/types/prometheus'
 import {
   integrationActionSchema,
@@ -67,18 +84,87 @@ import {
   type UarSettingsSnapshot,
   type UarSettingsUpdateResult
 } from '@shared/types/prometheusIntegration'
+import { uarLifecycleSelectorSchema, type UarLifecycleSnapshot } from '@shared/types/uarLifecycleAdministration'
+import type { UarTeamApprovalHistory } from '@shared/types/uarApprovalRecords'
+import {
+  uarChannelObserverActionSchema,
+  uarChannelSubscriptionSchema,
+  uarChannelDeliveriesSchema,
+  uarChannelObserversSnapshotSchema
+} from '@shared/types/uarChannelObservers'
 import type {
   UarDurableBinding,
+  UarDurableCommand,
+  UarDurableRunSnapshot,
   UarDurableInstance,
   UarDurableObserver,
   UarDurableWorkspaceSnapshot
 } from '@shared/types/uarDurableAdministration'
+import {
+  uarInstanceDeleteSchema,
+  uarInstanceSaveSchema,
+  uarInstanceSelectSchema,
+  type UarInstanceInventorySnapshot
+} from '@shared/types/uarServiceInstance'
+import { uarTeamContextSchema, uarTeamPeerMessagesSchema } from '@shared/types/uarTeamContext'
+import type { UarExecutionOwnerSnapshot, UarExecutionReclaimReceipt } from '@shared/types/uarTeamProfiles'
+import type { UarTeamRunEventsSnapshot } from '@shared/types/uarTeamRunEvents'
+import {
+  uarAuthoredTeamSchema,
+  type UarTeamAuthoringSnapshot,
+  type UarAuthoredTeamRevision,
+  type UarTeamSkillCatalog
+} from '@shared/types/uarTeams'
+import type {
+  UarTeamArtifact,
+  UarTeamExecutionAttempt,
+  UarTeamExecutionSummary,
+  UarTeamBinding,
+  UarTeamApproval,
+  UarTeamInstance,
+  UarTeamMailboxMessage,
+  UarTeamMailboxPage,
+  UarTeamsSnapshot
+} from '@shared/types/uarTeams'
+import {
+  uarWorkflowWorkspaceSchema,
+  uarWorkflowSelectorSchema,
+  uarWorkflowStartSchema,
+  uarWorkflowDecisionSchema,
+  uarWorkflowControlSchema,
+  uarWorkflowRunSchema,
+  uarWorkflowsSnapshotSchema
+} from '@shared/types/uarWorkflows'
 
 import { defineRoute } from '../define'
 
 const literRemoteEndpointSchema = z.url().refine((value) => {
   const endpoint = new URL(value)
   return /^https?:$/.test(endpoint.protocol) && !endpoint.username && !endpoint.password
+})
+
+const teamTaskCommandSchema = z
+  .object({
+    workspaceId: z.string().min(1).max(256),
+    teamInstanceId: z.string().min(1).max(256),
+    taskId: z.string().min(1).max(256),
+    commandId: z.uuid(),
+    expectedTeamRevision: z.number().int().nonnegative(),
+    expectedTaskRevision: z.number().int().nonnegative(),
+    memberId: z.string().min(1).max(256)
+  })
+  .strict()
+
+const teamExecutionSelectorSchema = z
+  .object({
+    workspaceId: z.string().min(1).max(256),
+    teamInstanceId: z.string().min(1).max(256)
+  })
+  .strict()
+const teamControlSchema = teamExecutionSelectorSchema.extend({
+  commandId: z.uuid(),
+  expectedTeamRevision: z.number().int().nonnegative(),
+  reason: z.string().min(1).max(512)
 })
 
 /**
@@ -90,6 +176,46 @@ const literRemoteEndpointSchema = z.url().refine((value) => {
  * process cannot report.
  */
 export const prometheusRequestSchemas = {
+  'prometheus.uar.representation.snapshot': defineRoute({ input: uarRepresentationWorkspaceSchema, output: uarRepresentationSnapshotSchema }),
+  'prometheus.uar.representation.preview_role': defineRoute({ input: uarExecutiveRoleAuthoringSchema, output: uarExecutiveRolePreviewSchema }),
+  'prometheus.uar.representation.install_role': defineRoute({ input: uarExecutiveRoleInstallSchema, output: z.custom<UarDurableBinding>() }),
+  'prometheus.uar.representation.save': defineRoute({ input: uarRepresentationSaveSchema, output: uarRepresentationInstallSchema }),
+  'prometheus.uar.representation.history': defineRoute({ input: uarRepresentationHistorySchema, output: z.array(uarRepresentationGrantSchema) }),
+  'prometheus.uar.representation.revoke': defineRoute({ input: uarRepresentationRevokeSchema, output: uarRepresentationInstallSchema }),
+  'prometheus.uar.connectors.reconcile': defineRoute({ input: uarConnectorReconcileSchema, output: uarConnectorEffectSchema }),
+  'prometheus.uar.feedback.policies': defineRoute({ input: uarFeedbackWorkspaceSchema, output: z.array(uarFeedbackPolicySchema) }),
+  'prometheus.uar.feedback.save_policy': defineRoute({ input: uarFeedbackPolicySaveSchema, output: uarFeedbackPolicySchema }),
+  'prometheus.uar.feedback.authorize_policy': defineRoute({ input: uarFeedbackPolicyAuthorizeSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.attach_review': defineRoute({ input: uarFeedbackReviewSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.implementation': defineRoute({ input: uarFeedbackImplementationSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.connectors.snapshot': defineRoute({ input: uarConnectorWorkspaceSchema, output: uarConnectorSnapshotSchema }),
+  'prometheus.uar.connectors.save': defineRoute({ input: uarConnectorSaveSchema, output: uarConnectorPublicBindingSchema }),
+  'prometheus.uar.connectors.prepare': defineRoute({ input: uarConnectorPrepareSchema, output: uarConnectorEffectSchema }),
+  'prometheus.uar.connectors.dispatch': defineRoute({ input: uarConnectorSelectorSchema, output: uarConnectorEffectSchema }),
+  'prometheus.uar.connectors.cancel': defineRoute({ input: uarConnectorSelectorSchema, output: uarConnectorEffectSchema }),
+  'prometheus.uar.feedback.snapshot': defineRoute({ input: uarFeedbackWorkspaceSchema, output: uarFeedbackSnapshotSchema }),
+  'prometheus.uar.feedback.read': defineRoute({ input: uarFeedbackSelectorSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.start': defineRoute({ input: uarFeedbackStartSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.preview': defineRoute({ input: uarFeedbackSelectorSchema, output: uarFeedbackPreviewSchema }),
+  'prometheus.uar.feedback.approve_publish': defineRoute({ input: uarFeedbackApprovalSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.retry_publish': defineRoute({ input: uarFeedbackRetryApprovalSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.reject': defineRoute({ input: uarFeedbackControlSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.cancel': defineRoute({ input: uarFeedbackControlSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.reconcile': defineRoute({ input: uarFeedbackSelectorSchema, output: uarFeedbackDetailSchema }),
+  'prometheus.uar.feedback.credential': defineRoute({ input: uarFeedbackCredentialSchema, output: z.object({ configured: z.boolean() }).strict() }),
+  'prometheus.uar.lifecycle.snapshot': defineRoute({
+    input: uarLifecycleSelectorSchema,
+    output: z.custom<UarLifecycleSnapshot>()
+  }),
+  'prometheus.uar.workflows.snapshot': defineRoute({
+    input: uarWorkflowWorkspaceSchema,
+    output: uarWorkflowsSnapshotSchema
+  }),
+  'prometheus.uar.workflows.read': defineRoute({ input: uarWorkflowSelectorSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.start': defineRoute({ input: uarWorkflowStartSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.decide': defineRoute({ input: uarWorkflowDecisionSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.cancel': defineRoute({ input: uarWorkflowControlSchema, output: uarWorkflowRunSchema }),
+  'prometheus.uar.workflows.recover': defineRoute({ input: uarWorkflowControlSchema, output: uarWorkflowRunSchema }),
   'prometheus.liter_config.select_local': defineRoute({
     input: z.object({}).strict(),
     output: z.custom<LiterConfigSourceSelection>()
@@ -260,9 +386,314 @@ export const prometheusRequestSchemas = {
     input: z.object({}).strict(),
     output: z.custom<UarAdministrationSnapshot>()
   }),
+  'prometheus.uar.channel_observers.read': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
+    output: uarChannelObserversSnapshotSchema
+  }),
+  'prometheus.uar.channel_observers.deliveries': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        subscriptionId: z.string().min(1).max(256),
+        generation: z.number().int().nonnegative()
+      })
+      .strict(),
+    output: uarChannelDeliveriesSchema
+  }),
+  'prometheus.uar.channel_observers.action': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        subscriptionId: z.string().min(1).max(256),
+        generation: z.number().int().nonnegative(),
+        expectedRevision: z.number().int().nonnegative(),
+        action: uarChannelObserverActionSchema
+      })
+      .strict(),
+    output: uarChannelSubscriptionSchema
+  }),
   'prometheus.uar.durable.read': defineRoute({
     input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
     output: z.custom<UarDurableWorkspaceSnapshot>()
+  }),
+  'prometheus.uar.teams.snapshot': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
+    output: z.custom<UarTeamsSnapshot>()
+  }),
+  'prometheus.uar.teams.setup_starter': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        model: z
+          .object({
+            source: z.enum(['uar', 'gateway']),
+            providerId: z.string().min(1).max(128),
+            modelId: z.string().min(1).max(256)
+          })
+          .strict()
+          .optional()
+      })
+      .strict(),
+    output: z.custom<UarTeamBinding>()
+  }),
+  'prometheus.uar.teams.rebind_starter': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        bindingId: z.string().min(1).max(512),
+        expectedBindingRevision: z.number().int().positive(),
+        model: z
+          .object({
+            source: z.enum(['uar', 'gateway']),
+            providerId: z.string().min(1).max(128),
+            modelId: z.string().min(1).max(256)
+          })
+          .strict()
+      })
+      .strict(),
+    output: z.custom<UarTeamBinding>()
+  }),
+  'prometheus.uar.teams.setup_coding': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        model: z
+          .object({
+            source: z.enum(['uar', 'gateway']),
+            providerId: z.string().min(1).max(128),
+            modelId: z.string().min(1).max(256)
+          })
+          .strict()
+      })
+      .strict(),
+    output: z.custom<UarTeamBinding>()
+  }),
+  'prometheus.uar.teams.authoring': defineRoute({
+    input: z.object({}).strict(),
+    output: z.custom<UarTeamAuthoringSnapshot>()
+  }),
+  'prometheus.uar.teams.review_model_policy': defineRoute({
+    input: z.object({ source: z.string().min(1).max(8 * 1024 * 1024) }).strict(),
+    output: uarReviewedModelPolicySchema
+  }),
+  'prometheus.uar.teams.review_guidance': defineRoute({
+    input: z.object({ source: z.string().min(1).max(8 * 1024 * 1024) }).strict(),
+    output: uarReviewedGuidanceSchema
+  }),
+  'prometheus.uar.teams.skills': defineRoute({ input: z.object({}).strict(), output: z.custom<UarTeamSkillCatalog>() }),
+  'prometheus.uar.teams.select_knowledge': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
+    output: z.array(z.string())
+  }),
+  'prometheus.uar.teams.save_authoring': defineRoute({
+    input: z.object({ team: uarAuthoredTeamSchema, expectedRevision: z.number().int().nonnegative() }).strict(),
+    output: z.custom<UarAuthoredTeamRevision>()
+  }),
+  'prometheus.uar.teams.deploy_authored': defineRoute({
+    input: z
+      .object({ workspaceId: z.string().min(1).max(256), teamId: z.uuid(), revision: z.number().int().positive() })
+      .strict(),
+    output: z.custom<UarTeamBinding>()
+  }),
+  'prometheus.uar.teams.submit_task': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        teamInstanceId: z.string().min(1).max(256),
+        commandId: z.uuid(),
+        prompt: z.string().trim().min(1).max(32768)
+      })
+      .strict(),
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.approvals': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256), teamInstanceId: z.string().min(1).max(256) }).strict(),
+    output: z.custom<{ approvals: UarTeamApproval[]; history: UarTeamApprovalHistory[] }>()
+  }),
+  'prometheus.uar.teams.decide_approval': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        teamInstanceId: z.string().min(1).max(256),
+        attemptId: z.string().min(1).max(256),
+        approvalId: z.string().min(1).max(256),
+        issuerId: z.string().min(1).max(256).optional(),
+        challengeId: z.string().min(1).max(256).optional(),
+        eventId: z.string().min(1).max(256),
+        cursor: z.number().int().nonnegative(),
+        approved: z.boolean()
+      })
+      .strict(),
+    output: z.object({ resolved: z.literal(true) })
+  }),
+  'prometheus.uar.teams.create': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        commandId: z.uuid(),
+        deploymentBindingId: z.string().min(1).max(256),
+        teamDefinition: z
+          .object({ id: z.string().min(1), version: z.string().min(1), digest: z.string().min(1) })
+          .strict(),
+        input: z.unknown(),
+        memberSlots: z
+          .array(z.object({ role: z.string().min(1), count: z.number().int().positive() }).strict())
+          .optional()
+      })
+      .strict(),
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.add_task': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        teamInstanceId: z.string().min(1).max(256),
+        commandId: z.uuid(),
+        taskId: z.string().min(1).max(256),
+        expectedTeamRevision: z.number().int().nonnegative(),
+        title: z.string().min(1).max(512),
+        role: z.string().min(1).max(256),
+        input: z.unknown(),
+        outputContract: z.unknown(),
+        dependsOn: z.array(z.string().min(1).max(256)).max(128)
+      })
+      .strict(),
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.claim_task': defineRoute({
+    input: teamTaskCommandSchema,
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.reassign_task': defineRoute({
+    input: teamTaskCommandSchema,
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.assign_reviewer': defineRoute({
+    input: teamTaskCommandSchema,
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.update_task_state': defineRoute({
+    input: teamTaskCommandSchema.omit({ memberId: true }).extend({
+      status: z.literal('ready'),
+      reason: z.string().min(1).max(512)
+    }),
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.execution_owner': defineRoute({
+    input: z.object({}).strict(),
+    output: z.custom<UarExecutionOwnerSnapshot>()
+  }),
+  'prometheus.uar.teams.quiesce_owner': defineRoute({
+    input: z.object({}).strict(),
+    output: z.custom<{ fencingEvidenceRef: string; claim: NonNullable<UarExecutionOwnerSnapshot['claim']> }>()
+  }),
+  'prometheus.uar.teams.reclaim_owner': defineRoute({
+    input: z
+      .object({
+        commandId: z.uuid(),
+        catalogId: z.string().min(1).max(128),
+        expectedEpoch: z.number().int().positive(),
+        replacementServiceInstanceId: z.string().min(1).max(128),
+        reason: z.string().min(1).max(2048),
+        fencingEvidenceRef: z
+          .string()
+          .regex(/^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/)
+          .max(128)
+      })
+      .strict(),
+    output: z.custom<UarExecutionReclaimReceipt>()
+  }),
+  'prometheus.uar.teams.peer_messages': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256), teamInstanceId: z.string().min(1).max(256) }).strict(),
+    output: uarTeamPeerMessagesSchema
+  }),
+  'prometheus.uar.teams.context': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        teamInstanceId: z.string().min(1).max(256),
+        attemptId: z.string().min(1).max(256)
+      })
+      .strict(),
+    output: uarTeamContextSchema
+  }),
+  'prometheus.uar.teams.execution': defineRoute({
+    input: teamExecutionSelectorSchema,
+    output: z.custom<UarTeamExecutionSummary>()
+  }),
+  'prometheus.uar.teams.events': defineRoute({
+    input: teamExecutionSelectorSchema.extend({
+      attemptId: z.string().min(1).max(256),
+      after: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER).optional()
+    }),
+    output: z.custom<UarTeamRunEventsSnapshot>()
+  }),
+  'prometheus.uar.teams.artifacts': defineRoute({
+    input: teamExecutionSelectorSchema,
+    output: z.custom<{ artifacts: UarTeamArtifact[] }>()
+  }),
+  'prometheus.uar.teams.admit_task': defineRoute({
+    input: teamTaskCommandSchema.extend({
+      reservation: z
+        .object({
+          tokens: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+          costMicrounits: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+          elapsedSeconds: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER)
+        })
+        .strict(),
+      contextArtifactIds: z.array(z.string().min(1).max(256)).max(128)
+    }),
+    output: z.custom<UarTeamExecutionAttempt>()
+  }),
+  'prometheus.uar.teams.queue_task': defineRoute({
+    input: teamTaskCommandSchema.extend({
+      reservation: z
+        .object({
+          tokens: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+          costMicrounits: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+          elapsedSeconds: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER)
+        })
+        .strict(),
+      contextArtifactIds: z.array(z.string().min(1).max(256)).max(128)
+    }),
+    output: z.custom<UarTeamExecutionAttempt>()
+  }),
+  'prometheus.uar.teams.dispatch_attempt': defineRoute({
+    input: teamExecutionSelectorSchema.extend({
+      commandId: z.uuid(),
+      expectedTeamRevision: z.number().int().nonnegative(),
+      attemptId: z.string().min(1).max(256)
+    }),
+    output: z.custom<UarTeamExecutionAttempt>()
+  }),
+  'prometheus.uar.teams.cancel_attempt': defineRoute({
+    input: teamControlSchema.extend({ attemptId: z.string().min(1).max(256) }),
+    output: z.custom<UarTeamExecutionAttempt>()
+  }),
+  'prometheus.uar.teams.recover': defineRoute({
+    input: teamControlSchema,
+    output: z.custom<UarTeamExecutionAttempt[]>()
+  }),
+  'prometheus.uar.teams.revoke_member': defineRoute({
+    input: teamControlSchema.extend({ memberId: z.string().min(1).max(256) }),
+    output: z.custom<UarTeamInstance>()
+  }),
+  'prometheus.uar.teams.mailbox_list': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256), teamInstanceId: z.string().min(1).max(256) }).strict(),
+    output: z.custom<UarTeamMailboxPage>()
+  }),
+  'prometheus.uar.teams.mailbox_send': defineRoute({
+    input: z
+      .object({
+        workspaceId: z.string().min(1).max(256),
+        teamInstanceId: z.string().min(1).max(256),
+        commandId: z.uuid(),
+        recipientMemberId: z.string().min(1).max(256),
+        mode: z.enum(['queue-only', 'trigger-turn']),
+        content: z.string().min(1).max(16000)
+      })
+      .strict(),
+    output: z.custom<UarTeamMailboxMessage>()
   }),
   'prometheus.uar.durable.setup_starter': defineRoute({
     input: z.object({ workspaceId: z.string().min(1).max(256) }).strict(),
@@ -277,6 +708,23 @@ export const prometheusRequestSchemas = {
       })
       .strict(),
     output: z.custom<UarDurableInstance>()
+  }),
+  'prometheus.uar.durable.submit_turn': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256), instanceId: z.string().min(1).max(256),
+      commandId: z.uuid(), prompt: z.string().trim().min(1).max(16000) }).strict(),
+    output: z.custom<UarDurableCommand>()
+  }),
+  'prometheus.uar.durable.run': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256), instanceId: z.string().min(1).max(256),
+      runId: z.string().min(1).max(256), after: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER).optional() }).strict(),
+    output: z.custom<UarDurableRunSnapshot>()
+  }),
+  'prometheus.uar.durable.decide_approval': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256), instanceId: z.string().min(1).max(256),
+      runId: z.string().min(1).max(256), approvalId: z.string().min(1).max(256), issuerId: z.string().min(1).max(256),
+      challengeId: z.string().min(1).max(256), eventId: z.string().min(1).max(256),
+      cursor: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER), approved: z.boolean() }).strict(),
+    output: z.object({ resolved: z.literal(true) })
   }),
   'prometheus.uar.durable.instance_action': defineRoute({
     input: z
@@ -327,6 +775,30 @@ export const prometheusRequestSchemas = {
   'prometheus.uar.admin.diagnose_authority': defineRoute({
     input: z.object({}).strict(),
     output: z.custom<UarAuthorityDiagnosticResult>()
+  }),
+  'prometheus.uar.instances.read': defineRoute({
+    input: z.object({}).strict(),
+    output: z.custom<UarInstanceInventorySnapshot>()
+  }),
+  'prometheus.uar.instances.save': defineRoute({
+    input: uarInstanceSaveSchema,
+    output: z.custom<UarInstanceInventorySnapshot>()
+  }),
+  'prometheus.uar.instances.delete': defineRoute({
+    input: uarInstanceDeleteSchema,
+    output: z.custom<UarInstanceInventorySnapshot>()
+  }),
+  'prometheus.uar.instances.select': defineRoute({
+    input: uarInstanceSelectSchema,
+    output: z.custom<UarInstanceInventorySnapshot>()
+  }),
+  'prometheus.uar.instances.test': defineRoute({
+    input: z.object({ instanceId: z.string().min(1).max(128) }).strict(),
+    output: z.custom<UarInstanceInventorySnapshot>()
+  }),
+  'prometheus.uar.instances.migrate': defineRoute({
+    input: z.object({ sessionId: z.string().min(1).max(256), targetInstanceId: z.string().min(1).max(128) }).strict(),
+    output: z.object({ supported: z.literal(false), reason: z.string() })
   }),
   'prometheus.uar.operations.read': defineRoute({
     input: z.object({}).strict(),

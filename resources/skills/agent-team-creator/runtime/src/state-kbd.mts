@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
-import type { KbdIdentity, ObjectValue, TeamState } from './types.mjs';
+import type { HandoffCanonicalIdentity, KbdIdentity, ObjectValue, TeamState } from './types.mjs';
 import { prepareCompletion, recordEvent } from './state-tasks.mjs';
 import { integer, object, text, validateState } from './state-validation.mjs';
 
@@ -26,6 +26,28 @@ function verifyIdentity(state: ObjectValue, identity: KbdIdentity): ObjectValue 
   const task = object(object(change.tasks, 'canonical tasks')[identity.taskId], 'canonical task');
   if (phase.id !== identity.phaseId || change.id !== identity.changeId || task.id !== identity.taskId) throw new Error('Canonical phase/change/task identity mismatch');
   return task;
+}
+
+/** Read-only observation for handoffs; reader errors never expose CLI output. */
+export function observeCanonicalTask(identity: KbdIdentity | undefined, binary: string | undefined, cwd: string): HandoffCanonicalIdentity {
+  const snapshot: HandoffCanonicalIdentity = {
+    path: resolve(cwd),
+    identity: identity ? structuredClone(identity) : null, observation: 'unknown',
+    revision: null, eventId: null, taskStatus: null, receiptSha256: null,
+    reason: identity ? 'reader-not-supplied' : 'task-not-linked',
+  };
+  if (!identity || !binary) return snapshot;
+  try {
+    const directory = resolve(cwd);
+    const result = execute(binary, ['kbd', '--path', directory, 'status', '--json'], directory);
+    const task = verifyIdentity(result.value, identity);
+    const taskStatus = text(task.status, 'canonical task status');
+    return { ...snapshot, observation: 'observed', revision: integer(result.value.revision, 'canonical revision'),
+      eventId: typeof result.value.lastEventId === 'string' ? result.value.lastEventId : null,
+      taskStatus, receiptSha256: createHash('sha256').update(result.stdout).digest('hex'), reason: null };
+  } catch {
+    return { ...snapshot, reason: 'reader-unavailable-or-identity-mismatch' };
+  }
 }
 
 /**

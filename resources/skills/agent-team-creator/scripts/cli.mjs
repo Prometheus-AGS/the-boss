@@ -8,9 +8,10 @@ import { installProject } from './project-install.mjs';
 import { bindUiRoles } from './ui-bindings.mjs';
 import { readState, initState, mutateState, mutateStateAsync, taskAction, completeKbdTask } from './state.mjs';
 import { createHandoff, acceptHandoff } from './handoff.mjs';
+import { inspectHandoff } from './handoff-provenance.mjs';
 import { discoverModels, selectModel } from './models.mjs';
 import { queueMemory, publishMemory } from './memory.mjs';
-import { compileUarPackage, diffUarPackages, writeUarPackage } from './uar-package.mjs';
+import { dispatchUarAuthoring, isUarAuthoringCommand, uarAuthoringCommands } from './uar-package/commands.mjs';
 import { refuseUarActivation, uarBindingInstall, uarBindingPreflight, uarBindingStatus, uarCapabilities, uarPackageInstall, uarPackagePreflight, uarPackageStatus, } from './uar-client.mjs';
 function revision(input) {
     const r = input.expectedRevision;
@@ -20,6 +21,8 @@ function revision(input) {
 }
 const stateFile = (input) => path.resolve(text(input.state, 'state'));
 async function dispatch(command, input) {
+    if (isUarAuthoringCommand(command))
+        return dispatchUarAuthoring(command, input);
     switch (command) {
         case 'guide': return guide(input);
         case 'validate': return { valid: true, team: validateTeam(input.team) };
@@ -40,7 +43,7 @@ async function dispatch(command, input) {
             for (const role of team.roles)
                 if (!role.owns.length)
                     result.diagnostics.push(`${role.id}: file ownership is not yet assigned; resolve it before parallel edits.`);
-            return { ...writeExport(text(input.out, 'out'), result), verification: result.verification, diagnostics: result.diagnostics, instructions: result.instructions };
+            return { ...writeExport(text(input.out, 'out'), result), verification: result.verification, capabilities: result.capabilities, diagnostics: result.diagnostics, instructions: result.instructions };
         }
         case 'task': return mutateState(stateFile(input), revision(input), state => taskAction(state, object(input.task, 'task action')));
         case 'complete-kbd': return mutateState(stateFile(input), revision(input), state => {
@@ -49,6 +52,7 @@ async function dispatch(command, input) {
         case 'handoff-create': return mutateState(stateFile(input), revision(input), state => {
             createHandoff(state, object(input.handoff, 'handoff'), text(input.cwd, 'cwd'));
         });
+        case 'handoff-inspect': return inspectHandoff(readState(stateFile(input)), text(input.id, 'handoff id'), text(input.cwd, 'cwd'), input);
         case 'handoff-accept': return mutateState(stateFile(input), revision(input), state => {
             const destination = object(input.destination, 'destination');
             const harness = target(destination.harness);
@@ -58,15 +62,12 @@ async function dispatch(command, input) {
         });
         case 'models-discover': return discoverModels(input);
         case 'models-select': return selectModel(validateTeam(input.team), text(input.roleId, 'roleId'), strings(input.skills ?? [], 'skills'), (input.taskPolicy ?? {}), input.catalog);
-        case 'memory-queue': return mutateState(stateFile(input), revision(input), state => { queueMemory(state, object(input.entry, 'entry')); });
+        case 'memory-queue': return mutateState(stateFile(input), revision(input), state => { queueMemory(state, object(input.entry, 'entry'), input); });
         case 'memory-publish': {
             let receipt = null;
-            const state = await mutateStateAsync(stateFile(input), revision(input), async (state) => { receipt = await publishMemory(state, object(input.publication, 'publication')); });
+            const state = await mutateStateAsync(stateFile(input), revision(input), async (state) => { receipt = await publishMemory(state, object(input.publication, 'publication'), input); });
             return { state, publication: receipt };
         }
-        case 'uar-package-validate': return { valid: true, package: compileUarPackage(input.package) };
-        case 'uar-package-build': return writeUarPackage(input.out, input.package);
-        case 'uar-package-diff': return diffUarPackages(input.before, input.after);
         case 'uar-capabilities': return uarCapabilities(input);
         case 'uar-package-preflight': return uarPackagePreflight(input);
         case 'uar-package-install': return uarPackageInstall(input);
@@ -78,7 +79,7 @@ async function dispatch(command, input) {
         default: throw Error(`Unknown command: ${command}`);
     }
 }
-const commands = ['guide', 'validate', 'init', 'status', 'team-update', 'export', 'install-project', 'task', 'complete-kbd', 'handoff-create', 'handoff-accept', 'models-discover', 'models-select', 'memory-queue', 'memory-publish', 'uar-package-validate', 'uar-package-build', 'uar-package-diff', 'uar-capabilities', 'uar-package-preflight', 'uar-package-install', 'uar-package-status', 'uar-binding-preflight', 'uar-binding-install', 'uar-binding-status', 'uar-activate'];
+const commands = ['guide', 'validate', 'init', 'status', 'team-update', 'export', 'install-project', 'task', 'complete-kbd', 'handoff-create', 'handoff-inspect', 'handoff-accept', 'models-discover', 'models-select', 'memory-queue', 'memory-publish', ...uarAuthoringCommands, 'uar-capabilities', 'uar-package-preflight', 'uar-package-install', 'uar-package-status', 'uar-binding-preflight', 'uar-binding-install', 'uar-binding-status', 'uar-activate'];
 async function main() {
     if (Number(process.versions.node.split('.')[0]) < 22)
         throw Error('Node.js 22 or newer is required');

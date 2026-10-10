@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import { closeSync, fsyncSync, openSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -63,7 +64,7 @@ export async function exerciseNativeHostCases(input: {
   const { bridge, post, store } = input
   const cases: Array<{ category: string; status: 'passed'; nativeConsumes: number; mcpEffects: number; ownerBinding?: OwnerBinding }> = []
   const initialEffects = input.effects()
-  const native = (): RecordValue => ({ ...input.invocation(), executionKind: 'runtime_native', mountedServerId: 'builtin',
+  const native = (): RecordValue => sealHostInvocation({ ...input.invocation(), executionKind: 'runtime_native', mountedServerId: 'builtin',
     nativeToolName: 'search_tools', providerToolName: 'search_tools', validatedArguments: { query: 'gate-target' } })
   const prepared = async (value = native()) => {
     const preparation = await post('prepare', { invocation: value })
@@ -75,6 +76,7 @@ export async function exerciseNativeHostCases(input: {
     const receipt = await post('resolve', { admissionId: result.preparation.admissionId,
       invocationId: value.invocationId, approved: true, localDisposition: 'allowed' })
     assert.equal(receipt.status, 200)
+    assert.equal((await post('claim', { admissionId: result.preparation.admissionId, invocation: value, receipt: receipt.body })).status, 200)
     return { ...result, receipt: receipt.body, body: { admissionId: result.preparation.admissionId, invocation: value, receipt: receipt.body } }
   }
   const record = (category: string, nativeConsumes = 0, ownerBinding?: OwnerBinding) => {
@@ -167,17 +169,16 @@ export async function exerciseNativeHostCases(input: {
     begin(category)
     const value = native()
     value[field] = { ...value[field], ...patch }
-    const entry = await authorized(value)
-    assert.equal((await post('claim-native', entry.body)).status, 409)
-    assert.equal(store.state(entry.preparation.admissionId), 'authorized')
+    sealHostInvocation(value)
+    assert.equal((await post('prepare', { invocation: value })).status, 409)
     record(category)
   }
   begin('different_exact_approval')
   input.disposition('ask')
   const human = await prepared()
   const other = await prepared()
-  assert(bridge.recordHumanDecision(String(other.preparation.admissionId), true))
-  assert.equal(bridge.recordHumanDecision('unknown-exact-approval', true), false)
+  assert(await bridge.recordHumanDecision(String(other.preparation.admissionId), true))
+  assert.equal(await bridge.recordHumanDecision('unknown-exact-approval', true), false)
   assert.equal((await post('resolve', { admissionId: human.preparation.admissionId, invocationId: human.value.invocationId,
     approved: true, localDisposition: 'approved' })).status, 409)
   record('different_exact_approval')
@@ -205,4 +206,44 @@ export async function exerciseNativeHostCases(input: {
   store.fail()
   record('host_terminal_persistence_failure', 1)
   return { syntheticAuthorityBindings: true, genuineNativeExecution: false, cases, caseCount: cases.length }
+}
+
+/** Synthetic host fixture with the current UAR authority envelope. */
+export function sealHostInvocation(value: RecordValue): RecordValue {
+  value.governancePolicyRevision ??= 'gate-governance-v1'
+  value.resourceRevision ??= 'gate-resource-v1'
+  value.grantRevision ??= 'gate-grant-v1'
+  value.leaseRevision ??= 'gate-lease-v1'
+  value.payloadRevision = fixtureRevision(value.validatedArguments)
+  value.authorityRevision = fixtureRevision({
+    executionKind: value.executionKind,
+    principalId: value.principalId,
+    ownerId: value.ownerId,
+    rootRunId: value.rootRunId,
+    executingRunId: value.executingRunId,
+    runtimeEpoch: value.runtimeEpoch,
+    hostEpoch: value.hostEpoch,
+    catalogRevision: value.catalogRevision,
+    runPolicyRevision: value.runPolicyRevision,
+    expectedGovernancePolicyRevision: value.governancePolicyRevision,
+    toolPolicyRevision: value.toolPolicyRevision,
+    resourceRevision: value.resourceRevision,
+    payloadRevision: value.payloadRevision,
+    grantRevision: value.grantRevision,
+    leaseRevision: value.leaseRevision,
+    budgetRevision: value.budgetRevision,
+    lease: value.lease,
+    budgetReservation: value.budgetReservation
+  })
+  return value
+}
+
+function fixtureRevision(value: unknown): string {
+  const canonicalize = (entry: unknown): unknown => {
+    if (Array.isArray(entry)) return entry.map(canonicalize)
+    if (!entry || typeof entry !== 'object') return entry
+    return Object.fromEntries(Object.entries(entry).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
+      .map(([key, child]) => [key, canonicalize(child)]))
+  }
+  return `sha256:${createHash('sha256').update(JSON.stringify(canonicalize(value))).digest('hex')}`
 }

@@ -1,22 +1,28 @@
-import { randomUUID } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import type { ServerResponse } from 'node:http'
+
+import { validatePath } from '@main/ai/mcp/servers/filesystem'
+import type { UarTeamPreparedEffect } from '@shared/types/uarTeams'
+
+import type { UarAuthorityDecision, UarAuthorityEffect, UarAuthorityProvider } from './UarAuthorityProvider'
+import { sanitizeUarProviderToolName } from './uarToolNames'
 
 import {
   argumentDigest,
   isPreparedInvocation,
   isRecord,
-  type PreparedInvocation,
+  type PreparedInvocation as UarPreparedInvocation,
   UAR_TOOL_ADMISSION_META_KEY,
   UAR_TOOL_ADMISSION_PATH,
   UAR_TOOL_ADMISSION_VERSION,
   type UarHostToolDisposition,
-  type UarToolExecutionKind
+  type UarToolExecutionKind,
+  validAuthorityEnvelope
 } from './toolAdmission/wire'
 import { hasLiveHostClaimFacts, revalidateHostClaim } from './uarHostClaimRevalidation'
-import { encodeUarProviderToolName } from './uarToolNames'
 
 export { UAR_TOOL_ADMISSION_META_KEY, UAR_TOOL_ADMISSION_PATH, UAR_TOOL_ADMISSION_VERSION } from './toolAdmission/wire'
-export type { UarHostToolDisposition } from './toolAdmission/wire'
+export type { PreparedInvocation as UarPreparedInvocation, UarHostToolDisposition } from './toolAdmission/wire'
 
 export type UarHostAdmissionState =
   | 'prepared'
@@ -52,9 +58,12 @@ export type UarHostAdmissionSnapshot = {
 
 type AdmissionRecord = {
   admissionId: string
-  invocation: PreparedInvocation
+  invocation: UarPreparedInvocation
   argumentDigest: string
   hostDisposition: UarHostToolDisposition
+  authority: UarAuthorityDecision
+  claimRevalidated: boolean
+  managedDispatchClaimed: boolean
   state: UarHostAdmissionState
   decision?: boolean
   actionDisplay: Record<string, unknown>
@@ -67,10 +76,15 @@ type ClaimResult = { call?: JsonRpcCall; admissionId?: string; error?: string }
 export interface UarHostToolAdmissionOptions {
   sessionId?: string
   ownerId: string
+  principalId: string
   workspace: string
+  authorityProvider: UarAuthorityProvider
   disposition(toolName: string): UarHostToolDisposition
   persistLifecycle?(snapshot: UarHostAdmissionSnapshot): void
   onLifecycle?(snapshot: UarHostAdmissionSnapshot): void
+  verifyTeamInvocation?(invocation: UarPreparedInvocation): Promise<boolean>
+  verifyInvocation?(invocation: UarPreparedInvocation): Promise<boolean>
+  recordDelegatedApproval?(body: unknown): Promise<Record<string, unknown>>
 }
 
 export class UarHostToolAdmission {
@@ -82,22 +96,36 @@ export class UarHostToolAdmission {
 
   constructor(private readonly options: UarHostToolAdmissionOptions) {}
 
-  handleHttp(method: string | undefined, path: string, body: unknown, response: ServerResponse): boolean {
+  async handleHttp(
+    method: string | undefined,
+    path: string,
+    body: unknown,
+    response: ServerResponse
+  ): Promise<boolean> {
     if (!path.startsWith(`${UAR_TOOL_ADMISSION_PATH}/`)) return false
     const operation = path.slice(UAR_TOOL_ADMISSION_PATH.length + 1)
     if (method === 'POST' && operation === 'prepare') return this.prepare(body, response)
     if (method === 'POST' && operation === 'resolve') return this.resolve(body, response)
-    if (method === 'POST' && operation === 'claim') return this.revalidateClaim(body, response)
-    if (method === 'POST' && operation === 'claim-native') return this.claimNative(body, response)
+    if (method === 'POST' && operation === 'claim') return this.claim(body, response, false)
+    if (method === 'POST' && operation === 'claim-native') return this.claim(body, response, true)
     if (method === 'POST' && operation === 'cancel') return this.cancel(body, response)
     if (method === 'POST' && operation === 'finish') return this.finish(body, response)
     if (method === 'POST' && operation === 'inspect') return this.inspect(body, response)
+    if (method === 'POST' && operation === 'delegated-approval' && this.options.recordDelegatedApproval) {
+      try {
+        this.respond(response, 200, await this.options.recordDelegatedApproval(body))
+      } catch {
+        this.respond(response, 409, { error: 'delegated_host_approval_mismatch' })
+      }
+      return true
+    }
     this.respond(response, 404, { error: 'Unknown tool admission operation' })
     return true
   }
 
   claimToolCall(body: unknown, serverName: string): ClaimResult {
-    if (Array.isArray(body)) return { call: { id: null }, error: 'Batch tools/call is not supported by the managed host' }
+    if (Array.isArray(body))
+      return { call: { id: null }, error: 'Batch tools/call is not supported by the managed host' }
     if (!isRecord(body) || body.method !== 'tools/call' || !isRecord(body.params)) return {}
     const call = { id: body.id ?? null }
     const name = body.params.name
@@ -112,7 +140,7 @@ export class UarHostToolAdmission {
     if (!record || typeof invocationId !== 'string') return { call, error: 'Managed tool admission is unknown' }
     if (record.state !== 'authorized') return { call, error: 'Managed tool admission is not executable' }
     const invocation = record.invocation
-    const providerName = encodeUarProviderToolName(`${serverName}__${name}`)
+    const providerName = sanitizeUarProviderToolName(`${serverName}__${name}`)
     const matches =
       meta.version === UAR_TOOL_ADMISSION_VERSION &&
       invocation.executionKind === 'host_mcp' &&
@@ -134,19 +162,29 @@ export class UarHostToolAdmission {
       this.transition(record, 'invalidated')
       return { call, error: 'Managed tool policy changed before dispatch' }
     }
+    if (!record.claimRevalidated) return { call, error: 'Managed tool admission was not revalidated before dispatch' }
+    if (record.managedDispatchClaimed) return { call, error: 'Managed tool admission was already dispatched' }
     if (!hasLiveHostClaimFacts(invocation)) return { call, error: 'Managed tool lease or budget is not executable' }
     try {
       this.transition(record, 'claimed')
     } catch {
       return { call, error: 'Managed tool claim evidence could not be persisted; dispatch was blocked' }
     }
+    record.managedDispatchClaimed = true
     return { call, admissionId: record.admissionId }
   }
 
-  recordHumanDecision(admissionId: string, approved: boolean): boolean {
+  async recordHumanDecision(admissionId: string, approved: boolean): Promise<boolean> {
     const record = this.records.get(admissionId)
     if (!record) return false
     if (record.decision !== undefined) return record.decision === approved
+    if (!['prepared', 'awaiting-human'].includes(record.state)) return false
+    if (
+      record.authority.disposition === 'challenge' &&
+      !(await this.options.authorityProvider.decide(record.authority, approved))
+    ) {
+      return false
+    }
     if (!['prepared', 'awaiting-human'].includes(record.state)) return false
     this.transition(record, approved ? 'awaiting-ack' : 'denied')
     record.decision = approved
@@ -195,27 +233,45 @@ export class UarHostToolAdmission {
     return [...this.records.values()].map((record) => this.snapshot(record))
   }
 
-  private prepare(body: unknown, response: ServerResponse): true {
+  private async prepare(body: unknown, response: ServerResponse): Promise<true> {
     const invocation = isRecord(body) && isPreparedInvocation(body.invocation) ? body.invocation : undefined
     if (!invocation) {
       this.respond(response, 422, { error: 'Invalid prepared tool invocation' })
       return true
     }
-    if (!this.binds(invocation)) {
+    if (
+      !this.binds(invocation) ||
+      (this.scopeVerifier && !(await this.scopeVerifier(invocation)))
+    ) {
       this.respond(response, 409, { error: 'Prepared tool invocation belongs to another host binding' })
+      return true
+    }
+    if (!validAuthorityEnvelope(invocation)) {
+      this.respond(response, 409, { error: 'Prepared tool invocation has an invalid authority binding' })
       return true
     }
     if (this.invocationIndex.has(invocation.invocationId)) {
       this.respond(response, 409, { error: 'Prepared tool invocation already exists' })
       return true
     }
-    const hostDisposition = this.options.disposition(invocation.providerToolName)
     const admissionId = randomUUID()
+    const localDisposition = this.options.disposition(invocation.providerToolName)
+    let authority: UarAuthorityDecision
+    try {
+      authority = await this.options.authorityProvider.evaluate(this.effect(admissionId, invocation, localDisposition))
+    } catch (error) {
+      this.respond(response, 503, { error: authorityError(error) })
+      return true
+    }
+    const hostDisposition = composeDisposition(localDisposition, authority.disposition)
     const record: AdmissionRecord = {
       admissionId,
       invocation: structuredClone(invocation),
       argumentDigest: argumentDigest(invocation.validatedArguments),
       hostDisposition,
+      authority,
+      claimRevalidated: false,
+      managedDispatchClaimed: false,
       state: hostDisposition === 'auto' ? 'prepared' : hostDisposition === 'ask' ? 'awaiting-human' : 'denied',
       actionDisplay: safeActionDisplay(invocation),
       updatedAt: Date.now()
@@ -276,17 +332,9 @@ export class UarHostToolAdmission {
     return true
   }
 
-  private revalidateClaim(body: unknown, response: ServerResponse): true {
-    const record = isRecord(body) && typeof body.admissionId === 'string' ? this.records.get(body.admissionId) : undefined
-    const result = revalidateHostClaim(body, record, record ? this.receipt(record) : undefined, (name) =>
-      this.options.disposition(name)
-    )
-    this.respond(response, result.status, result.body)
-    return true
-  }
-
-  private claimNative(body: unknown, response: ServerResponse): true {
-    const record = isRecord(body) && typeof body.admissionId === 'string' ? this.records.get(body.admissionId) : undefined
+  private async claim(body: unknown, response: ServerResponse, consumeNative: boolean): Promise<true> {
+    const admissionId = isRecord(body) && typeof body.admissionId === 'string' ? body.admissionId : ''
+    const record = this.records.get(admissionId)
     const result = revalidateHostClaim(body, record, record ? this.receipt(record) : undefined, (name) =>
       this.options.disposition(name)
     )
@@ -294,17 +342,56 @@ export class UarHostToolAdmission {
       this.respond(response, result.status, result.body)
       return true
     }
-    if (record.invocation.executionKind !== 'runtime_native') {
+    const invocation = record.invocation
+    if (consumeNative && invocation.executionKind !== 'runtime_native') {
       this.respond(response, 409, { error: 'Tool admission does not authorize native execution' })
       return true
     }
-    try {
-      this.transition(record, 'claimed')
-    } catch {
-      this.respond(response, 503, { error: 'Tool claim evidence could not be persisted; dispatch was blocked' })
+    const currentDisposition = this.options.disposition(invocation.providerToolName)
+    if (this.scopeVerifier && !(await this.scopeVerifier(invocation))) {
+      this.respond(response, 409, { error: 'Team tool authority changed before claim' })
       return true
     }
-    this.respond(response, 200, result.body)
+    let authority: UarAuthorityDecision
+    try {
+      authority = await this.options.authorityProvider.revalidate(
+        this.effect(admissionId, invocation, currentDisposition),
+        record.authority
+      )
+    } catch (error) {
+      this.respond(response, 503, { error: authorityError(error) })
+      return true
+    }
+    const currentHostDisposition = composeDisposition(currentDisposition, authority.disposition)
+    if (
+      authority.disposition !== 'permit' ||
+      authority.bindingRevision !== record.authority.bindingRevision ||
+      currentHostDisposition === 'deny' ||
+      (currentHostDisposition === 'ask' && record.decision !== true)
+    ) {
+      this.transition(record, 'invalidated')
+      this.respond(response, 409, { error: `Tool authority revalidation denied: ${authority.reason}` })
+      return true
+    }
+    const finalClaim = revalidateHostClaim(body, record, this.receipt(record), (name) => this.options.disposition(name))
+    if (finalClaim.status !== 200) {
+      this.respond(response, finalClaim.status, finalClaim.body)
+      return true
+    }
+    if (consumeNative) {
+      if (!record.claimRevalidated) {
+        this.respond(response, 409, { error: 'Native tool admission was not revalidated before dispatch' })
+        return true
+      }
+      try {
+        this.transition(record, 'claimed')
+      } catch {
+        this.respond(response, 503, { error: 'Tool claim evidence could not be persisted; dispatch was blocked' })
+        return true
+      }
+    }
+    record.claimRevalidated = true
+    this.respond(response, 200, this.receipt(record))
     return true
   }
 
@@ -329,7 +416,8 @@ export class UarHostToolAdmission {
   private finish(body: unknown, response: ServerResponse): true {
     const admissionId = isRecord(body) && typeof body.admissionId === 'string' ? body.admissionId : ''
     const invocationId = isRecord(body) && typeof body.invocationId === 'string' ? body.invocationId : ''
-    const outcome = isRecord(body) && (body.outcome === 'succeeded' || body.outcome === 'failed') ? body.outcome : undefined
+    const outcome =
+      isRecord(body) && (body.outcome === 'succeeded' || body.outcome === 'failed') ? body.outcome : undefined
     const record = this.records.get(admissionId)
     if (!record || record.invocation.invocationId !== invocationId || !outcome) {
       this.respond(response, 404, { error: 'Tool admission is unknown' })
@@ -345,12 +433,40 @@ export class UarHostToolAdmission {
     return true
   }
 
-  private inspect(body: unknown, response: ServerResponse): true {
+  private async inspect(body: unknown, response: ServerResponse): Promise<true> {
     const admissionId = isRecord(body) && typeof body.admissionId === 'string' ? body.admissionId : ''
     const record = this.records.get(admissionId)
     if (!record) {
       this.respond(response, 404, { error: 'Tool admission is unknown' })
       return true
+    }
+    const inspection = isRecord(body) ? body.inspection : undefined
+    let preparedEffect: UarTeamPreparedEffect | undefined
+    if (inspection !== undefined) {
+      const invocation = record.invocation
+      if (
+        !isRecord(inspection) ||
+        inspection.ownerId !== invocation.ownerId ||
+        inspection.workspace !== invocation.workspace ||
+        inspection.rootRunId !== invocation.rootRunId ||
+        inspection.runId !== invocation.executingRunId ||
+        inspection.toolCallId !== invocation.modelToolCallId ||
+        inspection.callIndex !== invocation.callIndex ||
+        inspection.toolName !== invocation.providerToolName ||
+        !isRecord(inspection.actionDisplay) ||
+        argumentDigest(inspection.actionDisplay) !== argumentDigest(record.actionDisplay)
+      ) {
+        this.respond(response, 409, { error: 'Prepared effect does not match its pending approval' })
+        return true
+      }
+      if (['prepared', 'awaiting-human'].includes(record.state)) {
+        try {
+          preparedEffect = await inspectPreparedEffect(record)
+        } catch {
+          this.respond(response, 409, { error: 'Prepared effect target is unavailable' })
+          return true
+        }
+      }
     }
     this.respond(response, 200, {
       admissionId,
@@ -359,24 +475,33 @@ export class UarHostToolAdmission {
       toolName: record.invocation.providerToolName,
       state: record.state,
       hostDisposition: record.hostDisposition,
-      updatedAt: record.updatedAt
+      updatedAt: record.updatedAt,
+      ...(preparedEffect ? { preparedEffect } : {})
     })
     return true
   }
 
-  private binds(invocation: PreparedInvocation): boolean {
+  private binds(invocation: UarPreparedInvocation): boolean {
     if (
       invocation.version !== UAR_TOOL_ADMISSION_VERSION ||
       invocation.hostEpoch !== this.hostEpoch ||
       invocation.ownerId !== this.options.ownerId ||
+      (!this.scopeVerifier && invocation.principalId !== this.options.principalId) ||
       invocation.workspace !== this.options.workspace ||
       invocation.attempt !== 1
     ) {
       return false
     }
     this.runtimeEpoch ??= invocation.runtimeEpoch
-    this.rootRunId ??= invocation.rootRunId
-    return this.runtimeEpoch === invocation.runtimeEpoch && this.rootRunId === invocation.rootRunId
+    if (!this.scopeVerifier) this.rootRunId ??= invocation.rootRunId
+    return (
+      this.runtimeEpoch === invocation.runtimeEpoch &&
+      (Boolean(this.scopeVerifier) || this.rootRunId === invocation.rootRunId)
+    )
+  }
+
+  private get scopeVerifier() {
+    return this.options.verifyInvocation ?? this.options.verifyTeamInvocation
   }
 
   private receipt(record: AdmissionRecord): Record<string, unknown> {
@@ -433,9 +558,83 @@ export class UarHostToolAdmission {
     response.writeHead(status, { 'content-type': 'application/json' })
     response.end(JSON.stringify(value))
   }
+
+  private effect(
+    effectId: string,
+    invocation: UarPreparedInvocation,
+    hostDisposition: UarHostToolDisposition
+  ): UarAuthorityEffect {
+    return {
+      effectId,
+      invocation,
+      trustedPrincipal: this.options.ownerId,
+      trustedActor: this.scopeVerifier ? invocation.principalId : this.options.principalId,
+      trustedSessionId: this.options.sessionId ?? this.options.ownerId,
+      trustedWorkspace: this.options.workspace,
+      hostDisposition
+    }
+  }
 }
 
-function safeActionDisplay(invocation: PreparedInvocation): Record<string, unknown> {
+async function inspectPreparedEffect(record: AdmissionRecord): Promise<UarTeamPreparedEffect> {
+  const invocation = record.invocation
+  const args = invocation.validatedArguments
+  const effect: UarTeamPreparedEffect = {
+    version: 1,
+    admissionId: record.admissionId,
+    invocationId: invocation.invocationId,
+    toolCallId: invocation.modelToolCallId,
+    callIndex: invocation.callIndex,
+    rootRunId: invocation.rootRunId,
+    runId: invocation.executingRunId,
+    ownerId: invocation.ownerId,
+    workspace: invocation.workspace,
+    toolName: invocation.providerToolName,
+    argumentsSha256: record.argumentDigest,
+    actionDisplaySha256: argumentDigest(record.actionDisplay)
+  }
+  if (invocation.mountedServerId !== 'filesystem') return effect
+  const fileOperation = ['read', 'write', 'edit'].includes(invocation.nativeToolName)
+  const queryOperation = ['ls', 'glob', 'grep'].includes(invocation.nativeToolName)
+  const target = fileOperation ? args.file_path : queryOperation ? args.path || invocation.workspace : undefined
+  if (typeof target === 'string') effect.targetPath = await validatePath(target, invocation.workspace)
+  if (invocation.nativeToolName === 'write' && typeof args.content === 'string') {
+    effect.write = { contentSha256: textDigest(args.content) }
+  }
+  if (
+    invocation.nativeToolName === 'edit' &&
+    typeof args.old_string === 'string' &&
+    typeof args.new_string === 'string'
+  ) {
+    effect.edit = {
+      oldStringSha256: textDigest(args.old_string),
+      newStringSha256: textDigest(args.new_string),
+      oldStringLength: args.old_string.length,
+      newStringLength: args.new_string.length,
+      replaceAll: args.replace_all === true
+    }
+  }
+  return effect
+}
+
+function textDigest(value: string): string {
+  return createHash('sha256').update(value).digest('hex')
+}
+
+function composeDisposition(
+  local: UarHostToolDisposition,
+  authority: UarAuthorityDecision['disposition']
+): UarHostToolDisposition {
+  if (local === 'deny' || authority === 'deny') return 'deny'
+  if (local === 'ask' || authority === 'challenge') return 'ask'
+  return 'auto'
+}
+
+function authorityError(error: unknown): string {
+  return error instanceof Error ? error.message : 'Host authority provider is unavailable'
+}
+
+function safeActionDisplay(invocation: UarPreparedInvocation): Record<string, unknown> {
   const target = safeTarget(invocation.validatedArguments)
   return {
     operation: invocation.nativeToolName,
@@ -446,7 +645,7 @@ function safeActionDisplay(invocation: PreparedInvocation): Record<string, unkno
 }
 
 function safeTarget(argumentsValue: Record<string, unknown>): string | undefined {
-  for (const key of ['path', 'filePath', 'directory', 'root', 'uri', 'url']) {
+  for (const key of ['path', 'file_path', 'filePath', 'directory', 'root', 'uri', 'url']) {
     const value = argumentsValue[key]
     if (typeof value !== 'string' || !value.trim()) continue
     const trimmed = value.trim().slice(0, 512)
@@ -464,3 +663,4 @@ function safeTarget(argumentsValue: Record<string, unknown>): string | undefined
   }
   return undefined
 }
+

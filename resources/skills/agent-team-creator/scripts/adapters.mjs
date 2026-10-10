@@ -2,6 +2,7 @@ import { identifier, json } from './adapters-codecs.mjs';
 import { exportLocal } from './adapters-local.mjs';
 import { exportService } from './adapters-services.mjs';
 import { bindUiRoles } from './ui-bindings.mjs';
+import { adapterCapabilities, requireAdapterCapabilities } from './adapters-capabilities.mjs';
 const sources = {
     codex: { source: 'https://learn.chatgpt.com/docs/agent-configuration/subagents', version: 'documentation inspected 2026-09-24' },
     claude: { source: 'https://code.claude.com/docs/en/sub-agents', version: 'documentation inspected 2026-09-24' },
@@ -13,6 +14,11 @@ const sources = {
     uar: { source: 'https://github.com/Prometheus-AGS/universal-agent-runtime/blob/ba12845138104d3c8c3b8bca8bc7c5be24004e91/src/uar/domain/artifact.rs', version: '1.0.0 / ba12845138104d3c8c3b8bca8bc7c5be24004e91' },
     bossfang: { source: 'crates/librefang-types/src/agent.rs; crates/librefang-hands/src/lib.rs; crates/librefang-api/src/routes/workflows/workflow.rs', version: '2026.7.11 / c719a4d683e4d3fb42e436f812e0193f865c9d2c' },
 };
+function codexNameCheck(value, pattern) {
+    if (typeof value !== 'string' || !pattern.test(value))
+        throw new Error(`Native agent name must match ${pattern.source}.`);
+    return value;
+}
 function safePath(path) {
     if (!path || path.includes('\\') || path.startsWith('/') || /[\x00-\x1f\x7f:]/.test(path)) {
         throw new Error(`Unsafe native export path: ${JSON.stringify(path)}`);
@@ -59,8 +65,8 @@ export function exportTeam(team, target) {
             paths.add(key);
             files[path] = content;
         },
-        claimName(value) {
-            const name = identifier(value, 'Native agent name');
+        claimName(value, pattern) {
+            const name = pattern ? codexNameCheck(value, pattern) : identifier(value, 'Native agent name');
             if (names.has(name))
                 throw new Error(`Native agent name collision: ${name}`);
             names.add(name);
@@ -68,6 +74,8 @@ export function exportTeam(team, target) {
         },
     };
     const native = team.native?.[target];
+    const capabilities = adapterCapabilities(target);
+    requireAdapterCapabilities(target, native?.requiredCapabilities, capabilities);
     if (native && (!native.source?.trim() || !native.version?.trim())) {
         throw new Error('Native configuration requires a nonempty source and version receipt.');
     }
@@ -82,7 +90,10 @@ export function exportTeam(team, target) {
         context.add('native-options.json', json(native.options));
     const verification = { level: 'source-verified', ...sources[target], live: 'unverified' };
     context.add('export-receipt.json', json({
-        target, verification, nativeProvenance: native ? { source: native.source, version: native.version } : null,
+        target, verification, capabilities, requiredCapabilities: native?.requiredCapabilities ?? [],
+        portableModelPolicies: { team: team.modelPolicy ?? null, skills: team.skillPolicies ?? null,
+            roles: Object.fromEntries(team.roles.filter(role => role.modelPolicy).map(role => [role.id, role.modelPolicy])) },
+        nativeProvenance: native ? { source: native.source, version: native.version } : null,
         nativeOptions: native?.options ?? null,
         roleOverrides: Object.fromEntries(team.roles.filter(role => role.native?.[target]).map(role => [role.id, role.native?.[target]])),
         diagnostics, instructions,
@@ -93,5 +104,5 @@ export function exportTeam(team, target) {
         }
         context.add(path, content);
     }
-    return { target, files, verification, diagnostics, instructions };
+    return { target, files, verification, capabilities, diagnostics, instructions };
 }

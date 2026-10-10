@@ -1,5 +1,5 @@
 import type { Tool } from '@shared/ai/tool'
-import type { AgentEntity, AgentPermissionMode } from '@shared/data/api/schemas/agents'
+import type { AgentEntity, AgentPermissionMode, UarModelAssignment } from '@shared/data/api/schemas/agents'
 import type { AgentType, InstalledSkill } from '@shared/data/types/agent'
 import type { Assistant } from '@shared/data/types/assistant'
 import type { UniqueModelId } from '@shared/data/types/model'
@@ -20,6 +20,7 @@ export type ResourceCreateValues = {
   avatar: string
   name: string
   modelId: UniqueModelId
+  uarModelAssignment?: UarModelAssignment
   description: string
   prompt: string
   knowledgeBaseIds: string[]

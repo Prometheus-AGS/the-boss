@@ -8,18 +8,20 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { CallToolRequestSchema, LATEST_PROTOCOL_VERSION, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 
+import { createLocalUarAuthorityProvider } from '../../src/main/ai/runtime/uar/UarAuthorityProvider'
 import { createUarHostMcpBridge } from '../../src/main/ai/runtime/uar/UarHostMcpBridge'
 import {
   UAR_TOOL_ADMISSION_META_KEY,
   UAR_TOOL_ADMISSION_VERSION,
   type UarHostToolDisposition
 } from '../../src/main/ai/runtime/uar/UarHostToolAdmission'
-import { exerciseNativeHostCases, lifecycleFixture, nativeHostProgress } from './bauar-native-host-cases'
+import { exerciseNativeHostCases, lifecycleFixture, nativeHostProgress, sealHostInvocation } from './bauar-native-host-cases'
 
 type JsonRecord = Record<string, unknown>
 type MatrixResult = { host: UarHostToolDisposition; local: 'auto' | 'ask' | 'deny'; result: string }
 
 const ownerId = 'gate-a1-owner'
+const principalId = 'gate-a1-agent'
 
 async function main(): Promise<void> {
   const workspace = await mkdtemp(join(tmpdir(), 'bauar-host-admission-'))
@@ -41,7 +43,14 @@ async function main(): Promise<void> {
   })
   const bridge = await createUarHostMcpBridge(
     { filesystem: { name: 'filesystem', instance: filesystem } },
-    { ownerId, workspace, disposition: () => hostDisposition, persistLifecycle: store.persist }
+    {
+      ownerId,
+      principalId,
+      workspace,
+      authorityProvider: createLocalUarAuthorityProvider(),
+      disposition: () => hostDisposition,
+      persistLifecycle: store.persist
+    }
   )
   const mounted = bridge.servers[0]
   assert(mounted)
@@ -58,7 +67,7 @@ async function main(): Promise<void> {
       argumentsValue: JsonRecord = { path: '/gate-a1/workspace/file.txt', content: 'protected' }
     ): JsonRecord => {
       ordinal += 1
-      return {
+      return sealHostInvocation({
         version: UAR_TOOL_ADMISSION_VERSION,
         executionKind: 'host_mcp',
         invocationId: `gate-a1-invocation-${ordinal}`,
@@ -67,13 +76,13 @@ async function main(): Promise<void> {
         rootRunId: 'gate-a1-root',
         executingRunId: 'gate-a1-root',
         ownerId,
-        principalId: ownerId,
+        principalId,
         workspace,
         runtimeEpoch: 'gate-a1-runtime',
         hostEpoch: bridge.toolAdmission.hostEpoch,
         authorityRevision: `gate-a1-authority-${ordinal}`,
         budgetRevision: 'gate-a1-budget-v1',
-        lease: { leaseId: `gate-a1-lease-${ordinal}`, task: 'gate-a1-root', active: true, attempt: 1, epoch: 'gate-a1-runtime', holder: ownerId,
+        lease: { leaseId: `gate-a1-lease-${ordinal}`, task: 'gate-a1-root', active: true, attempt: 1, epoch: 'gate-a1-runtime', holder: principalId,
           expiresAt: Math.floor(Date.now() / 1_000) + 600 },
         budgetReservation: { reservationId: `gate-a1-reservation-${ordinal}`, budgetId: 'gate-a1-budget', active: true, amount: 1, unit: 'tool_call', revision: 'gate-a1-budget-v1',
           expiresAt: Math.floor(Date.now() / 1_000) + 600 },
@@ -86,7 +95,7 @@ async function main(): Promise<void> {
         approvalClass: 'not_required',
         callIndex: ordinal,
         validatedArguments: argumentsValue
-      }
+      })
     }
     const post = async (operation: string, body: JsonRecord): Promise<{ status: number; body: JsonRecord }> => {
       const response = await fetch(`${bridge.toolAdmission.url}/${operation}`, {
@@ -167,7 +176,7 @@ async function main(): Promise<void> {
           continue
         }
         const needsHuman = host === 'ask' || local === 'ask'
-        if (needsHuman) assert(bridge.recordHumanDecision(String(prepared.admissionId), true))
+        if (needsHuman) assert(await bridge.recordHumanDecision(String(prepared.admissionId), true))
         const authorized = await resolve(prepared, needsHuman ? 'approved' : 'allowed', true)
         assert.equal(authorized.status, 200)
         assert.equal(authorized.body.admissionId, prepared.admissionId)
@@ -200,13 +209,8 @@ async function main(): Promise<void> {
     assert.equal((await post('prepare', { invocation: missingRevision })).status, 422)
     const expired = invocation(identicalArguments)
     ;(expired.lease as JsonRecord).expiresAt = 0
-    const expiredPrepared = await prepare(expired)
-    const expiredReceipt = await post('resolve', { admissionId: expiredPrepared.admissionId,
-      invocationId: expiredPrepared.invocationId, localDisposition: 'allowed', approved: true })
-    assert.equal(expiredReceipt.status, 200)
-    assert.equal((await post('claim', { admissionId: expiredPrepared.admissionId,
-      invocation: expired, receipt: expiredReceipt.body })).status, 409)
-    await assert.rejects(() => callManaged(expiredPrepared, identicalArguments))
+    sealHostInvocation(expired)
+    assert.equal((await post('prepare', { invocation: expired })).status, 409)
     const metadataMismatch = await prepare(invocation(identicalArguments))
     assert.equal((await resolve(metadataMismatch, 'allowed', true)).status, 200)
     await assert.rejects(() => callManaged({ ...metadataMismatch, authorityRevision: 'changed' }, identicalArguments))
@@ -243,9 +247,7 @@ async function main(): Promise<void> {
     const mismatchArguments = { path: '/gate-a1/workspace/mismatch.txt', content: 'original' }
     const mismatch = await prepare(invocation(mismatchArguments))
     assert.equal((await resolve(mismatch, 'allowed', true)).status, 200)
-    await assert.rejects(() =>
-      callManaged(mismatch, { path: '/gate-a1/workspace/mismatch.txt', content: 'changed' })
-    )
+    await assert.rejects(() => callManaged(mismatch, { path: '/gate-a1/workspace/mismatch.txt', content: 'changed' }))
     await assert.rejects(() => client.callTool({ name: 'write_file', arguments: {} }))
 
     const batch = await fetch(mounted.url, {

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.prometheus-ags.dev/uar/collaboration/0.1.0-draft.2/conversion-report.schema.json",
+  "title": "UAR ConversionReport — immutable field-level compatibility evidence",
+  "type": "object",
+  "properties": {
+    "profile": {
+      "const": "urn:prometheus:uar:collaboration:0.1.0-draft.2"
+    },
+    "kind": {
+      "const": "ConversionReport"
+    },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "version": {
+      "$ref": "common.schema.json#/$defs/semver"
+    },
+    "contentDigest": {
+      "$ref": "common.schema.json#/$defs/digest"
+    },
+    "provenance": {
+      "$ref": "common.schema.json#/$defs/provenance"
+    },
+    "requiredCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "extensions": {
+      "$ref": "common.schema.json#/$defs/extensions"
+    },
+    "exportClass": {
+      "const": "portable-evidence"
+    },
+    "source": {
+      "$ref": "common.schema.json#/$defs/sourceIdentity"
+    },
+    "target": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "harness": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "required": [
+        "profile",
+        "harness"
+      ],
+      "additionalProperties": false
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/diagnostic"
+      }
+    },
+    "activationBlocked": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "profile",
+    "kind",
+    "id",
+    "version",
+    "contentDigest",
+    "provenance",
+    "requiredCapabilities",
+    "extensions",
+    "exportClass",
+    "source",
+    "target",
+    "diagnostics",
+    "activationBlocked"
+  ],
+  "additionalProperties": false
+}

@@ -7,6 +7,8 @@ type UarSettingsSearch = {
   panel?: string
   focusId?: string
   agentId?: string
+  adminInstanceId?: string
+  adminWorkspaceId?: string
 }
 
 export const Route = createFileRoute('/settings/uar')({
@@ -17,6 +19,8 @@ export const Route = createFileRoute('/settings/uar')({
   validateSearch: (search: Record<string, unknown>): UarSettingsSearch => ({
     ...(typeof search.panel === 'string' ? { panel: search.panel } : {}),
     ...(typeof search.focusId === 'string' ? { focusId: search.focusId } : {}),
-    ...(typeof search.agentId === 'string' ? { agentId: search.agentId } : {})
+    ...(typeof search.agentId === 'string' ? { agentId: search.agentId } : {}),
+    ...(typeof search.adminInstanceId === 'string' ? { adminInstanceId: search.adminInstanceId } : {}),
+    ...(typeof search.adminWorkspaceId === 'string' ? { adminWorkspaceId: search.adminWorkspaceId } : {})
   })
 })

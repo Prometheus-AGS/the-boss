@@ -15,6 +15,8 @@ export const oauthHandlers: IpcHandlersFor<typeof oauthRequestSchemas> = {
   },
   'oauth.sign_in.attach': ({ providerId, requestId }, ctx) =>
     mapOAuthSignInCancellation(runtime().joinActiveSignIn(ctx.senderId, providerId, requestId)),
+  'oauth.sign_in.submit_code': async ({ providerId, requestId, code }, ctx) =>
+    runtime().submitAuthorizationCode(ctx.senderId, providerId, requestId, code),
   'oauth.cancel_sign_in': ({ providerId, requestId }, ctx) =>
     runtime().cancelSignIn(ctx.senderId, providerId, requestId),
   'oauth.has_token': ({ providerId }) => runtime().hasToken(providerId),

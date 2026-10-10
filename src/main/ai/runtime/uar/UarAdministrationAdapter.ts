@@ -14,6 +14,8 @@ import {
   type UarSettingsUpdateResult
 } from '@shared/types/prometheusIntegration'
 
+import type { UarSidecarEndpoint } from './UarSidecarService'
+
 const rawSettingSchema = z.object({
   key: z.string().min(1),
   saved: z.unknown(),
@@ -158,6 +160,7 @@ const UAR_ADMIN_METHOD_ALLOWLIST = new Set<string>([
   'runs.create\u0000POST\u0000/api/uar/runs\u0000owner\u0000live',
   'runs.list\u0000GET\u0000/api/uar/runs\u0000owner\u0000read',
   'runs.read\u0000GET\u0000/api/uar/runs/{id}\u0000owner\u0000read',
+  'runs.events\u0000GET\u0000/api/uar/runs/{id}/events\u0000owner\u0000read',
   'runs.stream\u0000GET\u0000/api/uar/runs/{id}/stream\u0000owner\u0000live',
   'runs.cancel\u0000POST\u0000/api/uar/runs/{id}/cancel\u0000owner\u0000live',
   'runs.approve\u0000POST\u0000/api/uar/runs/{id}/tool-approval\u0000owner\u0000live',
@@ -303,15 +306,42 @@ const UAR_ADMIN_METHOD_ALLOWLIST = new Set<string>([
   'collaboration.deployment_bindings.preflight\u0000POST\u0000/api/v1/collaboration/deployment-bindings:preflight\u0000owner\u0000read',
   'collaboration.deployment_bindings.install\u0000POST\u0000/api/v1/collaboration/deployment-bindings\u0000owner\u0000live',
   'collaboration.deployment_bindings.list\u0000GET\u0000/api/v1/collaboration/deployment-bindings\u0000owner\u0000read',
+  'team-definitions.list\u0000GET\u0000/api/v1/collaboration/team-definitions\u0000owner\u0000read',
+  'team-instances.list\u0000GET\u0000/api/v1/collaboration/team-instances\u0000owner\u0000read',
+  'team-instances.create\u0000POST\u0000/api/v1/collaboration/team-instances\u0000owner\u0000live',
+  'team-instances.read\u0000GET\u0000/api/v1/collaboration/team-instances/{id}\u0000owner\u0000read',
+  'team-instances.tasks.list\u0000GET\u0000/api/v1/collaboration/team-instances/{id}/tasks\u0000owner\u0000read',
+  'team-instances.tasks.create\u0000POST\u0000/api/v1/collaboration/team-instances/{id}/tasks\u0000owner\u0000live',
+  'team-instances.tasks.read\u0000GET\u0000/api/v1/collaboration/team-instances/{id}/tasks/{taskId}\u0000owner\u0000read',
+  'team-instances.tasks.admit\u0000POST\u0000/api/v1/collaboration/team-instances/{id}/tasks/{taskId}/admit\u0000owner\u0000live',
+  'team-instances.tasks.admit-queued\u0000POST\u0000/api/v1/collaboration/team-instances/{id}/tasks/{taskId}/admit-queued\u0000admin\u0000live',
+  'team-instances.attempts.dispatch\u0000POST\u0000/api/v1/collaboration/team-instances/{id}/attempts/{attemptId}/dispatch\u0000admin\u0000live',
+  'team-execution.owner.read\u0000GET\u0000/api/v1/collaboration/execution-owner\u0000owner\u0000read',
+  'team-execution.owner.quiesce\u0000POST\u0000/api/v1/collaboration/execution-owner/quiesce\u0000admin\u0000live',
+  'team-execution.owner.reclaim\u0000POST\u0000/api/v1/collaboration/execution-owner/reclaim\u0000admin\u0000live',
+  'team-instances.execution\u0000GET\u0000/api/v1/collaboration/team-instances/{id}/execution\u0000owner\u0000read',
+  'team-instances.attempts.context\u0000GET\u0000/api/v1/collaboration/team-instances/{id}/attempts/{attemptId}/context\u0000owner\u0000read',
+  'team-instances.peer-messages\u0000GET\u0000/api/v1/collaboration/team-instances/{id}/peer-messages\u0000owner\u0000read',
+  'team-instances.attempts.cancel\u0000POST\u0000/api/v1/collaboration/team-instances/{id}/attempts/{attemptId}/cancel\u0000owner\u0000live',
+  'team-instances.recover\u0000POST\u0000/api/v1/collaboration/team-instances/{id}/recover\u0000owner\u0000live',
+  'team-instances.members.revoke\u0000POST\u0000/api/v1/collaboration/team-instances/{id}/members/{memberId}/revoke\u0000owner\u0000live',
+  'team-instances.artifacts\u0000GET\u0000/api/v1/collaboration/team-instances/{id}/artifacts\u0000owner\u0000read',
   'agent-instances.list\u0000GET\u0000/api/uar/agent-instances/v1\u0000owner\u0000read',
   'agent-instances.read\u0000GET\u0000/api/uar/agent-instances/v1/{id}\u0000owner\u0000read',
   'agent-instances.create\u0000POST\u0000/api/uar/agent-instances/v1\u0000owner\u0000live',
+  'agent-instances.turn\u0000POST\u0000/api/uar/agent-instances/v1/{id}/turns\u0000owner\u0000live',
   'agent-instances.activate\u0000POST\u0000/api/uar/agent-instances/v1/{id}/activate\u0000owner\u0000live',
   'agent-instances.passivate\u0000POST\u0000/api/uar/agent-instances/v1/{id}/passivate\u0000owner\u0000live',
   'agent-instances.drain\u0000POST\u0000/api/uar/agent-instances/v1/{id}/drain\u0000owner\u0000live',
   'agent-instances.disable\u0000POST\u0000/api/uar/agent-instances/v1/{id}/disable\u0000owner\u0000live',
   'agent-instances.restart\u0000POST\u0000/api/uar/agent-instances/v1/{id}/restart\u0000owner\u0000live',
   'agent-instances.cancel\u0000POST\u0000/api/uar/agent-instances/v1/{id}/cancel\u0000owner\u0000live',
+  'channel-observers.capabilities\u0000GET\u0000/api/uar/channel-observers/v1/capabilities\u0000host\u0000read',
+  'channel-observers.list\u0000GET\u0000/api/uar/channel-observers/v1/subscriptions\u0000owner\u0000read',
+  'channel-observers.deliveries.list\u0000GET\u0000/api/uar/channel-observers/v1/subscriptions/{id}/deliveries\u0000owner\u0000read',
+  'channel-observers.pause\u0000POST\u0000/api/uar/channel-observers/v1/subscriptions/{id}/pause\u0000owner\u0000host_controlled',
+  'channel-observers.resume\u0000POST\u0000/api/uar/channel-observers/v1/subscriptions/{id}/resume\u0000owner\u0000host_controlled',
+  'channel-observers.revoke\u0000POST\u0000/api/uar/channel-observers/v1/subscriptions/{id}/revoke\u0000owner\u0000host_controlled',
   'observers.list\u0000GET\u0000/api/uar/observers/v1\u0000owner\u0000read',
   'observers.read\u0000GET\u0000/api/uar/observers/v1/{id}\u0000owner\u0000read',
   'observers.create\u0000POST\u0000/api/uar/observers/v1\u0000owner\u0000live',
@@ -330,8 +360,10 @@ function isAllowed(method: UarAdministrationMethod): boolean {
  * Project the sidecar manifest through The Boss's closed method/path/scope/apply allowlist.
  * Renderer code receives operation metadata, never an arbitrary fetch surface.
  */
-export async function readUarAdministrationSnapshot(): Promise<UarAdministrationSnapshot> {
-  const endpoint = await application.get('UarSidecarService').ensureReady()
+export async function readUarAdministrationSnapshot(
+  selectedEndpoint?: UarSidecarEndpoint
+): Promise<UarAdministrationSnapshot> {
+  const endpoint = selectedEndpoint ?? (await application.get('UarSidecarService').resolveSelected())
   return {
     schemaVersion: 1,
     uarVersion: endpoint.uarVersion,
@@ -360,7 +392,7 @@ async function readOwnerSettings(response: Response): Promise<z.infer<typeof own
  * protected authority or owner tokens to the renderer. */
 export async function diagnoseUarAuthority(): Promise<UarAuthorityDiagnosticResult> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
+  const endpoint = await sidecar.resolveSelected()
   const suffix = randomUUID()
   const ownerA = `diagnostics.owner.a-${suffix}`
   const ownerB = `diagnostics.owner.b-${suffix}`
@@ -375,14 +407,14 @@ export async function diagnoseUarAuthority(): Promise<UarAuthorityDiagnosticResu
     body: JSON.stringify({ prompt_caching_enabled: null })
   }
 
-  const unprivilegedAdmin = await sidecar.request('/api/uar/providers', ownerA, {}, endpoint.generation)
-  const privilegedAdmin = await sidecar.adminRequest('/api/uar/providers', {}, endpoint.generation)
-  const writeOwnerA = await sidecar.request('/api/uar/user/settings', ownerA, ownerUpdate, endpoint.generation)
-  const readOwnerAResponse = await sidecar.request('/api/uar/user/settings', ownerA, {}, endpoint.generation)
+  const unprivilegedAdmin = await sidecar.requestInstance(endpoint, '/api/uar/providers', ownerA)
+  const privilegedAdmin = await sidecar.adminRequestInstance(endpoint, '/api/uar/providers')
+  const writeOwnerA = await sidecar.requestInstance(endpoint, '/api/uar/user/settings', ownerA, ownerUpdate)
+  const readOwnerAResponse = await sidecar.requestInstance(endpoint, '/api/uar/user/settings', ownerA)
   const readOwnerA = await readOwnerSettings(readOwnerAResponse)
-  const readOwnerBResponse = await sidecar.request('/api/uar/user/settings', ownerB, {}, endpoint.generation)
+  const readOwnerBResponse = await sidecar.requestInstance(endpoint, '/api/uar/user/settings', ownerB)
   const readOwnerB = await readOwnerSettings(readOwnerBResponse)
-  await sidecar.request('/api/uar/user/settings', ownerA, ownerReset, endpoint.generation).catch(() => undefined)
+  await sidecar.requestInstance(endpoint, '/api/uar/user/settings', ownerA, ownerReset).catch(() => undefined)
 
   const adminBoundary = unprivilegedAdmin.status === 401 && privilegedAdmin.ok
   const ownerIsolation =
@@ -440,8 +472,8 @@ async function parseResponse(response: Response): Promise<unknown> {
 
 export async function readUarSettings(namespace: UarSettingsNamespace): Promise<UarSettingsSnapshot> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
-  const response = await sidecar.adminRequest(`/api/uar/settings/${namespace}`, {}, endpoint.generation)
+  const endpoint = await sidecar.resolveSelected()
+  const response = await sidecar.adminRequestInstance(endpoint, `/api/uar/settings/${namespace}`)
   const settings = z
     .array(rawSettingSchema)
     .parse(await parseResponse(response))
@@ -457,18 +489,14 @@ export async function updateUarSettings(
     throw new Error('A UAR setting field may only appear once per update')
   }
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.ensureReady()
+  const endpoint = await sidecar.resolveSelected()
   const data = Object.fromEntries(changes.map((change) => [change.field, change.value]))
   const expected_revisions = Object.fromEntries(changes.map((change) => [change.field, change.expectedRevision]))
-  const response = await sidecar.adminRequest(
-    `/api/uar/settings/${namespace}`,
-    {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ data, expected_revisions })
-    },
-    endpoint.generation
-  )
+  const response = await sidecar.adminRequestInstance(endpoint, `/api/uar/settings/${namespace}`, {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ data, expected_revisions })
+  })
   const body = await parseResponse(response)
   if (namespace === 'governance') {
     const result = rawGovernanceUpdateSchema.parse(body)

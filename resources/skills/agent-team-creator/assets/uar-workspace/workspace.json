@@ -1,0 +1,610 @@
+{
+  "schemaVersion": 1,
+  "revision": 1,
+  "profile": "urn:prometheus:uar:collaboration:0.1.0-draft.2",
+  "teamId": "example-team",
+  "packageId": "urn:prometheus:mini:example:package",
+  "packageVersion": "1.0.0",
+  "manifest": "manifest.source.json",
+  "definitions": [
+    "agents/coordinator.json",
+    "agents/specialist.json",
+    "agents/child.json",
+    "teams/root.json",
+    "teams/subteam.json",
+    "workflows/review.json",
+    "workflows/specialist.json"
+  ],
+  "bindingIntent": "package-only",
+  "questionState": {
+    "currentQuestionId": null,
+    "questions": [
+      {
+        "id": "manifest.provenance",
+        "document": "manifest.source.json",
+        "pointer": "/provenance",
+        "prompt": "What source and authors establish package provenance?",
+        "required": true,
+        "state": "answered",
+        "answer": {
+          "source": "agent-team-creator split workspace example",
+          "authors": [
+            "Prometheus-AGS"
+          ]
+        }
+      },
+      {
+        "id": "manifest.entrypoint",
+        "document": "manifest.source.json",
+        "pointer": "/entrypoints",
+        "prompt": "Which single TeamDefinition is the top-level package entrypoint?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "id": "urn:prometheus:mini:example:team:root",
+            "version": "1.0.0"
+          }
+        ]
+      },
+      {
+        "id": "team.urn:prometheus:mini:example:team:root.members",
+        "document": "teams/root.json",
+        "pointer": "/members",
+        "prompt": "Which agents or nested teams belong to urn:prometheus:mini:example:team:root?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "role": "coordinator",
+            "kind": "agent",
+            "definition": {
+              "id": "urn:prometheus:mini:example:agent:coordinator",
+              "version": "1.0.0"
+            },
+            "min": 1,
+            "max": 1,
+            "responsibility": "Coordinate the bounded workflow."
+          },
+          {
+            "role": "research",
+            "kind": "team",
+            "definition": {
+              "id": "urn:prometheus:mini:example:team:subteam",
+              "version": "1.0.0"
+            },
+            "min": 1,
+            "max": 1,
+            "responsibility": "Produce the nested specialist review."
+          }
+        ]
+      },
+      {
+        "id": "team.urn:prometheus:mini:example:team:root.coordinator",
+        "document": "teams/root.json",
+        "pointer": "/coordinatorRole",
+        "prompt": "Which agent role coordinates urn:prometheus:mini:example:team:root?",
+        "required": true,
+        "state": "answered",
+        "answer": "coordinator"
+      },
+      {
+        "id": "team.urn:prometheus:mini:example:team:root.communication",
+        "document": "teams/root.json",
+        "pointer": "/communication",
+        "prompt": "Which explicit role communication edges are allowed for urn:prometheus:mini:example:team:root?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "fromRole": "coordinator",
+            "toRole": "research",
+            "modes": [
+              "queue-only",
+              "trigger-turn"
+            ]
+          },
+          {
+            "fromRole": "research",
+            "toRole": "coordinator",
+            "modes": [
+              "queue-only"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "team.urn:prometheus:mini:example:team:root.acceptance",
+        "document": "teams/root.json",
+        "pointer": "/taskAcceptance/allowedWorkflows",
+        "prompt": "Which exact workflows may urn:prometheus:mini:example:team:root accept?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "id": "urn:prometheus:mini:example:workflow:review",
+            "version": "1.0.0"
+          }
+        ]
+      },
+      {
+        "id": "team.urn:prometheus:mini:example:team:root.limits",
+        "document": "teams/root.json",
+        "pointer": "/limits",
+        "prompt": "Which aggregate limits constrain urn:prometheus:mini:example:team:root?",
+        "required": true,
+        "state": "answered",
+        "answer": {
+          "concurrentTurns": 2,
+          "maxMembers": 4,
+          "maxDepth": 2,
+          "maxPendingTasks": 16
+        }
+      },
+      {
+        "id": "team.urn:prometheus:mini:example:team:root.budget",
+        "document": "teams/root.json",
+        "pointer": "/budget",
+        "prompt": "Which aggregate budget constrains urn:prometheus:mini:example:team:root?",
+        "required": true,
+        "state": "answered",
+        "answer": {
+          "maxTokens": 10000,
+          "maxCostMicrounits": 1000000,
+          "currency": "USD",
+          "maxElapsedSeconds": 300
+        }
+      },
+      {
+        "id": "team.urn:prometheus:mini:example:team:subteam.members",
+        "document": "teams/subteam.json",
+        "pointer": "/members",
+        "prompt": "Which agents or nested teams belong to urn:prometheus:mini:example:team:subteam?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "role": "specialist",
+            "kind": "agent",
+            "definition": {
+              "id": "urn:prometheus:mini:example:agent:specialist",
+              "version": "1.0.0"
+            },
+            "min": 1,
+            "max": 1,
+            "responsibility": "Produce a bounded specialist artifact."
+          }
+        ]
+      },
+      {
+        "id": "team.urn:prometheus:mini:example:team:subteam.coordinator",
+        "document": "teams/subteam.json",
+        "pointer": "/coordinatorRole",
+        "prompt": "Which agent role coordinates urn:prometheus:mini:example:team:subteam?",
+        "required": true,
+        "state": "answered",
+        "answer": "specialist"
+      },
+      {
+        "id": "team.urn:prometheus:mini:example:team:subteam.communication",
+        "document": "teams/subteam.json",
+        "pointer": "/communication",
+        "prompt": "Which explicit role communication edges are allowed for urn:prometheus:mini:example:team:subteam?",
+        "required": true,
+        "state": "answered",
+        "answer": []
+      },
+      {
+        "id": "team.urn:prometheus:mini:example:team:subteam.acceptance",
+        "document": "teams/subteam.json",
+        "pointer": "/taskAcceptance/allowedWorkflows",
+        "prompt": "Which exact workflows may urn:prometheus:mini:example:team:subteam accept?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "id": "urn:prometheus:mini:example:workflow:specialist",
+            "version": "1.0.0"
+          }
+        ]
+      },
+      {
+        "id": "team.urn:prometheus:mini:example:team:subteam.limits",
+        "document": "teams/subteam.json",
+        "pointer": "/limits",
+        "prompt": "Which aggregate limits constrain urn:prometheus:mini:example:team:subteam?",
+        "required": true,
+        "state": "answered",
+        "answer": {
+          "concurrentTurns": 1,
+          "maxMembers": 2,
+          "maxDepth": 1,
+          "maxPendingTasks": 8
+        }
+      },
+      {
+        "id": "team.urn:prometheus:mini:example:team:subteam.budget",
+        "document": "teams/subteam.json",
+        "pointer": "/budget",
+        "prompt": "Which aggregate budget constrains urn:prometheus:mini:example:team:subteam?",
+        "required": true,
+        "state": "answered",
+        "answer": {
+          "maxTokens": 10000,
+          "maxCostMicrounits": 1000000,
+          "currency": "USD",
+          "maxElapsedSeconds": 300
+        }
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:coordinator.children",
+        "document": "agents/coordinator.json",
+        "pointer": "/permittedChildren",
+        "prompt": "Which exact child agents may urn:prometheus:mini:example:agent:coordinator invoke?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "id": "urn:prometheus:mini:example:agent:child",
+            "version": "1.0.0"
+          }
+        ]
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:coordinator.skills",
+        "document": "agents/coordinator.json",
+        "pointer": "/skills",
+        "prompt": "Which exact skill locks does urn:prometheus:mini:example:agent:coordinator require?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "id": "urn:uar:skill:review",
+            "version": "2.1.0",
+            "digest": "sha256:3b3816290748ea6b1f71c43c34e4043e2aed44ff4b7a462e7b212bf88cf0b65f",
+            "required": true,
+            "config": {
+              "mode": "strict",
+              "output": "json"
+            },
+            "entrypoint": "review",
+            "requiredTools": [
+              "read-artifact"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:coordinator.models",
+        "document": "agents/coordinator.json",
+        "pointer": "/models",
+        "prompt": "Which model capabilities and aliases does urn:prometheus:mini:example:agent:coordinator request?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "role": "primary",
+            "capabilities": [
+              "text",
+              "tool-calling"
+            ],
+            "preferredAliases": [
+              "team-default"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:coordinator.context",
+        "document": "agents/coordinator.json",
+        "pointer": "/context",
+        "prompt": "Which bounded context may urn:prometheus:mini:example:agent:coordinator receive?",
+        "required": true,
+        "state": "answered",
+        "answer": {
+          "mode": "selected",
+          "artifacts": [
+            "task-input"
+          ],
+          "history": "authorized-summary",
+          "memoryScopes": []
+        }
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:coordinator.limits",
+        "document": "agents/coordinator.json",
+        "pointer": "/requestedLimits",
+        "prompt": "Which limits constrain urn:prometheus:mini:example:agent:coordinator?",
+        "required": true,
+        "state": "answered",
+        "answer": {
+          "concurrentTurns": 1,
+          "maxMembers": 2,
+          "maxDepth": 1,
+          "maxPendingTasks": 8
+        }
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:specialist.children",
+        "document": "agents/specialist.json",
+        "pointer": "/permittedChildren",
+        "prompt": "Which exact child agents may urn:prometheus:mini:example:agent:specialist invoke?",
+        "required": true,
+        "state": "answered",
+        "answer": []
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:specialist.skills",
+        "document": "agents/specialist.json",
+        "pointer": "/skills",
+        "prompt": "Which exact skill locks does urn:prometheus:mini:example:agent:specialist require?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "id": "urn:uar:skill:review",
+            "version": "2.1.0",
+            "digest": "sha256:3b3816290748ea6b1f71c43c34e4043e2aed44ff4b7a462e7b212bf88cf0b65f",
+            "required": true,
+            "config": {
+              "mode": "strict",
+              "output": "json"
+            },
+            "entrypoint": "review",
+            "requiredTools": [
+              "read-artifact"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:specialist.models",
+        "document": "agents/specialist.json",
+        "pointer": "/models",
+        "prompt": "Which model capabilities and aliases does urn:prometheus:mini:example:agent:specialist request?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "role": "primary",
+            "capabilities": [
+              "text",
+              "tool-calling"
+            ],
+            "preferredAliases": [
+              "team-default"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:specialist.context",
+        "document": "agents/specialist.json",
+        "pointer": "/context",
+        "prompt": "Which bounded context may urn:prometheus:mini:example:agent:specialist receive?",
+        "required": true,
+        "state": "answered",
+        "answer": {
+          "mode": "selected",
+          "artifacts": [
+            "task-input"
+          ],
+          "history": "authorized-summary",
+          "memoryScopes": []
+        }
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:specialist.limits",
+        "document": "agents/specialist.json",
+        "pointer": "/requestedLimits",
+        "prompt": "Which limits constrain urn:prometheus:mini:example:agent:specialist?",
+        "required": true,
+        "state": "answered",
+        "answer": {
+          "concurrentTurns": 1,
+          "maxMembers": 2,
+          "maxDepth": 1,
+          "maxPendingTasks": 8
+        }
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:child.children",
+        "document": "agents/child.json",
+        "pointer": "/permittedChildren",
+        "prompt": "Which exact child agents may urn:prometheus:mini:example:agent:child invoke?",
+        "required": true,
+        "state": "answered",
+        "answer": []
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:child.skills",
+        "document": "agents/child.json",
+        "pointer": "/skills",
+        "prompt": "Which exact skill locks does urn:prometheus:mini:example:agent:child require?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "id": "urn:uar:skill:review",
+            "version": "2.1.0",
+            "digest": "sha256:3b3816290748ea6b1f71c43c34e4043e2aed44ff4b7a462e7b212bf88cf0b65f",
+            "required": true,
+            "config": {
+              "mode": "strict",
+              "output": "json"
+            },
+            "entrypoint": "review",
+            "requiredTools": [
+              "read-artifact"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:child.models",
+        "document": "agents/child.json",
+        "pointer": "/models",
+        "prompt": "Which model capabilities and aliases does urn:prometheus:mini:example:agent:child request?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "role": "primary",
+            "capabilities": [
+              "text",
+              "tool-calling"
+            ],
+            "preferredAliases": [
+              "team-default"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:child.context",
+        "document": "agents/child.json",
+        "pointer": "/context",
+        "prompt": "Which bounded context may urn:prometheus:mini:example:agent:child receive?",
+        "required": true,
+        "state": "answered",
+        "answer": {
+          "mode": "selected",
+          "artifacts": [
+            "task-input"
+          ],
+          "history": "authorized-summary",
+          "memoryScopes": []
+        }
+      },
+      {
+        "id": "agent.urn:prometheus:mini:example:agent:child.limits",
+        "document": "agents/child.json",
+        "pointer": "/requestedLimits",
+        "prompt": "Which limits constrain urn:prometheus:mini:example:agent:child?",
+        "required": true,
+        "state": "answered",
+        "answer": {
+          "concurrentTurns": 1,
+          "maxMembers": 2,
+          "maxDepth": 1,
+          "maxPendingTasks": 8
+        }
+      },
+      {
+        "id": "workflow.urn:prometheus:mini:example:workflow:review.steps",
+        "document": "workflows/review.json",
+        "pointer": "/steps",
+        "prompt": "Which finite role steps define urn:prometheus:mini:example:workflow:review?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "id": "coordinate",
+            "role": "coordinator",
+            "dependsOn": [],
+            "inputMapping": {
+              "brief": "workflow-input:brief"
+            },
+            "output": {
+              "type": "object",
+              "properties": {
+                "artifact": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "artifact"
+              ],
+              "additionalProperties": false
+            },
+            "effect": "read",
+            "approval": "current-authority",
+            "retry": {
+              "maxAttempts": 1,
+              "onUnknownEffect": "reconcile-before-retry"
+            },
+            "completion": "artifact",
+            "instructions": "Prepare the bounded review brief."
+          },
+          {
+            "id": "review",
+            "role": "research",
+            "dependsOn": [
+              "coordinate"
+            ],
+            "inputMapping": {
+              "brief": "workflow-input:brief"
+            },
+            "output": {
+              "type": "object",
+              "properties": {
+                "artifact": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "artifact"
+              ],
+              "additionalProperties": false
+            },
+            "effect": "read",
+            "approval": "current-authority",
+            "retry": {
+              "maxAttempts": 1,
+              "onUnknownEffect": "reconcile-before-retry"
+            },
+            "completion": "artifact",
+            "instructions": "Review the brief through the nested team."
+          }
+        ]
+      },
+      {
+        "id": "workflow.urn:prometheus:mini:example:workflow:specialist.steps",
+        "document": "workflows/specialist.json",
+        "pointer": "/steps",
+        "prompt": "Which finite role steps define urn:prometheus:mini:example:workflow:specialist?",
+        "required": true,
+        "state": "answered",
+        "answer": [
+          {
+            "id": "specialist-artifact",
+            "role": "specialist",
+            "dependsOn": [],
+            "inputMapping": {
+              "brief": "workflow-input:brief"
+            },
+            "output": {
+              "type": "object",
+              "properties": {
+                "artifact": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "artifact"
+              ],
+              "additionalProperties": false
+            },
+            "effect": "read",
+            "approval": "current-authority",
+            "retry": {
+              "maxAttempts": 1,
+              "onUnknownEffect": "reconcile-before-retry"
+            },
+            "completion": "artifact",
+            "instructions": "Produce one bounded specialist artifact from the brief."
+          }
+        ]
+      },
+      {
+        "id": "workspace.binding-intent",
+        "document": "workspace.json",
+        "pointer": "/bindingIntent",
+        "prompt": "Should deployment stop after package installation or prepare a private binding?",
+        "required": true,
+        "state": "answered",
+        "answer": "package-only"
+      }
+    ]
+  }
+}

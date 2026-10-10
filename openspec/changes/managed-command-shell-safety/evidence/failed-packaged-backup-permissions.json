@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "issue": 39,
+  "status": "failed",
+  "sourceCommit": "d24897edbdd11d9300fc0772632d37b525845068",
+  "observed": "Packaged registry auto-created rc-backups mode 0755; private-backup guard refused shell edits",
+  "userBytes": "preserved",
+  "resources": "/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/boss-issue39-packaged-faEISV",
+  "recordedAt": "2026-10-07T08:14:09.066Z"
+}

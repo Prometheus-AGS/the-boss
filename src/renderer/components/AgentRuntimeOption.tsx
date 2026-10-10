@@ -55,7 +55,7 @@ const RUNTIME_DESCRIPTION_KEYS: Record<AgentType, string> = {
 }
 
 const RUNTIMES = (Object.keys(AGENT_RUNTIME_CAPABILITIES) as AgentType[]).filter(
-  (runtime) => runtime !== 'uar' || isUarEnabled()
+  (runtime) => runtime !== 'dsh' && (runtime !== 'uar' || isUarEnabled())
 )
 const RUNTIME_CARD_CLASS_NAME = 'w-full items-center gap-2 rounded-lg px-3 py-1.5 font-normal'
 

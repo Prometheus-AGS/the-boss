@@ -14,6 +14,46 @@ Team `native[target].options` means native Codex project config, Claude project 
 
 JSON flow syntax is used as YAML 1.2 for frontmatter and Cordis patch files. This preserves literal quotes, newlines and arbitrary JSON option structures without hand-built YAML interpolation. TOML uses quoted keys and nested inline tables; null values fail because TOML cannot represent null.
 
+## Required export semantics
+
+Every result and both export receipts include an adapter capability declaration.
+Its values describe artifacts produced by this exporter: `emitted`,
+`preserved-only` or `not-emitted`. They do not certify native parsing,
+installed discovery, inference, authentication or permission enforcement.
+
+An optional `native.<target>.requiredCapabilities` string array makes a
+semantic requirement explicit. Unknown names fail validation; any requirement
+whose declaration is not `emitted` refuses the export before staged files can
+be written. Omitting the array preserves existing exports and their diagnostics.
+Opaque native files and arbitrary overrides preserve data but cannot promote an
+unsupported semantic to supported.
+
+| Capability | Emitted by this adapter |
+| --- | --- |
+| `agent-definition` | All targets; UAR uses the legacy single-agent artifact path |
+| `role-model` | Codex, Claude, Copilot, MiniMax, OpenCode, UAR, BossFang |
+| `team-options` | Codex, Claude, OpenCode, DeepSeek, UAR, BossFang; Kimi/MiniMax/Copilot are `preserved-only` |
+| `agent-plugin`, `agent-marketplace` | Claude and Kimi |
+| `static-team-roster` | BossFang Hand/workflow only; UAR collaboration packages use the separate authoring API |
+| `model-policy-resolution` | None; resolve through agent-team-models before exporting |
+
+For example, a Kimi wrapper with `requiredCapabilities: ["role-model"]`
+refuses rather than silently accepting ignored per-role model selection. A
+Copilot wrapper requiring `team-options` refuses because its options are only
+preserved for manual application. `role-model` declares serialization of an
+explicit model ID, not availability, entitlement or automatic cost/tier routing.
+`team-options` declares merging into the target artifact/configuration shown
+above; it never means automatic installation or execution.
+
+The source receipt also retains `portableModelPolicies` for the team, skills
+and roles, including intent that the adapter cannot apply. Existing native
+options, extensions, override fields and source/version provenance remain intact.
+These declarations retain the existing source snapshots; moving documentation
+links are not exact CLI revision pins. C15.2 still needs exact eight-harness
+schema/CLI pins, real native round-trips/smoke workflows, full/mini parity and the
+Node.js/TypeScript 7 operational qualification checkpoint. No source-only export
+may mark those gates complete.
+
 ## Harnesses
 
 | Target | Emitted native artifacts | Contract and limits |
@@ -49,8 +89,11 @@ successful invocation.
 
 Schema-v1 UAR export remains a legacy `AgentArtifact` compatibility projection
 for ordinary single-agent consumers. It is not a team registration protocol.
-New collaboration authoring uses the official Draft 0.1.0-draft.1 schemas copied
-under `schemas/uar/`, compiles all agent/team/workflow definitions into one
+New collaboration authoring uses the official `0.1.0-draft.2` schemas under
+`schemas/uar/0.1.0-draft.2/`. The [consumer source receipt](../schemas/uar/0.1.0-draft.2/consumer-source-receipt.json)
+records the selected provider commit and schema hashes. Draft.1 remains a
+separate legacy reader/migration input; it is not the new authoring profile.
+The authoring path compiles all agent/team/workflow definitions into one
 immutable PackageManifest, and installs atomically through the versioned
 collaboration package API. A private DeploymentBinding follows package install.
 See `uar-deployment.md` for exact routes, request bodies, capability preflight,

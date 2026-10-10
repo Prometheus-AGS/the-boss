@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-07T20:40:50.979Z",
+  "receipts": [
+    {
+      "file": "first-packaged-operation.json",
+      "sha256": "a580ee7539b165d7f3190702277ca6638f2e21ded948c26df17bea94ecad829f",
+      "original": "/Users/gqadonis/Projects/prometheus/worktrees/agent-fabric-c06/librefang/docs/plans/agent-fabric-convergence/.prometheus/cadence/artifacts/c142-1f9c19b4-941c-4b85-be4e-8f3fa5ecc2be/evidence.json"
+    },
+    {
+      "file": "corrective-scope-refusal.json",
+      "sha256": "3f202c80ce8b375eac267229acf935c222aed9f42d54516560663bf91f04085a",
+      "original": "/Users/gqadonis/Projects/prometheus/worktrees/agent-fabric-c06/librefang/docs/plans/agent-fabric-convergence/.prometheus/cadence/artifacts/c142-cancellation-5079be89-fd77-4418-9c24-84d41f2e8351/evidence.json"
+    },
+    {
+      "file": "corrective-cancellation-operation.json",
+      "sha256": "555b2d7af4aacc67533d92e831d0e36d4e9b78b23717578da52fc3a8394841b5",
+      "original": "/Users/gqadonis/Projects/prometheus/worktrees/agent-fabric-c06/librefang/docs/plans/agent-fabric-convergence/.prometheus/cadence/artifacts/c142-cancellation-8e99e0d3-d3db-4cff-ba61-c180ddb28bc1/evidence.json"
+    },
+    {
+      "file": "observed-cancellation-defect.json",
+      "sha256": "d00dad4d972a3029eb8b89dc53668e677e6920c500e75c6b079ad7171c9d4f80",
+      "original": "/Users/gqadonis/Projects/prometheus/worktrees/agent-fabric-c06/librefang/docs/plans/agent-fabric-convergence/.prometheus/cadence/artifacts/c14-cancellation-observed-facts-20261007.json"
+    },
+    {
+      "file": "corrective-native-build.json",
+      "sha256": "525ea65c3dec9d7c85f5f75bd26fc1c4928afab65a1f279d0a61bb7ba1731c3b",
+      "original": "/Users/gqadonis/Projects/prometheus/worktrees/agent-fabric-c06/librefang/docs/plans/agent-fabric-convergence/.prometheus/cadence/artifacts/c14-cancellation-native-build-20261007.json"
+    },
+    {
+      "file": "corrective-mac-arm64-build.json",
+      "sha256": "7e6d97520e8ea34379a8ba192132c75fb69d350d5eeb44eea2df7a4d89145b15",
+      "original": "/Users/gqadonis/Projects/prometheus/worktrees/agent-fabric-c06/librefang/docs/plans/agent-fabric-convergence/.prometheus/cadence/artifacts/c14-corrective-mac-arm64-build-20261007.json"
+    },
+    {
+      "file": "corrective-local-dmg.json",
+      "sha256": "8a162cddbe256710337211c124316a73cc01b9138d395779e762a443f7c6857d",
+      "original": "/Users/gqadonis/Projects/prometheus/worktrees/agent-fabric-c06/librefang/docs/plans/agent-fabric-convergence/.prometheus/cadence/artifacts/c14-corrective-local-dmg-source-receipt-20261007.json"
+    }
+  ],
+  "scope": "C14.2 bounded Mac operation; parent completion and native Windows remain pending",
+  "testsRun": false
+}
