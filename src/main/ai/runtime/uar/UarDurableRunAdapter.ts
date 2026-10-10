@@ -15,7 +15,8 @@ async function target(input: { workspaceId: string; instanceId: string; runId: s
     '/api/uar/agent-instances/v1/' + encodeURIComponent(input.instanceId), state.generation), workspaceId)
   const command = instance.commands.find((entry) => entry.kind === 'turn' && entry.rootRunId === input.runId)
   if (instance.instanceId !== input.instanceId || !command) throw new Error('TEAM_SCOPE_DENIED')
-  return { workspaceId, generation: state.generation, command, path: '/api/uar/runs/' + encodeURIComponent(input.runId) }
+  return { workspaceId, generation: state.generation, command, activeRunId: instance.activeRunId,
+    path: '/api/uar/runs/' + encodeURIComponent(input.runId) }
 }
 
 export async function readUarDurableRun(input: {
@@ -23,8 +24,15 @@ export async function readUarDurableRun(input: {
 }): Promise<UarDurableRunSnapshot> {
   const state = await target(input)
   const after = input.after ?? 0
+  const eventsPath = state.path + '/events?after=' + after
   const [events, pending, history, effects] = await Promise.all([
-    scopedRequest(state.workspaceId, state.path + '/events?after=' + after, state.generation).then((value) => uarTeamRunEventsSchema.parse(value)),
+    scopedRequest(state.workspaceId, eventsPath, state.generation).catch((cause) => {
+      const terminal = ['completed', 'failed', 'cancelled'].includes(state.command.status)
+      if (!terminal || state.activeRunId === input.runId || !(cause instanceof Error) ||
+        cause.message !== `UAR request GET ${eventsPath} failed with HTTP 404`) throw cause
+      return { version: 1, runId: input.runId, after, cursor: after, retention: 'process-local-bounded',
+        firstAvailableEventId: null, gapReason: 'retention-gap', events: [] }
+    }).then((value) => uarTeamRunEventsSchema.parse(value)),
     scopedRequest(state.workspaceId, state.path + '/tool-approval/pending', state.generation).then((value) => rawPendingApproval.parse(value)),
     scopedRequest(state.workspaceId, state.path + '/tool-approval', state.generation).then((value) => uarApprovalHistorySchema.parse(value)),
     scopedRequest(state.workspaceId, state.path + '/tool-admission-evidence', state.generation).then((value) => rawAdmissionEvidence.parse(value))
