@@ -1,6 +1,41 @@
+import type { UarTeamApprovalHistory } from './uarApprovalRecords'
+import type { UarTeamApproval } from './uarTeams'
+import type { uarTeamRunEventsSchema } from './uarTeamRunEvents'
+import type * as z from 'zod'
+
+export interface UarDurableRunSnapshot {
+  instanceId: string
+  events: z.infer<typeof uarTeamRunEventsSchema>
+  approval: UarTeamApproval | null
+  effects: Array<{ toolName: string; state: string; admissionId: string | null; invocationId: string }>
+  history: UarTeamApprovalHistory[]
+}
+
+export interface UarDurableApprovalDecision {
+  workspaceId: string
+  instanceId: string
+  runId: string
+  approvalId: string
+  issuerId: string
+  challengeId: string
+  eventId: string
+  cursor: number
+  approved: boolean
+}
+
 export type UarInstanceProfile = 'request' | 'on_demand' | 'resident'
 export type UarInstanceAction = 'activate' | 'passivate' | 'drain' | 'disable' | 'restart' | 'cancel'
 export type UarObserverAction = 'pause' | 'resume'
+
+export interface UarDurableCommand {
+  commandId: string
+  kind: 'turn' | UarInstanceAction
+  status: 'accepted' | 'running' | 'completed' | 'failed' | 'cancelled' | 'uncertain'
+  attemptId: string | null
+  rootRunId: string | null
+  acceptedAt: string
+  updatedAt: string
+}
 
 export interface UarDurableBinding {
   id: string
@@ -21,6 +56,8 @@ export interface UarDurableInstance {
   bindingId: string
   bindingRevision: number
   bindingDigest?: string
+  representationRevision?: number
+  representationGrantRefs?: Array<{ grantId: string; revision: number; constraintDigest: string }>
   sessionId?: string
   limits?: {
     maxInbox: number
@@ -124,6 +161,7 @@ export type UarDurableOperation =
   | 'agent-instances.list'
   | 'agent-instances.read'
   | 'agent-instances.create'
+  | 'agent-instances.turn'
   | `agent-instances.${UarInstanceAction}`
   | 'observers.list'
   | 'observers.read'

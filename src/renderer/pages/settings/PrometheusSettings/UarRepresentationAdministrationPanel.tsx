@@ -10,11 +10,11 @@ import { UarExecutiveRoleCatalogPanel } from './UarExecutiveRoleCatalogPanel'
 type Snapshot = Awaited<ReturnType<typeof ipcApi.request<'prometheus.uar.representation.snapshot'>>>
 type Grant = UarRepresentationSaveInput['grant']
 const offices = ['ceo', 'cfo', 'cio', 'intelligence', 'security', 'marketing', 'product'] as const
-const blank = (): Grant => ({
+const blank = (workspaceId: string, issuerPrincipalId = ''): Grant => ({
   profile: 'urn:prometheus:uar:collaboration:0.1.0-draft.2', kind: 'RepresentationGrant',
   exportClass: 'private-authority-state', grantId: `urn:boss:grant:${crypto.randomUUID()}`,
   subjectPrincipalId: '', granteeAgentInstanceId: '', organizationId: '', office: 'ceo', purpose: '',
-  audienceScopes: ['user:issuer'], actionScopes: [], resourceScopes: ['workspace:current'], dataScopes: [],
+  audienceScopes: issuerPrincipalId ? [`user:${issuerPrincipalId}`] : [], actionScopes: [], resourceScopes: [`workspace:${workspaceId}`], dataScopes: [],
   approvalRequirements: ['current-policy', 'real-human'], disclosureRequirements: ['disclose-agent-assistance'],
   consentEvidenceRef: 'protected-evidence://', organizationalAuthorityEvidenceRef: 'protected-evidence://',
   revision: 1, status: 'pending', notBefore: new Date().toISOString(),
@@ -30,8 +30,9 @@ export function UarRepresentationAdministrationPanel({ workspaceId }: { workspac
   const tr = (key: string) => t(`settings.prometheus.integration.uarAdmin.representation.${key}`)
   const [snapshot, setSnapshot] = useState<Snapshot>()
   const [selectedId, setSelectedId] = useState('new')
-  const [draft, setDraft] = useState<Grant>(blank)
-  const [audience, setAudience] = useState('user:issuer')
+  const [draft, setDraft] = useState<Grant>(() => blank(workspaceId))
+  const [audience, setAudience] = useState('')
+  const [resources, setResources] = useState(`workspace:${workspaceId}`)
   const [actions, setActions] = useState('')
   const [data, setData] = useState('')
   const [attested, setAttested] = useState(false)
@@ -41,20 +42,34 @@ export function UarRepresentationAdministrationPanel({ workspaceId }: { workspac
   const [error, setError] = useState<string>()
   const selected = snapshot?.grants.find((grant) => grant.grantId === selectedId)
   const terminal = selected?.status === 'revoked' || selected?.status === 'expired'
+  const boundInstance = snapshot?.instances.find((instance) => instance.instanceId === draft.granteeAgentInstanceId)
+  const applied = selected && boundInstance?.representationGrantRefs?.some((reference) =>
+    reference.grantId === selected.grantId && reference.revision === selected.revision &&
+    reference.constraintDigest === selected.constraintDigest)
   const update = <K extends keyof Grant>(key: K, value: Grant[K]) => setDraft((previous) => ({ ...previous, [key]: value }))
   const load = useCallback(async () => {
     setBusy(true)
     setError(undefined)
-    try { setSnapshot(await ipcApi.request('prometheus.uar.representation.snapshot', { workspaceId })) }
+    try {
+      const next = await ipcApi.request('prometheus.uar.representation.snapshot', { workspaceId })
+      setSnapshot(next)
+      setAudience((current) => current || `user:${next.issuerPrincipalId}`)
+    }
     catch (cause) { setError(cause instanceof Error ? cause.message : String(cause)) }
     finally { setBusy(false) }
   }, [workspaceId])
-  useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    setSnapshot(undefined); setSelectedId('new'); setDraft(blank(workspaceId)); setAudience('')
+    setResources(`workspace:${workspaceId}`); setActions(''); setData(''); setAttested(false)
+    setHistory([]); setReason('')
+    void load()
+  }, [load, workspaceId])
   const choose = (value: string) => {
     const existing = snapshot?.grants.find((grant) => grant.grantId === value)
-    const next = existing ? (({ issuerPrincipalId: _issuer, constraintDigest: _digest, ...grant }) => grant)(existing) : blank()
+    const next = existing ? (({ issuerPrincipalId: _issuer, constraintDigest: _digest, ...grant }) => grant)(existing) : blank(workspaceId, snapshot?.issuerPrincipalId)
     setSelectedId(value); setDraft(next); setAudience(next.audienceScopes.join(', '))
     setActions(next.actionScopes.join(', ')); setData(next.dataScopes.join(', '))
+    setResources(next.resourceScopes.join(', '))
     setHistory([]); setAttested(false); setReason('')
   }
   const save = async () => {
@@ -64,7 +79,7 @@ export function UarRepresentationAdministrationPanel({ workspaceId }: { workspac
       const result = await ipcApi.request('prometheus.uar.representation.save', {
         workspaceId, commandId: crypto.randomUUID(), expectedRevision: selectedId === 'new' ? 0 : draft.revision,
         grant: { ...draft, revision: selectedId === 'new' ? 1 : draft.revision + 1,
-          audienceScopes: scopes(audience), actionScopes: scopes(actions), dataScopes: scopes(data) }
+          audienceScopes: scopes(audience), actionScopes: scopes(actions), resourceScopes: scopes(resources), dataScopes: scopes(data) }
       })
       const { issuerPrincipalId: _issuer, constraintDigest: _digest, ...grant } = result.grant
       setSelectedId(result.grant.grantId); setDraft(grant)
@@ -109,9 +124,10 @@ export function UarRepresentationAdministrationPanel({ workspaceId }: { workspac
         <IntegrationField label={tr('purpose')} value={draft.purpose} onChange={(value) => update('purpose', value)} disabled={busy || terminal} />
         <IntegrationField label={tr('consent')} value={draft.consentEvidenceRef} onChange={(value) => update('consentEvidenceRef', value)} disabled={busy || terminal} />
         <IntegrationField label={tr('authority')} value={draft.organizationalAuthorityEvidenceRef} onChange={(value) => update('organizationalAuthorityEvidenceRef', value)} disabled={busy || terminal} />
-        <IntegrationField label={tr('audience')} help="user:issuer, team-member:id" value={audience} onChange={setAudience} disabled={busy || terminal} />
-        <IntegrationField label={tr('actions')} help="tool:providername" value={actions} onChange={setActions} disabled={busy || terminal} />
-        <IntegrationField label={tr('data')} help="knowledge-base:id" value={data} onChange={setData} disabled={busy || terminal} />
+        <IntegrationField label={tr('audience')} help={snapshot && `user:${snapshot.issuerPrincipalId}`} value={audience} onChange={setAudience} disabled={busy || terminal} />
+        <IntegrationField label={tr('actions')} help="tool:file_read" value={actions} onChange={setActions} disabled={busy || terminal} />
+        <IntegrationField label={tr('resources')} help={`workspace:${workspaceId}`} value={resources} onChange={setResources} disabled={busy || terminal} />
+        <IntegrationField label={tr('data')} value={data} onChange={setData} disabled={busy || terminal} />
         <IntegrationChoice label={tr('status')} value={draft.status} onChange={(value) => update('status', value)} disabled={busy || terminal}
           options={(['pending', 'active', 'suspended', ...(terminal ? [draft.status] : [])] as Grant['status'][]).map((status) => ({ value: status, label: tr(`status.${status}`) }))} />
         <IntegrationField label={tr('notBefore')} help={tr('utc')} value={draft.notBefore} onChange={(value) => update('notBefore', value)} disabled={busy || terminal} />
@@ -121,7 +137,7 @@ export function UarRepresentationAdministrationPanel({ workspaceId }: { workspac
       <label className="mt-4 flex items-start gap-2 text-sm"><Checkbox checked={attested} disabled={busy || terminal}
         onCheckedChange={(value) => setAttested(value === true)} />{tr('attestation')}</label>
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button disabled={busy || terminal || !attested || !draft.subjectPrincipalId.trim() || !draft.granteeAgentInstanceId || !draft.organizationId.trim() || !draft.purpose.trim() || !actions.trim()}
+        <Button disabled={busy || terminal || !attested || !draft.subjectPrincipalId.trim() || !draft.granteeAgentInstanceId || !draft.organizationId.trim() || !draft.purpose.trim() || !actions.trim() || !resources.trim()}
           onClick={() => void save()}>{tr('save')}</Button>
         <Button variant="outline" disabled={busy} onClick={() => void load()}>{t('common.refresh')}</Button>
       </div>
@@ -130,6 +146,12 @@ export function UarRepresentationAdministrationPanel({ workspaceId }: { workspac
     {selected && <SettingGroup>
       <SettingTitle>{tr('audit')}</SettingTitle>
       <Badge>{tr(`status.${selected.status}`)} · r{selected.revision}</Badge>
+      <p className="mt-2 text-sm" role="status" data-ui="uar-representation-applied" data-applied={Boolean(applied)}>
+        {boundInstance?.representationGrantRefs === undefined
+          ? t('settings.prometheus.integration.uarAdmin.durable.unknown')
+          : tr(applied ? 'applied' : 'notApplied')}
+        {boundInstance?.representationRevision !== undefined && <> · r{boundInstance.representationRevision}</>}
+      </p>
       <p className="mt-2 break-all text-xs">{selected.grantId}<br />{selected.constraintDigest}</p>
       <div className="mt-4 space-y-3">
         <IntegrationField label={tr('reason')} value={reason} onChange={setReason} disabled={busy || terminal} />

@@ -8,6 +8,8 @@ import { ipcApi } from '@renderer/ipc'
 import type { UarDurableOperation, UarInstanceAction, UarInstanceProfile } from '@shared/types/uarDurableAdministration'
 
 import { useUarDurableWorkspace } from './useUarDurableWorkspace'
+import { UarDurableTurnControls } from './UarDurableTurnControls'
+import { UarLifecycleActivity } from './UarLifecycleActivity'
 
 const ACTIONS: UarInstanceAction[] = ['activate', 'passivate', 'drain', 'disable', 'restart', 'cancel']
 const PROFILES: UarInstanceProfile[] = ['request', 'on_demand', 'resident']
@@ -280,6 +282,9 @@ export function UarDurableInstancesPanel({ workspaceId }: { workspaceId: string 
                       )
                     })}
                   </div>
+                  <UarDurableTurnControls workspaceId={workspaceId} instance={instance}
+                    disabled={busy || refreshRequired || !canUse('agent-instances.turn')} refresh={refresh} />
+                  <dl className="mt-4"><UarLifecycleActivity instance={instance} /></dl>
                 </article>
               ))}
             </div>

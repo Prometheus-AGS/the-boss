@@ -94,6 +94,8 @@ import {
 } from '@shared/types/uarChannelObservers'
 import type {
   UarDurableBinding,
+  UarDurableCommand,
+  UarDurableRunSnapshot,
   UarDurableInstance,
   UarDurableObserver,
   UarDurableWorkspaceSnapshot
@@ -706,6 +708,23 @@ export const prometheusRequestSchemas = {
       })
       .strict(),
     output: z.custom<UarDurableInstance>()
+  }),
+  'prometheus.uar.durable.submit_turn': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256), instanceId: z.string().min(1).max(256),
+      commandId: z.uuid(), prompt: z.string().trim().min(1).max(16000) }).strict(),
+    output: z.custom<UarDurableCommand>()
+  }),
+  'prometheus.uar.durable.run': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256), instanceId: z.string().min(1).max(256),
+      runId: z.string().min(1).max(256), after: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER).optional() }).strict(),
+    output: z.custom<UarDurableRunSnapshot>()
+  }),
+  'prometheus.uar.durable.decide_approval': defineRoute({
+    input: z.object({ workspaceId: z.string().min(1).max(256), instanceId: z.string().min(1).max(256),
+      runId: z.string().min(1).max(256), approvalId: z.string().min(1).max(256), issuerId: z.string().min(1).max(256),
+      challengeId: z.string().min(1).max(256), eventId: z.string().min(1).max(256),
+      cursor: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER), approved: z.boolean() }).strict(),
+    output: z.object({ resolved: z.literal(true) })
   }),
   'prometheus.uar.durable.instance_action': defineRoute({
     input: z

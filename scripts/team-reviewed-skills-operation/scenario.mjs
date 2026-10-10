@@ -182,6 +182,7 @@ export async function scenario({ evaluate, signal, targets, trustedRequest }, co
     stage = 'onboarding-and-configured-gateway'
     await openWork(evaluate, signal)
     const selected = await setup(evaluate, configuration)
+    await configuration.onRuntimePrepared?.()
     const fullGenerationRoot = signedGenerationRoot(app.homePath)
     const snapshot = () => ipc(evaluate, route('snapshot'), { workspaceId: selected.workspaceId })
     const authoring = () => ipc(evaluate, route('authoring'), {})

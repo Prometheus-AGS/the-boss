@@ -7642,5 +7642,11 @@
   "xlsx_preview.formula_not_evaluated": "公式無法求值",
   "xlsx_preview.sheet_tabs_label": "工作表",
   "xlsx_preview.too_large.description": "檔案大小 {{size}} 超過 {{limit}} 的預覽大小限制。",
-  "xlsx_preview.too_large.title": "檔案過大，無法預覽"
+  "xlsx_preview.too_large.title": "檔案過大，無法預覽",
+  "settings.prometheus.integration.uarAdmin.durable.turnPrompt": "執行個體任務",
+  "settings.prometheus.integration.uarAdmin.durable.turnHelp": "使用已設定的模型和目前權限向此執行個體提交。重新整理可查看完成或失敗狀態；重新開啟後仍可查看保留的命令歷程。",
+  "settings.prometheus.integration.uarAdmin.durable.submitTurn": "提交任務",
+  "settings.prometheus.integration.uarAdmin.representation.resources": "資源範圍",
+  "settings.prometheus.integration.uarAdmin.representation.applied": "此授權的確切修訂已關聯至選定執行個體。每項操作仍受目前原則、有效期限和撤銷狀態約束。",
+  "settings.prometheus.integration.uarAdmin.representation.notApplied": "此授權修訂尚未關聯至選定執行個體。儲存已審閱的修訂以套用。"
 }

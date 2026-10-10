@@ -7642,5 +7642,11 @@
   "xlsx_preview.formula_not_evaluated": "Die Formel konnte nicht ausgewertet werden",
   "xlsx_preview.sheet_tabs_label": "Tabellenblätter",
   "xlsx_preview.too_large.description": "Die Dateigröße {{size}} überschreitet das Vorschaulimit von {{limit}}.",
-  "xlsx_preview.too_large.title": "Datei zu groß für die Vorschau"
+  "xlsx_preview.too_large.title": "Datei zu groß für die Vorschau",
+  "settings.prometheus.integration.uarAdmin.durable.turnPrompt": "Aufgabe der Instanz",
+  "settings.prometheus.integration.uarAdmin.durable.turnHelp": "Mit dem konfigurierten Modell und der aktuellen Berechtigung an diese Instanz senden. Aktualisieren Sie die Ansicht für Abschluss oder Fehler; der Befehlsverlauf bleibt nach erneutem Öffnen verfügbar.",
+  "settings.prometheus.integration.uarAdmin.durable.submitTurn": "Aufgabe senden",
+  "settings.prometheus.integration.uarAdmin.representation.resources": "Ressourcenbereiche",
+  "settings.prometheus.integration.uarAdmin.representation.applied": "Diese genaue Berechtigungsversion ist der ausgewählten Instanz zugeordnet. Aktuelle Richtlinien, Gültigkeit und Widerruf gelten weiterhin für jede Aktion.",
+  "settings.prometheus.integration.uarAdmin.representation.notApplied": "Diese Berechtigungsversion ist der ausgewählten Instanz nicht zugeordnet. Speichern Sie die geprüfte Version, um sie anzuwenden."
 }

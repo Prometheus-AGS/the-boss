@@ -5,7 +5,7 @@ import path from 'node:path';
 
 const LIMIT = 32_000;
 export function minimalEnvironment(names = [], supplied = process.env) {
-  const keep = ['PATH', 'Path', 'SystemRoot', 'WINDIR', 'COMSPEC', 'PATHEXT', 'TEMP', 'TMP', 'HOME', 'USERPROFILE', 'LANG', 'LC_ALL'];
+  const keep = ['PATH', 'Path', 'SystemRoot', 'WINDIR', 'COMSPEC', 'PATHEXT', 'TEMP', 'TMP', 'HOME', 'USER', 'USERPROFILE', 'LANG', 'LC_ALL'];
   return Object.fromEntries([...new Set([...keep, ...names])].filter(k => supplied[k] !== undefined).map(k => [k, supplied[k]]));
 }
 

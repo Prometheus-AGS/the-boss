@@ -329,6 +329,7 @@ const UAR_ADMIN_METHOD_ALLOWLIST = new Set<string>([
   'agent-instances.list\u0000GET\u0000/api/uar/agent-instances/v1\u0000owner\u0000read',
   'agent-instances.read\u0000GET\u0000/api/uar/agent-instances/v1/{id}\u0000owner\u0000read',
   'agent-instances.create\u0000POST\u0000/api/uar/agent-instances/v1\u0000owner\u0000live',
+  'agent-instances.turn\u0000POST\u0000/api/uar/agent-instances/v1/{id}/turns\u0000owner\u0000live',
   'agent-instances.activate\u0000POST\u0000/api/uar/agent-instances/v1/{id}/activate\u0000owner\u0000live',
   'agent-instances.passivate\u0000POST\u0000/api/uar/agent-instances/v1/{id}/passivate\u0000owner\u0000live',
   'agent-instances.drain\u0000POST\u0000/api/uar/agent-instances/v1/{id}/drain\u0000owner\u0000live',

@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
+import { isDeepStrictEqual } from 'node:util'
 
 import { digest, write, same, route, requireFact, waitFor, nativeIpcFailure } from './io.mjs'
 import { liveOutputObserver } from './live-output.mjs'
@@ -36,6 +37,29 @@ async function fill(evaluate, signal, selector, value) {
 async function choose(evaluate, signal, selector, option) {
   await click(evaluate, signal, selector)
   await click(evaluate, signal, option)
+}
+async function chooseMemberModel(evaluate, signal, role, model, evidence) {
+  const member = `[data-ui~="team-authoring-member"][data-role="${role}"]`
+  await click(evaluate, signal, member + ' [data-ui~="teams-model"]')
+  const popupId = await waitFor(signal, () => evaluate(`(() => {
+    const trigger=${visible(member + ' [data-ui~="teams-model"]')};
+    const popup=document.getElementById(trigger?.getAttribute('aria-controls'));
+    return trigger?.getAttribute('aria-expanded')==='true' && popup?.getAttribute('data-state')==='open' &&
+      popup.getClientRects().length && popup.id;
+  })()`), 'C15_REQUESTED_MODEL_POPUP_UNAVAILABLE')
+  const popupSelector = await evaluate(`'#'+CSS.escape(${JSON.stringify(popupId)})`)
+  await click(evaluate, signal, popupSelector +
+    ` [role="option"][data-model-source="${model.source}"][data-provider-id="${model.providerId}"][data-model-id="${model.modelId}"]`)
+  const committed = await waitFor(signal, () => evaluate(`(() => {
+    const picker=${visible(member + ' [data-ui~="uar-team-model-picker"]')};
+    const source=picker?.getAttribute('data-selected-source');
+    const modelId=picker?.getAttribute('data-selected-model');
+    const providerMatches=[...(picker?.querySelectorAll('p')??[])].some(node=>
+      node.textContent.trim().endsWith(${JSON.stringify(model.providerId + ' / ' + model.modelId)}));
+    return source===${JSON.stringify(model.source)} && modelId===${JSON.stringify(model.modelId)} &&
+      providerMatches && {role:${JSON.stringify(role)},source,modelId,providerMatches,popupId:${JSON.stringify(popupId)}};
+  })()`), 'C15_MODEL_SELECTION_NOT_COMMITTED')
+  evidence.modelChoices = [...(evidence.modelChoices ?? []), committed]
 }
 async function ipc(evaluate, name, input) {
   const result = await evaluate(`window.api.ipcApi.request(${JSON.stringify(name)},${JSON.stringify(input)})`)
@@ -147,7 +171,20 @@ async function setup(evaluate, configuration) {
   const provider = sources.sources
     .find((item) => item.source === 'gateway' && item.operational)
     ?.providers.find((item) => item.enabled && item.models.some((model) => model.enabled && model.id === gateway.alias))
-  requireFact(provider, 'C15_ADVERTISED_MODEL_UNAVAILABLE')
+  if (!provider) throw Object.assign(new Error('C15_ADVERTISED_MODEL_UNAVAILABLE'), {
+    code: 'C15_ADVERTISED_MODEL_UNAVAILABLE',
+    modelSourceDiagnostics: sources.sources.map((source) => ({
+      source: source.source,
+      operational: source.operational,
+      errorStatus: source.error?.match(/HTTP \d{3}/)?.[0],
+      providers: source.providers.map((entry) => ({
+        id: entry.id,
+        enabled: entry.enabled,
+        credentialConfigured: entry.credentialConfigured,
+        models: entry.models.map((model) => ({ id: model.id, enabled: model.enabled }))
+      }))
+    }))
+  })
   return {
     workspaceId: registered.data.id,
     model: { source: 'gateway', providerId: provider.id, modelId: gateway.alias }
@@ -224,13 +261,7 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     )
     const roles = ['coordinator', 'product', 'designer', 'reviewer']
     for (const role of roles) {
-      const member = `[data-ui~="team-authoring-member"][data-role="${role}"]`
-      await choose(
-        evaluate,
-        signal,
-        member + ' [data-ui~="teams-model"]',
-        `[role="option"][data-model-source="gateway"][data-provider-id="${selected.model.providerId}"][data-model-id="${selected.model.modelId}"]`
-      )
+      await chooseMemberModel(evaluate, signal, role, selected.model, evidence)
     }
     const skills = await ipc(evaluate, route('skills'), {})
     const tools = ['filesystem__glob', 'filesystem__ls', 'filesystem__grep', 'filesystem__read']
@@ -249,6 +280,10 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
         unavailableEntries: skills.entries.map((entry) => ({ skillId: entry.skillId, reasons: entry.reasons }))
       }
     requireFact(skill, 'C15_EXACT_INSTALLED_READ_ONLY_SKILL_UNAVAILABLE')
+    const selectedSkillRef = {
+      ...skill.skillRef,
+      required: skill.reviewedCoverage.status === 'reviewed' && skill.skillRef.required
+    }
     const skillSelector = `[data-ui~="team-authoring-member"][data-role="reviewer"] [data-ui~="team-authoring-skill"][data-skill-digest="${skill.skillRef.digest}"] [role="checkbox"]`
     await click(evaluate, signal, skillSelector)
     await click(evaluate, signal, '[data-ui~="team-authoring-save"]')
@@ -258,10 +293,17 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
       'C15_PERSISTED_AUTHORING_UNAVAILABLE'
     )
     requireFact(
-      first.team.members.find((member) => member.role === 'reviewer').skills.some((item) => same(item, skill.skillRef)),
+      first.team.members.find((member) => member.role === 'reviewer').skills.some((item) => isDeepStrictEqual(item, selectedSkillRef)),
       'C15_EXACT_SELECTED_SKILL_NOT_PERSISTED'
     )
-    evidence.skill = skill.skillRef
+    requireFact(first.team.members.every((member) => isDeepStrictEqual(member.model, selected.model)),
+      'C15_EXACT_MEMBER_MODELS_NOT_PERSISTED')
+    evidence.skill = selectedSkillRef
+    evidence.skillSelection = {
+      catalogRequired: skill.skillRef.required,
+      reviewedCoverageStatus: skill.reviewedCoverage.status,
+      requiredReviewedQualification: selectedSkillRef.required && skill.reviewedCoverage.status === 'reviewed'
+    }
     stage = 'deploy-immutable-package-and-private-binding'
     await click(evaluate, signal, '[data-ui~="team-authoring-deploy"]')
     const binding = await waitFor(
@@ -475,6 +517,7 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     evidence.complete = true
   } catch (error) {
     evidence.failureStage = stage
+    if (error.modelSourceDiagnostics) evidence.modelSourceDiagnostics = error.modelSourceDiagnostics
     if (error.approvalIpcFailure) evidence.approvalIpcFailure = error.approvalIpcFailure
     if (error.approvalScopeFailure) evidence.approvalScopeFailure = error.approvalScopeFailure
     evidence.failureCode = signal.aborted

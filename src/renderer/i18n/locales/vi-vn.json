@@ -7642,5 +7642,11 @@
   "xlsx_preview.formula_not_evaluated": "Không thể tính giá trị công thức",
   "xlsx_preview.sheet_tabs_label": "Trang tính",
   "xlsx_preview.too_large.description": "Kích thước tệp {{size}} vượt quá giới hạn xem trước {{limit}}.",
-  "xlsx_preview.too_large.title": "Tệp quá lớn để xem trước"
+  "xlsx_preview.too_large.title": "Tệp quá lớn để xem trước",
+  "settings.prometheus.integration.uarAdmin.durable.turnPrompt": "Tác vụ của phiên bản",
+  "settings.prometheus.integration.uarAdmin.durable.turnHelp": "Gửi đến phiên bản này bằng mô hình đã cấu hình và quyền hiện tại. Làm mới để xem hoàn tất hoặc lỗi; lịch sử lệnh vẫn có sau khi mở lại.",
+  "settings.prometheus.integration.uarAdmin.durable.submitTurn": "Gửi tác vụ",
+  "settings.prometheus.integration.uarAdmin.representation.resources": "Phạm vi tài nguyên",
+  "settings.prometheus.integration.uarAdmin.representation.applied": "Bản sửa đổi chính xác của quyền này đã được gắn với phiên bản đã chọn. Chính sách hiện tại, hiệu lực và việc thu hồi vẫn chi phối mọi hành động.",
+  "settings.prometheus.integration.uarAdmin.representation.notApplied": "Bản sửa đổi quyền này chưa được gắn với phiên bản đã chọn. Lưu bản đã xem xét để áp dụng."
 }

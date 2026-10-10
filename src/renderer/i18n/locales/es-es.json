@@ -7642,5 +7642,11 @@
   "xlsx_preview.formula_not_evaluated": "No se pudo evaluar la fórmula",
   "xlsx_preview.sheet_tabs_label": "Hojas",
   "xlsx_preview.too_large.description": "El tamaño del archivo {{size}} supera el límite de vista previa de {{limit}}.",
-  "xlsx_preview.too_large.title": "El archivo es demasiado grande para previsualizarlo"
+  "xlsx_preview.too_large.title": "El archivo es demasiado grande para previsualizarlo",
+  "settings.prometheus.integration.uarAdmin.durable.turnPrompt": "Tarea de la instancia",
+  "settings.prometheus.integration.uarAdmin.durable.turnHelp": "Enviar a esta instancia con su modelo configurado y autorización actual. Actualice para ver el resultado o error; el historial de comandos se conserva al volver a abrir.",
+  "settings.prometheus.integration.uarAdmin.durable.submitTurn": "Enviar tarea",
+  "settings.prometheus.integration.uarAdmin.representation.resources": "Ámbitos de recursos",
+  "settings.prometheus.integration.uarAdmin.representation.applied": "Esta revisión exacta de la autorización está vinculada a la instancia seleccionada. La política actual, la vigencia y la revocación siguen rigiendo cada acción.",
+  "settings.prometheus.integration.uarAdmin.representation.notApplied": "Esta revisión de la autorización no está vinculada a la instancia seleccionada. Guarde la revisión examinada para aplicarla."
 }

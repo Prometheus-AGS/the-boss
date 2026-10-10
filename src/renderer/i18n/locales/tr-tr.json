@@ -7642,5 +7642,11 @@
   "xlsx_preview.formula_not_evaluated": "Formül değerlendirilemedi",
   "xlsx_preview.sheet_tabs_label": "Sayfalar",
   "xlsx_preview.too_large.description": "{{size}} dosya boyutu, {{limit}} önizleme sınırını aşıyor.",
-  "xlsx_preview.too_large.title": "Dosya önizlenemeyecek kadar büyük"
+  "xlsx_preview.too_large.title": "Dosya önizlenemeyecek kadar büyük",
+  "settings.prometheus.integration.uarAdmin.durable.turnPrompt": "Örnek görevi",
+  "settings.prometheus.integration.uarAdmin.durable.turnHelp": "Yapılandırılmış model ve mevcut yetkiyle bu örneğe gönderin. Tamamlanma veya hata için yenileyin; komut geçmişi yeniden açıldıktan sonra kullanılabilir.",
+  "settings.prometheus.integration.uarAdmin.durable.submitTurn": "Görevi gönder",
+  "settings.prometheus.integration.uarAdmin.representation.resources": "Kaynak kapsamları",
+  "settings.prometheus.integration.uarAdmin.representation.applied": "Bu yetkinin tam revizyonu seçili örneğe bağlanmıştır. Her eylem mevcut ilkeye, geçerliliğe ve iptal durumuna tabidir.",
+  "settings.prometheus.integration.uarAdmin.representation.notApplied": "Bu yetki revizyonu seçili örneğe bağlanmamıştır. Uygulamak için incelenen revizyonu kaydedin."
 }
