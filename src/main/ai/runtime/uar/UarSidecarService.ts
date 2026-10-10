@@ -75,6 +75,50 @@ const safeTeamProviderRetry = z.object({
     delay_ms: z.number().int().nonnegative()
   })
 })
+const safeInstanceTurnDiagnostic = z.object({
+  fields: z.object({
+    message: z.literal('UAR_INSTANCE_TURN_DIAGNOSTIC'),
+    source_stage: z.enum(['actor_host', 'run_kernel']),
+    error_code: z.enum([
+      'actor_root_request_scope_mismatch',
+      'actor_root_artifact_scope_failed',
+      'actor_root_catalog_binding_failed',
+      'actor_root_instance_epoch_failed',
+      'actor_root_previous_recovery_failed',
+      'actor_root_identity_failed',
+      'actor_root_registration_failed',
+      'actor_root_terminal_epoch_failed',
+      'actor_root_terminal_persistence_failed',
+      'actor_host_failed',
+      'actor_kernel_failed',
+      'actor_root_mismatch',
+      'run_owner_mismatch',
+      'mcp_catalog_unavailable',
+      'mcp_capture_mismatch',
+      'child_bindings_unavailable',
+      'sandbox_binding_unavailable',
+      'mcp_server_not_run_scoped',
+      'mcp_preflight_failed',
+      'approval_channel_unavailable',
+      'world_state_load_failed',
+      'tool_admission_context_failed',
+      'provider_model_unavailable',
+      'thread_attachment_failed',
+      'turn_assembly_rejected',
+      'root_resource_binding_conflict',
+      'kernel_completion_closed',
+      'kernel_panicked',
+      'thread_cleanup_unconfirmed',
+      'session_persistence_unconfirmed',
+      'representation_cedar_required',
+      'representation_history_scope_unsupported',
+      'representation_instance_scope_denied',
+      'representation_admission_denied'
+    ]),
+    command_id: z.uuid(),
+    attempt_id: z.uuid()
+  })
+})
 // C10 packaged cold-start receipt (2026-10-09): READY after skill initialization took 34,651 ms.
 // This startup deadline is separate from capability and model request timeouts.
 const START_TIMEOUT_MS = 60_000
@@ -676,6 +720,12 @@ export class UarSidecarService extends BaseService {
         try {
           value = JSON.parse(line)
         } catch {
+          return
+        }
+        const instance = safeInstanceTurnDiagnostic.safeParse(value)
+        if (instance.success) {
+          const { source_stage, error_code, command_id, attempt_id } = instance.data.fields
+          logger.warn('UAR_INSTANCE_TURN_DIAGNOSTIC', { source_stage, error_code, command_id, attempt_id })
           return
         }
         const retry = safeTeamProviderRetry.safeParse(value)
