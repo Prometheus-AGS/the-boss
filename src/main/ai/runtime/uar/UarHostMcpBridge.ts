@@ -6,6 +6,9 @@ import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js'
 
 import type { AgentMcpServer } from '@main/ai/runtime/agentMcpServers'
 
+import { createUarProjectedMcpTransport } from './uarProjectedMcpTransport'
+import { createUarSecretProjection, type UarSecretProjection } from './uarSecretProjection'
+
 import {
   UAR_TOOL_ADMISSION_PATH,
   UAR_TOOL_ADMISSION_VERSION,
@@ -50,21 +53,28 @@ type MountedServer = {
   transport?: StreamableHTTPServerTransport
   sessions: Map<string, ClientSession>
   ownedSessions: Set<ClientSession>
+  projection: () => UarSecretProjection
 }
 
 export async function createUarHostMcpBridge(
   servers: Record<string, MountedServer['server']>,
   admissionOptions: UarHostToolAdmissionOptions,
-  onError: (error: unknown) => void = () => undefined
+  onError: (error: unknown) => void = () => undefined,
+  getProjection: () => UarSecretProjection = () => createUarSecretProjection([])
 ): Promise<UarHostMcpBridge> {
   const token = randomBytes(32).toString('base64url')
-  const mounted = await connectServers(servers, token)
+  let privateValues = [token]
+  const projection = () => getProjection().withValues(privateValues)
+  const reportError = (error: unknown) => onError(projection().error(error))
+  const mounted = await connectServers(servers, token, projection).catch((error) => {
+    throw projection().error(error)
+  })
   const routes = new Map(mounted.map((entry) => [entry.path, entry]))
   const admissions = new UarHostToolAdmission(admissionOptions)
   let expectedHost = ''
   const httpServer = createServer((request, response) => {
     void handleRequest(request, response, expectedHost, token, routes, admissions).catch((error) => {
-      onError(error)
+      reportError(error)
       if (!response.headersSent) response.writeHead(500)
       response.end()
     })
@@ -74,6 +84,7 @@ export async function createUarHostMcpBridge(
     const port = await listen(httpServer)
     expectedHost = `127.0.0.1:${port}`
     const admissionUrl = `http://${expectedHost}${UAR_TOOL_ADMISSION_PATH}`
+    privateValues = [token, admissionUrl, ...mounted.map((entry) => `http://${expectedHost}${entry.path}`)]
     return {
       servers: mounted.map((entry) => ({
         name: entry.server.name,
@@ -86,25 +97,26 @@ export async function createUarHostMcpBridge(
         url: admissionUrl,
         headers: { Authorization: `Bearer ${token}` }
       },
-      redactions: [token, admissionUrl, ...mounted.map((entry) => `http://${expectedHost}${entry.path}`)],
+      redactions: privateValues,
       recordHumanDecision: (admissionId, approved) => admissions.recordHumanDecision(admissionId, approved),
       cancelAdmission: (admissionId, invocationId, reason) =>
         admissions.cancelAdmission(admissionId, invocationId, reason),
       approvalSnapshot: () => admissions.snapshots(),
       close: async () => {
-        admissions.invalidateForTeardown(onError)
+        admissions.invalidateForTeardown(reportError)
         await closeBridge(httpServer, mounted)
       }
     }
   } catch (error) {
     await closeBridge(httpServer, mounted)
-    throw error
+    throw projection().error(error)
   }
 }
 
 async function connectServers(
   servers: Record<string, MountedServer['server']>,
-  token: string
+  token: string,
+  projection: () => UarSecretProjection
 ): Promise<MountedServer[]> {
   const mounted: MountedServer[] = []
   try {
@@ -113,12 +125,13 @@ async function connectServers(
         path: `/mcp/${createHash('sha256').update(`${token}\0${serverId}`).digest('hex')}`,
         server,
         sessions: new Map(),
-        ownedSessions: new Set()
+        ownedSessions: new Set(),
+        projection
       }
       mounted.push(entry)
       if ('instance' in server) {
         entry.transport = new StreamableHTTPServerTransport({ sessionIdGenerator: randomUUID })
-        await server.instance.connect(entry.transport)
+        await server.instance.connect(createUarProjectedMcpTransport(entry.transport, projection))
       }
     }
     return mounted
@@ -222,7 +235,7 @@ async function clientTransport(
     mounted.ownedSessions.delete(session)
   }
   try {
-    await instance.connect(transport)
+    await instance.connect(createUarProjectedMcpTransport(transport, mounted.projection))
     return transport
   } catch (error) {
     mounted.ownedSessions.delete(session)

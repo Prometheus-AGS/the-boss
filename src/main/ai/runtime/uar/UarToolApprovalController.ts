@@ -4,6 +4,7 @@ import { toolApprovalRegistry, type DispatchDecision } from '@main/ai/toolApprov
 
 import type { AgentRuntimeEvent } from '../types'
 import type { UarHostMcpBridge } from './UarHostMcpBridge'
+import { createUarSecretProjection, type UarSecretProjection } from './uarSecretProjection'
 import type { UarSidecarEndpoint } from './UarSidecarService'
 
 const logger = loggerService.withContext('UarToolApprovalController')
@@ -26,22 +27,26 @@ interface UarToolApprovalOptions {
   principal: string
   signal: AbortSignal
   bridge: UarHostMcpBridge
+  projection?: UarSecretProjection
   emit(event: AgentRuntimeEvent): void
   isClosed(): boolean
 }
 
 type PendingApproval = {
-  rawApprovalId?: string
+  rawApprovalId: string
   admissionId: string
   invocationId?: string
-  rawToolCallId: string
   toolCallId: string
   toolName: string
   input: Record<string, unknown>
 }
 
 export class UarToolApprovalController {
-  constructor(private readonly options: UarToolApprovalOptions) {}
+  private readonly projection: UarSecretProjection
+
+  constructor(private readonly options: UarToolApprovalOptions) {
+    this.projection = options.projection ?? createUarSecretProjection([])
+  }
 
   abort(reason: string): void {
     toolApprovalRegistry.abort(this.options.sessionId, reason)
@@ -52,6 +57,9 @@ export class UarToolApprovalController {
     ensureToolInput: (rawToolCallId: string, toolName: string, input: Record<string, unknown>) => string
   ): Promise<void> {
     const value = rawValue as UarApprovalValue
+    if (typeof value.approvalId !== 'string' || value.approvalId.trim().length === 0) {
+      throw new Error('UAR tool approval requires an exact approvalId; update the runtime before approving tools')
+    }
     if (
       typeof value.toolCallId !== 'string' ||
       typeof value.name !== 'string' ||
@@ -59,12 +67,11 @@ export class UarToolApprovalController {
     ) {
       throw new Error('UAR emitted an invalid tool approval request')
     }
-    const input = parseSafeActionDisplay(value.arguments)
+    const input = parseSafeActionDisplay(value.arguments, this.projection)
     const pending: PendingApproval = {
-      rawApprovalId: typeof value.approvalId === 'string' ? value.approvalId : undefined,
+      rawApprovalId: value.approvalId,
       admissionId: value.admissionId,
       invocationId: typeof value.invocationId === 'string' ? value.invocationId : undefined,
-      rawToolCallId: value.toolCallId,
       toolCallId: ensureToolInput(value.toolCallId, value.name, input),
       toolName: value.name,
       input
@@ -78,7 +85,7 @@ export class UarToolApprovalController {
       await this.recordAndResolve(input, false)
       return
     }
-    const approvalId = `uar:${this.options.runId}:${input.rawApprovalId ?? input.rawToolCallId}`
+    const approvalId = `uar:${this.options.runId}:${input.rawApprovalId}`
     const presentation = interactionState.userResponse === 'stream' ? 'stream' : 'message'
     const registration = toolApprovalRegistry.registerOrReattach({
       approvalId,
@@ -110,16 +117,22 @@ export class UarToolApprovalController {
       try {
         this.options.bridge.cancelAdmission(input.admissionId, input.invocationId, 'cancelled')
       } catch (error) {
-        logger.warn('Failed to persist cancelled UAR tool admission', { admissionId: input.admissionId, error })
+        logger.warn('Failed to persist cancelled UAR tool admission', {
+          admissionId: input.admissionId, error: this.projection.error(error)
+        })
       }
       return
     }
     if (decision.approved && decision.updatedInput) {
-      logger.warn('Editing tool input is not supported by the UAR runtime; rejecting', { toolName: input.toolName })
+      logger.warn('Editing tool input is not supported by the UAR runtime; rejecting', {
+        toolName: this.projection.text(input.toolName)
+      })
     }
     const approved = decision.approved && !decision.updatedInput
     void this.recordAndResolve(input, approved).catch((error) => {
-      if (!this.options.signal.aborted && !this.options.isClosed()) this.options.emit({ type: 'error', error })
+      if (!this.options.signal.aborted && !this.options.isClosed()) {
+        this.options.emit({ type: 'error', error: this.projection.error(error) })
+      }
     })
   }
 
@@ -130,7 +143,7 @@ export class UarToolApprovalController {
     await this.resolve(input.rawApprovalId, approved)
   }
 
-  private async resolve(approvalId: string | undefined, approved: boolean): Promise<void> {
+  private async resolve(approvalId: string, approved: boolean): Promise<void> {
     const response = await application
       .get('UarSidecarService')
       .requestInstanceCurrent(
@@ -140,18 +153,18 @@ export class UarToolApprovalController {
         {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ approved, ...(approvalId ? { approval_id: approvalId } : {}) })
+          body: JSON.stringify({ approved, approval_id: approvalId })
         }
       )
     if (!response) throw new Error('UAR restarted before the tool approval was resolved')
     if (!response.ok) {
-      const detail = (await response.text()).slice(0, 1_000).trim()
+      const detail = this.projection.text(await response.text()).slice(0, 1_000).trim()
       throw new Error(`UAR rejected the tool approval (HTTP ${response.status})${detail ? `: ${detail}` : ''}`)
     }
   }
 }
 
-function parseSafeActionDisplay(value: unknown): Record<string, unknown> {
+function parseSafeActionDisplay(value: unknown, projection: UarSecretProjection): Record<string, unknown> {
   let parsed: unknown = value
   if (typeof value === 'string') {
     try {
@@ -164,7 +177,7 @@ function parseSafeActionDisplay(value: unknown): Record<string, unknown> {
   const safe: Record<string, unknown> = {}
   for (const key of ['operation', 'server', 'target']) {
     const entry = parsed[key]
-    if (typeof entry === 'string') safe[key] = entry.slice(0, 512)
+    if (typeof entry === 'string') safe[key] = projection.text(entry).slice(0, 512)
   }
   if (typeof parsed.detailsAvailable === 'boolean') safe.detailsAvailable = parsed.detailsAvailable
   return safe
