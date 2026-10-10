@@ -209,17 +209,19 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.28 - Runtime follow-up recovery and scoped delegation repairs
+    The Boss 2.2.29 - Conversation recovery after cancellation and restart
 
     - [UAR] Preserve completed conversation history when admitting a new turn after runtime restart; interrupted execution retains its explicit recovery path.
+    - [UAR] Admit fresh input after a tool-free cancelled conversation survives a runtime restart; unresolved tool effects remain on explicit recovery.
     - [BossFang] Permit scoped model discovery through the selected UAR instance without sharing the host launch token.
     - [Runtime] Resolve gateway alias context capacity from its captured model identity while retaining explicitly configured limits.
     - [Diagnostics] Retain the static context-budget failure code in private runtime diagnostics.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.28 - 运行时续聊恢复与限定范围的委派修复
+    The Boss 2.2.29 - 取消对话并重启后的会话恢复
 
     - [UAR] 运行时重启后，接纳新一轮对话时保留已完成的会话历史；中断的执行仍使用明确的恢复路径。
+    - [UAR] 取消不涉及工具的对话并重启运行时后，允许通过保留的历史接纳新输入；未确定的工具操作仍须显式恢复。
     - [BossFang] 允许通过选定的 UAR 实例在授权范围内发现模型，不共享宿主启动令牌。
     - [运行时] 根据捕获的模型标识解析网关别名的上下文容量，同时保留显式配置的限制。
     - [诊断] 在私有运行时诊断中保留静态的上下文预算失败代码。
