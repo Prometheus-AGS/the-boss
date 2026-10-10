@@ -99,9 +99,8 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             build/integration-source/**/target
-          key: native-${{ matrix.platform }}-${{ inputs.native_tools || 'all' }}-${{ hashFiles('build/integration-sources.json') }}
+          key: native-${{ matrix.platform }}-${{ hashFiles('build/integration-sources.json') }}
           restore-keys: |
-            native-${{ matrix.platform }}-${{ inputs.native_tools || 'all' }}-
             native-${{ matrix.platform }}-
       - name: Build final native tool payload
         env:
