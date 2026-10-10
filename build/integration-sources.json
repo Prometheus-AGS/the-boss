@@ -4,15 +4,15 @@
   "sources": {
     "compass": {
       "repository": "GQAdonis/compass",
-      "revision": "d0b9e0fb3cc62a1985bd6a83c5b5ea7798d937f9"
+      "revision": "1ddd1d07979d67aa8ca715aec27fe8f3936bbb43"
     },
     "filesystem": {
       "repository": "GQAdonis/rust-mcp-filesystem",
-      "revision": "3a8d18233aa666f7cf776d5d998a28e7b2b88d0d"
+      "revision": "01ae76b99db4b818458efe2dc5d76e70fa5eadb4"
     },
     "prometheus": {
       "repository": "Prometheus-AGS/prometheus-skill-system",
-      "revision": "3e8a891bcd472e18cc1c097c04b208cb93f7f78f"
+      "revision": "9c776b291cdf942e90ce240550781c7ca461dcf6"
     },
     "pk": {
       "repository": "Prometheus-AGS/prometheus-knowledge-rs",
@@ -20,15 +20,15 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "838371d3b597e785b1fe264377b3f55b9ca6333f"
+      "revision": "951ed6005e0e8742ad589eb504ee6e27dbeb55ac"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "308aea46ff26e7f61340281bb51f67ebe5351569"
+      "revision": "22848ff4a27bcff4f902a40202d85ef1880dc9a5"
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
-      "revision": "bfb6d49a7fe25d82ef4ad55f49c8f97e6e82c54a"
+      "revision": "63eb413ebf520a4a525ffd3b8d1d07f1389d48d4"
     },
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
@@ -36,18 +36,18 @@
     },
     "bossfang": {
       "repository": "GQAdonis/librefang",
-      "revision": "0899e4993ebfede3f91366b22cfe9310b2e58f69"
+      "revision": "4971458c70543b592cc534986737a9d045164547"
     },
     "skill-pack": {
       "repository": "Prometheus-AGS/prometheus-skill-system",
-      "revision": "bb8950b254825079ab382119a8c425d645a081ae"
+      "revision": "9c776b291cdf942e90ce240550781c7ca461dcf6"
     }
   },
   "tools": {
     "compass": {
       "source": "compass",
       "package": "compass-cli",
-      "version": "0.3.28",
+      "version": "0.3.29",
       "features": "surreal-remote"
     },
     "rust-mcp-filesystem": {
@@ -59,7 +59,7 @@
       "source": "prometheus",
       "package": "prometheus-cli",
       "directory": "tools/prometheus-cli",
-      "version": "1.11.3"
+      "version": "1.12.2"
     },
     "pk": {
       "source": "pk",
@@ -80,7 +80,7 @@
     "bossfang": {
       "source": "bossfang",
       "package": "librefang-cli",
-      "version": "2026.9.19+0899e4993",
+      "version": "2026.9.19+4971458c7",
       "features": "telemetry,surreal-backend,uar-driver"
     }
   },

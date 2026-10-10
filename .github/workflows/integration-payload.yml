@@ -38,6 +38,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.select.outputs.matrix }}
+      skills_platform: ${{ steps.select.outputs.skills_platform }}
     steps:
       - id: select
         env:
@@ -54,6 +55,7 @@ jobs:
           ];
           const requested = process.env.PLATFORMS ? process.env.PLATFORMS.split(',').map(value => value.trim()) : targets.map(value => value.platform);
           if (requested.some(platform => !targets.some(value => value.platform === platform))) throw new Error('Unknown native platform');
+          require('fs').appendFileSync(process.env.GITHUB_OUTPUT, `skills_platform=${requested.includes('darwin-arm64') ? 'darwin-arm64' : requested[0]}\n`);
           require('fs').appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({include: targets.filter(value => requested.includes(value.platform))})}\n`);
           NODE
   native:
@@ -104,6 +106,7 @@ jobs:
       - name: Build final native tool payload
         env:
           INTEGRATION_TOOLS: ${{ inputs.native_tools }}
+          COMPASS_SKILLS_PLATFORM: ${{ needs.native-matrix.outputs.skills_platform }}
           BOSSFANG_PNPM_EXECUTABLE: ${{ runner.temp }}/bossfang-pnpm/node_modules/pnpm/pnpm${{ runner.os == 'Windows' && '.exe' || '' }}
         run: node scripts/build-integration-tools.cjs ${{ matrix.target }}
       - uses: actions/upload-artifact@v5

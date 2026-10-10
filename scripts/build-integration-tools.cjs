@@ -107,7 +107,7 @@ async function main() {
         output
       })
     fs.writeFileSync(path.join(output, `tools-${platform}.json`), JSON.stringify(records, null, 2))
-    if (name === 'compass' && platform === 'linux-x64') {
+    if (name === 'compass' && platform === (process.env.COMPASS_SKILLS_PLATFORM || 'darwin-arm64')) {
       const skills = path.join(output, 'compass-skills')
       fs.mkdirSync(skills, { recursive: true })
       fs.cpSync(path.join(source, 'crates/compass-cli/assets/compass-skill'), path.join(skills, 'compass'), {
