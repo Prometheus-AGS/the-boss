@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "parentProjectId": "7041aa63-d951-4b19-a59c-b963d65b3b83",
+  "parentRoot": "/Users/gqadonis/.codex/worktrees/bossfang-uar-architecture/prometheus-skills-mini/workstreams/bossfang-uar-architecture",
+  "parentPhase": "bossfang-uar-authorization-and-execution",
+  "approvedStagesInheritedFromParent": [
+    "assess",
+    "analyze",
+    "spec",
+    "plan"
+  ],
+  "executionApproval": "Approved. Use the agent team to execute.",
+  "childProjectId": "1778473f-37c3-4dff-af17-e967c84499e2",
+  "scope": "Repository-local task state only; source exact claims are owned by parent execution receipt.",
+  "rows": [
+    {
+      "change": "boss-bauar-approval-client",
+      "tasks": [
+        {
+          "id": "1",
+          "title": "1.1 Record the exact caller/type inventory, accepted source/worktree claims and user-selected strict cutover with no local exception; verify the driver has accepted the inventory and joint UAR dependency checkpoint, with installed/external compatibility limits explicit. Maps to parent bauar-02-execution-authorization/1."
+        },
+        {
+          "id": "2",
+          "title": "2.1 Require nonempty originating approval identity before presentation or host decision recording and send it on every controller approve/deny response; author missing/empty-event, unavailable-user, cancellation, reconnect and edited-input scenarios with the cutover documentation. Verify by the linked completed-boundary approval receipt; no run-only fallback may remain. Maps to parent bauar-02-execution-authorization/3."
+        },
+        {
+          "id": "3",
+          "title": "2.2 Retain the raw pending approval identity in the lifecycle projection and directly consumed shared inspection type without fabricating identity for host-only records; author inspection coverage in the same real-boundary scenario. Verify exact originating identity survives inspection in the linked V1 receipt. Maps to parent bauar-02-execution-authorization/3."
+        },
+        {
+          "id": "4",
+          "title": "2.3 Preserve host claim-before-effect and unknown outcomes, author concurrent duplicate claim and lost-response cases using the real host bridge and safe effect counter, and document the result classification. Verify the linked V1 receipt demonstrates no more than one effect and no automatic replay. Any production claim correction requires an observed failure and explicit path extension. Maps to parent bauar-02-execution-authorization/4 and shares scenario authoring with /3."
+        },
+        {
+          "id": "5",
+          "title": "3.1 At the parent's complete selected-production boundary, execute the shared real application/UAR approval matrix, including stale/foreign/replayed decisions, cancellation, identity projection and one-claim/lost-response behavior; verify every denial preserves legitimate pending authority and record exact provider/client source and payload revisions. This is deferred V1, maps to parent bauar-02-execution-authorization/7, and does not duplicate UAR's F6 diagnostic."
+        },
+        {
+          "id": "6",
+          "title": "3.2 After V1, run required repository lint/check/build and exact packaged-application validation once with a package-compatible Node runtime; verify exact payload/source correspondence and record platform/installed-version limits without closing unrelated shipping gates. This is deferred V2 and maps to parent bauar-02-execution-authorization/8."
+        }
+      ]
+    }
+  ]
+}

@@ -386,12 +386,22 @@ export async function compileUarAgent(input: UarCompilerRequest): Promise<UarCom
 }
 
 export async function saveUarAgentSkills(agentId: string, skillIds: string[]): Promise<UarCatalogSnapshot> {
-  await adminRequest(`/api/uar/agents/${encodeURIComponent(agentId)}/skills`, {
-    method: 'PUT',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ skill_ids: skillIds })
-  })
-  return readUarCatalog()
+  let stage = 'skill_binding_update; method=PUT; path_class=agent_skills'
+  try {
+    await adminRequest(`/api/uar/agents/${encodeURIComponent(agentId)}/skills`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ skill_ids: skillIds })
+    })
+    stage = 'catalog_refresh; method=GET; path_class=catalog_snapshot'
+    return await readUarCatalog()
+  } catch (error) {
+    // UAR's request deadline returns HTTP 408 with this exact fixed body.
+    if (error instanceof Error && error.message === 'Request timed out') {
+      throw new Error(`Request timed out [uar_http_408; stage=${stage}]`)
+    }
+    throw error
+  }
 }
 
 export async function toggleUarSkill(skillId: string, enabled: boolean): Promise<UarCatalogSnapshot> {

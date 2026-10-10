@@ -254,7 +254,7 @@ const uarAdministrationSurfaceSchema = z.object({
   methods: z.array(uarAdministrationMethodSchema)
 })
 export const uarAdministrationCapabilitiesSchema = z.object({
-  schema_version: z.literal(4),
+  schema_version: z.literal(5),
   scopes: z.tuple([z.literal('public'), z.literal('admin'), z.literal('owner'), z.literal('host')]),
   surfaces: z.array(uarAdministrationSurfaceSchema)
 })
@@ -334,6 +334,7 @@ export type UarMemoryInspection = {
 }
 
 export type UarApprovalLifecycleInspection = {
+  approvalId?: string
   admissionId: string
   invocationId: string
   eventId?: string

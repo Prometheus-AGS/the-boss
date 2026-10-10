@@ -24,9 +24,12 @@ import { redactToShape } from '@main/ai/utils/redactToShape'
 import type { McpServer as McpServerEntity } from '@shared/data/types/mcpServer'
 import type { McpPrompt, McpResource, McpTool } from '@shared/types/mcp'
 
+import type { McpOutputProjection } from './types'
+
 const logger = loggerService.withContext('McpBridge')
 
 export interface McpBridgeOptions {
+  projection?: McpOutputProjection
   /**
    * Declare `tools.listChanged` and relay cache updates as `tools/list_changed`.
    *
@@ -98,12 +101,13 @@ function toSdkResourceContents(content: McpResource): ReadResourceResult['conten
 export function createMcpBridgeServer(
   mcpId: string,
   serverSnapshot?: McpServerEntity,
-  { listChanged = true }: McpBridgeOptions = {}
+  { listChanged = true, projection }: McpBridgeOptions = {}
 ): McpServer {
   const serverConfig = serverSnapshot ?? mcpServerService.findByIdOrName(mcpId)
   if (!serverConfig) {
     throw new Error(`MCP server not found: ${mcpId}`)
   }
+  const context = <T>(value: T): T => projection ? projection.value(value) as T : value
 
   const sdkServer = new McpServer(
     { name: serverConfig.name, version: '0.1.0' },
@@ -179,35 +183,40 @@ export function createMcpBridgeServer(
         ? undefined
         : (progress: Progress) => {
             extra
-              .sendNotification({ method: 'notifications/progress', params: { ...progress, progressToken } })
-              .catch((error) => logger.debug('MCP bridge: progress notification dropped', { mcpId, error }))
+              .sendNotification({ method: 'notifications/progress', params: {
+                ...progress,
+                ...(projection && progress.message !== undefined ? { message: projection.text(progress.message) } : {}),
+                progressToken
+              } })
+              .catch((error) => logger.debug('MCP bridge: progress notification dropped', context({ mcpId, error })))
           }
 
     try {
-      logger.debug('MCP bridge: calling tool', { mcpId, tool: request.params.name })
+      logger.debug('MCP bridge: calling tool', context({ mcpId, tool: request.params.name }))
       const result = await application.get('McpRuntimeService').callTool({
         serverId: serverConfig.id,
         name: request.params.name,
         args: request.params.arguments,
         onProgress,
-        signal: extra.signal
+        signal: extra.signal,
+        projection
       })
       return result as CallToolResult
     } catch (error) {
       if (isMcpCancellation(error, extra.signal)) {
         // Expected cancellation from the SDK side — the runtime already logged it at debug.
-        logger.debug('MCP bridge: tool call aborted', { mcpId, tool: request.params.name })
+        logger.debug('MCP bridge: tool call aborted', context({ mcpId, tool: request.params.name }))
       } else {
         // Every agent runtime (dsh / pi / Claude Code) reaches Cherry's tools through this
         // handler, so this is the one place their tool failures are observable in-process.
-        logger.error('MCP bridge: failed to call tool', {
+        logger.error('MCP bridge: failed to call tool', context({
           mcpId,
           tool: request.params.name,
           argsShape: redactToShape(request.params.arguments),
-          err: chatErrorContext(error)
-        })
+          err: chatErrorContext(projection ? projection.error(error) : error)
+        }))
       }
-      throw error
+      throw projection ? projection.error(error) : error
     }
   })
 
@@ -270,6 +279,7 @@ export function createMcpBridgeServer(
     }
   })
 
-  logger.info(`Created SDK MCP bridge for "${serverConfig.name}"`)
+  const message = `Created SDK MCP bridge for "${serverConfig.name}"`
+  logger.info(projection ? projection.text(message) : message)
   return sdkServer
 }

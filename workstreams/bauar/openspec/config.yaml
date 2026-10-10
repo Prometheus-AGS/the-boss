@@ -1,0 +1,8 @@
+schema: spec-driven
+
+context: |
+  Repository-local execution child of approved Bossfang-UAR phase.
+  Parent phase plan and scope amendments are authoritative.
+  Product root: /Users/gqadonis/.claude/worktrees/bauar-boss
+  Parent root: /Users/gqadonis/.codex/worktrees/bossfang-uar-architecture/prometheus-skills-mini/workstreams/bossfang-uar-architecture
+  KBD state only at this nested root, never inherited repository root.

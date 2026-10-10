@@ -84,6 +84,7 @@ export function projectRuntimePending(
 ): UarApprovalLifecycleInspection {
   const action = parseActionDisplay(pending.argumentsJson)
   return {
+    approvalId: pending.approvalId,
     admissionId: pending.admissionId ?? pending.approvalId,
     invocationId: pending.admissionId ?? pending.approvalId,
     eventId: pending.eventId,
