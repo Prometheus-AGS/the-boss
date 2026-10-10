@@ -150,5 +150,6 @@
   "settings.title": "Cài đặt",
   "tray.quit": "Thoát",
   "tray.show_quick_assistant": "Trợ lý nhanh",
-  "tray.show_window": "Hiển thị cửa sổ"
+  "tray.show_window": "Hiển thị cửa sổ",
+  "uar.toolAdmissionV2Required": "UAR {{version}} không hỗ trợ giao thức cấp quyền công cụ v2. Hãy cập nhật phiên bản UAR này hoặc chọn một phiên bản tương thích. Các thay đổi danh mục và lượt chạy đã bị chặn."
 }

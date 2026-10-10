@@ -150,5 +150,6 @@
   "settings.title": "設定",
   "tray.quit": "結束",
   "tray.show_quick_assistant": "快速助理",
-  "tray.show_window": "顯示視窗"
+  "tray.show_window": "顯示視窗",
+  "uar.toolAdmissionV2Required": "UAR {{version}} 不支援工具准入協定 v2。請更新此執行個體或選擇相容的執行個體。目錄變更和執行已被封鎖。"
 }
