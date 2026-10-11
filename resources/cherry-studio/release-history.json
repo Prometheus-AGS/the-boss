@@ -1,5 +1,9 @@
 [
   {
+    "version": "2.2.33",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.33 - Consolidated local Mac build\n\n- Build the consolidated main branch for Apple Silicon.\n- Refresh the local UAR sidecar from the repaired source; correct standalone UAR frontend Zod and A2UI typing.\n- Update the mini skill payload and remove retired project Cadence configuration while retaining reusable skills.\n- This is a local build; published 2.2.32 installers remain unchanged.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.33 - 合并后的本地 Mac 构建\n\n- 为 Apple Silicon 构建合并后的 main 分支。\n- 从修复后的源码重新构建本地 UAR 辅助进程；修复独立 UAR 前端的 Zod 与 A2UI 类型问题。\n- 更新精简技能包并移除已停用的项目 Cadence 配置，保留可复用技能。\n- 此版本为本地构建；已发布的 2.2.32 安装程序保持不变。\n<!--LANG:END-->"
+  },
+  {
     "version": "2.2.32",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.32 - Integrated UAR and BossFang runtime\n\n- [UAR] Package admission-v2 runtime binaries matching the desktop source.\n- [Settings] Report older UAR incompatibility in the selected-instance connection check while preserving execution and catalog admission restrictions.\n- [Security] Require compatible tool admission before dependent catalog changes and execution; show an actionable error for older instances.\n- [BossFang] Preserve selected UAR ownership, scoped delegation and exact approval identities.\n- [Skills] Refresh pinned tools and skill payloads, including historical Cadence publication reconciliation.\n- [Platforms] Prioritize Apple Silicon Mac and Windows x64; other platform updates remain deferred.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.32 - 集成 UAR 与 BossFang 运行时\n\n- [UAR] 打包与桌面应用源码匹配、支持工具准入协议 v2 的运行时。\n- [设置] 检查所选实例连接时显示旧版 UAR 的兼容性问题，同时保留执行和目录操作的准入限制。\n- [安全] 在修改相关目录或执行工具前检查准入协议兼容性；为旧实例显示可操作的错误提示。\n- [BossFang] 保留所选 UAR 的管理归属、限定范围的委派和准确的审批标识。\n- [技能] 更新锁定的工具与技能包，包括 Cadence 历史发布核对功能。\n- [平台] 优先提供 Apple Silicon Mac 与 Windows x64；其他平台更新暂缓。\n<!--LANG:END-->"
   },
