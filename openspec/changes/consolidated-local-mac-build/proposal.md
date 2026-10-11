@@ -5,3 +5,7 @@ Operator requested the frontend typing repair on main, a usable local Apple Sili
 Use UAR main d4e819d1c0dfe9d12274299d52f1bd6c9c7cd95a for the local native sidecar. Build The Boss 2.2.33 through the existing build:mac:arm64 entrypoint, preserving published payload provenance for other tools. No native API or storage changes. The standalone UAR frontend is built separately; The Boss uses its existing administration UI.
 
 Build the installer once after source wiring, use its existing package validation and launch the resulting application with an isolated profile. Fix observed build failures only. No public release publication or broad qualification is included.
+
+## Approved public release follow-up
+
+Publish 2.2.33 for Mac ARM64 and Windows x64. Reuse the completed Mac native payload through an immutable UAR release record; build the matching Windows native payload. Use the existing public installer workflow with configured signing/notarization credentials, then serialized release metadata and landing-site publication. Preserve the local DMG and its evidence; do not relabel it as the public profile. No other platform builds or qualification work.

@@ -1,7 +1,7 @@
 [
   {
     "version": "2.2.33",
-    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.33 - Consolidated local Mac build\n\n- Build the consolidated main branch for Apple Silicon.\n- Refresh the local UAR sidecar from the repaired source; correct standalone UAR frontend Zod and A2UI typing.\n- Update the mini skill payload and remove retired project Cadence configuration while retaining reusable skills.\n- This is a local build; published 2.2.32 installers remain unchanged.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.33 - 合并后的本地 Mac 构建\n\n- 为 Apple Silicon 构建合并后的 main 分支。\n- 从修复后的源码重新构建本地 UAR 辅助进程；修复独立 UAR 前端的 Zod 与 A2UI 类型问题。\n- 更新精简技能包并移除已停用的项目 Cadence 配置，保留可复用技能。\n- 此版本为本地构建；已发布的 2.2.32 安装程序保持不变。\n<!--LANG:END-->"
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.33 - Consolidated desktop release\n\n- Deliver the consolidated main branch for Apple Silicon Mac and Windows x64.\n- Refresh the UAR sidecar from the repaired source; correct standalone UAR frontend Zod and A2UI typing.\n- Update the mini skill payload and remove retired project Cadence configuration while retaining reusable skills.\n- Provide a signed, notarized Mac installer. Windows signing status is recorded with the published installer.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.33 - 合并后的桌面版本\n\n- 为 Apple Silicon Mac 与 Windows x64 发布合并后的 main 分支。\n- 从修复后的源码重新构建 UAR 辅助进程；修复独立 UAR 前端的 Zod 与 A2UI 类型问题。\n- 更新精简技能包并移除已停用的项目 Cadence 配置，保留可复用技能。\n- 提供已签名并经过公证的 Mac 安装程序。Windows 安装程序的签名状态随发布记录提供。\n<!--LANG:END-->"
   },
   {
     "version": "2.2.32",
