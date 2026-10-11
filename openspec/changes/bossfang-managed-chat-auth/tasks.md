@@ -8,5 +8,5 @@
 
 ## 2. Delivery
 
-- [ ] 2.1 Build native payload and Mac ARM64 application; operate chat, daemon read, restart and reconnect.
-- [ ] 2.2 Record exact artifacts/results and commit/push scoped main changes.
+- [x] 2.1 Build native payload and Mac ARM64 application; operate chat, daemon read, restart and reconnect.
+- [x] 2.2 Record exact artifacts/results and commit/push scoped main changes.
