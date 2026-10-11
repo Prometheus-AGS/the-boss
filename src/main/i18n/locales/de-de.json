@@ -150,5 +150,6 @@
   "settings.title": "Einstellungen",
   "tray.quit": "Beenden",
   "tray.show_quick_assistant": "Schnellassistent",
-  "tray.show_window": "Fenster anzeigen"
+  "tray.show_window": "Fenster anzeigen",
+  "uar.toolAdmissionV2Required": "UAR {{version}} unterstützt die Tool-Zulassung v2 nicht. Aktualisieren Sie diese Instanz oder wählen Sie eine kompatible Instanz. Katalogänderungen und Ausführungen sind blockiert."
 }

@@ -150,5 +150,6 @@
   "settings.title": "Setări",
   "tray.quit": "Ieșire",
   "tray.show_quick_assistant": "Asistent rapid",
-  "tray.show_window": "Afișează fereastra"
+  "tray.show_window": "Afișează fereastra",
+  "uar.toolAdmissionV2Required": "UAR {{version}} nu acceptă autorizarea instrumentelor v2. Actualizați această instanță sau selectați o instanță compatibilă. Modificările catalogului și execuțiile sunt blocate."
 }

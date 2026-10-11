@@ -1,0 +1,479 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prometheusags.ai/schemas/delivery-cadence/frozen-source-reconciliation.schema.json",
+  "title": "Delivery Cadence frozen application and separately operated drivers",
+  "$ref": "#/$defs/input",
+  "$defs": {
+    "input": {
+      "type": "object",
+      "required": [
+        "candidateId",
+        "authorityRef",
+        "reason",
+        "operationEvidencePath",
+        "provenancePath",
+        "operationDriverCommit",
+        "buildCheckpointId",
+        "launchCheckpointId",
+        "artifacts"
+      ],
+      "properties": {
+        "candidateId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "applicationRepository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authorityRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operationEvidencePath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provenancePath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operationDriverCommit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "driverPath": {
+          "type": "string",
+          "pattern": "^scripts/[a-zA-Z0-9_./-]+$"
+        },
+        "driverPaths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^scripts/[a-zA-Z0-9_./-]+$"
+          },
+          "uniqueItems": true
+        },
+        "buildCheckpointId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "launchCheckpointId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifacts": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "driverPath"
+          ]
+        },
+        {
+          "required": [
+            "driverPaths"
+          ]
+        }
+      ]
+    },
+    "operatedSource": {
+      "type": "object",
+      "required": [
+        "baseRevision",
+        "dirtyDiffSha256",
+        "driverSha256",
+        "capturedAt"
+      ],
+      "properties": {
+        "baseRevision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operationDriverCommit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "driverPath": {
+          "type": "string",
+          "pattern": "^scripts/[a-zA-Z0-9_./-]+$"
+        },
+        "driverPaths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^scripts/[a-zA-Z0-9_./-]+$"
+          },
+          "uniqueItems": true
+        },
+        "driverSources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "sha256"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          }
+        },
+        "dirtyDiffSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "driverSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "wholeCheckoutDirtyDiffSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "capturedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "driverPath"
+          ]
+        },
+        {
+          "required": [
+            "driverPaths",
+            "driverSources",
+            "operationDriverCommit",
+            "wholeCheckoutDirtyDiffSha256"
+          ]
+        }
+      ]
+    },
+    "generatedOutputDeclaration": {
+      "type": "object",
+      "required": [
+        "source",
+        "transform",
+        "producerSources",
+        "paths"
+      ],
+      "properties": {
+        "source": {
+          "type": "object",
+          "required": [
+            "repository",
+            "revision"
+          ],
+          "properties": {
+            "repository": {
+              "type": "string",
+              "minLength": 1
+            },
+            "revision": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "transform": {
+          "const": "mini-pack-skill-text-v1"
+        },
+        "producerSources": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "sha256"
+            ],
+            "properties": {
+              "path": {
+                "enum": [
+                  "scripts/before-pack.js",
+                  "scripts/package-prometheus.js"
+                ]
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          }
+        },
+        "paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "sha256",
+              "size"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "record": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "candidateId",
+        "iterationId",
+        "candidateManifestHash",
+        "candidateSourceRefs",
+        "operatedSource",
+        "checkoutAtReconciliation",
+        "operationEvidence",
+        "provenance",
+        "artifacts",
+        "buildCheckpointId",
+        "launchCheckpointId",
+        "authorityRef",
+        "reason",
+        "recordedAt"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "candidateId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "iterationId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidateManifestHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "candidateSourceRefs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "repository",
+              "revision",
+              "fingerprint"
+            ],
+            "properties": {
+              "repository": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revision": {
+                "type": "string",
+                "minLength": 1
+              },
+              "fingerprint": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "submoduleRefs": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "applicationRepository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operatedSource": {
+          "$ref": "#/$defs/operatedSource"
+        },
+        "checkoutAtReconciliation": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "repository",
+              "revision",
+              "fingerprint"
+            ],
+            "properties": {
+              "repository": {
+                "type": "string",
+                "minLength": 1
+              },
+              "revision": {
+                "type": "string",
+                "minLength": 1
+              },
+              "fingerprint": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "submoduleRefs": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "checkoutAdvanced": {
+          "type": "boolean"
+        },
+        "operationEvidence": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "sha256",
+              "size"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "generatedOutputDeclaration": {
+          "$ref": "#/$defs/generatedOutputDeclaration"
+        },
+        "generatedArtifacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "sha256",
+              "size"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "buildCheckpointId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "launchCheckpointId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authorityRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recordedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

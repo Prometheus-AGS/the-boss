@@ -32,6 +32,7 @@ export function pipelineReport(state) {
       startedAt: attempt.startedAt ?? null, finishedAt: attempt.finishedAt ?? null,
       platformReceipts: (attempt.receipts ?? []).filter(r => r.effect.startsWith('artifact:')).map(r => ({ platform: r.platform, version: r.version, sha256: r.sha256, url: r.url })),
       metadata: (attempt.receipts ?? []).filter(r => r.effect === 'metadata'), site: (attempt.receipts ?? []).filter(r => r.effect === 'website') })),
+    externalReleases: state.externalReleases ?? [], publicationLinks: state.publicationLinks ?? [],
     installedAcceptance: state.installedAcceptance ?? [],
     velocityAssessment: 'No causal velocity claim. Compare at least the configured minimum of comparable, adequately measured usable deliveries.',
   };

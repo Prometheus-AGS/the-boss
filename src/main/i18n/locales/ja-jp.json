@@ -150,5 +150,6 @@
   "settings.title": "設定",
   "tray.quit": "終了",
   "tray.show_quick_assistant": "クイックアシスタント",
-  "tray.show_window": "ウィンドウを表示"
+  "tray.show_window": "ウィンドウを表示",
+  "uar.toolAdmissionV2Required": "UAR {{version}} はツール認可 v2 に対応していません。このインスタンスを更新するか、互換性のあるインスタンスを選択してください。カタログの変更と実行はブロックされています。"
 }

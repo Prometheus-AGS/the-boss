@@ -6,6 +6,7 @@ import { agentWorkspaceService } from '@data/services/AgentWorkspaceService'
 import { mcpServerService } from '@data/services/McpServerService'
 import { loggerService } from '@logger'
 import { readAppliedUarStorage, readUarModelSources, type UarSidecarEndpoint } from '@main/ai/runtime/uar'
+import { UarAdmissionCompatibilityError } from '@main/ai/runtime/uar/UarAdmissionCompatibilityError'
 import { BaseService, Injectable, Phase, ServicePhase } from '@main/core/lifecycle'
 import { installPrometheusPack } from '@main/utils/prometheusPack'
 import { assertUarEnabled, isUarEnabled, UAR_FEATURE_DISABLED_ERROR } from '@shared/ai/agentRuntimeCapabilities'
@@ -458,7 +459,11 @@ export class PrometheusIntegrationService extends BaseService {
   async testUarInstance(instanceId: string): Promise<UarInstanceInventorySnapshot> {
     assertUarEnabled()
     await this.ensureInitialized()
-    await application.get('UarSidecarService').resolveInstance(instanceId)
+    try {
+      await application.get('UarSidecarService').resolveInstance(instanceId)
+    } catch (error) {
+      if (!(error instanceof UarAdmissionCompatibilityError)) throw error
+    }
     return this.readUarInstanceInventory()
   }
 

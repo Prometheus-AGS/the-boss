@@ -33,6 +33,7 @@ import { uarPrincipalForSession } from './uarPrincipal'
 import { UarStartupDiagnostic } from './uarStartupDiagnostic'
 import { reviewedSkillSources } from './uarReviewedSkillSources'
 import { type AppliedUarStorage, readAppliedUarStorage, writeAppliedUarStorage } from './uarStorageProfile'
+import { UarAdmissionCompatibilityError, UAR_TOOL_ADMISSION_V2_CAPABILITY } from './UarAdmissionCompatibilityError'
 
 const logger = loggerService.withContext('UarSidecarService')
 const safeTeamProviderDiagnostic = z.object({
@@ -265,6 +266,7 @@ export class UarSidecarService extends BaseService {
       this.instanceDiagnostics.set(instance.id, { compatibility: 'operational', observed: endpoint.observed })
       return endpoint
     } catch (error) {
+      if (error instanceof UarAdmissionCompatibilityError) throw error
       const diagnostic = error instanceof Error ? error.message : String(error)
       const compatibility = /credential|HTTP 401|HTTP 403|authentication/i.test(diagnostic)
         ? 'unauthenticated'
@@ -886,6 +888,11 @@ export class UarSidecarService extends BaseService {
     }
     const principalMode =
       body.authentication?.principalMode ?? (instance.ownership === 'managed' ? 'host-asserted' : 'token-subject')
+    if (!capabilities.includes(UAR_TOOL_ADMISSION_V2_CAPABILITY)) {
+      const error = new UarAdmissionCompatibilityError(body.uar_version)
+      this.instanceDiagnostics.set(instance.id, { compatibility: 'incompatible', observed, diagnostic: error.message })
+      throw error
+    }
     return { uarVersion: body.uar_version, capabilities, administration: body.administration, observed, principalMode }
   }
 

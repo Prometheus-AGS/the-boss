@@ -30,19 +30,19 @@ const targets = [
 ]
 const manifest = require('../build/integration-artifacts.json')
 const available = profile.supportedPlatforms
+const selected = process.env.RELEASE_PLATFORMS
+  ? process.env.RELEASE_PLATFORMS.split(',').map((value) => value.trim())
+  : available
 const manifestPlatforms = Array.isArray(manifest.platforms) ? manifest.platforms : []
 const platformsMatch = profile.uarEnabled
-  ? available.every((platform) => manifestPlatforms.includes(platform))
+  ? selected.every((platform) => manifestPlatforms.includes(platform))
   : [...manifestPlatforms].sort().join(',') === [...available].sort().join(',')
 if (!platformsMatch) {
   throw new Error(`Integration artifact platforms do not cover release profile ${profile.id}`)
 }
-const selected = process.env.RELEASE_PLATFORMS
-  ? process.env.RELEASE_PLATFORMS.split(',').map((value) => value.trim())
-  : available
 for (const name of profile.nativeTools) {
   const tool = manifest.tools.find((entry) => entry.name === name)
-  for (const platform of name === 'uar-sidecar' ? selected : available) {
+  for (const platform of selected) {
     if (!tool?.packages?.[platform]) throw new Error(`No published ${name} payload for ${platform}`)
   }
 }

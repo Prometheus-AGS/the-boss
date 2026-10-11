@@ -95,6 +95,29 @@ for *why* this phase is running, never an answer to *what to run next*.
 | `mark-done <change> <id>` | flip one task done (no hooks) |
 | `verify <change>` | backend verify (openspec `validate`; speckit/native-kbd structural check); non-zero exit = fail |
 | `archive <change>` | backend archive (openspec `archive`; speckit/native-kbd move under `archive/`) |
+| `reconcile [<phase>] [--repair] [--json]` | compare backend tasks, canonical identities and progress counts; repair only explicitly requested safe drift |
+
+## Reconcile before reflection
+
+Run `boss-mini kbd-apply.mjs reconcile <phase> --json` to inspect the selected
+phase, or omit the phase to use the actual active nested phase. Reconciliation
+reads active and uniquely matched archived task artifacts for all three backends.
+It never migrates native task files or refreshes the inspected project's projections.
+Canonical reads use the installed runtime against an isolated copy of its authority.
+
+Exit **0** means a complete clean scan, **1** means drift, and **2** means invalid
+input or an incomplete scan. Missing, malformed, ambiguous, or unreadable artifacts
+and unavailable canonical authority are scan errors, never evidence of completion.
+JSON retains `phase`, `clean`, `drifted`, and `drift`, with explicit `errors`.
+
+`--repair` requires the selected phase to be active. It reuses existing task
+transitions and boundary handling only for unambiguous backend-complete tasks
+whose active ledger entries are missing or incomplete. It stops on transition
+failure and rescans actual state. Cancelled tasks, archived drift, ledger-ahead
+entries, and ambiguous task mappings need explicit resolution; they are not
+rewritten. Legacy progress counts can be repaired, but runtime-owned projections
+are never directly written. A successful reconciliation is task consistency
+evidence, not runtime acceptance or certification.
 
 ## Backends
 

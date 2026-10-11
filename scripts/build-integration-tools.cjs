@@ -61,6 +61,10 @@ async function main() {
     const env = {
       RUSTC_WRAPPER: '',
       ...(name === 'bossfang' ? { SKIP_DASHBOARD_BUILD: '1', GITHUB_SHA: pins.sources[recipe.source].revision } : {}),
+      // Fat LTO with one codegen unit blocks timely Mac and Windows payload builds.
+      ...(name === 'bossfang' && ['darwin', 'win32'].includes(process.platform)
+        ? { CARGO_PROFILE_RELEASE_LTO: 'thin', CARGO_PROFILE_RELEASE_CODEGEN_UNITS: '16' }
+        : {}),
       CARGO_BUILD_BUILD_DIR: path.join(cwd, 'target'),
       ...(name === 'compass' ? { PROJECT_ROOT: await parserSources(), TSLP_OFFLINE: '1' } : {})
     }
@@ -107,7 +111,7 @@ async function main() {
         output
       })
     fs.writeFileSync(path.join(output, `tools-${platform}.json`), JSON.stringify(records, null, 2))
-    if (name === 'compass' && platform === 'linux-x64') {
+    if (name === 'compass' && platform === (process.env.COMPASS_SKILLS_PLATFORM || 'darwin-arm64')) {
       const skills = path.join(output, 'compass-skills')
       fs.mkdirSync(skills, { recursive: true })
       fs.cpSync(path.join(source, 'crates/compass-cli/assets/compass-skill'), path.join(skills, 'compass'), {

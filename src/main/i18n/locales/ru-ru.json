@@ -150,5 +150,6 @@
   "settings.title": "Настройки",
   "tray.quit": "Выйти",
   "tray.show_quick_assistant": "Быстрый помощник",
-  "tray.show_window": "Показать окно"
+  "tray.show_window": "Показать окно",
+  "uar.toolAdmissionV2Required": "UAR {{version}} не поддерживает допуск инструментов v2. Обновите этот экземпляр или выберите совместимый. Изменения каталога и запуски заблокированы."
 }

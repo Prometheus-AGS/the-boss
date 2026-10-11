@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { candidateId, candidateDigest, clone, digest, fail, findCandidate, iterationFor, nonempty, strings, timestamp } from './pipeline-data.mjs';
 import { unresolvedObligations } from './opportunities.mjs';
 import { assessConsumer, validatePublicationReceipt } from './publication-receipts.mjs';
+import { assertHistoricalTarget } from './historical-publication.mjs';
 export { assessConsumer } from './publication-receipts.mjs';
 
 const active = attempt => ['intent', 'dispatched', 'running', 'unknown'].includes(attempt.state);
@@ -10,19 +11,21 @@ function findObligation(state, id) {
   if (!result) fail(`Unknown publication obligation: ${id}`);
   return result;
 }
-function coveredEffects(state, obligation) {
-  return [...new Set((state.releaseAttempts ?? []).filter(a => a.obligationId === obligation.id && a.candidateId === obligation.candidateId)
-    .flatMap(a => a.receipts ?? []).map(r => r.effect))];
+export function publicationReceipts(state, obligation) {
+  const linked = (state.publicationLinks ?? []).filter(link => link.obligationId === obligation.id && link.candidateId === obligation.candidateId
+    && link.contentManifestDigest === obligation.contentManifestDigest).flatMap(link =>
+      (state.externalReleases ?? []).filter(release => release.id === link.externalReleaseId && release.digest === link.releaseDigest)
+        .flatMap(release => release.receipts));
+  const attempts = (state.releaseAttempts ?? []).filter(a => a.obligationId === obligation.id && a.candidateId === obligation.candidateId).flatMap(a => a.receipts ?? []);
+  return linked.length ? linked : attempts;
 }
 function missingEffects(state, obligation) {
-  const covered = coveredEffects(state, obligation);
-  const missing = obligation.requiredEffects.filter(effect => !covered.includes(effect));
-  const receipts = (state.releaseAttempts ?? []).filter(a => a.obligationId === obligation.id && a.candidateId === obligation.candidateId).flatMap(a => a.receipts ?? []);
-  // A site deployment recorded early cannot certify platforms published later.
+  const receipts = publicationReceipts(state, obligation);
+  const missing = obligation.requiredEffects.filter(effect => !receipts.some(r => r.effect === effect));
   if (obligation.requiredEffects.includes('website')) {
     const site = receipts.filter(r => r.effect === 'website').at(-1);
     for (const artifact of receipts.filter(r => r.effect.startsWith('artifact:'))) {
-      if (!site?.links?.some(link => link.platform === artifact.platform && link.url === artifact.url && link.sha256 === artifact.sha256)) missing.push(`website-link:${artifact.platform}`);
+      if (!site?.links?.some(link => link.platform === artifact.platform && link.url === artifact.url && link.sha256 === artifact.sha256)) missing.push('website-link:' + artifact.platform);
     }
   }
   return [...new Set(missing)];
@@ -45,6 +48,7 @@ export function pipelinePublicationStatus(state, now = new Date().toISOString())
     ageMinutes: Number.isFinite(Date.parse(o.dueAt)) ? Math.max(0, (Date.parse(now) - Date.parse(o.dueAt)) / 60000) : null }));
   return { due: unresolvedObligations(state).length > 0, reason: 'Candidate-specific obligations persist until their platform, metadata and website effects are covered.',
     obligations, attempts: state.releaseAttempts ?? [], missing: obligations.filter(o => !['fulfilled', 'superseded'].includes(o.disposition)).flatMap(o => o.missing.map(effect => `${o.id}:${effect}`)),
+    externalReleases: state.externalReleases ?? [], publicationLinks: state.publicationLinks ?? [],
     installedAcceptance: state.installedAcceptance ?? [], acceptanceIndependent: true,
     blockedConsumers: (state.releaseAttempts ?? []).filter(a => a.state === 'capability-blocked').map(a => a.capabilityAssessment) };
 }
@@ -56,7 +60,8 @@ export function handlePublication(state, action, input = {}) {
   if (action === 'capabilities') return assessConsumer(input.adapter);
   if (action === 'acceptance') {
     const obligation = findObligation(state, input.obligationId);
-    const published = state.releaseAttempts.filter(a => a.obligationId === obligation.id).flatMap(a => a.receipts ?? []).find(r => r.platform === input.platform && r.sha256 === input.sha256);
+    const published = [...state.releaseAttempts.filter(a => a.obligationId === obligation.id).flatMap(a => a.receipts ?? []),
+      ...publicationReceipts(state, obligation)].find(r => r.platform === input.platform && r.sha256 === input.sha256);
     if (!published || !['passed', 'failed', 'pending'].includes(input.status) || !nonempty(input.evidenceRef)) fail('Installed acceptance needs a published artifact and explicit outcome/evidence');
     const receipt = { ...clone(input), recordedAt: timestamp() }; state.installedAcceptance.push(receipt); return receipt;
   }
@@ -92,6 +97,10 @@ export function handlePublication(state, action, input = {}) {
     if (!capabilityAssessment.supported && (!capabilityAssessment.owner || !capabilityAssessment.nextAction)) fail('Blocked consumer must name follow-up owner and nextAction');
     if (input.expectedPredecessor === undefined) fail('Publication must state expectedPredecessor (null for first publication)');
     const predecessor = state.publishedTargets?.[adapter.targetId ?? adapter.id] ?? null;
+    if (predecessor?.externalReleaseId) {
+      assertHistoricalTarget(predecessor, { version: input.releaseVersion, id: predecessor.externalReleaseId });
+      if (predecessor.releaseVersion === input.releaseVersion && (!input.correctiveReplacement?.authorityRef || !input.correctiveReplacement?.reason)) fail('Same-version corrective replacement requires explicit predecessor authority and reason');
+    }
     if (predecessor?.candidateId && predecessor.candidateId !== obligation.candidateId) {
       const advertised = findCandidate(state, predecessor.candidateId);
       if (Date.parse(advertised.createdAt) > Date.parse(candidate.createdAt)) fail('Cannot publish a stale candidate over a newer advertised delivery');
@@ -127,6 +136,10 @@ export function handlePublication(state, action, input = {}) {
     attempt.state = 'dispatched'; attempt.startedAt = timestamp(input.startedAt); return attempt;
   }
   if (action === 'reconcile') {
+    if (obligation.historicalLinkIds?.length) fail('Historical publication links cannot be relabeled as dispatched-attempt receipts');
+    const publishedTarget = state.publishedTargets?.[attempt.targetId] ?? null;
+    const ownTarget = { candidateId: obligation.candidateId, releaseVersion: attempt.releaseVersion, obligationId: obligation.id };
+    if (digest(publishedTarget) !== digest(attempt.expectedPredecessor) && digest(publishedTarget) !== digest(ownTarget)) fail('Publication target advanced since dispatch; reconcile actual predecessor before promotion');
     if (input.correlationId !== attempt.correlationId) fail('Publication reconciliation correlation mismatch');
     if (attempt.state === 'capability-blocked') fail('An unsupported consumer cannot acquire publication credit');
     const incoming = (input.receipts ?? []).map(raw => validatePublicationReceipt(raw, obligation, attempt, candidate));

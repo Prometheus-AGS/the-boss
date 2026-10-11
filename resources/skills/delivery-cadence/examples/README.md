@@ -5,3 +5,5 @@ These are editable declarations, not approval or execution evidence. Replace pat
 - [operation-admission.json](operation-admission.json) declares missing procedure work as an approved selected task before start/dispatch. Add the implemented argument-array entrypoint and source/build output paths, complete the task and satisfy prerequisites before ready/freeze. A test suite cannot replace this operation.
 
 The example deliberately leaves the entrypoint absent: it demonstrates how planning retains creation work instead of pretending an operation already exists. See [profile](../references/profile.md) for a completed entrypoint and [pipeline contracts](../references/pipeline-contract.md) for candidate, work-ahead, job and publication requests.
+
+Historical external releases and independent obligation links: see [historical publication](../references/historical-publication.md). This preserves original candidates, delivery credit, clocks and separate installed acceptance.

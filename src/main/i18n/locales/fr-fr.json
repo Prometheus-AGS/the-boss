@@ -150,5 +150,6 @@
   "settings.title": "Paramètres",
   "tray.quit": "Quitter",
   "tray.show_quick_assistant": "Assistant Rapide",
-  "tray.show_window": "Afficher la fenêtre"
+  "tray.show_window": "Afficher la fenêtre",
+  "uar.toolAdmissionV2Required": "UAR {{version}} ne prend pas en charge l’autorisation des outils v2. Mettez à jour cette instance ou sélectionnez une instance compatible. Les modifications du catalogue et les exécutions sont bloquées."
 }

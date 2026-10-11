@@ -15,8 +15,9 @@ export function provenance(options) {
   const pins = JSON.parse(fs.readFileSync(pinsFile, 'utf8'))
   const artifacts = JSON.parse(fs.readFileSync(artifactsFile, 'utf8'))
   const bossfang = artifacts.tools.find(tool=>tool.name==='bossfang')?.packages[platform]
+  const bossfangSource = typeof bossfang?.source === 'string' ? bossfang.source : bossfang?.source?.revision
   requireFact(/^[0-9a-f]{40}$/.test(options['bossfang-source']) &&
-    pins.sources.bossfang.revision === options['bossfang-source'] && bossfang?.source === options['bossfang-source'],
+    pins.sources.bossfang.revision === options['bossfang-source'] && bossfangSource === options['bossfang-source'],
   'C14W_NEW_NATIVE_SOURCE_RECORD_REQUIRED')
   requireFact(bossfang.dashboard?.embedded && bossfang.dashboard.basePath === '/dashboard/' &&
     bossfang.dashboard.files.some(asset=>/WorkflowsPage/.test(asset.path)&&asset.size>0),

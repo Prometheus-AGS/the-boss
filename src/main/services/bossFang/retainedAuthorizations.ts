@@ -2,6 +2,7 @@ import * as z from 'zod'
 
 import { application } from '@application'
 import { agentWorkspaceService } from '@data/services/AgentWorkspaceService'
+import { UarAdmissionCompatibilityError } from '@main/ai/runtime/uar/UarAdmissionCompatibilityError'
 import { uarPrincipalForSession } from '@main/ai/runtime/uar/uarPrincipal'
 import type { UarSidecarEndpoint } from '@main/ai/runtime/uar/UarSidecarService'
 import { t } from '@main/i18n'
@@ -106,7 +107,8 @@ export class RetainedUarAuthorizations {
     const configured = readIntegrationConfig().uar.instances.find((item) => item.id === inventoryId && item.enabled)
     if (!configured) throw failure('ORIGINAL_INVENTORY_UNAVAILABLE')
     const sidecar = application.get('UarSidecarService')
-    const endpoint = await sidecar.resolveInstance(inventoryId).catch(() => {
+    const endpoint = await sidecar.resolveInstance(inventoryId).catch((error) => {
+      if (error instanceof UarAdmissionCompatibilityError) throw error
       throw failure('ORIGINAL_RUNTIME_UNAVAILABLE')
     })
     if (original) {

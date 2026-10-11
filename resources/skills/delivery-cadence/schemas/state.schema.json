@@ -346,6 +346,18 @@
         "$ref": "pipeline-v3.schema.json#/$defs/obligations"
       }
     },
+    "externalReleases": {
+      "type": "array",
+      "items": { "$ref": "pipeline-v3.schema.json#/$defs/externalReleases" }
+    },
+    "frozenSourceReconciliations": {
+      "type": "array",
+      "items": { "$ref": "pipeline-v3.schema.json#/$defs/frozenSourceReconciliations" }
+    },
+    "publicationLinks": {
+      "type": "array",
+      "items": { "$ref": "pipeline-v3.schema.json#/$defs/publicationLinks" }
+    },
     "releaseAttempts": {
       "type": "array",
       "items": {

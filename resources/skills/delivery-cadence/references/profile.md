@@ -73,3 +73,7 @@ Read [child recovery](child-recovery.md) for nested work and [measurement](measu
 ## Unavailable capabilities
 
 The installed skill-pack refresh procedure (refresh scripts, upstream installer/updater invocation, background service restart, and the checkpoint/shim examples) is UNAVAILABLE IN THIS PROJECT. No refresh scripts ship in this payload; installed/service refresh is out of scope for the mini profile. Tracked as a follow-up in .prometheus/decisions.md and the dated mini adaptation record under .prometheus/.
+
+Historical external releases and independent obligation links: see [historical publication](historical-publication.md). This preserves original candidates, delivery credit, clocks and separate installed acceptance.
+
+An explicit operator decision can defer active delivery platforms without resetting its clock. See [publication target amendments](publication-target-amendment.md). Existing publication obligations are preserved.

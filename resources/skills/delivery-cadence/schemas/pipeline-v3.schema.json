@@ -350,6 +350,15 @@
           "type": "object"
         }
       }
+    },
+    "externalReleases": {
+      "$ref": "historical-publication.schema.json#/$defs/externalRelease"
+    },
+    "publicationLinks": {
+      "$ref": "historical-publication.schema.json#/$defs/publicationLink"
+    },
+    "frozenSourceReconciliations": {
+      "$ref": "frozen-source-reconciliation.schema.json#/$defs/record"
     }
   }
 }

@@ -33,6 +33,8 @@ export function UarIntegrationStatus({
   id?: string
 }) {
   const running = snapshot.uar.state === 'running'
+  const selectedInstance = snapshot.uar.instances.find((instance) => instance.selected)
+  const incompatible = selectedInstance?.compatibility === 'incompatible'
   const portFallback = running && snapshot.uar.effectivePort !== snapshot.uar.appliedPort
   const describeStorage = (
     backend: 'embedded' | 'remote',
@@ -60,10 +62,16 @@ export function UarIntegrationStatus({
           aria-atomic="true"
           variant="outline"
           className={running ? 'border-success-border text-success' : 'border-border text-muted-foreground'}>
-          {text(`states.${snapshot.uar.state}`)}
+          {text(incompatible ? 'uarAdmin.instances.compatibility.incompatible' : `states.${snapshot.uar.state}`)}
         </Badge>
       </div>
       <SettingDivider />
+
+      {incompatible && selectedInstance?.diagnostic && (
+        <SettingHelpText className="mb-3 text-error" role="alert">
+          {selectedInstance.diagnostic}
+        </SettingHelpText>
+      )}
 
       <div className="rounded-lg border border-border bg-background/40 p-4">
         <div className="text-xs font-medium text-muted-foreground">{text('uarEndpoint')}</div>

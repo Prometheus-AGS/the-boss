@@ -150,5 +150,6 @@
   "settings.title": "Settings",
   "tray.quit": "Quit",
   "tray.show_quick_assistant": "Quick Assistant",
-  "tray.show_window": "Show Window"
+  "tray.show_window": "Show Window",
+  "uar.toolAdmissionV2Required": "UAR {{version}} does not support tool admission v2. Update this instance or select a compatible instance. Catalog changes and runs are blocked."
 }

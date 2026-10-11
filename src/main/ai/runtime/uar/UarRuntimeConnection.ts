@@ -241,9 +241,9 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
         projection = projection.withValues([desiredAssignment.credential.api_key, desiredAssignment.credential.base_url])
       }
       const skillIds = await this.resolveSkillIds(agent.id)
-      bridge = await this.createMcpBridge(session, agent, workspace, snapshots, () => projection)
-      projection = projection.withValues(bridge.redactions)
       const catalog = await this.ensureCatalogAgent(storedAgent, desiredAssignment, skillIds, projection)
+      bridge = await this.createMcpBridge(session, agent, catalog.id, workspace, snapshots, () => projection)
+      projection = projection.withValues(bridge.redactions)
       const assignment = desiredAssignment
         ? this.resolveCatalogAssignment(catalog, desiredAssignment)
         : this.catalogOwnedAssignment(catalog)
@@ -399,6 +399,7 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
   private async createMcpBridge(
     session: AgentSessionEntity,
     agent: AgentEntity,
+    admissionPrincipalId: string,
     workspace: string,
     snapshots: McpServerSnapshotMap,
     getProjection: () => UarSecretProjection
@@ -429,7 +430,7 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
       {
         sessionId: session.id,
         ownerId: this.principal,
-        principalId: agent.id,
+        principalId: admissionPrincipalId,
         workspace,
         authorityProvider: await createUarAuthorityProvider(),
         persistLifecycle: (snapshot) => uarApprovalLifecycleStore.persist(snapshot),
