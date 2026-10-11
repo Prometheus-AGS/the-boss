@@ -68,6 +68,9 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(needs.native-matrix.outputs.matrix) }}
     steps:
+      - name: Enable Windows long paths for dependency submodules
+        if: runner.os == 'Windows'
+        run: git config --global core.longpaths true
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
