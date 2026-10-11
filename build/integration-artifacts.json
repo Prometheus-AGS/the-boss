@@ -216,16 +216,14 @@
       "version": "2026.9.19+92bc005f3",
       "packages": {
         "win32-x64": {
-          "source": {
-            "repository": "GQAdonis/librefang",
-            "revision": "95719eaefc491e6d19c84ed7bf0b7d62632d8d0b"
-          },
-          "size": 163411968,
-          "sha256": "7ecb884cde42e7e9ed6b890d937300370237b24f855201217a04b3855abd7858",
+          "source": "92bc005f3e7cc110715272b744830d2e3ccfe0d7",
+          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-92bc005f3/bossfang-win32-x64.exe",
+          "sha256": "8184d12ba27159f6f54a6d2776deef4298eacfa8c53957f2f3346f5f1044bfa5",
+          "size": 163417600,
+          "archive": "none",
           "binaries": [
             "bossfang.exe"
           ],
-          "archive": "none",
           "dashboard": {
             "embedded": true,
             "basePath": "/dashboard/",
@@ -1637,13 +1635,7 @@
               }
             ]
           },
-          "features": [
-            "telemetry",
-            "surreal-backend",
-            "uar-driver"
-          ],
-          "uarLifecycle": "connection-only",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-approval-repair-20261010-95719eae/bossfang-win32-x64.exe"
+          "uarLifecycle": "connection-only"
         },
         "darwin-arm64": {
           "source": "92bc005f3e7cc110715272b744830d2e3ccfe0d7",
