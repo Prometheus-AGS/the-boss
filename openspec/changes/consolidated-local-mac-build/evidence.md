@@ -22,3 +22,17 @@
 All 16 connected repositories were observed on main only with one primary checkout each. LibreFang has no open PRs. Generated active Cadence state was removed from active checkouts and preserved privately at /Users/gqadonis/Projects/prometheus/phase-closeout-preservation-20261011/archive/cadence-retirement-2026-10-11T14-48-35-355Z. Reusable skill implementation and historical specification/qualification evidence remain. No qualification counters were reset or advanced.
 
 No unit or broad qualification suite ran. No new security behavior was introduced.
+
+## Public customer release — 2.2.33
+
+The operator subsequently authorized public Mac ARM64 notarization, Windows x64 packaging, GitHub Releases, and the live download site. This public release is separate from the local-profile DMG above.
+
+- Mac installer source: 059279392e61458148d9519955497510be22503f. Native UAR payload reused the completed d4e819d1 build with its original archive checksum. GitHub build 38152425591 succeeded; metadata publisher 38154385026 succeeded.
+- Windows installer source: 14bc4c2d1fcd65316dbb2aa3f961d4180080567f. Native Windows server-full build 38152295103 succeeded from d4e819d1c0dfe9d12274299d52f1bd6c9c7cd95a. Its archive is 130101057 bytes, SHA-256 7f010b859b81fe805b3c3a8aabf3874604737b62049239260c55f820916873bc. Windows installer build 38159439689 and publisher 38161332355 succeeded.
+- The first Windows preparation attempt stopped before building because the edited release notes omitted the required Feature profile marker. Restoring the existing marker resolved it; only failed jobs were rerun. No native rebuild or application repair was required.
+- Mac public DMG: 717407042 bytes, SHA-256 83153d30c36af24aaac061695ee2819a67d43faefda9172d5dcba598ab94c4b6. Developer ID signed and Apple notarized. Downloaded bytes matched; hdiutil verified and mounted the image; codesign --verify --deep --strict succeeded; stapler validate succeeded; spctl accepted it as Notarized Developer ID.
+- Local notarized copy: /Users/gqadonis/Projects/prometheus/the-boss/dist/public-2.2.33/The-Boss-2.2.33-mac-arm64.dmg. The prior local-profile DMG was retained.
+- Windows setup: 529860832 bytes, SHA-256 3a25683bbdc70d3cfd965df93bb1d4ad58faae6ac58675f7d26f4be390b8acf4. Unsigned. The publisher downloaded and verified the public installer size and checksum. Installed Windows operation is not claimed by this packaging receipt.
+- Public release: https://github.com/Prometheus-AGS/the-boss/releases/tag/v2.2.33. Both immutable platform manifests preserve their actual source commits. RELEASES.md and release-manifest.json are committed on main (publication commit 470380d068).
+- Mac Intel, Windows ARM64 and Linux were excluded from this build request. No Cadence state, extra worktree, or feature branch was created.
+- Landing source: Know-Me-Tools/boss-landing-spot main d7d0f73816d6e4e0cb11b5700b8b048c4e7a7583 contains both 2.2.33 installers. Workflow 38161368397 verified the Windows public bytes and built the site; Lovable synchronized this source revision. The Mac link was already published in production. The final Windows website publication remains pending the operator unlocking the Mac for the authenticated publishing action; synchronized source alone is not a production deployment receipt.
