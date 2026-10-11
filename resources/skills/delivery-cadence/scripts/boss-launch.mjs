@@ -120,7 +120,7 @@ export async function launchBoss(args) {
         if (!response.ok) throw new Error('DevTools targets could not be read.');
         return response.json();
       });
-      target = targets.find(item => item.type === 'page' && item.webSocketDebuggerUrl && item.url !== 'about:blank');
+      target = targets.find(item => item.type === 'page' && item.webSocketDebuggerUrl && item.url.includes('/windows/main/index.html'));
       if (!target) await delay(200, undefined, { signal });
     }
     const debugUrl = new URL(target.webSocketDebuggerUrl);
