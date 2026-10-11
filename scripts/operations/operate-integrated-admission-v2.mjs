@@ -43,7 +43,7 @@ export async function operate(args = process.argv.slice(2)) {
     const configBytes = fs.readFileSync(options.config)
     const input = JSON.parse(configBytes)
     const candidate = input.candidate
-    requireFact(input.schemaVersion === 1 && input.version === '2.2.31' && candidate &&
+    requireFact(input.schemaVersion === 1 && ['2.2.31', '2.2.32'].includes(input.version) && candidate &&
       ['boss', 'bossfang', 'uar'].every(key => /^[0-9a-f]{40}$/.test(candidate[key] ?? '')) &&
       ['appAsarSha256', 'uarSha256', 'bossfangSha256'].every(key => /^[0-9a-f]{64}$/.test(candidate[key] ?? '')),
       'ADMISSION_V2_FROZEN_SOURCE_AND_PACKAGE_DIGESTS_REQUIRED')
