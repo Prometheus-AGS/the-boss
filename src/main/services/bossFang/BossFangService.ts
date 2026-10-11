@@ -23,6 +23,7 @@ import { BOSSFANG_DASHBOARD_PARTITION } from '@shared/utils/webviewSecurity'
 
 import { BossFangConnection } from './connection'
 import { BossFangDiagnostics } from './diagnostics'
+import { buildManagedEnvironment } from './environment'
 import {
   credentialsConfigured,
   dashboardOrigin,
@@ -244,18 +245,7 @@ export class BossFangService extends BaseService {
           binary,
           ['--config', file, 'start', '--foreground', '--bind', `${config.host}:${port}`],
           {
-            env: {
-              ...Object.fromEntries(
-                Object.entries(process.env).filter(
-                  ([key]) =>
-                    !key.startsWith('LIBREFANG_') &&
-                    !['LITER_LLM_MASTER_KEY', 'KNOW_ME_GITOPS_TOKEN'].includes(key) &&
-                    !/(_API_KEY|_API_TOKEN|_ACCESS_TOKEN|_SECRET_KEY)$/.test(key)
-                )
-              ),
-              LIBREFANG_HOME: directory,
-              LIBREFANG_DASHBOARD_PASS: credentials.password
-            },
+            env: await buildManagedEnvironment(directory, credentials.password, contents),
             cwd: directory,
             detached: !isWin,
             stdio: ['ignore', 'pipe', 'pipe'],

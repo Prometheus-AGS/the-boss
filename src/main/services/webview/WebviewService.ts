@@ -88,7 +88,12 @@ export class WebviewService extends BaseService {
       const allowed = application.get('BossFangService').getDashboardOrigin()
       let permit = false
       try {
-        permit = Boolean(allowed && new URL(details.url).origin === allowed)
+        const target = new URL(details.url)
+        if (details.resourceType === 'webSocket') {
+          if (target.protocol === 'ws:') target.protocol = 'http:'
+          else if (target.protocol === 'wss:') target.protocol = 'https:'
+        }
+        permit = Boolean(allowed && target.origin === allowed)
       } catch {
         permit = false
       }

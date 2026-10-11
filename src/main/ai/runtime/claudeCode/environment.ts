@@ -4,8 +4,6 @@
  * derives the auto-compact window and per-request output cap from the model catalog.
  */
 
-import fs from 'node:fs'
-import { createRequire } from 'node:module'
 import path from 'node:path'
 
 import { application } from '@application'
@@ -19,7 +17,6 @@ import {
   stripInheritedCherryProxyMarkers
 } from '@main/services/proxy/agentProxyEnvironment'
 import { getProxyEnvironment } from '@main/services/proxy/proxyEnv'
-import { toAsarUnpackedPath } from '@main/utils/asar'
 import { getBinaryPath } from '@main/utils/binaryResolver'
 import { autoDiscoverGitBash } from '@main/utils/commandResolver'
 import { getShellEnv, refreshShellEnv } from '@main/utils/shellEnv'
@@ -27,6 +24,8 @@ import type { AgentEntity } from '@shared/data/api/schemas/agents'
 import { parseUniqueModelId } from '@shared/data/types/model'
 import type { Provider } from '@shared/data/types/provider'
 import { isExternalCliProvider } from '@shared/utils/provider'
+
+export { resolveClaudeExecutablePath } from '@main/utils/claudeExecutable'
 
 const logger = loggerService.withContext('ClaudeCodeEnvironment')
 
@@ -60,7 +59,6 @@ const DEFAULT_REQUESTED_OUTPUT_TOKENS = 32_000
  * agents on small windows start compacting too eagerly to make progress.
  */
 export const AUTO_COMPACT_TRIGGER_PCT = 80
-const require_ = createRequire(import.meta.url)
 
 // Providers bill `input + max_tokens` against the context limit, so history can only occupy
 // `contextWindow - requestedOutput`; the floor over-promises models whose real budget is smaller.
@@ -102,31 +100,6 @@ export function resolveRequestedOutputTokens(
       ? Math.max(contextWindow - MIN_AUTO_COMPACT_WINDOW, DEFAULT_REQUESTED_OUTPUT_TOKENS)
       : Number.POSITIVE_INFINITY
   return Math.min(declared, MAX_REQUESTED_OUTPUT_TOKENS, inputRoom)
-}
-
-export function resolveClaudeExecutablePath(): string {
-  const sdkRequire = createRequire(require_.resolve('@anthropic-ai/claude-agent-sdk'))
-  const extension = isWin ? '.exe' : ''
-  const nativePackages = isLinux
-    ? [
-        `@anthropic-ai/claude-agent-sdk-linux-${process.arch}-musl`,
-        `@anthropic-ai/claude-agent-sdk-linux-${process.arch}`
-      ]
-    : [`@anthropic-ai/claude-agent-sdk-${process.platform}-${process.arch}`]
-
-  for (const packageName of nativePackages) {
-    try {
-      const packageDirectory = path.dirname(sdkRequire.resolve(`${packageName}/package.json`))
-      const executable = path.join(toAsarUnpackedPath(packageDirectory), `claude${extension}`)
-      if (fs.existsSync(executable)) return executable
-    } catch {
-      // Optional native packages are platform-specific; try the next candidate.
-    }
-  }
-
-  throw new Error(
-    `Claude Code native binary not found for ${process.platform}-${process.arch}. Reinstall @anthropic-ai/claude-agent-sdk with optional dependencies.`
-  )
 }
 
 export async function getClaudeCodeLoginShellEnvironment(
