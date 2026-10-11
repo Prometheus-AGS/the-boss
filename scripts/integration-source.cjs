@@ -14,8 +14,12 @@ function checkoutIntegrationSource(name, directory = path.join(root, 'build', 'i
   if (process.platform === 'win32') git('config', '--local', 'core.longpaths', 'true')
   if (git('status', '--porcelain', '--untracked-files=all'))
     throw new Error(`Integration source checkout has local changes: ${directory}`)
-  git('fetch', '--depth=1', `https://github.com/${pin.repository}.git`, pin.revision)
-  git('checkout', '--detach', 'FETCH_HEAD')
+  try {
+    git('rev-parse', '--verify', '--quiet', `${pin.revision}^{commit}`)
+  } catch {
+    git('fetch', '--depth=1', `https://github.com/${pin.repository}.git`, pin.revision)
+  }
+  git('checkout', '--detach', pin.revision)
   if (git('rev-parse', 'HEAD') !== pin.revision) throw new Error(`Integration source pin mismatch: ${name}`)
   if (name === 'uar')
     git(

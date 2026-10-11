@@ -61,8 +61,8 @@ async function main() {
     const env = {
       RUSTC_WRAPPER: '',
       ...(name === 'bossfang' ? { SKIP_DASHBOARD_BUILD: '1', GITHUB_SHA: pins.sources[recipe.source].revision } : {}),
-      // Fat LTO with one codegen unit exhausted the Mac payload job's three-hour limit.
-      ...(name === 'bossfang' && process.platform === 'darwin'
+      // Fat LTO with one codegen unit blocks timely Mac and Windows payload builds.
+      ...(name === 'bossfang' && ['darwin', 'win32'].includes(process.platform)
         ? { CARGO_PROFILE_RELEASE_LTO: 'thin', CARGO_PROFILE_RELEASE_CODEGEN_UNITS: '16' }
         : {}),
       CARGO_BUILD_BUILD_DIR: path.join(cwd, 'target'),
