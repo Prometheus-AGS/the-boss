@@ -43,7 +43,11 @@
     },
     "bossfang": {
       "repository": "GQAdonis/librefang",
-      "revision": "92bc005f3e7cc110715272b744830d2e3ccfe0d7"
+      "revision": "3d01efffb59502663c7a768858f70622cc94634e",
+      "platformRevisions": {
+        "win32-x64": "92bc005f3e7cc110715272b744830d2e3ccfe0d7",
+        "darwin-arm64": "3d01efffb59502663c7a768858f70622cc94634e"
+      }
     },
     "skill-pack": {
       "repository": "Prometheus-AGS/prometheus-skill-system",
@@ -213,7 +217,7 @@
     },
     {
       "name": "bossfang",
-      "version": "2026.9.19+92bc005f3",
+      "version": "2026.9.19+3d01efffb",
       "packages": {
         "win32-x64": {
           "source": "92bc005f3e7cc110715272b744830d2e3ccfe0d7",
@@ -1638,10 +1642,10 @@
           "uarLifecycle": "connection-only"
         },
         "darwin-arm64": {
-          "source": "92bc005f3e7cc110715272b744830d2e3ccfe0d7",
-          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-92bc005f3/bossfang-darwin-arm64",
-          "sha256": "0cac6b62b4b8cf39063d35227c04048752243eea7da01b1a78395cf8bae51a0f",
-          "size": 176573952,
+          "source": "3d01efffb59502663c7a768858f70622cc94634e",
+          "url": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-3d01efffb/bossfang-darwin-arm64",
+          "sha256": "de597330821ff7ba0d2f329785872210f6ff4069fb9ceccb832b6fae23830bde",
+          "size": 177203760,
           "archive": "none",
           "binaries": [
             "bossfang"
