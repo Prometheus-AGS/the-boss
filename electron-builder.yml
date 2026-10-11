@@ -209,18 +209,20 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.31 - Integrated UAR and BossFang runtime
-    
+    The Boss 2.2.32 - Integrated UAR and BossFang runtime
+
     - [UAR] Package admission-v2 runtime binaries matching the desktop source.
+    - [Settings] Report older UAR incompatibility in the selected-instance connection check while preserving execution and catalog admission restrictions.
     - [Security] Require compatible tool admission before dependent catalog changes and execution; show an actionable error for older instances.
     - [BossFang] Preserve selected UAR ownership, scoped delegation and exact approval identities.
     - [Skills] Refresh pinned tools and skill payloads, including historical Cadence publication reconciliation.
     - [Platforms] Prioritize Apple Silicon Mac and Windows x64; other platform updates remain deferred.
-    
+
     <!--LANG:zh-CN-->
-    The Boss 2.2.31 - 集成 UAR 与 BossFang 运行时
-    
+    The Boss 2.2.32 - 集成 UAR 与 BossFang 运行时
+
     - [UAR] 打包与桌面应用源码匹配、支持工具准入协议 v2 的运行时。
+    - [设置] 检查所选实例连接时显示旧版 UAR 的兼容性问题，同时保留执行和目录操作的准入限制。
     - [安全] 在修改相关目录或执行工具前检查准入协议兼容性；为旧实例显示可操作的错误提示。
     - [BossFang] 保留所选 UAR 的管理归属、限定范围的委派和准确的审批标识。
     - [技能] 更新锁定的工具与技能包，包括 Cadence 历史发布核对功能。
