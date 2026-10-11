@@ -209,16 +209,18 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.34 - BossFang agent connectivity
+    The Boss 2.2.35 - Integrated BossFang services
 
-    - Resolve Claude automatically for desktop-launched BossFang, with the bundled executable as fallback.
-    - Authenticate agent access to BossFang daemon tools without manual API-key configuration.
-    - Restore authenticated dashboard streaming while retaining the isolated origin boundary.
+    - Restore the selected UAR connection automatically using a persistent personal workspace.
+    - Use configured live models and show dashboard, execution, model and shared-memory readiness separately.
+    - Connect native and delegated agents to scoped Surreal Memory while preserving private agent memory.
+    - Keep service credentials in the host and preserve active execution bindings when configuration changes.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.34 - BossFang 智能体连接修复
+    The Boss 2.2.35 - BossFang 服务集成
 
-    - 为桌面启动的 BossFang 自动查找 Claude，并使用内置可执行文件作为后备。
-    - 自动验证智能体对 BossFang 工具的访问，无需手动配置 API 密钥。
-    - 恢复已认证的控制台流式连接，同时保留独立的来源访问限制。
+    - 使用持久化的个人工作区自动恢复所选 UAR 连接。
+    - 使用已配置的实时模型列表，分别显示控制台、执行、模型和共享记忆的就绪状态。
+    - 将原生和委派智能体连接到限定范围的 Surreal Memory，同时保留智能体的私有记忆。
+    - 将服务凭据保留在宿主中，并在配置变更时保留活动执行的绑定。
     <!--LANG:END-->

@@ -1,5 +1,9 @@
 [
   {
+    "version": "2.2.35",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.35 - Integrated BossFang services\n\n- Restore the selected UAR connection automatically using a persistent personal workspace.\n- Use configured live models and show dashboard, execution, model and shared-memory readiness separately.\n- Connect native and delegated agents to scoped Surreal Memory while preserving private agent memory.\n- Keep service credentials in the host and preserve active execution bindings when configuration changes.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.35 - BossFang 服务集成\n\n- 使用持久化的个人工作区自动恢复所选 UAR 连接。\n- 使用已配置的实时模型列表，分别显示控制台、执行、模型和共享记忆的就绪状态。\n- 将原生和委派智能体连接到限定范围的 Surreal Memory，同时保留智能体的私有记忆。\n- 将服务凭据保留在宿主中，并在配置变更时保留活动执行的绑定。\n<!--LANG:END-->"
+  },
+  {
     "version": "2.2.34",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.34 - BossFang agent connectivity\n\n- Resolve Claude automatically for desktop-launched BossFang, with the bundled executable as fallback.\n- Authenticate agent access to BossFang daemon tools without manual API-key configuration.\n- Restore authenticated dashboard streaming while retaining the isolated origin boundary.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.34 - BossFang 智能体连接修复\n\n- 为桌面启动的 BossFang 自动查找 Claude，并使用内置可执行文件作为后备。\n- 自动验证智能体对 BossFang 工具的访问，无需手动配置 API 密钥。\n- 恢复已认证的控制台流式连接，同时保留独立的来源访问限制。\n<!--LANG:END-->"
   },
