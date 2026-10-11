@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@cherrystudio/ui'
@@ -21,17 +21,20 @@ import type { UarInstanceInventorySnapshot } from '@shared/types/uarServiceInsta
 
 import { getSettingDomId } from '../settingsSearch/types'
 import { Choice, Field } from './Fields'
+import { ServiceReadiness } from './ServiceReadiness'
 
 export default function BossFangSettings() {
   const { t } = useTranslation()
   const { open, opening } = useBossFangDashboard()
   const [status, setStatus] = useState<BossFangStatus>()
   const [draft, setDraft] = useState<BossFangConfig>()
+  const requested = useRef<string | undefined>(undefined)
   const [inventory, setInventory] = useState<UarInstanceInventorySnapshot>()
   const { data: workspaces } = useQuery('/agent-workspaces')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
+  const [operation, setOperation] = useState('common.loading')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [models, setModels] = useState<{ id: string; name: string; provider: string }[]>([])
@@ -46,7 +49,9 @@ export default function BossFangSettings() {
     ])
     setStatus(next)
     setInventory(instances)
-    if (loadDraft) setDraft(next.requested)
+    const previousRequested = requested.current
+    setDraft((current) => (loadDraft || JSON.stringify(current) === previousRequested ? next.requested : current))
+    requested.current = JSON.stringify(next.requested)
   }, [])
   useEffect(() => {
     void refresh(true).catch((e) => setError(String(e)))
@@ -72,7 +77,7 @@ export default function BossFangSettings() {
         .then(setModels)
         .catch((e) => setError(String(e)))
     else setModels([])
-  }, [status?.connection, status?.effective?.uarGeneration])
+  }, [status?.connection, status?.effective?.uarGeneration, status?.effective?.uarInstanceId])
   useEffect(() => {
     if (status?.lastDiagnosticId && !diagnostic)
       void ipcApi
@@ -80,7 +85,8 @@ export default function BossFangSettings() {
         .then(setDiagnostic)
         .catch((e) => setError(String(e)))
   }, [status?.lastDiagnosticId, diagnostic?.id])
-  const act = async (fn: () => Promise<unknown>, success?: string) => {
+  const act = async (fn: () => Promise<unknown>, success?: string, pending = 'common.loading') => {
+    setOperation(pending)
     setBusy(true)
     setError('')
     setMessage('')
@@ -107,10 +113,14 @@ export default function BossFangSettings() {
   const dirty = JSON.stringify(draft) !== JSON.stringify(status.requested)
   const portInvalid = !Number.isInteger(draft.port) || draft.port < 1 || draft.port > 65535
   const save = () =>
-    act(async () => {
-      const next = await ipcApi.request('bossfang.configure', draft)
-      setDraft(next.requested)
-    }, 'bossfang.saved')
+    act(
+      async () => {
+        const next = await ipcApi.request('bossfang.apply', draft)
+        setDraft(next.requested)
+      },
+      'bossfang.configurationApplied',
+      'bossfang.applying'
+    )
   const start = (restart = false) =>
     act(async () => {
       const result = await ipcApi.request(restart ? 'bossfang.restart' : 'bossfang.start')
@@ -127,6 +137,12 @@ export default function BossFangSettings() {
               <p className="text-sm text-muted-foreground">{t('bossfang.description')}</p>
             </div>
           </div>
+          <ServiceReadiness status={status} />
+          {dirty && (
+            <p className="mb-4 text-sm text-warning" role="status">
+              {t('bossfang.pendingChanges')}
+            </p>
+          )}
           <fieldset disabled={busy || opening} className="min-w-0 space-y-5">
             <SettingGroup id={getSettingDomId('/settings/bossfang', 'process')}>
               <SettingTitle>{t('bossfang.process')}</SettingTitle>
@@ -178,8 +194,8 @@ export default function BossFangSettings() {
               </p>
               {status.restartRequired && <SettingHelpText>{t('bossfang.restartRequired')}</SettingHelpText>}
               <div className="mt-4 flex flex-wrap gap-2">
-                <Button data-ui="bossfang-save" disabled={!dirty || portInvalid} onClick={() => void save()}>
-                  {t('bossfang.save')}
+                <Button data-ui="bossfang-save" disabled={portInvalid} onClick={() => void save()}>
+                  {t('bossfang.apply')}
                 </Button>
                 <Button
                   data-ui="bossfang-start"
@@ -280,11 +296,15 @@ export default function BossFangSettings() {
                 <Choice
                   token="bossfang-workspace"
                   label={t('bossfang.workspace')}
-                  value={draft.workspaceId}
-                  onChange={(workspaceId) => update({ workspaceId })}
-                  options={(workspaces ?? []).map((x) => ({ value: x.id, label: x.name }))}
+                  value={draft.workspaceId || 'personal'}
+                  onChange={(workspaceId) => update({ workspaceId: workspaceId === 'personal' ? '' : workspaceId })}
+                  options={[
+                    { value: 'personal', label: t('bossfang.personalWorkspace') },
+                    ...(workspaces ?? []).map((x) => ({ value: x.id, label: x.name }))
+                  ]}
                 />
               </div>
+              <SettingHelpText className="mt-3">{t('bossfang.workspaceAccessHelp')}</SettingHelpText>
               <SettingHelpText className="mt-3">{t('bossfang.grantHelp')}</SettingHelpText>
               <p data-ui="bossfang-connection-status" className="mt-2 text-sm" role="status">
                 {t('bossfang.connection.' + status.connection)}
@@ -301,20 +321,26 @@ export default function BossFangSettings() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button
                   data-ui="bossfang-connect"
-                  disabled={dirty || !draft.workspaceId || status.status !== 'running'}
+                  disabled={dirty || status.status !== 'running'}
                   onClick={() =>
                     void act(async () => {
-                      await ipcApi.request('bossfang.connect')
+                      const next = await ipcApi.request('bossfang.connect')
+                      setDraft(next.requested)
                       setModels(await ipcApi.request('bossfang.models'))
                     })
                   }>
-                  {t('bossfang.connect')}
+                  {t('bossfang.reconnect')}
                 </Button>
                 <Button
                   data-ui="bossfang-disconnect"
                   variant="outline"
                   disabled={status.connection === 'disconnected'}
-                  onClick={() => void act(() => ipcApi.request('bossfang.disconnect'))}>
+                  onClick={() =>
+                    void act(async () => {
+                      const next = await ipcApi.request('bossfang.disconnect')
+                      setDraft(next.requested)
+                    })
+                  }>
                   {t('bossfang.disconnect')}
                 </Button>
                 <Link data-ui="bossfang-settings-link" to="/settings/uar" className="self-center text-sm text-link">
@@ -331,12 +357,20 @@ export default function BossFangSettings() {
                   label={t('bossfang.model')}
                   value={draft.diagnosticModelId}
                   onChange={(diagnosticModelId) => update({ diagnosticModelId })}
-                  options={models.map((x) => ({
-                    value: x.id,
-                    label: x.provider ? x.name + ' · ' + x.provider : x.name
-                  }))}
+                  options={[
+                    ...(draft.diagnosticModelId && !models.some((x) => x.id === draft.diagnosticModelId)
+                      ? [
+                          {
+                            value: draft.diagnosticModelId,
+                            label: t('bossfang.modelUnavailable', { model: draft.diagnosticModelId })
+                          }
+                        ]
+                      : []),
+                    ...models.map((x) => ({ value: x.id, label: x.provider ? x.name + ' · ' + x.provider : x.name }))
+                  ]}
                 />
               </div>
+              {!models.length && <SettingHelpText className="mt-3">{t('bossfang.noModels')}</SettingHelpText>}
               <SettingHelpText className="mt-3">
                 {t('bossfang.modelUsage', { model: draft.diagnosticModelId || t('bossfang.selectModel') })}
               </SettingHelpText>
@@ -346,7 +380,7 @@ export default function BossFangSettings() {
                   disabled={
                     dirty ||
                     status.connection !== 'connected' ||
-                    !draft.diagnosticModelId ||
+                    !models.some((x) => x.id === draft.diagnosticModelId) ||
                     diagnostic?.status === 'running'
                   }
                   onClick={() =>
@@ -356,7 +390,7 @@ export default function BossFangSettings() {
                       )
                     )
                   }>
-                  {t('bossfang.runDiagnostic')}
+                  {t('bossfang.checkIntegration')}
                 </Button>
                 <Button
                   data-ui="bossfang-diagnostic-cancel"
@@ -464,7 +498,7 @@ export default function BossFangSettings() {
           </fieldset>
           {busy && (
             <p className="mt-3 text-sm" role="status">
-              {t('common.loading')}
+              {t(operation)}
             </p>
           )}
           {message && (

@@ -16,6 +16,7 @@ const result = z.discriminatedUnion('success', [
 export const bossFangRequestSchemas = {
   'bossfang.start': defineRoute({ input: z.void(), output: result }),
   'bossfang.status': defineRoute({ input: z.void(), output: bossFangStatusSchema }),
+  'bossfang.apply': defineRoute({ input: bossFangConfigSchema, output: bossFangStatusSchema }),
   'bossfang.configure': defineRoute({ input: bossFangConfigSchema, output: bossFangStatusSchema }),
   'bossfang.configure_credentials': defineRoute({
     input: z.object({ username: z.string().trim().min(1).max(128), password: z.string().min(16).max(16384) }).strict(),

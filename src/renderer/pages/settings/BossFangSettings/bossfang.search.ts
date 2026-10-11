@@ -2,6 +2,11 @@ import type { SettingsSearchEntry } from '../settingsSearch/types'
 export const route = '/settings/bossfang'
 export const entries: SettingsSearchEntry[] = [
   {
+    anchorId: 'services',
+    titleKey: 'bossfang.services',
+    aliases: ['memory', 'Surreal', 'models', 'readiness', 'configuration']
+  },
+  {
     anchorId: 'process',
     titleKey: 'bossfang.process',
     aliases: ['BossFang', 'dashboard', 'port', 'managed', 'external', 'restart']

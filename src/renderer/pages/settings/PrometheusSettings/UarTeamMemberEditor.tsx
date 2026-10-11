@@ -16,8 +16,16 @@ const tools: Member['tools'] = [
   'filesystem__grep',
   'filesystem__read',
   'filesystem__edit',
-  'filesystem__write'
+  'filesystem__write',
+  'shared_memory__shared_memory_remember',
+  'shared_memory__shared_memory_retrieve',
+  'shared_memory__shared_memory_search'
 ]
+const memoryToolLabels: Record<string, string> = {
+  shared_memory__shared_memory_remember: 'sharedMemoryRemember',
+  shared_memory__shared_memory_retrieve: 'sharedMemoryRetrieve',
+  shared_memory__shared_memory_search: 'sharedMemorySearch'
+}
 
 function sameSkillRef(left: SkillRef, right: SkillRef) {
   return (
@@ -145,7 +153,9 @@ export function UarTeamMemberEditor({
           data-ui="team-authoring-requested-role-policy"
           data-source-role={guidanceRole.id}>
           <p>{tr('guidance.rolePolicy')}</p>
-          <pre className="whitespace-pre-wrap break-all">{JSON.stringify(guidanceRole.modelPolicy ?? null, null, 2)}</pre>
+          <pre className="whitespace-pre-wrap break-all">
+            {JSON.stringify(guidanceRole.modelPolicy ?? null, null, 2)}
+          </pre>
           <p className="text-muted-foreground">{tr('guidance.manualPolicy')}</p>
         </div>
       )}
@@ -163,6 +173,7 @@ export function UarTeamMemberEditor({
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium">{tr('tools')}</legend>
         <p className="text-xs text-muted-foreground">{tr('toolsHelp')}</p>
+        <p className="text-xs text-muted-foreground">{tr('sharedMemoryHelp')}</p>
         <div className="flex flex-wrap gap-3">
           {tools.map((tool) => (
             <label key={tool} className="flex items-center gap-2 text-xs">
@@ -170,7 +181,7 @@ export function UarTeamMemberEditor({
                 data-ui="team-authoring-tool"
                 data-tool-name={tool}
                 size="sm"
-                disabled={disabled || member.role === 'coordinator'}
+                disabled={disabled || (member.role === 'coordinator' && tool.startsWith('filesystem__'))}
                 checked={member.tools.includes(tool)}
                 onCheckedChange={(checked) =>
                   onChange({
@@ -179,7 +190,7 @@ export function UarTeamMemberEditor({
                   })
                 }
               />
-              {tr('tool.' + tool.replace('filesystem__', ''))}
+              {tr('tool.' + (memoryToolLabels[tool] ?? tool.replace('filesystem__', '')))}
             </label>
           ))}
         </div>
@@ -247,9 +258,7 @@ export function UarTeamMemberEditor({
                 {tr('reviewedSkill.' + entry.reviewedCoverage.status)}
               </p>
               {!reviewed && (
-                <p className="text-muted-foreground">
-                  {tr('reviewedSkill.' + entry.reviewedCoverage.reason)}
-                </p>
+                <p className="text-muted-foreground">{tr('reviewedSkill.' + entry.reviewedCoverage.reason)}</p>
               )}
               {selected && (
                 <div className="ms-6 space-y-1">
@@ -285,12 +294,7 @@ export function UarTeamMemberEditor({
           )
         })}
         {member.skills
-          .filter(
-            (skill) =>
-              !catalog?.entries.some(
-                (entry) => entry.skillRef && sameSkillRef(entry.skillRef, skill)
-              )
-          )
+          .filter((skill) => !catalog?.entries.some((entry) => entry.skillRef && sameSkillRef(entry.skillRef, skill)))
           .map((skill) => (
             <div key={skill.id} className="flex flex-wrap items-center gap-2 text-xs" role="alert">
               <span>

@@ -13,6 +13,7 @@ import { loggerService } from '@logger'
 import { providerResponseSchema } from '@main/ai/runtime/uar'
 import { BaseService, Injectable, Phase, ServicePhase } from '@main/core/lifecycle'
 import { isWin } from '@main/core/platform'
+import { t } from '@main/i18n'
 import { toAsarUnpackedPath } from '@main/utils/asar'
 import { fetchWithRateLimitRetries } from '@main/utils/http'
 import { crossPlatformSpawn, terminateProcessTree, waitForProcessExit } from '@main/utils/processRunner'
@@ -21,9 +22,12 @@ import { bossFangConfigSchema } from '@shared/types/bossFang'
 import { redactLiteral, redactSecretText } from '@shared/utils/redaction'
 import { BOSSFANG_DASHBOARD_PARTITION } from '@shared/utils/webviewSecurity'
 
+import { requireIdleBossFang } from './configurationAdmission'
 import { BossFangConnection } from './connection'
 import { BossFangDiagnostics } from './diagnostics'
 import { buildManagedEnvironment } from './environment'
+import { ensurePersonalWorkspace } from './personalWorkspace'
+import { BossFangSharedMemory } from './sharedMemory'
 import {
   credentialsConfigured,
   dashboardOrigin,
@@ -31,6 +35,7 @@ import {
   readCredentials,
   resolvePort,
   saveCredentials,
+  saveConfig,
   type DashboardCredentials
 } from './storage'
 
@@ -51,10 +56,15 @@ export class BossFangService extends BaseService {
   private logs: BossFangStatus['logs'] = []
   private sequence = 0
   private logWrites = Promise.resolve()
+  private readonly sharedMemory = new BossFangSharedMemory()
+  private modelReadiness: BossFangStatus['services']['models'] = { state: 'unknown', detail: null }
   readonly connection = new BossFangConnection(
     (p, i) => this.request(p, i),
     (text) => this.safe(text),
-    (text) => this.log('info', text)
+    (text) => this.log('info', text),
+    async () => {
+      await this.loadModels().catch(() => undefined)
+    }
   )
 
   readonly diagnostics = new BossFangDiagnostics(
@@ -68,6 +78,7 @@ export class BossFangService extends BaseService {
   )
 
   protected async onInit() {
+    await saveConfig(readConfig())
     await this.diagnostics.initialize()
     const logPath = application.getPath('feature.agents.bossfang.data', 'operator-log.json')
     if (existsSync(logPath)) {
@@ -86,9 +97,27 @@ export class BossFangService extends BaseService {
     }
     this.registerDisposable(
       application.get('PreferenceService').subscribeChange('app.prometheus.integrations', () => {
-        void this.connection.refresh().catch((error) => this.log('error', String(error)))
+        if (this.status === 'running')
+          void this.mutex
+            .runExclusive(async () => {
+              await requireIdleBossFang((p) => this.request(p))
+              const previous = await this.sharedMemory.nativeEnvironment()
+              await this.configureSharedMemory()
+              if (JSON.stringify(previous) !== JSON.stringify(await this.sharedMemory.nativeEnvironment())) {
+                await this.stopOwnedProcess()
+                this.status = 'stopped'
+                this.origin = null
+                this.dashboardToken = null
+                await this.startUnlocked()
+              } else await this.restoreConnection()
+            })
+            .catch((error) => this.log('error', String(error)))
       })
     )
+  }
+  protected onAllReady() {
+    if (readConfig().startOnLaunch && credentialsConfigured(readConfig().ownership))
+      void this.start().catch((error) => this.log('error', this.safe(String(error))))
   }
   protected async onStop() {
     await this.mutex.runExclusive(async () => {
@@ -101,8 +130,10 @@ export class BossFangService extends BaseService {
   }
   private safe(text: string) {
     return redactSecretText(
-      this.connection.redact(
-        redactLiteral(redactLiteral(text, this.dashboardToken ?? undefined), this.credentials?.password)
+      this.sharedMemory.redact(
+        this.connection.redact(
+          redactLiteral(redactLiteral(text, this.dashboardToken ?? undefined), this.credentials?.password)
+        )
       )
     ).slice(0, 2000)
   }
@@ -147,6 +178,35 @@ export class BossFangService extends BaseService {
       error: this.error,
       connection: this.connection.state,
       connectionError: this.connection.error,
+      services: {
+        dashboard: {
+          state:
+            this.status === 'running' && this.dashboardToken
+              ? 'ready'
+              : this.status === 'starting'
+                ? 'connecting'
+                : this.status === 'error'
+                  ? 'unavailable'
+                  : 'unknown',
+          detail: this.error
+        },
+        uar: {
+          state:
+            this.connection.state === 'connected'
+              ? 'ready'
+              : this.connection.state === 'connecting'
+                ? 'connecting'
+                : requested.connectionIntent === 'disconnected'
+                  ? 'disabled'
+                  : this.connection.state === 'error'
+                    ? 'unavailable'
+                    : 'unknown',
+          detail: this.connection.error
+        },
+        models: this.connection.state === 'connected' ? { ...this.modelReadiness } : { state: 'unknown', detail: null },
+        sharedMemory: this.sharedMemory.readiness
+      },
+      sharedMemory: this.sharedMemory.status,
       lastDiagnosticId: this.diagnostics.lastId,
       logs: structuredClone(this.logs)
     }
@@ -155,6 +215,28 @@ export class BossFangService extends BaseService {
     return this.status === 'running' ? (this.origin ?? undefined) : undefined
   }
   async configure(input: BossFangConfig) {
+    return this.mutex.runExclusive(() => this.configureUnlocked(input))
+  }
+  async applyConfiguration(input: BossFangConfig): Promise<BossFangStatus> {
+    return this.mutex.runExclusive(async () => {
+      if (this.status === 'running') await requireIdleBossFang((p) => this.request(p))
+      const previousMemoryEnvironment = await this.sharedMemory.nativeEnvironment()
+      const saved = await this.configureUnlocked(input)
+      await this.configureSharedMemory()
+      const memoryChanged =
+        JSON.stringify(previousMemoryEnvironment) !== JSON.stringify(await this.sharedMemory.nativeEnvironment())
+      if (saved.restartRequired || (this.status === 'running' && memoryChanged)) {
+        await this.stopOwnedProcess()
+        this.status = 'stopped'
+        this.origin = null
+        this.dashboardToken = null
+      }
+      if (this.status !== 'running') await this.startUnlocked()
+      else await this.restoreConnection()
+      return this.getStatus()
+    })
+  }
+  private async configureUnlocked(input: BossFangConfig) {
     const config = bossFangConfigSchema.parse(input)
     if (config.ownership === 'external') config.externalEndpoint = dashboardOrigin(config.externalEndpoint)
     if (config.workspaceId) agentWorkspaceService.getById(config.workspaceId)
@@ -162,9 +244,13 @@ export class BossFangService extends BaseService {
     if (!inventory.instances.some((x) => x.id === config.uarInstanceId && x.enabled))
       throw new Error('Choose an enabled UAR instance from the existing inventory')
     const previous = readConfig()
-    if (previous.uarInstanceId !== config.uarInstanceId || previous.workspaceId !== config.workspaceId)
+    await saveConfig(config)
+    if (
+      previous.uarInstanceId !== config.uarInstanceId ||
+      previous.workspaceId !== config.workspaceId ||
+      config.connectionIntent === 'disconnected'
+    )
       await this.connection.disconnect()
-    await application.get('PreferenceService').set('feature.bossfang.configuration', JSON.stringify(config))
     this.log('info', 'Saved BossFang configuration; restart applies requested values')
     return this.getStatus()
   }
@@ -197,7 +283,7 @@ export class BossFangService extends BaseService {
       }
   > {
     if (this.status === 'running' && this.origin) return { success: true, url: this.origin + '/dashboard/' }
-    const config = readConfig()
+    let config = readConfig()
     let credentials: DashboardCredentials
     try {
       credentials = await readCredentials(config.ownership)
@@ -212,6 +298,8 @@ export class BossFangService extends BaseService {
     try {
       this.status = 'starting'
       this.error = null
+      await this.configureSharedMemory()
+      config = readConfig()
       if (config.ownership === 'external') this.origin = dashboardOrigin(config.externalEndpoint)
       else {
         const binary = toAsarUnpackedPath(
@@ -245,7 +333,10 @@ export class BossFangService extends BaseService {
           binary,
           ['--config', file, 'start', '--foreground', '--bind', `${config.host}:${port}`],
           {
-            env: await buildManagedEnvironment(directory, credentials.password, contents),
+            env: {
+              ...(await buildManagedEnvironment(directory, credentials.password, contents)),
+              ...(await this.sharedMemory.nativeEnvironment())
+            },
             cwd: directory,
             detached: !isWin,
             stdio: ['ignore', 'pipe', 'pipe'],
@@ -274,6 +365,8 @@ export class BossFangService extends BaseService {
       await this.login()
       this.credentialChanges = false
       this.effectiveConfig = structuredClone(config)
+      await this.restoreConnection()
+      await saveConfig({ ...readConfig(), startOnLaunch: true })
       this.log('info', `BossFang dashboard ready at ${this.origin}`)
       return { success: true, url: this.origin + '/dashboard/' }
     } catch (error) {
@@ -356,43 +449,88 @@ export class BossFangService extends BaseService {
         application.get('UarSidecarService').admitRequest(binding, 4, signal)
       )
   }
+  private async configureSharedMemory() {
+    let config = readConfig()
+    try {
+      config = await ensurePersonalWorkspace(config)
+    } catch (error) {
+      this.log('warning', this.safe(error instanceof Error ? error.message : String(error)))
+    }
+    await this.sharedMemory.configure(config)
+  }
+  private async restoreConnection() {
+    const config = readConfig()
+    if (config.connectionIntent === 'disconnected') return
+    try {
+      await this.connection.connect(await ensurePersonalWorkspace(config))
+    } catch (error) {
+      this.connection.state = 'error'
+      this.connection.error = this.safe(error instanceof Error ? error.message : String(error))
+      this.log('warning', this.safe(error instanceof Error ? error.message : String(error)))
+    }
+  }
   async connect() {
-    await this.connection.connect(readConfig())
-    return this.getStatus()
+    return this.mutex.runExclusive(async () => {
+      const config = await ensurePersonalWorkspace({ ...readConfig(), connectionIntent: 'connected' })
+      await saveConfig(config)
+      await this.connection.connect(config)
+      return this.getStatus()
+    })
   }
   async disconnect() {
-    await this.connection.disconnect()
-    return this.getStatus()
+    return this.mutex.runExclusive(async () => {
+      await saveConfig({ ...readConfig(), connectionIntent: 'disconnected' })
+      await this.connection.disconnect()
+      return this.getStatus()
+    })
   }
   inspectDelegatedApproval(bossTaskId: string) {
     return this.connection.inspectDelegatedApproval(bossTaskId)
   }
   async models() {
     await this.connection.refresh()
-    const endpoint = this.connection.endpoint
-    if (!endpoint || this.connection.state !== 'connected')
-      throw new Error('Connect the selected UAR instance before selecting a model')
-    const response = await application.get('UarSidecarService').modelRequestInstance(endpoint, '/api/uar/providers')
-    if (!response.ok)
-      throw new Error(`UAR model inventory failed (HTTP ${response.status}); reconnect the selected UAR instance`)
-    return providerResponseSchema
-      .parse(await response.json())
-      .providers.filter((provider) => provider.enabled)
-      .flatMap((provider) =>
-        provider.models
-          .filter((model) => model.enabled)
-          .map((model) => ({
-            id: provider.id + '/' + model.id,
-            name: model.display_name ?? model.id,
-            provider: provider.id,
-            modelId: model.id
-          }))
-      )
+    return this.loadModels()
+  }
+  private async loadModels() {
+    this.modelReadiness = { state: 'connecting', detail: null }
+    try {
+      const endpoint = this.connection.endpoint
+      if (!endpoint || this.connection.state !== 'connected')
+        throw new Error('Connect the selected UAR instance before selecting a model')
+      const response = await application.get('UarSidecarService').modelRequestInstance(endpoint, '/api/uar/providers')
+      if (!response.ok)
+        throw new Error(`UAR model inventory failed (HTTP ${response.status}); reconnect the selected UAR instance`)
+      const models = providerResponseSchema
+        .parse(await response.json())
+        .providers.filter((provider) => provider.enabled)
+        .flatMap((provider) =>
+          provider.models
+            .filter((model) => model.enabled)
+            .map((model) => ({
+              id: provider.id + '/' + model.id,
+              name: model.display_name ?? model.id,
+              provider: provider.id,
+              modelId: model.id
+            }))
+        )
+      this.modelReadiness = {
+        state: models.length ? 'ready' : 'unavailable',
+        detail: models.length ? null : t('bossfang.noModels')
+      }
+      return models
+    } catch (error) {
+      this.modelReadiness = {
+        state: 'unavailable',
+        detail: this.safe(error instanceof Error ? error.message : String(error))
+      }
+      throw error
+    }
   }
   async stop() {
     await this.mutex.runExclusive(async () => {
       if (!this.child && (this.effectiveConfig ?? readConfig()).ownership === 'external')
         throw new Error('External BossFang process is managed outside The Boss; use disconnect')
+      await saveConfig({ ...readConfig(), startOnLaunch: false })
       await this.stopOwnedProcess()
       this.status = 'stopped'
       this.origin = null
@@ -402,6 +540,7 @@ export class BossFangService extends BaseService {
   }
   private async stopOwnedProcess() {
     await this.connection.shutdown().catch((error) => this.log('warning', String(error)))
+    await this.sharedMemory.close()
     const child = this.child
     this.child = null
     if (!child?.pid) return

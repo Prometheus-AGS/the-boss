@@ -6,9 +6,7 @@ import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js'
 
 import type { AgentMcpServer } from '@main/ai/runtime/agentMcpServers'
 
-import { createUarProjectedMcpTransport } from './uarProjectedMcpTransport'
-import { createUarSecretProjection, type UarSecretProjection } from './uarSecretProjection'
-
+import { admittedHostInvocation } from './uarHostInvocation'
 import {
   UAR_TOOL_ADMISSION_PATH,
   UAR_TOOL_ADMISSION_VERSION,
@@ -17,6 +15,8 @@ import {
   type UarHostAdmissionState,
   type UarHostToolAdmissionOptions
 } from './UarHostToolAdmission'
+import { createUarProjectedMcpTransport } from './uarProjectedMcpTransport'
+import { createUarSecretProjection, type UarSecretProjection } from './uarSecretProjection'
 
 export interface UarRunMcpServer {
   name: string
@@ -185,7 +185,7 @@ async function handleRequest(
     return
   }
   try {
-    await transport.handleRequest(request, response, body)
+    await admittedHostInvocation.run(claim.invocation, () => transport.handleRequest(request, response, body))
   } finally {
     // A rejected initialize owns no resumable session.
     if ('createInstance' in mounted.server && !transport.sessionId) {
@@ -298,4 +298,50 @@ async function closeMountedServers(mounted: readonly MountedServer[]): Promise<v
         : [...entry.ownedSessions].map((session) => session.instance.close())
     )
   )
+}
+
+/** Same host-resource authentication boundary for the owned native orchestration process. */
+export async function createAuthenticatedHostCallback(handler: (body: unknown) => Promise<unknown>) {
+  const token = randomBytes(32).toString('base64url')
+  let expectedHost = ''
+  const server = createServer((request, response) => {
+    void (async () => {
+      if (
+        request.socket.remoteAddress !== '127.0.0.1' ||
+        request.headers.host !== expectedHost ||
+        request.headers.origin !== undefined ||
+        !matchesBearerToken(request.headers.authorization, token)
+      ) {
+        response.writeHead(403)
+        response.end()
+        return
+      }
+      if (request.method !== 'POST' || request.url !== '/shared-memory') {
+        response.writeHead(404)
+        response.end()
+        return
+      }
+      const result = await handler(await readJsonBody(request))
+      response.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' })
+      response.end(JSON.stringify(result))
+    })().catch(() => {
+      if (!response.headersSent) response.writeHead(503)
+      response.end()
+    })
+  })
+  try {
+    const port = await listen(server)
+    expectedHost = '127.0.0.1:' + port
+    return {
+      url: 'http://' + expectedHost + '/shared-memory',
+      token,
+      close: async () => {
+        server.closeAllConnections()
+        await closeHttpServer(server)
+      }
+    }
+  } catch (error) {
+    await closeHttpServer(server)
+    throw error
+  }
 }

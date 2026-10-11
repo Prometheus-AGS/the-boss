@@ -1,11 +1,21 @@
 import { Mutex } from 'async-mutex'
 
 import { application } from '@application'
+import { UarAdmissionCompatibilityError } from '@main/ai/runtime/uar/UarAdmissionCompatibilityError'
 import type { UarSidecarEndpoint } from '@main/ai/runtime/uar/UarSidecarService'
 import { t } from '@main/i18n'
 import type { BossFangConfig } from '@shared/types/bossFang'
 
 import { RetainedUarAuthorizations, type PrivateUarAuthorization } from './retainedAuthorizations'
+
+function recoverableConnectionError(error: unknown): boolean {
+  if (error instanceof UarAdmissionCompatibilityError) return false
+  const message = error instanceof Error ? error.message : String(error)
+  return (
+    error instanceof TypeError ||
+    /ORIGINAL_RUNTIME_UNAVAILABLE|HTTP_(?:408|429|5\d\d)|fetch failed|ECONNREFUSED|timed out/i.test(message)
+  )
+}
 
 export class BossFangConnection {
   private readonly mutex = new Mutex()
@@ -15,11 +25,13 @@ export class BossFangConnection {
   private renewal: ReturnType<typeof setTimeout> | null = null
   private config: BossFangConfig | null = null
   private stopped = false
+  private retryConnection = false
   private readonly retained: RetainedUarAuthorizations
   constructor(
     private readonly request: (pathname: string, init?: RequestInit) => Promise<Response>,
     private readonly safe: (text: string) => string,
-    private readonly log: (text: string) => void
+    private readonly log: (text: string) => void,
+    private readonly onConnected: () => Promise<void> = async () => {}
   ) {
     this.retained = new RetainedUarAuthorizations(request, log)
   }
@@ -34,6 +46,8 @@ export class BossFangConnection {
   }
   private async connectUnlocked(config: BossFangConfig) {
     this.stopped = false
+    this.config = structuredClone(config)
+    this.retryConnection = false
     this.state = 'connecting'
     this.error = null
     let candidate: PrivateUarAuthorization | undefined,
@@ -54,15 +68,16 @@ export class BossFangConnection {
         throw new Error(`${t('bossfang.retainedAuthentication')} [SELECTED_CONNECT_HTTP_${response.status}]`)
       applied = true
       this.current = candidate
-      this.config = structuredClone(config)
       this.state = 'connected'
       // Selection is replaced only for new admissions. Existing original run transports keep their grants.
       await this.retained.refresh(candidate)
+      await this.onConnected()
       this.log(`Connected BossFang to UAR ${config.uarInstanceId}, generation ${candidate.endpoint.generation}`)
     } catch (error) {
       if (candidate && !applied) await this.retained.revoke(candidate)
       this.state = 'error'
       this.error = this.safe(error instanceof Error ? error.message : String(error))
+      this.retryConnection = recoverableConnectionError(error)
       throw new Error(this.error)
     } finally {
       this.scheduleRenewal()
@@ -71,7 +86,7 @@ export class BossFangConnection {
   private scheduleRenewal() {
     if (this.renewal) clearTimeout(this.renewal)
     this.renewal = null
-    if (this.stopped || (!this.current && !this.retained.hasRecords)) return
+    if (this.stopped || (!this.current && !this.retained.hasRecords && !this.retryConnection)) return
     // One explicit connection-lifecycle timer refreshes selected and original admitted authority.
     this.renewal = setTimeout(
       () => {
@@ -81,13 +96,18 @@ export class BossFangConnection {
         ? Math.min(30_000, Math.max(1_000, Date.parse(this.expiresAt) - Date.now() - 60_000))
         : 30_000
     )
+    this.renewal.unref()
   }
   async refresh() {
     return this.mutex.runExclusive(async () => {
       if (this.stopped) return
       let selectedRefresh = false
       try {
-        if (this.config && this.state === 'connected' && this.current) {
+        if (this.config && this.retryConnection) {
+          selectedRefresh = true
+          await this.connectUnlocked(this.config)
+          selectedRefresh = false
+        } else if (this.config && this.state === 'connected' && this.current) {
           selectedRefresh = true
           const next = await application.get('UarSidecarService').resolveInstance(this.config.uarInstanceId)
           if (
@@ -100,7 +120,10 @@ export class BossFangConnection {
         if (this.retained.hasRecords) await this.retained.refresh(this.state === 'connected' ? this.current : null)
         if (this.state !== 'error') this.error = null
       } catch (error) {
-        if (selectedRefresh) this.state = 'error'
+        if (selectedRefresh) {
+          this.state = 'error'
+          this.retryConnection = recoverableConnectionError(error)
+        }
         this.error = this.safe(error instanceof Error ? error.message : String(error))
         this.log(this.error)
       } finally {
@@ -110,6 +133,8 @@ export class BossFangConnection {
   }
   async disconnect() {
     return this.mutex.runExclusive(async () => {
+      this.config = null
+      this.retryConnection = false
       try {
         if (this.current) {
           const response = await this.request('/api/uar/disconnect', { method: 'POST' })
@@ -118,10 +143,13 @@ export class BossFangConnection {
         }
         this.current = null
         this.config = null
+        this.retryConnection = false
         this.state = 'disconnected'
         this.error = null
         if (this.retained.hasRecords) await this.retained.refresh(null)
       } catch (error) {
+        this.current = null
+        this.state = 'error'
         this.error = this.safe(error instanceof Error ? error.message : String(error))
         throw new Error(this.error)
       } finally {
@@ -131,6 +159,7 @@ export class BossFangConnection {
   }
   async shutdown() {
     this.stopped = true
+    this.retryConnection = false
     if (this.renewal) clearTimeout(this.renewal)
     this.renewal = null
     return this.mutex.runExclusive(async () => {

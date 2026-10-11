@@ -18,9 +18,9 @@ import { rawBinding, scopedRequest } from './UarDurableAdministrationAdapter'
 import { document, starterBinding, revisedStarterBinding } from './uarStarterDocuments'
 import { compileAuthoredTeam, teamAuthoringTemplates } from './uarTeamAuthoringPackage'
 import { readAuthoredTeamRecords, projectAuthoredTeam, saveAuthoredTeamRecord } from './uarTeamAuthoringStore'
+import { assertUarTeamGuidance } from './uarTeamGuidance'
 import { configureTeamModel } from './uarTeamModelSetup'
 import { assertReviewedModelPolicy, reviewedModelBindingTarget } from './uarTeamReviewedModelPolicy'
-import { assertUarTeamGuidance } from './uarTeamGuidance'
 import { planningState } from './UarTeamsAdministrationAdapter'
 import {
   reviewedSkillCoverageExtension,
@@ -197,7 +197,9 @@ export async function deployUarAuthoredTeam(input: {
         value: {
           version: 1,
           workspacePath: directory,
-          servers: ['filesystem'],
+          servers: record.team.members.some((member) => member.tools.some((tool) => tool.startsWith('shared_memory__')))
+            ? ['filesystem', 'shared_memory']
+            : ['filesystem'],
           tools: []
         }
       },

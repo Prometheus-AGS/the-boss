@@ -2,7 +2,9 @@ import * as z from 'zod'
 
 export const bossFangConfigSchema = z
   .object({
-    schemaVersion: z.literal(1),
+    schemaVersion: z.literal(2),
+    startOnLaunch: z.boolean().default(false),
+    connectionIntent: z.enum(['connected', 'disconnected']),
     ownership: z.enum(['managed', 'external']),
     host: z.literal('127.0.0.1'),
     port: z.number().int().min(1).max(65535),
@@ -21,6 +23,18 @@ export const bossFangLogSchema = z.object({
   level: z.enum(['info', 'warning', 'error']),
   message: z.string()
 })
+export const bossFangServiceReadinessSchema = z.object({
+  state: z.enum(['unknown', 'connecting', 'ready', 'unavailable', 'disabled']),
+  detail: z.string().nullable()
+})
+export const bossFangSharedMemoryStatusSchema = z.object({
+  source: z.enum(['full-pack', 'application', 'manual']).nullable(),
+  endpoint: z.string().nullable(),
+  workspaceId: z.string().nullable(),
+  scope: z.enum(['workspace', 'team', 'private']),
+  error: z.string().nullable()
+})
+
 export const bossFangStatusSchema = z.object({
   status: z.enum(['stopped', 'starting', 'running', 'error']),
   ownership: z.enum(['managed', 'external']),
@@ -40,6 +54,13 @@ export const bossFangStatusSchema = z.object({
   error: z.string().nullable(),
   connection: z.enum(['disconnected', 'connecting', 'connected', 'error']),
   connectionError: z.string().nullable(),
+  services: z.object({
+    dashboard: bossFangServiceReadinessSchema,
+    uar: bossFangServiceReadinessSchema,
+    models: bossFangServiceReadinessSchema,
+    sharedMemory: bossFangServiceReadinessSchema
+  }),
+  sharedMemory: bossFangSharedMemoryStatusSchema,
   lastDiagnosticId: z.string().nullable(),
   logs: z.array(bossFangLogSchema)
 })

@@ -1,6 +1,6 @@
 {
   "name": "TheBoss",
-  "version": "2.2.34",
+  "version": "2.2.35",
   "private": true,
   "description": "The Boss — an agent studio for people who ship.",
   "homepage": "https://github.com/CherryHQ/cherry-studio",
@@ -117,9 +117,9 @@
     "test:update": "pnpm test:renderer --update",
     "test:watch": "vitest",
     "typecheck": "pnpm --filter @cherrystudio/ai-sdk-provider build && concurrently -n \"node,web,aicore,e2e\" -c \"cyan,magenta,yellow,blue\" \"pnpm run typecheck:node\" \"pnpm run typecheck:web\" \"pnpm --filter @cherrystudio/ai-core typecheck\" \"pnpm run typecheck:e2e\"",
-    "typecheck:production": "pnpm --filter @cherrystudio/ai-sdk-provider build && concurrently -n \"node,web,aicore\" -c \"cyan,magenta,yellow\" \"pnpm run typecheck:node\" \"pnpm run typecheck:web\" \"pnpm --filter @cherrystudio/ai-core typecheck\"",
     "typecheck:e2e": "tsc --noEmit -p tsconfig.e2e.json",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
+    "typecheck:production": "pnpm --filter @cherrystudio/ai-sdk-provider build && concurrently -n \"node,web,aicore\" -c \"cyan,magenta,yellow\" \"pnpm run typecheck:node\" \"pnpm run typecheck:web\" \"pnpm --filter @cherrystudio/ai-core typecheck\"",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "ui:contract:query": "tsx scripts/uiContract/query.ts",
     "update:languages": "tsx scripts/update-languages.ts"

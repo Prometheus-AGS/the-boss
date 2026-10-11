@@ -336,7 +336,13 @@ export async function compileAuthoredTeam(team: UarAuthoredTeam, revision: numbe
         extensions: {
           [UAR_TEAM_HOST_EXTENSION]: {
             required: true,
-            value: { version: 1, tools: member.tools, servers: ['filesystem'] }
+            value: {
+              version: 1,
+              tools: member.tools,
+              servers: member.tools.some((tool) => tool.startsWith('shared_memory__'))
+                ? ['filesystem', 'shared_memory']
+                : ['filesystem']
+            }
           }
         },
         requestedLimits: { concurrentTurns: 1, maxMembers: team.members.length, maxDepth: 0, maxPendingTasks: 16 },

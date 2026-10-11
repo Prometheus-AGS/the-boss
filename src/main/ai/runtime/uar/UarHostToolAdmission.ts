@@ -4,9 +4,6 @@ import type { ServerResponse } from 'node:http'
 import { validatePath } from '@main/ai/mcp/servers/filesystem'
 import type { UarTeamPreparedEffect } from '@shared/types/uarTeams'
 
-import type { UarAuthorityDecision, UarAuthorityEffect, UarAuthorityProvider } from './UarAuthorityProvider'
-import { sanitizeUarProviderToolName } from './uarToolNames'
-
 import {
   argumentDigest,
   isPreparedInvocation,
@@ -19,7 +16,9 @@ import {
   type UarToolExecutionKind,
   validAuthorityEnvelope
 } from './toolAdmission/wire'
+import type { UarAuthorityDecision, UarAuthorityEffect, UarAuthorityProvider } from './UarAuthorityProvider'
 import { hasLiveHostClaimFacts, revalidateHostClaim } from './uarHostClaimRevalidation'
+import { sanitizeUarProviderToolName } from './uarToolNames'
 
 export { UAR_TOOL_ADMISSION_META_KEY, UAR_TOOL_ADMISSION_PATH, UAR_TOOL_ADMISSION_VERSION } from './toolAdmission/wire'
 export type { PreparedInvocation as UarPreparedInvocation, UarHostToolDisposition } from './toolAdmission/wire'
@@ -71,7 +70,7 @@ type AdmissionRecord = {
 }
 
 type JsonRpcCall = { id: unknown }
-type ClaimResult = { call?: JsonRpcCall; admissionId?: string; error?: string }
+type ClaimResult = { call?: JsonRpcCall; admissionId?: string; invocation?: UarPreparedInvocation; error?: string }
 
 export interface UarHostToolAdmissionOptions {
   sessionId?: string
@@ -171,7 +170,7 @@ export class UarHostToolAdmission {
       return { call, error: 'Managed tool claim evidence could not be persisted; dispatch was blocked' }
     }
     record.managedDispatchClaimed = true
-    return { call, admissionId: record.admissionId }
+    return { call, admissionId: record.admissionId, invocation: structuredClone(invocation) }
   }
 
   async recordHumanDecision(admissionId: string, approved: boolean): Promise<boolean> {
@@ -239,10 +238,7 @@ export class UarHostToolAdmission {
       this.respond(response, 422, { error: 'Invalid prepared tool invocation' })
       return true
     }
-    if (
-      !this.binds(invocation) ||
-      (this.scopeVerifier && !(await this.scopeVerifier(invocation)))
-    ) {
+    if (!this.binds(invocation) || (this.scopeVerifier && !(await this.scopeVerifier(invocation)))) {
       this.respond(response, 409, { error: 'Prepared tool invocation belongs to another host binding' })
       return true
     }
@@ -663,4 +659,3 @@ function safeTarget(argumentsValue: Record<string, unknown>): string | undefined
   }
   return undefined
 }
-

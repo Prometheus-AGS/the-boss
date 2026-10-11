@@ -2,6 +2,8 @@ import { application } from '@application'
 import { loggerService } from '@logger'
 import { FileSystemServer } from '@main/ai/mcp/servers/filesystem'
 import { BaseService, Injectable, Phase, ServicePhase } from '@main/core/lifecycle'
+import { createSharedMemoryServer, sharedMemoryTools } from '@main/services/bossFang/sharedMemory/scoped'
+import { readIntegrationConfig } from '@main/services/prometheus/integrationConfig'
 import type { UarTeamInstance } from '@shared/types/uarTeams'
 
 import { uarApprovalLifecycleStore } from './UarApprovalLifecycleStore'
@@ -41,7 +43,7 @@ export class UarTeamHostService extends BaseService {
   }
 
   private async attach(team: UarTeamInstance, generation: number): Promise<UarHostMcpBridge> {
-    const { directory, memberTools } = await resolveTeamHostScope(team, generation)
+    const { directory, memberTools, sharedMemory } = await resolveTeamHostScope(team, generation)
     const key = team.workspaceId + ':' + team.id
     const saved = this.bridges.get(key)
     if (saved?.generation === generation && saved.bindingRevision === team.binding.revision) return saved.bridge
@@ -50,7 +52,18 @@ export class UarTeamHostService extends BaseService {
       this.bridges.delete(key)
     }
     const bridge = await createUarHostMcpBridge(
-      { filesystem: { name: 'filesystem', createInstance: () => new FileSystemServer(directory).server } },
+      {
+        filesystem: { name: 'filesystem', createInstance: () => new FileSystemServer(directory).server },
+        ...(sharedMemory
+          ? {
+              shared_memory: {
+                name: 'shared_memory',
+                createInstance: () =>
+                  createSharedMemoryServer(readIntegrationConfig().services.memory, team.workspaceId, team.id)
+              }
+            }
+          : {})
+      },
       {
         sessionId: 'team:' + team.id,
         ownerId: team.ownerId,
@@ -58,8 +71,13 @@ export class UarTeamHostService extends BaseService {
         workspace: directory,
         authorityProvider: await createUarAuthorityProvider(),
         persistLifecycle: (snapshot) => uarApprovalLifecycleStore.persist(snapshot),
-        disposition: (toolName) =>
-          codingReadTools.includes(toolName) ? 'auto' : codingWriteTools.includes(toolName) ? 'ask' : 'deny',
+        disposition: (toolName) => {
+          if (codingReadTools.includes(toolName)) return 'auto'
+          if (codingWriteTools.includes(toolName)) return 'ask'
+          if (sharedMemory && sharedMemoryTools.includes(toolName))
+            return toolName === 'shared_memory__shared_memory_remember' ? 'ask' : 'auto'
+          return 'deny'
+        },
         verifyTeamInvocation: async (invocation) => {
           if (generation !== (await application.get('UarSidecarService').resolveSelected()).generation) return false
           const execution = await readUarTeamExecution({ workspaceId: team.workspaceId, teamInstanceId: team.id })

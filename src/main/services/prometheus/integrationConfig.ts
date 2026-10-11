@@ -19,7 +19,11 @@ import {
 import { MANAGED_UAR_INSTANCE_ID, managedUarRuntimeInstance } from '@shared/types/uarServiceInstance'
 
 const INTEGRATION_PREFERENCE = 'app.prometheus.integrations' as const
-type ManagedIntegrationSecret = IntegrationSecret | 'uarAdminKey' | 'uarCredentialEncryptionKey'
+type ManagedIntegrationSecret =
+  | IntegrationSecret
+  | 'uarAdminKey'
+  | 'uarCredentialEncryptionKey'
+  | 'memoryCredentialEndpoint'
 let credentialStoreRevision = 0
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -163,6 +167,8 @@ export async function migrateIntegrationDocument(): Promise<IntegrationDocument>
 
 export async function writeIntegrationDocument(document: IntegrationDocument): Promise<void> {
   const canonical = integrationDocumentSchema.parse(document)
+  const previous = readIntegrationConfig().services.memory.endpoint
+  if (previous !== canonical.config.services.memory.endpoint) await bindMemoryCredential(previous)
   await application.get('PreferenceService').set(INTEGRATION_PREFERENCE, JSON.stringify(canonical))
 }
 
@@ -188,6 +194,20 @@ export async function readSecrets(): Promise<Partial<Record<ManagedIntegrationSe
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return {}
     throw error
   }
+}
+
+export async function bindMemoryCredential(endpoint: string): Promise<void> {
+  const secrets = await readSecrets()
+  if (secrets.memoryToken && !secrets.memoryCredentialEndpoint) {
+    secrets.memoryCredentialEndpoint = endpoint
+    await replaceSecrets(secrets)
+  }
+}
+
+export async function readMemoryCredential(endpoint: string): Promise<string | undefined> {
+  const secrets = await readSecrets()
+  const binding = secrets.memoryCredentialEndpoint ?? readIntegrationConfig().services.memory.endpoint
+  return binding === endpoint ? secrets.memoryToken : undefined
 }
 
 export async function readLiterCredentialSnapshot(): Promise<{ credential?: string; revision: number }> {
@@ -314,7 +334,8 @@ export async function readLiterConnectionCredential(providerConnectionId: string
 
 /** Only the trusted GitHub host resolves this reference; responses expose presence alone. */
 export async function readFeedbackGithubCredential(credentialRef: string): Promise<string | undefined> {
-  if (!/^host:\/\/feedback-github-[a-f0-9]{64}$/.test(credentialRef)) throw new Error('FEEDBACK_CREDENTIAL_SCOPE_DENIED')
+  if (!/^host:\/\/feedback-github-[a-f0-9]{64}$/.test(credentialRef))
+    throw new Error('FEEDBACK_CREDENTIAL_SCOPE_DENIED')
   const secrets = (await readSecrets()) as Record<string, string | undefined>
   return secrets[credentialRef]
 }
@@ -323,7 +344,8 @@ export async function writeFeedbackGithubCredential(
   credentialRef: string,
   mutation: { operation: 'set'; value: string } | { operation: 'clear' }
 ): Promise<void> {
-  if (!/^host:\/\/feedback-github-[a-f0-9]{64}$/.test(credentialRef)) throw new Error('FEEDBACK_CREDENTIAL_SCOPE_DENIED')
+  if (!/^host:\/\/feedback-github-[a-f0-9]{64}$/.test(credentialRef))
+    throw new Error('FEEDBACK_CREDENTIAL_SCOPE_DENIED')
   const secrets = (await readSecrets()) as Record<string, string | undefined>
   if (mutation.operation === 'set') secrets[credentialRef] = mutation.value
   else delete secrets[credentialRef]
@@ -377,6 +399,9 @@ export async function writeSecrets(patch: IntegrationSecretPatch): Promise<void>
     if (mutation.operation === 'set') secrets[name] = mutation.value
     if (mutation.operation === 'clear') delete secrets[name]
   }
+  if (patch.memoryToken?.operation === 'set')
+    secrets.memoryCredentialEndpoint = readIntegrationConfig().services.memory.endpoint
+  if (patch.memoryToken?.operation === 'clear') delete secrets.memoryCredentialEndpoint
   await replaceSecrets(secrets)
   const persisted = await readSecrets()
   for (const [name, mutation] of mutations) {

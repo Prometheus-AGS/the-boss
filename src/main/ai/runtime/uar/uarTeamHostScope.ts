@@ -37,27 +37,36 @@ export async function resolveTeamHostScope(team: UarTeamInstance, generation: nu
     binding.package.digest !== team.package.digest
   )
     throw new Error('TEAM_SCOPE_DENIED')
-  z.object({
-    required: z.literal(true),
-    value: z
-      .object({
-        version: z.literal(1),
-        workspacePath: z.literal(directory),
-        servers: z.tuple([z.literal('filesystem')]),
-        tools: z.tuple([])
-      })
-      .strict()
-  })
+  const host = z
+    .object({
+      required: z.literal(true),
+      value: z
+        .object({
+          version: z.literal(1),
+          workspacePath: z.literal(directory),
+          servers: z.union([
+            z.tuple([z.literal('filesystem')]),
+            z.tuple([z.literal('filesystem'), z.literal('shared_memory')])
+          ]),
+          tools: z.tuple([])
+        })
+        .strict()
+    })
     .strict()
     .parse((binding.document.extensions as Record<string, unknown> | undefined)?.[UAR_TEAM_HOST_EXTENSION])
   const same = (left: { id: string; version: string; digest: string }, right: typeof left) =>
     left.id === right.id && left.version === right.version && left.digest === right.digest
   if (team.definition.id === UAR_CODING_TEAM_ID) {
     const preset = codingTeamPackage()
-    if (!same(team.definition, preset.definition) || !same(team.package, preset.identity))
+    if (
+      !same(team.definition, preset.definition) ||
+      !same(team.package, preset.identity) ||
+      host.value.servers.length !== 1
+    )
       throw new Error('TEAM_SCOPE_DENIED')
     return {
       directory,
+      sharedMemory: false,
       memberTools: new Map([
         ['coordinator', []],
         ['worker', [...codingReadTools, ...codingWriteTools]],
@@ -69,6 +78,10 @@ export async function resolveTeamHostScope(team: UarTeamInstance, generation: nu
     (item) => same(item.definition, team.definition) && same(item.package, team.package)
   )
   if (!record) throw new Error('TEAM_SCOPE_DENIED')
+  const sharedMemory = record.team.members.some((member) =>
+    member.tools.some((tool) => tool.startsWith('shared_memory__'))
+  )
+  if ((host.value.servers.length === 2) !== sharedMemory) throw new Error('TEAM_SCOPE_DENIED')
   const coverageExtension = (binding.document.extensions as Record<string, unknown> | undefined)?.[
     UAR_REVIEWED_SKILL_COVERAGE_EXTENSION
   ]
@@ -89,5 +102,9 @@ export async function resolveTeamHostScope(team: UarTeamInstance, generation: nu
     if (!same(member.definition, { id: definition.id, version: definition.version, digest: definition.contentDigest }))
       throw new Error('TEAM_SCOPE_DENIED')
   }
-  return { directory, memberTools: new Map(record.team.members.map((member) => [member.role, member.tools])) }
+  return {
+    directory,
+    sharedMemory,
+    memberTools: new Map(record.team.members.map((member) => [member.role, member.tools]))
+  }
 }

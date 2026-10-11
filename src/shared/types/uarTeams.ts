@@ -1,9 +1,6 @@
 import * as z from 'zod'
 
 import type { UarBindingPosture, UarBindingPreflightDiagnostic } from './uarBindingPosture'
-import { uarGuidanceMappingSchema, uarGuidanceRoles, uarReviewedGuidanceSchema } from './uarTeamGuidance'
-import { uarReviewedModelPolicySchema } from './uarTeamModelPolicy'
-import { uarTeamPresetIds } from './uarTeamPresets'
 import type {
   UarTeamCommandReceipt,
   UarTeamContextReceipt,
@@ -11,6 +8,9 @@ import type {
   UarTeamContinuationReceipt,
   UarTeamWait
 } from './uarTeamContext'
+import { uarGuidanceMappingSchema, uarGuidanceRoles, uarReviewedGuidanceSchema } from './uarTeamGuidance'
+import { uarReviewedModelPolicySchema } from './uarTeamModelPolicy'
+import { uarTeamPresetIds } from './uarTeamPresets'
 import type { UarEffectiveModelReceipt, UarExecutionFence, UarTeamDiagnostic } from './uarTeamProfiles'
 export interface UarTeamIdentity {
   id: string
@@ -400,7 +400,10 @@ export const uarAuthoredTeamSchema = z
                 'filesystem__grep',
                 'filesystem__read',
                 'filesystem__edit',
-                'filesystem__write'
+                'filesystem__write',
+                'shared_memory__shared_memory_remember',
+                'shared_memory__shared_memory_retrieve',
+                'shared_memory__shared_memory_search'
               ])
             ),
             skills: z.array(uarTeamSkillRefSchema),
@@ -417,8 +420,7 @@ export const uarAuthoredTeamSchema = z
     const proposals = value.reviewedGuidance ? uarGuidanceRoles(value.reviewedGuidance) : []
     if (
       mappings.length &&
-      (
-        !value.reviewedGuidance?.result.ready ||
+      (!value.reviewedGuidance?.result.ready ||
         new Set(mappings.map((mapping) => mapping.sourceRole)).size !== mappings.length ||
         new Set(mappings.map((mapping) => mapping.memberRole)).size !== mappings.length ||
         mappings.some(
@@ -426,8 +428,7 @@ export const uarAuthoredTeamSchema = z
             mapping.memberRole === 'coordinator' ||
             !proposals.some((proposal) => proposal.id === mapping.sourceRole) ||
             !value.members.some((member) => member.role === mapping.memberRole)
-        )
-      )
+        ))
     )
       context.addIssue({
         code: 'custom',
@@ -457,7 +458,11 @@ export const uarAuthoredTeamSchema = z
           message: 'Reviewed model selection must match its exact recommendation'
         })
     })
-    if (value.members.some((member) => member.role === 'coordinator' && member.tools.length))
+    if (
+      value.members.some(
+        (member) => member.role === 'coordinator' && member.tools.some((tool) => tool.startsWith('filesystem__'))
+      )
+    )
       context.addIssue({
         code: 'custom',
         path: ['members'],
@@ -491,10 +496,7 @@ export interface UarTeamSkillCatalog {
     skillRef: UarTeamSkillRef | null
     reviewedCoverage: {
       status: 'reviewed' | 'unreviewed' | 'blocked'
-      reason:
-        | 'verified-current-closure'
-        | 'trusted-source-unavailable'
-        | 'reviewed-closure-verification-failed'
+      reason: 'verified-current-closure' | 'trusted-source-unavailable' | 'reviewed-closure-verification-failed'
     }
   }>
 }

@@ -9,9 +9,13 @@ import { bossFangConfigSchema, type BossFangConfig } from '@shared/types/bossFan
 
 export type DashboardCredentials = { username: string; password: string }
 export function readConfig(): BossFangConfig {
+  const stored = JSON.parse(application.get('PreferenceService').get('feature.bossfang.configuration'))
   return bossFangConfigSchema.parse(
-    JSON.parse(application.get('PreferenceService').get('feature.bossfang.configuration'))
+    stored.schemaVersion === 1 ? { ...stored, schemaVersion: 2, connectionIntent: 'connected' } : stored
   )
+}
+export async function saveConfig(config: BossFangConfig): Promise<void> {
+  await application.get('PreferenceService').set('feature.bossfang.configuration', JSON.stringify(config))
 }
 export function dashboardOrigin(value: string): string {
   const url = new URL(value.trim())
