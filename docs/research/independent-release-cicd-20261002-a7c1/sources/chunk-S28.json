@@ -1,0 +1,15 @@
+{
+  "source_id": "S28",
+  "url": "https://docs.codemagic.io/rest-api/builds/",
+  "fetched_at": "2026-10-02T08:42:40.165Z",
+  "selection": "Decision-relevant paragraphs; excerpt collection, not entire page. Paragraph chunks are <= 7500 characters.",
+  "chunks": [
+    "**Note:** Using REST API will not fetch information about workflows when configuring with **codemagic.yaml**. It is because only workflows from the Workflow Editor are defaulted as no accessible data is present from **codemagic.yaml** until a repository is cloned, which means that there is no way to retrieve workflow IDs from **codemagic.yaml** before triggering a build.",
+    "**Note:** The workflow and branch information is passed with the curl request when starting builds from an API request. Any configuration related to triggers or branches in Flutter workflow editor or codemagic.yaml is ignored.",
+    "| **Name** | **Type** | **Description** |\n| --- | --- | --- |\n| `appId` | `string` | **Required.** The application identifier. |\n| `workflowId` | `string` | **Required.** The workflow identifier as specified in YAML file. |\n| `branch` | `string` | Optional. The branch name. Either `branch` or `tag` is **required**. |\n| `tag` | `string` | Optional. The tag name. Either `branch` or `tag` is **required**. |\n| `environment` | `object` | Optional. Specify environment variables, variable groups, and software versions to override or define in workflow settings. |\n| `labels` | `list` | Optional. Specify labels to be included for the build in addition to existing labels. |",
+    "```bash\n  curl -H \"Content-Type: application/json\" \\\n       -H \"x-auth-token: <API Token>\" \\\n       --data '{\n         \"appId\": \"<app_id>\",\n         \"workflowId\": \"<workflow_id>\",\n         \"branch\": \"<git_branch_name>\"\n       }' \\\n       -X POST https://api.codemagic.io/builds\n```",
+    "```json\n{\n  \"appId\": \"5c9c064185dd2310123b8e96\",\n  \"workflowId\": \"release\",\n  \"branch\": \"master\",\n  \"labels\": [\"foo\", \"bar\"],\n  \"environment\": {\n    \"variables\": {\n      \"ENVIRONMENT_VARIABLE_1\": \"...\",\n      \"ENVIRONMENT_VARIABLE_2\": \"...\"\n    },\n    \"groups\": [\\\n      \"variable_group_1\",\\\n      \"variable_group_2\"\\\n    ],\n    \"softwareVersions\": {\n      \"xcode\": \"11.4.1\",\n      \"flutter\": \"v1.12.13+hotfix.9\"\n    }\n  },\n  \"instanceType\": \"mac_mini_m2\"\n}\n```",
+    "## Getting help and support",
+    "**In-app chat** — Use the chat widget to get support.\nYou have to be logged in to see the chat icon at the bottom right corner (please note that some ad blockers might block the chat widget)."
+  ]
+}

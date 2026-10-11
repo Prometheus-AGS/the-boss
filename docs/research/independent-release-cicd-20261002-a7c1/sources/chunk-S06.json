@@ -1,0 +1,19 @@
+{
+  "source_id": "S06",
+  "url": "https://www.jenkins.io/doc/book/using/remote-access-api/",
+  "fetched_at": "2026-10-02T08:39:55.692Z",
+  "selection": "Decision-relevant paragraphs; excerpt collection, not entire page. Paragraph chunks are <= 7500 characters.",
+  "chunks": [
+    "  - [Best Practices](https://www.jenkins.io/doc/book/using/best-practices/)\n  - [Working with projects](https://www.jenkins.io/doc/book/using/working-with-projects/)\n  - [Using credentials](https://www.jenkins.io/doc/book/using/using-credentials/)\n  - [Command Palette](https://www.jenkins.io/doc/book/using/searchbox/)\n  - [Referencing another project by name](https://www.jenkins.io/doc/book/using/referencing-another-project-by-name/)\n  - [Aborting a build](https://www.jenkins.io/doc/book/using/aborting-a-build/)\n  - [Fingerprints](https://www.jenkins.io/doc/book/using/fingerprints/)\n  - [Using local language](https://www.jenkins.io/doc/book/using/using-local-language/)\n  - [Change time zone](https://www.jenkins.io/doc/book/using/change-time-zone/)\n  - [Remote Access API](https://www.jenkins.io/doc/book/using/remote-access-api/)\n  - [Executor Starvation](https://www.jenkins.io/doc/book/using/executor-starvation/)\n  - [Using Jenkins agents](https://www.jenkins.io/doc/book/using/using-agents/)\n  - [Using JMeter with Jenkins](https://www.jenkins.io/doc/book/using/using-jmeter-with-jenkins/)\n  - [Pluggable Storage](https://www.jenkins.io/doc/book/using/pluggable-storage/)",
+    "2. JSON with JSONP support",
+    "For example, if your Jenkins installation sits at [https://ci.jenkins.io](https://ci.jenkins.io/),\nvisiting [https://ci.jenkins.io/api/](https://ci.jenkins.io/api/) will show just the top-level API\nfeatures available – primarily a listing of the configured jobs for this\nJenkins controller.",
+    "2. trigger a new build",
+    "This also works for Multibranch Pipelines and Organization Folders. It would trigger a scan.",
+    "The XML API supports a selection by XPath by using the query parameter 'xpath'.\nThis is convenient for extracting information in environments\nwhere XML manipulation is tedious (such as shell script.)\nSee [issue #626](https://issue-redirect.jenkins.io/issue/626) for an\nexample of how to use this.",
+    "- Authentication support for Jenkins controllers",
+    "The [jenkins-rest](https://github.com/cdancy/jenkins-rest) library is an\nobject oriented Java project that provides access to the Jenkins REST\nAPI programmatically to some remote API Jenkins provides. It is built\nusing the [jclouds toolkit](https://jclouds.apache.org/) and can\neasily be extended to support more REST endpoints. Its feature set\nevolves and users are invited to contribute new endpoints via\npull-requests. In its current state it is possible with this library to\nsubmit a job, track its progress through the queue, and monitor its\nexecution until its completion, and obtain the build status. Services\ncurrently offered include:",
+    "- Crumbs Issuer support (auto-detect crumbs)",
+    "- Folder support",
+    "Alternatively, if you don't wish to complete the quick form, you can simply\nindicate if you found this page helpful?"
+  ]
+}

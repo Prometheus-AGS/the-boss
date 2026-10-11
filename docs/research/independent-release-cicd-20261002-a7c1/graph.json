@@ -1,0 +1,429 @@
+{
+  "topics": [
+    {
+      "id": "topic-001",
+      "name": "Independent release CI/CD",
+      "claims": [
+        "claim-5761d6d97632fc0f",
+        "claim-4a00b4d5112387e3",
+        "claim-87ebbdfab036857a",
+        "claim-1b442c5ac3c81eea",
+        "claim-1a540487c2d804c2",
+        "claim-59dd94b047ed80a6",
+        "claim-25078e1e954de323",
+        "claim-e282871e37eadd01",
+        "claim-203cd95af7b22bb1",
+        "claim-32f4fc5f70f61931",
+        "claim-1068306398a7389e",
+        "claim-d382777c9afb7389",
+        "claim-a6993369b8d3ca83",
+        "claim-52a236703965cf5f",
+        "claim-405248da0e554c85",
+        "claim-f4ec00fae4a7bd3a",
+        "claim-a26a1b753883de93",
+        "claim-6c740df70070499c"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "claim-5761d6d97632fc0f",
+      "text": "The inspected release attempt failed before build steps with an account billing-lock annotation.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.99,
+      "sources": [
+        "L1"
+      ],
+      "contradicts": [],
+      "evidence": "GitHub check 110749594246 annotations retrieved read-only in this research."
+    },
+    {
+      "id": "claim-4a00b4d5112387e3",
+      "text": "Changing only installer execution leaves two Actions-dependent publication stages.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.98,
+      "sources": [
+        "L4"
+      ],
+      "contradicts": [],
+      "evidence": "queue-release-publication.cjs:60, coordinate-release-publication.cjs:135 and landing workflow."
+    },
+    {
+      "id": "claim-87ebbdfab036857a",
+      "text": "Buildkite provides independent API builds accepting a commit and branch.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.95,
+      "sources": [
+        "S03"
+      ],
+      "contradicts": [],
+      "evidence": "Builds API Create a build requires commit and branch; write_builds."
+    },
+    {
+      "id": "claim-1b442c5ac3c81eea",
+      "text": "Buildkite self-hosted agent v4.1.0 publishes binaries for all four target architectures.",
+      "label": "verified",
+      "critical": true,
+      "confidence": 0.97,
+      "sources": [
+        "S33"
+      ],
+      "contradicts": [],
+      "evidence": "GitHub release assets contain darwin-amd64, darwin-arm64, windows-amd64, windows-arm64."
+    },
+    {
+      "id": "claim-1a540487c2d804c2",
+      "text": "Buildkite with native workers and a direct fallback is the preferred managed option for The Boss.",
+      "label": "inferred",
+      "critical": true,
+      "confidence": 0.8,
+      "sources": [
+        "S01",
+        "S02",
+        "S03",
+        "S11",
+        "S12",
+        "S33"
+      ],
+      "contradicts": [],
+      "evidence": "Inference balancing independent triggers, documented agents and current script reuse; no provider trial."
+    },
+    {
+      "id": "claim-59dd94b047ed80a6",
+      "text": "Self-managed Jenkins is the preferred option if owning the scheduler is mandatory.",
+      "label": "inferred",
+      "critical": true,
+      "confidence": 0.78,
+      "sources": [
+        "S05",
+        "S06",
+        "S07",
+        "S26"
+      ],
+      "contradicts": [],
+      "evidence": "Self-hosted controller with remote API and labeled workers; operating responsibility remains."
+    },
+    {
+      "id": "claim-25078e1e954de323",
+      "text": "Buildkite hosted Windows is private preview, AMD64 only and excludes desktop access.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.96,
+      "sources": [
+        "S12"
+      ],
+      "contradicts": [],
+      "evidence": "Windows hosted agents: Private preview feature; AMD64; current limitations include ARM64 and desktop."
+    },
+    {
+      "id": "claim-e282871e37eadd01",
+      "text": "Buildkite GitHub workflow importer excludes Windows shells and runtime-generated matrices.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.95,
+      "sources": [
+        "S11"
+      ],
+      "contradicts": [],
+      "evidence": "Supported functionality and limitations; unsupported features include PowerShell and matrices derived from needs outputs."
+    },
+    {
+      "id": "claim-203cd95af7b22bb1",
+      "text": "GitLab documents Windows ARM64 binaries and both Mac architectures.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.95,
+      "sources": [
+        "S08",
+        "S31"
+      ],
+      "contradicts": [],
+      "evidence": "Runner installation download choices explicitly include architectures."
+    },
+    {
+      "id": "claim-32f4fc5f70f61931",
+      "text": "GitLab external repository CI integration is Premium or Ultimate.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.95,
+      "sources": [
+        "S25"
+      ],
+      "contradicts": [],
+      "evidence": "CI/CD for external repositories Tier: Premium, Ultimate."
+    },
+    {
+      "id": "claim-1068306398a7389e",
+      "text": "The current automatic updater path is not established by downloadable installer publication.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.94,
+      "sources": [
+        "L6"
+      ],
+      "contradicts": [],
+      "evidence": "electron-builder.yml and AppUpdaterService generic host; publisher selection excludes updater YAML/mac ZIP; source-only finding."
+    },
+    {
+      "id": "claim-d382777c9afb7389",
+      "text": "Lovable Git synchronization and publishing are distinct steps.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.95,
+      "sources": [
+        "S22",
+        "S23"
+      ],
+      "contradicts": [],
+      "evidence": "Git sync FAQ: live site changes when published; publish docs deploy snapshot."
+    },
+    {
+      "id": "claim-a6993369b8d3ca83",
+      "text": "All four native build hosts and working credentials are available to this team now.",
+      "label": "unverified",
+      "critical": false,
+      "confidence": 0.2,
+      "sources": [
+        "local-evidence.md"
+      ],
+      "contradicts": [],
+      "evidence": "Not inventoried or provisioned; must not be assumed."
+    },
+    {
+      "id": "claim-52a236703965cf5f",
+      "text": "The exact GitHub account-lock cause is established.",
+      "label": "unverified",
+      "critical": false,
+      "confidence": 0.1,
+      "sources": [
+        "L1"
+      ],
+      "contradicts": [],
+      "evidence": "Annotation provides broad billing-lock reason only; no definitive budget or billing diagnosis."
+    },
+    {
+      "id": "claim-405248da0e554c85",
+      "text": "AWS Mac Dedicated Hosts impose a minimum 24-hour allocation.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.95,
+      "sources": [
+        "S19"
+      ],
+      "contradicts": [],
+      "evidence": "EC2 Mac Considerations: minimum allocation period of 24 hours."
+    },
+    {
+      "id": "claim-f4ec00fae4a7bd3a",
+      "text": "The Boss validates on a host matching package OS and architecture.",
+      "label": "verified",
+      "critical": false,
+      "confidence": 0.98,
+      "sources": [
+        "L5"
+      ],
+      "contradicts": [],
+      "evidence": "validate-release-package.cjs:23 rejects mismatched process.platform/process.arch."
+    },
+    {
+      "id": "claim-a26a1b753883de93",
+      "text": "A hosted CI vendor replacement cannot itself guarantee native Windows ARM capacity.",
+      "label": "inferred",
+      "critical": false,
+      "confidence": 0.9,
+      "sources": [
+        "S10",
+        "S12",
+        "S15"
+      ],
+      "contradicts": [],
+      "evidence": "Inspected hosted matrices leave gaps; different provider or owned machine required."
+    },
+    {
+      "id": "claim-6c740df70070499c",
+      "text": "Full GitHub independence requires more than replacing Actions.",
+      "label": "inferred",
+      "critical": true,
+      "confidence": 0.95,
+      "sources": [
+        "L4",
+        "S20",
+        "S21",
+        "S24",
+        "S30"
+      ],
+      "contradicts": [],
+      "evidence": "Payload URL validators, artifact hosting and landing sync remain dependencies."
+    }
+  ],
+  "relations": [
+    {
+      "from": "claim-5761d6d97632fc0f",
+      "to": "L1",
+      "type": "cites"
+    },
+    {
+      "from": "claim-4a00b4d5112387e3",
+      "to": "L4",
+      "type": "cites"
+    },
+    {
+      "from": "claim-87ebbdfab036857a",
+      "to": "S03",
+      "type": "cites"
+    },
+    {
+      "from": "claim-1b442c5ac3c81eea",
+      "to": "S33",
+      "type": "cites"
+    },
+    {
+      "from": "claim-1a540487c2d804c2",
+      "to": "S01",
+      "type": "cites"
+    },
+    {
+      "from": "claim-1a540487c2d804c2",
+      "to": "S02",
+      "type": "cites"
+    },
+    {
+      "from": "claim-1a540487c2d804c2",
+      "to": "S03",
+      "type": "cites"
+    },
+    {
+      "from": "claim-1a540487c2d804c2",
+      "to": "S11",
+      "type": "cites"
+    },
+    {
+      "from": "claim-1a540487c2d804c2",
+      "to": "S12",
+      "type": "cites"
+    },
+    {
+      "from": "claim-1a540487c2d804c2",
+      "to": "S33",
+      "type": "cites"
+    },
+    {
+      "from": "claim-59dd94b047ed80a6",
+      "to": "S05",
+      "type": "cites"
+    },
+    {
+      "from": "claim-59dd94b047ed80a6",
+      "to": "S06",
+      "type": "cites"
+    },
+    {
+      "from": "claim-59dd94b047ed80a6",
+      "to": "S07",
+      "type": "cites"
+    },
+    {
+      "from": "claim-59dd94b047ed80a6",
+      "to": "S26",
+      "type": "cites"
+    },
+    {
+      "from": "claim-25078e1e954de323",
+      "to": "S12",
+      "type": "cites"
+    },
+    {
+      "from": "claim-e282871e37eadd01",
+      "to": "S11",
+      "type": "cites"
+    },
+    {
+      "from": "claim-203cd95af7b22bb1",
+      "to": "S08",
+      "type": "cites"
+    },
+    {
+      "from": "claim-203cd95af7b22bb1",
+      "to": "S31",
+      "type": "cites"
+    },
+    {
+      "from": "claim-32f4fc5f70f61931",
+      "to": "S25",
+      "type": "cites"
+    },
+    {
+      "from": "claim-1068306398a7389e",
+      "to": "L6",
+      "type": "cites"
+    },
+    {
+      "from": "claim-d382777c9afb7389",
+      "to": "S22",
+      "type": "cites"
+    },
+    {
+      "from": "claim-d382777c9afb7389",
+      "to": "S23",
+      "type": "cites"
+    },
+    {
+      "from": "claim-52a236703965cf5f",
+      "to": "L1",
+      "type": "cites"
+    },
+    {
+      "from": "claim-405248da0e554c85",
+      "to": "S19",
+      "type": "cites"
+    },
+    {
+      "from": "claim-f4ec00fae4a7bd3a",
+      "to": "L5",
+      "type": "cites"
+    },
+    {
+      "from": "claim-a26a1b753883de93",
+      "to": "S10",
+      "type": "cites"
+    },
+    {
+      "from": "claim-a26a1b753883de93",
+      "to": "S12",
+      "type": "cites"
+    },
+    {
+      "from": "claim-a26a1b753883de93",
+      "to": "S15",
+      "type": "cites"
+    },
+    {
+      "from": "claim-6c740df70070499c",
+      "to": "L4",
+      "type": "cites"
+    },
+    {
+      "from": "claim-6c740df70070499c",
+      "to": "S20",
+      "type": "cites"
+    },
+    {
+      "from": "claim-6c740df70070499c",
+      "to": "S21",
+      "type": "cites"
+    },
+    {
+      "from": "claim-6c740df70070499c",
+      "to": "S24",
+      "type": "cites"
+    },
+    {
+      "from": "claim-6c740df70070499c",
+      "to": "S30",
+      "type": "cites"
+    }
+  ]
+}

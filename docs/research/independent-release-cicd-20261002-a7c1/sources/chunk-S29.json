@@ -1,0 +1,19 @@
+{
+  "source_id": "S29",
+  "url": "https://www.electron.build/v26/docs/features/multi-platform-build/",
+  "fetched_at": "2026-10-02T08:42:41.392Z",
+  "selection": "Decision-relevant paragraphs; excerpt collection, not entire page. Paragraph chunks are <= 7500 characters.",
+  "chunks": [
+    "- If your app has native dependencies, they can only be compiled on the target platform unless [prebuild](https://www.npmjs.com/package/prebuild) is used. Most node modules [don't provide](https://github.com/atom/node-keytar/issues/27) prebuilt binaries.\n- macOS Code Signing works only on macOS. [Cannot be fixed](http://stackoverflow.com/a/12156576).",
+    "## macOS [​](https://www.electron.build/v26/docs/features/multi-platform-build/\\#macos \"Direct link to macOS\")",
+    "All required system dependencies (except rpm) are downloaded automatically on demand on macOS 10.12+.",
+    "### Build for Windows on Linux [​](https://www.electron.build/v26/docs/features/multi-platform-build/\\#build-for-windows-on-linux \"Direct link to Build for Windows on Linux\")",
+    "- Install Wine 2.0+ — see [WineHQ Binary Packages](https://www.winehq.org/download#binary).\n- Install [Mono](http://www.mono-project.com/download/#download-lin) 4.2+ if you want to use Squirrel.Windows (NSIS doesn't require Mono).",
+    "Build Linux or Windows targets on any platform using Docker.",
+    "You cannot build for Windows using Docker if your app has native dependencies that don't use [prebuild](https://www.npmjs.com/package/prebuild).",
+    "Do not use Docker Toolbox on macOS. Only [Docker for Mac](https://docs.docker.com/docker-for-mac/install/) works.",
+    "If you don't need to build for Windows, use `electronuserland/builder` — Wine is not included in that image.",
+    "| Image | Contents |\n| --- | --- |\n| `electronuserland/builder` or `electronuserland/builder:20` | NodeJS 20 + Linux build dependencies. Use for Linux-only targets. |\n| `electronuserland/builder:wine` | Wine + NodeJS 20. Use for Windows targets. |\n| `electronuserland/builder:wine-mono` | Mono for Squirrel.Windows. |\n| `electronuserland/builder:wine-chrome` | `google-chrome-stable` \\+ `xvfb`. Use for headless Electron testing. |\n| `electronuserland/builder:base` | System dependencies only. Not meant for direct use. |",
+    "- [macOS](https://www.electron.build/v26/docs/features/multi-platform-build/#macos)\n- [Linux](https://www.electron.build/v26/docs/features/multi-platform-build/#linux)\n  - [Build for Windows on Linux](https://www.electron.build/v26/docs/features/multi-platform-build/#build-for-windows-on-linux)\n  - [Build 32-bit from a 64-bit Machine](https://www.electron.build/v26/docs/features/multi-platform-build/#build-32-bit-from-a-64-bit-machine)\n- [Docker](https://www.electron.build/v26/docs/features/multi-platform-build/#docker)\n  - [Build on a Local Machine](https://www.electron.build/v26/docs/features/multi-platform-build/#build-on-a-local-machine)\n  - [Provided Docker Images](https://www.electron.build/v26/docs/features/multi-platform-build/#provided-docker-images)"
+  ]
+}

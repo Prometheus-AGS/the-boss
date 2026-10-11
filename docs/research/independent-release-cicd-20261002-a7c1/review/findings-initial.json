@@ -1,0 +1,61 @@
+{
+  "mode": "artifact",
+  "verdict": "BLOCK",
+  "judge_model": "GPT-6",
+  "requested_model": "gpt-5.6-sol",
+  "isolation_mode": "harness-native",
+  "producer_model": "GPT-6 (variant not exposed)",
+  "cross_model_check": "unverified-same-family",
+  "note": "Gateway dispatch exited4 missing canonical reviewer identities; fresh-context harness fallback requested5.6 but reviewer self-reportedGPT6; cross-model independence not asserted.",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "report.md",
+      "claim": "Immediate recovery depends on unverified GitHub publication access without a defined early fallback decision.",
+      "evidence": "Build outside Actions then publish to GitHub; write eligibility unproven.",
+      "suggested_fix": "Establish publication eligibility before expensive builds and define conditional alternate-origin route."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "report.md",
+      "claim": "Provider preference lacks comparable costs and operating burdens for all shortlisted alternatives.",
+      "evidence": "Economics omits GitLab, TeamCity, CircleCI and Azure and native-host costs.",
+      "suggested_fix": "Add comparable cost drivers and downgrade to conditional pilot pending quotes/access."
+    },
+    {
+      "severity": "WARNING",
+      "file": "report.md",
+      "claim": "External metadata/landing/Lovable operations are insufficiently explicit.",
+      "evidence": "Use existing logic without named command/input/receipt mapping.",
+      "suggested_fix": "Add entrypoint mapping and distinguish missing adapter work."
+    },
+    {
+      "severity": "WARNING",
+      "file": "plan.md",
+      "claim": "Plan stage ledger conflicts with provenance.",
+      "evidence": "Stages02–09 pending although provenance records completed.",
+      "suggested_fix": "Reconcile actual stage outcomes."
+    },
+    {
+      "severity": "WARNING",
+      "file": "report.md",
+      "claim": "Report claims adversarial support before review disposition.",
+      "evidence": "Review described as support while provenance pending.",
+      "suggested_fix": "State actual verdict and dispositions."
+    },
+    {
+      "severity": "WARNING",
+      "file": "report.md",
+      "claim": "Acceptance does not name all four targets.",
+      "evidence": "Required platforms could be interpreted as critical pair.",
+      "suggested_fix": "List all four and receipts explicitly."
+    },
+    {
+      "severity": "WARNING",
+      "file": "report.md",
+      "claim": "Single confidence score has no defined proposition or derivation.",
+      "evidence": "0.82 despite unknowns and partial verification.",
+      "suggested_fix": "Use claim-level evidence and define aggregate."
+    }
+  ]
+}

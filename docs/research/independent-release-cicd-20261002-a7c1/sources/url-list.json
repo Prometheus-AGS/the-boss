@@ -1,0 +1,436 @@
+{
+  "search_provider": "Firecrawl",
+  "queries": [
+    {
+      "query": "TeamCity build agents Windows ARM64 macOS REST API trigger builds",
+      "results": [
+        {
+          "url": "https://teamcity-support.jetbrains.com/hc/en-us/community/posts/360009660319-Assign-an-agent-to-run-the-specific-build-using-REST-API",
+          "title": "Assign an agent to run the specific build using REST API"
+        },
+        {
+          "url": "https://stackoverflow.com/questions/57998578/how-to-properly-trigger-build-from-the-rest-api-in-teamcity-with-a-specific-vcs",
+          "title": "How to properly trigger build from the REST API in teamcity with a specific ..."
+        },
+        {
+          "url": "https://www.postman.com/api-evangelist/teamcity/request/w7fnn9b/get-a-trigger-of-the-matching-build-configuration",
+          "title": "Get a trigger of the matching build configuration. | TeamCity REST API"
+        },
+        {
+          "url": "https://github.com/TrimbleSolutionsCorporation/TeamCityRestApi",
+          "title": "net teamcity rest api client · GitHub"
+        }
+      ]
+    },
+    {
+      "query": "GitLab runner Windows ARM64 macOS supported operating systems",
+      "results": [
+        {
+          "url": "https://docs.gitlab.com/runner/install/requirements/",
+          "title": "System requirements and supported platforms - GitLab Docs"
+        },
+        {
+          "url": "https://forum.gitlab.com/t/more-information-about-official-gitlab-and-its-ci-and-its-shared-runners/28427",
+          "title": "More information about Official GitLab (and it's CI) and it's shared runners?"
+        },
+        {
+          "url": "https://docs.gitlab.com/runner/install/osx/",
+          "title": "Install GitLab Runner on macOS"
+        },
+        {
+          "url": "https://docs.gitlab.com/runner/install/",
+          "title": "Install GitLab Runner"
+        }
+      ]
+    },
+    {
+      "query": "Buildkite REST API create build pricing self hosted agents",
+      "results": [
+        {
+          "url": "https://buildkite.com/docs/apis/rest-api",
+          "title": "REST API overview | Buildkite Documentation"
+        },
+        {
+          "url": "https://buildkite.com/docs/agent/queues/managing",
+          "title": "Managing queues | Buildkite Documentation"
+        },
+        {
+          "url": "https://buildkite.com/pricing/",
+          "title": "Buildkite Pricing"
+        },
+        {
+          "url": "https://stackoverflow.com/questions/76983485/how-call-rest-api-in-command-step-in-buildkite",
+          "title": "How call rest api in command step in buildkite? - Stack Overflow"
+        }
+      ]
+    },
+    {
+      "query": "Buildkite agent supported platforms Windows ARM64 macOS installation",
+      "results": [
+        {
+          "url": "https://buildkite.com/docs/agent/self-hosted/install/macos",
+          "title": "Installing Buildkite agent on macOS"
+        },
+        {
+          "url": "https://github.com/elastic/buildkite-agent",
+          "title": "elastic/buildkite-agent - GitHub"
+        },
+        {
+          "url": "https://buildkite.com/docs/agent/self-hosted/install/windows",
+          "title": "Installing Buildkite agent on Windows"
+        },
+        {
+          "url": "https://buildkite.com/resources/changelog/112-apple-silicon-support-in-the-buildkite-agent/",
+          "title": "Apple Silicon support in the Buildkite Agent"
+        }
+      ]
+    },
+    {
+      "query": "Azure Pipelines Microsoft hosted agents Windows ARM64 macOS Intel Apple silicon",
+      "results": [
+        {
+          "url": "https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops",
+          "title": "Microsoft-hosted agents for Azure Pipelines"
+        },
+        {
+          "url": "https://devblogs.microsoft.com/devops/apple-silicon-and-xcode-27-images-availabile-in-pay-as-you-go-preview/",
+          "title": "Apple Silicon and Xcode 27 images available in pay-as-you-go (preview)"
+        },
+        {
+          "url": "https://www.reddit.com/r/azuredevops/comments/1ki306t/deploying_arm64_build_agents_on_apple_silicon/",
+          "title": "Deploying ARM64 Build Agents on Apple Silicon : r/azuredevops - Reddit"
+        },
+        {
+          "url": "https://learn.microsoft.com/en-us/azure/devops/release-notes/roadmap/macos-agents-apple-silicon",
+          "title": "Hosted macOS agents on Apple Silicon | Microsoft Learn"
+        }
+      ]
+    },
+    {
+      "query": "Jenkins remote access API build parameters distributed agents macOS Windows",
+      "results": [
+        {
+          "url": "https://www.jenkins.io/doc/book/using/using-agents/",
+          "title": "Using Jenkins agents"
+        },
+        {
+          "url": "https://stackoverflow.com/questions/20359810/how-to-trigger-jenkins-builds-remotely-and-to-pass-parameters",
+          "title": "How to trigger Jenkins builds remotely and to pass parameters"
+        },
+        {
+          "url": "https://wiki.jenkins-ci.org/display/JENKINS/Distributed+builds",
+          "title": "Distributed builds - Jenkins"
+        },
+        {
+          "url": "https://www.youtube.com/watch?v=NOc_jlcO3vY",
+          "title": "How to build a parameterized jenkins pipeline remotely - YouTube"
+        }
+      ]
+    },
+    {
+      "query": "Codemagic Windows desktop Electron macOS Intel ARM64 pricing",
+      "results": [
+        {
+          "url": "https://www.reddit.com/r/electronjs/comments/1hw10vf/electron_app_distribution_for_windows_and_mac/",
+          "title": "Electron App Distribution for Windows and Mac : r/electronjs - Reddit"
+        },
+        {
+          "url": "https://news.ycombinator.com/item?id=25157495",
+          "title": "Electron 11.0 released with support for Apple Silicon | Hacker News"
+        },
+        {
+          "url": "https://electronjs.org/blog/apple-silicon",
+          "title": "Apple Silicon Support | Electron"
+        },
+        {
+          "url": "https://www.electron.build/docs/architecture/",
+          "title": "Architecture & Multi-Arch Builds - electron-builder"
+        }
+      ]
+    },
+    {
+      "query": "GitHub Actions self hosted runners account locked billing issue",
+      "results": [
+        {
+          "url": "https://github.com/orgs/community/discussions/184077",
+          "title": "Account Locked Due to Billing Issue - Unable to Use GitHub Actions on ..."
+        },
+        {
+          "url": "https://github.com/orgs/community/discussions/208297",
+          "title": "My account is locked due to a billing issue, so GitHub Actions cannot start"
+        },
+        {
+          "url": "https://docs.github.com/en/enterprise-cloud@latest/billing/concepts/product-billing/github-actions",
+          "title": "GitHub Actions billing - GitHub Enterprise Cloud Docs"
+        },
+        {
+          "url": "https://www.reddit.com/r/devops/comments/1po8hj5/github_actions_introducing_a_perminute_fee_for/",
+          "title": "Github Actions introducing a per-minute fee for self-hosted runners"
+        }
+      ]
+    },
+    {
+      "query": "site:jetbrains.com/help/teamcity \"ARM64\"",
+      "results": [
+        {
+          "url": "https://www.jetbrains.com/help/teamcity/cloud/jetbrains-hosted-agents.html",
+          "title": "JetBrains-hosted Agents | TeamCity Cloud Documentation"
+        },
+        {
+          "url": "https://www.jetbrains.com/help/teamcity/cloud/teamcity-cli-analytics.html",
+          "title": "Anonymous usage statistics | TeamCity Cloud - JetBrains"
+        },
+        {
+          "url": "https://www.jetbrains.com/help/teamcity/teamcity-2025-03-release-notes.html",
+          "title": "TeamCity 2025.03 Release Notes - JetBrains"
+        }
+      ]
+    },
+    {
+      "query": "site:buildkite.com \"Windows\" \"ARM64\"",
+      "results": [
+        {
+          "url": "https://buildkite.com/bazel/rules-foreign-cc",
+          "title": "rules_foreign_cc · Bazel - Buildkite"
+        },
+        {
+          "url": "https://buildkite.com/bazel/rules-perl",
+          "title": "rules_perl · Bazel - Buildkite"
+        },
+        {
+          "url": "https://buildkite.com/divvun/divvun-runtime",
+          "title": "divvun-runtime - Buildkite"
+        }
+      ]
+    },
+    {
+      "query": "site:docs.codemagic.io \"Windows\" \"instance\"",
+      "results": [
+        {
+          "url": "https://docs.codemagic.io/billing/pricing/",
+          "title": "Pricing - Codemagic Docs"
+        },
+        {
+          "url": "https://docs.codemagic.io/knowledge-codemagic/machine-type/",
+          "title": "Build machine type - Codemagic Docs"
+        },
+        {
+          "url": "https://docs.codemagic.io/yaml-basic-configuration/yaml-getting-started/",
+          "title": "Using codemagic.yaml"
+        }
+      ]
+    },
+    {
+      "query": "site:aws.amazon.com ec2 mac minimum 24 hours dedicated host",
+      "results": [
+        {
+          "url": "https://aws.amazon.com/ec2/instance-types/mac/",
+          "title": "Amazon EC2 Mac Instances"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-mac-instances.html",
+          "title": "Amazon EC2 Mac instances - Amazon Elastic Compute Cloud"
+        },
+        {
+          "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/mac-instance-stop.html",
+          "title": "Stop or terminate your Amazon EC2 Mac instance - AWS Documentation"
+        }
+      ]
+    },
+    {
+      "query": "site:buildkite.com hosted agents macOS Windows pricing",
+      "results": [
+        {
+          "url": "https://buildkite.com/docs/agent/buildkite-hosted",
+          "title": "Buildkite hosted agents"
+        },
+        {
+          "url": "https://buildkite.com/docs/agent/buildkite-hosted/macos",
+          "title": "macOS hosted agents | Buildkite Documentation"
+        },
+        {
+          "url": "https://buildkite.com/pricing/",
+          "title": "Buildkite Pricing"
+        }
+      ]
+    },
+    {
+      "query": "site:buildkite.com \"Run GitHub Actions workflows\" limitations",
+      "results": [
+        {
+          "url": "https://buildkite.com/docs/pipelines/migration/run-github-actions-workflows",
+          "title": "Run GitHub Actions workflows in Buildkite"
+        },
+        {
+          "url": "https://buildkite.com/docs/pipelines/advantages/buildkite-vs-gha",
+          "title": "Advantages of migrating from GitHub Actions | Buildkite Documentation"
+        },
+        {
+          "url": "https://buildkite.com/docs/pipelines/migration/from-githubactions",
+          "title": "Migrate from GitHub Actions | Buildkite Documentation"
+        }
+      ]
+    },
+    {
+      "query": "site:www.jenkins.io licensing MIT free",
+      "results": [
+        {
+          "url": "https://www.jenkins.io/license/",
+          "title": "MIT License - Jenkins"
+        },
+        {
+          "url": "https://www.jenkins.io/project/governance/",
+          "title": "Project Governance Document - Jenkins"
+        },
+        {
+          "url": "https://www.jenkins.io/doc/developer/publishing/preparation/",
+          "title": "Before you start - Jenkins"
+        }
+      ]
+    },
+    {
+      "query": "site:developers.cloudflare.com r2 pricing storage egress custom domains",
+      "results": [
+        {
+          "url": "https://developers.cloudflare.com/r2/pricing/",
+          "title": "R2 pricing - Cloudflare Docs"
+        },
+        {
+          "url": "https://developers.cloudflare.com/r2/buckets/public-buckets/",
+          "title": "Public buckets - R2 - Cloudflare Docs"
+        },
+        {
+          "url": "https://developers.cloudflare.com/r2/",
+          "title": "Overview · Cloudflare R2 docs"
+        }
+      ]
+    },
+    {
+      "query": "site:docs.lovable.dev publish project GitHub sync self hosting deployment",
+      "results": [
+        {
+          "url": "https://docs.lovable.dev/integrations/github",
+          "title": "Sync your Lovable project with GitHub"
+        },
+        {
+          "url": "https://docs.lovable.dev/integrations/git-sync-overview",
+          "title": "Sync your Lovable project code with GitHub, GitLab, or Bitbucket"
+        },
+        {
+          "url": "https://docs.lovable.dev/tips-tricks/deployment-hosting-ownership",
+          "title": "Deployment, hosting, and ownership options with Lovable"
+        }
+      ]
+    },
+    {
+      "query": "site:docs.gitlab.com ci ci_cd_for_external_repos GitHub premium",
+      "results": [
+        {
+          "url": "https://docs.gitlab.com/ci/ci_cd_for_external_repos/",
+          "title": "CI/CD for external repositories - GitLab Docs"
+        },
+        {
+          "url": "https://docs.gitlab.com/ci/ci_cd_for_external_repos/github_integration/",
+          "title": "Using GitLab CI/CD with a GitHub repository"
+        },
+        {
+          "url": "https://docs.gitlab.com/ci/ci_cd_for_external_repos/bitbucket_integration/",
+          "title": "Using GitLab CI/CD with a Bitbucket Cloud repository"
+        }
+      ]
+    },
+    {
+      "query": "site:electron.build \"Don't expect\" \"all platforms\"",
+      "results": [
+        {
+          "url": "https://www.electron.build/v26/docs/features/multi-platform-build/",
+          "title": "Multi Platform Build | electron-builder"
+        }
+      ]
+    },
+    {
+      "query": "site:docs.codemagic.io REST API start build",
+      "results": [
+        {
+          "url": "https://docs.codemagic.io/rest-api/builds/",
+          "title": "Builds API - Codemagic Docs"
+        },
+        {
+          "url": "https://docs.codemagic.io/rest-api/codemagic-rest-api/",
+          "title": "API Overview - Codemagic Docs"
+        }
+      ]
+    },
+    {
+      "query": "site:buildkite.com docs artifacts custom S3 storage",
+      "results": [
+        {
+          "url": "https://buildkite.com/docs/agent/cli/reference/artifact",
+          "title": "buildkite-agent artifact"
+        },
+        {
+          "url": "https://buildkite.com/docs/pipelines/configure/artifacts",
+          "title": "Build artifacts | Buildkite Documentation"
+        }
+      ]
+    },
+    {
+      "query": "site:docs.github.com self hosted runners GitHub Actions queued job assigned",
+      "results": [
+        {
+          "url": "https://docs.github.com/en/actions/reference/runners/self-hosted-runners",
+          "title": "Self-hosted runners reference - GitHub Docs"
+        },
+        {
+          "url": "https://docs.github.com/actions/how-tos/using-github-hosted-runners/viewing-your-current-jobs",
+          "title": "Viewing your current jobs - GitHub Docs"
+        }
+      ]
+    }
+  ],
+  "accepted": [
+    "https://buildkite.com/docs/agent/self-hosted/install/windows",
+    "https://buildkite.com/docs/agent/self-hosted/install/macos",
+    "https://buildkite.com/docs/apis/rest-api/builds",
+    "https://buildkite.com/pricing/",
+    "https://www.jenkins.io/doc/book/using/using-agents/",
+    "https://www.jenkins.io/doc/book/using/remote-access-api/",
+    "https://www.jenkins.io/doc/book/security/controller-isolation/",
+    "https://docs.gitlab.com/runner/install/windows/",
+    "https://docs.gitlab.com/ci/triggers/",
+    "https://circleci.com/docs/guides/execution-runner/runner-overview/",
+    "https://buildkite.com/docs/pipelines/migration/run-github-actions-workflows",
+    "https://buildkite.com/docs/agent/buildkite-hosted/windows",
+    "https://buildkite.com/docs/agent/buildkite-hosted/macos",
+    "https://docs.codemagic.io/billing/pricing/",
+    "https://docs.codemagic.io/specs/versions-windows/",
+    "https://www.jetbrains.com/help/teamcity/supported-platforms-and-environments.html",
+    "https://www.jetbrains.com/help/teamcity/rest/start-and-cancel-builds.html",
+    "https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops",
+    "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-mac-instances.html",
+    "https://docs.github.com/en/rest/releases/releases#create-a-release",
+    "https://developers.cloudflare.com/pages/get-started/direct-upload/",
+    "https://docs.lovable.dev/integrations/git-sync-overview",
+    "https://docs.lovable.dev/features/publish",
+    "https://developers.cloudflare.com/r2/pricing/",
+    "https://docs.gitlab.com/ci/ci_cd_for_external_repos/",
+    "https://www.jenkins.io/license/",
+    "https://docs.github.com/en/actions/reference/runners/self-hosted-runners",
+    "https://docs.codemagic.io/rest-api/builds/",
+    "https://www.electron.build/v26/docs/features/multi-platform-build/",
+    "https://buildkite.com/docs/agent/cli/reference/artifact",
+    "https://docs.gitlab.com/runner/install/osx/",
+    "https://devblogs.microsoft.com/devops/apple-silicon-and-xcode-27-images-availabile-in-pay-as-you-go-preview/",
+    "https://api.github.com/repos/buildkite/agent/releases/tags/v4.1.0"
+  ],
+  "rejected": [
+    {
+      "url": "https://www.electron.build/multi-platform-build.html",
+      "reason": "Short legacy response; replaced by versioned official v26 documentation."
+    },
+    {
+      "url": "https://github.com/orgs/community/discussions/208297",
+      "reason": "Community diagnosis cannot establish this account's lock cause; not used as technical proof."
+    }
+  ]
+}

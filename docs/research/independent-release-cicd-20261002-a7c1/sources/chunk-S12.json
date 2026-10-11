@@ -1,0 +1,22 @@
+{
+  "source_id": "S12",
+  "url": "https://buildkite.com/docs/agent/buildkite-hosted/windows",
+  "fetched_at": "2026-10-02T08:40:55.256Z",
+  "selection": "Decision-relevant paragraphs; excerpt collection, not entire page. Paragraph chunks are <= 7500 characters.",
+  "chunks": [
+    "# Windows hosted agents",
+    "Windows hosted agents are:",
+    "- [Buildkite agents](https://buildkite.com/docs/agent) hosted by Buildkite that run on Windows Server 2022 in ephemeral virtual machines.",
+    "- Configured as part of a _Buildkite hosted queue_, where the machine type is Windows, with a particular [size](https://buildkite.com/docs/agent/buildkite-hosted/windows#sizes) to efficiently manage jobs with varying requirements.",
+    "Windows hosted agents are currently in private preview and must be enabled for your Buildkite organization. To request access, contact the Buildkite Support team at [support@buildkite.com](mailto:support@buildkite.com).",
+    "- How to configure Windows hosted agents in [Create a Buildkite hosted queue](https://buildkite.com/docs/agent/queues/managing#create-a-buildkite-hosted-queue).",
+    "- The [concurrency](https://buildkite.com/docs/agent/buildkite-hosted/windows#concurrency), [security](https://buildkite.com/docs/agent/buildkite-hosted/windows#security), and [current limitations](https://buildkite.com/docs/agent/buildkite-hosted/windows#current-limitations) of Windows hosted agents.",
+    "Windows hosted agents support the AMD64 architecture in four instance shapes:",
+    "Windows hosted agents use a fixed, Buildkite-managed Windows Server 2022 base image. Windows hosted queues don't support the base image configuration available for [Linux](https://buildkite.com/docs/agent/buildkite-hosted/linux#agent-images) and [macOS](https://buildkite.com/docs/agent/buildkite-hosted/macos#macos-instance-software-support) hosted queues. A Windows hosted queue's settings page doesn't display a **Base Image** tab.",
+    "Windows hosted agents can operate concurrently when running your Buildkite pipeline jobs.",
+    "The number of Windows hosted agents that can process jobs concurrently depends on the Windows vCPU concurrency allocated to your organization and the [instance shape](https://buildkite.com/docs/agent/buildkite-hosted/windows#sizes) configured for the queue.",
+    "Each Windows job runs in an isolated virtual machine that Buildkite destroys, together with its data, after the job completes.",
+    "Windows hosted agents don't currently support:",
+    "- Custom base images\n- [Cache volumes](https://buildkite.com/docs/agent/buildkite-hosted/cache-volumes)\n- [Terminal access](https://buildkite.com/docs/agent/buildkite-hosted/terminal-access) using SSH\n- [Desktop access](https://buildkite.com/docs/agent/buildkite-hosted/desktop-access) using VNC or Remote Desktop\n- ARM64 architecture\n- Windows Server 2025\n- Selecting a Windows shell in the queue settings\n- Selecting or managing the Buildkite agent version\n- Windows jobs through the [GitHub Actions compatibility feature](https://buildkite.com/docs/pipelines/migration/run-github-actions-workflows)"
+  ]
+}

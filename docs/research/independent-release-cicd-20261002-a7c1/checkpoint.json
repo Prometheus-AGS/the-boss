@@ -1,0 +1,36 @@
+{
+  "schema_version": "2.0.0",
+  "package_id": "independent-release-cicd-20261002-a7c1",
+  "job_id": "manual-ci-research-20261002",
+  "scale": "full",
+  "stages_completed": [
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10"
+  ],
+  "execution": "Harness-driven Node/file adaptation; shell research driver not run; no daemon installed.",
+  "created_at": "2026-10-02T08:39:48.685Z",
+  "integrations": {
+    "firecrawl_used": true,
+    "context7_used": true,
+    "surreal_memory_used": false,
+    "adversarial_review_used": true,
+    "feynman_gate_used": false,
+    "sycophancy_correction_used": true
+  },
+  "review": {
+    "initial_verdict": "BLOCK",
+    "verdict": "PASS",
+    "findings": 0,
+    "distinct_model_identity": "unverified",
+    "receipt": "review/findings.json"
+  },
+  "completed_at": "2026-10-02T09:05:19.869Z"
+}

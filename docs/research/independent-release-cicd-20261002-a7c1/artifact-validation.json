@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "completed_at": "2026-10-02T09:05:55.949Z",
+  "scope": "Completed research artifact consistency only; no application tests, builds or provider trials.",
+  "checks": [
+    {
+      "name": "manifest.json schema",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "graph.json schema",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "source and citation count",
+      "passed": true,
+      "detail": 37
+    },
+    {
+      "name": "claim count",
+      "passed": true,
+      "detail": 18
+    },
+    {
+      "name": "report copies identical",
+      "passed": true
+    },
+    {
+      "name": "report source IDs resolve",
+      "passed": true
+    },
+    {
+      "name": "source evidence exists",
+      "passed": true
+    },
+    {
+      "name": "partial verification preserved",
+      "passed": true
+    },
+    {
+      "name": "final review consistent",
+      "passed": true
+    },
+    {
+      "name": "contradictions reconcile",
+      "passed": true
+    },
+    {
+      "name": "package files present",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "report_sha256": "bed14f648741e87b1d570901b9c4bf5694d95c4d7e667994c6752a8b2074be9b"
+}

@@ -1,0 +1,33 @@
+{
+  "source_id": "S02",
+  "url": "https://buildkite.com/docs/agent/self-hosted/install/macos",
+  "fetched_at": "2026-10-02T08:39:49.952Z",
+  "selection": "Decision-relevant paragraphs; excerpt collection, not entire page. Paragraph chunks are <= 7500 characters.",
+  "chunks": [
+    "# Installing Buildkite agent on macOS",
+    "The Buildkite agent is supported on macOS 11 (Big Sur) or newer using Homebrew or the Buildkite installer script, and supports pre-release versions of both macOS and Xcode.",
+    "## [Installation](https://buildkite.com/docs/agent/self-hosted/install/macos\\#installation)",
+    "We recommend installing the agent using [Homebrew](http://brew.sh/) so you can use the [Buildkite formula repository](https://github.com/buildkite/homebrew-buildkite). If you don't use Homebrew you should follow the [Linux](https://buildkite.com/docs/agent/self-hosted/install/linux) install instructions.",
+    "2. Add your [agent token](https://buildkite.com/docs/agent/self-hosted/tokens) to authenticate the agent by replacing `INSERT-YOUR-AGENT-TOKEN-HERE` with your agent token and running:",
+    "\n## [SSH key configuration](https://buildkite.com/docs/agent/self-hosted/install/macos\\#ssh-key-configuration)",
+    "See the [Buildkite agent code access](https://buildkite.com/docs/agent/self-hosted/code-access) documentation for more details.",
+    "## [File locations](https://buildkite.com/docs/agent/self-hosted/install/macos\\#file-locations)",
+    "### [Homebrew installation](https://buildkite.com/docs/agent/self-hosted/install/macos\\#file-locations-homebrew-installation)",
+    "The typical paths for [Mac computers with Apple silicon](https://support.apple.com/en-gb/HT211814) (such as M1 chips) are:",
+    "The typical paths for Mac computers with Intel processors are:",
+    "### [Linux installer script on macOS](https://buildkite.com/docs/agent/self-hosted/install/macos\\#file-locations-linux-installer-script-on-macos)",
+    "## [Configuration](https://buildkite.com/docs/agent/self-hosted/install/macos\\#configuration)",
+    "See the [configuration documentation](https://buildkite.com/docs/agent/self-hosted/configure) for an explanation of each configuration setting.",
+    "## [Which user the agent runs as](https://buildkite.com/docs/agent/self-hosted/install/macos\\#which-user-the-agent-runs-as)",
+    "On macOS, the Buildkite agent runs as the user who started the `launchd` service.",
+    "## [Starting on login](https://buildkite.com/docs/agent/self-hosted/install/macos\\#starting-on-login)",
+    "If you installed the buildkite-agent using the [Linux install script](https://buildkite.com/docs/agent/self-hosted/install/linux) then you'll need to install the plist yourself using the following commands:",
+    "[Troubleshooting: `launchctl` fails with \"Could not find domain for\"](https://buildkite.com/docs/agent/self-hosted/install/macos#troubleshooting-launchctl-fails-with-could-not-find-domain-for)",
+    "Ensure that you have a user logged in to the macOS host, then re-run:",
+    "## [Running multiple agents](https://buildkite.com/docs/agent/self-hosted/install/macos\\#running-multiple-agents)",
+    "If you need the same configuration on each agent, either configure the `launchd` service to use the [`--spawn` flag](https://buildkite.com/docs/agent/cli/reference/start#starting-an-agent-options) on the `buildkite-agent`, or the [`spawn` setting](https://buildkite.com/docs/agent/self-hosted/configure#spawn) in the `buildkite-agent.cfg` file.",
+    "3. Once you've edited your plist/s with your custom config, make sure that all the referenced paths exist and have the correct permissions. See the [Starting on Login](https://buildkite.com/docs/agent/self-hosted/install/macos#starting-on-login) section above for an example of how to check directories and permissions.",
+    "\n## [Upgrading](https://buildkite.com/docs/agent/self-hosted/install/macos\\#upgrading)",
+    "If you installed the buildkite-agent using the [Linux install script](https://buildkite.com/docs/agent/self-hosted/install/linux) then you should run the installer script again and it will update your agent."
+  ]
+}

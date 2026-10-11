@@ -1,0 +1,296 @@
+{
+  "mode": "artifact",
+  "target": "research",
+  "producer_model": "GPT-6 (variant not exposed)",
+  "producer_identity": null,
+  "goals": "Recommend independent CI/CD for The Boss four native Mac/Windows targets, no Linux, no production edits. Immediate Actions escape versus full GitHub independence. Costs, limits, triggers, publication and website continuity. No per-edit tests.",
+  "research_report": "---\ntype: research-report\ntitle: \"The Boss: release without depending on GitHub Actions\"\nquery: \"Which CI/CD architecture can reliably build and publish The Boss on Mac and Windows when GitHub Actions is unavailable?\"\ndate: \"2026-10-02\"\nverification_status: partial\nconfidence: 0.847222\nfeynman_grade: null\nsources_count: 33\ncontradictions_resolved: 4\npackage_id: independent-release-cicd-20261002-a7c1\njob_id: manual-ci-research-20261002\nokf_version: \"0.1\"\n---\n\n# Release The Boss independently of GitHub Actions\n\n## Recommendation\n\n**Use an independent release execution path now, then adopt Buildkite with native workers as the preferred managed CI option. Keep the same build and publication procedures callable without Buildkite.** Initially retain GitHub as source and installer hosting; remove Actions from every required orchestration step. If freedom from any vendor-operated scheduler is a hard requirement, choose self-managed Jenkins instead. Neither choice supplies the native machines, signing credentials or release correctness automatically. **This is an architectural recommendation, not a completed migration.** [inferred: local inspection L1–L6; sources S01–S07, S12–S13, S27, S33]\n\nThe fastest recovery is not to rebuild our release system while customers wait. Prepare an operator-triggered release on available native machines, using the existing repository scripts and exact source revision. Complete the metadata and website stages outside Actions too. A Buildkite proof of operation can follow on the two critical platforms, then extend to all four. Hardware availability is the principal unverified prerequisite—not an assumption that four machines already exist.\n\nGitHub remains useful as a repository and download mirror. This incident establishes that **our Actions jobs are currently refused**; it does not establish that GitHub Git, Releases, every CI vendor or GitHub generally is unusable. A sensible response removes the demonstrated single point of failure without pretending another SaaS platform cannot fail.\n\n## What the evidence establishes\n\nHere, **verified** means a fetched primary source or inspected local artifact supports the statement. It does not mean a new CI provider has built our application. **Inferred** marks a recommendation; **unverified** marks an unmet prerequisite.\n\n| ID | Finding | Label and evidence |\n|---|---|---|\n| L1 | Release run 36924951718, attempt 3, failed before any build steps. Its check annotation says the account is locked due to a billing issue. | Verified: [run](https://github.com/Prometheus-AGS/the-boss/actions/runs/36924951718/attempts/3), check 110749594246 re-read in this research. |\n| L2 | The replacement token authenticated as GQAdonis and could read repository admin permissions, but the preceding retry request was denied as inaccessible to that token. | Observed in the preceding turn; not rerun here. Token permission failure and job-admission billing lock are different failures. No secret included. |\n| L3 | The release source inspected is `61bc79e8ec039de31d524d2c8d2883dc7e47cce6`, version 2.2.10. | Verified: isolated `upstream-grok-compatibility` worktree. Report destination main checkout is separately at `e2ae2ce21245030293c0bea96ed02ae853b820a7`; it was not updated. |\n| L4 | Three Actions-dependent stages exist: installer build, Boss metadata publication, and landing data refresh. | Verified: Boss workflow and publication scripts; landing workflow. Exact references in [local evidence](research/independent-release-cicd-20261002-a7c1/local-evidence.md). |\n| L5 | Existing native package validation rejects a different host OS/architecture; it inspects installed/mounted packages and probes native payloads. | Verified: `scripts/validate-release-package.cjs:23`, `:59`, `:105`, `:134`. |\n| L6 | Download publication is not established automatic application updating: the inspected updater configuration still points at Cherry's generic host, and this publisher selects DMG/setup.exe assets. | Verified source observation: `electron-builder.yml:200`, `AppUpdaterService.ts:32,100`, `publish-installers.cjs:20`. No updater network trace performed. |\n\n**The precise account-lock cause remains unresolved.** Neither the screenshot, the token check nor public documentation proves an exhausted budget, outstanding debt or the deleted organization's causal role. Changing CI is an availability decision; it is not a diagnosis of GitHub's internal billing state.\n\n## The dependency that a runner swap misses\n\nThe current path is:\n\n```mermaid\nflowchart LR\n  A[Actions release trigger] --> B[Four native installer jobs]\n  B --> C[GitHub Releases assets]\n  C --> D[repository_dispatch to Boss Actions publisher]\n  D --> E[Release manifest and RELEASES.md]\n  E --> F[repository_dispatch to landing Actions]\n  F --> G[Landing release.json and main push]\n  G --> H[Lovable sync]\n  H --> I[Explicit publish and live link confirmation]\n```\n\nBuildkite, Jenkins or a developer terminal can execute the build commands, but a build-only migration still stalls at D or F. A successful GitHub API dispatch is also not evidence that the downstream job ran.\n\nCurrent payload downloads include Compass, filesystem MCP, Prometheus, PK, liter-llm and UAR assets hosted on GitHub Releases. The UAR importer and landing synchronizer deliberately validate GitHub-specific release URLs. A total GitHub exit therefore requires a reviewed artifact-origin migration, not just different CI YAML. These checks should remain intact during initial recovery. [L4; local evidence]\n\nAdding a GitHub self-hosted runner changes compute, not the scheduler. GitHub still assigns jobs to that runner. **Do not count that, an Actions-backed runner vendor, another PAT, or local Actions emulation as a proven escape from the current lock.** Whether a self-hosted Actions job is allowed under this particular lock is unverified; its control-plane dependency is documented. [S27](https://docs.github.com/en/actions/reference/runners/self-hosted-runners)\n\n## Options compared\n\nThe dispositions below are inferences from the cited capabilities and this repository. “Supported agent” is not a certificate that our Electron, NSIS, UAR or signing stack operates there.\n\n| Option | Trigger/control plane | Mac and Windows fit | Main trade-off | Disposition |\n|---|---|---|---|---|\n| **Buildkite + self-hosted native agents** | Independent UI, API, schedules and repository webhooks; exact commit supplied to Builds API. | Mac Intel/ARM documented; published v4.1.0 agent assets include Windows AMD64 and ARM64. We provide or rent hosts. | Low controller administration, but another SaaS dependency remains; maintain manual fallback. | **Preferred managed option.** [S01–S04, S33] |\n| **Jenkins, self-managed** | Our controller; authenticated remote build API, manual jobs and scheduled/polling triggers. | Labeled native workers; agent requires compatible Java and tools. Windows ARM JDK/agent/toolchain must be qualified. | We own patching, backup, access control, plugin restraint and recovery. | **Preferred sovereign scheduler** if that operational responsibility is acceptable. [S05–S07, S26] |\n| **GitLab CI + own runners** | GitLab UI/API; self-managed GitLab removes a hosted scheduler dependency. | Official Windows ARM64/AMD64 binaries; Mac Intel/ARM supported. | More repository/control-plane setup. Turnkey CI for an external GitHub repo is Premium/Ultimate; a separately managed mirror or CI project has its own synchronization work. | Strong alternative if adopting GitLab as a broader platform is desirable. [S08–S09, S25, S31] |\n| **TeamCity** | Cloud or own server, REST build queue, native agents. | Broad OS/JVM support; exact Windows ARM qualification still needed. | More controller/licensing decisions than immediate recovery requires; no measured advantage for this app. | Viable, not first migration choice. [S16–S17] |\n| **Codemagic** | Separate Builds API; managed builders. | Published Windows 2022 and Apple Silicon capacity. No native Windows ARM/Intel-Mac provision established by this research. | Attractive critical-platform stopgap; native four-target coverage remains incomplete. | Pilot candidate for Mac ARM + Win x64, not a proven whole-matrix replacement. [S14–S15, S28] |\n| **CircleCI** | Independent service; own machine runners poll CircleCI. | Its supported own-runner list includes both Mac architectures and Windows x64, not Windows ARM64. | Still a SaaS controller and needs an ARM solution. | Lower fit than Buildkite/GitLab for our full matrix. [S10] |\n| **Azure Pipelines** | Separate Azure DevOps controller; hosted or own agents. | Hosted Intel and Windows options; ARM Mac documentation has multiple preview paths, including a GitHub-hosted Agents pool. | Entitlement, preview, capacity and provider coupling must be clarified; not assumed independently available. | Conditional option, not the fastest well-evidenced four-platform answer. [S18, S32] |\n| **Operator-run native release** | Direct authenticated invocation on machines we control, independent of any CI scheduler. | All four only if all four native environments exist. | Weak queue visibility until wrapped; operator must preserve receipts and publisher serialization. | **Immediate recovery/fallback**, not a new custom CI product. [L3–L5] |\n\n### Important Buildkite caveats\n\n- Its GitHub Actions workflow compatibility feature is in preview and excludes Windows shells/jobs; runtime matrices from previous job outputs are also listed as unsupported. The Boss has a generated matrix. **Translate a thin orchestration layer around existing scripts; do not promise direct YAML import.** [S11](https://buildkite.com/docs/pipelines/migration/run-github-actions-workflows)\n- Hosted Windows agents are private preview, AMD64-only, and do not expose desktop access. They cannot be the committed Windows ARM supply plan. [S12](https://buildkite.com/docs/agent/buildkite-hosted/windows)\n- Hosted Mac agents are Apple Silicon and require Pro/Enterprise. Intel still needs separate native capacity under our current validation contract. [S13](https://buildkite.com/docs/agent/buildkite-hosted/macos)\n- Self-hosted agent releases include all four architecture binaries, but obtaining and qualifying four build environments is our responsibility. [S33](https://api.github.com/repos/buildkite/agent/releases/tags/v4.1.0)\n\n### Azure documentation ambiguity\n\nMicrosoft's hosted-agent page says the older macOS 15 ARM preview is paused. A separate Microsoft announcement describes Apple Silicon via a pay-as-you-go **GitHub-hosted Agents** pool. These are different offerings, not evidence that all ARM hosting is unavailable. Neither source proves this account can use the new pool or that it avoids the incident's failure domain. This uncertainty is retained, not resolved by selecting whichever page favors a recommendation. [S18](https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops), [S32](https://devblogs.microsoft.com/devops/apple-silicon-and-xcode-27-images-availabile-in-pay-as-you-go-preview/)\n\n## Proposed release architecture\n\nThe release contract belongs to the repository; the CI system only admits and runs it. Do not build another UAR scheduler, KBD controller or Cadence daemon for CI.\n\n```mermaid\nflowchart TD\n  C[Cadence delivery is ready] --> R[Approved immutable release request]\n  O[Operator UI or API] --> R\n  W[Repository webhook or scheduled reconciliation] --> R\n  R --> Q[Independent CI admission and deduplication]\n  R -. emergency direct invocation .-> M[Operator-run existing procedures]\n  Q --> A[Mac ARM64 build worker]\n  Q --> B[Windows x64 build worker]\n  Q --> D[Mac Intel build worker]\n  Q --> E[Windows ARM64 build worker]\n  M --> A\n  M --> B\n  M --> D\n  M --> E\n  A --> P[Immutable artifacts and platform receipts]\n  B --> P\n  D --> P\n  E --> P\n  P --> V[Single serialized publisher]\n  V --> G[GitHub Releases while reachable]\n  V --> S[Release metadata and landing data]\n  S --> L[Explicit Lovable publish and live checks]\n  P -. optional later independence .-> Z[Independent artifact mirror]\n  Z -. separately approved origin migration .-> S\n```\n\n**Trigger contract — proposed, not implemented:** each request records a release/candidate ID, exact Boss commit, recursive submodule SHAs, locked dependency references, UAR and native-payload manifests, version/profile, targets, approvals and the publication destination. A webhook is a notification to reconcile approved requests—not authority to release arbitrary pushed code. A manual/API path supplies the same request. Scheduled reconciliation recovers missed notifications without creating a new candidate every two hours.\n\nAn external runner must select the exact SHA and verify it after checkout. Branch names alone move. Tag-only APIs should resolve an immutable tag and compare its commit with the request before executing. A mirror must contain that commit and all submodule commits before admission.\n\n**Resume semantics:** preserve platform receipts by candidate/source/platform; resume incomplete work instead of rebuilding successful artifacts because another architecture failed. Never replace an already-published version/filename with different bytes. Retry publication separately from build. Treat a timed-out upload as uncertain until the destination is inspected by digest and size. Different candidates must never be silently aggregated.\n\n**Single publisher:** use one serialized release queue plus durable per-candidate publication records. It merges each finished platform without erasing other platforms or previously available downloads, updates release metadata, updates the landing data, publishes Lovable, and checks the exact public download bytes. A CI “success” indicator does not replace these receipts. Prevent a late older job from rolling the website back.\n\n**Cadence:** keep 120-minute development increments, a local Mac ARM64 build and actual operation of the completed function each delivery, and full Mac/Windows publication every second successful delivery or explicit request. Build a frozen candidate in a separate release workspace while independent implementation continues on the next approved increment. Serialize writers to a shared target directory; impose per-machine capacity limits. Do not let CI add unit/per-edit/broad test loops. Build errors are corrected before that candidate is declared delivered. Builds, launch, feature operation, publication and installed acceptance remain separate records.\n\n## Recovery sequence using current scripts\n\nThis is a proposed runbook, not something executed during research.\n\n1. **Inventory real access.** Identify available Mac ARM, Windows x64, Intel Mac and Windows ARM hosts. Verify native toolchain, disk, signing access and permitted publisher identities. The user's Windows machine is known to run The Boss; it is not yet a provisioned build worker. Do not enroll a daily-use machine with broad developer secrets as an unrestricted CI runner.\n2. **Freeze the recovery source.** Use the inspected 2.2.10 SHA, or explicitly approve a newer candidate after reconciling source changes. Preserve all submodule and payload pins. Use clean disposable release checkouts, not the dirty main checkout.\n3. **Reuse current commands.** Node `24.21.0`, pnpm `12.6.0`, recursive submodules, capacity checks, payload import/download and native release commands are source requirements. Preserve the existing 10 GiB minimum disk preflight; measure peak use before selecting paid runner sizes rather than assuming that minimum is comfortable capacity.\n4. **Build the two customer-critical platforms first, then the other two.** Use `build:mac:arm64:release:uar`, `build:win:x64:release:uar`, `build:mac:x64:release:uar`, and `build:win:arm64:release:uar` on matching hosts. Preserve the local `pnpm build:mac:arm64` delivery requirement. Do not substitute cross-build success for native operation.\n5. **Operate the completed packages.** Native package checks plus actual launch/feature operation are the boundary. Windows services do not provide an interactive desktop; provision a controlled interactive session for UI operation. A service job's successful installer execution is not a visible app acceptance receipt. [S08](https://docs.gitlab.com/runner/install/windows/)\n6. **Publish outside Actions.** Use the existing release preparation/upload logic and invoke the publisher serially. The current scripts still emit dispatch events; do not wait for those events to run. Explicitly execute the landing sync/build/push work externally too. Keep a clear single owner to avoid competing with an Actions retry if it unexpectedly starts.\n7. **Publish the existing Lovable project.** Verify the expected repository commit has synced, then publish and confirm the live release/version/URLs. Git sync and live deployment are separate in Lovable. No domain migration is needed for the initial recovery. [S22](https://docs.lovable.dev/integrations/git-sync-overview), [S23](https://docs.lovable.dev/features/publish)\n\nTwo script hazards must be accounted for in any external adapter: `release-platforms.cjs` expects `GITHUB_OUTPUT`; provide a private job-output file or use the known matrix directly. The publication coordinator performs `git reset --hard` and deletes `manifests/`; execute it only inside a disposable checkout. Do not run it in a user's active workspace. [local evidence]\n\n## Signing, secrets and native capacity\n\nThe existing macOS workflow enforces Developer ID/App Store Connect prerequisites. Its notarization hook can skip when credentials are absent, and validation is conditional on `HAS_NOTARIZATION`. **An external release must carry over the workflow's enforcement**, not merely call the happy-path packaging command. Record actual signature/notarization results.\n\nWindows signing is also conditional; the custom hook and workflow use different credential switches. Preserve and inspect the actual output's Authenticode result; do not label a build signed because a signing-related environment variable was present. No signing policy is changed here. [local evidence]\n\nUse scoped, separate credentials for source read, release write, landing write and CI triggering; repository admin visibility does not demonstrate permission to mutate a particular API. Buildkite's build-create API has its own `write_builds` authorization. GitHub Release creation remains an ordinary API operation, but permission and account-policy availability must be exercised during the approved publication—not assumed from today's read-only research. [S03](https://buildkite.com/docs/apis/rest-api/builds), [S20](https://docs.github.com/en/rest/releases/releases#create-a-release)\n\nRelease/signing workers must not run untrusted pull-request code with secrets. Keep controller execution separate from builders; use temporary signing keychains/credential access and remove secret material after the job. Pin dependency and worker-image inputs. A clean rebuild should not depend on the developer's shell profile or login state. Jenkins specifically recommends keeping builds off its controller. [S07](https://www.jenkins.io/doc/book/security/controller-isolation/)\n\nDo not claim cross-compilation is impossible in general. electron-builder can cross-package some combinations, but native dependencies and macOS signing constrain that. The Boss additionally enforces matching native validation today. Changing that contract to save machine cost would be a separate decision with native operation still required. [S29](https://www.electron.build/v26/docs/features/multi-platform-build/)\n\n## Economics and time to adopt\n\nPrices are a retrieval-date snapshot, not a quote or an authorization to spend.\n\n| Option | Documented price/cost driver | Interpretation for us |\n|---|---|---|\n| Buildkite | Pro lists **$30/active user/month**, 10 agents included; listed M4 Medium hosted compute is **$0.12/minute**, M4 Large **$0.24/minute**. A Free plan exists with smaller limits. [S04](https://buildkite.com/pricing/) | Own-worker hardware/rental and administration remain additional. Hosted Mac access requires Pro/Enterprise. Illustratively, 60 × 30-minute medium-Mac builds cost $216 compute plus plan charges; our actual build durations are not benchmarked here. |\n| Codemagic | Team M2 **$0.095/min**, M4 **$0.114/min**, Windows **$0.045/min**; 500 free M2 minutes apply to individual accounts, not teams. [S14](https://docs.codemagic.io/billing/pricing/) | Illustrative 60 releases with 30-minute M2 + 30-minute Windows jobs cost $252 compute, excluding extra concurrency. Does not cover missing Intel/ARM-native capacity. |\n| Jenkins | MIT-licensed core. [S26](https://www.jenkins.io/license/) | No core license purchase; controller hosting, native machines, backups, patching and operator time are real costs. |\n| EC2 Mac capacity | Dedicated hosts have a **24-hour minimum allocation**. [S19](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-mac-instances.html) | Renting one solely for a short build is not minute-priced like an ephemeral job; compare with persistent fleet use and other Mac providers before buying. |\n\nNo credible fixed completion time can be promised until worker access, enrollment and signing credentials are established. Suggested bounded delivery slices: (A) independent critical-platform build/operation; (B) external serialized publisher through the live site; (C) four-native-platform scheduling and recovery drill. These are deliverables, not a promise that each fits one two-hour slot. Keep the existing product phase moving once a frozen build candidate has been admitted and resources are isolated.\n\n## If we mean complete GitHub independence\n\nInitial migration removes **Actions** dependence. Full independence additionally requires:\n\n1. A verified source mirror containing every pinned submodule commit, or a provenance-preserving source export; private credentials and Git LFS, if used, must be included in the plan.\n2. An independent cache/mirror of every required native tool, Electron/runtime download and service image, with existing digests. A source mirror alone cannot rebuild this payload.\n3. Independent installer hosting with a stable owned download domain and immutable objects. R2 is one option: Standard storage lists $0.015/GB-month plus operations and no internet egress charge; it is not free or outage-proof. [S24](https://developers.cloudflare.com/r2/pricing/)\n4. A reviewed relaxation of GitHub-specific artifact URL validation and landing origins that retains provenance, checksum and origin policy. No IPFS reintroduction.\n5. An independent site publishing path. Cloudflare Pages supports prebuilt-asset direct upload, but adopting it would be a separate hosting/domain change. Host installers in object storage, not a static site's small-asset upload path. Preserve current Lovable deployment for first recovery. [S21](https://developers.cloudflare.com/pages/get-started/direct-upload/)\n\nOwn storage can also retain CI evidence beyond vendor artifact retention; Buildkite documents external artifact backends. Native workers and emergency procedures should remain usable when the chosen CI service is down. A second always-running scheduler is unnecessary initially; a documented direct invocation path with preserved receipts is sufficient until an outage drill demonstrates otherwise. [S30](https://buildkite.com/docs/agent/cli/reference/artifact)\n\n**Automatic updates are a separate product gap.** This report's release path means installers downloadable from the website. Repairing the app's update feed would require the correct updater metadata/assets, signing compatibility and installed upgrade operation. Do not add that code silently to a CI migration or advertise automatic delivery based solely on installer publication. [L6]\n\n## Decision conditions and acceptance of a later implementation\n\nChoose Buildkite if managed orchestration plus owned workers and a manual fallback meet the independence requirement. Choose Jenkins if owning the scheduler itself matters more than minimizing operations. Choose GitLab if a wider repository/platform move is already wanted. Reject all proposals that promise the complete native matrix without naming where Intel Mac and Windows ARM execute.\n\n**What would change this recommendation:** an already-maintained Jenkins/GitLab/TeamCity controller; a verified provider offering all four native workers at an acceptable price; unavailable Windows ARM capacity; an account policy prohibiting SaaS controllers; or measured fleet costs making owned workers unattractive. None was established in this inspection.\n\nA later migration is done only when one exact frozen candidate builds and operates on the required platforms while Actions is unused; a failed-platform retry preserves successful bytes; publication survives interruption without duplicate/replaced assets; source-qualified manifests and public downloaded hashes agree; the live site points to the correct installers; and signing/installed-acceptance states are accurate. Demonstrate this once at the completed delivery boundary. No intermediate test-suite loops are proposed.\n\n## Research and review limits\n\nFirecrawl discovery and primary-page retrieval, Context7 API documentation, one independent local-source inspection, and an independent adversarial review support this report. The [research package](research/independent-release-cicd-20261002-a7c1/index.md) includes source excerpts, labelled claims, unresolved questions and review dispositions. Verification status is **partial** because recommendations are inferred and alternative-provider operation, hardware availability and the automated Feynman gate are not demonstrated.\n\nNo product code, CI configuration, credentials, billing settings, domains or deployment were changed. Existing uncommitted work remains untouched. Only research documents were added; no commits or pushes were made.\n",
+  "research_provenance": "# Provenance: independent release CI/CD\n\n- Package: independent-release-cicd-20261002-a7c1\n- Date: 2026-10-02\n- Scale: full; bounded ten-stage research, no arbitrary source-count quota\n- Stages completed before report review: 01 02 03 04 05 06 07 08 09\n- Sources accepted: 33 primary web documents/API artifacts plus separately recorded local evidence\n- Verification: PASS WITH NOTES\n- Verification status: partial (inferred recommendations, unverified prerequisites, Feynman gate skipped)\n- Adversarial review: pending; report review follows completed primary-source verification\n- Plan: plan.md\n- Tools: Firecrawl search/scrape, Context7 resolve/query, GitHub read-only API, filesystem/source inspection, independent source explorer\n- Execution: harness-driven stages with local Node/file artifacts. Installed shell/Python research driver not invoked under the Node-only project rule; no service installed. No claim of automated driver certification.\n- Memory: narrow registry lookup located earlier release context; all decision-driving release-state claims refreshed from repository/check API. No memory changed.\n- Surreal memory: not used; registry and graph are local persistence fallback.\n- Feynman gate: not invoked; grade null. No fabricated score.\n- Source credibility: editorial evidence-quality scores, not measured CI reliability. Vendor docs establish advertised capability only.\n- Truncation: source evidence files retain selected relevant paragraphs, not entire pages; each paragraph capped at7500characters. Review packet records its own cap separately.\n- Constraints: no code/config/workflows altered, no commits/pushes/deployments, no builds or application test suites.\n- Open uncertainties: actual worker inventory/credentials, provider account eligibility/cost, GitHub lock cause, site deployment and updater operation.\n\n",
+  "research_plan": "# Research plan: resilient CI/CD for The Boss\n\nScope: research and documentation only. No source/configuration edits, installations, builds, billing changes, workflow dispatches, purchases, commits or deployments.\n\n## Questions\n\n1. Which current release dependencies require GitHub Actions, and which merely require GitHub Git/API/artifact access?\n2. What is the fastest practical way to resume four-platform Mac/Windows releases while Actions refuses jobs?\n3. Which alternative control planes support independent manual/API/scheduled triggers and native workers for all four targets?\n4. How should signing, native runtime operation, immutable payloads, resumability, publication and website updates work across providers?\n5. What are the costs, operational burdens, limitations and reasons to reject alternatives?\n\n## Method\n\nUse Firecrawl web search and primary-source retrieval, Context7 where relevant, source inspection at recorded commits, claim labels and contradiction resolution. Compare Buildkite, self-managed Jenkins, GitLab, TeamCity, Azure Pipelines, CircleCI, Codemagic and hosted-runner substitutions. Separate immediate recovery from complete GitHub independence. Do not treat marketing claims as deployed proof. Use one independent adversarial review after source verification, resolve its findings, then export the report and evidence package. No arbitrary source-count target; stop when the decision questions have primary evidence and remaining unknowns are explicit.\n\n## Task ledger\n\n- 01 Planner: complete; bounded question and comparison criteria defined.\n- 02 Search: pending.\n- 03 Retrieve: pending.\n- 04 Collect: pending; local package is persistence fallback.\n- 05 Verify: pending; source credibility precedes adversarial review.\n- 06 Resolve: pending.\n- 07 Graph: pending.\n- 08 Cite: pending.\n- 09 Report and independent review: pending.\n- 10 Export: pending.\n\n## Verification log\n\nNo new CI deployment or provider trials are authorized. Documented capability is not operational certification.\n\n## Decision log\n\nResearch only; implementation choices remain proposals. Existing two-hour cadence, local Mac ARM64 build per delivery, four-platform publication and exclusion of Linux remain requirements.\n",
+  "local_evidence": "# Local evidence and scope\n\nInspection date: 2026-10-02. Source inspection is not new runtime operation.\n\n- L1: GitHub run 36924951718 attempt3, source61bc79e8ec039de31d524d2c8d2883dc7e47cce6; annotation110749594246: account locked due to billing issue; no steps. Re-read this session. No dispatch in research.\n- L2: preceding conversation token read and retry; identity GQAdonis, repo admin visible, rerun denied Resource not accessible by personal access token. No token persisted in report.\n- L3: Boss inspected worktree /Users/gqadonis/.claude/worktrees/upstream-grok-compatibility at61bc79e8ec039de31d524d2c8d2883dc7e47cce6; package2.2.10. Report destination /Users/gqadonis/Projects/prometheus/the-boss at e2ae2ce21245030293c0bea96ed02ae853b820a7 (not fast-forwarded). Landing local checkout019363e738f19fb6e53251bc14f511e3b3d779a2; not claimed latest deployed revision.\n- L4: Boss .github/workflows/the-boss-release.yml:60,239; scripts/queue-release-publication.cjs:45,60; scripts/coordinate-release-publication.cjs:75,93,112,135. Coordinator destructively resets its checkout/removes manifests: disposable release checkout only. Landing .github/workflows/publish-release-platform.yml:71,82,96; .github/workflows/sync-release.yml:9. Landing has no host-deployment command in inspected workflow. scripts/sync-release-platform.mjs:10,125,130,174 validates GitHub origins and public bytes.\n- L5: scripts/release-platforms.cjs:5 defines win32-x64 windows-2025, win32-arm64 windows-11-arm, darwin-x64 macos-15-intel, darwin-arm64 macos-15; :54 expects GITHUB_OUTPUT. scripts/validate-release-package.cjs:23,59,82,105,134; matching host, native payload probes, conditional notarization, mounted DMG, installed Windows package. Node24.21.0, pnpm12.6.0, before-pack.js:143 native SQLite rebuild, release-capacity.cjs:10 minimum10GiB, nsis-preflight.cjs:27. UAR Intel script exists; non-UAR matrix's build:mac:x64:release is absent from inspected package scripts, unlike build:mac:x64. Not fixed.\n- L6: electron-builder.yml:200 and src/main/services/AppUpdaterService.ts:32,100 generic Cherry updater host. publish-installers.cjs:20 selects DMG/setup.exe only. Not a demonstrated updater delivery path.\n\n## Payload and signing dependencies\n\nbuild/integration-artifacts.json:54,92,130,168,207 (native tools), :263 (Node source), :324,346,368,390 (UAR). import-uar-sidecar-payloads.cjs:49,121 requires immutable GitHub release URLs/source/hash. download-binaries.js:230 vendors other GitHub-hosted tools. electron-builder.yml:203 Electron mirror. publish-installers.cjs:40 GitHub release upload.\n\nMac workflow .github/workflows/the-boss-release.yml:151 enforces signing/notary credentials; notarize.js:26 returns if unavailable; validator:82 conditional on HAS_NOTARIZATION. Windows win-sign.js:96 relies on WIN_SIGN and CHERRY_CERT_* while workflow:194 exports CSC_LINK/password. Record actual signature; source presence does not prove signing.\n\n## Independent source specialist\n\nFresh-context explorer release_research_baseline inspected these files read-only and returned source references. It did not change code, build, test, dispatch, publish or verify the live website. The parent used this inspection to ground the proposal.\n\n",
+  "citations": {
+    "style": "IEEE",
+    "citations": [
+      {
+        "id": "S01",
+        "url": "https://buildkite.com/docs/agent/self-hosted/install/windows",
+        "formatted": "Installing Buildkite agent on Windows. Retrieved 2026-10-02. https://buildkite.com/docs/agent/self-hosted/install/windows",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S02",
+        "url": "https://buildkite.com/docs/agent/self-hosted/install/macos",
+        "formatted": "Installing Buildkite agent on macOS. Retrieved 2026-10-02. https://buildkite.com/docs/agent/self-hosted/install/macos",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S03",
+        "url": "https://buildkite.com/docs/apis/rest-api/builds",
+        "formatted": "Builds API. Retrieved 2026-10-02. https://buildkite.com/docs/apis/rest-api/builds",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S04",
+        "url": "https://buildkite.com/pricing/",
+        "formatted": "Pricing. Retrieved 2026-10-02. https://buildkite.com/pricing/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S05",
+        "url": "https://www.jenkins.io/doc/book/using/using-agents/",
+        "formatted": "Using Jenkins agents [Anchor](https://www.jenkins.io/doc/book/using/using-agents/\\#using-jenkins-agents). Retrieved 2026-10-02. https://www.jenkins.io/doc/book/using/using-agents/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S06",
+        "url": "https://www.jenkins.io/doc/book/using/remote-access-api/",
+        "formatted": "Remote Access API [Anchor](https://www.jenkins.io/doc/book/using/remote-access-api/\\#remote-access-api). Retrieved 2026-10-02. https://www.jenkins.io/doc/book/using/remote-access-api/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S07",
+        "url": "https://www.jenkins.io/doc/book/security/controller-isolation/",
+        "formatted": "Controller Isolation [Anchor](https://www.jenkins.io/doc/book/security/controller-isolation/\\#controller-isolation). Retrieved 2026-10-02. https://www.jenkins.io/doc/book/security/controller-isolation/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S08",
+        "url": "https://docs.gitlab.com/runner/install/windows/",
+        "formatted": "Install GitLab Runner on Windows. Retrieved 2026-10-02. https://docs.gitlab.com/runner/install/windows/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S09",
+        "url": "https://docs.gitlab.com/ci/triggers/",
+        "formatted": "Trigger pipelines with the API. Retrieved 2026-10-02. https://docs.gitlab.com/ci/triggers/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S10",
+        "url": "https://circleci.com/docs/guides/execution-runner/runner-overview/",
+        "formatted": "CircleCI’s self-hosted runner overview. Retrieved 2026-10-02. https://circleci.com/docs/guides/execution-runner/runner-overview/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S11",
+        "url": "https://buildkite.com/docs/pipelines/migration/run-github-actions-workflows",
+        "formatted": "Run GitHub Actions workflows in Buildkite. Retrieved 2026-10-02. https://buildkite.com/docs/pipelines/migration/run-github-actions-workflows",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S12",
+        "url": "https://buildkite.com/docs/agent/buildkite-hosted/windows",
+        "formatted": "Windows hosted agents. Retrieved 2026-10-02. https://buildkite.com/docs/agent/buildkite-hosted/windows",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S13",
+        "url": "https://buildkite.com/docs/agent/buildkite-hosted/macos",
+        "formatted": "macOS hosted agents. Retrieved 2026-10-02. https://buildkite.com/docs/agent/buildkite-hosted/macos",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S14",
+        "url": "https://docs.codemagic.io/billing/pricing/",
+        "formatted": "Pricing. Retrieved 2026-10-02. https://docs.codemagic.io/billing/pricing/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S15",
+        "url": "https://docs.codemagic.io/specs/versions-windows/",
+        "formatted": "Windows 2022. Retrieved 2026-10-02. https://docs.codemagic.io/specs/versions-windows/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S16",
+        "url": "https://www.jetbrains.com/help/teamcity/supported-platforms-and-environments.html",
+        "formatted": "Supported Platforms and Environments﻿. Retrieved 2026-10-02. https://www.jetbrains.com/help/teamcity/supported-platforms-and-environments.html",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S17",
+        "url": "https://www.jetbrains.com/help/teamcity/rest/start-and-cancel-builds.html",
+        "formatted": "Start and Cancel Builds﻿. Retrieved 2026-10-02. https://www.jetbrains.com/help/teamcity/rest/start-and-cancel-builds.html",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S18",
+        "url": "https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops",
+        "formatted": "Microsoft-hosted agents. Retrieved 2026-10-02. https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S19",
+        "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-mac-instances.html",
+        "formatted": "Amazon EC2 Mac instances. Retrieved 2026-10-02. https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-mac-instances.html",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S20",
+        "url": "https://docs.github.com/en/rest/releases/releases#create-a-release",
+        "formatted": "REST API endpoints for releases. Retrieved 2026-10-02. https://docs.github.com/en/rest/releases/releases#create-a-release",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S21",
+        "url": "https://developers.cloudflare.com/pages/get-started/direct-upload/",
+        "formatted": "Direct Upload. Retrieved 2026-10-02. https://developers.cloudflare.com/pages/get-started/direct-upload/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S22",
+        "url": "https://docs.lovable.dev/integrations/git-sync-overview",
+        "formatted": "https://docs.lovable.dev/integrations/git-sync-overview. Retrieved 2026-10-02. https://docs.lovable.dev/integrations/git-sync-overview",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S23",
+        "url": "https://docs.lovable.dev/features/publish",
+        "formatted": "https://docs.lovable.dev/features/publish. Retrieved 2026-10-02. https://docs.lovable.dev/features/publish",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S24",
+        "url": "https://developers.cloudflare.com/r2/pricing/",
+        "formatted": "Pricing. Retrieved 2026-10-02. https://developers.cloudflare.com/r2/pricing/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S25",
+        "url": "https://docs.gitlab.com/ci/ci_cd_for_external_repos/",
+        "formatted": "CI/CD for external repositories. Retrieved 2026-10-02. https://docs.gitlab.com/ci/ci_cd_for_external_repos/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S26",
+        "url": "https://www.jenkins.io/license/",
+        "formatted": "MIT License [Anchor](https://www.jenkins.io/license/\\#mit-license). Retrieved 2026-10-02. https://www.jenkins.io/license/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S27",
+        "url": "https://docs.github.com/en/actions/reference/runners/self-hosted-runners",
+        "formatted": "Self-hosted runners reference. Retrieved 2026-10-02. https://docs.github.com/en/actions/reference/runners/self-hosted-runners",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S28",
+        "url": "https://docs.codemagic.io/rest-api/builds/",
+        "formatted": "Builds API. Retrieved 2026-10-02. https://docs.codemagic.io/rest-api/builds/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S29",
+        "url": "https://www.electron.build/v26/docs/features/multi-platform-build/",
+        "formatted": "or. Retrieved 2026-10-02. https://www.electron.build/v26/docs/features/multi-platform-build/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S30",
+        "url": "https://buildkite.com/docs/agent/cli/reference/artifact",
+        "formatted": "buildkite-agent artifact. Retrieved 2026-10-02. https://buildkite.com/docs/agent/cli/reference/artifact",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S31",
+        "url": "https://docs.gitlab.com/runner/install/osx/",
+        "formatted": "Install GitLab Runner on macOS. Retrieved 2026-10-02. https://docs.gitlab.com/runner/install/osx/",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S32",
+        "url": "https://devblogs.microsoft.com/devops/apple-silicon-and-xcode-27-images-availabile-in-pay-as-you-go-preview/",
+        "formatted": "Or, for the larger agent:. Retrieved 2026-10-02. https://devblogs.microsoft.com/devops/apple-silicon-and-xcode-27-images-availabile-in-pay-as-you-go-preview/",
+        "credibility_score": 85,
+        "confidence": 0.9,
+        "label": "verified"
+      },
+      {
+        "id": "S33",
+        "url": "https://api.github.com/repos/buildkite/agent/releases/tags/v4.1.0",
+        "formatted": "https://api.github.com/repos/buildkite/agent/releases/tags/v4.1.0. Retrieved 2026-10-02. https://api.github.com/repos/buildkite/agent/releases/tags/v4.1.0",
+        "credibility_score": 90,
+        "confidence": 0.9,
+        "label": "verified"
+      }
+    ]
+  },
+  "constraints": "Research only. No live CI provider deployments proven. Source verification completed; do not invent citations. Find architectural failure modes and false certainty. Distinguish published facts from user-account eligibility.",
+  "review_focus": [
+    "orphan citations",
+    "unsupported capabilities",
+    "scheduler vs compute independence",
+    "native ARM/Intel coverage",
+    "signing and publication",
+    "scope expansion",
+    "costs and timing",
+    "credential assumptions"
+  ],
+  "truncation": {
+    "cap_per_field": 100000,
+    "fields_truncated": []
+  },
+  "scores_note": "Confidence is an editorial claim-weighted aggregate, not observed CI success probability."
+}

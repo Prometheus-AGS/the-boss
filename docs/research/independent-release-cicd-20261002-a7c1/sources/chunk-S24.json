@@ -1,0 +1,28 @@
+{
+  "source_id": "S24",
+  "url": "https://developers.cloudflare.com/r2/pricing/",
+  "fetched_at": "2026-10-02T08:42:11.438Z",
+  "selection": "Decision-relevant paragraphs; excerpt collection, not entire page. Paragraph chunks are <= 7500 characters.",
+  "chunks": [
+    "[Skip to content](https://developers.cloudflare.com/r2/pricing/#main-content)",
+    "# Pricing",
+    "Last updated Oct 1, 2026\\|Copy as Markdown\\| [View as Markdown](https://developers.cloudflare.com/r2/pricing/index.md) \\| [Agent setup](https://developers.cloudflare.com/agent-setup/)",
+    "1. [Class A operations](https://developers.cloudflare.com/r2/pricing/#class-a-operations) which are more expensive and tend to mutate state.\n2. [Class B operations](https://developers.cloudflare.com/r2/pricing/#class-b-operations) which tend to read existing state.",
+    "For the Infrequent Access storage class, [data retrieval](https://developers.cloudflare.com/r2/pricing/#data-retrieval) fees apply. There are no charges for egress bandwidth for any storage class.",
+    "## R2 pricing",
+    "|  | Standard storage | Infrequent Access storage |\n| --- | --- | --- |\n| Storage | $0.015 / GB-month | $0.01 / GB-month |\n| Class A Operations | $4.50 / million requests | $9.00 / million requests |\n| Class B Operations | $0.36 / million requests | $0.90 / million requests |\n| Data Retrieval (processing) | None | $0.01 / GB |\n| Egress (data transfer to Internet) | Free 1 | Free 1 |",
+    "|  | Free |\n| --- | --- |\n| Storage | 10 GB-month / month |\n| Class A Operations | 1 million requests / month |\n| Class B Operations | 10 million requests / month |\n| Egress (data transfer to Internet) | Free 1 |",
+    "### Storage usage",
+    "Storage is billed using gigabyte-month (GB-month) as the billing metric. A GB-month is calculated by averaging the _peak_ storage per day over a billing period (30 days).",
+    "Class A Operations include `ListBuckets`, `PutBucket`, `ListObjects`, `PutObject`, `CopyObject`, `CompleteMultipartUpload`, `CreateMultipartUpload`, `LifecycleStorageTierTransition`, `ListMultipartUploads`, `UploadPart`, `UploadPartCopy`, `ListParts`, `PutBucketEncryption`, `PutBucketCors` and `PutBucketLifecycleConfiguration`.",
+    "| Storage class | Minimum storage duration |\n| --- | --- |\n| Standard storage | None |\n| Infrequent Access storage | 30 days |",
+    "## Basin Catalog pricing",
+    "Basin Catalog charges for catalog operations and compaction data processed, in addition to standard R2 storage and operations. For full details, refer to [Basin Catalog pricing](https://developers.cloudflare.com/basin-catalog/platform/pricing/).",
+    "## Data migration pricing",
+    "## Pricing calculator",
+    "To learn about potential cost savings from using R2, refer to the [R2 pricing calculator ↗︎](https://r2-calculator.cloudflare.com/).",
+    "|  | Usage | Free Tier | Billable Quantity | Price |\n| --- | --- | --- | --- | --- |\n| Storage | (1,000 objects) \\* (1 GB per object) = 1,000 GB-months | 10 GB-months | 990 GB-months | $14.85 |\n| Class A Operations | (1,000 objects) \\* (1 write per object) = 1,000 writes | 1 million | 0 | $0.00 |\n| Class B Operations | (1,000 objects) \\* (1,000 reads per object) = 1 million reads | 10 million | 0 | $0.00 |\n| Data retrieval (processing) | (1,000 objects) \\* (1 GB per object) = 1,000 GB | NA | None | $0.00 |\n| **TOTAL** |  |  |  | **$14.85** |",
+    "|  | Usage | Free Tier | Billable Quantity | Price |\n| --- | --- | --- | --- | --- |\n| Storage | (1,000 objects) \\* (1 GB per object) = 1,000 GB-months | NA | 1,000 GB-months | $10.00 |\n| Class A Operations | (1,000 objects) \\* (1 write per object) = 1,000 writes | NA | 1,000 | $9.00 |\n| Class B Operations | (1,000 objects) \\* (1,000 reads per object) = 1 million reads | NA | 1 million | $0.90 |\n| Data retrieval (processing) | (1,000 objects) \\* (1 GB per object) = 1,000 GB | NA | 1,000 GB | $10.00 |\n| **TOTAL** |  |  |  | **$29.90** |",
+    "|  | Usage | Free Tier | Billable Quantity | Price |\n| --- | --- | --- | --- | --- |\n| Storage | (100,000 objects) \\* (100KB per object) | 10 GB-months | 0 GB-months | $0.00 |\n| Class A Operations | (100,000 writes) | 1 million | 0 | $0.00 |\n| Class B Operations | (10,000,000 reads per day) \\* (30 days) | 10 million | 290,000,000 | $104.40 |\n| **TOTAL** |  |  |  | **$104.40** |"
+  ]
+}

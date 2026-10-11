@@ -1,0 +1,30 @@
+{
+  "source_id": "S31",
+  "url": "https://docs.gitlab.com/runner/install/osx/",
+  "fetched_at": "2026-10-02T08:43:46.072Z",
+  "selection": "Decision-relevant paragraphs; excerpt collection, not entire page. Paragraph chunks are <= 7500 characters.",
+  "chunks": [
+    "# Install GitLab Runner on macOS",
+    "Install GitLab Runner on macOS on Apple Silicon or Intel x86-64 systems. GitLab itself\ntypically runs on a container or virtual machine, either locally or remotely.",
+    "## macOS service modes [Permalink](https://docs.gitlab.com/runner/install/osx/\\#macos-service-modes \"Permalink\")",
+    "On macOS, GitLab Runner runs as a user-mode `LaunchAgent`, not as a system-level `LaunchDaemon`.\nThis is the only supported mode.",
+    "- Runs as the currently authenticated user, not as root.\n- Starts when that user signs in, and stops when they sign out.\n- Has access to the user’s keychain and UI session, which is required to run the iOS Simulator\nand to perform code signing.\n- Stores its configuration in `~/.gitlab-runner/config.toml`.",
+    "A system-level `LaunchDaemon` starts at boot, runs as root, and has no access to a user session.\nGitLab Runner does not support running as a `LaunchDaemon`.",
+    "To keep the runner available after a reboot, turn on automatic login on the macOS machine.",
+    "Install GitLab Runner on macOS to run CI/CD jobs on Apple Silicon or Intel x86-64 systems.",
+    "- You must be signed in to the macOS machine as the user account that runs the jobs.\nDo not use an SSH session for this procedure. Use a local GUI terminal.",
+    "\n   - For Intel (x86-64):",
+    "     ```shell\n     sudo curl --output /usr/local/bin/gitlab-runner \\\n       \"https://s3.dualstack.us-east-1.amazonaws.com/gitlab-runner-downloads/latest/binaries/gitlab-runner-darwin-arm64\"\n     ```",
+    "3. [Register a runner](https://docs.gitlab.com/runner/register/) configuration. Use the\n[shell executor](https://docs.gitlab.com/runner/executors/shell/) for iOS and macOS builds.\nFor security details, see\n[security for shell executor](https://docs.gitlab.com/runner/security/#usage-of-shell-executor).",
+    "\n   - For Intel (x86-64):",
+    "     ```shell\n     sudo curl -o /usr/local/bin/gitlab-runner \\\n       \"https://s3.dualstack.us-east-1.amazonaws.com/gitlab-runner-downloads/latest/binaries/gitlab-runner-darwin-arm64\"\n     ```",
+    "## Use `codesign` with GitLab Runner [Permalink](https://docs.gitlab.com/runner/install/osx/\\#use-codesign-with-gitlab-runner \"Permalink\")",
+    "If you installed GitLab Runner with Homebrew and your build calls `codesign`, you might need\nto set `<key>SessionCreate</key><true/>` to access the user keychain.",
+    "In the following example, the runner runs builds as the `gitlab` user and needs access to\nthat user’s signing certificates:",
+    "When installing GitLab Runner on macOS, you might encounter the following issues.",
+    "To resolve this error, open a terminal application directly on the macOS machine and run\nthe `install` and `start` commands from there.",
+    "If the error persists, sign in to the macOS GUI desktop instead of using SSH, and run the\ncommands from a terminal there. The `LaunchAgent` requires a graphical login session to\nbootstrap.",
+    "For macOS instances on AWS, follow the\n[AWS documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-to-mac-instance.html)\nto connect to the GUI, then retry from a terminal in that session.",
+    "If Homebrew installed Git, it may have added a `credential.helper = osxkeychain` entry to\n`/usr/local/etc/gitconfig`. This caches credentials in the macOS keychain and can cause\n`git fetch` to hang."
+  ]
+}

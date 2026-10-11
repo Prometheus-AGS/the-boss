@@ -1,0 +1,69 @@
+{
+  "contradictions": [
+    {
+      "id": "R1",
+      "topic": "Scheduler independence",
+      "label": "inferred",
+      "resolved": true,
+      "resolution": "Self-hosted GitHub workers still receive jobs from GitHub; replacing compute is not replacing control plane.",
+      "sources": [
+        "S27"
+      ]
+    },
+    {
+      "id": "R2",
+      "topic": "Ready-made four-platform Buildkite hosting",
+      "label": "verified",
+      "resolved": true,
+      "resolution": "Hosted Windows is private preview AMD64; self-hosted Windows ARM binaries are a distinct option.",
+      "sources": [
+        "S12",
+        "S33"
+      ]
+    },
+    {
+      "id": "R3",
+      "topic": "Native vs cross-package",
+      "label": "inferred",
+      "resolved": true,
+      "resolution": "Cross-packaging can work in general but the current Boss gate explicitly requires native host operation.",
+      "sources": [
+        "S29",
+        "L5"
+      ]
+    },
+    {
+      "id": "R4",
+      "topic": "Git sync vs deployment",
+      "label": "verified",
+      "resolved": true,
+      "resolution": "Landing main sync does not publish the Lovable site.",
+      "sources": [
+        "S22",
+        "S23"
+      ]
+    },
+    {
+      "id": "R5",
+      "topic": "Azure ARM availability",
+      "label": "unverified",
+      "resolved": false,
+      "resolution": "Old preview paused; new GitHub-hosted pool documented. This account's eligibility and billing isolation not established.",
+      "sources": [
+        "S18",
+        "S32"
+      ]
+    },
+    {
+      "id": "R6",
+      "topic": "GitHub billing cause",
+      "label": "unverified",
+      "resolved": false,
+      "resolution": "Observed lock, no proven underlying billing/budget cause.",
+      "sources": [
+        "L1",
+        "L2"
+      ]
+    }
+  ]
+}

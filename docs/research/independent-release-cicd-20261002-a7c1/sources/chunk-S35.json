@@ -1,0 +1,33 @@
+{
+  "source_id": "S35",
+  "url": "https://www.jetbrains.com/teamcity/buy/",
+  "fetched_at": "2026-10-02T08:54:14.209Z",
+  "chunks": [
+    "- **3 build agents** included",
+    "Get additional build agents",
+    "$359.00",
+    "per agent, per year",
+    "Every agent adds 10 build configurations",
+    "build agents",
+    "**$0**",
+    "- **3 build agents** included",
+    "Get additional build agents",
+    "$359.00",
+    "per agent, per year",
+    "Unlimited build agents in free trial",
+    "build agents",
+    "**$2,399.00**",
+    "Renew your Enterprise server or build agent licenses to keep support and updates active.",
+    "- **600 GB** of data transfer per month",
+    "- **24,000 build credits** per month",
+    "**$540.00**",
+    "Renew your Enterprise server or build agent licenses to keep support and updates active.",
+    "|  | On-Premises | Cloud |\n| --- | --- | --- |\n| **Setup** | Install and manage yourself | Ready in minutes |\n| **Pricing model** | License + build agents | Per committer + usage |\n| **Entry point** | Free server available | From $15.00 per committer, per month |\n| **Capacity scaling** | Add build agents | Add committers and build agents |\n| **Infrastructure** | Your infrastructure | Fully managed by JetBrains |\n| **Best for** | Enterprise, compliance, and control | Growing teams, fast onboarding |",
+    "Run your server on-premises and agents in the cloud – or the other way around.",
+    "How many build agent licenses do I need?",
+    "You need build agents to run builds in parallel. Start with the three agent licenses included in the free Professional edition, and add more to reduce waiting time. You can also start a 30-day Enterprise trial with unlimited agents to better estimate your real-world needs.",
+    "A committer is anyone with more than 10 commits per month in a repository built using TeamCity Cloud. Regular web users can log in and use TeamCity for free.",
+    "Can I scale build agents automatically?",
+    "Yes. In TeamCity Cloud, you can use JetBrains-provided agents that start on demand for your builds. In TeamCity Cloud and TeamCity On-Premises, you can also connect your own cloud infrastructure, such as AWS EC2, Google Cloud, or Kubernetes, and let TeamCity scale agents automatically when needed."
+  ]
+}

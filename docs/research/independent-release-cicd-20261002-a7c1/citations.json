@@ -1,0 +1,301 @@
+{
+  "style": "IEEE",
+  "citations": [
+    {
+      "id": "S01",
+      "url": "https://buildkite.com/docs/agent/self-hosted/install/windows",
+      "formatted": "Installing Buildkite agent on Windows. Retrieved2026-10-02. https://buildkite.com/docs/agent/self-hosted/install/windows",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S02",
+      "url": "https://buildkite.com/docs/agent/self-hosted/install/macos",
+      "formatted": "Installing Buildkite agent on macOS. Retrieved2026-10-02. https://buildkite.com/docs/agent/self-hosted/install/macos",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S03",
+      "url": "https://buildkite.com/docs/apis/rest-api/builds",
+      "formatted": "Builds API. Retrieved2026-10-02. https://buildkite.com/docs/apis/rest-api/builds",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S04",
+      "url": "https://buildkite.com/pricing/",
+      "formatted": "Pricing. Retrieved2026-10-02. https://buildkite.com/pricing/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S05",
+      "url": "https://www.jenkins.io/doc/book/using/using-agents/",
+      "formatted": "Using Jenkins agents [Anchor](https://www.jenkins.io/doc/book/using/using-agents/\\#using-jenkins-agents). Retrieved2026-10-02. https://www.jenkins.io/doc/book/using/using-agents/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S06",
+      "url": "https://www.jenkins.io/doc/book/using/remote-access-api/",
+      "formatted": "Remote Access API [Anchor](https://www.jenkins.io/doc/book/using/remote-access-api/\\#remote-access-api). Retrieved2026-10-02. https://www.jenkins.io/doc/book/using/remote-access-api/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S07",
+      "url": "https://www.jenkins.io/doc/book/security/controller-isolation/",
+      "formatted": "Controller Isolation [Anchor](https://www.jenkins.io/doc/book/security/controller-isolation/\\#controller-isolation). Retrieved2026-10-02. https://www.jenkins.io/doc/book/security/controller-isolation/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S08",
+      "url": "https://docs.gitlab.com/runner/install/windows/",
+      "formatted": "Install GitLab Runner on Windows. Retrieved2026-10-02. https://docs.gitlab.com/runner/install/windows/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S09",
+      "url": "https://docs.gitlab.com/ci/triggers/",
+      "formatted": "Trigger pipelines with the API. Retrieved2026-10-02. https://docs.gitlab.com/ci/triggers/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S10",
+      "url": "https://circleci.com/docs/guides/execution-runner/runner-overview/",
+      "formatted": "CircleCI’s self-hosted runner overview. Retrieved2026-10-02. https://circleci.com/docs/guides/execution-runner/runner-overview/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S11",
+      "url": "https://buildkite.com/docs/pipelines/migration/run-github-actions-workflows",
+      "formatted": "Run GitHub Actions workflows in Buildkite. Retrieved2026-10-02. https://buildkite.com/docs/pipelines/migration/run-github-actions-workflows",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S12",
+      "url": "https://buildkite.com/docs/agent/buildkite-hosted/windows",
+      "formatted": "Windows hosted agents. Retrieved2026-10-02. https://buildkite.com/docs/agent/buildkite-hosted/windows",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S13",
+      "url": "https://buildkite.com/docs/agent/buildkite-hosted/macos",
+      "formatted": "macOS hosted agents. Retrieved2026-10-02. https://buildkite.com/docs/agent/buildkite-hosted/macos",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S14",
+      "url": "https://docs.codemagic.io/billing/pricing/",
+      "formatted": "Pricing. Retrieved2026-10-02. https://docs.codemagic.io/billing/pricing/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S15",
+      "url": "https://docs.codemagic.io/specs/versions-windows/",
+      "formatted": "Windows 2022. Retrieved2026-10-02. https://docs.codemagic.io/specs/versions-windows/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S16",
+      "url": "https://www.jetbrains.com/help/teamcity/supported-platforms-and-environments.html",
+      "formatted": "Supported Platforms and Environments﻿. Retrieved2026-10-02. https://www.jetbrains.com/help/teamcity/supported-platforms-and-environments.html",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S17",
+      "url": "https://www.jetbrains.com/help/teamcity/rest/start-and-cancel-builds.html",
+      "formatted": "Start and Cancel Builds﻿. Retrieved2026-10-02. https://www.jetbrains.com/help/teamcity/rest/start-and-cancel-builds.html",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S18",
+      "url": "https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops",
+      "formatted": "Microsoft-hosted agents. Retrieved2026-10-02. https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S19",
+      "url": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-mac-instances.html",
+      "formatted": "Amazon EC2 Mac instances. Retrieved2026-10-02. https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-mac-instances.html",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S20",
+      "url": "https://docs.github.com/en/rest/releases/releases#create-a-release",
+      "formatted": "REST API endpoints for releases. Retrieved2026-10-02. https://docs.github.com/en/rest/releases/releases#create-a-release",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S21",
+      "url": "https://developers.cloudflare.com/pages/get-started/direct-upload/",
+      "formatted": "Direct Upload. Retrieved2026-10-02. https://developers.cloudflare.com/pages/get-started/direct-upload/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S22",
+      "url": "https://docs.lovable.dev/integrations/git-sync-overview",
+      "formatted": "https://docs.lovable.dev/integrations/git-sync-overview. Retrieved2026-10-02. https://docs.lovable.dev/integrations/git-sync-overview",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S23",
+      "url": "https://docs.lovable.dev/features/publish",
+      "formatted": "https://docs.lovable.dev/features/publish. Retrieved2026-10-02. https://docs.lovable.dev/features/publish",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S24",
+      "url": "https://developers.cloudflare.com/r2/pricing/",
+      "formatted": "Pricing. Retrieved2026-10-02. https://developers.cloudflare.com/r2/pricing/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S25",
+      "url": "https://docs.gitlab.com/ci/ci_cd_for_external_repos/",
+      "formatted": "CI/CD for external repositories. Retrieved2026-10-02. https://docs.gitlab.com/ci/ci_cd_for_external_repos/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S26",
+      "url": "https://www.jenkins.io/license/",
+      "formatted": "MIT License [Anchor](https://www.jenkins.io/license/\\#mit-license). Retrieved2026-10-02. https://www.jenkins.io/license/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S27",
+      "url": "https://docs.github.com/en/actions/reference/runners/self-hosted-runners",
+      "formatted": "Self-hosted runners reference. Retrieved2026-10-02. https://docs.github.com/en/actions/reference/runners/self-hosted-runners",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S28",
+      "url": "https://docs.codemagic.io/rest-api/builds/",
+      "formatted": "Builds API. Retrieved2026-10-02. https://docs.codemagic.io/rest-api/builds/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S29",
+      "url": "https://www.electron.build/v26/docs/features/multi-platform-build/",
+      "formatted": "or. Retrieved2026-10-02. https://www.electron.build/v26/docs/features/multi-platform-build/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S30",
+      "url": "https://buildkite.com/docs/agent/cli/reference/artifact",
+      "formatted": "buildkite-agent artifact. Retrieved2026-10-02. https://buildkite.com/docs/agent/cli/reference/artifact",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S31",
+      "url": "https://docs.gitlab.com/runner/install/osx/",
+      "formatted": "Install GitLab Runner on macOS. Retrieved2026-10-02. https://docs.gitlab.com/runner/install/osx/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S32",
+      "url": "https://devblogs.microsoft.com/devops/apple-silicon-and-xcode-27-images-availabile-in-pay-as-you-go-preview/",
+      "formatted": "Apple Silicon and Xcode 27 images available in pay-as-you-go preview. Retrieved2026-10-02. https://devblogs.microsoft.com/devops/apple-silicon-and-xcode-27-images-availabile-in-pay-as-you-go-preview/",
+      "credibility_score": 85,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S33",
+      "url": "https://api.github.com/repos/buildkite/agent/releases/tags/v4.1.0",
+      "formatted": "Buildkite agent v4.1.0 published release assets. Retrieved2026-10-02. https://api.github.com/repos/buildkite/agent/releases/tags/v4.1.0",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S34",
+      "url": "https://about.gitlab.com/pricing/",
+      "formatted": "GitLab pricing. Retrieved2026-10-02. https://about.gitlab.com/pricing/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S35",
+      "url": "https://www.jetbrains.com/teamcity/buy/",
+      "formatted": "TeamCity pricing and licensing. Retrieved2026-10-02. https://www.jetbrains.com/teamcity/buy/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S36",
+      "url": "https://circleci.com/pricing/",
+      "formatted": "CircleCI pricing. Retrieved2026-10-02. https://circleci.com/pricing/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    },
+    {
+      "id": "S37",
+      "url": "https://azure.microsoft.com/en-us/pricing/details/devops/azure-devops-services/",
+      "formatted": "Azure DevOps Services pricing. Retrieved2026-10-02. https://azure.microsoft.com/en-us/pricing/details/devops/azure-devops-services/",
+      "credibility_score": 90,
+      "confidence": 0.9,
+      "label": "verified"
+    }
+  ]
+}

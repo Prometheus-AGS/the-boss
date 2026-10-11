@@ -1,0 +1,28 @@
+{
+  "mode": "artifact",
+  "verdict": "PASS",
+  "judge_model": "GPT-6",
+  "isolation_mode": "harness-native",
+  "producer_model": "GPT-6 (variant not exposed)",
+  "cross_model_check": "unverified",
+  "findings": [],
+  "checked_classes": [
+    "Publication access precedes expensive builds; alternate origin remains separately gated.",
+    "Comparable provider costs, worker sourcing, concurrency, retention and ownership are explicit; Buildkite is a conditional pilot.",
+    "Exact publication entrypoints, inputs, receipts, dispatch dependencies and partial effects are mapped.",
+    "Plan and provenance reflect initial BLOCK and bounded correction.",
+    "All four native platforms require separate acceptance.",
+    "Confidence is an editorial evidence measure, not release-success probability.",
+    "Actions independence and complete GitHub independence are separated.",
+    "Unsupported capabilities, account access, timing and native operation remain unknown."
+  ],
+  "residual_risks": [
+    "No alternative provider or four-native-worker fleet has built or operated The Boss.",
+    "GitHub release/repository writes, landing writes and Lovable publication access remain unexercised.",
+    "Dispatch-free publication, truthful external provenance and durable receipts require implementation.",
+    "Alternate R2 and owned-domain delivery is not currently available and requires approval.",
+    "Actual fleet cost, operator labor, hardware, credentials, signing and recovery remain unknown.",
+    "Automated Feynman gate skipped.",
+    "Distinct reviewer-model identity unverified."
+  ]
+}
