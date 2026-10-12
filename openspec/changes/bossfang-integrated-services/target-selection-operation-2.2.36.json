@@ -408,9 +408,64 @@
       },
       "repair": {
         "source": "b4244aeaa7e931240ae0f09ae31bae3f45bda244",
-        "status": "production-code-complete-native-build-running",
+        "status": "production-code-and-mac-build-complete-installed-operation-pending",
         "review": "endpoint-repair-review.json"
       }
+    }
+  },
+  "endpointRepairBoundary": {
+    "recordedAt": "2026-10-12T05:34:48.604Z",
+    "source": {
+      "boss": "6205a5588008e1ad12937d334220b517dd37c82d",
+      "uar": "b4244aeaa7e931240ae0f09ae31bae3f45bda244",
+      "bossfang": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85"
+    },
+    "nativeBuild": {
+      "source": "b4244aeaa7e931240ae0f09ae31bae3f45bda244",
+      "startedAt": "2026-10-12T05:12:00.964Z",
+      "finishedAt": "2026-10-12T05:17:30.097Z",
+      "code": 0
+    },
+    "applicationBuild": {
+      "source": "6205a5588008e1ad12937d334220b517dd37c82d",
+      "uar": "b4244aeaa7e931240ae0f09ae31bae3f45bda244",
+      "startedAt": "2026-10-12T05:17:42.333Z",
+      "finishedAt": "2026-10-12T05:34:10.790Z",
+      "code": 0,
+      "command": [
+        "pnpm",
+        "build:mac:arm64"
+      ],
+      "signature": "Developer ID Application; mounted bundle valid on disk",
+      "payloadValidation": "passed",
+      "notarization": "pending-public-release"
+    },
+    "artifact": {
+      "schemaVersion": 1,
+      "candidate": "2.2.36",
+      "source": "6205a5588008e1ad12937d334220b517dd37c82d",
+      "uar": "b4244aeaa7e931240ae0f09ae31bae3f45bda244",
+      "bossfang": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85",
+      "path": "/Users/gqadonis/Projects/prometheus/the-boss/dist/The-Boss-2.2.36-mac-arm64.dmg",
+      "size": 1884119312,
+      "sha256": "c139bc8a85b603b7aedd3501eb9727f6d98b75ad246027487c72022983f14f12",
+      "notarization": "not-notarized-local-build",
+      "operation": "pending-installation",
+      "recordedAt": "2026-10-12T05:29:13.631Z"
+    },
+    "operation": {
+      "status": "pending",
+      "reason": "Computer control reported Mac locked; operator unlock requested. New candidate has not been installed or operated. Earlier applicable evidence remains separately recorded."
+    },
+    "sharedMemory": {
+      "nativeBossfangAfterApplicationRestart": "passed-existing-evidence",
+      "differentWorkspace": "passed-existing-evidence",
+      "delegatedUar": "pending-fresh-human-approval-and-operation"
+    },
+    "publication": {
+      "macArm64": "pending",
+      "windowsX64": "native-build-in-progress",
+      "website": "pending"
     }
   }
 }
