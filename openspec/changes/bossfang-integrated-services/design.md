@@ -19,3 +19,13 @@ BossFang persists explicit target configuration and dispatches dashboard chat th
 The UI is an incumbent-style operational refinement using Impeccable guidance: searchable Installed agents and Models through the default agent groups, visible unavailable choices, optional Advanced model override, and instance/agent/model/workspace/memory summary. The Boss resolves existing protected provider credentials against BossFang's selected instance independently of Work. No OAuth-to-API-key reinterpretation or silent provider/billing change.
 
 Ownership: UAR worker owns runtime catalog/resolver/admission; BossFang worker owns native chat dispatch and dashboard/locales; desktop worker owns The Boss source/settings/provider and memory lifecycle. Lead owns OpenSpec, source reconciliation, serialized native builds, versioning, installed operation and publication. All three implementation areas finish before the delivery operation. Preserve other sessions' dirty UAR source separately from exact release inputs.
+
+## Observed endpoint relocation repair (2026-10-12)
+
+The installed port-change operation exposed a stale reusable deployment receipt:
+UAR advertised port 1910, but delegated-host admission compared the deployment’s
+stored port 1907 with current placement and refused it. New execution admission
+must resolve current placement from the same trusted instance authority while
+retaining definition/binding identity. Existing run receipts, epochs and effect
+authority remain immutable and strictly checked. No caller endpoint override,
+automatic effect replay, or blanket conflict suppression is authorized.

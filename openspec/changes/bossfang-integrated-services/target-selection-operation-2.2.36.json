@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "candidate": "2.2.36",
-  "recordedAt": "2026-10-12T04:49:45.327Z",
+  "recordedAt": "2026-10-12T05:04:35.882Z",
   "status": "installed-operation",
   "source": {
     "boss": "5d32e53253",
@@ -84,8 +84,8 @@
     },
     {
       "name": "service/model failures, restart and endpoint recovery",
-      "outcome": "partial",
-      "detail": "Managed UAR restarted through installed UI and BossFang completed a fresh delegated prompt after automatic reconnection. Unavailable models were shown in the empty workspace. Explicit endpoint-change and unavailable-memory-service operations remain pending.",
+      "outcome": "failed-endpoint-relocation",
+      "detail": "Same-endpoint restart passed. Port relocation1910 failed new delegated-host admission despite listening and Ready indicators. Original effective1907 and original pending remote-storage selection restored. Repair remains required.",
       "evidenceRef": "completedBoundary.observations.runtimeRestart"
     },
     {
@@ -96,11 +96,12 @@
     }
   ],
   "publication": {
-    "macArm64": "building-notarized-installer",
+    "macArm64": "cancelled-before-publication-pending-endpoint-repair",
     "windowsX64": "pending",
     "website": "pending",
     "nativeWindowsAcceptance": "pending",
-    "macWorkflow": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38204641474"
+    "macWorkflow": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38204641474",
+    "reason": "Installed endpoint relocation operation failed. Existing draft2.2.36 has no published installers."
   },
   "scope": "Mac ARM64 and Windows x64 only; source changes are not operational proof.",
   "initialSource": {
@@ -191,7 +192,7 @@
       },
       {
         "scenario": "delegated-shared-memory-retrieval",
-        "status": "pending-human-approval",
+        "status": "not-proven-approval-lease-expired",
         "session": "32f830c4-8067-4cbc-9fc0-b807321e5bb7",
         "run": "5dfdf1a8-2153-47ea-8ea8-a793c1f67d59",
         "key": "copper-kite-235",
@@ -382,6 +383,29 @@
       "endpointChangeDemonstrated": false,
       "sharedMemoryUnaffected": true,
       "scope": "Existing pending operational storage configuration is distinct from the working shared memory API at port23001. No credentials or store selection were modified."
+    },
+    "endpointChange": {
+      "status": "failed",
+      "observedAt": "2026-10-12T04:56:00Z",
+      "action": "Apply runtime port1910 using unchanged embedded store",
+      "listener": "http://127.0.0.1:1910",
+      "bossfangSettingsReadiness": "ready",
+      "session": "af9ee1fe-298a-445a-86cc-00a7629fcc08",
+      "error": "uar_target_catalog_unavailable",
+      "restored": {
+        "listener": "http://127.0.0.1:1907",
+        "preferredPort": 1906,
+        "effectiveStorage": "embedded",
+        "originalPendingRemoteSelection": true
+      },
+      "diagnosis": {
+        "code": "delegated_host_binding_unavailable",
+        "operatorLogSequences": [
+          1122,
+          1127
+        ],
+        "cause": "Reusable deployment admission retained listener1907 after the selected runtime moved to1910. Existing execution transport receipts must remain immutable; new admissions need current trusted instance placement."
+      }
     }
   }
 }
