@@ -43,7 +43,8 @@
     },
     {
       "name": "shared-memory retrieval through UAR",
-      "outcome": "pending"
+      "outcome": "passed",
+      "evidenceRef": "endpointRepairBoundary.operation.sharedMemory"
     },
     {
       "name": "shared-memory retrieval after whole-application restart",
@@ -84,9 +85,9 @@
     },
     {
       "name": "service/model failures, restart and endpoint recovery",
-      "outcome": "failed-endpoint-relocation",
-      "detail": "Same-endpoint restart passed. Port relocation1910 failed new delegated-host admission despite listening and Ready indicators. Original effective1907 and original pending remote-storage selection restored. Repair remains required.",
-      "evidenceRef": "completedBoundary.observations.runtimeRestart"
+      "outcome": "passed-endpoint-relocation-and-restart",
+      "detail": "Original failed attempt preserved. Repaired installed app completed a new admission at1910, retrieved scoped shared memory, then restored1907.",
+      "evidenceRef": "endpointRepairBoundary.operation"
     },
     {
       "name": "persisted target, override, workspace and instance",
@@ -96,12 +97,12 @@
     }
   ],
   "publication": {
-    "macArm64": "cancelled-before-publication-pending-endpoint-repair",
-    "windowsX64": "pending",
+    "macArm64": "release-workflow-running",
+    "windowsX64": "release-workflow-running",
     "website": "pending",
     "nativeWindowsAcceptance": "pending",
-    "macWorkflow": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38204641474",
-    "reason": "Installed endpoint relocation operation failed. Existing draft2.2.36 has no published installers."
+    "macWorkflow": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38227578387",
+    "reason": "Installed endpoint relocation and UAR shared-memory retrieval passed; final notarized Mac and Windows installers are building."
   },
   "scope": "Mac ARM64 and Windows x64 only; source changes are not operational proof.",
   "initialSource": {
@@ -408,7 +409,7 @@
       },
       "repair": {
         "source": "b4244aeaa7e931240ae0f09ae31bae3f45bda244",
-        "status": "production-code-and-mac-build-complete-installed-operation-pending",
+        "status": "passed-installed-endpoint-relocation",
         "review": "endpoint-repair-review.json"
       }
     }
@@ -454,8 +455,47 @@
       "recordedAt": "2026-10-12T05:29:13.631Z"
     },
     "operation": {
-      "status": "pending",
-      "reason": "Computer control reported Mac locked; operator unlock requested. New candidate has not been installed or operated. Earlier applicable evidence remains separately recorded."
+      "observedAt": "2026-10-12T09:08:05.539Z",
+      "source": {
+        "boss": "6205a5588008e1ad12937d334220b517dd37c82d",
+        "uar": "b4244aeaa7e931240ae0f09ae31bae3f45bda244",
+        "bossfang": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85"
+      },
+      "installedAt": "2026-10-12T08:59:58.402Z",
+      "installation": "/Applications/The Boss.app",
+      "endpointRelocation": {
+        "outcome": "passed",
+        "from": "http://127.0.0.1:1907",
+        "to": "http://127.0.0.1:1910",
+        "session": "af9ee1fe-298a-445a-86cc-00a7629fcc08",
+        "run": "0efcaaf8-1554-41e9-b259-02a378d5eeb9",
+        "terminalState": "completed",
+        "response": "BossFang followed the new UAR port.",
+        "readiness": "Connecting during rebinding; Ready after new admission"
+      },
+      "sharedMemory": {
+        "outcome": "passed-installed-uar-retrieval-after-whole-application-restart",
+        "session": "31e2a5a9-1bc4-47f8-af99-0c3e750f88ff",
+        "run": "6e4949fe-6459-4987-9bd8-c13a5a94989a",
+        "workspace": "da769885-e227-49ad-a407-fb337e4dab60",
+        "lookupKey": "copper-kite-235",
+        "returnedValue": "lantern-68319",
+        "recordId": "7e554267-a679-4d1d-a995-6d78667892a4",
+        "originalCreatedAt": "2026-10-11T23:10:49.104452Z",
+        "freshConversation": true,
+        "promptSuppliedValue": false,
+        "authorization": "Operator explicitly approved the synthetic shared_memory_search; submitted through dashboard Approve control.",
+        "terminalState": "completed",
+        "evidence": "Installed native accessibility UI: input_required/shared_memory_search then completed with original stored value, record identity and creation timestamp. No independent raw UAR tool-result export claimed."
+      },
+      "restoration": {
+        "preferredPort": 1906,
+        "effectivePort": 1907,
+        "originalPendingRemoteStorageSelectionRestored": true,
+        "originalCredentialsUnchanged": true,
+        "effectiveStorage": "existing embedded profile",
+        "sharedMemoryEndpoint": "http://127.0.0.1:23001/mcp/sse"
+      }
     },
     "sharedMemory": {
       "nativeBossfangAfterApplicationRestart": "passed-existing-evidence",
