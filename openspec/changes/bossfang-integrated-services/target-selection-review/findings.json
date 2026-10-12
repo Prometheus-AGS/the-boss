@@ -1,0 +1,56 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-6.1-sol",
+  "judge_identity": {
+    "providerId": "openai",
+    "providerConnectionId": "openai-proxy-8181",
+    "modelId": "gpt-6.1-sol"
+  },
+  "producer_model": "unknown",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "unverified-producer-unknown",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "src/uar/api/targets.rs",
+      "claim": "Model discovery removes unverified and disabled configured models instead of exposing them as unavailable choices.",
+      "evidence": "In catalog(), the provider-model loop executes `let Some(proof) = ...current(...).await else { continue; };`, while current() returns None for disabled providers, disabled models, missing verification, or changed configuration. Consequently these targets never reach UarTargetSettings. The approved continuation requires 'visible unavailable choices' and distinguishes configured from verified.",
+      "suggested_fix": "Emit a catalog row for every configured model, with availability, verification status, and a concrete unavailability reason; keep verified_model() as the execution admission gate."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "src/server.rs",
+      "line": 5078,
+      "claim": "The new verification gate changes legacy inference-only configurations before explicit save conversion.",
+      "evidence": "resolve_requested_model() now unconditionally calls target_sources().verified_model(), returning model_not_verified unless a persisted operation receipt exists. Previously it accepted configured models and supported the configured global-model fallback. BossFang's uar_model_catalog.rs explicitly retains a legacy inference-only driver path, while the approved continuation says 'Legacy inference-only configurations keep their semantics until explicit save conversion.'",
+      "suggested_fix": "Apply the new target admission requirements to explicitly converted full-run targets while preserving the existing inference-only resolution contract for unconverted configurations."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "crates/librefang-api/src/routes/uar_delegation/chat/turns.rs",
+      "claim": "Converting an existing chat to an explicit UAR target drops its existing conversation history from subsequent inference.",
+      "evidence": "begin() obtains `previous` exclusively from projections(), which filters list_uar_delegations() to rows with chat correlation, and constructs all history solely from those rows. config::save() converts an existing manifest in place without migrating its native session history or requiring a new session. Thus the first converted turn sends an empty history even when the selected native session already contains messages, contrary to 'Preserve current history'.",
+      "suggested_fix": "Seed the converted conversation from the authorized existing session history and then append retained UAR turns without duplication, preserving the existing session identity."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "crates/librefang-api/src/routes/uar_delegation/chat/turns.rs",
+      "claim": "Saving a different Advanced model override silently changes the effective model of an existing conversation.",
+      "evidence": "The previous-turn compatibility check compares target_binding_id, definition, selected_instance_id, and workspace_id, but never compares effective_target's provider/model or the saved override. config::save() permits changing model_override on the same binding, and begin() admits the new override for the same session. The approved continuation requires active conversations to retain their original binding, and specifies that the override is part of the effective binding receipt.",
+      "suggested_fix": "Persist the conversation's admitted effective target and reuse its original model selection for later turns; require an explicitly new conversation to adopt a changed override."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "crates/librefang-api/dashboard/src/components/UarTargetSettings.tsx",
+      "claim": "The new target controls introduce untranslated locale keys without updating any locale definitions.",
+      "evidence": "The added components use new keys including `uar_chat.target`, `uar_chat.group_agent`, `uar_chat.group_model`, and `uar_chat.override_policy`; the desktop additions similarly use `bossfang.configureModels` and `bossfang.pendingConfiguration`. Neither repository diff includes locale-definition changes. The approved design explicitly requires 'every locale is updated.'",
+      "suggested_fix": "Add the introduced dashboard and desktop keys to their source locale definitions for every supported locale and regenerate any derived locale artifacts through the existing generation path."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}

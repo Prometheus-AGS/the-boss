@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-12T03:15:47.853Z",
+  "reviewMode": "fresh REST gateway; producer model identity unknown, cross-model distinction unverified",
+  "findings": [
+    {
+      "id": 1,
+      "disposition": "rejected",
+      "reason": "Approved policy explicitly advertises provider/model routes only after successful verification; administration retains unverified configured entries."
+    },
+    {
+      "id": 2,
+      "disposition": "clarified",
+      "reason": "BossFang legacy native-loop configuration is preserved until explicit save. UAR new discovery/admission intentionally requires verified exact bindings; no fallback or paid inference discovery."
+    },
+    {
+      "id": 3,
+      "disposition": "fixed",
+      "source": "37f05a819",
+      "reason": "Authorized native conversation prefix persisted on first delegated turn; then append durable UAR turns."
+    },
+    {
+      "id": 4,
+      "disposition": "fixed-with-explicit-refusal",
+      "source": "37f05a819",
+      "reason": "Changing saved model cannot alter an active execution or prior conversation binding; a later turn refuses and requires a new conversation. Existing old conversations do not transparently adopt new credentials/model."
+    },
+    {
+      "id": 5,
+      "disposition": "packet-omission",
+      "reason": "All five dashboard locales and thirteen desktop/main locales updated. Corrective packet includes actual values."
+    }
+  ],
+  "correctiveReview": [
+    {
+      "finding": "Session id alias",
+      "disposition": "not-observed",
+      "evidence": "kernel/session_ops.rs741 -> substrate.rs733 -> session.rs1493 always emits session_id. Authorization fallback accepts a hypothetical id shape, but real producer never emits it."
+    },
+    {
+      "finding": "Follow-up after saved override change should continue with original model",
+      "disposition": "documented-limitation",
+      "reason": "Explicit new-conversation refusal preserves immutable selections and avoids hidden migration. No claim of transparent continuation after configuration change."
+    }
+  ],
+  "operation": "pending"
+}

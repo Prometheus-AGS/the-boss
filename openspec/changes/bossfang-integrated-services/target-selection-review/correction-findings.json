@@ -1,0 +1,34 @@
+{
+  "mode": "diff",
+  "verdict": "BLOCK",
+  "judge_model": "gpt-6.1-sol",
+  "judge_identity": {
+    "providerId": "openai",
+    "providerConnectionId": "openai-proxy-8181",
+    "modelId": "gpt-6.1-sol"
+  },
+  "producer_model": "unknown",
+  "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+  "cross_model_check": "unverified-producer-unknown",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "crates/librefang-api/src/routes/uar_delegation/chat/turns.rs",
+      "claim": "Changing the saved model override blocks subsequent turns in an existing conversation instead of continuing with its original effective target.",
+      "evidence": "begin() resolves the current saved target and returns `uar_chat_model_changed_new_conversation_required` when a previous turn's `chat.model_override` differs from `target.model_override` or its admitted model differs from `live.effective_model`. It never reuses the conversation's original model selection. The approved policy requires preserving the original effective target for active conversations, and previous finding 4 explicitly requires reusing that selection for later turns.",
+      "suggested_fix": "Resolve follow-up turns using the conversation's persisted original binding and effective model receipt, independently of changes to the agent's saved selection. Apply the newly saved override only to new conversations, while still checking current availability of the original target."
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "crates/librefang-api/src/routes/uar_delegation/chat/history.rs",
+      "claim": "Native history is silently discarded for a session represented by the supported `id` field rather than `session_id`.",
+      "evidence": "turns.rs session() recognizes session rows using `row[\"session_id\"].as_str().or_else(|| row[\"id\"].as_str())`, but history.rs seed() checks only `row[\"session_id\"].as_str()==Some(sid)` and returns `Ok(vec![])` when no such row matches. Thus a session accepted through the `id` representation receives an empty native prefix, which is then frozen into `native_history` on first admission. This violates the approved requirement to preserve history and leaves previous finding 3 unresolved for that supported representation.",
+      "suggested_fix": "Use the same session identity extraction in authorization and history seeding, including the `id` fallback. Do not silently treat an authorized existing session as empty when its history cannot be located; return an explicit error instead."
+    }
+  ],
+  "sycophancy_screen": {
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2
+  }
+}
