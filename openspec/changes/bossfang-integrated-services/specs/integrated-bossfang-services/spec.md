@@ -17,3 +17,21 @@ The application SHALL show dashboard, UAR execution, models and shared memory re
 #### Scenario: Unavailable model
 - **WHEN** a persisted model is absent from the connected catalog
 - **THEN** it is shown unavailable with valid replacements without silently switching inference routes
+
+### Requirement: Authoritative UAR targets
+Discovery, chat and delegated admission SHALL agree on installed-agent and configured-model identity. Agent selection SHALL retain the authorized immutable definition binding; model selection SHALL execute the default agent. An explicit model override SHALL be policy-admitted and recorded in the effective binding without mutating the definition.
+#### Scenario: Agent and model selection
+- **WHEN** a user chooses an installed agent, a verified model, or an agent with an explicit verified override
+- **THEN** the catalog and execution resolve the same target, effective model, instance and authorized workspace
+
+### Requirement: UAR owns delegated dashboard execution
+Explicit UAR targets SHALL use existing full-run admission and control, bypassing the native BossFang agent loop. Legacy inference-only configurations SHALL retain their behavior until explicit conversion. Active runs SHALL retain their original authority when configuration changes.
+#### Scenario: Conversation and cancellation
+- **WHEN** a user streams a prompt, follows up, cancels or reopens an explicitly delegated conversation
+- **THEN** BossFang presents the correlated UAR result and lifecycle without replaying effects or running a second tool loop
+
+### Requirement: Installed restart proof
+Release evidence SHALL distinguish build, launch, prompt completion and shared-memory persistence.
+#### Scenario: Whole application restart
+- **WHEN** The Boss is quit and relaunched after an authorized workspace memory is stored
+- **THEN** a fresh authorized UAR conversation retrieves the original value using its lookup key alone, while another workspace cannot retrieve it
