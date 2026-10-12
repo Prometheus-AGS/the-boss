@@ -15,6 +15,7 @@ import { readLocalLiterCredential } from '@main/services/prometheus/literConfig'
 import { writeMiniConfiguration } from '@main/services/prometheus/miniCommands'
 import { discoverServiceCandidates } from '@main/services/prometheus/serviceDiscovery'
 import type { UarModelAssignment } from '@shared/data/api/schemas/agents'
+import { hasRuntimeTransportAdapter } from '@shared/data/presets/runtimeTransport'
 import type { UniqueModelId } from '@shared/data/types/model'
 import type { BossFangModelSourceChoice } from '@shared/types/bossFang'
 
@@ -35,12 +36,29 @@ export async function bossFangModelSources(endpoint: UarSidecarEndpoint): Promis
           source.operational &&
           provider.enabled &&
           model.enabled &&
+          !(
+            source.source === 'boss' &&
+            hasRuntimeTransportAdapter(provider.id) &&
+            !['localhost', '127.0.0.1', '[::1]'].includes(new URL(endpoint.baseUrl).hostname)
+          ) &&
           (provider.credentialConfigured ||
             (source.source === 'uar' &&
               Boolean(
                 provider.baseUrl && ['localhost', '127.0.0.1', '[::1]'].includes(new URL(provider.baseUrl).hostname)
               ))),
-        detail: source.error ?? (!provider.credentialConfigured ? t('bossfang.sourceCredentials') : null)
+        detail:
+          source.error ??
+          (source.source === 'boss' && hasRuntimeTransportAdapter(provider.id)
+            ? !['localhost', '127.0.0.1', '[::1]'].includes(new URL(endpoint.baseUrl).hostname)
+              ? t('bossfang.subscriptionLocal')
+              : !provider.credentialConfigured
+                ? t('bossfang.subscriptionSignIn')
+                : !application.get('ApiGatewayService').getCurrentConfig().enabled
+                  ? t('bossfang.subscriptionGateway')
+                  : null
+            : !provider.credentialConfigured
+              ? t('bossfang.sourceCredentials')
+              : null)
       }))
     )
   )
@@ -77,7 +95,7 @@ export async function configureBossFangModel(
   const source = (await bossFangModelSources(endpoint)).find(
     (item) => item.source === choice.source && item.providerId === choice.providerId && item.modelId === choice.modelId
   )
-  if (!source?.available) throw new Error(t('bossfang.sourceCredentials'))
+  if (!source?.available) throw new Error(source?.detail ?? t('bossfang.sourceCredentials'))
   const assignment: UarModelAssignment =
     choice.source === 'boss'
       ? { source: 'boss', modelId: choice.modelId as UniqueModelId }

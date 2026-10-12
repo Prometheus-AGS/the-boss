@@ -3,13 +3,17 @@ import { modelService } from '@data/services/ModelService'
 import { providerService } from '@data/services/ProviderService'
 import { resolveEffectiveEndpoint } from '@main/ai/provider/endpoint'
 import { createAiUsagePricingSnapshot } from '@main/ai/utils/usageCapture'
+import { t } from '@main/i18n'
 import { readIntegrationConfig, readLiterCredential } from '@main/services/prometheus/integrationConfig'
 import { contextWindowForLiterAlias } from '@main/services/prometheus/literGatewayCatalog'
 import type { UarModelAssignment } from '@shared/data/api/schemas/agents'
+import { hasRuntimeTransportAdapter } from '@shared/data/presets/runtimeTransport'
 import type { ModelSnapshot } from '@shared/data/types/message'
 import { ENDPOINT_TYPE, parseUniqueModelId, type UniqueModelId } from '@shared/data/types/model'
+import { formatGatewayModelId } from '@shared/utils/apiGateway'
 import { getRawModelId } from '@shared/utils/model'
 
+import { resolveApiGatewayRuntime } from '../agentApiGateway'
 import type { AgentSessionUsageCapture } from '../types'
 import { gatewayResponseSchema, providerResponseSchema } from './UarModelSourceAdapter'
 import type { UarSidecarEndpoint } from './UarSidecarService'
@@ -60,7 +64,7 @@ function normalizeGatewayEndpoint(endpoint: string): string {
   return url.href.replace(/\/$/, '')
 }
 
-function resolveBossModel(uniqueModelId: UniqueModelId): ResolvedUarModelAssignment {
+async function resolveBossModel(uniqueModelId: UniqueModelId): Promise<ResolvedUarModelAssignment> {
   const { providerId, modelId } = parseUniqueModelId(uniqueModelId)
   const provider = providerService.getByProviderId(providerId)
   const model = modelService.getByKey(providerId, modelId)
@@ -68,6 +72,38 @@ function resolveBossModel(uniqueModelId: UniqueModelId): ResolvedUarModelAssignm
     throw new Error(
       `UAR_MODEL_ASSIGNMENT_REQUIRED: ${provider.name} or ${model.name} is disabled. Choose an available model in this agent's settings.`
     )
+  }
+  if (provider.authType !== 'api-key' && hasRuntimeTransportAdapter(provider.id)) {
+    if (!(await application.get('OAuthRuntimeService').hasToken(provider.id))) {
+      throw new Error(t('bossfang.subscriptionSignIn'))
+    }
+    if (!application.get('ApiGatewayService').getCurrentConfig().enabled) {
+      throw new Error(t('bossfang.subscriptionGateway'))
+    }
+    // Reuse the existing application gateway: it owns OAuth refresh, account
+    // headers and wire conversion. Only its local credential crosses to UAR.
+    const gateway = await resolveApiGatewayRuntime('uar-model-source:' + provider.id)
+    const apiModelId = getRawModelId(model)
+    const gatewayModelId = formatGatewayModelId(provider.id, apiModelId)
+    const baseUrl = normalizeGatewayEndpoint(gateway.baseUrl)
+    return {
+      source: 'boss',
+      providerId: provider.id,
+      modelId: gatewayModelId,
+      providerName: provider.name ?? provider.id,
+      modelName: model.name ?? model.id,
+      effectiveIdentity: `${provider.id}/${apiModelId}`,
+      connectedInstance: baseUrl,
+      protocol: 'chat',
+      credential: {
+        provider_id: provider.id,
+        provider_kind: 'openai_compatible',
+        base_url: baseUrl,
+        api_key: gateway.apiKey,
+        default_model: gatewayModelId,
+        ...(model.contextWindow ? { context_window: Math.min(model.contextWindow, 2_000_000) } : {})
+      }
+    }
   }
   const endpoint = resolveEffectiveEndpoint(provider, model)
   const providerKind =
@@ -184,7 +220,15 @@ export async function assertUarModelAvailable(
   assignment: ResolvedUarModelAssignment,
   endpoint: UarSidecarEndpoint
 ): Promise<void> {
-  if (assignment.source === 'boss') return
+  if (assignment.source === 'boss') {
+    if (
+      hasRuntimeTransportAdapter(assignment.providerId) &&
+      !['localhost', '127.0.0.1', '[::1]'].includes(new URL(endpoint.baseUrl).hostname)
+    ) {
+      throw new Error(t('bossfang.subscriptionLocal'))
+    }
+    return
+  }
   if (assignment.source === 'gateway') {
     const response = await fetch(`${assignment.connectedInstance}/models`, {
       headers: { authorization: `Bearer ${assignment.credential?.api_key ?? ''}` },

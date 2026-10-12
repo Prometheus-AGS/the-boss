@@ -5,6 +5,7 @@ import { modelService } from '@data/services/ModelService'
 import { providerService } from '@data/services/ProviderService'
 import { resolveEffectiveEndpoint } from '@main/ai/provider/endpoint'
 import { readIntegrationConfig, readLiterCredential } from '@main/services/prometheus/integrationConfig'
+import { hasRuntimeTransportAdapter } from '@shared/data/presets/runtimeTransport'
 import { ENDPOINT_TYPE, type Model } from '@shared/data/types/model'
 import type { Provider } from '@shared/data/types/provider'
 import type { UarModelSourceSnapshot, UarProviderMutation } from '@shared/types/prometheusIntegration'
@@ -85,6 +86,17 @@ export async function readUarModelSources(selectedEndpoint?: UarSidecarEndpoint)
   const literKey = await readLiterCredential(config.services.liter.endpoint)
   const bossProviders = providerService.list({})
   const bossModels = modelService.list({})
+  const gatewayEnabled = application.get('ApiGatewayService').getCurrentConfig().enabled
+  const subscriptionReady = new Map(
+    await Promise.all(
+      bossProviders
+        .filter((provider) => provider.authType !== 'api-key' && hasRuntimeTransportAdapter(provider.id))
+        .map(
+          async (provider) =>
+            [provider.id, await application.get('OAuthRuntimeService').hasToken(provider.id)] as const
+        )
+    )
+  )
 
   let gatewayModels: string[] = []
   let gatewayError: string | undefined
@@ -113,9 +125,12 @@ export async function readUarModelSources(selectedEndpoint?: UarSidecarEndpoint)
           id: provider.id,
           name: provider.name ?? provider.id,
           credentialConfigured:
-            provider.authType === 'api-key' &&
-            (provider.apiKeys.some((key) => key.isEnabled) || Boolean(provider.authOptional)),
-          enabled: provider.isEnabled && provider.authType === 'api-key',
+            provider.authType === 'api-key'
+              ? provider.apiKeys.some((key) => key.isEnabled) || Boolean(provider.authOptional)
+              : subscriptionReady.get(provider.id) === true,
+          enabled:
+            provider.isEnabled &&
+            (provider.authType === 'api-key' || (gatewayEnabled && subscriptionReady.get(provider.id) === true)),
           models: bossModels
             .filter((model) => model.providerId === provider.id)
             .map((model) => ({
