@@ -48,7 +48,7 @@
     },
     {
       "name": "shared-memory retrieval after whole-application restart",
-      "outcome": "passed-native-bossfang",
+      "outcome": "passed-native-and-delegated-uar",
       "attempts": [
         {
           "outcome": "pending-tool-evidence",
@@ -57,7 +57,7 @@
           "detail": "Fresh installed BossFang native Claude conversation returned original synthetic value and record identity after full application restart using lookup key only. Independent tool receipt inspection pending."
         }
       ],
-      "detail": "Actual native BossFang MCP retrieval confirmed after full application restart; cross-runtime UAR retrieval remains separately pending.",
+      "detail": "Actual native BossFang MCP receipt and separate fresh installed UAR-backed conversation both retrieved the original synthetic record after whole-application restart. UAR evidence records the native approval UI and returned record, without claiming an independent raw tool-result export.",
       "evidence": {
         "session": "8f531e94-17a4-462a-9e45-ee35b1fadafc",
         "tool": "mcp__librefang__shared_memory_search",
@@ -91,9 +91,9 @@
     },
     {
       "name": "persisted target, override, workspace and instance",
-      "outcome": "passed-target-workspace-instance",
-      "detail": "Installed agent selection without override, personal workspace and managed-local instance survived whole-application restart and completed a prompt. Advanced override execution passed earlier; its restart persistence is not separately claimed.",
-      "evidenceRef": "completedBoundary.observations"
+      "outcome": "passed",
+      "detail": "Saved installed agent and explicit Codex override, workspace and selected instance survived full application restart.",
+      "evidenceRef": "endpointRepairBoundary.operation.savedOverrideRestart"
     }
   ],
   "publication": {
@@ -495,6 +495,49 @@
         "originalCredentialsUnchanged": true,
         "effectiveStorage": "existing embedded profile",
         "sharedMemoryEndpoint": "http://127.0.0.1:23001/mcp/sse"
+      },
+      "savedOverrideRestart": {
+        "recordedAt": "2026-10-12T09:16:10.504Z",
+        "outcome": "passed",
+        "procedure": "Save installed Default agent with GPT-6.1 Sol override; normal menu Quit TheBoss; reopen /Applications/The Boss.app; Apps > BossFang > Chat > runtime-agent > UAR target.",
+        "agent": "c9a58bb2-20fb-5e0a-8436-fe1d6c52ae86",
+        "target": "uar:agent:urn%3Aboss%3Adefault-agent%3Abinding%3Ada769885-e227-49ad-a407-fb337e4dab60",
+        "modelOverride": "bossfang-source-e4e508a62bc0b8711926/openai-codex:gpt-6.1-sol",
+        "instance": "managed-local",
+        "workspace": "da769885-e227-49ad-a407-fb337e4dab60",
+        "evidence": "Installed application accessibility UI showed saved target, expanded advanced override, effective model, instance and workspace after full restart; no new inference or memory write performed."
+      },
+      "disconnectedRecovery": {
+        "recordedAt": "2026-10-12T09:18:21.845Z",
+        "outcome": "passed",
+        "procedure": [
+          "Settings > BossFang > Disconnect UAR",
+          "Open dashboard > Refresh UAR target",
+          "Settings > BossFang > Reconnect",
+          "Open dashboard > Refresh UAR target"
+        ],
+        "disconnected": {
+          "dashboard": "Ready",
+          "execution": "Disabled",
+          "models": "Disabled",
+          "sharedMemory": "Ready",
+          "savedTarget": "retained and visibly Unavailable",
+          "error": "uar_connection_unavailable",
+          "action": "Configure and verify a model in The Boss > Settings > BossFang, then refresh"
+        },
+        "recovered": {
+          "dashboard": "Ready",
+          "execution": "Ready",
+          "models": "Ready",
+          "sharedMemory": "Ready",
+          "originalTargetAndOverridePreserved": true
+        },
+        "externalMemoryServiceStopped": false,
+        "response": "UAR is ready after reconnecting.",
+        "session": "0ed45a55-1bd7-4272-b791-df4420c10823",
+        "run": "3239d17e-809c-4aaf-a3fb-47c5dccd1fd4",
+        "terminalState": "completed",
+        "conversationHistoryPreserved": true
       }
     },
     "sharedMemory": {
