@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "candidate": "2.2.35",
+  "status": "in_progress",
+  "source": {
+    "boss": "0fb7d3ff96",
+    "uar": "4ee38989a7ed542193341cb995c6993719e3ee4b",
+    "bossfang": "73bfbe7a1a65bace9d5048040829afd315cae578"
+  },
+  "installedFrom": "/Users/gqadonis/Projects/prometheus/the-boss/dist/The-Boss-2.2.35-mac-arm64.dmg",
+  "workspaceId": "da769885-e227-49ad-a407-fb337e4dab60",
+  "operations": [
+    {
+      "name": "Start BossFang from installed Settings",
+      "outcome": "passed",
+      "detail": "Dashboard4545; selected managed UAR1907; external workstation memory23001; all readiness states ready without manual UAR connect."
+    },
+    {
+      "name": "Native Claude agent remembers via shared_memory_remember",
+      "outcome": "passed",
+      "memoryId": "7e554267-a679-4d1d-a995-6d78667892a4",
+      "observedAt": "2026-10-11T23:10:49Z",
+      "detail": "Actual workstation service record independently read; trusted user/session/agent fields present."
+    },
+    {
+      "name": "Restart BossFang and retrieve in fresh conversation",
+      "outcome": "passed",
+      "sessionId": "3c0821fa-8bd3-433b-9dcd-aa71f8ab1146",
+      "detail": "Requested only synthetic check name; returned original record ID and value lantern-68319 through shared_memory_search."
+    },
+    {
+      "name": "UAR model selection and inference",
+      "outcome": "failed",
+      "detail": "v1/models advertised unconfigured gpt-4.1-mini; runtime rejected Unknown model. Repair underway; configured runtime model is gpt-4o."
+    }
+  ],
+  "pending": [
+    "actual UAR agent shared-memory retrieval",
+    "whole app restart retrieval",
+    "workspace isolation",
+    "UAR generation/port/cancellation/failure recovery",
+    "final corrected signed/notarized build and Windows x64 publication"
+  ]
+}

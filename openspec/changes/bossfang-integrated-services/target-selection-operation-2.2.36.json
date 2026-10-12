@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "candidate": "2.2.36",
+  "recordedAt": "2026-10-12T03:26:31.500Z",
+  "status": "installed-operation",
+  "source": {
+    "boss": "5d32e53253",
+    "uar": "536df169d8a5774812b01595fec67e9faa9c30d1",
+    "bossfang": "37f05a819f3e7ea92f8b6541b6432e2bdb961785"
+  },
+  "nativeWindowsRun": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38201027520",
+  "priorEvidence": "installed-operation-20261011.json",
+  "operations": [
+    {
+      "name": "automatic startup connection and persisted workspace",
+      "outcome": "passed",
+      "detail": "Installed 2.2.36 UI restored Dashboard/UAR/Shared memory readiness and personal workspace. Models correctly unavailable until verified."
+    },
+    {
+      "name": "installed-agent prompt, follow-up and cancellation",
+      "outcome": "passed",
+      "attempts": [
+        {
+          "at": "2026-10-12T03:54:00Z",
+          "outcome": "failed",
+          "error": "delegated_host_context_mismatch",
+          "cause": "Host-context admission rejected supplied conversation history before its existing history validator.",
+          "repairSource": "c314099bc9173058f3ba43b983539d8d13c6f4de"
+        }
+      ],
+      "evidenceRef": "installedRepairOperations.observations"
+    },
+    {
+      "name": "verified model and explicit model override",
+      "outcome": "passed",
+      "attempts": [
+        {
+          "outcome": "partial",
+          "detail": "Configured Moonshot kimi-k3 through existing protected provider; actual inference verification passed. Codex source was incorrectly API-key gated; host bridge repair committed ebcf2faaa4. Override remains pending."
+        }
+      ],
+      "evidenceRef": "installedRepairOperations.observations"
+    },
+    {
+      "name": "shared-memory retrieval through UAR",
+      "outcome": "pending"
+    },
+    {
+      "name": "shared-memory retrieval after whole-application restart",
+      "outcome": "passed-native-bossfang",
+      "attempts": [
+        {
+          "outcome": "pending-tool-evidence",
+          "session": "8f531e94-17a4-462a-9e45-ee35b1fadafc",
+          "agent": "b905fed5-ca6d-58f7-a81a-c73595b7efcb",
+          "detail": "Fresh installed BossFang native Claude conversation returned original synthetic value and record identity after full application restart using lookup key only. Independent tool receipt inspection pending."
+        }
+      ],
+      "detail": "Actual native BossFang MCP retrieval confirmed after full application restart; cross-runtime UAR retrieval remains separately pending.",
+      "evidence": {
+        "session": "8f531e94-17a4-462a-9e45-ee35b1fadafc",
+        "tool": "mcp__librefang__shared_memory_search",
+        "query": "copper-kite-235",
+        "scope": "workspace",
+        "workspaceId": "da769885-e227-49ad-a407-fb337e4dab60",
+        "recordId": "7e554267-a679-4d1d-a995-6d78667892a4",
+        "originalCreatedAt": "2026-10-11T23:10:49.104452Z",
+        "toolCalledAt": "2026-10-12T03:55:25.443Z",
+        "resultAt": "2026-10-12T03:55:27.536Z",
+        "transcript": "/Users/gqadonis/.claude/projects/-Users-gqadonis-Library-Application-Support-TheBoss-Data-Agents--bossfang/7d6b10e6-a320-484b-98f0-2875344290ed.jsonl",
+        "lines": [
+          32,
+          34
+        ],
+        "promptContainsStoredValue": false,
+        "transcriptSha256": "08a261c11511aad6786cb3e2763a4edaf475339c75d9e5979ee19268ad746cba"
+      }
+    },
+    {
+      "name": "different-workspace isolation and private-memory distinction",
+      "outcome": "pending"
+    },
+    {
+      "name": "service/model failures, restart and endpoint recovery",
+      "outcome": "pending"
+    },
+    {
+      "name": "persisted target, override, workspace and instance",
+      "outcome": "pending"
+    }
+  ],
+  "publication": {
+    "macArm64": "pending",
+    "windowsX64": "pending",
+    "website": "pending",
+    "nativeWindowsAcceptance": "pending"
+  },
+  "scope": "Mac ARM64 and Windows x64 only; source changes are not operational proof.",
+  "initialSource": {
+    "boss": "52c6e181c82258943b10a6ff80c09230038ca03d",
+    "uar": "a42f23bbc8c83beb2f0a362633c0b769206b1027",
+    "bossfang": "37f05a819f3e7ea92f8b6541b6432e2bdb961785"
+  },
+  "buildAttempts": [
+    {
+      "component": "bossfang",
+      "source": "37f05a819f3e7ea92f8b6541b6432e2bdb961785",
+      "outcome": "passed",
+      "receipt": "/tmp/bossfang-target-selection-20261012/build-result.json"
+    },
+    {
+      "component": "uar",
+      "source": "a42f23bbc8c83beb2f0a362633c0b769206b1027",
+      "outcome": "failed",
+      "reason": "Two SHA-256 digest LowerHex compile errors",
+      "receipt": "/tmp/uar-target-selection-native-20261012/attempt-1-result.json"
+    },
+    {
+      "component": "uar",
+      "source": "536df169d8a5774812b01595fec67e9faa9c30d1",
+      "outcome": "passed",
+      "receipt": "/tmp/uar-target-selection-native-20261012/result.json"
+    },
+    {
+      "component": "the-boss-mac-arm64",
+      "source": "5d32e53253",
+      "outcome": "failed",
+      "reason": "DMG checksum and signature passed. Final payload validation observed source pin changed to c314 during packaging while installed payload remained536df. Preserve this failed orchestration attempt; corrected rebuild will freeze inputs through completion.",
+      "receipt": "/tmp/the-boss-target-selection-2.2.36-build-result.json"
+    }
+  ],
+  "installedFrom": "dist/mac-arm64/The Boss.app",
+  "installedAt": "2026-10-12T03:50:55.454Z",
+  "observedNonblockingIssues": [
+    "Native Claude internal MCP calls are absent from BossFang message rows; an unnecessary actions-not-executed nudge triggered a second read. First actual tool receipt proves fresh retrieval."
+  ],
+  "installedRepairOperations": {
+    "schemaVersion": 1,
+    "observedAt": "2026-10-12T04:27:48.180Z",
+    "applicationVersion": "2.2.36",
+    "source": {
+      "boss": "45db56d98e",
+      "uar": "c314099bc9173058f3ba43b983539d8d13c6f4de",
+      "bossfang": "37f05a819f3e7ea92f8b6541b6432e2bdb961785"
+    },
+    "observations": [
+      {
+        "scenario": "installed-agent-prompt-followup",
+        "status": "passed",
+        "session": "78c20bf0-494b-479c-b443-871b11df2269",
+        "agent": "default-agent",
+        "model": "bossfang-source-fba70d2ddb565ab3b644/kimi-k3",
+        "response": "UAR integrated chat is working.",
+        "evidence": "Installed packaged application native accessibility observation"
+      },
+      {
+        "scenario": "explicit-agent-model-override",
+        "status": "passed",
+        "session": "5aeccdbe-9e53-4810-aea0-6b2be72f28ff",
+        "agent": "default-agent",
+        "model": "bossfang-source-e4e508a62bc0b8711926/openai-codex:gpt-6.1-sol",
+        "response": "Explicit model override is working.",
+        "terminalState": "completed"
+      },
+      {
+        "scenario": "delegated-cancellation",
+        "status": "passed",
+        "session": "5aeccdbe-9e53-4810-aea0-6b2be72f28ff",
+        "actions": [
+          "Stop generating",
+          "Cancel delegated run"
+        ],
+        "terminalState": "cancelled"
+      },
+      {
+        "scenario": "verified-model-default-agent",
+        "status": "passed",
+        "session": "0ed45a55-1bd7-4272-b791-df4420c10823",
+        "agent": "default-agent",
+        "model": "bossfang-source-e4e508a62bc0b8711926/openai-codex:gpt-6.1-sol",
+        "response": "Verified model route is working.",
+        "terminalState": "completed",
+        "run": "0d8b7028-1dde-4050-949e-520d59eaf55d"
+      },
+      {
+        "scenario": "delegated-shared-memory-retrieval",
+        "status": "pending-human-approval",
+        "session": "32f830c4-8067-4cbc-9fc0-b807321e5bb7",
+        "run": "5dfdf1a8-2153-47ea-8ea8-a793c1f67d59",
+        "key": "copper-kite-235",
+        "scope": "workspace",
+        "terminalState": null
+      }
+    ],
+    "knownRepair": {
+      "scenario": "target-selection-persistence",
+      "observedFailure": "TOML serialization of optional null fields failed; restart reloaded legacy target",
+      "sourceFix": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85",
+      "status": "native-built-packaged-operation-pending"
+    }
+  },
+  "repairedMacBuild": {
+    "source": "45db56d98ec495193eba55797f6184ab9d5edd7b",
+    "startedAt": "2026-10-12T04:06:50.852Z",
+    "finishedAt": "2026-10-12T04:29:55.746Z",
+    "command": [
+      "pnpm",
+      "build:mac:arm64"
+    ],
+    "code": 0
+  },
+  "targetPersistenceRepair": {
+    "source": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85",
+    "status": "native-built-packaged-operation-pending",
+    "manifest": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-2ec0f66ec/bossfang-darwin-arm64.json"
+  }
+}
