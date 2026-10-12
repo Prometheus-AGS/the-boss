@@ -209,18 +209,22 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.35 - Integrated BossFang services
+    The Boss 2.2.36 - UAR targets and shared services
 
     - Restore the selected UAR connection automatically using a persistent personal workspace.
-    - Use configured live models and show dashboard, execution, model and shared-memory readiness separately.
+    - Select installed UAR agents or verified model routes, with explicit advanced model overrides.
+    - Delegate configured BossFang conversations to complete UAR runs, with streaming and cancellation.
+    - Configure existing providers and show dashboard, execution, model and shared-memory readiness separately.
     - Connect native and delegated agents to scoped Surreal Memory while preserving private agent memory.
     - Keep service credentials in the host and preserve active execution bindings when configuration changes.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.35 - BossFang 服务集成
+    The Boss 2.2.36 - UAR 执行目标与共享服务
 
     - 使用持久化的个人工作区自动恢复所选 UAR 连接。
-    - 使用已配置的实时模型列表，分别显示控制台、执行、模型和共享记忆的就绪状态。
+    - 选择已安装的 UAR 智能体或已验证的模型路由，并支持显式的高级模型覆盖设置。
+    - 将已配置的 BossFang 对话委派为完整的 UAR 运行，支持流式输出和取消。
+    - 配置现有模型提供商，分别显示控制台、执行、模型和共享记忆的就绪状态。
     - 将原生和委派智能体连接到限定范围的 Surreal Memory，同时保留智能体的私有记忆。
     - 将服务凭据保留在宿主中，并在配置变更时保留活动执行的绑定。
     <!--LANG:END-->
