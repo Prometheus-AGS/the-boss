@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "candidate": "2.2.36",
   "recordedAt": "2026-10-12T05:04:35.882Z",
-  "status": "installed-operation",
+  "status": "installed-mac-operation-passed-publication-running",
   "source": {
-    "boss": "5d32e53253",
-    "uar": "536df169d8a5774812b01595fec67e9faa9c30d1",
-    "bossfang": "37f05a819f3e7ea92f8b6541b6432e2bdb961785"
+    "boss": "019d30fedb179520cab33706b67482d91782b86d",
+    "uar": "b4244aeaa7e931240ae0f09ae31bae3f45bda244",
+    "bossfang": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85"
   },
   "nativeWindowsRun": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38201027520",
   "priorEvidence": "installed-operation-20261011.json",
@@ -538,6 +538,16 @@
         "run": "3239d17e-809c-4aaf-a3fb-47c5dccd1fd4",
         "terminalState": "completed",
         "conversationHistoryPreserved": true
+      },
+      "memoryUnavailableRecovery": {
+        "recordedAt": "2026-10-12T09:25:44.805Z",
+        "outcome": "passed-readiness-and-recovery",
+        "procedure": "Use Services UI to save http://127.0.0.1:1/mcp/sse temporarily, observe BossFang readiness, then restore http://127.0.0.1:23001/mcp/sse.",
+        "failure": "Selected shared memory is unavailable. Open Services settings to configure it.",
+        "otherServices": "Dashboard, UAR execution and models stayed Ready",
+        "recovery": "Shared memory Ready again with original endpoint and external-service ownership",
+        "scope": "Connection readiness and UI recovery only; no memory write attempted during outage; external service process and data were not changed.",
+        "connectionSourceAfterRestoration": "manual endpoint, externally owned"
       }
     },
     "sharedMemory": {
@@ -550,5 +560,6 @@
       "windowsX64": "native-build-in-progress",
       "website": "pending"
     }
-  }
+  },
+  "sourceApplicability": "Installed Mac source6205a55880 contains the same production inputs as release019d30fedb; later commits update Windows manifest and operation documentation. Earlier passing operations retain their named exact inputs; the endpoint repair affects new-admission placement and readiness, and the failed relocation was repeated against b424."
 }
