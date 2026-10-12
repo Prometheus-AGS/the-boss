@@ -18,6 +18,11 @@ export const entries: SettingsSearchEntry[] = [
     aliases: ['UAR', 'instance', 'workspace', 'delegation', 'grant']
   },
   {
+    anchorId: 'model-sources',
+    titleKey: 'bossfang.configureModels',
+    aliases: ['provider', 'API key', 'gateway', 'liter-llm', 'inference']
+  },
+  {
     anchorId: 'diagnostics',
     titleKey: 'bossfang.diagnostics',
     aliases: ['model', 'stream', 'run', 'tokens', 'logs', 'export']

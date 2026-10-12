@@ -24,6 +24,8 @@ type ManagedIntegrationSecret =
   | 'uarAdminKey'
   | 'uarCredentialEncryptionKey'
   | 'memoryCredentialEndpoint'
+  | 'literCredentialEndpoint'
+  | 'literExternalCredentials'
 let credentialStoreRevision = 0
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -167,6 +169,8 @@ export async function migrateIntegrationDocument(): Promise<IntegrationDocument>
 
 export async function writeIntegrationDocument(document: IntegrationDocument): Promise<void> {
   const canonical = integrationDocumentSchema.parse(document)
+  const previousLiter = readIntegrationConfig().services.liter.endpoint
+  if (previousLiter !== canonical.config.services.liter.endpoint) await bindLiterCredential(previousLiter)
   const previous = readIntegrationConfig().services.memory.endpoint
   if (previous !== canonical.config.services.memory.endpoint) await bindMemoryCredential(previous)
   await application.get('PreferenceService').set(INTEGRATION_PREFERENCE, JSON.stringify(canonical))
@@ -210,10 +214,36 @@ export async function readMemoryCredential(endpoint: string): Promise<string | u
   return binding === endpoint ? secrets.memoryToken : undefined
 }
 
+/** Credentials are bound to an explicit service endpoint, never a discovered replacement. */
+export async function bindLiterCredential(endpoint: string): Promise<void> {
+  const secrets = await readSecrets()
+  if (secrets.literKey && !secrets.literCredentialEndpoint) {
+    secrets.literCredentialEndpoint = new URL(endpoint).href
+    await replaceSecrets(secrets)
+  }
+}
+
+export async function readLiterCredential(endpoint: string): Promise<string | undefined> {
+  const secrets = await readSecrets()
+  const key = new URL(endpoint).href
+  const external: Record<string, string> = JSON.parse(secrets.literExternalCredentials ?? '{}')
+  if (external[key]) return external[key]
+  const binding = secrets.literCredentialEndpoint ?? new URL(readIntegrationConfig().services.liter.endpoint).href
+  return binding === key ? secrets.literKey : undefined
+}
+
+export async function saveExternalLiterCredential(endpoint: string, credential: string): Promise<void> {
+  const secrets = await readSecrets()
+  const external: Record<string, string> = JSON.parse(secrets.literExternalCredentials ?? '{}')
+  external[new URL(endpoint).href] = credential
+  secrets.literExternalCredentials = JSON.stringify(external)
+  await replaceSecrets(secrets)
+}
+
 export async function readLiterCredentialSnapshot(): Promise<{ credential?: string; revision: number }> {
   while (true) {
     const revision = credentialStoreRevision
-    const credential = (await readSecrets()).literKey
+    const credential = await readLiterCredential(readIntegrationConfig().services.liter.endpoint)
     if (revision === credentialStoreRevision) return { ...(credential ? { credential } : {}), revision }
   }
 }
@@ -399,6 +429,9 @@ export async function writeSecrets(patch: IntegrationSecretPatch): Promise<void>
     if (mutation.operation === 'set') secrets[name] = mutation.value
     if (mutation.operation === 'clear') delete secrets[name]
   }
+  if (patch.literKey?.operation === 'set')
+    secrets.literCredentialEndpoint = new URL(readIntegrationConfig().services.liter.endpoint).href
+  if (patch.literKey?.operation === 'clear') delete secrets.literCredentialEndpoint
   if (patch.memoryToken?.operation === 'set')
     secrets.memoryCredentialEndpoint = readIntegrationConfig().services.memory.endpoint
   if (patch.memoryToken?.operation === 'clear') delete secrets.memoryCredentialEndpoint

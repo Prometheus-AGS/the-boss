@@ -1,6 +1,12 @@
 import * as z from 'zod'
 
-import { bossFangConfigSchema, bossFangDiagnosticSchema, bossFangStatusSchema } from '@shared/types/bossFang'
+import {
+  bossFangConfigSchema,
+  bossFangDiagnosticSchema,
+  bossFangStatusSchema,
+  bossFangModelSourceChoiceSchema,
+  bossFangModelSourceSelectionSchema
+} from '@shared/types/bossFang'
 import { bossFangDelegatedApprovalInspectionSchema } from '@shared/types/bossFangDelegatedApproval'
 
 import { defineRoute } from '../define'
@@ -33,6 +39,12 @@ export const bossFangRequestSchemas = {
     input: z.object({ bossTaskId: z.string().min(1).max(512) }).strict(),
     output: bossFangDelegatedApprovalInspectionSchema
   }),
+  'bossfang.model_sources': defineRoute({ input: z.void(), output: z.array(bossFangModelSourceChoiceSchema) }),
+  'bossfang.model_configure': defineRoute({
+    input: bossFangModelSourceSelectionSchema,
+    output: z.object({ id: z.string() })
+  }),
+  'bossfang.gateway_import': defineRoute({ input: z.void(), output: z.array(bossFangModelSourceChoiceSchema) }),
   'bossfang.models': defineRoute({
     input: z.void(),
     output: z.array(z.object({ id: z.string(), name: z.string(), provider: z.string(), modelId: z.string() }))

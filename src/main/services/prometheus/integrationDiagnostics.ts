@@ -11,7 +11,7 @@ import type {
   WorkspaceIntegration
 } from '@shared/types/prometheusIntegration'
 
-import { readSecrets } from './integrationConfig'
+import { readSecrets, readLiterCredential } from './integrationConfig'
 import { surrealSql } from './surrealConnection'
 import { registerWorkspaceServers, workspaceDatabase } from './workspaceMcp'
 
@@ -34,6 +34,7 @@ export async function runIntegrationDiagnostics(
   const runtime = application.get('McpRuntimeService')
   const servers = await registerWorkspaceServers(workspace, config)
   const secrets = await readSecrets()
+  const literKey = await readLiterCredential(config.services.liter.endpoint)
   const check = async (id: string, run: () => Promise<void>) => {
     signal.throwIfAborted()
     try {
@@ -147,7 +148,7 @@ export async function runIntegrationDiagnostics(
       const response = await fetch(`${config.services.liter.endpoint.replace(/\/$/, '')}/v1/chat/completions`, {
         method: 'POST',
         signal: AbortSignal.any([signal, AbortSignal.timeout(60000)]),
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${secrets.literKey ?? ''}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${literKey ?? ''}` },
         body: JSON.stringify({
           model,
           messages: [{ role: 'user', content: 'Reply with OK.' }],

@@ -24,6 +24,9 @@ export const bossFangHandlers: IpcHandlersFor<typeof bossFangRequestSchemas> = {
   'bossfang.disconnect': () => application.get('BossFangService').disconnect(),
   'bossfang.delegated_approval.inspect': ({ bossTaskId }) =>
     application.get('BossFangService').inspectDelegatedApproval(bossTaskId),
+  'bossfang.model_sources': () => application.get('BossFangService').modelSources(),
+  'bossfang.model_configure': (choice) => application.get('BossFangService').configureModel(choice),
+  'bossfang.gateway_import': () => application.get('BossFangService').importGatewayCredential(),
   'bossfang.models': () => application.get('BossFangService').models(),
   'bossfang.diagnostic.start': ({ model }) => application.get('BossFangService').diagnostics.start(model),
   'bossfang.diagnostic.status': ({ id }) => application.get('BossFangService').diagnostics.restore(id),

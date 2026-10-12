@@ -21,6 +21,7 @@ import type { UarInstanceInventorySnapshot } from '@shared/types/uarServiceInsta
 
 import { getSettingDomId } from '../settingsSearch/types'
 import { Choice, Field } from './Fields'
+import { ModelSources } from './ModelSources'
 import { ServiceReadiness } from './ServiceReadiness'
 
 export default function BossFangSettings() {
@@ -30,7 +31,7 @@ export default function BossFangSettings() {
   const [draft, setDraft] = useState<BossFangConfig>()
   const requested = useRef<string | undefined>(undefined)
   const [inventory, setInventory] = useState<UarInstanceInventorySnapshot>()
-  const { data: workspaces } = useQuery('/agent-workspaces')
+  const { data: workspaces, refetch: refreshWorkspaces } = useQuery('/agent-workspaces')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -60,6 +61,9 @@ export default function BossFangSettings() {
     }, 3000)
     return () => clearInterval(timer)
   }, [refresh])
+  useEffect(() => {
+    if (status?.requested.workspaceId) void refreshWorkspaces().catch((e) => setError(String(e)))
+  }, [status?.requested.workspaceId, refreshWorkspaces])
   useEffect(() => {
     if (!diagnostic || diagnostic.status !== 'running') return
     const timer = setInterval(() => {
@@ -348,6 +352,29 @@ export default function BossFangSettings() {
                 </Link>
               </div>
             </SettingGroup>
+            {status.configurationPending && (
+              <SettingGroup>
+                <SettingTitle>{t('bossfang.pendingConfiguration')}</SettingTitle>
+                <SettingDescription>{t('bossfang.pendingConfigurationHelp')}</SettingDescription>
+                {status.configurationPendingReason && (
+                  <p role="status" className="mt-2 text-sm">
+                    {status.configurationPendingReason}
+                  </p>
+                )}
+                <Button className="mt-3" onClick={() => void open()}>
+                  {t('bossfang.finishOrCancelWork')}
+                </Button>
+              </SettingGroup>
+            )}
+            <ModelSources
+              instanceId={draft.uarInstanceId}
+              disabled={dirty || status.configurationPending}
+              onConfigured={async (id) => {
+                setModels(await ipcApi.request('bossfang.models'))
+                update({ diagnosticModelId: id })
+                await refresh()
+              }}
+            />
             <SettingGroup id={getSettingDomId('/settings/bossfang', 'diagnostics')}>
               <SettingTitle>{t('bossfang.diagnostics')}</SettingTitle>
               <SettingDescription>{t('bossfang.diagnosticHelp')}</SettingDescription>

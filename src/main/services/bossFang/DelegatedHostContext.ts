@@ -36,6 +36,7 @@ const registration = z.object({
   definition: bossFangDelegatedIdentitySchema,
   binding: bossFangDelegatedBindingSchema,
   agent_id: z.string(),
+  model: z.string().nullish(),
   expires_at: z.string()
 })
 const taskSchema = z.object({
@@ -94,11 +95,12 @@ export class DelegatedHostContext {
       runtimeEpoch: this.receipt.runtime_epoch,
       definition: this.receipt.definition,
       binding: this.receipt.binding,
+      ...(this.receipt.model ? { model: this.receipt.model } : {}),
       expiresAt: this.receipt.expires_at
     }
   }
 
-  static async create(authorization: PrivateUarAuthorization, binding: z.infer<typeof rawBinding>) {
+  static async create(authorization: PrivateUarAuthorization, binding: z.infer<typeof rawBinding>, model?: string) {
     const directory = await realpath(agentWorkspaceService.getById(authorization.workspaceId).path)
     const context = new DelegatedHostContext(authorization, directory)
     const memory = readIntegrationConfig().services.memory
@@ -135,6 +137,7 @@ export class DelegatedHostContext {
           runtime_epoch: authorization.runtimeEpoch,
           deployment_binding_id: binding.id,
           definition: binding.package,
+          ...(model ? { model } : {}),
           working_directory: directory,
           mcp_servers: context.bridge.servers,
           tool_admission: context.bridge.toolAdmission
@@ -147,6 +150,7 @@ export class DelegatedHostContext {
         context.receipt.binding.id !== binding.id ||
         context.receipt.binding.revision !== binding.revision ||
         !same(context.receipt.definition, binding.package) ||
+        (context.receipt.model ?? undefined) !== model ||
         context.receipt.expires_at !== authorization.grant!.expires_at
       )
         throw failure('DELEGATED_CONTEXT_REGISTRATION_MISMATCH')
@@ -386,7 +390,11 @@ export async function registerDelegatedHostContexts(authorization: PrivateUarAut
       try {
         contexts.push(await DelegatedHostContext.create(authorization, binding))
       } catch (error) {
-        if (!(error instanceof ContextRegistrationError) || error.code !== 'delegated_host_binding_not_agent')
+        // An unconfigured agent stays in discovery; it must not disable other ready bindings.
+        if (
+          !(error instanceof ContextRegistrationError) ||
+          !['delegated_host_binding_not_agent', 'target_model_unavailable'].includes(error.code)
+        )
           throw error
       }
     }

@@ -31,34 +31,44 @@ export function document<T extends Record<string, JsonValue>>(value: T): T & { c
 }
 
 /** A fixed portable definition. Owner, workspace, model choice and credentials belong only in the private binding. */
-export function starterPackage() {
+export function starterPackage(purpose?: 'default-agent', overrideSlots = 0) {
+  const definitionVersion = purpose === 'default-agent' ? `1.0.${overrideSlots + 1}` : version
+  const agentIdentity = purpose === 'default-agent' ? 'default-agent' : agentId
+  const packageIdentity = purpose === 'default-agent' ? 'urn:boss:default-agent:package' : packageId
   const agent = document({
     profile,
     kind: 'AgentDefinition',
-    id: agentId,
-    version,
+    id: agentIdentity,
+    version: definitionVersion,
     provenance,
     requiredCapabilities: ['collaboration_definition_packages_v2'],
     extensions: {},
-    title: 'Starter agent',
+    title: purpose === 'default-agent' ? 'Default agent' : 'Starter agent',
     role: 'assistant',
     whenToUse: 'Use for a simple, user-directed task in this workspace.',
     instructions: 'Follow the user request using the configured model. Ask when essential information is missing.',
     input: { type: 'object' },
     output: { type: 'object' },
     skills: [],
-    models: [{ role: 'primary', capabilities: ['text'], preferredAliases: ['local-default'] }],
+    models: [
+      { role: 'primary', capabilities: ['text'], preferredAliases: ['local-default'] },
+      ...Array.from({ length: overrideSlots }, (_, index) => ({
+        role: 'override',
+        capabilities: ['text'],
+        preferredAliases: ['explicit-override-' + (index + 1)]
+      }))
+    ],
     permittedChildren: [],
     context: { mode: 'none', artifacts: [], history: 'none', memoryScopes: [] },
     requestedLimits: limits,
     sourceIdentity: {
       profile: 'urn:boss:starter:source:1',
-      id: agentId,
-      version,
+      id: agentIdentity,
+      version: definitionVersion,
       digest: digest('The Boss built-in starter agent 1.0.0'),
       revision: null
     },
-    renameMapping: { sourceId: agentId, targetId: agentId, reason: 'unchanged' },
+    renameMapping: { sourceId: agentIdentity, targetId: agentIdentity, reason: 'unchanged' },
     authoredFields: [],
     modelRequirements: { required: false, value: { capabilities: ['text'] } },
     promptDialect: { required: false, value: 'default' },
@@ -73,8 +83,8 @@ export function starterPackage() {
   const manifest = document({
     profile,
     kind: 'PackageManifest',
-    id: packageId,
-    version,
+    id: packageIdentity,
+    version: definitionVersion,
     provenance,
     requiredCapabilities: ['collaboration_definition_packages_v2'],
     extensions: {},

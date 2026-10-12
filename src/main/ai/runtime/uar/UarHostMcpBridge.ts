@@ -301,7 +301,10 @@ async function closeMountedServers(mounted: readonly MountedServer[]): Promise<v
 }
 
 /** Same host-resource authentication boundary for the owned native orchestration process. */
-export async function createAuthenticatedHostCallback(handler: (body: unknown) => Promise<unknown>) {
+export async function createAuthenticatedHostCallback(
+  handler: (body: unknown) => Promise<unknown>,
+  pathname = '/shared-memory'
+) {
   const token = randomBytes(32).toString('base64url')
   let expectedHost = ''
   const server = createServer((request, response) => {
@@ -316,7 +319,7 @@ export async function createAuthenticatedHostCallback(handler: (body: unknown) =
         response.end()
         return
       }
-      if (request.method !== 'POST' || request.url !== '/shared-memory') {
+      if (request.method !== 'POST' || request.url !== pathname) {
         response.writeHead(404)
         response.end()
         return
@@ -333,7 +336,7 @@ export async function createAuthenticatedHostCallback(handler: (body: unknown) =
     const port = await listen(server)
     expectedHost = '127.0.0.1:' + port
     return {
-      url: 'http://' + expectedHost + '/shared-memory',
+      url: 'http://' + expectedHost + pathname,
       token,
       close: async () => {
         server.closeAllConnections()

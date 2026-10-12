@@ -4,11 +4,12 @@ import path from 'node:path'
 
 import { application } from '@application'
 
-import { readIntegrationConfig, readSecrets, integrationDirectory } from './integrationConfig'
+import { readIntegrationConfig, readSecrets, readLiterCredential, integrationDirectory } from './integrationConfig'
 
 export async function writeMiniConfiguration(): Promise<void> {
   const config = readIntegrationConfig()
   const secrets = await readSecrets()
+  const literKey = await readLiterCredential(config.services.liter.endpoint)
   const literRoles = config.services.literRoles
   const roleEnvironment = literRoles
     ? Object.fromEntries(
@@ -37,7 +38,7 @@ export async function writeMiniConfiguration(): Promise<void> {
       SURREAL_MEMORY_URL: new URL('/', config.services.memory.endpoint).href.replace(/\/$/, ''),
       SURREAL_MEMORY_TOKEN: secrets.memoryToken ?? '',
       LITER_LLM_BASE_URL: `${config.services.liter.endpoint.replace(/\/$/, '')}/v1`,
-      LITER_LLM_MASTER_KEY: secrets.literKey ?? '',
+      LITER_LLM_MASTER_KEY: literKey ?? '',
       LITER_LLM_CONFIG: path.join(integrationDirectory(), 'services', 'liter-llm-proxy.toml'),
       PROMETHEUS_KBD_MODELS_CONFIG: path.join(integrationDirectory(), 'models.toml'),
       ...roleEnvironment

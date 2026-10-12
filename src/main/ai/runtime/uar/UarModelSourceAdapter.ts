@@ -4,12 +4,14 @@ import { application } from '@application'
 import { modelService } from '@data/services/ModelService'
 import { providerService } from '@data/services/ProviderService'
 import { resolveEffectiveEndpoint } from '@main/ai/provider/endpoint'
-import { readIntegrationConfig, readSecrets } from '@main/services/prometheus/integrationConfig'
+import { readIntegrationConfig, readLiterCredential } from '@main/services/prometheus/integrationConfig'
 import { ENDPOINT_TYPE, type Model } from '@shared/data/types/model'
 import type { Provider } from '@shared/data/types/provider'
 import type { UarModelSourceSnapshot, UarProviderMutation } from '@shared/types/prometheusIntegration'
 import { uarExecutionProfileSchema } from '@shared/types/uarTeamProfiles'
 import { getRawModelId } from '@shared/utils/model'
+
+import type { UarSidecarEndpoint } from './UarSidecarService'
 
 export const providerResponseSchema = z.object({
   default_id: z.string().nullable().optional(),
@@ -74,13 +76,13 @@ async function responseBody(response: Response): Promise<unknown> {
 
 /** Main-process-only model source projection. Secret values are reduced to
  * presence flags before the result crosses IPC. */
-export async function readUarModelSources(): Promise<UarModelSourceSnapshot> {
+export async function readUarModelSources(selectedEndpoint?: UarSidecarEndpoint): Promise<UarModelSourceSnapshot> {
   const sidecar = application.get('UarSidecarService')
-  const endpoint = await sidecar.resolveSelected()
+  const endpoint = selectedEndpoint ?? (await sidecar.resolveSelected())
   const uarResponse = await sidecar.modelRequestInstance(endpoint, '/api/uar/providers')
   const uar = providerResponseSchema.parse(await responseBody(uarResponse))
   const config = readIntegrationConfig()
-  const secrets = await readSecrets()
+  const literKey = await readLiterCredential(config.services.liter.endpoint)
   const bossProviders = providerService.list({})
   const bossModels = modelService.list({})
 
@@ -88,7 +90,7 @@ export async function readUarModelSources(): Promise<UarModelSourceSnapshot> {
   let gatewayError: string | undefined
   try {
     const response = await fetch(gatewayModelsEndpoint(config.services.liter.endpoint), {
-      headers: { authorization: `Bearer ${secrets.literKey ?? ''}` },
+      headers: { authorization: `Bearer ${literKey ?? ''}` },
       signal: AbortSignal.timeout(10_000)
     })
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
@@ -135,7 +137,7 @@ export async function readUarModelSources(): Promise<UarModelSourceSnapshot> {
           {
             id: 'the-boss-gateway',
             name: 'liter-llm',
-            credentialConfigured: Boolean(secrets.literKey),
+            credentialConfigured: Boolean(literKey),
             enabled: true,
             models: gatewayModels.map((model) => ({
               id: model,

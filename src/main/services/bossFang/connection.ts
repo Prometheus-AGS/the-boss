@@ -61,6 +61,14 @@ export class BossFangConnection {
           instance: this.retained.instance(candidate),
           bearer: candidate.bearer,
           workspaceId: config.workspaceId,
+          ...(candidate.hostContextResolver
+            ? {
+                hostContextResolver: {
+                  url: candidate.hostContextResolver.url,
+                  token: candidate.hostContextResolver.token
+                }
+              }
+            : {}),
           delegatedHostContexts: candidate.contexts.map((context) => context.safe)
         })
       })

@@ -49,8 +49,10 @@ function isScoped(value: unknown, scope: ReturnType<typeof boundScope>): value i
   )
 }
 function publicMemory(value: Record<string, unknown>) {
-  const { embedding: _, user_id: _user, session_id: _session, agent_id: _agent, ...record } = value
-  return record
+  // Legacy storage scope is not the identity-bound scope returned by this adapter.
+  return Object.fromEntries(
+    Object.entries(value).filter(([key]) => !['embedding', 'user_id', 'session_id', 'agent_id', 'scope'].includes(key))
+  )
 }
 
 export async function scopedMemoryOperation(

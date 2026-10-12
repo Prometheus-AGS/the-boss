@@ -8,7 +8,9 @@ import type { UarSidecarEndpoint } from '@main/ai/runtime/uar/UarSidecarService'
 import { t } from '@main/i18n'
 import { readIntegrationConfig, readUarInstanceCredentials } from '@main/services/prometheus/integrationConfig'
 
-import { DelegatedHostContext, registerDelegatedHostContexts } from './DelegatedHostContext'
+import type { DelegatedHostContext} from './DelegatedHostContext';
+import { registerDelegatedHostContexts } from './DelegatedHostContext'
+import { createDelegatedHostContextResolver } from './DelegatedHostContextResolver'
 
 const failure = (code: string) => new Error(`${t('bossfang.retainedAuthentication')} [${code}]`)
 async function decode<T>(response: Response, schema: z.ZodType<T>, code: string): Promise<T> {
@@ -75,6 +77,7 @@ export type PrivateUarAuthorization = {
   grant: z.infer<typeof grantSchema> | null
   runtimeEpoch: string | null
   contexts: DelegatedHostContext[]
+  hostContextResolver?: Awaited<ReturnType<typeof createDelegatedHostContextResolver>>
 }
 const sameEndpoints = (left: z.infer<typeof endpointsSchema>, right: z.infer<typeof endpointsSchema>) =>
   ['runtime', 'administration', 'models', 'console'].every(
@@ -169,6 +172,8 @@ export class RetainedUarAuthorizations {
     }
     try {
       authorization.contexts = await registerDelegatedHostContexts(authorization)
+      if (grant)
+        authorization.hostContextResolver = await createDelegatedHostContextResolver(authorization, this.request)
       return authorization
     } catch (error) {
       await this.revoke(authorization)
@@ -285,7 +290,11 @@ export class RetainedUarAuthorizations {
       }
     }
     for (const authorization of [...this.records])
-      if (authorization !== selected && !this.hasOriginalContext(authorization, runs) && !runs.some((run) => this.matches(authorization, run)))
+      if (
+        authorization !== selected &&
+        !this.hasOriginalContext(authorization, runs) &&
+        !runs.some((run) => this.matches(authorization, run))
+      )
         await this.revoke(authorization)
   }
   private hasOriginalContext(authorization: PrivateUarAuthorization, runs: OriginalConnection[]) {
@@ -294,21 +303,30 @@ export class RetainedUarAuthorizations {
   async inspectDelegatedApproval(bossTaskId: string) {
     const response = await this.request('/api/uar/delegations/' + encodeURIComponent(bossTaskId))
     if (!response.ok) throw failure('DELEGATED_APPROVAL_OWNER_UNAVAILABLE')
-    const projection = await decode(response, projectionSchema.extend({
-      uarTaskId: z.string(), uarRunId: z.string()
-    }), 'DELEGATED_APPROVAL_PROJECTION_MISMATCH')
+    const projection = await decode(
+      response,
+      projectionSchema.extend({
+        uarTaskId: z.string(),
+        uarRunId: z.string()
+      }),
+      'DELEGATED_APPROVAL_PROJECTION_MISMATCH'
+    )
     if (projection.bossTaskId !== bossTaskId || !projection.delegatedHostContextId)
       throw failure('DELEGATED_APPROVAL_OWNER_MISMATCH')
-    const context = [...this.records].flatMap((record) => record.contexts).find(
-      (candidate) => candidate.id === projection.delegatedHostContextId
-    )
+    const context = [...this.records]
+      .flatMap((record) => record.contexts)
+      .find((candidate) => candidate.id === projection.delegatedHostContextId)
     if (
-      !context || !this.matches(context.authorization, projection) ||
-      context.safe.workspaceId !== projection.workspaceId || context.safe.runtimeEpoch !== projection.runtimeEpoch
-    ) throw failure('DELEGATED_APPROVAL_CONTEXT_UNAVAILABLE')
+      !context ||
+      !this.matches(context.authorization, projection) ||
+      context.safe.workspaceId !== projection.workspaceId ||
+      context.safe.runtimeEpoch !== projection.runtimeEpoch
+    )
+      throw failure('DELEGATED_APPROVAL_CONTEXT_UNAVAILABLE')
     return context.inspect(projection.uarTaskId, projection.uarRunId, bossTaskId)
   }
   async revoke(authorization: PrivateUarAuthorization) {
+    await authorization.hostContextResolver?.close()
     await Promise.allSettled(authorization.contexts.map((context) => context.release()))
     const grant = authorization.grant
     if (grant) {
@@ -337,6 +355,12 @@ export class RetainedUarAuthorizations {
   redact(text: string) {
     for (const authorization of this.records) {
       text = text.split(authorization.bearer).join('<redacted>')
+      if (authorization.hostContextResolver)
+        text = text
+          .split(authorization.hostContextResolver.token)
+          .join('<redacted>')
+          .split(authorization.hostContextResolver.url)
+          .join('<host-resource>')
       for (const context of authorization.contexts) text = context.redact(text)
     }
     return text

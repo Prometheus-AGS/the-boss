@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto'
 import * as z from 'zod'
 
 import { application } from '@application'
-import { readIntegrationConfig, readSecrets } from '@main/services/prometheus/integrationConfig'
+import { readIntegrationConfig, readLiterCredential } from '@main/services/prometheus/integrationConfig'
 import { configuredModelForLiterAlias, contextWindowForLiterAlias } from '@main/services/prometheus/literGatewayCatalog'
 import type { UarExecutionProfile } from '@shared/types/uarTeamProfiles'
 import type { UarTeamModelSelection } from '@shared/types/uarTeams'
@@ -51,9 +51,8 @@ export async function configureTeamModel(
   )
     throw new Error('UAR_TEAM_MODEL_POLICY_TARGET_MISMATCH')
   const contextWindow = await contextWindowForLiterAlias(config, model.id)
-  const secrets = await readSecrets()
-  if (!secrets.literKey?.trim())
-    throw new Error('Configure the liter-llm gateway credential before setting up the team')
+  const literKey = await readLiterCredential(config.services.liter.endpoint)
+  if (!literKey?.trim()) throw new Error('Configure the liter-llm gateway credential before setting up the team')
   const url = new URL(config.services.liter.endpoint)
   const path = url.pathname.replace(/\/$/, '')
   url.pathname = path.endsWith('/v1') ? path : path + '/v1'
@@ -115,7 +114,7 @@ export async function configureTeamModel(
           }
         ],
         enabled: true,
-        api_key: secrets.literKey
+        api_key: literKey
       })
     })
     if (!response.ok) {

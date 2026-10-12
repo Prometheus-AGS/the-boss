@@ -3,7 +3,7 @@ import { modelService } from '@data/services/ModelService'
 import { providerService } from '@data/services/ProviderService'
 import { resolveEffectiveEndpoint } from '@main/ai/provider/endpoint'
 import { createAiUsagePricingSnapshot } from '@main/ai/utils/usageCapture'
-import { readIntegrationConfig, readSecrets } from '@main/services/prometheus/integrationConfig'
+import { readIntegrationConfig, readLiterCredential } from '@main/services/prometheus/integrationConfig'
 import { contextWindowForLiterAlias } from '@main/services/prometheus/literGatewayCatalog'
 import type { UarModelAssignment } from '@shared/data/api/schemas/agents'
 import type { ModelSnapshot } from '@shared/data/types/message'
@@ -31,6 +31,7 @@ export type ResolvedUarModelAssignment = {
   modelName: string
   effectiveIdentity: string
   connectedInstance: string
+  protocol?: 'auto' | 'chat' | 'responses'
   credential?: UarRunCredential
   usageCapture?: AgentSessionUsageCapture
 }
@@ -101,6 +102,12 @@ function resolveBossModel(uniqueModelId: UniqueModelId): ResolvedUarModelAssignm
     modelName: model.name ?? model.id,
     effectiveIdentity: `${provider.id}/${apiModelId}`,
     connectedInstance: endpoint.baseUrl,
+    protocol:
+      endpoint.endpointType === ENDPOINT_TYPE.OPENAI_RESPONSES
+        ? 'responses'
+        : providerKind === 'anthropic'
+          ? 'auto'
+          : 'chat',
     credential: {
       provider_id: provider.id,
       provider_kind: providerKind,
@@ -147,8 +154,8 @@ export async function resolveUarModelAssignment(
     }
   }
   const config = readIntegrationConfig()
-  const secrets = await readSecrets()
-  const apiKey = secrets.literKey?.trim()
+  const literKey = await readLiterCredential(config.services.liter.endpoint)
+  const apiKey = literKey?.trim()
   if (!apiKey) throw new Error('The selected liter-llm gateway has no credential configured')
   const endpoint = normalizeGatewayEndpoint(config.services.liter.endpoint)
   const contextWindow = await contextWindowForLiterAlias(config, assignment.modelId)

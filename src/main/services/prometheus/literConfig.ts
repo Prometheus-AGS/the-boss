@@ -2,9 +2,11 @@ import { createHash, randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
+import type * as TomlEditorModule from '@rainbowatcher/toml-edit-js'
 import { dialog } from 'electron'
 
 import { application } from '@application'
+import { t } from '@main/i18n'
 import type {
   LiterConfigApplyResult,
   LiterConfigEdit,
@@ -27,7 +29,7 @@ import { serviceDirectory } from './managedServices'
 
 const EMPTY_CONFIG =
   '[server]\nhost = "0.0.0.0"\nport = 4000\n\n[general]\nmaster_key = "${LITER_LLM_MASTER_KEY}"\n\n[security]\noutbound_policy = "deny_private"\n'
-type TomlEditor = typeof import('@rainbowatcher/toml-edit-js')
+type TomlEditor = typeof TomlEditorModule
 
 type LiterModelDocument = {
   name: string
@@ -436,4 +438,28 @@ export async function exportSavedLiterConfig(
   remoteEndpoint?: string
 ): Promise<LiterConfigExportResult> {
   return exportLiterConfig(source, expectedRevision, await savedGatewayEdits(source), remoteEndpoint)
+}
+
+/** Explicit local import only; the selected endpoint must match the configuration's loopback listener. */
+export async function readLocalLiterCredential(filename: string, endpoint: string): Promise<string> {
+  const current = await resolveSource({ ownership: 'local', path: filename })
+  const editor = await ensureTomlEditor()
+  const parsed = editor.parse(current.content) as {
+    server?: { host?: string; port?: number }
+    general?: { master_key?: string }
+  }
+  const selected = new URL(endpoint)
+  if (
+    !['localhost', '127.0.0.1', '[::1]'].includes(selected.hostname) ||
+    selected.protocol !== 'http:' ||
+    !['', '/', '/v1', '/v1/'].includes(selected.pathname) ||
+    !['localhost', '127.0.0.1', '::1', '0.0.0.0'].includes(parsed.server?.host ?? '') ||
+    Number(selected.port || 80) !== parsed.server?.port
+  )
+    throw new Error(t('bossfang.gatewayEndpointMismatch'))
+  const configured = parsed.general?.master_key?.trim()
+  const reference = configured?.match(/^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$/)
+  const credential = reference ? process.env[reference[1]]?.trim() : configured
+  if (!credential || credential.includes('${')) throw new Error(t('bossfang.gatewayCredentialMissing'))
+  return credential
 }

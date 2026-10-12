@@ -50,6 +50,8 @@ export const bossFangStatusSchema = z.object({
     })
     .nullable(),
   restartRequired: z.boolean(),
+  configurationPending: z.boolean(),
+  configurationPendingReason: z.string().nullable(),
   url: z.string().optional(),
   error: z.string().nullable(),
   connection: z.enum(['disconnected', 'connecting', 'connected', 'error']),
@@ -110,3 +112,37 @@ export const bossFangDiagnosticSchema = z.object({
     .nullable()
 })
 export type BossFangDiagnostic = z.infer<typeof bossFangDiagnosticSchema>
+
+export const bossFangModelSourceChoiceSchema = z.object({
+  source: z.enum(['boss', 'gateway', 'uar']),
+  providerId: z.string(),
+  modelId: z.string(),
+  name: z.string(),
+  providerName: z.string(),
+  available: z.boolean(),
+  detail: z.string().nullable()
+})
+export type BossFangModelSourceChoice = z.infer<typeof bossFangModelSourceChoiceSchema>
+export const bossFangModelSourceSelectionSchema = bossFangModelSourceChoiceSchema.pick({
+  source: true,
+  providerId: true,
+  modelId: true
+})
+export const bossFangTargetCatalogSchema = z.object({
+  data: z.array(
+    z.object({
+      id: z.string(),
+      uar: z.object({
+        version: z.literal(1),
+        kind: z.enum(['agent', 'model']),
+        available: z.boolean(),
+        reason: z.string().optional(),
+        display_name: z.string().optional(),
+        provider_id: z.string().optional(),
+        model_id: z.string().optional(),
+        verified_at: z.string().optional(),
+        delegation_available: z.boolean().optional()
+      })
+    })
+  )
+})

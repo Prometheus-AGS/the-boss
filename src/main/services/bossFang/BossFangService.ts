@@ -10,14 +10,13 @@ import * as z from 'zod'
 import { application } from '@application'
 import { agentWorkspaceService } from '@data/services/AgentWorkspaceService'
 import { loggerService } from '@logger'
-import { providerResponseSchema } from '@main/ai/runtime/uar'
 import { BaseService, Injectable, Phase, ServicePhase } from '@main/core/lifecycle'
 import { isWin } from '@main/core/platform'
 import { t } from '@main/i18n'
 import { toAsarUnpackedPath } from '@main/utils/asar'
 import { fetchWithRateLimitRetries } from '@main/utils/http'
 import { crossPlatformSpawn, terminateProcessTree, waitForProcessExit } from '@main/utils/processRunner'
-import type { BossFangConfig, BossFangStatus } from '@shared/types/bossFang'
+import type { BossFangConfig, BossFangStatus, BossFangModelSourceChoice } from '@shared/types/bossFang'
 import { bossFangConfigSchema } from '@shared/types/bossFang'
 import { redactLiteral, redactSecretText } from '@shared/utils/redaction'
 import { BOSSFANG_DASHBOARD_PARTITION } from '@shared/utils/webviewSecurity'
@@ -26,6 +25,12 @@ import { requireIdleBossFang } from './configurationAdmission'
 import { BossFangConnection } from './connection'
 import { BossFangDiagnostics } from './diagnostics'
 import { buildManagedEnvironment } from './environment'
+import {
+  bossFangModelSources,
+  configureBossFangModel,
+  importBossFangGatewayCredential,
+  readBossFangTargets
+} from './modelSources'
 import { ensurePersonalWorkspace } from './personalWorkspace'
 import { BossFangSharedMemory } from './sharedMemory'
 import {
@@ -52,6 +57,8 @@ export class BossFangService extends BaseService {
   private error: string | null = null
   private dashboardToken: string | null = null
   private credentialChanges = false
+  private configurationPending = false
+  private configurationPendingReason: string | null = null
   private credentials: DashboardCredentials | null = null
   private logs: BossFangStatus['logs'] = []
   private sequence = 0
@@ -97,23 +104,16 @@ export class BossFangService extends BaseService {
     }
     this.registerDisposable(
       application.get('PreferenceService').subscribeChange('app.prometheus.integrations', () => {
-        if (this.status === 'running')
-          void this.mutex
-            .runExclusive(async () => {
-              await requireIdleBossFang((p) => this.request(p))
-              const previous = await this.sharedMemory.nativeEnvironment()
-              await this.configureSharedMemory()
-              if (JSON.stringify(previous) !== JSON.stringify(await this.sharedMemory.nativeEnvironment())) {
-                await this.stopOwnedProcess()
-                this.status = 'stopped'
-                this.origin = null
-                this.dashboardToken = null
-                await this.startUnlocked()
-              } else await this.restoreConnection()
-            })
-            .catch((error) => this.log('error', String(error)))
+        if (this.status === 'running') {
+          this.configurationPending = true
+          void this.applyConfiguration(readConfig()).catch((error) => this.log('error', this.safe(String(error))))
+        }
       })
     )
+    this.registerInterval(() => {
+      if (this.configurationPending && this.status === 'running' && !this.mutex.isLocked())
+        void this.applyConfiguration(readConfig()).catch((error) => this.log('error', this.safe(String(error))))
+    }, 5000)
   }
   protected onAllReady() {
     if (readConfig().startOnLaunch && credentialsConfigured(readConfig().ownership))
@@ -166,11 +166,13 @@ export class BossFangService extends BaseService {
             grantExpiresAt: this.connection.expiresAt
           }
         : null,
+      configurationPending: this.configurationPending,
+      configurationPendingReason: this.configurationPendingReason,
       restartRequired:
         this.credentialChanges ||
         Boolean(
           this.effectiveConfig &&
-          ['ownership', 'host', 'port', 'portPolicy', 'externalEndpoint'].some(
+          ['ownership', 'host', 'port', 'portPolicy', 'externalEndpoint', 'workspaceId'].some(
             (key) => requested[key as keyof BossFangConfig] !== this.effectiveConfig![key as keyof BossFangConfig]
           )
         ),
@@ -219,9 +221,17 @@ export class BossFangService extends BaseService {
   }
   async applyConfiguration(input: BossFangConfig): Promise<BossFangStatus> {
     return this.mutex.runExclusive(async () => {
-      if (this.status === 'running') await requireIdleBossFang((p) => this.request(p))
-      const previousMemoryEnvironment = await this.sharedMemory.nativeEnvironment()
       const saved = await this.configureUnlocked(input)
+      if (this.status === 'running') {
+        try {
+          await requireIdleBossFang((p) => this.request(p))
+        } catch (error) {
+          this.configurationPending = true
+          this.configurationPendingReason = this.safe(error instanceof Error ? error.message : String(error))
+          return this.getStatus()
+        }
+      }
+      const previousMemoryEnvironment = await this.sharedMemory.nativeEnvironment()
       await this.configureSharedMemory()
       const memoryChanged =
         JSON.stringify(previousMemoryEnvironment) !== JSON.stringify(await this.sharedMemory.nativeEnvironment())
@@ -233,6 +243,8 @@ export class BossFangService extends BaseService {
       }
       if (this.status !== 'running') await this.startUnlocked()
       else await this.restoreConnection()
+      this.configurationPending = false
+      this.configurationPendingReason = null
       return this.getStatus()
     })
   }
@@ -243,14 +255,7 @@ export class BossFangService extends BaseService {
     const inventory = await application.get('PrometheusIntegrationService').readUarInstanceInventory()
     if (!inventory.instances.some((x) => x.id === config.uarInstanceId && x.enabled))
       throw new Error('Choose an enabled UAR instance from the existing inventory')
-    const previous = readConfig()
     await saveConfig(config)
-    if (
-      previous.uarInstanceId !== config.uarInstanceId ||
-      previous.workspaceId !== config.workspaceId ||
-      config.connectionIntent === 'disconnected'
-    )
-      await this.connection.disconnect()
     this.log('info', 'Saved BossFang configuration; restart applies requested values')
     return this.getStatus()
   }
@@ -267,6 +272,7 @@ export class BossFangService extends BaseService {
   }
   async restart() {
     return this.mutex.runExclusive(async () => {
+      if (this.status === 'running') await requireIdleBossFang((p) => this.request(p))
       await this.stopOwnedProcess()
       this.origin = null
       this.status = 'stopped'
@@ -460,7 +466,10 @@ export class BossFangService extends BaseService {
   }
   private async restoreConnection() {
     const config = readConfig()
-    if (config.connectionIntent === 'disconnected') return
+    if (config.connectionIntent === 'disconnected') {
+      await this.connection.disconnect()
+      return
+    }
     try {
       await this.connection.connect(await ensurePersonalWorkspace(config))
     } catch (error) {
@@ -471,6 +480,7 @@ export class BossFangService extends BaseService {
   }
   async connect() {
     return this.mutex.runExclusive(async () => {
+      if (this.configurationPending) throw new Error(t('bossfang.configurationBusy'))
       const config = await ensurePersonalWorkspace({ ...readConfig(), connectionIntent: 'connected' })
       await saveConfig(config)
       await this.connection.connect(config)
@@ -497,22 +507,17 @@ export class BossFangService extends BaseService {
       const endpoint = this.connection.endpoint
       if (!endpoint || this.connection.state !== 'connected')
         throw new Error('Connect the selected UAR instance before selecting a model')
-      const response = await application.get('UarSidecarService').modelRequestInstance(endpoint, '/api/uar/providers')
-      if (!response.ok)
-        throw new Error(`UAR model inventory failed (HTTP ${response.status}); reconnect the selected UAR instance`)
-      const models = providerResponseSchema
-        .parse(await response.json())
-        .providers.filter((provider) => provider.enabled)
-        .flatMap((provider) =>
-          provider.models
-            .filter((model) => model.enabled)
-            .map((model) => ({
-              id: provider.id + '/' + model.id,
-              name: model.display_name ?? model.id,
-              provider: provider.id,
-              modelId: model.id
-            }))
+      const targets = await readBossFangTargets(endpoint, this.effectiveConfig?.workspaceId ?? readConfig().workspaceId)
+      const models = targets
+        .filter(
+          (target) => target.uar.kind === 'model' && target.uar.available && target.uar.delegation_available !== false
         )
+        .map((target) => ({
+          id: target.id,
+          name: target.uar.display_name ?? target.id,
+          provider: target.uar.provider_id ?? '',
+          modelId: target.uar.model_id ?? target.id
+        }))
       this.modelReadiness = {
         state: models.length ? 'ready' : 'unavailable',
         detail: models.length ? null : t('bossfang.noModels')
@@ -525,6 +530,23 @@ export class BossFangService extends BaseService {
       }
       throw error
     }
+  }
+  async modelSources() {
+    return bossFangModelSources(await application.get('UarSidecarService').resolveInstance(readConfig().uarInstanceId))
+  }
+  async importGatewayCredential() {
+    await importBossFangGatewayCredential()
+    return this.modelSources()
+  }
+  async configureModel(choice: Pick<BossFangModelSourceChoice, 'source' | 'providerId' | 'modelId'>) {
+    return this.mutex.runExclusive(async () => {
+      if (this.configurationPending) throw new Error(t('bossfang.configurationBusy'))
+      const config = await ensurePersonalWorkspace(readConfig())
+      const endpoint = await application.get('UarSidecarService').resolveInstance(config.uarInstanceId)
+      const selected = await configureBossFangModel(endpoint, config.workspaceId, choice)
+      if (this.status === 'running') await this.restoreConnection()
+      return { id: selected.providerId + '/' + selected.modelId }
+    })
   }
   async stop() {
     await this.mutex.runExclusive(async () => {
