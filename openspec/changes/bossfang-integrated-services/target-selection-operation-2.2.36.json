@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "candidate": "2.2.36",
-  "recordedAt": "2026-10-12T03:26:31.500Z",
+  "recordedAt": "2026-10-12T04:49:45.327Z",
   "status": "installed-operation",
   "source": {
     "boss": "5d32e53253",
@@ -78,22 +78,29 @@
     },
     {
       "name": "different-workspace isolation and private-memory distinction",
-      "outcome": "pending"
+      "outcome": "passed-workspace-isolation",
+      "evidenceRef": "completedBoundary.observations.workspaceIsolation",
+      "detail": "Real native BossFang shared-memory tool returned zero records in a different workspace. Private key-value storage remains a separate adapter; no new private-memory operation was claimed."
     },
     {
       "name": "service/model failures, restart and endpoint recovery",
-      "outcome": "pending"
+      "outcome": "partial",
+      "detail": "Managed UAR restarted through installed UI and BossFang completed a fresh delegated prompt after automatic reconnection. Unavailable models were shown in the empty workspace. Explicit endpoint-change and unavailable-memory-service operations remain pending.",
+      "evidenceRef": "completedBoundary.observations.runtimeRestart"
     },
     {
       "name": "persisted target, override, workspace and instance",
-      "outcome": "pending"
+      "outcome": "passed-target-workspace-instance",
+      "detail": "Installed agent selection without override, personal workspace and managed-local instance survived whole-application restart and completed a prompt. Advanced override execution passed earlier; its restart persistence is not separately claimed.",
+      "evidenceRef": "completedBoundary.observations"
     }
   ],
   "publication": {
-    "macArm64": "pending",
+    "macArm64": "building-notarized-installer",
     "windowsX64": "pending",
     "website": "pending",
-    "nativeWindowsAcceptance": "pending"
+    "nativeWindowsAcceptance": "pending",
+    "macWorkflow": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38204641474"
   },
   "scope": "Mac ARM64 and Windows x64 only; source changes are not operational proof.",
   "initialSource": {
@@ -211,7 +218,149 @@
   },
   "targetPersistenceRepair": {
     "source": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85",
-    "status": "native-built-packaged-operation-pending",
-    "manifest": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-2ec0f66ec/bossfang-darwin-arm64.json"
+    "status": "passed-installed-full-application-restart",
+    "manifest": "https://github.com/GQAdonis/librefang/releases/download/bossfang-sidecar-2ec0f66ec/bossfang-darwin-arm64.json",
+    "evidenceRef": "completedBoundary.observations"
+  },
+  "completedBoundary": {
+    "observations": {
+      "schemaVersion": 1,
+      "observedAt": "2026-10-12T04:27:48.180Z",
+      "applicationVersion": "2.2.36",
+      "source": {
+        "boss": "45db56d98e",
+        "uar": "c314099bc9173058f3ba43b983539d8d13c6f4de",
+        "bossfang": "37f05a819f3e7ea92f8b6541b6432e2bdb961785"
+      },
+      "observations": [
+        {
+          "scenario": "installed-agent-prompt-followup",
+          "status": "passed",
+          "session": "78c20bf0-494b-479c-b443-871b11df2269",
+          "agent": "default-agent",
+          "model": "bossfang-source-fba70d2ddb565ab3b644/kimi-k3",
+          "response": "UAR integrated chat is working.",
+          "evidence": "Installed packaged application native accessibility observation"
+        },
+        {
+          "scenario": "explicit-agent-model-override",
+          "status": "passed",
+          "session": "5aeccdbe-9e53-4810-aea0-6b2be72f28ff",
+          "agent": "default-agent",
+          "model": "bossfang-source-e4e508a62bc0b8711926/openai-codex:gpt-6.1-sol",
+          "response": "Explicit model override is working.",
+          "terminalState": "completed"
+        },
+        {
+          "scenario": "delegated-cancellation",
+          "status": "passed",
+          "session": "5aeccdbe-9e53-4810-aea0-6b2be72f28ff",
+          "actions": [
+            "Stop generating",
+            "Cancel delegated run"
+          ],
+          "terminalState": "cancelled"
+        },
+        {
+          "scenario": "verified-model-default-agent",
+          "status": "passed",
+          "session": "0ed45a55-1bd7-4272-b791-df4420c10823",
+          "agent": "default-agent",
+          "model": "bossfang-source-e4e508a62bc0b8711926/openai-codex:gpt-6.1-sol",
+          "response": "Verified model route is working.",
+          "terminalState": "completed",
+          "run": "0d8b7028-1dde-4050-949e-520d59eaf55d"
+        },
+        {
+          "scenario": "delegated-shared-memory-retrieval",
+          "status": "not-proven-approval-lease-expired",
+          "session": "32f830c4-8067-4cbc-9fc0-b807321e5bb7",
+          "run": "5dfdf1a8-2153-47ea-8ea8-a793c1f67d59",
+          "key": "copper-kite-235",
+          "scope": "workspace",
+          "terminalState": "completed-with-tool-errors",
+          "error": "Tool lease or budget reservation expired before claim",
+          "detail": "Original run preserved; model attempted search twice; neither produced a record. No automatic replay by operator.",
+          "observedAt": "2026-10-12T04:32:26.216Z"
+        },
+        {
+          "scenario": "installed-agent-target-persists-after-app-restart",
+          "status": "passed",
+          "observedAt": "2026-10-12T04:38:41.070Z",
+          "workspace": "da769885-e227-49ad-a407-fb337e4dab60",
+          "instance": "managed-local",
+          "target": "uar:agent:urn%3Aboss%3Adefault-agent%3Abinding%3Ada769885-e227-49ad-a407-fb337e4dab60",
+          "modelOverride": null,
+          "evidence": "Saved in corrected packaged app, quit/reopen The Boss, restored same target and effective Kimi K3"
+        },
+        {
+          "scenario": "saved-target-executes-after-app-restart",
+          "status": "passed",
+          "observedAt": "2026-10-12T04:39:46.952Z",
+          "session": "65e374ad-654e-4d78-bf98-d992fdc4b296",
+          "run": "f2927b45-553d-417e-a727-0a62fd7bd288",
+          "response": "My saved UAR target works after restarting The Boss.",
+          "terminalState": "completed",
+          "effectiveModel": "bossfang-source-fba70d2ddb565ab3b644/kimi-k3"
+        }
+      ],
+      "knownRepair": {
+        "scenario": "target-selection-persistence",
+        "observedFailure": "TOML serialization of optional null fields failed; restart reloaded legacy target",
+        "sourceFix": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85",
+        "status": "native-payload-building"
+      },
+      "finalPayload": {
+        "boss": "2745e58b0f",
+        "uar": "c314099bc9173058f3ba43b983539d8d13c6f4de",
+        "bossfang": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85",
+        "installedAt": "2026-10-12T04:35:00Z",
+        "timestampPrecision": "approximate"
+      },
+      "macPublicationRun": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38204641474",
+      "workspaceIsolation": {
+        "status": "passed",
+        "at": "2026-10-12T04:46:38.949Z",
+        "workspace": "08f4ad51-204e-406b-97b8-c2fc23cbeffd",
+        "path": "/private/tmp/bossfang-memory-isolation-20261012",
+        "session": "60d93854-3708-4847-af71-99031cd50942",
+        "query": "copper-kite-235",
+        "resultCount": 0,
+        "tool": "mcp__librefang__shared_memory_search",
+        "toolUseId": "toolu_01SMznUmCt73StMwadJH8GjH",
+        "resultAt": "2026-10-12T04:45:44.738Z",
+        "transcript": "/Users/gqadonis/.claude/projects/-Users-gqadonis-Library-Application-Support-TheBoss-Data-Agents--bossfang/100ff44b-4343-4b4f-b14f-9851f9dd3584.jsonl",
+        "screenshot": "/tmp/bossfang-2.2.36-memory-isolation.png",
+        "transcriptSha256": "cba8baba47c3bc7db511d3cfbdda2fbbfe7a37bb7c9e803d55f8a88eee413b22"
+      },
+      "runtimeRestart": {
+        "status": "passed",
+        "at": "2026-10-12T04:49:45.326Z",
+        "action": "Settings > UAR > Restart UAR",
+        "endpoint": "http://127.0.0.1:1907",
+        "requestedPort": 1906,
+        "portFallbackObserved": true,
+        "session": "8226f9f2-6fd8-429d-b859-058100efdbc2",
+        "run": "4e258441-9b43-40e4-9983-536d2040c20f",
+        "response": "BossFang reconnected after UAR restart.",
+        "terminalState": "completed",
+        "personalWorkspaceRestored": true
+      }
+    },
+    "build": {
+      "source": "2745e58b0f77fd7fa01abb9a769189abf5200271",
+      "startedAt": "2026-10-12T04:31:14.069Z",
+      "finishedAt": "2026-10-12T04:48:21.178Z",
+      "command": [
+        "pnpm",
+        "build:mac:arm64"
+      ],
+      "code": 0
+    },
+    "source": {
+      "boss": "2745e58b0f77fd7fa01abb9a769189abf5200271",
+      "uar": "c314099bc9173058f3ba43b983539d8d13c6f4de",
+      "bossfang": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85"
+    }
   }
 }
