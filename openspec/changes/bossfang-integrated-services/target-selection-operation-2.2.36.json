@@ -361,6 +361,27 @@
       "boss": "2745e58b0f77fd7fa01abb9a769189abf5200271",
       "uar": "c314099bc9173058f3ba43b983539d8d13c6f4de",
       "bossfang": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85"
+    },
+    "requestedStorageFailure": {
+      "at": "2026-10-12T04:53:06.659Z",
+      "action": "Save preferred port 1910, then Apply and restart UAR",
+      "status": "refused-invalid-pending-storage-credentials",
+      "error": "SurrealDB authentication failed. Check the username, password and authentication scope.",
+      "requestedStorage": {
+        "backend": "remote-surrealdb",
+        "endpoint": "http://127.0.0.1:28000",
+        "namespace": "uar",
+        "database": "main"
+      },
+      "effectiveStorage": {
+        "backend": "embedded-surrealdb",
+        "endpoint": "http://127.0.0.1:1907"
+      },
+      "originalPortPreferenceRestored": 1906,
+      "runningProcessPreserved": true,
+      "endpointChangeDemonstrated": false,
+      "sharedMemoryUnaffected": true,
+      "scope": "Existing pending operational storage configuration is distinct from the working shared memory API at port23001. No credentials or store selection were modified."
     }
   }
 }
