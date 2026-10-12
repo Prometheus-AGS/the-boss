@@ -1,7 +1,7 @@
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
-const { execFileSync } = require('node:child_process')
+const { execFileSync, spawnSync } = require('node:child_process')
 
 const { RETAINED_NATIVE_TOOLS, resolveReleaseProfile } = require('./release-profile.cjs')
 const {
@@ -64,6 +64,23 @@ function verifyPackagedApplication(resourcesDir) {
   } else assertPackagedUarPayloadAbsent(resourcesDir, platformKey)
 }
 
+function validateStapledTicket(app) {
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const result = spawnSync('xcrun', ['stapler', 'validate', app], { encoding: 'utf8', timeout: 60_000 })
+    if (result.stdout) process.stdout.write(result.stdout)
+    if (result.stderr) process.stderr.write(result.stderr)
+    if (result.error) throw result.error
+    if (result.status === 0) return
+    // Apple CloudKit lost the connection after notarization in release run 38227578387.
+    const connectionLost = result.status === 68 && /NSURLErrorDomain Code=-1005\b/.test(`${result.stdout}${result.stderr}`)
+    if (!connectionLost || attempt === 3) {
+      throw new Error(`Stapler validation failed (status ${result.status}, signal ${result.signal || 'none'})`)
+    }
+    process.stderr.write(`Apple ticket lookup connection lost; retrying validation (${attempt + 1}/3)\n`)
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 2_000)
+  }
+}
+
 function verifyApplicationBundle(app) {
   const info = path.join(app, 'Contents', 'Info.plist')
   execFileSync('plutil', ['-lint', info], { stdio: 'inherit' })
@@ -82,7 +99,7 @@ function verifyApplicationBundle(app) {
   }
   execFileSync('codesign', ['--verify', '--deep', '--strict', '--verbose=4', app], { stdio: 'inherit' })
   if (requireNotarization) {
-    execFileSync('xcrun', ['stapler', 'validate', app], { stdio: 'inherit', timeout: 60_000 })
+    validateStapledTicket(app)
     execFileSync('spctl', ['--assess', '--type', 'execute', '--verbose=4', app], { stdio: 'inherit' })
   } else {
     process.stdout.write('Notarization validation skipped because HAS_NOTARIZATION is not true\n')
