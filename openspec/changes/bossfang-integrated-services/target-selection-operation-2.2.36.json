@@ -405,6 +405,11 @@
           1127
         ],
         "cause": "Reusable deployment admission retained listener1907 after the selected runtime moved to1910. Existing execution transport receipts must remain immutable; new admissions need current trusted instance placement."
+      },
+      "repair": {
+        "source": "b4244aeaa7e931240ae0f09ae31bae3f45bda244",
+        "status": "production-code-complete-native-build-running",
+        "review": "endpoint-repair-review.json"
       }
     }
   }

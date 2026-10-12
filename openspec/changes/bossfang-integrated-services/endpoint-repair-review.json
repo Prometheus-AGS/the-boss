@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "target": "managed-UAR-endpoint-relocation",
+  "source": "b4244aeaa7e931240ae0f09ae31bae3f45bda244",
+  "readinessSource": "93636ab039",
+  "rounds": [
+    {
+      "mode": "diff",
+      "verdict": "BLOCK",
+      "judge_model": "gpt-6.1-sol",
+      "judge_identity": {
+        "providerId": "openai",
+        "providerConnectionId": "openai-proxy-8181",
+        "modelId": "gpt-6.1-sol"
+      },
+      "producer_model": "unknown",
+      "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+      "cross_model_check": "unverified-producer-unknown",
+      "findings": [
+        {
+          "severity": "CRITICAL",
+          "file": "src/uar/compiler/collaboration/placement.rs",
+          "claim": "Strict revalidation now rejects existing Reattach receipts even when their endpoint and all identity fields remain unchanged.",
+          "evidence": "service.rs adds validate_receipt_projection(stored_receipt, receipt) to revalidate_effective_binding. placement.rs implements that comparison by unconditionally calling admit_deployment_receipt(stored), which invokes readmit_deployment. In service_instance.rs, readmit_deployment passes binding.intent as the expectation but PlacementIntent::New as the allowed intent, producing placement.intent-mismatch for Reattach. Previously, strict revalidate passed binding.intent as the allowed intent, and the descriptor explicitly advertises reattach: true. This changes existing execution validation despite the constraint to preserve existing run endpoint/epoch authority.",
+          "suggested_fix": "Separate strict existing-receipt validation from new-admission projection validation. Preserve complete equality with the trusted persisted receipt for existing Reattach receipts, and permit the current-endpoint projection only in an explicitly new-admission path without relaxing strict endpoint validation for existing runs."
+        }
+      ]
+    },
+    {
+      "mode": "diff",
+      "verdict": "BLOCK",
+      "judge_model": "gpt-6.1-sol",
+      "judge_identity": {
+        "providerId": "openai",
+        "providerConnectionId": "openai-proxy-8181",
+        "modelId": "gpt-6.1-sol"
+      },
+      "producer_model": "unknown",
+      "isolation_mode": "rest-gateway:http://localhost:4000/v1",
+      "cross_model_check": "unverified-producer-unknown",
+      "findings": [
+        {
+          "severity": "CRITICAL",
+          "file": "src/uar/compiler/collaboration/service.rs",
+          "line": 138,
+          "claim": "Resolving a bound agent now rejects persisted Reattach bindings even when the runtime endpoints have not changed.",
+          "evidence": "resolve_bound_agent_run now unconditionally calls admit_deployment_receipt, which calls readmit_deployment with the stored binding's intent. readmit_deployment passes PlacementIntent::New as allowed_intent to evaluate, whose intent-mismatch check rejects PlacementIntent::Reattach. Previously this path called revalidate_effective_binding directly, and authority.revalidate validates using binding.intent as the allowed intent. The unchanged-receipt exception in validate_receipt_projection cannot prevent this earlier rejection.",
+          "suggested_fix": "Preserve strict validation for unchanged Reattach receipts before attempting a New-only relocation projection; do not route every bound-agent resolution through readmit_deployment."
+        },
+        {
+          "severity": "CRITICAL",
+          "file": "src/main/services/bossFang/BossFangService.ts",
+          "line": 157,
+          "claim": "Managed UAR readiness still reports ready when the managed service fails without changing its endpoint identity.",
+          "evidence": "getStatus uses the managed status only to compare generation, baseUrl, and observed.id. When those values equal the cached endpoint, relocated is false and a cached connected state produces services.uar.state = 'ready', irrespective of the managed service's readiness or failure. When identity differs, any defined managed status instead produces 'connecting', also without inspecting failure. This does not satisfy the constraint 'Boss readiness must report failure without network side effects on status polls.'",
+          "suggested_fix": "Use the sidecar's locally reported availability/failure state as well as endpoint identity when deriving connection and UAR readiness, returning unavailable with its failure detail when the managed service is failed, without initiating network activity."
+        }
+      ]
+    }
+  ],
+  "dispositions": [
+    {
+      "finding": "Existing Reattach receipt rejected by unconditional New projection",
+      "status": "corrected",
+      "commits": [
+        "501deac8",
+        "b4244aea"
+      ],
+      "detail": "Both new resolution and strict revalidation retain an unchanged trusted receipt; changed endpoints remain New-only. Installed operation pending."
+    },
+    {
+      "finding": "Sidecar failed status object can remain ready",
+      "status": "rejected-source-contradiction",
+      "evidence": "UarSidecarService.ts status type175; status()294-297 returns live running snapshot orundefined; child exit699 andstop964-969 clear running; isAlive981 checks exitCode/signalCode. Projection maps undefined to unavailable without network."
+    }
+  ],
+  "limitations": [
+    "Fresh gateway review; exact producing model unavailable, so cross-model independence unverified.",
+    "Two bounded review rounds; final corrections source-inspected, not independently rerun a third time.",
+    "No build or UI evidence inferred from review."
+  ],
+  "sycophancyScreen": {
+    "score": 0,
+    "at": "2026-10-12T05:12:28.004232Z",
+    "mode": "completion",
+    "scope": "Finding disposition summary",
+    "source": "sycophancy-correction MCP"
+  }
+}
