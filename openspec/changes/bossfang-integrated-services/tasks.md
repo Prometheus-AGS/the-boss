@@ -4,7 +4,7 @@
 - [x] 2. Apply inventory-backed scoped shared memory to native and delegated agents without replacing private memory.
 - [x] 3. Finish authoritative mixed UAR target discovery/resolution, credential-aware verification, admitted model overrides, full-run BossFang chat, grouped selector, settings readiness/actions, typed IPC and every locale. Preserve active run bindings and explicit legacy conversion.
 - [x] 4. Build and operate installed Mac ARM64 through all approved scenarios; fix observed failures.
-- [ ] 5. Commit/push main, publish Mac ARM64 and Windows x64 and update website with truthful operation evidence.
+- [x] 5. Commit/push main, publish Mac ARM64 and Windows x64 and update website with truthful operation evidence.
 
 Items 1–3 record implementation. They do not certify every operational scenario.
 The completed local 2.2.36 build and installed prompt, model override, cancellation,
@@ -36,3 +36,12 @@ produced the specific shared-memory configuration error; restoring the original
 external endpoint returned readiness. No external service was stopped and no
 memory write was attempted during the outage. Native Windows installed acceptance
 remains separate from publication and the completed Mac operation.
+
+Publication completed on 2026-10-12: Mac ARM64 2.2.36 is Developer ID signed and
+notarized; Windows x64 2.2.36 is unsigned. Both exact installer links are live on
+https://the-boss.know-me.tools/#download. The downloaded notarized Mac installer
+matched its release-manifest checksum and is saved under
+`dist/published-2.2.36/The-Boss-2.2.36-mac-arm64.dmg`. Platform source revisions,
+checksums, workflow identities and website observation are in the operation receipt.
+Native Windows installed acceptance remains pending; this publication completion
+does not certify it or unrelated portfolio work.
