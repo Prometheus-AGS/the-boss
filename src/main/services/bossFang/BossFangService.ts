@@ -152,6 +152,30 @@ export class BossFangService extends BaseService {
   }
   async getStatus(): Promise<BossFangStatus> {
     const requested = readConfig()
+    const endpoint = this.connection.endpoint
+    const managed = endpoint?.ownership === 'managed' ? application.get('UarSidecarService').status() : undefined
+    const relocated =
+      this.connection.state === 'connected' &&
+      endpoint?.ownership === 'managed' &&
+      (!managed ||
+        managed.generation !== endpoint.generation ||
+        managed.baseUrl !== endpoint.baseUrl ||
+        managed.observed.id !== endpoint.observed.id)
+    const connection = relocated ? (managed ? 'connecting' : 'error') : this.connection.state
+    const connectionError = relocated ? t('bossfang.retainedAuthentication') : this.connection.error
+    const uarReadiness: BossFangStatus['services']['uar'] = {
+      state:
+        connection === 'connected'
+          ? 'ready'
+          : connection === 'connecting'
+            ? 'connecting'
+            : requested.connectionIntent === 'disconnected'
+              ? 'disabled'
+              : connection === 'error'
+                ? 'unavailable'
+                : 'unknown',
+      detail: connectionError
+    }
     return {
       status: this.status,
       ownership: this.effectiveConfig?.ownership ?? requested.ownership,
@@ -161,9 +185,9 @@ export class BossFangService extends BaseService {
         ? {
             origin: this.origin,
             port: Number(new URL(this.origin).port || (this.origin.startsWith('https:') ? 443 : 80)),
-            uarInstanceId: this.connection.endpoint?.instanceId ?? null,
-            uarGeneration: this.connection.endpoint?.generation ?? null,
-            grantExpiresAt: this.connection.expiresAt
+            uarInstanceId: connection === 'connected' ? (endpoint?.instanceId ?? null) : null,
+            uarGeneration: connection === 'connected' ? (endpoint?.generation ?? null) : null,
+            grantExpiresAt: connection === 'connected' ? this.connection.expiresAt : null
           }
         : null,
       configurationPending: this.configurationPending,
@@ -178,8 +202,8 @@ export class BossFangService extends BaseService {
         ),
       ...(this.origin ? { url: this.origin + '/dashboard/' } : {}),
       error: this.error,
-      connection: this.connection.state,
-      connectionError: this.connection.error,
+      connection,
+      connectionError,
       services: {
         dashboard: {
           state:
@@ -192,20 +216,8 @@ export class BossFangService extends BaseService {
                   : 'unknown',
           detail: this.error
         },
-        uar: {
-          state:
-            this.connection.state === 'connected'
-              ? 'ready'
-              : this.connection.state === 'connecting'
-                ? 'connecting'
-                : requested.connectionIntent === 'disconnected'
-                  ? 'disabled'
-                  : this.connection.state === 'error'
-                    ? 'unavailable'
-                    : 'unknown',
-          detail: this.connection.error
-        },
-        models: this.connection.state === 'connected' ? { ...this.modelReadiness } : { state: 'unknown', detail: null },
+        uar: uarReadiness,
+        models: connection === 'connected' ? { ...this.modelReadiness } : { ...uarReadiness },
         sharedMemory: this.sharedMemory.readiness
       },
       sharedMemory: this.sharedMemory.status,
