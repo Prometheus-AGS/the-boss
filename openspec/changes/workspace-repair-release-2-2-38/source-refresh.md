@@ -11,3 +11,5 @@ UAR dependency closure at the selected revision: liter-llm e446f5ef91003bbec5fce
 Compatibility review found the existing Boss run/AG-UI path retained; do not switch to new Dot endpoints merely to refresh the payload. Source docs disclose principal-scoped legacy history/knowledge quarantine and explicit credential migration. Legacy stores are preserved, not automatically reassigned. The installer carries mini MIT LICENSE alongside its runtime. New release operation and Windows acceptance remain separate.
 
 The empty unpublished draft is reanchored to the final build source during release preparation. Published releases or drafts with artifacts keep their immutable existing source anchor.
+
+Both selected UAR server-full payloads were built and published from 482c4180: native run38562596849, Mac packaging38565834001, Windows packaging38566588005. Exact archives and source/digest receipts: build/uar-payload-refresh-482c4180.json. Local Mac source pin and archive are updated together. Application build, operation, publication and acceptance remain pending at this source freeze.

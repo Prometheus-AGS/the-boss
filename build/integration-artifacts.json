@@ -27,10 +27,10 @@
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "3e6af7c4a81b9406c11dc3886d3626232f037375",
+      "revision": "482c418093d66487b5713b9022d185577c2a38f7",
       "platformRevisions": {
-        "darwin-arm64": "3e6af7c4a81b9406c11dc3886d3626232f037375",
-        "win32-x64": "3e6af7c4a81b9406c11dc3886d3626232f037375"
+        "darwin-arm64": "482c418093d66487b5713b9022d185577c2a38f7",
+        "win32-x64": "482c418093d66487b5713b9022d185577c2a38f7"
       }
     },
     "surreal-memory": {
@@ -3130,9 +3130,9 @@
       "version": "1.0.0",
       "packages": {
         "darwin-arm64": {
-          "source": "3e6af7c4a81b9406c11dc3886d3626232f037375",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-3e6af7c4/uar-sidecar-darwin-arm64.tar.gz",
-          "sha256": "44659b937da8c3ecc9c37541489a41c968413eeab4bfcbd6734f36ac22c392e9",
+          "source": "482c418093d66487b5713b9022d185577c2a38f7",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-482c4180/uar-sidecar-darwin-arm64.tar.gz",
+          "sha256": "efdd9db5b953f2dad4dc40f94a34fef71745a5c710cb37cd12268893b2e875eb",
           "archive": "tar.gz",
           "binaries": [
             "libcrc_fast-c9544bfaf069c5bc.dylib",
@@ -3152,9 +3152,9 @@
           ]
         },
         "win32-x64": {
-          "source": "3e6af7c4a81b9406c11dc3886d3626232f037375",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-3e6af7c4/uar-sidecar-win32-x64.tar.gz",
-          "sha256": "8c7b16cfe540ea133e4ab64bb8407a98ebbaaf34629a8b07454df6cc6f4c290a",
+          "source": "482c418093d66487b5713b9022d185577c2a38f7",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-482c4180/uar-sidecar-win32-x64.tar.gz",
+          "sha256": "e2197402eb9577e9ac8ad3d6f8777bd712fa03ed2075bfd98c154f592b384cc5",
           "archive": "tar.gz",
           "binaries": [
             "crc_fast-c45996daf34d96b5.dll",
