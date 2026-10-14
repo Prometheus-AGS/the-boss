@@ -10,7 +10,7 @@ Published Mac ARM64 and Windows x64 with UAR source 3e6af7c4a81b9406c11dc3886d36
 
 ## Evidence
 
-[Operation receipt](operation.json), [local UAR operation](bossfang-uar-operation.png), [public Mac operation](public-mac-uar-operation.png), [live website](website-both-published.png), [installer workflow](https://github.com/Prometheus-AGS/the-boss/actions/runs/38544734884), [GitHub Release](https://github.com/Prometheus-AGS/the-boss/releases/tag/v2.2.37).
+[Operation receipt](operation.json), [local UAR operation](bossfang-uar-operation.png), [public Mac operation](public-mac-uar-operation.png), [live website](website-installer-links.png), [installer workflow](https://github.com/Prometheus-AGS/the-boss/actions/runs/38544734884), [GitHub Release](https://github.com/Prometheus-AGS/the-boss/releases/tag/v2.2.37).
 
 ## Limits and preserved history
 

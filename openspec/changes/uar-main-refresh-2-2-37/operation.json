@@ -148,7 +148,7 @@
       "verifiedAt": "2026-10-14T10:31:44.265Z",
       "status": "both-required-platforms-live",
       "sourceCommit": "06bca09",
-      "evidence": "website-both-published.png",
+      "evidence": "website-installer-links.png",
       "links": [
         "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.37/The-Boss-2.2.37-win-x64-setup.exe",
         "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.37/The-Boss-2.2.37-mac-arm64.dmg"
