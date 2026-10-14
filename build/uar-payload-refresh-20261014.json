@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-14T09:25:55.666Z",
+  "authority": "Operator approved payload completion and Mac ARM64/Windows x64 application release on 2026-10-14",
+  "source": {
+    "repository": "Prometheus-AGS/universal-agent-runtime",
+    "revision": "3e6af7c4a81b9406c11dc3886d3626232f037375",
+    "branch": "main",
+    "otherSessionChanges": "Shared checkout preserved; no writes or local Cargo builds in this session"
+  },
+  "nativeBuild": {
+    "repository": "Prometheus-AGS/the-boss",
+    "run": 38534534540,
+    "sourceCommit": "6b5b555a1908f92626f34c1ab9bcaa1b1a7751e5",
+    "url": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38534534540",
+    "status": "success"
+  },
+  "platforms": {
+    "win32-x64": {
+      "nativeJob": 115754132851,
+      "features": [
+        "server-full"
+      ],
+      "nativeBinarySize": 330008576,
+      "nativeBinarySha256": "d3dbe0827286d5005a0aee3262d36341eb3cee835f6388ec2c17a80ab81dca36",
+      "packagingRun": 38538913055,
+      "packagingJob": 115768584240,
+      "packagingCommit": "709ce1fd05545e47f83b65782b76aa0112d9a678",
+      "packaging": "Exact completed native binary and cache reused without compilation",
+      "releaseTag": "boss-sidecar-win32-x64-v1.0.0-3e6af7c4",
+      "recordUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-3e6af7c4/uar-sidecar-win32-x64.json",
+      "recordSha256": "6079411ee7198256b7975dfda819ff6558d66b019540eb089e223389d5181bfd",
+      "archiveUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-3e6af7c4/uar-sidecar-win32-x64.tar.gz",
+      "archiveSize": 130273408,
+      "archiveSha256": "8c7b16cfe540ea133e4ab64bb8407a98ebbaaf34629a8b07454df6cc6f4c290a",
+      "binaries": [
+        "crc_fast-c45996daf34d96b5.dll",
+        "LICENSE",
+        "policies/default.cedar",
+        "policies/skill-mutation.cedar",
+        "policies/tool-approval.cedar",
+        "sevenz_rust2-0296aedd6d6c479a.dll",
+        "uar-models/bg-small-en-v1.5.onnx",
+        "uar-models/config.json",
+        "uar-models/MODEL-NOTICE.txt",
+        "uar-models/special_tokens_map.json",
+        "uar-models/tokenizer_config.json",
+        "uar-models/tokenizer.json",
+        "uar-sidecar.exe",
+        "payload-manifest.json"
+      ],
+      "nativeCompletedAt": "2026-10-14T08:57:02Z",
+      "nativeBuildResult": "success",
+      "packagingCompletedAt": "2026-10-14T09:05:40Z"
+    },
+    "darwin-arm64": {
+      "nativeJob": 115754132855,
+      "features": [
+        "server-full"
+      ],
+      "nativeBinarySize": 302728688,
+      "nativeBinarySha256": "058fd506cf4770b88affd419f7baccd5ebf8d224f6c4b69fb41ebf9d6481f0dc",
+      "packagingRun": 38541686314,
+      "packagingJob": 115777783930,
+      "packagingCommit": "709ce1fd05545e47f83b65782b76aa0112d9a678",
+      "packaging": "Exact completed native binary and cache reused without compilation",
+      "releaseTag": "boss-sidecar-darwin-arm64-v1.0.0-3e6af7c4",
+      "recordUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-3e6af7c4/uar-sidecar-darwin-arm64.json",
+      "recordSha256": "0842ebe98d79036faa7a5ab84bd8bbd239c4ee6216f508e2957cae911b8933e1",
+      "archiveUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-3e6af7c4/uar-sidecar-darwin-arm64.tar.gz",
+      "archiveSize": 126437012,
+      "archiveSha256": "44659b937da8c3ecc9c37541489a41c968413eeab4bfcbd6734f36ac22c392e9",
+      "binaries": [
+        "libcrc_fast-c9544bfaf069c5bc.dylib",
+        "libsevenz_rust2-bcd9d32571c57b36.dylib",
+        "LICENSE",
+        "policies/default.cedar",
+        "policies/skill-mutation.cedar",
+        "policies/tool-approval.cedar",
+        "uar-models/bg-small-en-v1.5.onnx",
+        "uar-models/config.json",
+        "uar-models/MODEL-NOTICE.txt",
+        "uar-models/special_tokens_map.json",
+        "uar-models/tokenizer_config.json",
+        "uar-models/tokenizer.json",
+        "uar-sidecar",
+        "payload-manifest.json"
+      ],
+      "nativeCompletedAt": "2026-10-14T09:19:34Z",
+      "nativeBuildResult": "success",
+      "packagingCompletedAt": "2026-10-14T09:23:59Z"
+    }
+  },
+  "platformsOutsideRepair": [
+    "darwin-x64",
+    "win32-arm64"
+  ],
+  "applicationOperation": "Recorded by lead separately; native package creation is not installed application acceptance",
+  "status": "selected-platform-payloads-published-and-imported",
+  "import": {
+    "command": "RELEASE_PLATFORMS=darwin-arm64,win32-x64 node scripts/import-uar-sidecar-payloads.cjs <Mac record URL> <Windows record URL>",
+    "result": "Both selected records imported from immutable GitHub Releases; platformRevisions updated together",
+    "retainedPlatformRevisions": {
+      "darwin-x64": "74194623b17e5db127534b0f0469f8557794d4bc",
+      "win32-arm64": "74194623b17e5db127534b0f0469f8557794d4bc"
+    }
+  },
+  "notes": [
+    "Windows archive carries two required application-private runtime DLLs; Mac archive carries the corresponding two dylibs.",
+    "Both archives include model assets, three Cedar policies, LICENSE and checksummed payload-manifest.json.",
+    "No application code changes or suite execution were performed by this payload promotion.",
+    "Previous installers and their provenance remain immutable."
+  ]
+}

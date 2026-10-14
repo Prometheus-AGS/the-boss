@@ -28,8 +28,8 @@
       "platformRevisions": {
         "darwin-x64": "74194623b17e5db127534b0f0469f8557794d4bc",
         "win32-arm64": "74194623b17e5db127534b0f0469f8557794d4bc",
-        "darwin-arm64": "b4244aeaa7e931240ae0f09ae31bae3f45bda244",
-        "win32-x64": "b4244aeaa7e931240ae0f09ae31bae3f45bda244"
+        "darwin-arm64": "3e6af7c4a81b9406c11dc3886d3626232f037375",
+        "win32-x64": "3e6af7c4a81b9406c11dc3886d3626232f037375"
       }
     },
     "surreal-memory": {
