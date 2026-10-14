@@ -1,43 +1,29 @@
 {
-  "version": "2.2.37",
+  "version": "2.2.38",
   "profile": "uar-enabled",
   "features": {
     "uar": true
   },
   "supportedPlatforms": [
-    "win32-x64",
-    "win32-arm64",
     "darwin-arm64",
-    "darwin-x64"
+    "win32-x64"
   ],
-  "source": "9bdf16fa2eea3eb469f1b5caf0b628089c5fdeb2",
-  "publishedAt": "2026-10-14T10:23:08.829Z",
+  "source": "2a508b433db5dea80073b46fee34b8c549043056",
+  "publishedAt": "2026-10-14T15:05:56.878Z",
   "pendingPlatforms": [
-    "win32-arm64",
-    "darwin-x64"
+    "darwin-arm64"
   ],
   "artifacts": [
     {
-      "name": "The-Boss-2.2.37-win-x64-setup.exe",
-      "size": 534438432,
-      "sha256": "263348f7c78224376f28614a124a99d54ca6909099224a54e6b1f093cb9368d8",
-      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.37/The-Boss-2.2.37-win-x64-setup.exe",
+      "name": "The-Boss-2.2.38-win-x64-setup.exe",
+      "size": 537262294,
+      "sha256": "bd1146fc48a453cc780856451db81ca7c66e7008eafc1890cb569b8187f99629",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.38/The-Boss-2.2.38-win-x64-setup.exe",
       "signing": "unsigned",
       "profile": "uar-enabled",
       "platform": "win32",
       "arch": "x64",
-      "source": "9bdf16fa2eea3eb469f1b5caf0b628089c5fdeb2"
-    },
-    {
-      "name": "The-Boss-2.2.37-mac-arm64.dmg",
-      "size": 718201249,
-      "sha256": "db4bb468ef4fc76d0f72df243d53238a7fd67eede8a2e236e062e176ce125645",
-      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.37/The-Boss-2.2.37-mac-arm64.dmg",
-      "signing": "signed (not notarized)",
-      "profile": "uar-enabled",
-      "platform": "darwin",
-      "arch": "arm64",
-      "source": "9bdf16fa2eea3eb469f1b5caf0b628089c5fdeb2"
+      "source": "2a508b433db5dea80073b46fee34b8c549043056"
     }
   ]
 }
