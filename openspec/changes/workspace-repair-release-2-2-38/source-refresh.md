@@ -9,3 +9,5 @@ No retired Cadence clocks, counts, history or original code/qualification marker
 UAR dependency closure at the selected revision: liter-llm e446f5ef91003bbec5fce6b2f45fb94559dff335; prometheus-skill-system f4bef4556a83ac22bf204bf69a01ddf0f9e007f2; Rust filesystem 01ae76b99db4b818458efe2dc5d76e70fa5eadb4. The independently packaged liter CLI retains its proven a6047386 source; this refresh does not relabel it as the UAR embedded library revision. Mini synchronization copied 101 skills, including kbd-handoff.
 
 Compatibility review found the existing Boss run/AG-UI path retained; do not switch to new Dot endpoints merely to refresh the payload. Source docs disclose principal-scoped legacy history/knowledge quarantine and explicit credential migration. Legacy stores are preserved, not automatically reassigned. The installer carries mini MIT LICENSE alongside its runtime. New release operation and Windows acceptance remain separate.
+
+The empty unpublished draft is reanchored to the final build source during release preparation. Published releases or drafts with artifacts keep their immutable existing source anchor.

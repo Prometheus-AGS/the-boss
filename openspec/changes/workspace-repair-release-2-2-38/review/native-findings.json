@@ -1,0 +1,19 @@
+{
+  "mode": "diff",
+  "verdict": "PASS",
+  "judge_model": "gpt-6",
+  "isolation_mode": "harness-native",
+  "producer_model": "unknown",
+  "cross_model_check": "unverified-producer-unknown",
+  "checked_classes": [
+    "Scope and acceptance: reviewed 155fdc762c6c366430ca0cec0fefe52138b1bbfb..3ce982854f892c2ae7ebb1425042838a67bdc9ed once, read-only apart from this receipt. No tests, builds, GUI operations, external writes or commits were run; PASS covers source review only.",
+    "Release platform metadata: resolveReleaseTargets applies the darwin-arm64/win32-x64 selection only to version 2.2.38. Preparation, metadata update and downloaded-installer verification use that selection; other versions retain the general four-platform contract.",
+    "Publication callers: coordinate-release-publication passes the immutable installer source and one platform into update-release-entry and verify-github-release. The first 2.2.38 platform replaces the prior 2.2.37 manifest; the second retains the first platform under the matching two-platform contract.",
+    "Draft notes: preparation edits notes only for an existing empty draft with the matching feature profile. The existing source anchor is preserved, and immutable per-platform manifests retain installer origins.",
+    "Payload provenance: mini integration metadata and the submodule gitlink both select 52a84e7d19f3ffdae0b58bd1732a853abd06e748. UAR source intent selects 482c418093d66487b5713b9022d185577c2a38f7 for the two release platforms while deferred-platform origins remain unchanged. Old UAR archives are a declared pending import from build 38562596849, excluded from completed-payload certification and not reported as a new defect.",
+    "Packaging contract: the pinned mini source contains LICENSE, which the existing payload copy loop now includes and inventories. The existing shared-root closure calculation includes the new file without a new package/runtime dependency.",
+    "Documentation and historical evidence: bilingual notes/history agree on selected pins, targets and deferred notarization. Source-refresh notes disclose preservation of legacy authenticated stores and required explicit migration/reconfiguration. The diff does not change historical code, qualification or installed-acceptance records.",
+    "Trust boundaries: the change adds no new external-input execution path or credential handling. Target validation restricts configured platforms to the existing supported-platform set; existing public-profile and immutable UAR record checks remain in callers."
+  ],
+  "findings": []
+}

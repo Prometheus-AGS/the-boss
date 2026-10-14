@@ -1,0 +1,9 @@
+{
+  "source": "sycophancy-correction.detect_sycophancy",
+  "target": "completion",
+  "sycophancyScore": 0,
+  "correctionMandatory": false,
+  "patterns": [],
+  "reviewScope": "Native source review summary; actual runtime and payload build evidence pending",
+  "isolation": "Fresh-context harness-native; cross-model identity unverified"
+}

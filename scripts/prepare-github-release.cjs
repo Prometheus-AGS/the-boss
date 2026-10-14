@@ -26,9 +26,10 @@ if (existing.status === 0) {
   if (existingProfile !== profile.id) {
     throw new Error(`GitHub Release ${tag} already belongs to feature profile ${existingProfile || 'unknown'}`)
   }
-  if (release.isDraft && release.assets.length === 0 && release.body !== notes) {
-    const updated = spawnSync('gh', ['release', 'edit', tag, '--repo', repository, '--notes', notes], { encoding: 'utf8' })
-    if (updated.status !== 0) throw new Error('Unable to refresh the unpublished draft release notes')
+  if (release.isDraft && release.assets.length === 0 &&
+      (release.body !== notes || release.targetCommitish !== process.env.GITHUB_SHA)) {
+    const updated = spawnSync('gh', ['release', 'edit', tag, '--repo', repository, '--notes', notes, '--target', process.env.GITHUB_SHA], { encoding: 'utf8' })
+    if (updated.status !== 0) throw new Error('Unable to refresh the unpublished draft release source and notes')
   }
   // The tag keeps its first source as the release anchor. A later platform may
   // use a newer commit; its immutable installer manifest records that commit.
