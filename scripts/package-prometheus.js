@@ -27,7 +27,7 @@ const entries = [
   'config',
   '.agents/skills'
 ]
-const files = ['package.json', 'package-lock.json', 'versions.toml', 'skill-system.json']
+const files = ['package.json', 'package-lock.json', 'versions.toml', 'skill-system.json', 'LICENSE']
 
 /** Ship the existing full-pack verifier independently of the writable generation it verifies. */
 function packageReviewedVerifier(payload) {
