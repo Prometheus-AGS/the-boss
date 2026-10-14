@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-14T08:20:34.072Z",
+  "authority": "Operator requested current UAR main pointer on 2026-10-14",
+  "repository": "Prometheus-AGS/universal-agent-runtime",
+  "previousSource": "b4244aeaa7e931240ae0f09ae31bae3f45bda244",
+  "selectedSource": "3e6af7c4a81b9406c11dc3886d3626232f037375",
+  "branch": "origin/main",
+  "mergedChange": "PR381: administrator pre-approval for named MCP tools",
+  "sourceFiles": [
+    "build/integration-sources.json",
+    "build/local-uar-source.json",
+    "resources/convergence-supported-profile.json"
+  ],
+  "publishedPayloads": {
+    "darwin-arm64": {
+      "source": "b4244aeaa7e931240ae0f09ae31bae3f45bda244",
+      "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-b4244aea/uar-sidecar-darwin-arm64.tar.gz",
+      "sha256": "8b329f888b710ab13a074ae325c1fe99621a48faf0f189b6f44d9872f0f8b303"
+    },
+    "win32-x64": {
+      "source": "b4244aeaa7e931240ae0f09ae31bae3f45bda244",
+      "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-b4244aea/uar-sidecar-win32-x64.tar.gz",
+      "sha256": "3ff11adcfde392a7f62573818d6913ad47db9ffd58801f3088add7b3c7633e54"
+    }
+  },
+  "payloadStatus": "previous-published-payloads-retained; native-build-and-promotion-required-to-ship-selected-source",
+  "localUarCheckout": {
+    "head": "3e6af7c4a81b9406c11dc3886d3626232f037375",
+    "otherSessionChanges": "preserved without merge, reset, stash or build"
+  },
+  "historicalReceipts": "unchanged; 2.2.36 remains bound to original published inputs"
+}
