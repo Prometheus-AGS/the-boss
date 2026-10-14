@@ -25,6 +25,11 @@ on:
         required: false
         default: false
         type: boolean
+      notarize_macos:
+        description: Notarize the signed Mac installer (disable only for an operator-approved release)
+        required: false
+        default: true
+        type: boolean
       uar_win32_x64_record_url:
         description: Immutable win32-x64 UAR sidecar release record URL (required for uar-enabled)
         required: false
@@ -106,7 +111,7 @@ jobs:
       HAS_MAC_SIGNING: ${{ secrets.CSC_LINK != '' }}
       HAS_WINDOWS_SIGNING: ${{ secrets.WIN_CSC_LINK != '' }}
       HAS_SIGNING: ${{ (matrix.platform == 'darwin' && secrets.CSC_LINK != '') || (matrix.platform == 'win32' && secrets.WIN_CSC_LINK != '') }}
-      HAS_NOTARIZATION: ${{ secrets.APPLE_API_KEY_P8 != '' && secrets.APPLE_API_KEY_ID != '' && secrets.APPLE_API_ISSUER != '' }}
+      HAS_NOTARIZATION: ${{ inputs.notarize_macos && secrets.APPLE_API_KEY_P8 != '' && secrets.APPLE_API_KEY_ID != '' && secrets.APPLE_API_ISSUER != '' }}
     permissions:
       contents: write
     strategy:
@@ -152,7 +157,7 @@ jobs:
         if: runner.os == 'macOS'
         shell: bash
         run: |
-          if [ "$HAS_MAC_SIGNING" != "true" ] || [ "$HAS_NOTARIZATION" != "true" ]; then
+          if [ "$HAS_MAC_SIGNING" != "true" ] || { [ "${{ inputs.notarize_macos }}" == "true" ] && [ "$HAS_NOTARIZATION" != "true" ]; }; then
             echo "macOS releases require Developer ID signing and App Store Connect notarization credentials" >&2
             exit 1
           fi
@@ -185,9 +190,11 @@ jobs:
         run: |
           echo "CSC_LINK=$SIGN_LINK" >> "$GITHUB_ENV"
           echo "CSC_KEY_PASSWORD=$SIGN_PASSWORD" >> "$GITHUB_ENV"
-          echo "APPLE_ID=$SIGN_APPLE_ID" >> "$GITHUB_ENV"
-          echo "APPLE_APP_SPECIFIC_PASSWORD=$SIGN_APPLE_PASSWORD" >> "$GITHUB_ENV"
-          echo "APPLE_TEAM_ID=$SIGN_APPLE_TEAM" >> "$GITHUB_ENV"
+          if [ "${{ inputs.notarize_macos }}" == "true" ]; then
+            echo "APPLE_ID=$SIGN_APPLE_ID" >> "$GITHUB_ENV"
+            echo "APPLE_APP_SPECIFIC_PASSWORD=$SIGN_APPLE_PASSWORD" >> "$GITHUB_ENV"
+            echo "APPLE_TEAM_ID=$SIGN_APPLE_TEAM" >> "$GITHUB_ENV"
+          fi
       - name: Enable configured Windows signing
         if: runner.os == 'Windows' && env.HAS_WINDOWS_SIGNING == 'true'
         shell: bash
