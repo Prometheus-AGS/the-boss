@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-14T16:16:20.806Z",
+  "status": "evidence-reconciled-and-pushed; administrative change archived",
+  "commits": {
+    "boss": "cf2fe454b4c747521d3a68d7cd08b6aab124a3ae",
+    "librefang": "a2a6f8943c0c9ec5beafc3b78c88d52bd15c360d"
+  },
+  "pushes": {
+    "boss": "main push succeeded from8ab4a36937 tocf2fe454b4",
+    "librefang": "main push succeeded from2ec0f66ec toa2a6f8943"
+  },
+  "historicalArchives": {
+    "boss": 8,
+    "initiative": 8
+  },
+  "bossHistoricalRemaining": {
+    "activeChanges": 10,
+    "uncheckedPredicates": 66,
+    "recoveredStaleBoxes": 21
+  },
+  "initiativeRemaining": {
+    "activeChanges": 7,
+    "unqualifiedTaskIds": 18
+  },
+  "markers": {
+    "codeTasks": "61/61",
+    "codeChanges": "20/20",
+    "qualification": "43/61 terminal=42qualified+1historical skipped duplicate;18pending"
+  },
+  "kbd": {
+    "revision": 709,
+    "phaseStatus": "complete",
+    "runLifecycle": "cancelled",
+    "meaning": "Closed administrative run retired through supportedCLI cancel; phase remains complete and qualification remains partial.",
+    "taskStatesUnchanged": true
+  },
+  "cadence": {
+    "state": "retired",
+    "historicalDeliveries": 17,
+    "clockAndHistoryPreserved": true,
+    "newCredit": 0
+  },
+  "review": {
+    "initial": "review/findings.json",
+    "correction": "review/correction.json",
+    "confirmation": "review/findings.confirmation.json",
+    "independence": "Fresh-context native; distinct-model unverified after gateway refusal",
+    "scope": "documentation/accounting only",
+    "criticalRemaining": 0
+  },
+  "documentation": {
+    "boss": "pnpm docs:check passed419 Markdown links,structure,frontmatter,index",
+    "initiative": "18/18 main spec metadata validation;4 existing warnings preserved"
+  },
+  "productActivity": {
+    "builds": 0,
+    "passingOperationsRepeated": 0,
+    "approvalCycles": 0,
+    "productionCodeChanges": 0,
+    "payloadOrPinChanges": 0
+  },
+  "pendingAcceptance": "Exact2.2.38 operator acceptance and nativeWindowsoperation remain pending;2.2.32 acceptance preserved separately.",
+  "ci": "Documentation push commit messages use [skip ci] to avoid automatic repeated builds.",
+  "archive": "openspec/changes/archive/2026-10-14-reconcile-historical-delivery-ledgers"
+}
