@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-14T11:38:53.827Z",
+  "sourceBaseline": "c23abd7036315e977d8015de54f98854db60d5a3",
+  "workspaceCleanup": {
+    "path": "/private/tmp/bossfang-memory-isolation-20261012",
+    "method": "Installed 2.2.37 Work workspace selector and existing deletion impact preview",
+    "references": {
+      "sessions": 0,
+      "channels": 0,
+      "scheduledTasks": 0
+    },
+    "result": "Deleted successfully; absent from refreshed selector; personal and project registrations retained",
+    "filesystem": "Folder and files preserved by existing workflow",
+    "evidence": "workspace-cleanup.png",
+    "temporaryEmptyComposer": "Archived after configuration operation"
+  },
+  "sourceOperation": {
+    "schemaVersion": 1,
+    "phase": "completed",
+    "realApplicationBootstrap": true,
+    "missingWorkspaceOmitted": true,
+    "availableWorkspaceRetained": true,
+    "staleProjectionRemoved": true,
+    "restoredWorkspaceRecovered": true,
+    "persistentRecordsRetained": 2,
+    "recordedAt": "2026-10-14T11:35:06.938Z",
+    "kind": "Actual Electron application lifecycle, production services, native filesystem and real SQLite-backed isolated profile; no mocks",
+    "profile": "/tmp/boss-workspace-reconciliation-profile",
+    "processExitCode": 0,
+    "restart": "Completed operation used fresh process and retained database after first fixture launch",
+    "initialFixtureFailure": "Isolated profile lacked Compass command binary. Existing shipped command binaries copied into isolated profile before retry; no production changes for fixture failure.",
+    "mainBuild": {
+      "command": "pnpm exec electron-vite build --config /tmp/boss-reconciliation-main.config.ts",
+      "exitCode": 0,
+      "log": "/tmp/boss-workspace-main-build.log"
+    },
+    "operationDriver": {
+      "path": "/tmp/boss-workspace-operation.ts",
+      "sha256": "eff3bd38bb41018057d790982db32863a244a5fd911a64448f9ce152a5336b89"
+    },
+    "operationBundleBuild": {
+      "exitCode": 0,
+      "log": "/tmp/boss-workspace-operation-build.log"
+    }
+  },
+  "documentation": {
+    "fixedRelativeLinks": 5,
+    "missingFrontmatter": "Added description and existing source reference to docs/contrib/uar-durable-standalone-approval-repair.md; regenerated docs index",
+    "gate": "pnpm docs:check",
+    "exitCode": 0,
+    "log": "/tmp/boss-reconciliation-docs-check-completed.log"
+  },
+  "lint": {
+    "fullCommand": "pnpm lint",
+    "status": "blocked-by-existing-unrelated-errors",
+    "log": "/tmp/boss-workspace-reconciliation-lint.log",
+    "unrelatedAutomaticWritesReverted": 29,
+    "changedFileOxlintExitCode": 0,
+    "changedFileEslint": "Existing unchanged deep import on line 9 rejected by barrel/closed; no scope expansion"
+  },
+  "review": {
+    "verdict": "PASS",
+    "receipt": "review/findings.json"
+  },
+  "accounting": {
+    "code": "61/61 tasks;20/20 original changes; unchanged",
+    "qualification": "43/61 terminal:42 qualified+1 skipped;18 pending; unchanged",
+    "repositoryLocalArchives": 21,
+    "archiving": "Administrative only; no new qualification or installed acceptance",
+    "cadence": "Retired;17 historical successful deliveries unchanged"
+  },
+  "delivery": {
+    "installedApp": "2.2.37 existing public app; configuration cleanup applied",
+    "sourceFix": "Committed source for next build; no installer rebuilt or republished",
+    "windowsAcceptance": "2.2.37 interactive acceptance remains pending",
+    "notarization": "Deferred by operator"
+  },
+  "commitPolicy": "Cryptographic signatures and Assisted-by retained. User A-15 forbids Signed-off-by; hooks overridden to avoid conflicting DCO/per-edit gate policy. Executed boundary results are recorded explicitly."
+}

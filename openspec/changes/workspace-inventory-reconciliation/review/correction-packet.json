@@ -1,0 +1,211 @@
+{
+  "originalReview": {
+    "model": "gpt-5.6-sol",
+    "content": "{\"verdict\":\"BLOCK\",\"findings\":[{\"severity\":\"CRITICAL\",\"file\":\"src/main/services/prometheus/PrometheusIntegrationService.ts\",\"claim\":\"The ENOENT recovery path automatically deletes matching workspaces from the service inventory, directly conflicting with the requirement that missing workspaces not be automatically deleted.\",\"evidence\":\"In `loadRegisteredWorkspace`, every `this.workspaces` entry whose `workspace.path === workspacePath` is removed with `this.workspaces.delete(id)` when `loadWorkspaceState` throws ENOENT.\",\"suggested_fix\":\"On confirmed missing workspace directories, skip loading and preserve the registered/inventory identity, optionally marking it unavailable. Do not delete entries unless an explicit operator-controlled removal action is invoked.\"},{\"severity\":\"WARNING\",\"file\":\"src/main/services/prometheus/PrometheusIntegrationService.ts\",\"claim\":\"The handler treats any ENOENT raised anywhere inside `loadWorkspaceState` as proof that the workspace directory itself is missing, which can conceal missing internal files or transient dependency failures.\",\"evidence\":\"The catch checks only `(error as NodeJS.ErrnoException).code !== 'ENOENT'`; it neither verifies that `workspacePath` is absent nor checks the error's `path`. It then logs `Skipping missing workspace directory` and suppresses the error.\",\"suggested_fix\":\"Confirm the workspace root itself is absent, for example with a targeted stat/lstat check, before applying missing-workspace behavior. Re-throw ENOENT errors originating from files within an existing workspace.\"},{\"severity\":\"WARNING\",\"file\":\"report (provided completion report)\",\"claim\":\"The administrative archive accounting is not represented by the supplied completed diff and is internally unexplained against the stated change count.\",\"evidence\":\"The report lists 21 archive entries while declaring `changes: 20` and `totalChanges: 20`, and the diff contains no additions, deletions, or renames under `openspec/changes` or `openspec/changes/archive`. Consequently, the claimed archive cannot be audited from this diff.\",\"suggested_fix\":\"Include the OpenSpec archive moves in the reviewed diff and reconcile or explicitly explain why 21 archived entries correspond to 20 completed changes, without altering qualification totals.\"}]}"
+  },
+  "clarification": {
+    "finding1": "The deleted entries are ONLY transient integration projections. persistentRecordsRetained is 2 in actual SQLite-backed operation. Neither AgentWorkspaceService nor any DB deletion occurs in the source fix. The approved spec explicitly requires removing a stale integration projection.",
+    "finding2": "Inspect the complete loader: missing workspace.json is already handled and yields a default; fs.access errors are converted to presence=false; the uncaught ENOENT is workspaceIdentity realpathSync at the root. Do not demand speculative handling without an actual uncovered path.",
+    "finding3": {
+      "convergenceChanges": "20 original convergence changes in LibreFang initiative",
+      "productArchives": "21 completed repository-local Boss changes, including release and rebrand work; independent inventory, not an increase of the convergence denominator"
+    }
+  },
+  "source": "import { createHash } from 'node:crypto'\nimport { realpathSync } from 'node:fs'\nimport fs from 'node:fs/promises'\nimport path from 'node:path'\n\nimport { application } from '@application'\nimport { mcpServerService } from '@data/services/McpServerService'\nimport { getBinaryPath } from '@main/utils/binaryResolver'\nimport type { CreateMcpServerDto } from '@shared/data/api/schemas/mcpServers'\nimport type { McpServer } from '@shared/data/types/mcpServer'\nimport type { CompassFreshness, IntegrationConfig, WorkspaceIntegration } from '@shared/types/prometheusIntegration'\n\nimport { detectFullPack } from './fullPackDetection'\nimport { integrationDirectory, readIntegrationConfig, readSecrets } from './integrationConfig'\nimport { IntegrationProcessError, runIntegrationProcess } from './integrationProcess'\nimport { renderMiniSkill } from './miniCommands'\nimport { copyOwnedSkill } from './ownedSkillCopy'\nimport { compassEnvironment, compassRemoteReady } from './surrealConnection'\n\nexport const MANAGED_TAG = 'the-boss:workspace-managed'\nexport function workspaceIdentity(workspace: string): string {\n  const normalized = realpathSync.native(path.resolve(workspace))\n  return createHash('sha256')\n    .update(process.platform === 'win32' ? normalized.toLowerCase() : normalized)\n    .digest('hex')\n    .slice(0, 16)\n}\nexport const workspaceDirectory = (id: string) => path.join(integrationDirectory(), 'workspaces', id)\nexport const workspaceDatabase = (id: string) => `workspace_${id}`\nconst workspaceGraph = (id: string, remote: boolean) =>\n  path.join(workspaceDirectory(id), remote ? 'remote' : 'local', 'compass-out', 'graph.json')\nconst exists = async (filename: string) =>\n  fs.access(filename).then(\n    () => true,\n    () => false\n  )\n\nfunction projectionProfile(config: IntegrationConfig, backend: WorkspaceIntegration['backend']): string {\n  const { endpoint, namespace, username, authLevel } = config.compass\n  const profile = {\n    schemaVersion: 1,\n    backend,\n    extraction: { codeOnly: true, visualization: false },\n    ...(backend === 'remote' ? { endpoint, namespace, username, authLevel } : {})\n  }\n  return JSON.stringify(profile)\n}\n\nasync function matchesProjection(output: string, profile: string): Promise<boolean> {\n  try {\n    return (await fs.readFile(path.join(output, 'boss-projection.json'), 'utf8')) === profile\n  } catch (error) {\n    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error\n    return false\n  }\n}\n\nasync function hasProjection(graph: string, backend: WorkspaceIntegration['backend']): Promise<boolean> {\n  const output = path.dirname(graph)\n  let snapshot = output\n  try {\n    const pointer = (await fs.readFile(path.join(output, 'current-snapshot'), 'utf8')).trim()\n    const snapshots = path.join(output, 'snapshots')\n    snapshot = path.resolve(snapshots, pointer)\n    if (!snapshot.startsWith(snapshots + path.sep)) return false\n  } catch (error) {\n    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error\n  }\n  return (\n    (await exists(path.join(snapshot, 'graph.json'))) &&\n    (backend === 'json' || (await exists(path.join(snapshot, backend === 'remote' ? 'surreal.ref' : 'store.ref'))))\n  )\n}\n\nexport async function saveWorkspaceState(workspace: WorkspaceIntegration): Promise<void> {\n  const directory = workspaceDirectory(workspace.id)\n  await fs.mkdir(directory, { recursive: true })\n  await fs.writeFile(path.join(directory, 'workspace.json'), JSON.stringify(workspace, null, 2) + '\\n')\n}\n\nexport async function loadWorkspaceState(workspace: string): Promise<WorkspaceIntegration> {\n  const id = workspaceIdentity(workspace)\n  try {\n    const saved = JSON.parse(\n      await fs.readFile(path.join(workspaceDirectory(id), 'workspace.json'), 'utf8')\n    ) as Partial<WorkspaceIntegration>\n    const graph = workspaceGraph(id, saved.backend === 'remote')\n    const indexed = saved.indexed ?? (await exists(graph))\n    return {\n      path: workspace,\n      id,\n      graph,\n      backend: saved.backend ?? 'sqlite',\n      serverIds: saved.serverIds ?? [],\n      enabled: saved.enabled ?? true,\n      indexed,\n      freshness: saved.freshness ?? { state: indexed ? 'unknown' : 'missing' },\n      ...(saved.lastIndexedAt === undefined ? {} : { lastIndexedAt: saved.lastIndexedAt }),\n      ...(saved.latestOperationId === undefined ? {} : { latestOperationId: saved.latestOperationId }),\n      ...(saved.error === undefined ? {} : { error: saved.error })\n    }\n  } catch (error) {\n    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error\n    const graph = workspaceGraph(id, false)\n    const indexed = await exists(graph)\n    return {\n      path: workspace,\n      id,\n      graph,\n      backend: 'sqlite',\n      serverIds: [],\n      enabled: true,\n      indexed,\n      freshness: { state: indexed ? 'unknown' : 'missing' }\n    }\n  }\n}\n\nexport async function describeWorkspace(\n  workspace: string,",
+  "approvedSpec": "# Spec Delta\n\n## Purpose\n\nLoad usable integration settings independently of missing directories retained in the workspace catalog, without changing execution authority or deleting historical work.\n\n## ADDED Requirements\n\n### Requirement: Missing workspace isolation\nThe integration service SHALL omit a registered workspace whose directory cannot be resolved because it no longer exists from initialization and integration snapshots. It SHALL retain its persistent workspace record and SHALL NOT create a replacement directory or weaken execution path validation.\n\n#### Scenario: Deleted unrelated workspace\n- **WHEN** one registered directory is missing while another workspace is available\n- **THEN** integration initialization and snapshots succeed for the available workspace\n- **AND** the missing workspace receives no integration projection or managed server registration\n\n#### Scenario: Directory disappears after projection\n- **WHEN** a previously projected workspace directory is removed\n- **THEN** the next snapshot excludes its stale projection while other settings remain available\n\n#### Scenario: Execution uses a missing directory\n- **WHEN** a run attempts to use a missing workspace\n- **THEN** existing strict path validation refuses it without substituting another directory or identity\n",
+  "operation": {
+    "schemaVersion": 1,
+    "phase": "completed",
+    "realApplicationBootstrap": true,
+    "missingWorkspaceOmitted": true,
+    "availableWorkspaceRetained": true,
+    "staleProjectionRemoved": true,
+    "restoredWorkspaceRecovered": true,
+    "persistentRecordsRetained": 2,
+    "recordedAt": "2026-10-14T11:35:06.938Z"
+  },
+  "archiveEvidence": [
+    {
+      "name": "uar-main-refresh-2-2-37",
+      "tasksUnchanged": true,
+      "sha256": "04b01f0c8940e3368720d97e143d5982fa93088604210b4a56fa86b5269f5c9c",
+      "legacyMissingArtifacts": [],
+      "specsSynced": false
+    },
+    {
+      "name": "bossfang-integrated-services",
+      "tasksUnchanged": true,
+      "sha256": "db9c97c5e465fcc957cbb8827959bddcf074b3fbe7f98eac0087519d6f31d24f",
+      "legacyMissingArtifacts": [],
+      "specsSynced": true
+    },
+    {
+      "name": "bossfang-managed-chat-auth",
+      "tasksUnchanged": true,
+      "sha256": "a7852e582c947d51ab22cf5bf894dd8803ed2579995e4502ee45a3bb5806d116",
+      "legacyMissingArtifacts": [],
+      "specsSynced": true
+    },
+    {
+      "name": "consolidated-local-mac-build",
+      "tasksUnchanged": true,
+      "sha256": "203a73d121ed0aa637f7cca2e7b5dbb63da007d75327486b5e29b91c8c1f28fc",
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ],
+      "specsSynced": false
+    },
+    {
+      "name": "uar-c09-team-planning-admin",
+      "tasksUnchanged": true,
+      "sha256": "6a2c3c5abe98d065dd7a1bb4af31f6856fe804be8fa81299918d08e074cbe828",
+      "legacyMissingArtifacts": [
+        "specs"
+      ],
+      "specsSynced": false
+    },
+    {
+      "name": "managed-command-shell-safety",
+      "tasksUnchanged": true,
+      "sha256": "3dc9b57bb7e9cbabfa0235bb0b1eeb6ca1bdec5f91523c8b0475f25c9adb47d3",
+      "legacyMissingArtifacts": [],
+      "specsSynced": true
+    },
+    {
+      "name": "uar-c09-task-ownership-mailbox-admin",
+      "tasksUnchanged": true,
+      "sha256": "f49942ec37320d452a26c1094f6515228022c16eb9108e99875aab3beea883c5",
+      "legacyMissingArtifacts": [],
+      "specsSynced": true
+    },
+    {
+      "name": "c16-team-guidance",
+      "tasksUnchanged": true,
+      "sha256": "e2e8cd9b7c935f7864f531c81bfadc8a88ea996134d3951ef191c799ae8bcbcd",
+      "legacyMissingArtifacts": [],
+      "specsSynced": true
+    },
+    {
+      "name": "c15-lossless-team-handoff",
+      "tasksUnchanged": true,
+      "sha256": "290039286ab7bb8cff823423a948db3c42f0462c36d8812ce8b921851c5bdcae",
+      "legacyMissingArtifacts": [],
+      "specsSynced": true
+    },
+    {
+      "name": "boss-development-team",
+      "tasksUnchanged": true,
+      "sha256": "776797439cccb4cd7609b52458231b76324d7bf6c75b283eed1b0a4178858058",
+      "legacyMissingArtifacts": [],
+      "specsSynced": false
+    },
+    {
+      "name": "afc-c14-approval-lifecycle",
+      "tasksUnchanged": true,
+      "sha256": "fdefbe88ce83e3e93edb270b554efe8605c6c10e848d7a66b0fac605978d4b4b",
+      "legacyMissingArtifacts": [],
+      "specsSynced": true
+    },
+    {
+      "name": "rebrand-009-upstream-merge-discipline",
+      "tasksUnchanged": true,
+      "sha256": "e12e2129f070a034f709497f160dc0229c03855fa2f5ece7f75d9bdcd2b8984f",
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ],
+      "specsSynced": false
+    },
+    {
+      "name": "rebrand-008-service-endpoints",
+      "tasksUnchanged": true,
+      "sha256": "f3628805522710cf5d24d01cff095043a1fba39b5598877316b26aa671215e1f",
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ],
+      "specsSynced": false
+    },
+    {
+      "name": "rebrand-0075-preboot-identity",
+      "tasksUnchanged": true,
+      "sha256": "061f6fd79e7266b4c833a5f0df1c817380eac2ae6c8112cadef3273820da0d1a",
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ],
+      "specsSynced": false
+    },
+    {
+      "name": "rebrand-007-outbound-attribution",
+      "tasksUnchanged": true,
+      "sha256": "ecf2fd4c1b401196f932a88fd6715e17837df5a492375fae2af21f0750645d2e",
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ],
+      "specsSynced": false
+    },
+    {
+      "name": "rebrand-005-visual-assets",
+      "tasksUnchanged": true,
+      "sha256": "39eb3eca7525a39c00115c003729241fdf357456f4e1e834a0cd717e7302b443",
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ],
+      "specsSynced": false
+    },
+    {
+      "name": "rebrand-006-i18n-strings",
+      "tasksUnchanged": true,
+      "sha256": "edba3c76ccdeec43f947d47a8002ca92591e0cc6134d55ef362a3d1be204616d",
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ],
+      "specsSynced": false
+    },
+    {
+      "name": "rebrand-004-app-identity",
+      "tasksUnchanged": true,
+      "sha256": "5d318f592f1dc9a1d5e4dd9a818d7a7369fc86e5e992fb579504d87fff215668",
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ],
+      "specsSynced": false
+    },
+    {
+      "name": "rebrand-003-explicit-userdata",
+      "tasksUnchanged": true,
+      "sha256": "fb44a827617ff1d4088de20e1f7f222fe2d881f0ebdfffd6109def0d17c6dc34",
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ],
+      "specsSynced": false
+    },
+    {
+      "name": "rebrand-001-sync-upstream",
+      "tasksUnchanged": true,
+      "sha256": "28d5216d5d472c97fa8b823ebce6a9fc875ecbc5eb21d632df39fcd5f3e85bfd",
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ],
+      "specsSynced": false
+    },
+    {
+      "name": "rebrand-002-branding-module",
+      "tasksUnchanged": true,
+      "sha256": "2241e45c8e170cf352d73d052d2b563873d3d9eb020d24c87ed7570044604733",
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ],
+      "specsSynced": false
+    }
+  ]
+}

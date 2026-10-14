@@ -1,3 +1,9 @@
+---
+description: Source repair and retained operational history for durable standalone UAR approval presentation.
+sources:
+  - src/main/ai/runtime/uar
+---
+
 # Durable standalone native approval repair
 
 The actual 2.2.28 synthetic representation run reached a `file_read` challenge,

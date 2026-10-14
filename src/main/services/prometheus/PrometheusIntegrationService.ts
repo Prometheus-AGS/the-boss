@@ -119,8 +119,21 @@ export class PrometheusIntegrationService extends BaseService {
     const config = readIntegrationConfig()
     this.serviceDiscovery = await discoverServiceCandidates(config)
     for (const workspace of agentWorkspaceService.list()) {
-      const state = await loadWorkspaceState(workspace.path)
-      await registerWorkspaceServers(state, config)
+      const state = await this.loadRegisteredWorkspace(workspace.path)
+      if (state) await registerWorkspaceServers(state, config)
+    }
+  }
+
+  private async loadRegisteredWorkspace(workspacePath: string): Promise<WorkspaceIntegration | undefined> {
+    try {
+      return await loadWorkspaceState(workspacePath)
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+      for (const [id, workspace] of this.workspaces) {
+        if (workspace.path === workspacePath) this.workspaces.delete(id)
+      }
+      logger.warn('Skipping missing workspace directory in service inventory', { workspacePath })
+      return undefined
     }
   }
 
@@ -144,8 +157,8 @@ export class PrometheusIntegrationService extends BaseService {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
     }
     for (const workspace of agentWorkspaceService.list()) {
-      const id = workspaceIdentity(workspace.path)
-      if (!this.workspaces.has(id)) this.workspaces.set(id, await loadWorkspaceState(workspace.path))
+      const state = await this.loadRegisteredWorkspace(workspace.path)
+      if (state && !this.workspaces.has(state.id)) this.workspaces.set(state.id, state)
     }
     let uar: IntegrationSnapshot['uar']
     if (isUarEnabled()) {

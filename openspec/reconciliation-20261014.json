@@ -1,0 +1,324 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-14T11:32:35.831Z",
+  "authority": "Operator requested workspace repair, link correction and completed OpenSpec reconciliation.",
+  "codeCompletion": {
+    "tasks": 61,
+    "totalTasks": 61,
+    "changes": 20,
+    "totalChanges": 20
+  },
+  "qualification": {
+    "terminal": 43,
+    "total": 61,
+    "passed": 42,
+    "historicalSkippedDuplicate": 1,
+    "pending": 18
+  },
+  "canonicalProgress": {
+    "path": "/Users/gqadonis/Projects/prometheus/librefang/docs/plans/agent-fabric-convergence/.kbd-orchestrator/phases/agent-fabric-convergence/progress.json",
+    "sha256": "f7913c5194c009043df002a15589652a61a4d43bf292f6ee6caa54c102973503",
+    "sourceRevision": 704
+  },
+  "archive": [
+    {
+      "name": "uar-main-refresh-2-2-37",
+      "tasks": 5,
+      "path": "openspec/changes/archive/2026-10-14-uar-main-refresh-2-2-37",
+      "specsSynced": false,
+      "legacyMissingArtifacts": []
+    },
+    {
+      "name": "bossfang-integrated-services",
+      "tasks": 5,
+      "path": "openspec/changes/archive/2026-10-14-bossfang-integrated-services",
+      "specsSynced": true,
+      "legacyMissingArtifacts": []
+    },
+    {
+      "name": "bossfang-managed-chat-auth",
+      "tasks": 5,
+      "path": "openspec/changes/archive/2026-10-14-bossfang-managed-chat-auth",
+      "specsSynced": true,
+      "legacyMissingArtifacts": []
+    },
+    {
+      "name": "consolidated-local-mac-build",
+      "tasks": 5,
+      "path": "openspec/changes/archive/2026-10-14-consolidated-local-mac-build",
+      "specsSynced": false,
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ]
+    },
+    {
+      "name": "uar-c09-team-planning-admin",
+      "tasks": 4,
+      "path": "openspec/changes/archive/2026-10-14-uar-c09-team-planning-admin",
+      "specsSynced": false,
+      "legacyMissingArtifacts": [
+        "specs"
+      ]
+    },
+    {
+      "name": "managed-command-shell-safety",
+      "tasks": 3,
+      "path": "openspec/changes/archive/2026-10-14-managed-command-shell-safety",
+      "specsSynced": true,
+      "legacyMissingArtifacts": []
+    },
+    {
+      "name": "uar-c09-task-ownership-mailbox-admin",
+      "tasks": 3,
+      "path": "openspec/changes/archive/2026-10-14-uar-c09-task-ownership-mailbox-admin",
+      "specsSynced": true,
+      "legacyMissingArtifacts": []
+    },
+    {
+      "name": "c16-team-guidance",
+      "tasks": 6,
+      "path": "openspec/changes/archive/2026-10-14-c16-team-guidance",
+      "specsSynced": true,
+      "legacyMissingArtifacts": []
+    },
+    {
+      "name": "c15-lossless-team-handoff",
+      "tasks": 3,
+      "path": "openspec/changes/archive/2026-10-14-c15-lossless-team-handoff",
+      "specsSynced": true,
+      "legacyMissingArtifacts": []
+    },
+    {
+      "name": "boss-development-team",
+      "tasks": 6,
+      "path": "openspec/changes/archive/2026-10-14-boss-development-team",
+      "specsSynced": false,
+      "legacyMissingArtifacts": []
+    },
+    {
+      "name": "afc-c14-approval-lifecycle",
+      "tasks": 5,
+      "path": "openspec/changes/archive/2026-10-14-afc-c14-approval-lifecycle",
+      "specsSynced": true,
+      "legacyMissingArtifacts": []
+    },
+    {
+      "name": "rebrand-009-upstream-merge-discipline",
+      "tasks": 3,
+      "path": "openspec/changes/archive/2026-10-14-rebrand-009-upstream-merge-discipline",
+      "specsSynced": false,
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ]
+    },
+    {
+      "name": "rebrand-008-service-endpoints",
+      "tasks": 3,
+      "path": "openspec/changes/archive/2026-10-14-rebrand-008-service-endpoints",
+      "specsSynced": false,
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ]
+    },
+    {
+      "name": "rebrand-0075-preboot-identity",
+      "tasks": 3,
+      "path": "openspec/changes/archive/2026-10-14-rebrand-0075-preboot-identity",
+      "specsSynced": false,
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ]
+    },
+    {
+      "name": "rebrand-007-outbound-attribution",
+      "tasks": 3,
+      "path": "openspec/changes/archive/2026-10-14-rebrand-007-outbound-attribution",
+      "specsSynced": false,
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ]
+    },
+    {
+      "name": "rebrand-005-visual-assets",
+      "tasks": 3,
+      "path": "openspec/changes/archive/2026-10-14-rebrand-005-visual-assets",
+      "specsSynced": false,
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ]
+    },
+    {
+      "name": "rebrand-006-i18n-strings",
+      "tasks": 3,
+      "path": "openspec/changes/archive/2026-10-14-rebrand-006-i18n-strings",
+      "specsSynced": false,
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ]
+    },
+    {
+      "name": "rebrand-004-app-identity",
+      "tasks": 3,
+      "path": "openspec/changes/archive/2026-10-14-rebrand-004-app-identity",
+      "specsSynced": false,
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ]
+    },
+    {
+      "name": "rebrand-003-explicit-userdata",
+      "tasks": 3,
+      "path": "openspec/changes/archive/2026-10-14-rebrand-003-explicit-userdata",
+      "specsSynced": false,
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ]
+    },
+    {
+      "name": "rebrand-001-sync-upstream",
+      "tasks": 3,
+      "path": "openspec/changes/archive/2026-10-14-rebrand-001-sync-upstream",
+      "specsSynced": false,
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ]
+    },
+    {
+      "name": "rebrand-002-branding-module",
+      "tasks": 3,
+      "path": "openspec/changes/archive/2026-10-14-rebrand-002-branding-module",
+      "specsSynced": false,
+      "legacyMissingArtifacts": [
+        "specs",
+        "design"
+      ]
+    }
+  ],
+  "retainedIncompleteChecklists": [
+    {
+      "name": "uar-reusable-team-authoring",
+      "checked": 11,
+      "total": 12,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "uar-d01-local-delivery",
+      "checked": 0,
+      "total": 4,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "uar-c10-workflow-decisions",
+      "checked": 0,
+      "total": 6,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "uar-c14-teams-in-work",
+      "checked": 0,
+      "total": 4,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "uar-c09-team-execution-admin",
+      "checked": 4,
+      "total": 14,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "c16-specialist-team-authoring",
+      "checked": 4,
+      "total": 5,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "c15-reviewed-skill-coverage",
+      "checked": 0,
+      "total": 4,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "c16-practical-team-presets",
+      "checked": 3,
+      "total": 4,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "bossfang-operated-miniapp",
+      "checked": 6,
+      "total": 7,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "c10-github-feedback-in-work",
+      "checked": 0,
+      "total": 5,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "afc-c14-uar-lifecycle-overview",
+      "checked": 0,
+      "total": 4,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "afc-c14-bossfang-workflow",
+      "checked": 1,
+      "total": 3,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "afc-c14-supported-lifecycle-controls",
+      "checked": 0,
+      "total": 0,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "prometheus-003-settings-and-doctor",
+      "checked": 14,
+      "total": 16,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "prometheus-005-mcp-server-presets",
+      "checked": 0,
+      "total": 10,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "prometheus-002-binary-shipping",
+      "checked": 0,
+      "total": 9,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "prometheus-004-docker-services",
+      "checked": 0,
+      "total": 8,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    },
+    {
+      "name": "prometheus-001-skills-bundling",
+      "checked": 0,
+      "total": 15,
+      "disposition": "Retained unchanged; no qualification inferred from source-completion markers."
+    }
+  ],
+  "archiveMeaning": "Administrative closure of already completed product work; original receipts and candidate-specific acceptance remain source-bound. No new qualification credit.",
+  "release": "2.2.37 unchanged; Windows interactive acceptance pending; notarization deferred by operator",
+  "cadence": "Retired; historical 17 deliveries unchanged; no counter or clock mutations",
+  "accountingDomains": {
+    "convergenceChanges": "20 original convergence changes in LibreFang initiative",
+    "productArchives": "21 completed repository-local Boss changes, including release and rebrand work; independent inventory, not an increase of the convergence denominator"
+  }
+}
