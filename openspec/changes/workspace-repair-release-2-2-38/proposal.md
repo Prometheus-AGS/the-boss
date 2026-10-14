@@ -9,7 +9,7 @@ The operator requests shipping the completed workspace inventory repair in new M
 - Release The Boss 2.2.38 with the committed missing-directory isolation repair and corrected documentation.
 - Build locally with pnpm build:mac:arm64 and operate the packaged workspace/settings path with a removed disposable directory.
 - Publish Developer ID signed, unnotarized Mac ARM64 and Windows x64 installers, truthful manifests and website links.
-- Preserve the selected UAR/BossFang payloads and separate historical code, qualification, release and installed-acceptance evidence.
+- Refresh merged UAR and mini skill payloads while preserving BossFang and separate historical code, qualification, release and installed-acceptance evidence.
 
 ## Capabilities
 
