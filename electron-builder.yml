@@ -217,6 +217,7 @@ releaseInfo:
     - Correct documentation links and reconcile completed OpenSpec work without changing qualification records.
     - Retain the packaged UAR 3e6af7c4 and the existing BossFang model and shared-service configuration.
     - Feature profile: UAR enabled. Mac ARM64 and Windows x64 release; Mac notarization deferred by operator.
+    - Refresh merged UAR runtime and the Prometheus mini skill pack, including kbd-handoff.
 
     <!--LANG:zh-CN-->
     The Boss 2.2.38 - 可靠的工作区设置

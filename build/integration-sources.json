@@ -20,16 +20,16 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "4956d2adc3a746b676d7574572886756b7916eba"
+      "revision": "52a84e7d19f3ffdae0b58bd1732a853abd06e748"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "3e6af7c4a81b9406c11dc3886d3626232f037375",
+      "revision": "482c418093d66487b5713b9022d185577c2a38f7",
       "platformRevisions": {
         "darwin-x64": "74194623b17e5db127534b0f0469f8557794d4bc",
         "win32-arm64": "74194623b17e5db127534b0f0469f8557794d4bc",
-        "darwin-arm64": "3e6af7c4a81b9406c11dc3886d3626232f037375",
-        "win32-x64": "3e6af7c4a81b9406c11dc3886d3626232f037375"
+        "darwin-arm64": "482c418093d66487b5713b9022d185577c2a38f7",
+        "win32-x64": "482c418093d66487b5713b9022d185577c2a38f7"
       }
     },
     "surreal-memory": {

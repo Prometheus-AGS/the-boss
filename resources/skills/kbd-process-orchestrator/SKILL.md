@@ -417,6 +417,7 @@ hook it is mirroring.
 - `/kbd-audit` — Inspect causal history, ownership, and drift, read-only
 - `/kbd-pause` — Checkpoint and suspend the active run
 - `/kbd-resume` — Resume a paused run at a validated plan revision
+- `/kbd-handoff` — Write a read-only packet that hands the active phase to another harness
 - `/kbd-cancel` — Gracefully terminate the active run
 - `/kbd-evolve [name]` — Domain-landscape-first evolution when the roadmap is empty or exhausted
 - `/kbd-goal-check` — Impartial stopping-condition check for a goal-driven phase, separate from the implementer turn
