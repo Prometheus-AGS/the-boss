@@ -114,3 +114,6 @@ YOUR_MEMORY_FILE_PATH
 # Project-local Compass graph and pre-build cache preservation
 /compass-out/
 /.compass/local-backup/
+
+# Local desktop context stays in local installed-operation captures.
+build/release-operation-2.2.38/*.png

@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-14T14:39:09.776Z",
+  "status": "local-build-and-affected-installed-operation-passed",
+  "version": "2.2.38",
+  "sources": {
+    "boss": "2a508b433db5dea80073b46fee34b8c549043056",
+    "uar": "ac0970437096a1b935809bb90f48bfdd6d6421bd",
+    "mini": "52a84e7d19f3ffdae0b58bd1732a853abd06e748"
+  },
+  "build": {
+    "command": "pnpm build:mac:arm64",
+    "exitCode": 0,
+    "log": "/tmp/the-boss-2.2.38-final-mac-arm64.log",
+    "notarization": "skipped by operator request",
+    "signing": "Developer ID Application",
+    "strictSignature": {
+      "packaged": 0,
+      "installed": 0
+    },
+    "installedPath": "/Applications/The Boss.app",
+    "dmgOpenedReadOnly": true
+  },
+  "delegation": {
+    "entry": "Settings → BossFang → Open BossFang → Chat → runtime-agent",
+    "readinessBeforeAndAfterWholeAppRestart": [
+      "Dashboard: ready",
+      "UAR execution: ready",
+      "Models: ready",
+      "Shared memory: ready"
+    ],
+    "target": "uar:agent:urn%3Aboss%3Adefault-agent%3Abinding%3Ada769885-e227-49ad-a407-fb337e4dab60",
+    "effectiveModel": "bossfang-source-e4e508a62bc0b8711926/openai-codex:gpt-6.1-sol",
+    "prompt": "Do not use tools. Reply with exactly UAR_AC097_READY.",
+    "observedStreaming": true,
+    "response": "UAR_AC097_READY",
+    "state": "completed",
+    "uarRun": "6592dbb1-0887-47f1-a5be-6d14f1462ebe",
+    "workspace": "da769885-e227-49ad-a407-fb337e4dab60",
+    "newToolEffects": "none requested"
+  },
+  "workspaceOperation": {
+    "fixture": "/private/tmp/the-boss-workspace-release-238",
+    "registeredThrough": "normal Work folder picker on an empty task",
+    "registration": "c90aac65-b738-4d19-8400-db0f40a2f050",
+    "missingDirectory": "owned directory moved aside, registration retained",
+    "settings": "Compass settings and usable inventory loaded",
+    "coldStart": "whole application quit and relaunched with directory absent; integration settings loaded",
+    "recovery": "directory restored; Work retained registration and selection",
+    "cleanup": "restored bunbox selection; preview confirmed 0 sessions, 0 channels, 0 scheduled tasks; removed only empty fixture registration; archived only the empty created task; folder/files retained",
+    "historicalWarnings": "Earlier operation cards remain unchanged; not new failed operations"
+  },
+  "authoritySeparation": {
+    "sourceReview": "independent native review PASS bound to exact two UAR files",
+    "runtimeProof": "fresh scoped registration and delegated prompt completed",
+    "unchangedChecks": "exact owner/workspace/binding/epoch and absence of host privilege retained in reviewed source",
+    "broadNegativeEffectMatrix": "not rerun or claimed"
+  },
+  "publication": {
+    "run": 38582021106,
+    "status": "in_progress",
+    "platforms": [
+      "darwin-arm64",
+      "win32-x64"
+    ],
+    "website": "pending"
+  },
+  "acceptance": {
+    "macInstalledOperation": "passed affected release scope",
+    "macOperatorAcceptance": "pending new candidate",
+    "windowsInstalledOperation": "pending native machine",
+    "earlierAcceptedCandidate": "2.2.32 preserved"
+  },
+  "historicalMarkers": {
+    "codeTasks": "61/61",
+    "codeChanges": "20/20",
+    "terminalQualification": "43/61: 42 qualified plus one historical skipped duplicate",
+    "cadence": "retired; 17 deliveries and original history unchanged"
+  },
+  "scopeLimits": [
+    "No repeated memory authorization cycles",
+    "No claim of broader Dot or portfolio qualification",
+    "Mac Intel, Windows ARM64 and Linux outside this release"
+  ],
+  "localEvidence": [
+    "bossfang-uar-prompt.png",
+    "bossfang-uar-correlation.png",
+    "missing-directory-inventory.png",
+    "missing-directory-cold-start.png",
+    "bossfang-ready-after-restart.png"
+  ]
+}

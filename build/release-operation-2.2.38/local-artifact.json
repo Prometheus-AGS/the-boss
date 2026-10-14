@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "source": "2a508b433db5dea80073b46fee34b8c549043056",
+  "path": "/Users/gqadonis/Projects/prometheus/the-boss/dist/The-Boss-2.2.38-mac-arm64.dmg",
+  "size": 1888581973,
+  "sha256": "ed29956e13439fd9ae09eebebd325a1a57e15fbf2bda489e5ff4b784ca29591d",
+  "signing": "Developer ID signed; notarization skipped by operator request",
+  "openedReadOnly": true,
+  "installedAffectedOperation": "operation.json",
+  "publicArtifact": "Recorded separately: CI-built installer bytes may differ from this local build"
+}
