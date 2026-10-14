@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "release": "2.2.37",
   "recordedAt": "2026-10-14T08:52:50.222Z",
-  "status": "local-application-build-in-progress",
+  "status": "published-and-operated",
   "sources": {
     "uar": "3e6af7c4a81b9406c11dc3886d3626232f037375",
     "bossVersionPreparation": "709ce1fd05",
@@ -80,9 +80,82 @@
     "runtimeExecutable": "/Applications/The Boss.app/Contents/Resources/app.asar.unpacked/resources/binaries/darwin-arm64/uar-sidecar"
   },
   "publication": {
-    "status": "installer-build-running",
+    "status": "published",
     "workflow": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38544734884",
-    "notarizeMacos": false
+    "notarizeMacos": false,
+    "platforms": {
+      "win32-x64": {
+        "platform": "win32",
+        "arch": "x64",
+        "version": "2.2.37",
+        "profile": "uar-enabled",
+        "features": {
+          "uar": true
+        },
+        "source": "9bdf16fa2eea3eb469f1b5caf0b628089c5fdeb2",
+        "artifacts": [
+          {
+            "name": "The-Boss-2.2.37-win-x64-setup.exe",
+            "size": 534438432,
+            "sha256": "263348f7c78224376f28614a124a99d54ca6909099224a54e6b1f093cb9368d8",
+            "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.37/The-Boss-2.2.37-win-x64-setup.exe",
+            "signing": "unsigned",
+            "profile": "uar-enabled"
+          }
+        ],
+        "downloadVerified": true,
+        "localPath": "/Users/gqadonis/Projects/prometheus/the-boss/dist/published-2.2.37/The-Boss-2.2.37-win-x64-setup.exe",
+        "metadataWorkflow": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38548039955",
+        "landingWorkflow": "https://github.com/Know-Me-Tools/boss-landing-spot/actions/runs/38548115530"
+      },
+      "darwin-arm64": {
+        "platform": "darwin",
+        "arch": "arm64",
+        "version": "2.2.37",
+        "profile": "uar-enabled",
+        "features": {
+          "uar": true
+        },
+        "source": "9bdf16fa2eea3eb469f1b5caf0b628089c5fdeb2",
+        "artifacts": [
+          {
+            "name": "The-Boss-2.2.37-mac-arm64.dmg",
+            "size": 718201249,
+            "sha256": "db4bb468ef4fc76d0f72df243d53238a7fd67eede8a2e236e062e176ce125645",
+            "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.37/The-Boss-2.2.37-mac-arm64.dmg",
+            "signing": "signed (not notarized)",
+            "profile": "uar-enabled"
+          }
+        ],
+        "downloadVerified": true,
+        "localPath": "/Users/gqadonis/Projects/prometheus/the-boss/dist/published-2.2.37/The-Boss-2.2.37-mac-arm64.dmg",
+        "metadataWorkflow": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38549150278",
+        "landingWorkflow": "https://github.com/Know-Me-Tools/boss-landing-spot/actions/runs/38549224458"
+      }
+    },
+    "websiteStages": [
+      {
+        "recordedAt": "2026-10-14T10:20:01.633Z",
+        "status": "windows-published-mac-pending",
+        "url": "https://the-boss.know-me.tools/#download",
+        "windowsUrl": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.37/The-Boss-2.2.37-win-x64-setup.exe",
+        "evidence": "website-windows-published.png",
+        "publisher": "authenticated Lovable browser; connector projects:write unavailable"
+      }
+    ],
+    "website": {
+      "url": "https://the-boss.know-me.tools/#download",
+      "verifiedAt": "2026-10-14T10:31:44.265Z",
+      "status": "both-required-platforms-live",
+      "sourceCommit": "06bca09",
+      "evidence": "website-both-published.png",
+      "links": [
+        "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.37/The-Boss-2.2.37-win-x64-setup.exe",
+        "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.37/The-Boss-2.2.37-mac-arm64.dmg"
+      ]
+    },
+    "releaseNotesScope": "Updated GitHub notes to Mac ARM64 and Windows x64 only; signing statuses and pending Windows interactive acceptance explicit.",
+    "landingSourceCommit": "06bca09"
   },
   "nativeWindowsAcceptance": "pending",
   "boundaries": {
@@ -139,5 +212,37 @@
       ".agents/skills/vercel-react-best-practices/AGENTS.md"
     ],
     "unchangedByThisRelease": true
+  },
+  "commitSignature": {
+    "localCryptographicSignature": true,
+    "githubVerified": false,
+    "githubReason": "no_user",
+    "checkedCommit": "58f3732b42c17b0b3bfa10214c4999eaa3503a80"
+  },
+  "completedAt": "2026-10-14T10:40:02.588Z",
+  "publicMacOperation": {
+    "status": "passed",
+    "installer": "/Users/gqadonis/Projects/prometheus/the-boss/dist/published-2.2.37/The-Boss-2.2.37-mac-arm64.dmg",
+    "installerSha256": "db4bb468ef4fc76d0f72df243d53238a7fd67eede8a2e236e062e176ce125645",
+    "source": "9bdf16fa2eea3eb469f1b5caf0b628089c5fdeb2",
+    "application": "/Applications/The Boss.app",
+    "launch": "passed",
+    "dashboard": "opened through Apps",
+    "savedTarget": "uar:agent:urn%3Aboss%3Adefault-agent%3Abinding%3Ada769885-e227-49ad-a407-fb337e4dab60",
+    "effectiveModel": "bossfang-source-e4e508a62bc0b8711926/openai-codex:gpt-6.1-sol",
+    "request": "Reply with exactly PUBLIC_UAR_3E_READY. Do not use tools.",
+    "response": "PUBLIC_UAR_3E_READY",
+    "executionState": "completed",
+    "run": "72b4a44c-791a-4e30-9576-67101b166dfa",
+    "session": "0ed45a55-1bd7-4272-b791-df4420c10823",
+    "workspace": "da769885-e227-49ad-a407-fb337e4dab60",
+    "evidence": "public-mac-uar-operation.png",
+    "leftRunning": true
+  },
+  "finalEvidence": {
+    "path": "openspec/changes/uar-main-refresh-2-2-37",
+    "delivery": "commit containing this completed receipt; push confirmation recorded by execution owner",
+    "unrelatedUarWork": "preserved; no changes to the shared dirty UAR checkout",
+    "qualification": "Historical markers unchanged; interactive Windows acceptance remains pending"
   }
 }
