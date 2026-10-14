@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "release": "2.2.37",
+  "recordedAt": "2026-10-14T08:52:50.222Z",
+  "status": "local-application-build-in-progress",
+  "sources": {
+    "uar": "3e6af7c4a81b9406c11dc3886d3626232f037375",
+    "bossVersionPreparation": "709ce1fd05",
+    "bossFrozenInputs": "91aaea7f849a8ce0398c5c43f0b30d9ca1d82634",
+    "bossPublicationInputs": "9bdf16fa2eea3eb469f1b5caf0b628089c5fdeb2"
+  },
+  "scope": [
+    "darwin-arm64",
+    "win32-x64"
+  ],
+  "nativeWorkflow": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38534534540",
+  "localBuild": {
+    "command": "pnpm build:mac:arm64",
+    "status": "passed",
+    "attempts": [
+      {
+        "status": "failed",
+        "log": "/tmp/the-boss-2.2.37-mac-arm64.log",
+        "reason": "2.2.37 missing from bundled release history; fixed through existing generator and commit91aaea7f84"
+      },
+      {
+        "status": "passed",
+        "log": "/tmp/the-boss-2.2.37-mac-arm64-retry.log",
+        "source": "91aaea7f849a8ce0398c5c43f0b30d9ca1d82634",
+        "exitCode": 0
+      }
+    ],
+    "dmg": {
+      "path": "/Users/gqadonis/Projects/prometheus/the-boss/dist/The-Boss-2.2.37-mac-arm64.dmg",
+      "size": 1884174474,
+      "sha256": "1ccd8c71daa023967237e11e9c12767f2db4787c1d2920ba7a0a88418488806d",
+      "signing": "Developer ID signed; not notarized"
+    },
+    "completedAt": "2026-10-14T09:56:17.342Z",
+    "packageValidation": "DMG integrity, Developer ID signature, required native binaries, exact source-bound UAR payload and native probe passed"
+  },
+  "installedOperation": {
+    "status": "passed",
+    "installedVersion": "2.2.37",
+    "application": "/Applications/The Boss.app",
+    "backup": "dist/application-backups/The Boss-2.2.36-before-2.2.37.app",
+    "workspace": "da769885-e227-49ad-a407-fb337e4dab60",
+    "selectedInstance": "managed-local",
+    "target": "uar:agent:urn%3Aboss%3Adefault-agent%3Abinding%3Ada769885-e227-49ad-a407-fb337e4dab60",
+    "effectiveModel": "bossfang-source-e4e508a62bc0b8711926/openai-codex:gpt-6.1-sol",
+    "dashboard": "http://127.0.0.1:4545/dashboard/",
+    "readiness": {
+      "dashboard": "Ready",
+      "uarExecution": "Ready",
+      "models": "Ready",
+      "sharedMemory": "Ready"
+    },
+    "firstPrompt": {
+      "request": "Reply with exactly UAR_3E_READY. Do not use tools.",
+      "response": "UAR_3E_READY",
+      "state": "completed",
+      "session": "0ed45a55-1bd7-4272-b791-df4420c10823"
+    },
+    "configurationRecovery": "Restored empty /private/tmp/bossfang-memory-isolation-20261012 left in workspace inventory; normal app restart loaded existing personal workspace. No new project access or grants enabled.",
+    "followUp": {
+      "response": "UAR_3E_READY",
+      "state": "completed",
+      "retainedConversation": true
+    },
+    "cancellation": {
+      "state": "cancelled",
+      "run": "8b6d349f-d453-4571-bf39-7f23c168ea48",
+      "streamingObserved": true,
+      "controls": [
+        "Stop generating",
+        "Cancel delegated run"
+      ]
+    },
+    "evidence": "bossfang-uar-operation.png",
+    "runtimeExecutable": "/Applications/The Boss.app/Contents/Resources/app.asar.unpacked/resources/binaries/darwin-arm64/uar-sidecar"
+  },
+  "publication": {
+    "status": "installer-build-running",
+    "workflow": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38544734884",
+    "notarizeMacos": false
+  },
+  "nativeWindowsAcceptance": "pending",
+  "boundaries": {
+    "sharedUarSource": "untouched; separate clean checkout",
+    "mcpPreApproval": "upstream capability packaged; no new administrator pre-approval enabled"
+  },
+  "history": {
+    "publishedBaseline": "2.2.36",
+    "convergenceImplementation": "61/61 tasks;20/20 changes; unchanged",
+    "portfolioQualification": "43/61 terminal; unchanged",
+    "cadence": "retired; no delivery count created"
+  },
+  "nativePayloads": {
+    "win32-x64": {
+      "status": "published",
+      "source": "3e6af7c4a81b9406c11dc3886d3626232f037375",
+      "recordUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-3e6af7c4/uar-sidecar-win32-x64.json",
+      "archiveSha256": "8c7b16cfe540ea133e4ab64bb8407a98ebbaaf34629a8b07454df6cc6f4c290a",
+      "archiveSize": 130273408,
+      "packagingWorkflow": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38538913055",
+      "packagedWithoutRecompilation": true
+    },
+    "darwin-arm64": {
+      "status": "published",
+      "source": "3e6af7c4a81b9406c11dc3886d3626232f037375",
+      "recordUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-3e6af7c4/uar-sidecar-darwin-arm64.json",
+      "archiveSha256": "44659b937da8c3ecc9c37541489a41c968413eeab4bfcbd6734f36ac22c392e9",
+      "archiveSize": 126437012,
+      "packagingWorkflow": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38541686314"
+    }
+  },
+  "payloadReceipt": "build/uar-payload-refresh-20261014.json",
+  "review": {
+    "findings": "review/findings.json",
+    "verdict": "PASS",
+    "isolation": "harness-native",
+    "crossModel": "unverified-same-family-fallback",
+    "sycophancyScore": 0,
+    "checkedAt": "2026-10-14T09:33:10.657547Z"
+  },
+  "notarization": {
+    "status": "deferred-by-operator",
+    "instruction": "Do not bother with the notarization process for now.",
+    "recordedAt": "2026-10-14T09:38:06.206Z",
+    "macSigning": "Developer ID retained"
+  },
+  "documentationCheck": {
+    "command": "pnpm docs:check",
+    "status": "failed-pre-existing-links",
+    "brokenLinks": 5,
+    "log": "/tmp/the-boss-2.2.37-docs-check.log",
+    "affected": [
+      "docs/research/independent-release-cicd-20261002-a7c1/report.md",
+      ".agents/skills/vercel-react-best-practices/AGENTS.md"
+    ],
+    "unchangedByThisRelease": true
+  }
+}

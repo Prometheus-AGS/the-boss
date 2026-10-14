@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "score": 0,
+  "patterns": [],
+  "strictness": "strict",
+  "provider": "sycophancy-correction MCP",
+  "scope": "release-input review",
+  "checkedAt": "2026-10-14T09:33:10.657547Z",
+  "limitations": "Review is fresh-context same-family fallback; neither this score nor source review certifies installed behavior or publication."
+}

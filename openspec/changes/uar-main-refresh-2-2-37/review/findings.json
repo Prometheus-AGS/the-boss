@@ -1,0 +1,43 @@
+{
+  "verdict": "PASS",
+  "findings": [],
+  "checked_classes": [
+    "Spec violations — selected platform source pins, package URLs and hashes agree with payloadEvidence; package.json and both release-note locations select 2.2.37. Tasks 2.1–2.3 remain upcoming under the explicit packet constraint, so this verdict does not certify delivery completion.",
+    "Correctness — the changed source pins all select 3e6af7c4a81b9406c11dc3886d3626232f037375; Mac and Windows archive hashes match their corresponding payloadEvidence records. No executable logic is changed.",
+    "Regressions — integration-sources.json retains darwin-x64 and win32-arm64 at 74194623b17e5db127534b0f0469f8557794d4bc; release-history.json preserves the existing 2.2.36 entry. The earlier source-refresh record has an earlier timestamp and records historical payload state.",
+    "Security — the diff changes no credentials, authorization configuration or protected tool grants; design.md explicitly keeps upstream MCP pre-approval opt-in. Package URLs remain repository-specific GitHub release URLs with SHA-256 pins.",
+    "Constraint breaches — the diff updates only the selected Mac ARM64 and Windows x64 payloads and release metadata; no dirty UAR source edits, code redesign or test execution appear in the packet.",
+    "Silent failure — no error handlers, retries, fallbacks or defaults are changed. The payload receipt explicitly distinguishes native package publication from installed application acceptance, and the design keeps unobserved Windows installed operation pending.",
+    "Notarization deferral — additional_source_reviews contains the default, mandatory signing, both Apple credential activation paths and metadata wording review for 91aaea7f849a8ce0398c5c43f0b30d9ca1d82634..9bdf16fa2e."
+  ],
+  "isolation_mode": "harness-native",
+  "producer_model": "unknown-exact-variant;GPT-6-family",
+  "judge_model": "harness-native-inherited",
+  "cross_model_check": "unverified-same-family-fallback",
+  "scope": "Supplied release-input packet from 6c24e0c3b64dc0748ff9249a7080b5f3e5b494b1 to 91aaea7f849a8ce0398c5c43f0b30d9ca1d82634, plus source diff from 91aaea7f849a8ce0398c5c43f0b30d9ca1d82634 to 9bdf16fa2e for the operator-approved notarization deferral.",
+  "limitations": [
+    "REST dispatch was refused because configured judge and critic canonical identities collide without a backup; cross-model independence is unverified.",
+    "Remote artifacts, build logs, actual archive contents and repository files outside the packet were not independently inspected; provenance consistency was reviewed within the supplied evidence.",
+    "No tests or packaged application operation were run. Mac signing/notarization, installer publication, live website links and completed release acceptance are not certified."
+  ],
+  "additional_source_reviews": [
+    {
+      "base": "91aaea7f849a8ce0398c5c43f0b30d9ca1d82634",
+      "head": "9bdf16fa2e",
+      "verdict": "PASS",
+      "findings": [],
+      "checked_classes": [
+        "Default behavior — .github/workflows/the-boss-release.yml adds notarize_macos as a boolean workflow_dispatch input with default: true; build runs only for workflow_dispatch.",
+        "Signing requirement — Require macOS distribution credentials always rejects HAS_MAC_SIGNING != true, irrespective of notarize_macos; Enable configured macOS signing still exports CSC_LINK and CSC_KEY_PASSWORD unconditionally within its signing step.",
+        "Apple credential activation — HAS_NOTARIZATION requires inputs.notarize_macos, disabling the App Store Connect API-key step when false; the Apple ID, app-specific password and team ID exports are also enclosed by inputs.notarize_macos == true.",
+        "Metadata truthfulness — design.md records the operator deferral, changes public-artifact wording from notarized to signed and retains the distinction between local operation and public artifacts. The workflow continues using the existing publish-installers.cjs and coordinate-release-publication.cjs paths without adding an unconditional notarization claim.",
+        "Scope and regressions — only the workflow toggle, its credential conditions and design wording change; no signing bypass, runtime code change or grant expansion appears in this diff."
+      ],
+      "limitations": [
+        "Reviewed only the specified git diff, including expanded unchanged context; no tests, CI run or installed application operation were executed.",
+        "Publisher implementation and generated release manifests are outside this diff; actual signing and notarization metadata output remains unverified.",
+        "Earlier proposal/tasks still refer to notarization; the direct operator deferral supplied for this review supersedes that earlier acceptance condition. This review does not certify release completion."
+      ]
+    }
+  ]
+}
