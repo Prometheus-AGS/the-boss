@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-14T15:20:50Z",
+  "version": "2.2.38",
+  "status": "selected-installers-and-live-website-published",
+  "sources": {
+    "applicationBuild": "2a508b433db5dea80073b46fee34b8c549043056",
+    "uarRuntimeBuild": "ac0970437096a1b935809bb90f48bfdd6d6421bd",
+    "miniSkills": "52a84e7d19f3ffdae0b58bd1732a853abd06e748",
+    "releaseMetadata": "42b275f2a9264664441bead9949fd2e989445a96",
+    "landing": "053c7c5f7dd7f2b411efd2d3d0167e971143fac2"
+  },
+  "priorEvidence": {
+    "installedOperation": "operation.json",
+    "installedOperationSha256": "14852db6274e2620aed884997c0dedba2af2b9c297cfeb2955e58bcb7d5c88cb",
+    "localArtifact": "local-artifact.json",
+    "uarPayloadReceipt": "../uar-payload-refresh-ac097043.json",
+    "uarPayloadReceiptSha256": "245835770a64ab92ffc3cae9d2cdfc676fc6f337625e80fccc8fad7dcb613906",
+    "meaning": "Earlier receipts and timestamps are preserved. Publication completed after the installed operation receipt was recorded."
+  },
+  "release": {
+    "url": "https://github.com/Prometheus-AGS/the-boss/releases/tag/v2.2.38",
+    "draft": false,
+    "installerWorkflow": 38582021106,
+    "installerWorkflowOutcome": "success"
+  },
+  "installers": [
+    {
+      "platform": "darwin-arm64",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.38/The-Boss-2.2.38-mac-arm64.dmg",
+      "size": 722787253,
+      "sha256": "0517927b3505ea9ed8c2a0275588d951c1808e920d0d6d0820b90cd7bda30f08",
+      "signing": "Developer ID signed; not notarized by operator request",
+      "manifest": "release-platform-v2.2.38-uar-enabled-darwin-arm64-2a508b433db5dea80073b46fee34b8c549043056.json",
+      "manifestSha256": "8d33a8ae3fae078d8f311a9ea9dbe2d11daf897e808166f389aed4925a1739c4",
+      "metadataWorkflow": 38586844057,
+      "landingWorkflow": 38586947968,
+      "downloadVerification": {
+        "status": "passed",
+        "at": "2026-10-14T15:10:23.4346384Z",
+        "entryPoint": "production landing release sync",
+        "checks": ["downloaded byte count", "SHA-256"]
+      }
+    },
+    {
+      "platform": "win32-x64",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.38/The-Boss-2.2.38-win-x64-setup.exe",
+      "size": 537262294,
+      "sha256": "bd1146fc48a453cc780856451db81ca7c66e7008eafc1890cb569b8187f99629",
+      "signing": "unsigned",
+      "manifest": "release-platform-v2.2.38-uar-enabled-win32-x64-2a508b433db5dea80073b46fee34b8c549043056.json",
+      "manifestSha256": "4da253cd26d9b4d5f86c302d30b884887d03450e182e9bdc587fdf9e2ada2cb0",
+      "metadataWorkflow": 38586269650,
+      "landingWorkflow": 38586391554,
+      "downloadVerification": {
+        "status": "passed",
+        "at": "2026-10-14T15:06:45.2786211Z",
+        "entryPoint": "production landing release sync",
+        "checks": ["downloaded byte count", "SHA-256"]
+      }
+    }
+  ],
+  "website": {
+    "url": "https://the-boss.know-me.tools/#download",
+    "deployment": "Lovable Publish changes",
+    "observedResult": "Your website was updated",
+    "livePageObserved": true,
+    "liveDownloadLinks": ["darwin-arm64: 2.2.38", "win32-x64: 2.2.38"],
+    "retainedEarlierDownloads": ["darwin-x64: 2.2.30", "win32-arm64: 2.2.30"],
+    "localOnlyScreenshot": "website-published.png"
+  },
+  "accounting": {
+    "historicalCodeTasks": "61/61",
+    "historicalCodeChanges": "20/20",
+    "portfolioTerminalQualification": "43/61: 42 qualified and one historical skipped duplicate",
+    "cadence": "retired; 17 deliveries, clocks and history unchanged",
+    "macAffectedInstalledOperation": "passed; see immutable operation.json",
+    "macOperatorAcceptance238": "pending",
+    "windowsNativeInstalledOperation238": "pending",
+    "priorAcceptance232": "preserved; not reused for 2.2.38"
+  }
+}

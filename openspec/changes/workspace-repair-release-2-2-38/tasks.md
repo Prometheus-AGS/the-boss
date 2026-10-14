@@ -9,6 +9,6 @@
 
 ## 2. Publication
 
-- [ ] 2.1 Publish Mac ARM64 and Windows x64 installers with notarization skipped, actual signing and immutable manifests; verify downloaded checksums.
-- [ ] 2.2 Update the landing source and publish the live website; observe both 2.2.38 download links.
+- [x] 2.1 Publish Mac ARM64 and Windows x64 installers with notarization skipped, actual signing and immutable manifests; verify downloaded checksums.
+- [x] 2.2 Update the landing source and publish the live website; observe both 2.2.38 download links.
 - [ ] 2.3 Commit/push final source-bound receipts and reconcile this release change without altering historical qualification or retired Cadence.
