@@ -209,8 +209,9 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.36 - UAR targets and shared services
+    The Boss 2.2.37 - UAR targets and shared services
 
+    - Update the packaged UAR to merged main 3e6af7c4, including administrator-configured MCP tool pre-approval.
     - Restore the selected UAR connection automatically using a persistent personal workspace.
     - Select installed UAR agents or verified model routes, with explicit advanced model overrides.
     - Delegate configured BossFang conversations to complete UAR runs, with streaming and cancellation.
@@ -219,8 +220,9 @@ releaseInfo:
     - Keep service credentials in the host and preserve active execution bindings when configuration changes.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.36 - UAR 执行目标与共享服务
+    The Boss 2.2.37 - UAR 执行目标与共享服务
 
+    - 将打包的 UAR 更新为已合并的主分支 3e6af7c4，包含管理员配置的 MCP 工具预审批支持。
     - 使用持久化的个人工作区自动恢复所选 UAR 连接。
     - 选择已安装的 UAR 智能体或已验证的模型路由，并支持显式的高级模型覆盖设置。
     - 将已配置的 BossFang 对话委派为完整的 UAR 运行，支持流式输出和取消。
