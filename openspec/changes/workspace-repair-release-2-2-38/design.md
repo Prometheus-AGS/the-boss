@@ -6,7 +6,7 @@ Source repair 39858313fe isolates ENOENT inventory reads while keeping persisten
 
 ## Goals / Non-Goals
 
-Build, operate and publish the corrected desktop application. Use merged UAR 482c418093d66487b5713b9022d185577c2a38f7 and mini 52a84e7d19f3ffdae0b58bd1732a853abd06e748, rebuilding the actual UAR server-full payloads and copying the mini runtime through existing packaging. Do not upgrade unrelated dependencies or alter credentials, repeat memory approval cycles, reset retired Cadence or infer Windows interactive acceptance from packaging.
+Build, operate and publish the corrected desktop application. Use merged UAR with the observed scoped-identity repair at ac0970437096a1b935809bb90f48bfdd6d6421bd and mini 52a84e7d19f3ffdae0b58bd1732a853abd06e748, rebuilding the actual UAR server-full payloads and copying the mini runtime through existing packaging. Do not upgrade unrelated dependencies or alter credentials, repeat memory approval cycles, reset retired Cadence or infer Windows interactive acceptance from packaging.
 
 ## Decisions
 

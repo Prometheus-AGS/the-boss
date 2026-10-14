@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "status": "selected-platform-payloads-published-and-imported",
+  "recordedAt": "2026-10-14T14:11:57.010Z",
+  "authority": "Operator-approved UAR consumer refresh; observed installed 482c4180 host-context registration regression repaired before application release",
+  "source": {
+    "repository": "Prometheus-AGS/universal-agent-runtime",
+    "revision": "ac0970437096a1b935809bb90f48bfdd6d6421bd",
+    "branch": "main",
+    "sharedCheckout": "Preserved; no writes or local Cargo builds by payload worker"
+  },
+  "nativeBuild": {
+    "repository": "Prometheus-AGS/the-boss",
+    "run": 38571289891,
+    "sourceCommit": "36ed7ac7bf9eaee55ea1005f439348fdfd44a36c",
+    "url": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38571289891",
+    "result": "success"
+  },
+  "platforms": {
+    "darwin-arm64": {
+      "nativeJob": 115876913870,
+      "nativeCompletedAt": "2026-10-14T13:50:12Z",
+      "nativeBuildResult": "success",
+      "features": [
+        "server-full"
+      ],
+      "nativeBinarySize": 311473696,
+      "nativeBinarySha256": "1b70034c48d70c7e3ba6404fc7220e5d91c2ae2f2a84fe58eaa3ed10c0463bfc",
+      "packagingRun": 38575305304,
+      "packagingJob": 115890773453,
+      "packagingCommit": "fa6c848589da431b741496584624124fd7caf6c3",
+      "packagingCompletedAt": "2026-10-14T13:54:42Z",
+      "packagingResult": "success",
+      "releaseTag": "boss-sidecar-darwin-arm64-v1.0.0-ac097043",
+      "recordUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-ac097043/uar-sidecar-darwin-arm64.json",
+      "recordSha256": "178fa1fc6cebd20e731ff37ae302c77a2e70823635081c364ccaabbcb55759fb",
+      "archiveUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.0.0-ac097043/uar-sidecar-darwin-arm64.tar.gz",
+      "archiveSize": 129605071,
+      "archiveSha256": "3104d30833c0a1e4c33f4f42a29f9e40e82c17e4c21f71500b8ac4cf6d2a27da",
+      "githubAssetDigest": "sha256:3104d30833c0a1e4c33f4f42a29f9e40e82c17e4c21f71500b8ac4cf6d2a27da",
+      "binaries": [
+        "libcrc_fast-c9544bfaf069c5bc.dylib",
+        "libsevenz_rust2-bcd9d32571c57b36.dylib",
+        "LICENSE",
+        "policies/default.cedar",
+        "policies/skill-mutation.cedar",
+        "policies/tool-approval.cedar",
+        "uar-models/bg-small-en-v1.5.onnx",
+        "uar-models/config.json",
+        "uar-models/MODEL-NOTICE.txt",
+        "uar-models/special_tokens_map.json",
+        "uar-models/tokenizer_config.json",
+        "uar-models/tokenizer.json",
+        "uar-sidecar",
+        "payload-manifest.json"
+      ]
+    },
+    "win32-x64": {
+      "nativeJob": 115876914087,
+      "nativeCompletedAt": "2026-10-14T14:03:00Z",
+      "nativeBuildResult": "success",
+      "features": [
+        "server-full"
+      ],
+      "nativeBinarySize": 341865984,
+      "nativeBinarySha256": "60dac3393ca553521e02b87f84938aa8403aec7f318a9b04078a8172e481da46",
+      "packagingRun": 38577244578,
+      "packagingJob": 115897533956,
+      "packagingCommit": "fa6c848589da431b741496584624124fd7caf6c3",
+      "packagingCompletedAt": "2026-10-14T14:10:27Z",
+      "packagingResult": "success",
+      "releaseTag": "boss-sidecar-win32-x64-v1.0.0-ac097043",
+      "recordUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-ac097043/uar-sidecar-win32-x64.json",
+      "recordSha256": "fc828cf694dc5e8076b7b3541eaea34071713978f203dd4a886005431a1959b7",
+      "archiveUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.0.0-ac097043/uar-sidecar-win32-x64.tar.gz",
+      "archiveSize": 133880680,
+      "archiveSha256": "38c189d42c864e1ad1ed4e554657ba45ffe35f3508bee3d53bdc5b5c341d37d4",
+      "githubAssetDigest": "sha256:38c189d42c864e1ad1ed4e554657ba45ffe35f3508bee3d53bdc5b5c341d37d4",
+      "binaries": [
+        "crc_fast-c45996daf34d96b5.dll",
+        "LICENSE",
+        "policies/default.cedar",
+        "policies/skill-mutation.cedar",
+        "policies/tool-approval.cedar",
+        "sevenz_rust2-0296aedd6d6c479a.dll",
+        "uar-models/bg-small-en-v1.5.onnx",
+        "uar-models/config.json",
+        "uar-models/MODEL-NOTICE.txt",
+        "uar-models/special_tokens_map.json",
+        "uar-models/tokenizer_config.json",
+        "uar-models/tokenizer.json",
+        "uar-sidecar.exe",
+        "payload-manifest.json"
+      ]
+    }
+  },
+  "consumerQualification": {
+    "mergedMainUse": "Operator allowed merged-main consumer use without waiting for the separate 109-scenario qualification",
+    "dotFullMatrix": "Not claimed qualified by this receipt",
+    "applicationOperation": "Lead records separately; native package production is not installed application acceptance"
+  },
+  "supersedesConsumerCandidate": {
+    "source": "482c418093d66487b5713b9022d185577c2a38f7",
+    "reason": "Installed fresh host-context registration failed; corrected runtime retains delegated claims/grant identity while host privilege remains removed",
+    "historicalPayloads": "Old tags and provenance receipt preserved unchanged",
+    "cancelledInstallerRuns": "No application installer assets published from the invalid candidate"
+  },
+  "platformsOutsideRepair": [
+    "darwin-x64",
+    "win32-arm64"
+  ],
+  "notes": [
+    "Exact completed native binaries and matching build caches reused; packaging performs no compilation.",
+    "Archives include runtime dynamic libraries, model assets, three Cedar policies, LICENSE and checksummed payload-manifest.json.",
+    "Historical archives and application releases remain immutable."
+  ],
+  "import": {
+    "command": "RELEASE_PLATFORMS=darwin-arm64,win32-x64 node scripts/import-uar-sidecar-payloads.cjs <Mac record URL> <Windows record URL>",
+    "result": "Both immutable records imported; platform payloads match frozen corrected source and actual release archive hashes",
+    "retainedPlatformRevisions": {
+      "darwin-x64": "74194623b17e5db127534b0f0469f8557794d4bc",
+      "win32-arm64": "74194623b17e5db127534b0f0469f8557794d4bc"
+    }
+  }
+}
