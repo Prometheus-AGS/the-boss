@@ -13,3 +13,5 @@ Compatibility review found the existing Boss run/AG-UI path retained; do not swi
 The empty unpublished draft is reanchored to the final build source during release preparation. Published releases or drafts with artifacts keep their immutable existing source anchor.
 
 Both selected UAR server-full payloads were built and published from 482c4180: native run38562596849, Mac packaging38565834001, Windows packaging38566588005. Exact archives and source/digest receipts: build/uar-payload-refresh-482c4180.json. Local Mac source pin and archive are updated together. Application build, operation, publication and acceptance remain pending at this source freeze.
+
+Installed consumer regression is repaired in UAR ac0970437096a1b935809bb90f48bfdd6d6421bd. Both selected native payloads must be rebuilt from that source. Prior482c4180 payloads and their failed-consumer operation remain immutable evidence. No legacy identity migration or host-privilege restoration is introduced.
