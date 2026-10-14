@@ -1,0 +1,25 @@
+{
+  "mode": "artifact",
+  "verdict": "BLOCK",
+  "producer_model": "unknown",
+  "judge_model": "unknown",
+  "isolation_mode": "harness-native",
+  "cross_model_check": "unverified-same-family-native-fallback",
+  "review_scope": "documentation/accounting only",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "/Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/archive/2026-10-14-c16-practical-team-presets/tasks.md",
+      "line": 11,
+      "claim": "Task 4 is newly marked complete and the change archived without mapping its explicit independent-review clause to retained qualifying evidence.",
+      "evidence": "At review base 8ab4a369374ca628e0729626035ec59871c245a4 this exact task was unchecked. The retained clause says \"obtain independent review and record accepted artifacts/findings\". The sole receipt linked by this archive’s reconciliation.md is initiative receipts/c16-practical-team-presets-20261008.json. Lines 83–85 identify artifactQualityAcceptance.assessedBy as \"root\" and scope as inspection of twelve saved role artifact bodies. Lines 87–89 mention reviewer findings within product artifacts, but identify no independent delivery-review receipt, reviewer identity or reviewed delivery/source boundary. The reconciliation itself describes this evidence as \"root review\". These mapped facts support the historical operation and root artifact assessment, but leave the explicit independent delivery-review clause unproved; this is an accounting gap, not a claim that no historical review ever occurred.",
+      "suggested_fix": "Restore the original practical-presets change to active with task 4 unchecked, retain all existing build/operation/artifact evidence, and explicitly name only independent review as the missing clause. Adjust the Boss archive/active/unchecked counts and corresponding disposition rows. Alternatively, cite an already-existing independent review with exact source boundary and findings if one is available; do not manufacture or rerun qualification, and do not alter the initiative’s original code or qualification markers."
+    }
+  ],
+  "limitations": [
+    "One bounded read-only review of the packet, changed Boss historical scopes, selected mapped receipts and initiative accounting/synchronization. No builds, tests, application/service operations, KBD mutations or archive operations were performed.",
+    "The eight initiative archive moves were compared byte-for-byte with baseline 2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85; the seven pending qualification task-file hashes matched the retained reconciliation receipt. Boss task text and five affected delta specs were compared against the stated review base.",
+    "Private historical Cadence archives and every historical runtime assertion were not independently recertified; receipt signatures were inspected as provenance fields, not cryptographically verified.",
+    "Gateway judge refused the no-distinct-backup configuration. This harness-native fallback does not establish a distinct-model review."
+  ]
+}

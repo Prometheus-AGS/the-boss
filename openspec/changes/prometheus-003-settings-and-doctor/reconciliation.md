@@ -1,0 +1,5 @@
+# Retained qualification — 2026-10-14
+
+Retain14 already completed items. Tasks 6.2(all designed down/absent/push/repair states and screenshots) and 6.4(native Windows repetition) remain qualification-pending. Current configurable gateway/source ownership supersedes the old fixed 4000-only presentation assumption in practice; no requirement is silently rewritten or marked passed.
+
+Historical code completion remains **61/61 tasks and 20/20 changes**. Portfolio qualification remains **43/61 terminal (42 qualified + one historical duplicate)**, with **18 original manual criteria** retained in the [manual certification handoff](https://github.com/GQAdonis/librefang/blob/main/docs/plans/agent-fabric-convergence/manual-certification-handoff.md). Local OpenSpec boxes are a separate narrower/more detailed inventory, not new canonical tasks. No existing checkbox is reset, no requirement is weakened and no build or passing operation is repeated. Refer to [the task-level reconciliation report](../../../docs/contrib/openspec-evidence-reconciliation-2.2.38.md) for source/evidence references and scope limits.

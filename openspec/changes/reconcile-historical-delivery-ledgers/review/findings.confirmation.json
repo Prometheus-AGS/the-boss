@@ -1,0 +1,42 @@
+{
+  "mode": "artifact",
+  "verdict": "PASS",
+  "producer_model": "unknown",
+  "judge_model": "unknown",
+  "isolation_mode": "harness-native",
+  "cross_model_check": "unverified-same-family-native-fallback",
+  "review_scope": "documentation/accounting only; confirmation of the single failed finding",
+  "findings": [],
+  "confirmation": {
+    "criticalFindingResolved": true,
+    "originalFindings": "findings.json",
+    "taskFile": "/Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/c16-practical-team-presets/tasks.md",
+    "taskFileByteIdenticalToReviewBase": true,
+    "reviewBase": "8ab4a369374ca628e0729626035ec59871c245a4",
+    "priorCheckedTasks": 3,
+    "pendingTask": 4,
+    "originalIndependentReviewPredicateRetained": true,
+    "activeChangeRestored": true,
+    "attemptedArchiveDirectoryAbsent": true,
+    "reconciliation": "/Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/c16-practical-team-presets/reconciliation.md",
+    "accountingDocument": "/Users/gqadonis/Projects/prometheus/the-boss/docs/contrib/openspec-evidence-reconciliation-2.2.38.md",
+    "historicalBossCounts": {
+      "archives": 8,
+      "activeChanges": 10,
+      "uncheckedBoxes": 66,
+      "reconciledBoxes": 21
+    },
+    "originalOperationReceipt": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence/receipts/c16-practical-team-presets-20261008.json",
+    "operationReceiptSha256": "f6ba96245151dcbb9bf6bfaba74d5865a25371323715aac9d504b60ff7c119af",
+    "operationReceiptMatchesPreviouslyRetainedDigest": true,
+    "sourceContractOnlyDisposition": "The active reconciliation and accounting document expressly retain the practical-presets main specification as source-contract synchronization without certifying task 4 or runtime conformance. The original independent-review requirement remains pending.",
+    "newQualificationCredit": 0,
+    "originalBlockReportPreserved": true
+  },
+  "limitations": [
+    "Confirmed only the correction of the failed practical-presets finding and its directly affected local accounting. PASS applies to this correction; it does not certify the whole product or supply the missing independent delivery review.",
+    "Read-only task/document inspection, scoped filesystem inventory and receipt digest comparison only. No builds, tests, application/service operations, KBD mutations, archive operations or producer edits were performed.",
+    "Private historical Cadence archives and runtime assertions were not independently recertified; receipt signatures were not cryptographically verified.",
+    "Gateway judge refused the no-distinct-backup configuration. This harness-native fallback does not establish a distinct-model review."
+  ]
+}

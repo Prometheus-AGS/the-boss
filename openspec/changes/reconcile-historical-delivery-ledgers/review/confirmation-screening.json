@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "target": "findings.confirmation.json",
+  "audit_trail": {
+    "agent_did": null,
+    "executed_at": "2026-10-14T16:11:33.086913Z",
+    "hook_log": [],
+    "passes": 0,
+    "skill_id": "sycophancy.correction",
+    "strictness": "strict",
+    "version": "1.0.0"
+  },
+  "classifications": [],
+  "correction_mandatory": false,
+  "delta_summary": "No changes needed: score below clean threshold and no sycophancy patterns were detected.",
+  "sycophancy_score": 0
+}

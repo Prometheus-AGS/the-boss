@@ -13,6 +13,7 @@
 | [Develop The Boss](./contrib/development.md) | The Boss developer environment, pinned prerequisites, project setup, and UI team workflow |
 | [Feishu Notification Script](./contrib/feishu-notify.md) | CLI script that sends Feishu webhook card notifications from GitHub Actions workflows, with command reference |
 | [Linux Packaging](./contrib/linux-packaging.md) | Linux packaging flow using pinned better-sqlite3 prebuilds, with build commands and prebuild update steps |
+| [Historical OpenSpec reconciliation after 2.2.38](./contrib/openspec-evidence-reconciliation-2.2.38.md) | Historical OpenSpec delivery reconciliation after 2.2.38, with separate code completion and pending qualification |
 | [Release Workflow Operations](./contrib/release-workflow.md) | Maintainer runbook for preparing, validating, hotfixing, publishing, and synchronizing release branches |
 | [Test Plan](./contrib/test-plan.md) | The Test Plan process for beta and rc testing, covering user participation and maintainer PR workflow |
 | [The Boss integration release](./contrib/the-boss-release.md) | Native integration payloads, serialized publication, and installed acceptance for The Boss |

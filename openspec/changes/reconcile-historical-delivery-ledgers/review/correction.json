@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-14T16:09:56.966Z",
+  "finding": "Independent delivery review cannot be inferred from root artifact assessment.",
+  "resolution": "Reverse uncommitted practical-presets archive; keep final task pending and preserve its existing source/build/operation evidence.",
+  "restoredTaskFile": "openspec/changes/c16-practical-team-presets/tasks.md",
+  "restoredTaskFileByteIdenticalToBaseline": true,
+  "taskFileSha256": "d427cba43a9360f167ba0ab135d6cece81adf1dcbdd274fb153b5fb79d181912",
+  "oldArchiveAbsent": true,
+  "remainingOriginalChanges": 10,
+  "remainingOriginalUnchecked": 66,
+  "historicalBossArchives": 8,
+  "reconciledOriginalBoxes": 21,
+  "practicalMainSpec": "source contract synchronized; not qualification",
+  "buildsOrProductOperations": 0
+}

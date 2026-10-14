@@ -1,4 +1,10 @@
-# Current waypoint
+# Current coordination reference
+
+Agent Fabric Convergence is complete; its enclosing run was administratively retired at canonical revision 709 on 14 October 2026. No implementation task is selected. The authority is `/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence`; use `prometheus kbd --path` with that directory for status. The root JSON snapshot below belongs to the historical shipping coordinator and is not the current convergence selector. It has not been hand-edited or adopted into a different project identity.
+
+Code remains **61/61 tasks and 20/20 changes**. Qualification remains **43/61 terminal: 42 qualified, one skipped duplicate, eighteen pending**. The [2.2.38 release evidence](../build/release-operation-2.2.38/README.md) records publication and installed operation separately from new-candidate acceptance. Cadence is retired. See the initiative's `manual-certification-handoff.md` for pending qualification.
+
+## Historical linked shipping snapshot — September 2026
 
 Active: **the-boss-shipping-and-settings → the-boss-universal-agent-runtime**.
 

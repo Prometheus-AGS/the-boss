@@ -1,3 +1,7 @@
+## Purpose
+
+Provide bounded practical team starting points through the existing authoring and execution lifecycle, preserving explicit resources, immutable identities and separate connector authority.
+
 ## ADDED Requirements
 
 ### Requirement: Task-specific bounded starting points

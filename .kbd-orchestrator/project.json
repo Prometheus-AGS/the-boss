@@ -145,5 +145,6 @@
     ]
   },
   "updatedAt": "2026-09-23T20:19:47.231Z",
-  "canonicalCoordinator": "/Users/gqadonis/Projects/prometheus/prometheus-skills-mini"
+  "canonicalCoordinator": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence",
+  "canonicalCoordinatorNote": "Current convergence authority is the consolidated initiative on main. The root linked-coordinator-snapshot and shipping project fields are historical September records, not current convergence dispatch. Use prometheus kbd --path <canonicalCoordinator> status --json; no project UUID is adopted or merged."
 }

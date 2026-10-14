@@ -1,0 +1,5 @@
+# Retained qualification — 2026-10-14
+
+The current managed/external service implementation and selectable endpoints replace the earlier fixed three-endpoint/Docker-only architecture assumptions. Original all-state, all-down startup, consent and Windows no-WSL/endpoints criteria have no complete located evidence mapping; preserve pending. Source paths and unit-first prescriptions are historical, not a new implementation backlog.
+
+Historical code completion remains **61/61 tasks and 20/20 changes**. Portfolio qualification remains **43/61 terminal (42 qualified + one historical duplicate)**, with **18 original manual criteria** retained in the [manual certification handoff](https://github.com/GQAdonis/librefang/blob/main/docs/plans/agent-fabric-convergence/manual-certification-handoff.md). Local OpenSpec boxes are a separate narrower/more detailed inventory, not new canonical tasks. No existing checkbox is reset, no requirement is weakened and no build or passing operation is repeated. Refer to [the task-level reconciliation report](../../../docs/contrib/openspec-evidence-reconciliation-2.2.38.md) for source/evidence references and scope limits.
