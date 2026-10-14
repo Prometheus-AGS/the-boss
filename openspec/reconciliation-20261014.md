@@ -62,3 +62,7 @@ These older repository-scoped records mix implementation, packaging and operatio
 The [2.2.37 release receipt](changes/archive/2026-10-14-uar-main-refresh-2-2-37/operation.json) retains source, artifacts, publication and actual operation. Windows interactive acceptance remains pending; Mac notarization remains operator-deferred. This repair does not overwrite 2.2.37 or create a new release, delivery count or acceptance. Cadence remains retired with 17 historical successes.
 
 The 21 archived product changes are an independent inventory from the 20 original convergence changes; neither count is substituted for the other. The current workspace repair is tracked separately.
+
+## Current workspace repair
+
+The separate [workspace inventory repair](changes/archive/2026-10-14-workspace-inventory-reconciliation/tasks.md) completed 5/5 scoped items and was archived after its source commit was pushed. Its [operation receipt](changes/archive/2026-10-14-workspace-inventory-reconciliation/operation.json) distinguishes installed configuration cleanup, actual isolated main-process operation and source-only delivery. There are **22 archives from this reconciliation: 21 previously completed product changes plus this repair**. Historical convergence counters remain unchanged.

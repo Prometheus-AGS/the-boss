@@ -320,5 +320,13 @@
   "accountingDomains": {
     "convergenceChanges": "20 original convergence changes in LibreFang initiative",
     "productArchives": "21 completed repository-local Boss changes, including release and rebrand work; independent inventory, not an increase of the convergence denominator"
+  },
+  "currentRepair": {
+    "name": "workspace-inventory-reconciliation",
+    "path": "openspec/changes/archive/2026-10-14-workspace-inventory-reconciliation",
+    "tasksCompleted": 5,
+    "tasksTotal": 5,
+    "sourceCommit": "39858313fea8b9be665a92424d1b57cf99d32aa0",
+    "separateFromHistoricalConvergence": true
   }
 }

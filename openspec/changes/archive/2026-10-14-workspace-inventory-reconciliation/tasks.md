@@ -9,4 +9,4 @@
 ## 2. Reconciliation
 
 - [x] 2.1 Archive completed OpenSpec changes with source-bound evidence and record incomplete checklists separately; verify archive results and unchanged qualification accounting.
-- [ ] 2.2 Record the completed boundary, commit and push scoped main changes; verify remote commit identity.
+- [x] 2.2 Record the completed boundary, commit and push scoped main changes; verify remote commit identity.

@@ -61,7 +61,8 @@
   },
   "review": {
     "verdict": "PASS",
-    "receipt": "review/findings.json"
+    "receipt": "review/findings.json",
+    "sycophancyScore": 0
   },
   "accounting": {
     "code": "61/61 tasks;20/20 original changes; unchanged",
@@ -76,5 +77,13 @@
     "windowsAcceptance": "2.2.37 interactive acceptance remains pending",
     "notarization": "Deferred by operator"
   },
-  "commitPolicy": "Cryptographic signatures and Assisted-by retained. User A-15 forbids Signed-off-by; hooks overridden to avoid conflicting DCO/per-edit gate policy. Executed boundary results are recorded explicitly."
+  "commitPolicy": "Cryptographic signatures and Assisted-by retained. User A-15 forbids Signed-off-by; hooks overridden to avoid conflicting DCO/per-edit gate policy. Executed boundary results are recorded explicitly.",
+  "sourceCommit": "39858313fea8b9be665a92424d1b57cf99d32aa0",
+  "sourceSha256": "62428b225e852840427fa9c54dc92d8daedd17ff38c43cfc2f71edf8ffafd4e2",
+  "push": {
+    "branch": "main",
+    "remote": "origin",
+    "verifiedRemoteCommit": "39858313fea8b9be665a92424d1b57cf99d32aa0",
+    "verifiedAt": "2026-10-14T11:40:20.316Z"
+  }
 }
