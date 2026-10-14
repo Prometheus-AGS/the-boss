@@ -1,0 +1,14 @@
+{
+  "candidate": "2.2.38",
+  "appSource": "b4512475d4d02317025e0eac22c628d67832cf7e",
+  "uarSource": "482c418093d66487b5713b9022d185577c2a38f7",
+  "observed": "InstalledSettingsBossFang, followedbyReconnect",
+  "dashboard": "ready",
+  "sharedMemory": "ready",
+  "uarExecution": "unavailable",
+  "error": "delegated_host_context_mismatch",
+  "rootCause": "Scopedgrantremoveslaunchproof but does not retain verifiedlocal-host credentialprincipal separately; fullActorOwner equality mismatches during fresh registration",
+  "publicRun": 38567621099,
+  "publicAssets": [],
+  "qualification": "No newqualificationclaimed"
+}

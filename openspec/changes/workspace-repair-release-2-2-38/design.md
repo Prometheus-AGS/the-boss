@@ -27,3 +27,7 @@ No data/schema migration. Preserve the installed 2.2.37 app before replacing it.
 ## Release target metadata correction
 
 The existing publisher advertises all four supported architectures even when this release selects only Mac ARM64 and Windows x64. Add a version-bound target record used by release preparation and metadata updates. Leave the general four-platform build capability and previous release contracts unchanged.
+
+## Observed merged-runtime repair
+
+Installed candidate2.2.38 using UAR482c4180 launches, but BossFang reconnect repeatedly returns delegated_host_context_mismatch. UAR compares full captured ActorOwner identities during host-context registration. Grant issuance drops host_authority (correctly) but loses the local-host credential identity proof, producing None rather than the caller's captured principal. Repair verified identity retention within the scoped grant, while keeping host privilege absent and exact owner/workspace/binding/epoch checks intact. Do not weaken owner comparison or replay retained work. Rebuild only affected UAR payloads and installers after complete wiring. Publicrun38567621099 cancelled with no assets; build attempt evidence is retained.

@@ -2,8 +2,10 @@
 
 ## 1. Frozen release
 
-- [x] 1.1 Prepare 2.2.38 bilingual notes/history and freeze source with current merged UAR/mini pins and rebuilt UAR native payloads; record exact commit and payload identities.
+- [ ] 1.1 Prepare 2.2.38 bilingual notes/history and freeze source with current merged UAR/mini pins and rebuilt UAR native payloads; record exact commit and payload identities.
 - [ ] 1.2 Run pnpm build:mac:arm64 and operate the packaged missing-workspace, settings restart/recovery and bounded BossFang/UAR prompt; record actual outcomes.
+
+- [ ] 1.3 Repair observed UAR scoped-grant principal loss without host privilege; rebuild affected payloads and repeat the failed connection/prompt operation.
 
 ## 2. Publication
 
