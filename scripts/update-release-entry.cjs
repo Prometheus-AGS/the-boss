@@ -11,7 +11,7 @@ const entries = fs
 const packageVersion = require('../package.json').version
 const version = process.env.RELEASE_VERSION || packageVersion
 const profile = assertPublicReleaseProfile()
-const platforms = profile.supportedPlatforms
+const platforms = require('./release-profile.cjs').resolveReleaseTargets(version, profile)
 const selected = (process.env.RELEASE_PLATFORMS || platforms.join(',')).split(',')
 const releaseSource = process.env.RELEASE_SOURCE_SHA || process.env.GITHUB_SHA
 for (const target of selected) {

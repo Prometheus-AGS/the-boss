@@ -23,3 +23,7 @@ Operate a disposable registered workspace in the installed package: remove its d
 ## Migration Plan
 
 No data/schema migration. Preserve the installed 2.2.37 app before replacing it. Keep prior public installers available for supported rollback. Deploy the landing site after immutable installer and metadata publication.
+
+## Release target metadata correction
+
+The existing publisher advertises all four supported architectures even when this release selects only Mac ARM64 and Windows x64. Add a version-bound target record used by release preparation and metadata updates. Leave the general four-platform build capability and previous release contracts unchanged.

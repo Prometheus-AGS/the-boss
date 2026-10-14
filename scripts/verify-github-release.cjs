@@ -5,18 +5,19 @@ const { resolveReleaseProfile } = require('./release-profile.cjs')
 async function main() {
   const manifest = JSON.parse(fs.readFileSync('release-manifest.json'))
   const profile = resolveReleaseProfile()
-  const selected = (process.env.RELEASE_PLATFORMS || profile.supportedPlatforms.join(',')).split(',')
+  const platforms = require('./release-profile.cjs').resolveReleaseTargets(manifest.version, profile)
+  const selected = (process.env.RELEASE_PLATFORMS || platforms.join(',')).split(',')
   const releaseSource = process.env.RELEASE_SOURCE_SHA || process.env.GITHUB_SHA
   if (
     manifest.profile !== profile.id ||
     manifest.features?.uar !== profile.uarEnabled ||
     manifest.source !== releaseSource ||
-    [...(manifest.supportedPlatforms || [])].sort().join(',') !== [...profile.supportedPlatforms].sort().join(',')
+    [...(manifest.supportedPlatforms || [])].sort().join(',') !== [...platforms].sort().join(',')
   ) {
     throw new Error('Release manifest does not match the frozen source and feature profile')
   }
   for (const platform of selected) {
-    if (!profile.supportedPlatforms.includes(platform)) throw new Error(`Unknown release platform: ${platform}`)
+    if (!platforms.includes(platform)) throw new Error(`Unknown release platform: ${platform}`)
   }
   const artifacts = manifest.artifacts.filter((artifact) => selected.includes(`${artifact.platform}-${artifact.arch}`))
   if (artifacts.length !== selected.length) {

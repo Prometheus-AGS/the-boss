@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "version": "2.2.38",
+  "platforms": [
+    "darwin-arm64",
+    "win32-x64"
+  ]
+}

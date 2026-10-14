@@ -29,4 +29,18 @@ function resolveReleaseProfile(env = process.env) {
   })
 }
 
-module.exports = { RELEASE_PLATFORM_KEYS, RETAINED_NATIVE_TOOLS, UAR_RELEASE_PLATFORM_KEYS, resolveReleaseProfile }
+function resolveReleaseTargets(version, profile) {
+  const fs = require('node:fs')
+  const path = require('node:path')
+  const filename = path.join(__dirname, '..', 'build', 'customer-release-targets.json')
+  if (!fs.existsSync(filename)) return profile.supportedPlatforms
+  const configured = JSON.parse(fs.readFileSync(filename, 'utf8'))
+  if (configured.version !== version) return profile.supportedPlatforms
+  if (configured.schema !== 1 || !Array.isArray(configured.platforms) || !configured.platforms.length ||
+      new Set(configured.platforms).size !== configured.platforms.length ||
+      configured.platforms.some(platform => !profile.supportedPlatforms.includes(platform)))
+    throw new Error('Customer release targets must select unique supported platforms')
+  return configured.platforms
+}
+
+module.exports = { RELEASE_PLATFORM_KEYS, RETAINED_NATIVE_TOOLS, UAR_RELEASE_PLATFORM_KEYS, resolveReleaseProfile, resolveReleaseTargets }
