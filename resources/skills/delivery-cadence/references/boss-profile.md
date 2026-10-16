@@ -13,7 +13,11 @@ node scripts/boss-launch.mjs --repository /absolute/the-boss-checkout --scenario
 
 By default the helper runs
 `<repository>/dist/mac-arm64/The Boss.app/Contents/MacOS/The Boss`. Supply `--app`
-for another built `.app`. It creates an isolated temporary user-data directory,
+for another built `.app`. It creates an isolated temporary profile root and passes
+`THE_BOSS_PROFILE_ROOT` to the application, keeping command registration and config
+inside that profile. DevTools is read from its `user-data` directory. Set an existing,
+owned `THE_BOSS_PROFILE_ROOT` explicitly when retaining a diagnostic profile; never
+point it at the user's normal installation. The helper
 binds DevTools to loopback on an ephemeral port, waits for DevToolsActivePort and a
 page target, and uses CDP to observe a complete, nonempty rendered UI. It closes only
 its owned application process tree after recording the receipt. `--keep-open`

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "version": "1.2.9",
+  "fullSource": "367dfd4fb05b40af96d5433d4c5eb816ee599937",
+  "miniSource": "0c6b6e4c2a7ee849f55570f6d5ec2bb7d4961f7a",
+  "files": [
+    {
+      "path": "SKILL.md",
+      "sha256": "43ff3ed7ad2dec927bdb65efa5e012920b30b351e2c49e800c18794f96646c81"
+    },
+    {
+      "path": "references/boss-profile.md",
+      "sha256": "34cd654387a4f5049314d9876d3e589e86bd373cdb2b0e895b49854681593da8"
+    },
+    {
+      "path": "scripts/boss-launch.mjs",
+      "sha256": "68d0d5e3389b74d8a59ff00e6be1b23401400f22d0660f752fe1bd79424e0b6b"
+    }
+  ],
+  "observed": "Installed 2.2.39 reached its renderer through session-data/DevToolsActivePort; seven IPC/skill/file operations passed. Broader application predicates remain separately recorded.",
+  "historicalCountersChanged": false
+}
