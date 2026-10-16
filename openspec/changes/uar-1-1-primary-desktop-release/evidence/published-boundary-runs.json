@@ -1,0 +1,733 @@
+{
+  "schemaVersion": 1,
+  "runs": [
+    {
+      "repo": "Prometheus-AGS/the-boss",
+      "id": 38876043909,
+      "kind": "windows-native-installer",
+      "conclusion": "success",
+      "headSha": "2d2bbaf15271e1f5abc47ee38d4e80400159f31d",
+      "jobs": [
+        {
+          "name": "platforms",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T08:47:33Z",
+          "completedAt": "2026-10-16T08:47:42Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:47:34Z",
+              "completedAt": "2026-10-16T08:47:35Z"
+            },
+            {
+              "name": "Run actions/checkout@v7",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:47:35Z",
+              "completedAt": "2026-10-16T08:47:38Z"
+            },
+            {
+              "name": "Run actions/setup-node@v6",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:47:38Z",
+              "completedAt": "2026-10-16T08:47:38Z"
+            },
+            {
+              "name": "Freeze release version, profile, and source",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:47:38Z",
+              "completedAt": "2026-10-16T08:47:38Z"
+            },
+            {
+              "name": "Import complete UAR sidecar payload",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:47:38Z",
+              "completedAt": "2026-10-16T08:47:39Z"
+            },
+            {
+              "name": "Run node scripts/release-platforms.cjs",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:47:39Z",
+              "completedAt": "2026-10-16T08:47:39Z"
+            },
+            {
+              "name": "Post Run actions/setup-node@v6",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:47:39Z",
+              "completedAt": "2026-10-16T08:47:39Z"
+            },
+            {
+              "name": "Post Run actions/checkout@v7",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:47:39Z",
+              "completedAt": "2026-10-16T08:47:39Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:47:39Z",
+              "completedAt": "2026-10-16T08:47:40Z"
+            }
+          ]
+        },
+        {
+          "name": "publish-platform",
+          "status": "completed",
+          "conclusion": "skipped",
+          "startedAt": "2026-10-16T08:47:32Z",
+          "completedAt": "2026-10-16T08:47:31Z",
+          "steps": []
+        },
+        {
+          "name": "prepare-release",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T08:47:44Z",
+          "completedAt": "2026-10-16T08:47:56Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:47:45Z",
+              "completedAt": "2026-10-16T08:47:46Z"
+            },
+            {
+              "name": "Run actions/checkout@v7",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:47:46Z",
+              "completedAt": "2026-10-16T08:47:52Z"
+            },
+            {
+              "name": "Prepare versioned GitHub Release",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:47:52Z",
+              "completedAt": "2026-10-16T08:47:54Z"
+            },
+            {
+              "name": "Post Run actions/checkout@v7",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:47:54Z",
+              "completedAt": "2026-10-16T08:47:54Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:47:54Z",
+              "completedAt": "2026-10-16T08:47:54Z"
+            }
+          ]
+        },
+        {
+          "name": "Installer (win32-x64)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T08:47:59Z",
+          "completedAt": "2026-10-16T09:18:45Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:48:00Z",
+              "completedAt": "2026-10-16T08:48:01Z"
+            },
+            {
+              "name": "Enable Windows long paths",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:48:01Z",
+              "completedAt": "2026-10-16T08:48:03Z"
+            },
+            {
+              "name": "Run actions/checkout@v7",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:48:03Z",
+              "completedAt": "2026-10-16T08:48:37Z"
+            },
+            {
+              "name": "Run actions/setup-node@v6",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:48:37Z",
+              "completedAt": "2026-10-16T08:48:42Z"
+            },
+            {
+              "name": "Import complete UAR sidecar payload",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:48:42Z",
+              "completedAt": "2026-10-16T08:48:43Z"
+            },
+            {
+              "name": "Report native release capacity and payloads",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:48:43Z",
+              "completedAt": "2026-10-16T08:48:43Z"
+            },
+            {
+              "name": "Run pnpm/action-setup@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:48:43Z",
+              "completedAt": "2026-10-16T08:48:54Z"
+            },
+            {
+              "name": "Run actions/cache@v6",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:48:54Z",
+              "completedAt": "2026-10-16T08:48:54Z"
+            },
+            {
+              "name": "Install Linux packaging dependencies",
+              "status": "completed",
+              "conclusion": "skipped",
+              "startedAt": "2026-10-16T08:48:54Z",
+              "completedAt": "2026-10-16T08:48:54Z"
+            },
+            {
+              "name": "Install macOS packaging dependencies",
+              "status": "completed",
+              "conclusion": "skipped",
+              "startedAt": "2026-10-16T08:48:54Z",
+              "completedAt": "2026-10-16T08:48:54Z"
+            },
+            {
+              "name": "Install dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:48:54Z",
+              "completedAt": "2026-10-16T08:50:16Z"
+            },
+            {
+              "name": "Require macOS distribution credentials",
+              "status": "completed",
+              "conclusion": "skipped",
+              "startedAt": "2026-10-16T08:50:16Z",
+              "completedAt": "2026-10-16T08:50:16Z"
+            },
+            {
+              "name": "Recover Windows runner capacity",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:50:16Z",
+              "completedAt": "2026-10-16T08:50:17Z"
+            },
+            {
+              "name": "Require macOS runner capacity",
+              "status": "completed",
+              "conclusion": "skipped",
+              "startedAt": "2026-10-16T08:50:17Z",
+              "completedAt": "2026-10-16T08:50:17Z"
+            },
+            {
+              "name": "Compile Windows NSIS uninstall hook",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:50:17Z",
+              "completedAt": "2026-10-16T08:50:19Z"
+            },
+            {
+              "name": "Enable configured macOS signing",
+              "status": "completed",
+              "conclusion": "skipped",
+              "startedAt": "2026-10-16T08:50:19Z",
+              "completedAt": "2026-10-16T08:50:19Z"
+            },
+            {
+              "name": "Enable configured Windows signing",
+              "status": "completed",
+              "conclusion": "skipped",
+              "startedAt": "2026-10-16T08:50:19Z",
+              "completedAt": "2026-10-16T08:50:19Z"
+            },
+            {
+              "name": "Enable App Store Connect notarization",
+              "status": "completed",
+              "conclusion": "skipped",
+              "startedAt": "2026-10-16T08:50:19Z",
+              "completedAt": "2026-10-16T08:50:19Z"
+            },
+            {
+              "name": "Build actual installers",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:50:19Z",
+              "completedAt": "2026-10-16T09:16:03Z"
+            },
+            {
+              "name": "Preserve Mac installer for failed-build recovery",
+              "status": "completed",
+              "conclusion": "skipped",
+              "startedAt": "2026-10-16T09:16:03Z",
+              "completedAt": "2026-10-16T09:16:03Z"
+            },
+            {
+              "name": "Publish installer to GitHub Release",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:16:03Z",
+              "completedAt": "2026-10-16T09:18:32Z"
+            },
+            {
+              "name": "Queue serialized metadata and site publication",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:18:32Z",
+              "completedAt": "2026-10-16T09:18:35Z"
+            },
+            {
+              "name": "Record release runner capacity",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:18:35Z",
+              "completedAt": "2026-10-16T09:18:36Z"
+            },
+            {
+              "name": "Run actions/upload-artifact@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:18:36Z",
+              "completedAt": "2026-10-16T09:18:37Z"
+            },
+            {
+              "name": "Post Run actions/cache@v6",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:18:37Z",
+              "completedAt": "2026-10-16T09:18:38Z"
+            },
+            {
+              "name": "Post Run pnpm/action-setup@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:18:38Z",
+              "completedAt": "2026-10-16T09:18:38Z"
+            },
+            {
+              "name": "Post Run actions/setup-node@v6",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:18:38Z",
+              "completedAt": "2026-10-16T09:18:39Z"
+            },
+            {
+              "name": "Post Run actions/checkout@v7",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:18:39Z",
+              "completedAt": "2026-10-16T09:18:43Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:18:43Z",
+              "completedAt": "2026-10-16T09:18:43Z"
+            }
+          ]
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38876043909"
+    },
+    {
+      "repo": "Prometheus-AGS/the-boss",
+      "id": 38877399781,
+      "kind": "mac-metadata-and-download-verification",
+      "conclusion": "success",
+      "headSha": "2d2bbaf15271e1f5abc47ee38d4e80400159f31d",
+      "jobs": [
+        {
+          "name": "publish-platform",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T08:59:45Z",
+          "completedAt": "2026-10-16T09:00:53Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:59:46Z",
+              "completedAt": "2026-10-16T08:59:47Z"
+            },
+            {
+              "name": "Run actions/checkout@v7",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T08:59:47Z",
+              "completedAt": "2026-10-16T09:00:02Z"
+            },
+            {
+              "name": "Run actions/setup-node@v6",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:00:02Z",
+              "completedAt": "2026-10-16T09:00:07Z"
+            },
+            {
+              "name": "Merge, publish, verify, and dispatch platform",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:00:07Z",
+              "completedAt": "2026-10-16T09:00:50Z"
+            },
+            {
+              "name": "Run actions/upload-artifact@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:00:50Z",
+              "completedAt": "2026-10-16T09:00:51Z"
+            },
+            {
+              "name": "Post Run actions/setup-node@v6",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:00:51Z",
+              "completedAt": "2026-10-16T09:00:51Z"
+            },
+            {
+              "name": "Post Run actions/checkout@v7",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:00:51Z",
+              "completedAt": "2026-10-16T09:00:51Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:00:51Z",
+              "completedAt": "2026-10-16T09:00:51Z"
+            }
+          ]
+        },
+        {
+          "name": "platforms",
+          "status": "completed",
+          "conclusion": "skipped",
+          "startedAt": "2026-10-16T08:59:43Z",
+          "completedAt": "2026-10-16T08:59:43Z",
+          "steps": []
+        },
+        {
+          "name": "prepare-release",
+          "status": "completed",
+          "conclusion": "skipped",
+          "startedAt": "2026-10-16T08:59:43Z",
+          "completedAt": "2026-10-16T08:59:43Z",
+          "steps": []
+        },
+        {
+          "name": "Installer (${{ matrix.platform }}-${{ matrix.arch }})",
+          "status": "completed",
+          "conclusion": "skipped",
+          "startedAt": "2026-10-16T08:59:43Z",
+          "completedAt": "2026-10-16T08:59:43Z",
+          "steps": []
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38877399781"
+    },
+    {
+      "repo": "Prometheus-AGS/the-boss",
+      "id": 38879569287,
+      "kind": "windows-metadata-and-download-verification",
+      "conclusion": "success",
+      "headSha": "4c0168ab7ef55c08fc72863574ba44bb962c552c",
+      "jobs": [
+        {
+          "name": "publish-platform",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T09:18:40Z",
+          "completedAt": "2026-10-16T09:19:23Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:18:40Z",
+              "completedAt": "2026-10-16T09:18:41Z"
+            },
+            {
+              "name": "Run actions/checkout@v7",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:18:41Z",
+              "completedAt": "2026-10-16T09:18:57Z"
+            },
+            {
+              "name": "Run actions/setup-node@v6",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:18:57Z",
+              "completedAt": "2026-10-16T09:18:57Z"
+            },
+            {
+              "name": "Merge, publish, verify, and dispatch platform",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:18:57Z",
+              "completedAt": "2026-10-16T09:19:19Z"
+            },
+            {
+              "name": "Run actions/upload-artifact@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:19:19Z",
+              "completedAt": "2026-10-16T09:19:20Z"
+            },
+            {
+              "name": "Post Run actions/setup-node@v6",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:19:20Z",
+              "completedAt": "2026-10-16T09:19:20Z"
+            },
+            {
+              "name": "Post Run actions/checkout@v7",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:19:20Z",
+              "completedAt": "2026-10-16T09:19:21Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:19:21Z",
+              "completedAt": "2026-10-16T09:19:21Z"
+            }
+          ]
+        },
+        {
+          "name": "prepare-release",
+          "status": "completed",
+          "conclusion": "skipped",
+          "startedAt": "2026-10-16T09:18:38Z",
+          "completedAt": "2026-10-16T09:18:37Z",
+          "steps": []
+        },
+        {
+          "name": "platforms",
+          "status": "completed",
+          "conclusion": "skipped",
+          "startedAt": "2026-10-16T09:18:38Z",
+          "completedAt": "2026-10-16T09:18:37Z",
+          "steps": []
+        },
+        {
+          "name": "Installer (${{ matrix.platform }}-${{ matrix.arch }})",
+          "status": "completed",
+          "conclusion": "skipped",
+          "startedAt": "2026-10-16T09:18:38Z",
+          "completedAt": "2026-10-16T09:18:37Z",
+          "steps": []
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38879569287"
+    },
+    {
+      "repo": "Know-Me-Tools/boss-landing-spot",
+      "id": 38877538458,
+      "kind": "mac-landing-byte-verification",
+      "conclusion": "success",
+      "headSha": "053c7c5f7dd7f2b411efd2d3d0167e971143fac2",
+      "jobs": [
+        {
+          "name": "Verify and publish platform",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T09:00:55Z",
+          "completedAt": "2026-10-16T09:02:11Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:00:56Z",
+              "completedAt": "2026-10-16T09:00:57Z"
+            },
+            {
+              "name": "Run actions/checkout@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:00:57Z",
+              "completedAt": "2026-10-16T09:00:58Z"
+            },
+            {
+              "name": "Run actions/setup-node@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:00:58Z",
+              "completedAt": "2026-10-16T09:01:01Z"
+            },
+            {
+              "name": "Verify public installer bytes and generate release data",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:01:01Z",
+              "completedAt": "2026-10-16T09:01:06Z"
+            },
+            {
+              "name": "Install dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:01:06Z",
+              "completedAt": "2026-10-16T09:02:03Z"
+            },
+            {
+              "name": "Verify generated site",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:02:03Z",
+              "completedAt": "2026-10-16T09:02:07Z"
+            },
+            {
+              "name": "Publish generated release data",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:02:07Z",
+              "completedAt": "2026-10-16T09:02:08Z"
+            },
+            {
+              "name": "Post Run actions/setup-node@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:02:08Z",
+              "completedAt": "2026-10-16T09:02:08Z"
+            },
+            {
+              "name": "Post Run actions/checkout@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:02:08Z",
+              "completedAt": "2026-10-16T09:02:09Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:02:09Z",
+              "completedAt": "2026-10-16T09:02:09Z"
+            }
+          ]
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/Know-Me-Tools/boss-landing-spot/actions/runs/38877538458"
+    },
+    {
+      "repo": "Know-Me-Tools/boss-landing-spot",
+      "id": 38879651830,
+      "kind": "windows-landing-byte-verification",
+      "conclusion": "success",
+      "headSha": "f43b0a420c96beec60fcccae7582c43e655be36c",
+      "jobs": [
+        {
+          "name": "Verify and publish platform",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T09:19:25Z",
+          "completedAt": "2026-10-16T09:20:30Z",
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:19:25Z",
+              "completedAt": "2026-10-16T09:19:27Z"
+            },
+            {
+              "name": "Run actions/checkout@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:19:27Z",
+              "completedAt": "2026-10-16T09:19:28Z"
+            },
+            {
+              "name": "Run actions/setup-node@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:19:28Z",
+              "completedAt": "2026-10-16T09:19:31Z"
+            },
+            {
+              "name": "Verify public installer bytes and generate release data",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:19:31Z",
+              "completedAt": "2026-10-16T09:19:35Z"
+            },
+            {
+              "name": "Install dependencies",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:19:35Z",
+              "completedAt": "2026-10-16T09:20:24Z"
+            },
+            {
+              "name": "Verify generated site",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:20:24Z",
+              "completedAt": "2026-10-16T09:20:27Z"
+            },
+            {
+              "name": "Publish generated release data",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:20:27Z",
+              "completedAt": "2026-10-16T09:20:28Z"
+            },
+            {
+              "name": "Post Run actions/setup-node@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:20:28Z",
+              "completedAt": "2026-10-16T09:20:28Z"
+            },
+            {
+              "name": "Post Run actions/checkout@v5",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:20:28Z",
+              "completedAt": "2026-10-16T09:20:29Z"
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "startedAt": "2026-10-16T09:20:29Z",
+              "completedAt": "2026-10-16T09:20:29Z"
+            }
+          ]
+        }
+      ],
+      "status": "completed",
+      "url": "https://github.com/Know-Me-Tools/boss-landing-spot/actions/runs/38879651830"
+    }
+  ],
+  "limits": "Windows native package extraction/payload launch and download verification are separate from customer UI operation or operator acceptance."
+}

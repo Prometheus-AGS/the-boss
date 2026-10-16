@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "platform": "win32",
+  "arch": "x64",
+  "version": "2.2.39",
+  "profile": "uar-enabled",
+  "features": {
+    "uar": true
+  },
+  "source": "2d2bbaf15271e1f5abc47ee38d4e80400159f31d",
+  "artifacts": [
+    {
+      "name": "The-Boss-2.2.39-win-x64-setup.exe",
+      "size": 537698336,
+      "sha256": "8e0bd88c14aa29710339d59713359eb3df3e24f3b8fe8efeed562db98b227c49",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.39/The-Boss-2.2.39-win-x64-setup.exe",
+      "signing": "unsigned",
+      "profile": "uar-enabled"
+    }
+  ],
+  "nativeInstallerBuild": {
+    "runId": 38876043909,
+    "conclusion": "success",
+    "source": "2d2bbaf15271e1f5abc47ee38d4e80400159f31d",
+    "installerExtractionAndPayloadProbe": "passed on actual Windows runner"
+  },
+  "customerInstalledAcceptance": "pending",
+  "metadataPublicationRun": 38879569287,
+  "metadataPublication": {
+    "runId": 38879569287,
+    "conclusion": "success",
+    "landingRun": 38879651830,
+    "landingConclusion": "success",
+    "landingSource": "0ce5e01175d3ccd3ec738fe8fceaba53b7d9ccb0"
+  }
+}

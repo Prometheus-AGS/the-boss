@@ -8,5 +8,11 @@
   "status": 2,
   "refusedInvalidToken": true,
   "priorFailure": "30-second mounted executable cold launch timeout; preserve mac-publication.log",
-  "deadlineMs": 120000
+  "deadlineMs": 120000,
+  "cleanup": {
+    "firstAttempt": "hdiutil detach returned Resource busy after successful probe",
+    "recovery": "Subsequent hdiutil detach of the same owned temporary mount succeeded; disk18 ejected",
+    "recoveryExitCode": 0,
+    "unrelatedVolumesTouched": false
+  }
 }

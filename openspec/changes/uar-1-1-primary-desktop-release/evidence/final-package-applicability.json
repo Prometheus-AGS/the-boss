@@ -14,5 +14,17 @@
   "launcherSha256": "68d0d5e3389b74d8a59ff00e6be1b23401400f22d0660f752fe1bd79424e0b6b",
   "priorOperations": "Retain R3 and completed normal prompt; production main/preload compiled bytes identical; only packaged launcher source fixed.",
   "notarization": "skipped",
-  "signed": true
+  "signed": true,
+  "installedFinal": {
+    "pid": 53312,
+    "normalProfile": true,
+    "mini": "0c6b6e4c2a7ee849f55570f6d5ec2bb7d4961f7a",
+    "visualObservation": "KimiCU app snapshot 7BB180B1-C599-4495-8EEA-15B1BCA5AE43: normal saved application renders Work/Chat/settings/Launchpad and Knowledge Base after final package restart; no new inference replay.",
+    "nativeVersion": {
+      "version": "universal-agent-runtime 1.1.0",
+      "elapsedMs": 17052,
+      "status": 0
+    }
+  },
+  "installedAcceptance": "Operator acceptance of 2.2.39 not inferred from earlier releases; Windows x64 installed operation pending"
 }

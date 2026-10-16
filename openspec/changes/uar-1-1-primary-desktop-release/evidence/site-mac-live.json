@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-16T09:07:16.522Z",
+  "url": "https://the-boss.know-me.tools/",
+  "assets": [
+    {
+      "script": "https://the-boss.know-me.tools/assets/index-Dc6DqIYZ.js",
+      "installers": [
+        "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.39/The-Boss-2.2.39-mac-arm64.dmg",
+        "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.30/The-Boss-2.2.30-mac-x64.dmg",
+        "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.38/The-Boss-2.2.38-win-x64-setup.exe",
+        "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.30/The-Boss-2.2.30-win-arm64-setup.exe"
+      ]
+    }
+  ],
+  "schemaVersion": 1,
+  "platform": "darwin-arm64",
+  "version": "2.2.39",
+  "landingSource": "f43b0a420c96beec60fcccae7582c43e655be36c",
+  "landingRun": 38877538458,
+  "publicationAction": "Authenticated Lovable Publish changes once after preview displayed Mac2.2.39",
+  "windowsAtThisBoundary": "2.2.38 retained until its independent installer completes"
+}

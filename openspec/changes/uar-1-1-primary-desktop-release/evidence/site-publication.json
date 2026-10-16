@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-16T09:22:58.327Z",
+  "url": "https://the-boss.know-me.tools/",
+  "version": "2.2.39",
+  "landingSource": "0ce5e01175d3ccd3ec738fe8fceaba53b7d9ccb0",
+  "assets": [
+    {
+      "script": "https://the-boss.know-me.tools/assets/index-CEAM2VgP.js",
+      "sha256": "8ee93446914595d40a8765b1b683a81f0f53e692ae15ef8fe18896cbdf1345e6",
+      "installers": [
+        "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.39/The-Boss-2.2.39-mac-arm64.dmg",
+        "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.30/The-Boss-2.2.30-mac-x64.dmg",
+        "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.39/The-Boss-2.2.39-win-x64-setup.exe",
+        "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.30/The-Boss-2.2.30-win-arm64-setup.exe"
+      ],
+      "expectedArtifacts": [
+        {
+          "name": "The-Boss-2.2.39-mac-arm64.dmg",
+          "urlMatches": true,
+          "checksumPresent": true
+        },
+        {
+          "name": "The-Boss-2.2.39-win-x64-setup.exe",
+          "urlMatches": true,
+          "checksumPresent": true
+        }
+      ]
+    }
+  ],
+  "complete": true,
+  "linkChecks": [
+    {
+      "name": "The-Boss-2.2.39-mac-arm64.dmg",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.39/The-Boss-2.2.39-mac-arm64.dmg",
+      "httpStatus": 200,
+      "bytes": 1889334343,
+      "sha256": "fcbd0075427ef897cb015f5aafc20cca01d0ca732271f9a9ac9864f0a610a9dd",
+      "downloadBytesEvidence": "Successful serialized publication and landing workflows download and hash this exact immutable asset; retain published-boundary-runs.json instead of repeating downloads."
+    },
+    {
+      "name": "The-Boss-2.2.39-win-x64-setup.exe",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.39/The-Boss-2.2.39-win-x64-setup.exe",
+      "httpStatus": 200,
+      "bytes": 537698336,
+      "sha256": "8e0bd88c14aa29710339d59713359eb3df3e24f3b8fe8efeed562db98b227c49",
+      "downloadBytesEvidence": "Successful serialized publication and landing workflows download and hash this exact immutable asset; retain published-boundary-runs.json instead of repeating downloads."
+    }
+  ],
+  "publication": {
+    "macRun": 38877399781,
+    "windowsRun": 38879569287,
+    "macLanding": 38877538458,
+    "windowsLanding": 38879651830,
+    "method": "Authenticated Lovable Publish changes after preview displayed both primary 2.2.39 installers"
+  }
+}

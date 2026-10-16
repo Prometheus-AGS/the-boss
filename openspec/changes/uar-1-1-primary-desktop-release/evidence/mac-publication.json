@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "version": "2.2.39",
+  "platform": "darwin",
+  "source": "2d2bbaf15271e1f5abc47ee38d4e80400159f31d",
+  "arch": "arm64",
+  "profile": "uar-enabled",
+  "features": {
+    "uar": true
+  },
+  "artifacts": [
+    {
+      "name": "The-Boss-2.2.39-mac-arm64.dmg",
+      "size": 1889334343,
+      "sha256": "fcbd0075427ef897cb015f5aafc20cca01d0ca732271f9a9ac9864f0a610a9dd",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.39/The-Boss-2.2.39-mac-arm64.dmg",
+      "signing": "signed (not notarized)",
+      "profile": "uar-enabled"
+    }
+  ],
+  "publication": {
+    "url": "https://github.com/Prometheus-AGS/the-boss/releases/tag/v2.2.39",
+    "draft": false,
+    "runId": 38877399781,
+    "conclusion": "success",
+    "immutableAssetDigestConfirmed": true
+  },
+  "qualification": {
+    "installedMacOperation": "performed and retained by matching compiled/payload contracts",
+    "operatorAcceptance": "pending",
+    "windows": "pending"
+  }
+}
