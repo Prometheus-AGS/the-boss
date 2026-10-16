@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "kind": "failed-only-mounted-native-probe",
+  "artifact": "/Users/gqadonis/Projects/prometheus/the-boss/dist/The-Boss-2.2.39-mac-arm64.dmg",
+  "startedAt": "2026-10-16T08:56:36.991Z",
+  "finishedAt": "2026-10-16T08:56:37.192Z",
+  "elapsedMs": 198,
+  "status": 2,
+  "refusedInvalidToken": true,
+  "priorFailure": "30-second mounted executable cold launch timeout; preserve mac-publication.log",
+  "deadlineMs": 120000
+}

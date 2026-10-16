@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-16T08:33:33.446Z",
+  "status": "cancelled-owned-operation-after-observed-tooling-mismatch",
+  "appPid": 90427,
+  "observedPortFile": ".context/release-2.2.39/desktop-operation-r2/profile/session-data/DevToolsActivePort",
+  "wrongPath": "profile/user-data/DevToolsActivePort",
+  "repair": "Full/mini1.2.9 launchers and owned port cleanup use actual session-data path",
+  "receipt": ".context/release-2.2.39/desktop-operation-r2/operation.json",
+  "applicationSource": "unchanged; no application recompilation needed",
+  "windowsRun": 38873203806,
+  "windowsDisposition": "cancel requested to prevent publication of superseded mini launcher"
+}

@@ -85,7 +85,8 @@ export async function launchBoss(args) {
     ? fs.mkdtempSync(path.join(os.tmpdir(), 'cadence-boss-'))
     : fs.realpathSync(process.env.THE_BOSS_PROFILE_ROOT);
   const userData = path.join(profileRoot, 'user-data');
-  if (fs.existsSync(path.join(userData, 'DevToolsActivePort'))) {
+  const sessionData = path.join(profileRoot, 'session-data');
+  if (fs.existsSync(path.join(sessionData, 'DevToolsActivePort'))) {
     throw new Error('Profile has an existing DevTools endpoint; reconcile its owned application before launching.');
   }
   const controller = new AbortController();
@@ -108,12 +109,12 @@ export async function launchBoss(args) {
   };
   const receipt = { schemaVersion: 1, kind: 'boss-launch', startedAt, repository, app, executable,
     executableModifiedAt: executableStat.mtime.toISOString(), executableBytes: executableStat.size,
-    scenario, scenarioDigest, isolatedProfileRoot: profileRoot, isolatedUserData: userData, launch: 'pending', functionalAcceptance: 'not-performed' };
+    scenario, scenarioDigest, isolatedProfileRoot: profileRoot, isolatedUserData: userData, isolatedSessionData: sessionData, launch: 'pending', functionalAcceptance: 'not-performed' };
   try {
     let port;
     while (!port) {
       ensureAlive();
-      const activePort = path.join(userData, 'DevToolsActivePort');
+      const activePort = path.join(sessionData, 'DevToolsActivePort');
       if (fs.existsSync(activePort)) {
         const firstLine = fs.readFileSync(activePort, 'utf8').split(/\r?\n/)[0];
         if (/^\d+$/.test(firstLine) && Number(firstLine) > 0 && Number(firstLine) <= 65535) port = Number(firstLine);

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-16T08:29:59.753Z",
+  "status": "tooling-failed-before-application-launch",
+  "error": "ERR_FS_FILE_TOO_LARGE",
+  "cause": "Driver attempted whole-buffer hash of actual3830804916-byte ASAR",
+  "repair": "Stream the ASAR SHA-256; application source and built package unchanged",
+  "output": ".context/release-2.2.39/desktop-operation",
+  "repeatScope": "Only failed operation driver; no application rebuild"
+}

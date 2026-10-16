@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "kind": "uar110-normal-saved-chat-ui-operation",
+  "complete": true,
+  "startedAt": "2026-10-16T08:50:37.850Z",
+  "finishedAt": "2026-10-16T08:50:41.451Z",
+  "sourceRefs": {
+    "boss": "ea4530acbf3de0c0436c1c90c3324a7f40d973fc",
+    "uar": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
+    "mini": "7a500cf4b502ac6b8032d7144af59b45a754719f",
+    "bossfang": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85"
+  },
+  "provenance": [
+    {
+      "path": "/Users/gqadonis/Projects/prometheus/the-boss/.context/release-2.2.39/normal-uar-prompt.mjs",
+      "sha256": "31be1f767c22178cbaf27791d0f5905a2139b12f46d6044ee84bfc3c6cf245e4",
+      "bytes": 26003
+    },
+    {
+      "path": "/Applications/The Boss.app/Contents/Resources/app.asar",
+      "sha256": "ade0a169e076778f0b9cc5a49b971af5c10300becae46412659cb541b80f2645",
+      "bytes": 3830804916
+    },
+    {
+      "path": "/Applications/The Boss.app/Contents/MacOS/The Boss",
+      "sha256": "bda5700f7777424e523948ae5c3827eb85e1de372ff0571396b2499824aca985",
+      "bytes": 52976
+    },
+    {
+      "path": "/Applications/The Boss.app/Contents/Resources/app.asar.unpacked/resources/binaries/darwin-arm64/uar-sidecar",
+      "sha256": "6b219ae9767a1cc0b32c636b9245637b7082410092101f226dc5931452e07274",
+      "bytes": 311331872
+    },
+    {
+      "path": "/Applications/The Boss.app/Contents/Resources/app.asar.unpacked/resources/binaries/darwin-arm64/bossfang",
+      "sha256": "ab6126aa29e4e46029541f726d7dd38d8d6cbc4c1b10bf7878cd7ec3f5cb2e9c",
+      "bytes": 176875904
+    },
+    {
+      "path": "/Applications/The Boss.app/Contents/Resources/app.asar.unpacked/resources/binaries/darwin-arm64/payload-manifest.json",
+      "sha256": "66d06b7ec800f67b1f344635c08213dfe26213c4d3aee5a12d399a28f00d9387",
+      "bytes": 2299
+    },
+    {
+      "path": "/Applications/The Boss.app/Contents/Resources/app.asar.unpacked/resources/prometheus-skills-mini/release-manifest.json",
+      "sha256": "0789b7f6a4dace0d28a69447c3bdd41e3ce1fd11b132bf9102cedf66a50012fc",
+      "bytes": 601761
+    },
+    {
+      "path": "/Users/gqadonis/Projects/prometheus/the-boss/build/integration-sources.json",
+      "sha256": "3da9d533e938c4c5fa6908d963f2ab61b6db7efa687d1a5ae6a1f32690d9e9e1",
+      "bytes": 3371
+    },
+    {
+      "path": "/Users/gqadonis/Projects/prometheus/the-boss/scripts/bossfang-workflow-delegation-operation/dashboard.mjs",
+      "sha256": "04da68c951ef41b4259dce8814bcabf560189c200422f239ff451c4988a77935",
+      "bytes": 5288
+    }
+  ],
+  "visible": {
+    "runMatches": true,
+    "completed": true,
+    "markerVisible": true,
+    "workspaceMatches": true,
+    "modelMatches": true
+  },
+  "beforeTarget": {
+    "targetId": "uar:agent:urn%3Aboss%3Adefault-agent%3Abinding%3Ada769885-e227-49ad-a407-fb337e4dab60",
+    "instanceId": "managed-local",
+    "workspaceId": "da769885-e227-49ad-a407-fb337e4dab60",
+    "bindingId": "urn:boss:default-agent:binding:da769885-e227-49ad-a407-fb337e4dab60",
+    "bindingRevision": 2,
+    "definition": {
+      "id": "urn:boss:default-agent:package",
+      "version": "1.0.2",
+      "digest": "sha256:46f3da72350d50ad77233a5dc9d59a0b8fbcb161392ff989b5be88f11f651a7f"
+    },
+    "modelOverride": "bossfang-source-e4e508a62bc0b8711926/openai-codex:gpt-6.1-sol"
+  },
+  "afterTarget": {
+    "targetId": "uar:agent:urn%3Aboss%3Adefault-agent%3Abinding%3Ada769885-e227-49ad-a407-fb337e4dab60",
+    "instanceId": "managed-local",
+    "workspaceId": "da769885-e227-49ad-a407-fb337e4dab60",
+    "bindingId": "urn:boss:default-agent:binding:da769885-e227-49ad-a407-fb337e4dab60",
+    "bindingRevision": 2,
+    "definition": {
+      "id": "urn:boss:default-agent:package",
+      "version": "1.0.2",
+      "digest": "sha256:46f3da72350d50ad77233a5dc9d59a0b8fbcb161392ff989b5be88f11f651a7f"
+    },
+    "modelOverride": "bossfang-source-e4e508a62bc0b8711926/openai-codex:gpt-6.1-sol"
+  },
+  "receiptSha256": "5b2aa3c4b052809337a6ba2665f00095aeec9528b3531319c9f7cd03e107742a",
+  "sourceReceipt": ".context/release-2.2.39/normal-prompt-d9ae04ba-a38e-4229-abbe-44a9bf4d5830/receipt.json",
+  "limits": [
+    "This prompt is inference/stream/native correlation evidence, not a memory, tool authorization, team-executor, or Windows-installed claim.",
+    "App initially contained mini 1.2.8; final packaging replaces only mini with 1.2.9. Runtime evidence applies only after matching compiled application and UAR source/payload identity."
+  ],
+  "reconciledInference": {
+    "priorSubmissionClicks": 1,
+    "stream": {
+      "textDeltaFrames": 2,
+      "textDeltaCharacters": 14,
+      "promptFramesSent": 1,
+      "terminalFrames": 1,
+      "toolFrames": 0,
+      "markerExact": true,
+      "sessionId": "b4d90589-31f8-42ae-9856-7259358078df"
+    },
+    "agent": {
+      "id": "c9a58bb2-20fb-5e0a-8436-fe1d6c52ae86",
+      "name": "runtime-agent",
+      "provider": "uar",
+      "model": "uar:agent:urn%3Aboss%3Adefault-agent%3Abinding%3Ada769885-e227-49ad-a407-fb337e4dab60"
+    },
+    "sessionId": "b4d90589-31f8-42ae-9856-7259358078df",
+    "turn": {
+      "bossTaskId": "uar-chat-v1-c9a58bb2-20fb-5e0a-8436-fe1d6c52ae86-b4d90589-31f8-42ae-9856-7259358078df-0a6799d4-a4f5-560f-9c9a-f88285e51313",
+      "selectedInstanceId": "managed-local",
+      "workspaceId": "da769885-e227-49ad-a407-fb337e4dab60",
+      "effectiveBinding": {
+        "instance_id": "managed-local",
+        "ownership": "external",
+        "profile": "uar.service-instance/1"
+      },
+      "uarTaskId": "fh-d9c63880bf1e4375b859256349f81a8c-bcb21def1fdd4164b6c29b67876182ee",
+      "uarRootRunId": "2ed13cc1-35e2-436c-a4c4-f7f8e279da95",
+      "uarRunId": "2ed13cc1-35e2-436c-a4c4-f7f8e279da95",
+      "runtimeEpoch": "d9c63880bf1e4375b859256349f81a8c",
+      "executionState": "completed",
+      "recoveryState": "available",
+      "effectiveTarget": {
+        "version": 1,
+        "id": "uar:agent:urn%3Aboss%3Adefault-agent%3Abinding%3Ada769885-e227-49ad-a407-fb337e4dab60",
+        "kind": "agent",
+        "agent_id": "default-agent",
+        "provider_id": "bossfang-source-e4e508a62bc0b8711926",
+        "model_id": "openai-codex:gpt-6.1-sol",
+        "verified_at": "2026-10-12T04:18:32.986536Z",
+        "configuration_digest": "394cebc5b52be974dde27ea147c8e37ab05134223ab3f81c6d11d70f2172ca20",
+        "definition": {
+          "id": "urn:boss:default-agent:package",
+          "version": "1.0.2",
+          "digest": "sha256:46f3da72350d50ad77233a5dc9d59a0b8fbcb161392ff989b5be88f11f651a7f"
+        },
+        "binding": {
+          "id": "urn:boss:default-agent:binding:da769885-e227-49ad-a407-fb337e4dab60",
+          "revision": 2,
+          "digest": "sha256:505bc0bed789afbff420336ffe570dd444dec46765c4e3c636a7cf8f045daffc"
+        },
+        "workspace_id": "da769885-e227-49ad-a407-fb337e4dab60",
+        "instance_id": "managed-local"
+      },
+      "chat": {
+        "agentId": "c9a58bb2-20fb-5e0a-8436-fe1d6c52ae86",
+        "sessionId": "b4d90589-31f8-42ae-9856-7259358078df",
+        "turnId": "0a6799d4-a4f5-560f-9c9a-f88285e51313",
+        "targetId": "uar:agent:urn%3Aboss%3Adefault-agent%3Abinding%3Ada769885-e227-49ad-a407-fb337e4dab60"
+      },
+      "markerExact": true
+    },
+    "nativeProjection": {
+      "bossTaskId": "uar-chat-v1-c9a58bb2-20fb-5e0a-8436-fe1d6c52ae86-b4d90589-31f8-42ae-9856-7259358078df-0a6799d4-a4f5-560f-9c9a-f88285e51313",
+      "selectedInstanceId": "managed-local",
+      "workspaceId": "da769885-e227-49ad-a407-fb337e4dab60",
+      "effectiveBinding": {
+        "instance_id": "managed-local",
+        "ownership": "external",
+        "profile": "uar.service-instance/1"
+      },
+      "uarTaskId": "fh-d9c63880bf1e4375b859256349f81a8c-bcb21def1fdd4164b6c29b67876182ee",
+      "uarRootRunId": "2ed13cc1-35e2-436c-a4c4-f7f8e279da95",
+      "uarRunId": "2ed13cc1-35e2-436c-a4c4-f7f8e279da95",
+      "runtimeEpoch": "d9c63880bf1e4375b859256349f81a8c",
+      "executionState": "completed",
+      "recoveryState": "available",
+      "effectiveTarget": {
+        "version": 1,
+        "id": "uar:agent:urn%3Aboss%3Adefault-agent%3Abinding%3Ada769885-e227-49ad-a407-fb337e4dab60",
+        "kind": "agent",
+        "agent_id": "default-agent",
+        "provider_id": "bossfang-source-e4e508a62bc0b8711926",
+        "model_id": "openai-codex:gpt-6.1-sol",
+        "verified_at": "2026-10-12T04:18:32.986536Z",
+        "configuration_digest": "394cebc5b52be974dde27ea147c8e37ab05134223ab3f81c6d11d70f2172ca20",
+        "definition": {
+          "id": "urn:boss:default-agent:package",
+          "version": "1.0.2",
+          "digest": "sha256:46f3da72350d50ad77233a5dc9d59a0b8fbcb161392ff989b5be88f11f651a7f"
+        },
+        "binding": {
+          "id": "urn:boss:default-agent:binding:da769885-e227-49ad-a407-fb337e4dab60",
+          "revision": 2,
+          "digest": "sha256:505bc0bed789afbff420336ffe570dd444dec46765c4e3c636a7cf8f045daffc"
+        },
+        "workspace_id": "da769885-e227-49ad-a407-fb337e4dab60",
+        "instance_id": "managed-local"
+      },
+      "chat": {
+        "agentId": "c9a58bb2-20fb-5e0a-8436-fe1d6c52ae86",
+        "sessionId": "b4d90589-31f8-42ae-9856-7259358078df",
+        "turnId": "0a6799d4-a4f5-560f-9c9a-f88285e51313",
+        "targetId": "uar:agent:urn%3Aboss%3Adefault-agent%3Abinding%3Ada769885-e227-49ad-a407-fb337e4dab60"
+      },
+      "markerExact": true
+    },
+    "optionalThreadIdPresent": false
+  },
+  "originalAssertionFailure": {
+    "stage": "observe-real-stream-and-new-completed-native-projection",
+    "code": "NORMAL_EXACT_MARKER_OR_NATIVE_CORRELATION_UNCONFIRMED",
+    "cause": "uarThreadId is optional in the actual projection; completed task/root-run/run and exact marker were present"
+  },
+  "resumeFrom": {
+    "path": "/Users/gqadonis/Projects/prometheus/the-boss/.context/release-2.2.39/normal-prompt-e5063f98-bbe3-41ef-95e3-0e5ce7035ace/receipt.json",
+    "sha256": "3276e0148d26bcdf58999390b0e421e1e5d740bb54cc2ccc6796bd72f0b43241",
+    "bytes": 8513
+  }
+}

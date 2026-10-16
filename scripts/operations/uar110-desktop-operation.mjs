@@ -6,12 +6,19 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { setTimeout as delay } from 'node:timers/promises'
 
 const digest = bytes => createHash('sha256').update(bytes).digest('hex')
+async function digestFile(file) {
+  const hash = createHash('sha256')
+  for await (const chunk of fs.createReadStream(file)) hash.update(chunk)
+  return hash.digest('hex')
+}
 const requireFact = (condition, code) => {
   if (!condition) throw Object.assign(new Error(code), { code })
 }
 const save = (file, value) => fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n', { mode: 0o600 })
 const safeFailure = error => ({ code: /^[A-Z][A-Z0-9_]+$/.test(error?.code ?? '')
   ? error.code : 'UAR110_APPLICATION_OPERATION_UNCONFIRMED' })
+const failedStages = ['workspace-managed-mcp-registration-and-index',
+  'available-owned-workspace-mcp-connections-and-tool-inventory', 'isolated-unreachable-service-endpoint-feedback']
 let configuration
 
 async function waitFor(signal, read, code, timeout = 90000) {
@@ -105,11 +112,12 @@ const operationSummary = page => ({ id: page.operation.id, action: page.operatio
 async function stopOwnedApp(launch, app, profile) {
   requireFact(launch.keptOpen && Number.isInteger(launch.pid) && launch.pid > 0 &&
     launch.app === app && launch.isolatedProfileRoot === profile &&
-    launch.isolatedUserData === path.join(profile, 'user-data'), 'UAR110_OWNED_APP_IDENTITY_UNAVAILABLE')
+    launch.isolatedUserData === path.join(profile, 'user-data') &&
+    launch.isolatedSessionData === path.join(profile, 'session-data'), 'UAR110_OWNED_APP_IDENTITY_UNAVAILABLE')
   const command = execFileSync('ps', ['-p', String(launch.pid), '-o', 'command='], { encoding: 'utf8' }).trim()
   requireFact(command.includes(path.join(app, 'Contents', 'MacOS', 'The Boss')) &&
     command.includes('--user-data-dir=' + path.join(profile, 'user-data')), 'UAR110_OWNED_APP_PID_NO_LONGER_MATCHES')
-  const portFile = path.join(launch.isolatedUserData, 'DevToolsActivePort')
+  const portFile = path.join(launch.isolatedSessionData, 'DevToolsActivePort')
   const beforeStat = fs.existsSync(portFile) ? fs.lstatSync(portFile) : null
   requireFact(!beforeStat || beforeStat.isFile(), 'UAR110_PRIVATE_DEVTOOLS_PORT_NOT_REGULAR')
   const beforePort = beforeStat ? { stat: beforeStat, bytes: fs.readFileSync(portFile) } : null
@@ -168,8 +176,14 @@ export default async function scenario({ evaluate, signal }) {
   const evidence = { schemaVersion: 1, kind: 'uar110-installed-desktop-operation', phase: configuration.phase,
     sourceRefs: configuration.sourceRefs, startedAt: new Date().toISOString(), complete: false,
     checks: [], failures: [], pending: [], credentialValuesRecorded: false }
-  const pending = (clause, reason) => evidence.pending.push({ clause, reason })
+  if (configuration.resume) {
+    evidence.retained = configuration.resume
+    evidence.pending = configuration.resume.pending
+    evidence.workspaceId = configuration.resume.workspaceId
+  }
+  const pending = (clause, reason) => { if (!configuration.resume) evidence.pending.push({ clause, reason }) }
   const step = async (name, action) => {
+    if (configuration.resume && !failedStages.includes(name) && name !== 'restore-owned-service-configuration') return
     try { await action(); evidence.checks.push(name) }
     catch (error) { evidence.failures.push({ stage: name, ...safeFailure(error) }) }
   }
@@ -177,9 +191,19 @@ export default async function scenario({ evaluate, signal }) {
   try {
     await waitFor(signal, () => evaluate(`(()=>{const skip=[...document.querySelectorAll('button')]
       .find(node=>node.getClientRects().length&&node.innerText.trim()==='Set up later');
-      if(skip)skip.click();return Boolean(document.querySelector('#app-sidebar'));})()`), 'UAR110_ONBOARDING_UNAVAILABLE')
-    const initial = await startup(evaluate, signal, evidence)
-    evidence.checks.push('actual-installed-private-profile-startup-catalog-library-mirror-pack-shims')
+      if(skip)skip.click();return Boolean(document.querySelector('#app-sidebar,[data-ui="settings.view"]'));})()`), 'UAR110_ONBOARDING_UNAVAILABLE')
+    let initial
+    if (configuration.resume) {
+      const response = await evaluate('window.api.ipcApi.request("app.get_info")')
+      requireFact(response?.ok, 'UAR110_RESUME_APP_INFO_REFUSED')
+      const info = response.data
+      requireFact(info.isPackaged && info.version === configuration.version &&
+        fs.realpathSync(info.appDataPath) === fs.realpathSync(path.join(configuration.profile, 'user-data')),
+      'UAR110_RESUME_APP_IDENTITY_CHANGED')
+    } else {
+      initial = await startup(evaluate, signal, evidence)
+      evidence.checks.push('actual-installed-private-profile-startup-catalog-library-mirror-pack-shims')
+    }
     if (configuration.phase === 'reopen') {
       const before = JSON.parse(fs.readFileSync(configuration.firstEvidence, 'utf8'))
       requireFact(JSON.stringify(before.startup.shims) === JSON.stringify(evidence.startup.shims),
@@ -203,17 +227,19 @@ export default async function scenario({ evaluate, signal }) {
         await ipc(evaluate, 'skill.reconcile')
       })
       await step('workspace-managed-mcp-registration-and-index', async () => {
-        const registered = await data(evaluate, 'POST', '/agent-workspaces', { path: configuration.workspace,
-          name: 'UAR 1.1 desktop operation' })
-        evidence.workspaceId = registered.id
-        let snapshot = await ipc(evaluate, 'prometheus.integration.snapshot')
-        await ipc(evaluate, 'prometheus.integration.configure', { updates: [
-          { feature: 'compass', expectedRevision: snapshot.revisions.compass,
-            value: { ...snapshot.config.compass, storage: 'json', enabled: true } },
-          { feature: 'filesystem', expectedRevision: snapshot.revisions.filesystem,
-            value: { enabled: true, allowWrite: false, additionalRoots: [] } }
-        ], secrets: {} })
-        await ipc(evaluate, 'prometheus.integration.workspace_enabled', { workspacePath: configuration.workspace, enabled: true })
+        if (!configuration.resume) {
+          const registered = await data(evaluate, 'POST', '/agent-workspaces', { path: configuration.workspace,
+            name: 'UAR 1.1 desktop operation' })
+          evidence.workspaceId = registered.id
+          let snapshot = await ipc(evaluate, 'prometheus.integration.snapshot')
+          await ipc(evaluate, 'prometheus.integration.configure', { updates: [
+            { feature: 'compass', expectedRevision: snapshot.revisions.compass,
+              value: { ...snapshot.config.compass, storage: 'json', enabled: true } },
+            { feature: 'filesystem', expectedRevision: snapshot.revisions.filesystem,
+              value: { enabled: true, allowWrite: false, additionalRoots: [] } }
+          ], secrets: {} })
+          await ipc(evaluate, 'prometheus.integration.workspace_enabled', { workspacePath: configuration.workspace, enabled: true })
+        }
         const indexed = await terminal(evaluate, signal, await ipc(evaluate, 'prometheus.integration.start',
           { action: 'index', workspacePath: configuration.workspace }))
         evidence.index = operationSummary(indexed)
@@ -261,6 +287,7 @@ export default async function scenario({ evaluate, signal }) {
           'UAR110_MISSING_SERVER_NOT_VISIBLE', 15000)
       })
       await step('isolated-unreachable-service-endpoint-feedback', async () => {
+        await ipc(evaluate, 'navigation.open_route_in_main', { path: '/settings/mcp/servers' })
         const snapshot = await ipc(evaluate, 'prometheus.integration.snapshot')
         originalServices = snapshot.config.services
         const down = { ownership: 'external', source: 'manual', endpoint: 'http://127.0.0.1:1' }
@@ -273,21 +300,33 @@ export default async function scenario({ evaluate, signal }) {
           .every(row => row.state === 'failed') && result.operation.diagnostics.some(row => row.id === 'memory'),
         'UAR110_UNREACHABLE_ENDPOINT_NOT_REPORTED')
         await ipc(evaluate, 'navigation.open_route_in_main', { path: '/settings/services' })
-        evidence.degradedServices.usableUi = await waitFor(signal, () => evaluate(`Boolean(document.querySelector('#app-sidebar'))&&
-          [...document.querySelectorAll('button')].some(node=>node.getClientRects().length&&!node.disabled)`), 'UAR110_DEGRADED_UI_UNAVAILABLE')
+        const ui = await waitFor(signal, () => evaluate(`(()=>{
+          const group=document.querySelector('#setting-services-service-management');
+          const visible=node=>Boolean(node?.getClientRects().length);
+          if(!visible(document.querySelector('[data-ui="settings.navigation"]'))||!visible(group))return false;
+          const diagnostics=[...group.querySelectorAll('dl dt')].filter(visible).map(node=>({
+            id:node.textContent,stateLabel:node.parentElement.nextElementSibling?.textContent?.trim()}));
+          return [...group.querySelectorAll('button')].some(node=>visible(node)&&!node.disabled)&&
+            ['surrealdb','memory','gateway'].every(id=>diagnostics.some(row=>row.id===id&&row.stateLabel))
+            ?{diagnostics}:false;
+        })()`), 'UAR110_DEGRADED_UI_UNAVAILABLE')
+        evidence.degradedServices.usableUi = true
+        evidence.degradedServices.ui = ui
       })
-      const nativeResponse = await evaluate('window.api.ipcApi.request("prometheus.uar.operations.read",{})')
-      if (nativeResponse?.ok) {
-        const snapshot = nativeResponse.data
-        evidence.nativeInventory = { generation: snapshot.generation, runCount: snapshot.runs.length,
-          nativeMcp: snapshot.tools.mcpServers.map(server => ({ name: server.name, status: server.status, toolCount: server.toolCount })) }
+      if (!configuration.resume) {
+        const nativeResponse = await evaluate('window.api.ipcApi.request("prometheus.uar.operations.read",{})')
+        if (nativeResponse?.ok) {
+          const snapshot = nativeResponse.data
+          evidence.nativeInventory = { generation: snapshot.generation, runCount: snapshot.runs.length,
+            nativeMcp: snapshot.tools.mcpServers.map(server => ({ name: server.name, status: server.status, toolCount: server.toolCount })) }
+        }
+        pending('native-runs-cancel-reopen', nativeResponse?.ok
+          ? 'No new inference or arbitrary run is admitted by this driver. A normal Work-created owned run is required before cancellation can qualify.'
+          : 'Native operations IPC is unavailable in this fresh profile; no owner or run is fabricated.')
+        pending('native-mcp-retained-and-empty-catalog-hydration', 'No existing renderer namespace mutates the native catalog; do not replace it with Boss SQLite records or raw native requests.')
+        pending('openspec-command-execution', 'Existing shims and JS closure captured; no supported renderer IPC executes the openspec shim directly.')
+        pending('doctor-streaming-repair-and-docker-absent-down', 'Buffered doctor, actual offered repairs and distinct Docker installation/daemon states are not simulated.')
       }
-      pending('native-runs-cancel-reopen', nativeResponse?.ok
-        ? 'No new inference or arbitrary run is admitted by this driver. A normal Work-created owned run is required before cancellation can qualify.'
-        : 'Native operations IPC is unavailable in this fresh profile; no owner or run is fabricated.')
-      pending('native-mcp-retained-and-empty-catalog-hydration', 'No existing renderer namespace mutates the native catalog; do not replace it with Boss SQLite records or raw native requests.')
-      pending('openspec-command-execution', 'Existing shims and JS closure captured; no supported renderer IPC executes the openspec shim directly.')
-      pending('doctor-streaming-repair-and-docker-absent-down', 'Buffered doctor, actual offered repairs and distinct Docker installation/daemon states are not simulated.')
     }
   } catch (error) { evidence.failures.push({ stage: 'startup', ...safeFailure(error) }) }
   finally {
@@ -310,7 +349,7 @@ export default async function scenario({ evaluate, signal }) {
 async function main(args) {
   const options = {}
   for (let index = 0; index < args.length; index += 2) {
-    requireFact(['--boss', '--app', '--launcher', '--output', '--version'].includes(args[index]) && args[index + 1], 'UAR110_ARGUMENTS')
+    requireFact(['--boss', '--app', '--launcher', '--output', '--version', '--resume'].includes(args[index]) && args[index + 1], 'UAR110_ARGUMENTS')
     options[args[index].slice(2)] = args[index + 1]
   }
   requireFact(process.platform === 'darwin' && process.arch === 'arm64' &&
@@ -330,14 +369,29 @@ async function main(args) {
   const output = fs.realpathSync(path.dirname(path.resolve(options.output)))
   const destination = path.join(output, path.basename(options.output))
   fs.mkdirSync(destination)
-  const profile = path.join(destination, 'profile'), workspace = path.join(destination, 'workspace')
-  fs.mkdirSync(profile); fs.mkdirSync(workspace)
+  const priorFile = options.resume && fs.realpathSync(options.resume)
+  const prior = priorFile && JSON.parse(fs.readFileSync(priorFile, 'utf8'))
+  const priorPhase = prior?.phases?.[0]
+  const priorEvidence = prior && JSON.parse(fs.readFileSync(priorPhase.evidence, 'utf8'))
+  if (prior) {
+    requireFact(prior.kind === 'uar110-bounded-installed-operation' && prior.phases.length === 1 &&
+      priorPhase.phase === 'initial' && priorPhase.shutdown?.exited && priorPhase.shutdown.signal === 'SIGTERM' &&
+      prior.sourceRefs.installedApp === app && prior.profile === path.join(path.dirname(priorFile), 'profile') &&
+      prior.workspace === path.join(path.dirname(priorFile), 'workspace') &&
+      priorEvidence.failures.length === 3 && failedStages.every(stage => priorEvidence.failures.some(row => row.stage === stage)),
+    'UAR110_RESUME_REQUIRES_OWNED_THREE_FAILURE_RECEIPT')
+    try { process.kill(priorPhase.pid, 0); requireFact(false, 'UAR110_PRIOR_OWNED_PID_STILL_PRESENT') }
+    catch (error) { if (error.code !== 'ESRCH') throw error }
+    requireFact(!fs.existsSync(path.join(prior.profile, 'session-data', 'DevToolsActivePort')),
+      'UAR110_PRIOR_OWNED_PORT_CLEANUP_REQUIRED')
+  }
+  const profile = prior?.profile ?? path.join(destination, 'profile'), workspace = prior?.workspace ?? path.join(destination, 'workspace')
+  if (!prior) { fs.mkdirSync(profile); fs.mkdirSync(workspace) }
   const readme = path.join(workspace, 'README.md'), marker = 'UAR110-' + randomUUID()
-  fs.writeFileSync(readme, '# Owned UAR 1.1 operation\n\n' + marker + '\n', { flag: 'wx' })
-  const userSkillName = 'uar110-owned-user-skill', userSkill = path.join(destination, userSkillName)
-  fs.mkdirSync(userSkill)
+  if (!prior) fs.writeFileSync(readme, '# Owned UAR 1.1 operation\n\n' + marker + '\n', { flag: 'wx' })
+  const userSkillName = 'uar110-owned-user-skill', userSkill = path.join(prior ? path.dirname(priorFile) : destination, userSkillName)
   const userBytes = Buffer.from('---\nname: uar110-owned-user-skill\ndescription: Owned operation fixture.\n---\n\nRead the owned README only.\n')
-  fs.writeFileSync(path.join(userSkill, 'SKILL.md'), userBytes)
+  if (!prior) { fs.mkdirSync(userSkill); fs.writeFileSync(path.join(userSkill, 'SKILL.md'), userBytes) }
   const resources = path.join(app, 'Contents', 'Resources'), asar = path.join(resources, 'app.asar')
   const bundled = path.join(resources, 'app.asar.unpacked', 'resources')
   const skillNames = fs.readdirSync(path.join(bundled, 'skills'), { withFileTypes: true })
@@ -345,21 +399,32 @@ async function main(args) {
   requireFact(skillNames.length > 0, 'UAR110_BUNDLED_SKILL_INVENTORY_ABSENT')
   const sourceRefs = { bossCheckoutHead: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repository, encoding: 'utf8' }).trim(),
     installedBossSourceRelationship: 'Lead must bind installed ASAR hash to frozen built candidate; checkout HEAD alone is not that proof.',
-    installedApp: app, appAsarSha256: digest(fs.readFileSync(asar)), launcherSha256: digest(Buffer.from(launcherSource)),
+    installedApp: app, appAsarSha256: await digestFile(asar), launcherSha256: digest(Buffer.from(launcherSource)),
     scenarioSha256: digest(fs.readFileSync(fileURLToPath(import.meta.url))),
     uarPayload: publicPayloadIdentity(bundled) }
+  if (prior) requireFact(sourceRefs.appAsarSha256 === prior.sourceRefs.appAsarSha256 &&
+    sourceRefs.uarPayload.actualExecutable.sha256 === prior.sourceRefs.uarPayload.actualExecutable.sha256,
+  'UAR110_RESUME_INSTALLED_CANDIDATE_CHANGED')
+  const fixture = path.join(workspace, 'operation-fixture.js')
+  const fixtureBytes = Buffer.from('function show(value) { return value; }\nmodule.exports = { show };\n')
+  if (prior && fs.existsSync(fixture)) requireFact(fs.readFileSync(fixture).equals(fixtureBytes),
+    'UAR110_OWNED_SOURCE_FIXTURE_CHANGED')
+  else fs.writeFileSync(fixture, fixtureBytes, { flag: 'wx' })
   const previousProfile = process.env.THE_BOSS_PROFILE_ROOT
   requireFact(previousProfile === undefined, 'UAR110_CALLER_PROFILE_OVERRIDE_PRESENT')
   process.env.THE_BOSS_PROFILE_ROOT = profile
   const operation = { schemaVersion: 1, kind: 'uar110-bounded-installed-operation', sourceRefs,
-    profile, workspace, startedAt: new Date().toISOString(), phases: [], complete: false }
+    profile, workspace, ...(prior ? { priorReceipt: { path: priorFile, sha256: digest(fs.readFileSync(priorFile)) } } : {}),
+    startedAt: new Date().toISOString(), phases: [], complete: false }
   try {
     const { launchBoss } = await import(pathToFileURL(launcher).href)
-    for (const phase of ['initial', 'reopen']) {
+    for (const phase of prior ? ['failed-only'] : ['initial', 'reopen']) {
       const evidence = path.join(destination, phase + '-evidence.json')
       configuration = { version: options.version, profile, workspace, readme, markerDigest: digest(fs.readFileSync(readme)),
         userSkillName, userSkill, userSkillDigest: digest(userBytes), skillNames, sourceRefs, phase, evidence,
-        firstEvidence: path.join(destination, 'initial-evidence.json') }
+        firstEvidence: path.join(destination, 'initial-evidence.json'),
+        resume: prior && { evidence: priorPhase.evidence, sha256: digest(fs.readFileSync(priorPhase.evidence)),
+          checks: priorEvidence.checks, pending: priorEvidence.pending, workspaceId: priorEvidence.workspaceId } }
       const launch = await launchBoss({ repository, app, scenario: fileURLToPath(import.meta.url),
         'require-scenario': true, 'keep-open': true, 'timeout-ms': 600000,
         receipt: path.join(destination, phase + '-launch.json') })

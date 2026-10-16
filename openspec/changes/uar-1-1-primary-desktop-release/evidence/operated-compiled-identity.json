@@ -1,0 +1,1043 @@
+{
+  "schemaVersion": 1,
+  "application": "2.2.39",
+  "allMatch": true,
+  "basis": "Initial signed installed package vs reused out/main and out/preload compiled bytes, prior to mini-only repackage",
+  "files": [
+    {
+      "path": "out/main/Application-C7jOHWR9.js",
+      "installed": "79cd0d3860f71d590144b64f89fb860c5661a1e83dcf0cfbffb2ba99be67c2cc",
+      "compiled": "79cd0d3860f71d590144b64f89fb860c5661a1e83dcf0cfbffb2ba99be67c2cc"
+    },
+    {
+      "path": "out/main/AwsRestJsonProtocol-B8kIr9FE.js",
+      "installed": "27dc7d689a6678eb17b59b69f599069b141eedcb51c7974041429fdecb914765",
+      "compiled": "27dc7d689a6678eb17b59b69f599069b141eedcb51c7974041429fdecb914765"
+    },
+    {
+      "path": "out/main/BatchSpanProcessor-shim-d8izEZUG.js",
+      "installed": "bac393b0b8605ab409c208eca6170eaf8277f0f8139fe2ad2c8b8299f2bf91c1",
+      "compiled": "bac393b0b8605ab409c208eca6170eaf8277f0f8139fe2ad2c8b8299f2bf91c1"
+    },
+    {
+      "path": "out/main/CacheBatchSpanProcessor-CbBLStXs.js",
+      "installed": "67e662c24f6ec0a325eb3eaa7f20151e01e4ccc4476a1a1531c66a76ae8beafa",
+      "compiled": "67e662c24f6ec0a325eb3eaa7f20151e01e4ccc4476a1a1531c66a76ae8beafa"
+    },
+    {
+      "path": "out/main/ClaudeCodeRuntimeDriver-T1FgWbBh.js",
+      "installed": "fea2419bb8b234eb960f520a2da1299d0cfa784fcc09f7ea337e89e727ac81e8",
+      "compiled": "fea2419bb8b234eb960f520a2da1299d0cfa784fcc09f7ea337e89e727ac81e8"
+    },
+    {
+      "path": "out/main/CredentialsProviderError-B9unxsw6.js",
+      "installed": "c21bb1c5614d1f3856bd69e6bc6c490d6646a844270c9cb60f98c7c54953cea5",
+      "compiled": "c21bb1c5614d1f3856bd69e6bc6c490d6646a844270c9cb60f98c7c54953cea5"
+    },
+    {
+      "path": "out/main/DiscordAdapter-CRVEWHzs.js",
+      "installed": "c69ac005a2e308def456705c28bd133bea15d7f2053c24c49089c96dd1a143f2",
+      "compiled": "c69ac005a2e308def456705c28bd133bea15d7f2053c24c49089c96dd1a143f2"
+    },
+    {
+      "path": "out/main/DocReader-B9JxEYSU.js",
+      "installed": "ce32b1e15dd977afbb2db20e80828e4ee4c97d300ce7916a3beba43939e388b5",
+      "compiled": "ce32b1e15dd977afbb2db20e80828e4ee4c97d300ce7916a3beba43939e388b5"
+    },
+    {
+      "path": "out/main/EpubReader-BNVFIC2H.js",
+      "installed": "d4b14d73207300336772f014f6c43dac7b056a758990f9cf46a2dbcb04cba515",
+      "compiled": "d4b14d73207300336772f014f6c43dac7b056a758990f9cf46a2dbcb04cba515"
+    },
+    {
+      "path": "out/main/ExportResult-CeOUah4b.js",
+      "installed": "3d3922f86a5a68d214e5e23120c7ddc6774573570bbedddd10536967c89d90b9",
+      "compiled": "3d3922f86a5a68d214e5e23120c7ddc6774573570bbedddd10536967c89d90b9"
+    },
+    {
+      "path": "out/main/FeishuAdapter-DbUP56E7.js",
+      "installed": "917a01a464deb69dfb3d361c2678d2031049b6ed3350139d27916cfa3f2d9427",
+      "compiled": "917a01a464deb69dfb3d361c2678d2031049b6ed3350139d27916cfa3f2d9427"
+    },
+    {
+      "path": "out/main/FileEntryService-blEh0es5.js",
+      "installed": "827ff87768d859799f098093960249c5057181d8bb621723d5d6dff3ee495edd",
+      "compiled": "827ff87768d859799f098093960249c5057181d8bb621723d5d6dff3ee495edd"
+    },
+    {
+      "path": "out/main/FlushController-D0M8l4PH.js",
+      "installed": "708e95d7826782597efa949de3b07414784d8db72f808451a6b7339ef9a7cb18",
+      "compiled": "708e95d7826782597efa949de3b07414784d8db72f808451a6b7339ef9a7cb18"
+    },
+    {
+      "path": "out/main/FunctionSpanExporter-Bk7mFZKs.js",
+      "installed": "f48d9a8ed58b8591329d69307df3b6a4275177511969a4fb83f5817247261758",
+      "compiled": "f48d9a8ed58b8591329d69307df3b6a4275177511969a4fb83f5817247261758"
+    },
+    {
+      "path": "out/main/KnowledgeFileReader-CW2MJK5A.js",
+      "installed": "dd0e373337cd51742a5a7c849ee35a2864e54d8cf167c659b017e3e8a3541423",
+      "compiled": "dd0e373337cd51742a5a7c849ee35a2864e54d8cf167c659b017e3e8a3541423"
+    },
+    {
+      "path": "out/main/KnowledgeSnapshotReader-ctC1h1Zo.js",
+      "installed": "c2cbda5a13d57cb1073f2578c678c087ec1b4a13576678f873f7f67e36b44337",
+      "compiled": "c2cbda5a13d57cb1073f2578c678c087ec1b4a13576678f873f7f67e36b44337"
+    },
+    {
+      "path": "out/main/LoggerService-11UPSMnQ.js",
+      "installed": "75567d579ea0e3b2de8f72a99a0f4aba2dcec269a9067198ab793238e2813a8a",
+      "compiled": "75567d579ea0e3b2de8f72a99a0f4aba2dcec269a9067198ab793238e2813a8a"
+    },
+    {
+      "path": "out/main/NodeProxyBackend-BsZZWIyZ.js",
+      "installed": "cfbba491df2b7386a74d878f31e9022b0c722ac43cd900f1a35815898c017776",
+      "compiled": "cfbba491df2b7386a74d878f31e9022b0c722ac43cd900f1a35815898c017776"
+    },
+    {
+      "path": "out/main/NodeTracer-BYMWYr1h.js",
+      "installed": "1d66130a844101f219f2a85d5807f2d9191916d17b113d29b3ad83efc1a5eecd",
+      "compiled": "1d66130a844101f219f2a85d5807f2d9191916d17b113d29b3ad83efc1a5eecd"
+    },
+    {
+      "path": "out/main/QqAdapter-CamP4l8A.js",
+      "installed": "7b5d2708f30ff684edce69faef81cbbc051034d82754987ef013961782e89662",
+      "compiled": "7b5d2708f30ff684edce69faef81cbbc051034d82754987ef013961782e89662"
+    },
+    {
+      "path": "out/main/SlackAdapter-CRKQq5og.js",
+      "installed": "b5c1d1c920b9f08b9aeba677f8fd59ba6b59120865484ab8f1a5d89e059eb508",
+      "compiled": "b5c1d1c920b9f08b9aeba677f8fd59ba6b59120865484ab8f1a5d89e059eb508"
+    },
+    {
+      "path": "out/main/TelegramAdapter-4vG0y9eC.js",
+      "installed": "8c4b0c0529be2cd9efd10e0adff56cfb7d47f1b84d3f18e786baf712d2edc913",
+      "compiled": "8c4b0c0529be2cd9efd10e0adff56cfb7d47f1b84d3f18e786baf712d2edc913"
+    },
+    {
+      "path": "out/main/TypeRegistry-CuU-k1Ov.js",
+      "installed": "205d3281486df142bb01c6f8b057e64ea9b76e6598bca53c338272d893032a1e",
+      "compiled": "205d3281486df142bb01c6f8b057e64ea9b76e6598bca53c338272d893032a1e"
+    },
+    {
+      "path": "out/main/WeChatAdapter-mzQT0HjX.js",
+      "installed": "0b23b6c3cbdcbf6f7ab08209a207a36d906a3be8ce4f8c08b51fb92fb82b7a26",
+      "compiled": "0b23b6c3cbdcbf6f7ab08209a207a36d906a3be8ce4f8c08b51fb92fb82b7a26"
+    },
+    {
+      "path": "out/main/agentSessionWarmup-eRzEUsQ-.js",
+      "installed": "6132b656a29caa3a02808f9767b18d892475252e78d9ddde492a6f4ffa49161d",
+      "compiled": "6132b656a29caa3a02808f9767b18d892475252e78d9ddde492a6f4ffa49161d"
+    },
+    {
+      "path": "out/main/ai-sdk-openai-Aeh4KsRe.js",
+      "installed": "5cb1a5ce30eb196676991497b9cc117e328ac8db1d138d167316fd3a0cf8c435",
+      "compiled": "5cb1a5ce30eb196676991497b9cc117e328ac8db1d138d167316fd3a0cf8c435"
+    },
+    {
+      "path": "out/main/aihubmixProvider-C-ADCvx7.js",
+      "installed": "76bfea028f0f2a57ca75b3db64329223d64803c911ab3d92fc115fe4be7e9331",
+      "compiled": "76bfea028f0f2a57ca75b3db64329223d64803c911ab3d92fc115fe4be7e9331"
+    },
+    {
+      "path": "out/main/auth-CGOnswU9.js",
+      "installed": "1351e3fb21ea3ed5d0627b0bff9613ac2b364fee7b9f3370a94c22f80ea13cc4",
+      "compiled": "1351e3fb21ea3ed5d0627b0bff9613ac2b364fee7b9f3370a94c22f80ea13cc4"
+    },
+    {
+      "path": "out/main/binaryResolver-D3d2HyGw.js",
+      "installed": "729649c77c08d2ef626d363a327f1c31b14b423d33b6937c4347849858a8727d",
+      "compiled": "729649c77c08d2ef626d363a327f1c31b14b423d33b6937c4347849858a8727d"
+    },
+    {
+      "path": "out/main/branding-BMIFb48h.js",
+      "installed": "727850c9e27a32cba0090885ee160b74490cb593a9dadff8575d39ecb57be3e1",
+      "compiled": "727850c9e27a32cba0090885ee160b74490cb593a9dadff8575d39ecb57be3e1"
+    },
+    {
+      "path": "out/main/braveSearch-BkS6K759.js",
+      "installed": "13355eba4fce97adb4f87c7952abac3b1fd902c7b00ae4ab391634f6f81faf35",
+      "compiled": "13355eba4fce97adb4f87c7952abac3b1fd902c7b00ae4ab391634f6f81faf35"
+    },
+    {
+      "path": "out/main/bypassRules-C7axJN0l.js",
+      "installed": "234d550440d2a7c5d1f515333801bd1eb89596f1fc9cf38559def850d5cd1b75",
+      "compiled": "234d550440d2a7c5d1f515333801bd1eb89596f1fc9cf38559def850d5cd1b75"
+    },
+    {
+      "path": "out/main/chain-j1Joi0SW.js",
+      "installed": "0a1e906071d6a28087b125fbf23de924eb2fc9382611d4c2ba9034a4a3bc5f4f",
+      "compiled": "0a1e906071d6a28087b125fbf23de924eb2fc9382611d4c2ba9034a4a3bc5f4f"
+    },
+    {
+      "path": "out/main/claudeFork-DEDn8fbN.js",
+      "installed": "ccea02e66f1138938bcb0eb64a1dcb7765de4cf30bc44c7372f44291f12e0d30",
+      "compiled": "ccea02e66f1138938bcb0eb64a1dcb7765de4cf30bc44c7372f44291f12e0d30"
+    },
+    {
+      "path": "out/main/client-DHYssb7V.js",
+      "installed": "fabc149c9f5beb180fa8071bd658a44c6b60b5f48e429ee3aaf7784a2bcdb5b0",
+      "compiled": "fabc149c9f5beb180fa8071bd658a44c6b60b5f48e429ee3aaf7784a2bcdb5b0"
+    },
+    {
+      "path": "out/main/client-DrnKSMjo.js",
+      "installed": "b6a38f80117b31ef55de07fa080edb99074e9de4149d10f7f875b57b875eef36",
+      "compiled": "b6a38f80117b31ef55de07fa080edb99074e9de4149d10f7f875b57b875eef36"
+    },
+    {
+      "path": "out/main/comfyuiHttp-CmZpFk4E.js",
+      "installed": "26608d55d68b26215100cb3daa0aa0f8289e41b0e28f15a661b0e1f2ae1fa91b",
+      "compiled": "26608d55d68b26215100cb3daa0aa0f8289e41b0e28f15a661b0e1f2ae1fa91b"
+    },
+    {
+      "path": "out/main/comfyuiProvider-BAaJ8yfJ.js",
+      "installed": "d39a0dbc0bf52ee0bc27b6f60d63e9dfa410e3bb877252bf6daef5773039004e",
+      "compiled": "d39a0dbc0bf52ee0bc27b6f60d63e9dfa410e3bb877252bf6daef5773039004e"
+    },
+    {
+      "path": "out/main/comfyuiTransport-BgaGO-PM.js",
+      "installed": "93595c65debbcc300204a35335b2cb6df8f724a02cc2cf89150478eba752f53d",
+      "compiled": "93595c65debbcc300204a35335b2cb6df8f724a02cc2cf89150478eba752f53d"
+    },
+    {
+      "path": "out/main/configLoader-Gg4s8cV1.js",
+      "installed": "5c247a87682431ddd63db057872adb43bca51501ae7ed4fb1506181bde36a83e",
+      "compiled": "5c247a87682431ddd63db057872adb43bca51501ae7ed4fb1506181bde36a83e"
+    },
+    {
+      "path": "out/main/constants-DIv7b0sE.js",
+      "installed": "fdfa4f4665312b98576ea2a780230af25f9eb1b2a3683fc15570fa8e3c95081d",
+      "compiled": "fdfa4f4665312b98576ea2a780230af25f9eb1b2a3683fc15570fa8e3c95081d"
+    },
+    {
+      "path": "out/main/constants-iYCKzB8y.js",
+      "installed": "36fc0179c2b022a422c473add43a7ae192a39ea7c16a50795f3f7f4b8c2f8d3a",
+      "compiled": "36fc0179c2b022a422c473add43a7ae192a39ea7c16a50795f3f7f4b8c2f8d3a"
+    },
+    {
+      "path": "out/main/constants-xj-y8v8r.js",
+      "installed": "33b556d0edbf22ca78525587f973f0529447935e5059675b125b625e12aecc58",
+      "compiled": "33b556d0edbf22ca78525587f973f0529447935e5059675b125b625e12aecc58"
+    },
+    {
+      "path": "out/main/dashscopeProvider-DItiiU27.js",
+      "installed": "ebf5df1c4de380b0d008aabd8298c319e2e313baaa5c86e7957909c7a49ffce1",
+      "compiled": "ebf5df1c4de380b0d008aabd8298c319e2e313baaa5c86e7957909c7a49ffce1"
+    },
+    {
+      "path": "out/main/dataUrl-CFoNd4lV.js",
+      "installed": "30472307d232b71bca1470d63b5204478ee4b35ab33df4338396018a8d5822aa",
+      "compiled": "30472307d232b71bca1470d63b5204478ee4b35ab33df4338396018a8d5822aa"
+    },
+    {
+      "path": "out/main/didiMcp-6tjPisHd.js",
+      "installed": "95fbadf343e83f580c7cd7f8219a7da636d15108f6bc5811657f0132d58da09f",
+      "compiled": "95fbadf343e83f580c7cd7f8219a7da636d15108f6bc5811657f0132d58da09f"
+    },
+    {
+      "path": "out/main/difyKnowledge-JhzAsy1V.js",
+      "installed": "61083625beb98ea2e926d8da974b4d7827e055e31f63c22a323d389b1d3c516c",
+      "compiled": "61083625beb98ea2e926d8da974b4d7827e055e31f63c22a323d389b1d3c516c"
+    },
+    {
+      "path": "out/main/dist--Z4nXUnD.js",
+      "installed": "f443990cd0c6d6c835600d766c54004dcb8561086f9393e5b0f98a4fdaa38476",
+      "compiled": "f443990cd0c6d6c835600d766c54004dcb8561086f9393e5b0f98a4fdaa38476"
+    },
+    {
+      "path": "out/main/dist-6dhkf8GO.js",
+      "installed": "f41b813c53061010a3f3d6318a65118c679332235e729a8442ad18b70ea44a96",
+      "compiled": "f41b813c53061010a3f3d6318a65118c679332235e729a8442ad18b70ea44a96"
+    },
+    {
+      "path": "out/main/dist-8zv4CXI_.js",
+      "installed": "aedf21453ff8910f02a4d304adb8a09f8eb2c9d79cb6b6f927d3c647fde35583",
+      "compiled": "aedf21453ff8910f02a4d304adb8a09f8eb2c9d79cb6b6f927d3c647fde35583"
+    },
+    {
+      "path": "out/main/dist-Axym_fNT.js",
+      "installed": "7ceb03595acd7a20d5856e0ad77542e3ca97cb0f958cdd1c7ab6cee2850e6355",
+      "compiled": "7ceb03595acd7a20d5856e0ad77542e3ca97cb0f958cdd1c7ab6cee2850e6355"
+    },
+    {
+      "path": "out/main/dist-B5E9bFEK.js",
+      "installed": "7c15b7feca35d1fa2756387f90b78017078cd22f05f4770957dbfd872e5b38c8",
+      "compiled": "7c15b7feca35d1fa2756387f90b78017078cd22f05f4770957dbfd872e5b38c8"
+    },
+    {
+      "path": "out/main/dist-BGAO7m0l.js",
+      "installed": "11e485e9d033441c4eff2f2f2393fbf69c030ab73527512dd50f3bcd28e28aba",
+      "compiled": "11e485e9d033441c4eff2f2f2393fbf69c030ab73527512dd50f3bcd28e28aba"
+    },
+    {
+      "path": "out/main/dist-BHZCGBzP.js",
+      "installed": "d53540c3e3da339a76f6e6692240ab21110beaf5b7eb393e224e9ef1ab53f4bd",
+      "compiled": "d53540c3e3da339a76f6e6692240ab21110beaf5b7eb393e224e9ef1ab53f4bd"
+    },
+    {
+      "path": "out/main/dist-B_105WM9.js",
+      "installed": "f04024e860e121b485f9ae057975d1e5186e59d2a8c54894ef23ad2e216b1205",
+      "compiled": "f04024e860e121b485f9ae057975d1e5186e59d2a8c54894ef23ad2e216b1205"
+    },
+    {
+      "path": "out/main/dist-BgsuqYua.js",
+      "installed": "f5354deca333937657dd812e10555743cd1f2bd74c2d07ee386eda41728b1f0c",
+      "compiled": "f5354deca333937657dd812e10555743cd1f2bd74c2d07ee386eda41728b1f0c"
+    },
+    {
+      "path": "out/main/dist-BjOHhcae.js",
+      "installed": "786bea53198443f6351a120724a1cd1578df0c636b42202e4bf20b094e91f39b",
+      "compiled": "786bea53198443f6351a120724a1cd1578df0c636b42202e4bf20b094e91f39b"
+    },
+    {
+      "path": "out/main/dist-Bmih9oVY.js",
+      "installed": "7bf0d9f31fc6318938b9b3865997d89331f6bc809d072d7bd9669f9518b8a589",
+      "compiled": "7bf0d9f31fc6318938b9b3865997d89331f6bc809d072d7bd9669f9518b8a589"
+    },
+    {
+      "path": "out/main/dist-By28JlHv.js",
+      "installed": "ae2745c1dc96320e594e21544709be1a47e899609ece44fab7cd4999bbd98888",
+      "compiled": "ae2745c1dc96320e594e21544709be1a47e899609ece44fab7cd4999bbd98888"
+    },
+    {
+      "path": "out/main/dist-ByWjfbQq.js",
+      "installed": "2c0cbbb07430e54cb73dff729ec7ac4d1559132b7c869a1c74d252561542b77d",
+      "compiled": "2c0cbbb07430e54cb73dff729ec7ac4d1559132b7c869a1c74d252561542b77d"
+    },
+    {
+      "path": "out/main/dist-CGUojJRm.js",
+      "installed": "be14a8753e585d1062b7f7132a6e250a7fb7758038a01f65e4c100d5fb196ac9",
+      "compiled": "be14a8753e585d1062b7f7132a6e250a7fb7758038a01f65e4c100d5fb196ac9"
+    },
+    {
+      "path": "out/main/dist-CP2NfYvx.js",
+      "installed": "2684b0a7b0a11e6aa3dfef3bd526aa44cdc59ab3e6cee4982a92e66267632d9b",
+      "compiled": "2684b0a7b0a11e6aa3dfef3bd526aa44cdc59ab3e6cee4982a92e66267632d9b"
+    },
+    {
+      "path": "out/main/dist-CSXrWCFD.js",
+      "installed": "64969e7e3a2ee386fbfcc0fc58be5b30d34a6af9e5c05d99e0bbbb662c40048e",
+      "compiled": "64969e7e3a2ee386fbfcc0fc58be5b30d34a6af9e5c05d99e0bbbb662c40048e"
+    },
+    {
+      "path": "out/main/dist-CVHhEb12.js",
+      "installed": "27e0039357b7e01d548704049244b68f3c3ced10c70a9ac69cf5980cc99447c6",
+      "compiled": "27e0039357b7e01d548704049244b68f3c3ced10c70a9ac69cf5980cc99447c6"
+    },
+    {
+      "path": "out/main/dist-CfR4lUUA.js",
+      "installed": "d4c53323f2400b560e44665909f2d8a0c0d7808211104d38400ae7ac18cdf518",
+      "compiled": "d4c53323f2400b560e44665909f2d8a0c0d7808211104d38400ae7ac18cdf518"
+    },
+    {
+      "path": "out/main/dist-DElNzy35.js",
+      "installed": "b3f5e1e306cfb80cf0c781fe331085f623a287aead045d7ed111bc42c49b9367",
+      "compiled": "b3f5e1e306cfb80cf0c781fe331085f623a287aead045d7ed111bc42c49b9367"
+    },
+    {
+      "path": "out/main/dist-DjvxGpaA.js",
+      "installed": "ecd93186ea8577c88043c7afdcc583f26ef95cad7419960fbb648fc9b925a3a6",
+      "compiled": "ecd93186ea8577c88043c7afdcc583f26ef95cad7419960fbb648fc9b925a3a6"
+    },
+    {
+      "path": "out/main/dist-DoGrbzGE.js",
+      "installed": "3e3ae5c205cd57272829175946e3fdd23c9bc11fc793ae639b36bcb2a0e7070e",
+      "compiled": "3e3ae5c205cd57272829175946e3fdd23c9bc11fc793ae639b36bcb2a0e7070e"
+    },
+    {
+      "path": "out/main/dist-DrWkvqjF.js",
+      "installed": "5727cc41a98106442944baa2f97a478bc1791d7b69d1e5caf80a06024523b813",
+      "compiled": "5727cc41a98106442944baa2f97a478bc1791d7b69d1e5caf80a06024523b813"
+    },
+    {
+      "path": "out/main/dist-DuTi0Vr6.js",
+      "installed": "9b75a6ea9ee52e09918c01cb0b0955cec36e1a447c2be0d2a37155d4e371fd79",
+      "compiled": "9b75a6ea9ee52e09918c01cb0b0955cec36e1a447c2be0d2a37155d4e371fd79"
+    },
+    {
+      "path": "out/main/dist-ExsOBU3c.js",
+      "installed": "13bb88c4220b3fe8a6aecef860be04257175f8cd17c695933e11363499fe9896",
+      "compiled": "13bb88c4220b3fe8a6aecef860be04257175f8cd17c695933e11363499fe9896"
+    },
+    {
+      "path": "out/main/dist-Ingd0_nG.js",
+      "installed": "46bf67bad1c044a970f66ef478b69f60305ec2f29fc9241906e6c0b8717167fb",
+      "compiled": "46bf67bad1c044a970f66ef478b69f60305ec2f29fc9241906e6c0b8717167fb"
+    },
+    {
+      "path": "out/main/dist-_PP-tBzY.js",
+      "installed": "718b55a2c150cfdbdd398ef7712282ea37af9da341e9af987b070bc73a2931ec",
+      "compiled": "718b55a2c150cfdbdd398ef7712282ea37af9da341e9af987b070bc73a2931ec"
+    },
+    {
+      "path": "out/main/dist-e4vRHQgp.js",
+      "installed": "94eb381d555b800cc1dcb50408cbe99127f7d512b6b3d94e94c78373eb8ee770",
+      "compiled": "94eb381d555b800cc1dcb50408cbe99127f7d512b6b3d94e94c78373eb8ee770"
+    },
+    {
+      "path": "out/main/dist-es-C23wKlOm.js",
+      "installed": "b806abef6792684835fedb928c53a29ca2036590f02e10ee3a0744085fe502de",
+      "compiled": "b806abef6792684835fedb928c53a29ca2036590f02e10ee3a0744085fe502de"
+    },
+    {
+      "path": "out/main/dist-es-D8NbnOLS.js",
+      "installed": "da3254e2e99f1048745e9bbb996053f1ae4c0eb450bf7a8998b4c6afe90b8d29",
+      "compiled": "da3254e2e99f1048745e9bbb996053f1ae4c0eb450bf7a8998b4c6afe90b8d29"
+    },
+    {
+      "path": "out/main/dist-es-DqobrpBK.js",
+      "installed": "c2d75d86ca3e55eddc0e33e266541096ee5657c7caa002f17f2cea93d9974120",
+      "compiled": "c2d75d86ca3e55eddc0e33e266541096ee5657c7caa002f17f2cea93d9974120"
+    },
+    {
+      "path": "out/main/dist-es-Dv7xbeYs.js",
+      "installed": "2c62fc60434cc5b9d700181648add5aca83cc9ab3df26de475b80663f1296ad7",
+      "compiled": "2c62fc60434cc5b9d700181648add5aca83cc9ab3df26de475b80663f1296ad7"
+    },
+    {
+      "path": "out/main/dist-es-DwSPchNW.js",
+      "installed": "8662becc06489ba31d75acb2f74037ef760f0df3a18400a8ee8be2307d8003de",
+      "compiled": "8662becc06489ba31d75acb2f74037ef760f0df3a18400a8ee8be2307d8003de"
+    },
+    {
+      "path": "out/main/dist-es-g9v87hgQ.js",
+      "installed": "eece464882064ef4c6079cfd34b37a04cdaab305685df48bbe134387ef9bf43e",
+      "compiled": "eece464882064ef4c6079cfd34b37a04cdaab305685df48bbe134387ef9bf43e"
+    },
+    {
+      "path": "out/main/dmxapiImageRouting-Dhappe8w.js",
+      "installed": "7494da969d1eda9f4a22812d3385ad8932d3613d611bb1979c45ec3e7b83918b",
+      "compiled": "7494da969d1eda9f4a22812d3385ad8932d3613d611bb1979c45ec3e7b83918b"
+    },
+    {
+      "path": "out/main/dmxapiProvider-VSJRnTAi.js",
+      "installed": "91c9cc69ca19cfb33e55a387e4acdaf0720ff41502f1c04738eb1b17b54e6e25",
+      "compiled": "91c9cc69ca19cfb33e55a387e4acdaf0720ff41502f1c04738eb1b17b54e6e25"
+    },
+    {
+      "path": "out/main/dshFork-BvlN1FtL.js",
+      "installed": "e5c933ff44d482933cf869bf96451d47efc600c27340edc76940788e5558aee6",
+      "compiled": "e5c933ff44d482933cf869bf96451d47efc600c27340edc76940788e5558aee6"
+    },
+    {
+      "path": "out/main/edge-778goTPJ.js",
+      "installed": "272867b87c0e3ddebdeff937c10afc3cd445fb9e6ad1c5f838d9f3559affdc5d",
+      "compiled": "272867b87c0e3ddebdeff937c10afc3cd445fb9e6ad1c5f838d9f3559affdc5d"
+    },
+    {
+      "path": "out/main/edge-Bae4DAkg.js",
+      "installed": "067e5c81df47e5594356763fd296f5772590d1f1b7bbad4a34c4fd7cd8b62d05",
+      "compiled": "067e5c81df47e5594356763fd296f5772590d1f1b7bbad4a34c4fd7cd8b62d05"
+    },
+    {
+      "path": "out/main/edge-D9NWKEmJ.js",
+      "installed": "c918fec428abd8079393cec9f40cd3a7e99fda07f1f96cac07e00d52c8515094",
+      "compiled": "c918fec428abd8079393cec9f40cd3a7e99fda07f1f96cac07e00d52c8515094"
+    },
+    {
+      "path": "out/main/electron-store-conf-DGI4v34L.js",
+      "installed": "5766dc6441ff9ecca769b5ecf77e8773881211f0526068753f4f2b1b023e7b5e",
+      "compiled": "5766dc6441ff9ecca769b5ecf77e8773881211f0526068753f4f2b1b023e7b5e"
+    },
+    {
+      "path": "out/main/es-CoMohDPE.js",
+      "installed": "117a167c971d0fb45aafc75426a186f287271a0d352860858e6ff099783e9471",
+      "compiled": "117a167c971d0fb45aafc75426a186f287271a0d352860858e6ff099783e9471"
+    },
+    {
+      "path": "out/main/esm-COV0JX-x.js",
+      "installed": "d3eb715194391c593d11e02025ee577fa78661d56fa1f4e61f22a87e99f4ddb6",
+      "compiled": "d3eb715194391c593d11e02025ee577fa78661d56fa1f4e61f22a87e99f4ddb6"
+    },
+    {
+      "path": "out/main/event-streams-vQblLl5W.js",
+      "installed": "bbda373be8c8de2c5bd39270f9d776266426f22d248de6f859d3e892f5bb132b",
+      "compiled": "bbda373be8c8de2c5bd39270f9d776266426f22d248de6f859d3e892f5bb132b"
+    },
+    {
+      "path": "out/main/extend-CC8nPQSq.js",
+      "installed": "8f9e17f1302cc242af017136df26f8edb8bd60ed189aaa56f2a9edd1c3486405",
+      "compiled": "8f9e17f1302cc242af017136df26f8edb8bd60ed189aaa56f2a9edd1c3486405"
+    },
+    {
+      "path": "out/main/extensions-yRVW9gzt.js",
+      "installed": "66c3b7786bb0c57db3754ebb9443206e12d0bde0e89086a29918f6d0db37c03b",
+      "compiled": "66c3b7786bb0c57db3754ebb9443206e12d0bde0e89086a29918f6d0db37c03b"
+    },
+    {
+      "path": "out/main/externalDataInterceptor-CLsZTVYX.js",
+      "installed": "0def9d2fd27a721c32ef017cb17703eb437edc7dc5b3b1b7508f02f9b5df01c1",
+      "compiled": "0def9d2fd27a721c32ef017cb17703eb437edc7dc5b3b1b7508f02f9b5df01c1"
+    },
+    {
+      "path": "out/main/fetch-CzVGUxPo.js",
+      "installed": "899fb7ff1e4a1141dfd9806cedc2f87ba2bc900a55de62d1d7a308958b56998b",
+      "compiled": "899fb7ff1e4a1141dfd9806cedc2f87ba2bc900a55de62d1d7a308958b56998b"
+    },
+    {
+      "path": "out/main/file-0PuMq9Iv.js",
+      "installed": "be436d6698dfb2e6960628a203531a11a3c428391e2c53d97ba4dea5f7b4913c",
+      "compiled": "be436d6698dfb2e6960628a203531a11a3c428391e2c53d97ba4dea5f7b4913c"
+    },
+    {
+      "path": "out/main/file-BKrhv_Af.js",
+      "installed": "376f2c051296f8adecc2566168d042bc31da64f9cde253c64654b7107dd1a00b",
+      "compiled": "376f2c051296f8adecc2566168d042bc31da64f9cde253c64654b7107dd1a00b"
+    },
+    {
+      "path": "out/main/file-aE0cZEdO.js",
+      "installed": "42cde2676fa21800bf88b5ad14f19146a4736338ddec90e22bc701000cb26506",
+      "compiled": "42cde2676fa21800bf88b5ad14f19146a4736338ddec90e22bc701000cb26506"
+    },
+    {
+      "path": "out/main/fileRelations-SPJBxqLL.js",
+      "installed": "a9c784f6ae9a04c33e97b456ca248119cff4dba365bfad5ea77103c077096b3d",
+      "compiled": "a9c784f6ae9a04c33e97b456ca248119cff4dba365bfad5ea77103c077096b3d"
+    },
+    {
+      "path": "out/main/filesystem-Vn_azB0_.js",
+      "installed": "b653fd5549d769b00ea3919958118458cb0442bc8bd9e540196a173f8d6f48ee",
+      "compiled": "b653fd5549d769b00ea3919958118458cb0442bc8bd9e540196a173f8d6f48ee"
+    },
+    {
+      "path": "out/main/forkWorker-07TbyhHb.js",
+      "installed": "86d736c01761ad21b8c90ab7358c456838ca00ae4a380ec1ec15b870177e0714",
+      "compiled": "86d736c01761ad21b8c90ab7358c456838ca00ae4a380ec1ec15b870177e0714"
+    },
+    {
+      "path": "out/main/forkWorker-BQP9LFc1.js",
+      "installed": "a167a64ff8fcf3bf5329b0bc311ff870f8b584e303bb897c44fc0c818e1cf31d",
+      "compiled": "a167a64ff8fcf3bf5329b0bc311ff870f8b584e303bb897c44fc0c818e1cf31d"
+    },
+    {
+      "path": "out/main/format-DwiiqNA8.js",
+      "installed": "4f517c994bbf3282cdd5a2cf6d39bf9d39b25a15370385d6ad5dc76deea351fb",
+      "compiled": "4f517c994bbf3282cdd5a2cf6d39bf9d39b25a15370385d6ad5dc76deea351fb"
+    },
+    {
+      "path": "out/main/gatewayChatRouting-BQhVUCkU.js",
+      "installed": "5115dee38195ea734a332fd838ee534092d0aa303586d7a506694048176c13cd",
+      "compiled": "5115dee38195ea734a332fd838ee534092d0aa303586d7a506694048176c13cd"
+    },
+    {
+      "path": "out/main/gatewayProvider-BGkCKWS7.js",
+      "installed": "01226c89d5398a50622f65a061615154cb3c5835728041413469fc54917fbb23",
+      "compiled": "01226c89d5398a50622f65a061615154cb3c5835728041413469fc54917fbb23"
+    },
+    {
+      "path": "out/main/getSSOTokenFromFile-A-lx0QSM.js",
+      "installed": "3f7aca1e6726c57af49f19949dacae40d9f8a3fa4a457f4b75d36a7fa8b25637",
+      "compiled": "3f7aca1e6726c57af49f19949dacae40d9f8a3fa4a457f4b75d36a7fa8b25637"
+    },
+    {
+      "path": "out/main/globalThis-B3iv6uiO.js",
+      "installed": "7a0015c52fb72c0861b02e59c61311675e2392c7588dcfacc00e6e62e88c75f7",
+      "compiled": "7a0015c52fb72c0861b02e59c61311675e2392c7588dcfacc00e6e62e88c75f7"
+    },
+    {
+      "path": "out/main/group-BbmMp6xx.js",
+      "installed": "5c450c23ba1199ba8abcee02005be5304a53a59ca58abd307e8bb81c1f3144f3",
+      "compiled": "5c450c23ba1199ba8abcee02005be5304a53a59ca58abd307e8bb81c1f3144f3"
+    },
+    {
+      "path": "out/main/handler-2Zg_hoNI.js",
+      "installed": "3d0a704f0b4450c2158df775d074cc7547d020ec12ce46983bd28f63a334a885",
+      "compiled": "3d0a704f0b4450c2158df775d074cc7547d020ec12ce46983bd28f63a334a885"
+    },
+    {
+      "path": "out/main/handler-7wekraFO.js",
+      "installed": "a080e379f979e7a3effdf739d9326894bfd732789f6a420605112ffca4913f70",
+      "compiled": "a080e379f979e7a3effdf739d9326894bfd732789f6a420605112ffca4913f70"
+    },
+    {
+      "path": "out/main/handler-B2y3wC7O.js",
+      "installed": "cd6788c60c47cf402b5418ef509bf9cab04f56d0ba69ae13da2a0ab387397219",
+      "compiled": "cd6788c60c47cf402b5418ef509bf9cab04f56d0ba69ae13da2a0ab387397219"
+    },
+    {
+      "path": "out/main/handler-BCLYb5Jn.js",
+      "installed": "4d6e04927e1e665d8aa6e82d78d553df609af65cf37e6c3768bed7e722beb3ff",
+      "compiled": "4d6e04927e1e665d8aa6e82d78d553df609af65cf37e6c3768bed7e722beb3ff"
+    },
+    {
+      "path": "out/main/handler-BTu-DQJJ.js",
+      "installed": "816bbb5e365d789f63ef223b4538002ca6b1fedb61befc359a5288b4b756f9ef",
+      "compiled": "816bbb5e365d789f63ef223b4538002ca6b1fedb61befc359a5288b4b756f9ef"
+    },
+    {
+      "path": "out/main/handler-BeFMcNnD.js",
+      "installed": "080c0a97305ef87ac002742e83c2a1ce63d4ae421f7142d0f31f18916afc2749",
+      "compiled": "080c0a97305ef87ac002742e83c2a1ce63d4ae421f7142d0f31f18916afc2749"
+    },
+    {
+      "path": "out/main/handler-BwTtgC4_.js",
+      "installed": "d408877c8c62a6ed5ba68b743ef7b2f0bd470d90965f3fd0c5d85ac4776b897f",
+      "compiled": "d408877c8c62a6ed5ba68b743ef7b2f0bd470d90965f3fd0c5d85ac4776b897f"
+    },
+    {
+      "path": "out/main/handler-CIIp8Gcb.js",
+      "installed": "0da366711195b5bfd5b23f41b91119c726f2fed300d5dea781428416508bd0e4",
+      "compiled": "0da366711195b5bfd5b23f41b91119c726f2fed300d5dea781428416508bd0e4"
+    },
+    {
+      "path": "out/main/handler-CWl0STnq.js",
+      "installed": "9af251bd390e8af02f0d890e477ebfeab788146d1e7a0aa1c171f4c9a138b175",
+      "compiled": "9af251bd390e8af02f0d890e477ebfeab788146d1e7a0aa1c171f4c9a138b175"
+    },
+    {
+      "path": "out/main/handler-D1aQDujm.js",
+      "installed": "d088d96130aaa356d1fb5ecb52fb028180d26a5ee9bac274e47ce8e1e929e9cb",
+      "compiled": "d088d96130aaa356d1fb5ecb52fb028180d26a5ee9bac274e47ce8e1e929e9cb"
+    },
+    {
+      "path": "out/main/handler-DhditusN.js",
+      "installed": "c72ce712c16630c6e4ae655f52b52ca8ac06e690136b0686c8688e35b82efb4e",
+      "compiled": "c72ce712c16630c6e4ae655f52b52ca8ac06e690136b0686c8688e35b82efb4e"
+    },
+    {
+      "path": "out/main/handler-DxqR7-xp.js",
+      "installed": "66c9345186d06bbff8ef358f879b86d8be7a25cafe840a255de2609be36cda26",
+      "compiled": "66c9345186d06bbff8ef358f879b86d8be7a25cafe840a255de2609be36cda26"
+    },
+    {
+      "path": "out/main/has-flag-BhqRTIuD.js",
+      "installed": "7dfa7f2555d35fa5efb79b5d11c8e65b484feff153bcf4087ee2a5ac7f60a574",
+      "compiled": "7dfa7f2555d35fa5efb79b5d11c8e65b484feff153bcf4087ee2a5ac7f60a574"
+    },
+    {
+      "path": "out/main/helpers-DefZQUT9.js",
+      "installed": "a3a7d0ac00ea9b90f32bce5a26d2caa7adeda3dea78ee85953889db6f656bbcc",
+      "compiled": "a3a7d0ac00ea9b90f32bce5a26d2caa7adeda3dea78ee85953889db6f656bbcc"
+    },
+    {
+      "path": "out/main/http-UAUMAp20.js",
+      "installed": "896158cb8d6235adbc2d323950ecc9882692a38920eb02c4fd014e57d090e1f0",
+      "compiled": "896158cb8d6235adbc2d323950ecc9882692a38920eb02c4fd014e57d090e1f0"
+    },
+    {
+      "path": "out/main/httpRequest-DMz4lvg_.js",
+      "installed": "1b9b08312a5347c1604374036791fab4766d2b89d9377308cc54bc2feab439fa",
+      "compiled": "1b9b08312a5347c1604374036791fab4766d2b89d9377308cc54bc2feab439fa"
+    },
+    {
+      "path": "out/main/i18n-D7evYCYp.js",
+      "installed": "ded61d09bebc9b8d4c4fa94e80a533f6e04f13b4415507002c15e06d2c772d7e",
+      "compiled": "ded61d09bebc9b8d4c4fa94e80a533f6e04f13b4415507002c15e06d2c772d7e"
+    },
+    {
+      "path": "out/main/imageGenerationModel-DM883IyC.js",
+      "installed": "1c9051a462df4830ced09724d42430f9d7a218f20191001d11af142f2ce22abf",
+      "compiled": "1c9051a462df4830ced09724d42430f9d7a218f20191001d11af142f2ce22abf"
+    },
+    {
+      "path": "out/main/inMemory-UDCBEnk5.js",
+      "installed": "2a0869c3ab0535ced42c1169c00b51f2daca4a579748f14d01bfadc47f9d9ba1",
+      "compiled": "2a0869c3ab0535ced42c1169c00b51f2daca4a579748f14d01bfadc47f9d9ba1"
+    },
+    {
+      "path": "out/main/inherits-B1dEGy_t.js",
+      "installed": "7c290bbeab51aeffd584a1d898186172e37533080dfd0feb7aca842b4a64f3ad",
+      "compiled": "7c290bbeab51aeffd584a1d898186172e37533080dfd0feb7aca842b4a64f3ad"
+    },
+    {
+      "path": "out/main/integrationDiagnostics-Be7QTUWM.js",
+      "installed": "603582b385bc02745fe5df411e075caeef1a0ccdeaf60b35b79ced7c17e1ed70",
+      "compiled": "603582b385bc02745fe5df411e075caeef1a0ccdeaf60b35b79ced7c17e1ed70"
+    },
+    {
+      "path": "out/main/integrationProcess-5OXK7Nya.js",
+      "installed": "0891f7384264399635dcc66d6c387f20d29fda53846fdee9b6c7ad55db61e4ce",
+      "compiled": "0891f7384264399635dcc66d6c387f20d29fda53846fdee9b6c7ad55db61e4ce"
+    },
+    {
+      "path": "out/main/internal-ChPe6UJ3.js",
+      "installed": "be508912f3ad111af320283325a4f4bdd37c922cdc3067fff3aa7872cfb7bfbf",
+      "compiled": "be508912f3ad111af320283325a4f4bdd37c922cdc3067fff3aa7872cfb7bfbf"
+    },
+    {
+      "path": "out/main/internal-Ea-ou3yM.js",
+      "installed": "6a2c14132d18295d796a6c84953da61e7a4e604fdc21d5608442724d77ce197f",
+      "compiled": "6a2c14132d18295d796a6c84953da61e7a4e604fdc21d5608442724d77ce197f"
+    },
+    {
+      "path": "out/main/ipaddr-6g2WFZft.js",
+      "installed": "7f97a491f022afcb951d00d1eda537ecec184e75309bc0f422018d7377107c46",
+      "compiled": "7f97a491f022afcb951d00d1eda537ecec184e75309bc0f422018d7377107c46"
+    },
+    {
+      "path": "out/main/is-stream-Dfg264-a.js",
+      "installed": "b4dc02401b1aa3dd605f4030253d94398d1edd7414af9fea175eed0bb21b07f3",
+      "compiled": "b4dc02401b1aa3dd605f4030253d94398d1edd7414af9fea175eed0bb21b07f3"
+    },
+    {
+      "path": "out/main/legacyFile-3oJLmY55.js",
+      "installed": "a70fa244c7b38652fa89aa210dd5dfd913a6e0e11197f3c0ece398fb2cd4d138",
+      "compiled": "a70fa244c7b38652fa89aa210dd5dfd913a6e0e11197f3c0ece398fb2cd4d138"
+    },
+    {
+      "path": "out/main/lib-BKA342Gi.js",
+      "installed": "3c45f9504bb19ab8d65ced157a39318b4bfdfd26372adc6e87480c64f5152122",
+      "compiled": "3c45f9504bb19ab8d65ced157a39318b4bfdfd26372adc6e87480c64f5152122"
+    },
+    {
+      "path": "out/main/lib-D-T65Dlk.js",
+      "installed": "78d3103dc4314782c2f5539c340a72c48b6602f5a54dc380d03b7d1410e66c15",
+      "compiled": "78d3103dc4314782c2f5539c340a72c48b6602f5a54dc380d03b7d1410e66c15"
+    },
+    {
+      "path": "out/main/loadSharedConfigFiles-BqoZX_6U.js",
+      "installed": "a112287f243dffc92e551ad751fb91f85e11d67a394050c2890b6c87cc6a9407",
+      "compiled": "a112287f243dffc92e551ad751fb91f85e11d67a394050c2890b6c87cc6a9407"
+    },
+    {
+      "path": "out/main/loadSso-CT0i9wU2.js",
+      "installed": "779f5cd2ec7f3ab23e7fa782bff425ba67d7d9199a7a1e40af86d49d81aabaeb",
+      "compiled": "779f5cd2ec7f3ab23e7fa782bff425ba67d7d9199a7a1e40af86d49d81aabaeb"
+    },
+    {
+      "path": "out/main/localEmbedding-CVevn9er.js",
+      "installed": "df5d1f1e35f1a16346fbf4f36421b1ad285bf25a2fb139fcd17a45207694109a",
+      "compiled": "df5d1f1e35f1a16346fbf4f36421b1ad285bf25a2fb139fcd17a45207694109a"
+    },
+    {
+      "path": "out/main/localEmbeddingProvider-BzPwmNp8.js",
+      "installed": "3451fc38ecfa0b766b8f48dae12dc164ee2b0d33eb208d1a6ef0b8f9323340e0",
+      "compiled": "3451fc38ecfa0b766b8f48dae12dc164ee2b0d33eb208d1a6ef0b8f9323340e0"
+    },
+    {
+      "path": "out/main/main.js",
+      "installed": "da419a02f4d37ac25f74edc3a77fbda0cdb98c0da30e724d72e16e78c9455bf7",
+      "compiled": "da419a02f4d37ac25f74edc3a77fbda0cdb98c0da30e724d72e16e78c9455bf7"
+    },
+    {
+      "path": "out/main/memory-aTB5Rb6C.js",
+      "installed": "c5c8eae3ca91ee787b912642339e56acbb9606cef3c382e765d5eb3685e888c8",
+      "compiled": "c5c8eae3ca91ee787b912642339e56acbb9606cef3c382e765d5eb3685e888c8"
+    },
+    {
+      "path": "out/main/migrationDiagnosticBundle-wi-QtzHA.js",
+      "installed": "6bb5114f2064d81b1094e26f324cfe9138590c5c7f252b56aa8523bbbbddaf4a",
+      "compiled": "6bb5114f2064d81b1094e26f324cfe9138590c5c7f252b56aa8523bbbbddaf4a"
+    },
+    {
+      "path": "out/main/minimaxProvider-CcKFGC1M.js",
+      "installed": "1f746117c9b081b89ec7be3e3f238dea4723ad51aae6c111d8d9f91445819772",
+      "compiled": "1f746117c9b081b89ec7be3e3f238dea4723ad51aae6c111d8d9f91445819772"
+    },
+    {
+      "path": "out/main/model-Cvb57X7l.js",
+      "installed": "7c6bb0bd79fb5cc2134f654ed19931a8513418f41de04638869703e53c1ae7a6",
+      "compiled": "7c6bb0bd79fb5cc2134f654ed19931a8513418f41de04638869703e53c1ae7a6"
+    },
+    {
+      "path": "out/main/modelscopeProvider-BkDES2A7.js",
+      "installed": "38ab72c20875881d560a077eef697842aec72673d5dd83b3314052120df529eb",
+      "compiled": "38ab72c20875881d560a077eef697842aec72673d5dd83b3314052120df529eb"
+    },
+    {
+      "path": "out/main/moonshotProvider-53kCcwWs.js",
+      "installed": "c1339d028013b70fb9083a03013360a3e6050b3c294cb547a9ff0e231f8d3374",
+      "compiled": "c1339d028013b70fb9083a03013360a3e6050b3c294cb547a9ff0e231f8d3374"
+    },
+    {
+      "path": "out/main/ms-C0oEYwLO.js",
+      "installed": "28776db751df4195439ff7dc1e7bba8b6b9c5e3e5d2bbd895b8c6814850f18e0",
+      "compiled": "28776db751df4195439ff7dc1e7bba8b6b9c5e3e5d2bbd895b8c6814850f18e0"
+    },
+    {
+      "path": "out/main/multipart-parser-CLNF6zjc.js",
+      "installed": "91734d3ff5a1c5f296120fedaf9666e78d4248124368642607291c9f5e7b6962",
+      "compiled": "91734d3ff5a1c5f296120fedaf9666e78d4248124368642607291c9f5e7b6962"
+    },
+    {
+      "path": "out/main/newapiProvider-Cyh_wPVz.js",
+      "installed": "4016c96d3f99e619a7f74fa5967c00cc363e1ba78319b086a9ec8c45a375b715",
+      "compiled": "4016c96d3f99e619a7f74fa5967c00cc363e1ba78319b086a9ec8c45a375b715"
+    },
+    {
+      "path": "out/main/node-http-handler-Db6kuaZK.js",
+      "installed": "7843d324ffae18fdea428af5e9844dafc075eb951408611c3e8b23c94bcd01e4",
+      "compiled": "7843d324ffae18fdea428af5e9844dafc075eb951408611c3e8b23c94bcd01e4"
+    },
+    {
+      "path": "out/main/o200k_base-EAxL9usL.js",
+      "installed": "45273dbb5b982311d29807cfedf06e8234326e8645022e7dede83855547fe2c3",
+      "compiled": "45273dbb5b982311d29807cfedf06e8234326e8645022e7dede83855547fe2c3"
+    },
+    {
+      "path": "out/main/observability-BvjMqs9H.js",
+      "installed": "29d466bc0f8f7e50f5bd518832739ff34da193707230f66746cbaf406eaf8cf7",
+      "compiled": "29d466bc0f8f7e50f5bd518832739ff34da193707230f66746cbaf406eaf8cf7"
+    },
+    {
+      "path": "out/main/ollamaProvider-BIMlJiGV.js",
+      "installed": "5888f48ed1dc7096e4e6302c8fffe5105568680c24e15ec2d8af69b6a06d885d",
+      "compiled": "5888f48ed1dc7096e4e6302c8fffe5105568680c24e15ec2d8af69b6a06d885d"
+    },
+    {
+      "path": "out/main/ovmsProvider-h3CKEXSm.js",
+      "installed": "818554297ae137899d58936e3e64be0b91a2762ff81f22b084486afc4f0a52b0",
+      "compiled": "818554297ae137899d58936e3e64be0b91a2762ff81f22b084486afc4f0a52b0"
+    },
+    {
+      "path": "out/main/package-K9luydUL.js",
+      "installed": "5ceacf87966b8074bc2732761c574d4aeead950fea8c7ff24e1cb6a5a873e1b3",
+      "compiled": "5ceacf87966b8074bc2732761c574d4aeead950fea8c7ff24e1cb6a5a873e1b3"
+    },
+    {
+      "path": "out/main/pako-BUbhRxir.js",
+      "installed": "3b204070a8314476c2a5bbee0b0d5e82a01bf73033d848372bdebb26fb0b626c",
+      "compiled": "3b204070a8314476c2a5bbee0b0d5e82a01bf73033d848372bdebb26fb0b626c"
+    },
+    {
+      "path": "out/main/parseKnownFiles-DBRzxtVe.js",
+      "installed": "f60a60b6615ff8e1c056e54d9dac3f4eaed46968a1dff139a874c8c83aaffd1f",
+      "compiled": "f60a60b6615ff8e1c056e54d9dac3f4eaed46968a1dff139a874c8c83aaffd1f"
+    },
+    {
+      "path": "out/main/pathStorage-_TwfStHS.js",
+      "installed": "dd1cd750bf7cae7a7eab59d2dfd8b13dd892195cc5b82d7764e5f9611ec19e51",
+      "compiled": "dd1cd750bf7cae7a7eab59d2dfd8b13dd892195cc5b82d7764e5f9611ec19e51"
+    },
+    {
+      "path": "out/main/pdf-Dprfu1Xn.js",
+      "installed": "3cb6c2bf11bb9443d7448063150c063de398f9fd00de53ad2d0d648068b45fb3",
+      "compiled": "3cb6c2bf11bb9443d7448063150c063de398f9fd00de53ad2d0d648068b45fb3"
+    },
+    {
+      "path": "out/main/ppioProvider-BgYBoOR6.js",
+      "installed": "db8320ca385634bb201ef61904b9dba8d032a63c249423741ab30b414e12e7d4",
+      "compiled": "db8320ca385634bb201ef61904b9dba8d032a63c249423741ab30b414e12e7d4"
+    },
+    {
+      "path": "out/main/proxyEnv-Drv3EiQp.js",
+      "installed": "2b43580aaeca6788fb4209f00c6da5d3b0a29cd1ae5fad1bcb1bce33a8f055e0",
+      "compiled": "2b43580aaeca6788fb4209f00c6da5d3b0a29cd1ae5fad1bcb1bce33a8f055e0"
+    },
+    {
+      "path": "out/main/python-DgHGzMaK.js",
+      "installed": "b74d3dcfa7af0c97bfaf9b1648de6e223c6201f2a6c67ce3eacd6f3d080ffce2",
+      "compiled": "b74d3dcfa7af0c97bfaf9b1648de6e223c6201f2a6c67ce3eacd6f3d080ffce2"
+    },
+    {
+      "path": "out/main/readErrorMessage-Cz1baaw_.js",
+      "installed": "937da3812af39bebac97bc3a7313235bc321d10e1549386739de2a8d387ee36e",
+      "compiled": "937da3812af39bebac97bc3a7313235bc321d10e1549386739de2a8d387ee36e"
+    },
+    {
+      "path": "out/main/readFile-CizScOgo.js",
+      "installed": "34b5873812ab940fa1a2e72cac14045ac84b5b836716aac83d58760cff62eb7a",
+      "compiled": "34b5873812ab940fa1a2e72cac14045ac84b5b836716aac83d58760cff62eb7a"
+    },
+    {
+      "path": "out/main/readableContentWorker-CsHf7Neq.js",
+      "installed": "116744c9149005b00a2c46712e57af55f038b4ff987b61d759c359b472537dc5",
+      "compiled": "116744c9149005b00a2c46712e57af55f038b4ff987b61d759c359b472537dc5"
+    },
+    {
+      "path": "out/main/reasoningSerializers-CNYSFk9d.js",
+      "installed": "ffa1f89c0c9ae53137a2f6464ab1fb5c51d305c8a67e0cbc0c903e95fb7fb395",
+      "compiled": "ffa1f89c0c9ae53137a2f6464ab1fb5c51d305c8a67e0cbc0c903e95fb7fb395"
+    },
+    {
+      "path": "out/main/remoteFetch-DTlvz3Sm.js",
+      "installed": "dc74254fb6cbee9f00aa8f4952fccc9d9c1cbd6d96c6d3f52caf08ec6fd85550",
+      "compiled": "dc74254fb6cbee9f00aa8f4952fccc9d9c1cbd6d96c6d3f52caf08ec6fd85550"
+    },
+    {
+      "path": "out/main/remoteUrlSafety-gOpCZmt8.js",
+      "installed": "a5bb264d79e680c9c6dda5f778dacf6effd1fcc4d3daf1562bf6b3d2d7af9e1d",
+      "compiled": "a5bb264d79e680c9c6dda5f778dacf6effd1fcc4d3daf1562bf6b3d2d7af9e1d"
+    },
+    {
+      "path": "out/main/rerankingModel-Cb_EykBi.js",
+      "installed": "c7e675560ec97a3723aff122caa186e557df589563070515b6c49b5f259aea05",
+      "compiled": "c7e675560ec97a3723aff122caa186e557df589563070515b6c49b5f259aea05"
+    },
+    {
+      "path": "out/main/rolldown-runtime-ch10HqoO.js",
+      "installed": "67f3c53ee4facef8908b6645f39d3eb9b3c68bb47cd17b99e7b1d9c61576920e",
+      "compiled": "67f3c53ee4facef8908b6645f39d3eb9b3c68bb47cd17b99e7b1d9c61576920e"
+    },
+    {
+      "path": "out/main/safe-buffer-Bkfv--ia.js",
+      "installed": "f76cda40ce4cda361c273771feab2836c9bc15d146418cf31693418bed5658e4",
+      "compiled": "f76cda40ce4cda361c273771feab2836c9bc15d146418cf31693418bed5658e4"
+    },
+    {
+      "path": "out/main/sequentialthinking-BkLuagke.js",
+      "installed": "853fb6bd3ba52b443e9b3bb070deb6bc92500887c99364b70c7d361046a084c0",
+      "compiled": "853fb6bd3ba52b443e9b3bb070deb6bc92500887c99364b70c7d361046a084c0"
+    },
+    {
+      "path": "out/main/server-CPuJIruS.js",
+      "installed": "c03aa4ee585a05f2459b2f22ae7f47739697db8ce19094864de6e0a3fb82c9a6",
+      "compiled": "c03aa4ee585a05f2459b2f22ae7f47739697db8ce19094864de6e0a3fb82c9a6"
+    },
+    {
+      "path": "out/main/server-DJvIB7qe.js",
+      "installed": "6640c27a2e02fdfcc5432ad6a6447cea14e57b85a80fb02aae941ea631b3b31c",
+      "compiled": "6640c27a2e02fdfcc5432ad6a6447cea14e57b85a80fb02aae941ea631b3b31c"
+    },
+    {
+      "path": "out/main/setCredentialFeature-C2uQ3EWq.js",
+      "installed": "84390e3a13720cae7f5534ce291653f197b08e798b7b087f806de638fe286695",
+      "compiled": "84390e3a13720cae7f5534ce291653f197b08e798b7b087f806de638fe286695"
+    },
+    {
+      "path": "out/main/setCredentialFeature-C5I_hoJC.js",
+      "installed": "da5f37cb0bfbd9a696a7c13a294bcc1ac9f45fe8acd1601bb27bd7cebedf19b8",
+      "compiled": "da5f37cb0bfbd9a696a7c13a294bcc1ac9f45fe8acd1601bb27bd7cebedf19b8"
+    },
+    {
+      "path": "out/main/signin-D9cXm_2I.js",
+      "installed": "dceadb79d79116438468b8a0b21aba3e337b91365b27f550db1f8696317a4a2b",
+      "compiled": "dceadb79d79116438468b8a0b21aba3e337b91365b27f550db1f8696317a4a2b"
+    },
+    {
+      "path": "out/main/siliconProvider-BU-lHj5H.js",
+      "installed": "397e933145ec7a4ba3a8c24cfbcd99c77ff7cf08f770d25a11eb98585ed13694",
+      "compiled": "397e933145ec7a4ba3a8c24cfbcd99c77ff7cf08f770d25a11eb98585ed13694"
+    },
+    {
+      "path": "out/main/source--kby-H06.js",
+      "installed": "f3d58178edd93551cce265c772ab6dd16107e387cf49d05f3bebdedb53c325f9",
+      "compiled": "f3d58178edd93551cce265c772ab6dd16107e387cf49d05f3bebdedb53c325f9"
+    },
+    {
+      "path": "out/main/src-B5yIrlhO.js",
+      "installed": "dd71ba626e02da4295f59f651189d24eec976f308783acfe0616989c54881807",
+      "compiled": "dd71ba626e02da4295f59f651189d24eec976f308783acfe0616989c54881807"
+    },
+    {
+      "path": "out/main/src-DtZO6Yh_.js",
+      "installed": "39955c7af00596ea84b7a82e533def021ff73d69d7507ca9e1bb420352469453",
+      "compiled": "39955c7af00596ea84b7a82e533def021ff73d69d7507ca9e1bb420352469453"
+    },
+    {
+      "path": "out/main/src-hSAmBB3p.js",
+      "installed": "81045b236b4972efa650c00eca8f7cd2c62dd83c21f8f7afa8c0a25e04a94667",
+      "compiled": "81045b236b4972efa650c00eca8f7cd2c62dd83c21f8f7afa8c0a25e04a94667"
+    },
+    {
+      "path": "out/main/sse-7zC-YWNx.js",
+      "installed": "03645b4c3561d3b98faaa4e3dffa6656cb85fb18c9723456f14f15c17c8a1a34",
+      "compiled": "03645b4c3561d3b98faaa4e3dffa6656cb85fb18c9723456f14f15c17c8a1a34"
+    },
+    {
+      "path": "out/main/sso-oidc-ChS7R--N.js",
+      "installed": "34d20e8e02316c018fbd7e043d3a03a5cf9d7dc04c925a9b0961341d7ae6ba5d",
+      "compiled": "34d20e8e02316c018fbd7e043d3a03a5cf9d7dc04c925a9b0961341d7ae6ba5d"
+    },
+    {
+      "path": "out/main/stdio-C6X3PcSy.js",
+      "installed": "07eec9f3ffe8fbeffd63b59e6736c970e65c4d88bb29db94733bd0e0475d246b",
+      "compiled": "07eec9f3ffe8fbeffd63b59e6736c970e65c4d88bb29db94733bd0e0475d246b"
+    },
+    {
+      "path": "out/main/streamableHttp-BwNEi5Af.js",
+      "installed": "0421c3bf20d6793441fe9a4fb197f32dbb9e306cac7f42f34a9a5451cfb357bc",
+      "compiled": "0421c3bf20d6793441fe9a4fb197f32dbb9e306cac7f42f34a9a5451cfb357bc"
+    },
+    {
+      "path": "out/main/string_decoder-BIoOs8Qp.js",
+      "installed": "191f5e2fd5904562c53e5d1328c03cc7be8b7d277c8257d07bb0474bd6873596",
+      "compiled": "191f5e2fd5904562c53e5d1328c03cc7be8b7d277c8257d07bb0474bd6873596"
+    },
+    {
+      "path": "out/main/sts-D4iYeOe5.js",
+      "installed": "86b15a2b215df640c5dfb2623c6159e46bfd0e3350c4d41fbfb6b981b6c36e32",
+      "compiled": "86b15a2b215df640c5dfb2623c6159e46bfd0e3350c4d41fbfb6b981b6c36e32"
+    },
+    {
+      "path": "out/main/toBase64-z7jNJi5E.js",
+      "installed": "b73e8ebec0ded24952dce615bd2652c8d91f3069526171fac2962cfa6a56c1e8",
+      "compiled": "b73e8ebec0ded24952dce615bd2652c8d91f3069526171fac2962cfa6a56c1e8"
+    },
+    {
+      "path": "out/main/toUtf8-CzHu8jAv.js",
+      "installed": "7d8b3760ee67af1bbaa48e729a04876454faa07320987d540d6996f8db76ec98",
+      "compiled": "7d8b3760ee67af1bbaa48e729a04876454faa07320987d540d6996f8db76ec98"
+    },
+    {
+      "path": "out/main/token-C1XQU0p0.js",
+      "installed": "128f6eb78b3cb289a9f4c24d3212e6e7d4a7b772a33e9b7524471b323d2ee813",
+      "compiled": "128f6eb78b3cb289a9f4c24d3212e6e7d4a7b772a33e9b7524471b323d2ee813"
+    },
+    {
+      "path": "out/main/token-util-BID95cyX.js",
+      "installed": "bdbd58f203b3f187308d17feb88239f1fe73235a6db39685031dcda0f64d1ea3",
+      "compiled": "bdbd58f203b3f187308d17feb88239f1fe73235a6db39685031dcda0f64d1ea3"
+    },
+    {
+      "path": "out/main/tokenhubProvider-B7YXImmd.js",
+      "installed": "06ba1f8210e5884c1262ef2a1b6a46cc145f78261926c893173a749d519c4932",
+      "compiled": "06ba1f8210e5884c1262ef2a1b6a46cc145f78261926c893173a749d519c4932"
+    },
+    {
+      "path": "out/main/traceConfig-BBPCK9Bd.js",
+      "installed": "aae062d18454a48879010842ba5ba357bbd83bd6784edde55d3d0b074bb86101",
+      "compiled": "aae062d18454a48879010842ba5ba357bbd83bd6784edde55d3d0b074bb86101"
+    },
+    {
+      "path": "out/main/transportUtils-BQqEhyMu.js",
+      "installed": "b4a0005ea2233928aafe0edeba3e7e45b6ff8026597d5a04d5946f85bd170de5",
+      "compiled": "b4a0005ea2233928aafe0edeba3e7e45b6ff8026597d5a04d5946f85bd170de5"
+    },
+    {
+      "path": "out/main/types-6NNWDhB2.js",
+      "installed": "6db13495c9ea692bd1cdfd2ee8a2e7280734c816fdd0f9c53be8cf91bb1d310f",
+      "compiled": "6db13495c9ea692bd1cdfd2ee8a2e7280734c816fdd0f9c53be8cf91bb1d310f"
+    },
+    {
+      "path": "out/main/types-B2RWv8S9.js",
+      "installed": "d2a84d92cc8d5598da2ceebf9984aa2e17a5fe07f0f50302187fcfd86428bbce",
+      "compiled": "d2a84d92cc8d5598da2ceebf9984aa2e17a5fe07f0f50302187fcfd86428bbce"
+    },
+    {
+      "path": "out/main/undici-GWKJrFpB.js",
+      "installed": "eb5d71fa263f2632f0f4d32202cb6d95fb001195f43296b5499af8b7d1c603d7",
+      "compiled": "eb5d71fa263f2632f0f4d32202cb6d95fb001195f43296b5499af8b7d1c603d7"
+    },
+    {
+      "path": "out/main/utils-CkHQ0mIK.js",
+      "installed": "5b9594dc96b57be787a040aada0f5f048fecbccdcd019de82f3c9a9dd65e5a75",
+      "compiled": "5b9594dc96b57be787a040aada0f5f048fecbccdcd019de82f3c9a9dd65e5a75"
+    },
+    {
+      "path": "out/main/utils-Dk66y4Vz.js",
+      "installed": "cf4e036f8c738c3467f4ed6802cc9591ffe84fb81acedd0ff59067abc28443e8",
+      "compiled": "cf4e036f8c738c3467f4ed6802cc9591ffe84fb81acedd0ff59067abc28443e8"
+    },
+    {
+      "path": "out/main/word-F4NoRNx5.js",
+      "installed": "82a22bce4057a516f1ba6dd744f61a5683bf8abaf211adc335613c7e85f23706",
+      "compiled": "82a22bce4057a516f1ba6dd744f61a5683bf8abaf211adc335613c7e85f23706"
+    },
+    {
+      "path": "out/main/zhipuProvider-DgRYSC17.js",
+      "installed": "c976a8012e360e1e392ea754d93afcdae748500dffc14a9d7622fd173abfc47c",
+      "compiled": "c976a8012e360e1e392ea754d93afcdae748500dffc14a9d7622fd173abfc47c"
+    },
+    {
+      "path": "out/preload/miniAppBridge.js",
+      "installed": "57b774601a48f695487302005d411162e47f3077f9bcf18b3b9931012397cd23",
+      "compiled": "57b774601a48f695487302005d411162e47f3077f9bcf18b3b9931012397cd23"
+    },
+    {
+      "path": "out/preload/preload.js",
+      "installed": "9a1afe7ac20bbda0f63e93864c67c2b2aa26ccfa6382f43c08aedcdb56af8a92",
+      "compiled": "9a1afe7ac20bbda0f63e93864c67c2b2aa26ccfa6382f43c08aedcdb56af8a92"
+    },
+    {
+      "path": "out/preload/simplest.js",
+      "installed": "75882d6ffa7e7204810a95d849c37e1742a0620ad21d642eafd884d52d2de5e3",
+      "compiled": "75882d6ffa7e7204810a95d849c37e1742a0620ad21d642eafd884d52d2de5e3"
+    },
+    {
+      "path": "out/preload/webview.js",
+      "installed": "f4e6d14f8ab1594233d17f062ddf239db66c520b57209d7b32feeed3e8fed290",
+      "compiled": "f4e6d14f8ab1594233d17f062ddf239db66c520b57209d7b32feeed3e8fed290"
+    }
+  ]
+}

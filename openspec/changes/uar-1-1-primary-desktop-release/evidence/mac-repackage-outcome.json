@@ -1,0 +1,11 @@
+{
+  "source": "2d2bbaf15271e1f5abc47ee38d4e80400159f31d",
+  "startedAt": "2026-10-16T08:47:17.912Z",
+  "pid": 14816,
+  "command": "pnpm exec electron-builder --mac dmg --arm64",
+  "basis": "Reuse passing compiled application; repackage corrected mini 1.2.9 only. Initial full pnpm build:mac:arm64 completed signing and package validation. Superseded artifacts retained.",
+  "notarization": "skipped",
+  "code": 0,
+  "signal": null,
+  "finishedAt": "2026-10-16T08:53:21.198Z"
+}

@@ -11,7 +11,7 @@ These update tasks do not change historical 61/61 code, 20/20 changes or 43/61 t
 ## 2. Native payload and final candidate boundary
 
 - [x] 2.1 Build/package Mac ARM64 and Windows x64 UAR server-full payloads, record actual source/version/checksums/libraries, publish immutable payload assets and import their records into Boss.
-- [ ] 2.2 Freeze complete Boss source and run pnpm build:mac:arm64; operate only affected/missing primary-desktop outcomes in the identified installed application. Preserve failures and repeat only failed operations after repair.
+- [x] 2.2 Freeze complete Boss source and run pnpm build:mac:arm64; operate only affected/missing primary-desktop outcomes in the identified installed application. Preserve failures and repeat only failed operations after repair.
 - [ ] 2.3 Build the Windows x64 installer from the same frozen source and payload set; record actual signing/package provenance separately from installed acceptance. Run native installed operations only if the actual environment is available.
 
 ## 3. Publish and reconcile

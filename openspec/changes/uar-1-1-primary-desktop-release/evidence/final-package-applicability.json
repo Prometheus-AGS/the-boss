@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "source": "2d2bbaf15271e1f5abc47ee38d4e80400159f31d",
+  "mini": "0c6b6e4c2a7ee849f55570f6d5ec2bb7d4961f7a",
+  "uar": {
+    "repository": "Prometheus-AGS/universal-agent-runtime",
+    "revision": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
+    "platformRevisions": {
+      "darwin-arm64": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
+      "win32-x64": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326"
+    }
+  },
+  "matchedCompiledFiles": 207,
+  "launcherSha256": "68d0d5e3389b74d8a59ff00e6be1b23401400f22d0660f752fe1bd79424e0b6b",
+  "priorOperations": "Retain R3 and completed normal prompt; production main/preload compiled bytes identical; only packaged launcher source fixed.",
+  "notarization": "skipped",
+  "signed": true
+}

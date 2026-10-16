@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "version": "2.2.39",
+  "source": "2d2bbaf15271e1f5abc47ee38d4e80400159f31d",
+  "runId": 38876043909,
+  "url": "https://github.com/Prometheus-AGS/the-boss/actions/runs/38876043909",
+  "platform": "win32-x64",
+  "nativeInstalledAcceptance": "pending",
+  "supersedes": {
+    "runId": 38873203806,
+    "conclusion": "cancelled",
+    "reason": "Superseded mini launcher 1.2.8, no installer uploaded"
+  },
+  "notarization": "not-applicable"
+}
