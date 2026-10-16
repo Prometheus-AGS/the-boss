@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "version": "2.2.38",
+  "version": "2.2.39",
   "platforms": [
     "darwin-arm64",
     "win32-x64"

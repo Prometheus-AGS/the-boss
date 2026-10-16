@@ -1,0 +1,49 @@
+{
+  "mode": "diff-correction-confirmation",
+  "target": "UAR 1.1.0 / Boss 2.2.39 completed production-source boundary",
+  "producer_model": "unknown",
+  "cross_model_check": "unverified-producer-unknown",
+  "scope": "Only confirm resolution or persistence of UAR110-SRC-1 and UAR110-SRC-2. No reopening other scope or runtime qualification. No tests/builds/apps run.",
+  "previous_findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "src/main/core/paths/constants.ts",
+      "line": 51,
+      "claim": "An existing private profile whose home directory is a symlink can still redirect shell registration into the user's real home.",
+      "evidence": "Source-flow reproducer, not an executed runtime reproduction: create an owned profile root with `<profile>/home` symlinked to the real home, then launch with THE_BOSS_PROFILE_ROOT selecting that profile. resolvePrivateProfilePaths() canonicalizes only root and calls mkdirSync(directory, { recursive: true }) on paths.home, which accepts a symlink to an existing directory. pathRegistry.ts then selects PRIVATE_PROFILE_PATHS.home for external.shell.home. The documented commandPath.ts flow writes shell startup files through that path, escaping the profile before the operation driver's later realpath check can detect it. This violates the constraint that the private fixture and real shell registration trust boundary require isolation.",
+      "suggested_fix": "Before returning the private paths or permitting initialization, reject a symlink at the private home directory and verify that its canonical path is contained within the canonical profile root. Fail closed before any shell registration writes.",
+      "id": "UAR110-SRC-1",
+      "reproduction_status": "source-flow-only; no tests/builds/app launches authorized for reviewer"
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "skills/process/delivery-cadence/scripts/boss-launch.mjs",
+      "line": 84,
+      "claim": "Reusing a profile can cause the launcher to run its scenario against an already-running application rather than the process it spawned.",
+      "evidence": "Source-flow reproducer, not an executed runtime reproduction: keep one application running with profile P, then invoke launchBoss with THE_BOSS_PROFILE_ROOT=P. The new profile-selection branch reuses P/user-data, and the DevTools polling loop immediately accepts its existing DevToolsActivePort and the first matching main page. No check binds that endpoint to child.pid. ensureAlive() only checks whether the child has already emitted close/error, so it does not prevent attachment and scenario execution before a duplicate-instance process exits. The receipt can consequently identify the newly spawned PID/app while scenario mutations affect the existing instance. The same code is present in skills/delivery-cadence/scripts/boss-launch.mjs. This breaks the required owned-process/private-fixture isolation.",
+      "suggested_fix": "Apply the correction to both launcher copies: reject a reused profile with an existing DevToolsActivePort before spawning, without deleting or modifying that file. Require explicit resolution of a stale file after confirming the prior owned process exited; the operation wrapper already performs that cleanup for its normal reopen sequence.",
+      "id": "UAR110-SRC-2",
+      "reproduction_status": "source-flow-only; no tests/builds/app launches authorized for reviewer"
+    }
+  ],
+  "corrections": [
+    {
+      "file": "/Users/gqadonis/Projects/prometheus/the-boss/src/main/core/paths/constants.ts",
+      "sha256": "f2c62da3bc0f64358fea3b776e4ef4351c30dcbe3e0d4f67766dc2030eac67a2",
+      "diff": "diff --git Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/uar-1-1-primary-desktop-release/evidence/review/correction-inputs/boss-private-paths-before.txt Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/uar-1-1-primary-desktop-release/evidence/review/correction-inputs/boss-private-paths-after.txt\nindex f843d6b945..3f37baa7a0 100644\n--- Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/uar-1-1-primary-desktop-release/evidence/review/correction-inputs/boss-private-paths-before.txt\n+++ Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/uar-1-1-primary-desktop-release/evidence/review/correction-inputs/boss-private-paths-after.txt\n@@ -51,6 +51,7 @@ function resolvePrivateProfilePaths(): PrivateProfilePaths | undefined {\n     for (const directory of [paths.home, paths.config, paths.userData, paths.sessionData, paths.logs, paths.temp]) {\n       fs.mkdirSync(directory, { recursive: true })\n     }\n+    if (fs.realpathSync(paths.home) !== paths.home) throw new Error()\n     app.setPath('userData', paths.userData)\n     app.setPath('sessionData', paths.sessionData)\n     app.setPath('temp', paths.temp)\n"
+    },
+    {
+      "file": "/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/process/delivery-cadence/scripts/boss-launch.mjs",
+      "sha256": "1020e50d1fc3912e3342571d73b77deeade3d9f657aa26bc267390957effbe4d",
+      "diff": "diff --git Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/uar-1-1-primary-desktop-release/evidence/review/correction-inputs/full-launcher-before.txt Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/uar-1-1-primary-desktop-release/evidence/review/correction-inputs/full-launcher-after.txt\nindex 91857a7f00..ec3747ed4b 100644\n--- Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/uar-1-1-primary-desktop-release/evidence/review/correction-inputs/full-launcher-before.txt\n+++ Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/uar-1-1-primary-desktop-release/evidence/review/correction-inputs/full-launcher-after.txt\n@@ -85,6 +85,9 @@ export async function launchBoss(args) {\n     ? fs.mkdtempSync(path.join(os.tmpdir(), 'cadence-boss-'))\n     : fs.realpathSync(process.env.THE_BOSS_PROFILE_ROOT);\n   const userData = path.join(profileRoot, 'user-data');\n+  if (fs.existsSync(path.join(userData, 'DevToolsActivePort'))) {\n+    throw new Error('Profile has an existing DevTools endpoint; reconcile its owned application before launching.');\n+  }\n   const controller = new AbortController();\n   const timeout = setTimeout(() => controller.abort('timeout'), timeoutMs);\n   const abort = () => controller.abort('operator cancellation');\n"
+    },
+    {
+      "file": "/Users/gqadonis/Projects/prometheus/prometheus-skills-mini/skills/delivery-cadence/scripts/boss-launch.mjs",
+      "sha256": "1020e50d1fc3912e3342571d73b77deeade3d9f657aa26bc267390957effbe4d",
+      "diff": "diff --git Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/uar-1-1-primary-desktop-release/evidence/review/correction-inputs/mini-launcher-before.txt Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/uar-1-1-primary-desktop-release/evidence/review/correction-inputs/mini-launcher-after.txt\nindex 91857a7f00..ec3747ed4b 100644\n--- Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/uar-1-1-primary-desktop-release/evidence/review/correction-inputs/mini-launcher-before.txt\n+++ Users/gqadonis/Projects/prometheus/the-boss/openspec/changes/uar-1-1-primary-desktop-release/evidence/review/correction-inputs/mini-launcher-after.txt\n@@ -85,6 +85,9 @@ export async function launchBoss(args) {\n     ? fs.mkdtempSync(path.join(os.tmpdir(), 'cadence-boss-'))\n     : fs.realpathSync(process.env.THE_BOSS_PROFILE_ROOT);\n   const userData = path.join(profileRoot, 'user-data');\n+  if (fs.existsSync(path.join(userData, 'DevToolsActivePort'))) {\n+    throw new Error('Profile has an existing DevTools endpoint; reconcile its owned application before launching.');\n+  }\n   const controller = new AbortController();\n   const timeout = setTimeout(() => controller.abort('timeout'), timeoutMs);\n   const abort = () => controller.abort('operator cancellation');\n"
+    }
+  ],
+  "truncation": {
+    "any_truncated": false
+  }
+}

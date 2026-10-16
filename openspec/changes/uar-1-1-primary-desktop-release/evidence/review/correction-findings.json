@@ -1,0 +1,24 @@
+{
+  "verdict": "RESOLVED",
+  "results": [
+    {
+      "id": "UAR110-SRC-1",
+      "status": "resolved",
+      "evidence": "constants.ts adds `if (fs.realpathSync(paths.home) !== paths.home) throw new Error()` before app.setPath calls and returning the private paths. With the profile root already canonicalized, a private home symlink redirecting to the real home fails this check before shell registration can receive that path. This resolves the reported source flow, not runtime qualification.",
+      "runtime_verified": false
+    },
+    {
+      "id": "UAR110-SRC-2",
+      "status": "resolved",
+      "evidence": "Both launcher copies now check `fs.existsSync(path.join(userData, 'DevToolsActivePort'))` immediately after selecting userData and throw before spawning when the file exists. Neither correction deletes or modifies that file, preventing the reported reused-profile attachment flow and requiring explicit reconciliation before relaunch. This resolves the reported source flow, not runtime qualification.",
+      "runtime_verified": false
+    }
+  ],
+  "remaining_findings": [],
+  "producer_model": "unknown",
+  "cross_model_check": "unverified-producer-unknown",
+  "judge_model": "gpt-6.1-sol",
+  "isolation_mode": "rest-gateway:http://127.0.0.1:8181/v1",
+  "reviewedAt": "2026-10-15T21:05:44.580Z",
+  "runtime_verified": false
+}

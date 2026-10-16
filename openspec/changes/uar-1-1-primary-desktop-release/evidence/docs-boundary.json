@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-15T21:10:36.848Z",
+  "command": "PATH=/Users/gqadonis/.nvm/versions/node/v24.21.0/bin:$PATH pnpm docs:check",
+  "outcome": "passed",
+  "checks": [
+    "419 Markdown links valid",
+    "documentation structure",
+    "frontmatter",
+    "generated index current"
+  ],
+  "preparation": "pnpm12.6 automatically reconciled29pinned packages afterpackageversionedit and built existing dependency postinstall outputs; lockfile unchanged",
+  "notEvidenceOf": [
+    "app build",
+    "UAR runtime",
+    "nativeWindows operation",
+    "installer acceptance"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-15T20:57:05.746Z",
+  "version": "2.2.39",
+  "requiredPlatforms": [
+    "darwin-arm64",
+    "win32-x64"
+  ],
+  "notarization": "explicitly-deferred-by-operator",
+  "nativeJobs": [
+    38804105095,
+    38804105174
+  ],
+  "applicationProductionSourceComplete": true,
+  "ownedDiagnosticAttempt": {
+    "version": "2.2.38",
+    "outcome": "interrupted-no-pass",
+    "sideEffects": "exact managed RC blocks restored from verified backups; receipt retained"
+  },
+  "codeCompletion": {
+    "tasks": 61,
+    "totalTasks": 61,
+    "changes": 20,
+    "totalChanges": 20
+  },
+  "portfolioQualification": {
+    "qualified": 42,
+    "historicalSkippedDuplicate": 1,
+    "terminal": 43,
+    "total": 61
+  },
+  "sequence": [
+    "Import actual immutable native payload records",
+    "Freeze Boss source and run pnpm build:mac:arm64 with Node24 and notarization credentials explicitly disabled",
+    "Build Windows x64 from identical frozen source",
+    "Operate packaged Mac candidate through corrected private profile, affected UAR prompt and maintained desktop subset",
+    "Publish exact operated Mac artifact and Windows installer, merge metadata and deploy website",
+    "Bounded independent review, evidence reconciliation and scoped commits/pushes"
+  ],
+  "reuse": "Retain source-applicable 2.2.38 and earlier receipts; no broad suites or unrelated passing operations repeated",
+  "acceptance": "Windows native installed operation and operator acceptance remain distinct from build/publication"
+}

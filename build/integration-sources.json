@@ -20,16 +20,16 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "52a84e7d19f3ffdae0b58bd1732a853abd06e748"
+      "revision": "7a500cf4b502ac6b8032d7144af59b45a754719f"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "ac0970437096a1b935809bb90f48bfdd6d6421bd",
+      "revision": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
       "platformRevisions": {
         "darwin-x64": "74194623b17e5db127534b0f0469f8557794d4bc",
         "win32-arm64": "74194623b17e5db127534b0f0469f8557794d4bc",
-        "darwin-arm64": "ac0970437096a1b935809bb90f48bfdd6d6421bd",
-        "win32-x64": "ac0970437096a1b935809bb90f48bfdd6d6421bd"
+        "darwin-arm64": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
+        "win32-x64": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326"
       }
     },
     "surreal-memory": {
@@ -79,7 +79,7 @@
     "uar-sidecar": {
       "source": "uar",
       "package": "universal-agent-runtime",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "features": "server-full"
     },
     "liter-llm": {

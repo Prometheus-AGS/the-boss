@@ -18,7 +18,7 @@ import { loggerService } from '@logger'
 import { isMac, isWin } from '@main/core/platform'
 import { PRODUCT_DIRNAME } from '@shared/utils/branding'
 
-import { CHERRY_HOME, DEV_PROFILE_ROOT, LOGS_DIR } from './constants'
+import { CHERRY_HOME, DEV_PROFILE_ROOT, LOGS_DIR, PRIVATE_PROFILE_PATHS } from './constants'
 
 const logger = loggerService.withContext('PathRegistry')
 
@@ -307,7 +307,7 @@ export function buildPathRegistry() {
     'v1.agents.claude': path.join(appUserData, '.claude'),
 
     // -- F. external.* — third-party tool paths (Cherry reads/writes, does NOT own) --
-    'external.shell.home': DEV_PROFILE_ROOT ? path.join(DEV_PROFILE_ROOT, 'home') : sysHome,
+    'external.shell.home': PRIVATE_PROFILE_PATHS?.home ?? (DEV_PROFILE_ROOT ? path.join(DEV_PROFILE_ROOT, 'home') : sysHome),
     'external.claude.config': path.join(sysHome, '.claude'),
     'external.browser.chrome': isMac
       ? path.join(sysHome, 'Library/Application Support/Google/Chrome')

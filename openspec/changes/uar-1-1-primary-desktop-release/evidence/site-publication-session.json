@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-15T21:11:51.293Z",
+  "projectId": "c0ca344c-ebc5-4be2-9d02-46d3d9631118",
+  "site": "https://the-boss.know-me.tools",
+  "browser": "existing Chrome know-me.tools profile",
+  "observed": "Authenticated existing Boss Landing project and Publish control; latest displayed GitHub sync2.2.38",
+  "published": false,
+  "reason": "Wait for exact new installer records and landing source update; no old-data redeployment"
+}

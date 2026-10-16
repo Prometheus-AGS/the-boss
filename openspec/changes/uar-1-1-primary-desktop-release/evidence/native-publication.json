@@ -1,0 +1,648 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-16T02:40:29.502Z",
+  "boundary": "The Boss openspec/changes/uar-1-1-primary-desktop-release/evidence/production-complete.md",
+  "source": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
+  "version": "1.1.0",
+  "features": [
+    "server-full"
+  ],
+  "platforms": [
+    {
+      "platform": "darwin-arm64",
+      "target": "aarch64-apple-darwin",
+      "tag": "boss-sidecar-darwin-arm64-v1.1.0-d815ef72",
+      "runId": 38804105095,
+      "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/actions/runs/38804105095",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
+      "jobs": [
+        {
+          "completedAt": "2026-10-15T21:58:43Z",
+          "conclusion": "success",
+          "databaseId": 116660371197,
+          "name": "The Boss sidecar (darwin-arm64)",
+          "startedAt": "2026-10-15T20:42:34Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-15T20:42:37Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-15T20:42:35Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T20:42:49Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v7",
+              "number": 2,
+              "startedAt": "2026-10-15T20:42:37Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T20:43:15Z",
+              "conclusion": "success",
+              "name": "Checkout Rust workspace submodules",
+              "number": 3,
+              "startedAt": "2026-10-15T20:42:49Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T20:43:46Z",
+              "conclusion": "success",
+              "name": "Install pinned Rust target",
+              "number": 4,
+              "startedAt": "2026-10-15T20:43:15Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T20:43:52Z",
+              "conclusion": "success",
+              "name": "Restore Rust build cache",
+              "number": 5,
+              "startedAt": "2026-10-15T20:43:46Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T21:56:48Z",
+              "conclusion": "success",
+              "name": "Build production sidecar",
+              "number": 6,
+              "startedAt": "2026-10-15T20:43:52Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T21:57:05Z",
+              "conclusion": "success",
+              "name": "Package complete sidecar payload",
+              "number": 7,
+              "startedAt": "2026-10-15T21:56:48Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T21:57:14Z",
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@v7",
+              "number": 8,
+              "startedAt": "2026-10-15T21:57:06Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T21:58:35Z",
+              "conclusion": "success",
+              "name": "Post Restore Rust build cache",
+              "number": 15,
+              "startedAt": "2026-10-15T21:57:14Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T21:58:37Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v7",
+              "number": 16,
+              "startedAt": "2026-10-15T21:58:35Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T21:58:40Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-10-15T21:58:37Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/actions/runs/38804105095/job/116660371197"
+        },
+        {
+          "completedAt": "2026-10-15T20:42:23Z",
+          "conclusion": "skipped",
+          "databaseId": 116660373173,
+          "name": "GHCR Build (${{ matrix.platform }})",
+          "startedAt": "2026-10-15T20:42:23Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/actions/runs/38804105095/job/116660373173"
+        },
+        {
+          "completedAt": "2026-10-15T20:42:23Z",
+          "conclusion": "skipped",
+          "databaseId": 116660373656,
+          "name": "GHCR Merge Manifest",
+          "startedAt": "2026-10-15T20:42:24Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/actions/runs/38804105095/job/116660373656"
+        },
+        {
+          "completedAt": "2026-10-15T21:59:18Z",
+          "conclusion": "success",
+          "databaseId": 116693517699,
+          "name": "Publish immutable The Boss sidecar payload",
+          "startedAt": "2026-10-15T21:58:46Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-15T21:58:48Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-15T21:58:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T21:59:00Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v7",
+              "number": 2,
+              "startedAt": "2026-10-15T21:58:48Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T21:59:07Z",
+              "conclusion": "success",
+              "name": "Run actions/download-artifact@v8",
+              "number": 3,
+              "startedAt": "2026-10-15T21:59:00Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T21:59:15Z",
+              "conclusion": "success",
+              "name": "Publish GitHub Release",
+              "number": 4,
+              "startedAt": "2026-10-15T21:59:07Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T21:59:16Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v7",
+              "number": 8,
+              "startedAt": "2026-10-15T21:59:15Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T21:59:16Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "startedAt": "2026-10-15T21:59:16Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/actions/runs/38804105095/job/116693517699"
+        }
+      ],
+      "release": {
+        "assets": [
+          {
+            "apiUrl": "https://api.github.com/repos/Prometheus-AGS/universal-agent-runtime/releases/assets/645295009",
+            "contentType": "application/json",
+            "createdAt": "2026-10-15T21:59:09Z",
+            "digest": "sha256:bf8601dff109e51707e5bda01b3e065ad1859554f26c0949ed54acee540ee399",
+            "downloadCount": 0,
+            "id": "RA_kwDOQ815F84mdmuh",
+            "label": "",
+            "name": "uar-sidecar-darwin-arm64.json",
+            "size": 879,
+            "state": "uploaded",
+            "updatedAt": "2026-10-15T21:59:09Z",
+            "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.1.0-d815ef72/uar-sidecar-darwin-arm64.json"
+          },
+          {
+            "apiUrl": "https://api.github.com/repos/Prometheus-AGS/universal-agent-runtime/releases/assets/645295003",
+            "contentType": "application/x-gtar",
+            "createdAt": "2026-10-15T21:59:08Z",
+            "digest": "sha256:6858182f90d70b761fad79134e7fbfd0fb720a6b497c238b8d40b5136d6bd83a",
+            "downloadCount": 0,
+            "id": "RA_kwDOQ815F84mdmub",
+            "label": "",
+            "name": "uar-sidecar-darwin-arm64.tar.gz",
+            "size": 130190550,
+            "state": "uploaded",
+            "updatedAt": "2026-10-15T21:59:14Z",
+            "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.1.0-d815ef72/uar-sidecar-darwin-arm64.tar.gz"
+          }
+        ],
+        "publishedAt": "2026-10-15T21:59:15Z",
+        "tagName": "boss-sidecar-darwin-arm64-v1.1.0-d815ef72",
+        "targetCommitish": "main",
+        "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/tag/boss-sidecar-darwin-arm64-v1.1.0-d815ef72"
+      },
+      "download": {
+        "recordPath": "/Users/gqadonis/Projects/prometheus/universal-agent-runtime/dist/boss-sidecar/v1.1.0-d815ef72/uar-sidecar-darwin-arm64.json",
+        "recordUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.1.0-d815ef72/uar-sidecar-darwin-arm64.json",
+        "recordSha256": "bf8601dff109e51707e5bda01b3e065ad1859554f26c0949ed54acee540ee399",
+        "archivePath": "/Users/gqadonis/Projects/prometheus/universal-agent-runtime/dist/boss-sidecar/v1.1.0-d815ef72/uar-sidecar-darwin-arm64.tar.gz",
+        "archiveUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.1.0-d815ef72/uar-sidecar-darwin-arm64.tar.gz",
+        "archiveSha256": "6858182f90d70b761fad79134e7fbfd0fb720a6b497c238b8d40b5136d6bd83a",
+        "archiveSize": 130190550,
+        "payloadManifest": {
+          "schema": 1,
+          "name": "uar-sidecar",
+          "version": "1.1.0",
+          "platform": "darwin-arm64",
+          "source": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
+          "features": [
+            "server-full"
+          ],
+          "files": [
+            {
+              "path": "libcrc_fast-c9544bfaf069c5bc.dylib",
+              "size": 518864,
+              "sha256": "da9c61e262cb6d80a97f555554b458d9d11cd0c413a2905f0aa86121406df791"
+            },
+            {
+              "path": "libsevenz_rust2-bcd9d32571c57b36.dylib",
+              "size": 16768,
+              "sha256": "3d9804bfad89583b4e193b6468ccd0d68c7c0e5753ac23ee6132b6c60e26b265"
+            },
+            {
+              "path": "LICENSE",
+              "size": 1071,
+              "sha256": "c80a50b8f2630936009ad9cd516ff1ac603a92f78386906afbac044452c5d2a7"
+            },
+            {
+              "path": "policies/default.cedar",
+              "size": 272,
+              "sha256": "533be695da370d80c039259788fff40b757be1b44e2b833a72ef3039e1a5b7d4"
+            },
+            {
+              "path": "policies/skill-mutation.cedar",
+              "size": 2339,
+              "sha256": "6feacc9af1090ad2f1d6871e15e76d56c185d6302e329cc603ff40958346ae9e"
+            },
+            {
+              "path": "policies/tool-approval.cedar",
+              "size": 1200,
+              "sha256": "f6c7844b10c6cabd594f05e94af314eb176e23a7fce908a35ddb9382afbf80f6"
+            },
+            {
+              "path": "uar-models/bg-small-en-v1.5.onnx",
+              "size": 34014426,
+              "sha256": "6c9c6101a956d62dfb5e7190c538226c0c5bb9cb27b651234b6df063ee7dbfe4"
+            },
+            {
+              "path": "uar-models/config.json",
+              "size": 650,
+              "sha256": "f2c87ea17fdfa286f48d6e1506f2cdc838d303420dc55606190e67e5acd9e186"
+            },
+            {
+              "path": "uar-models/MODEL-NOTICE.txt",
+              "size": 331,
+              "sha256": "99d87511d89807668120d86f3bce9f3d138d8da2428cf66c0c82e39d26b1ad22"
+            },
+            {
+              "path": "uar-models/special_tokens_map.json",
+              "size": 125,
+              "sha256": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3"
+            },
+            {
+              "path": "uar-models/tokenizer_config.json",
+              "size": 366,
+              "sha256": "9261e7d79b44c8195c1cada2b453e55b00aeb81e907a6664974b4d7776172ab3"
+            },
+            {
+              "path": "uar-models/tokenizer.json",
+              "size": 711396,
+              "sha256": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66"
+            },
+            {
+              "path": "uar-sidecar",
+              "size": 313133248,
+              "sha256": "4003a2410287db133e8b47bcd792f72071a9f07a93f8ce78fbc30c213897c8ca"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "platform": "win32-x64",
+      "target": "x86_64-pc-windows-msvc",
+      "tag": "boss-sidecar-win32-x64-v1.1.0-d815ef72",
+      "runId": 38804105174,
+      "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/actions/runs/38804105174",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
+      "jobs": [
+        {
+          "completedAt": "2026-10-15T22:09:48Z",
+          "conclusion": "success",
+          "databaseId": 116660371058,
+          "name": "The Boss sidecar (win32-x64)",
+          "startedAt": "2026-10-15T20:42:26Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-15T20:42:29Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-15T20:42:27Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T20:42:47Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v7",
+              "number": 2,
+              "startedAt": "2026-10-15T20:42:29Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T20:43:08Z",
+              "conclusion": "success",
+              "name": "Checkout Rust workspace submodules",
+              "number": 3,
+              "startedAt": "2026-10-15T20:42:47Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T20:45:04Z",
+              "conclusion": "success",
+              "name": "Install pinned Rust target",
+              "number": 4,
+              "startedAt": "2026-10-15T20:43:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T20:45:33Z",
+              "conclusion": "success",
+              "name": "Restore Rust build cache",
+              "number": 5,
+              "startedAt": "2026-10-15T20:45:04Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T22:05:42Z",
+              "conclusion": "success",
+              "name": "Build production sidecar",
+              "number": 6,
+              "startedAt": "2026-10-15T20:45:33Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T22:06:08Z",
+              "conclusion": "success",
+              "name": "Package complete sidecar payload",
+              "number": 7,
+              "startedAt": "2026-10-15T22:05:43Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T22:06:16Z",
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@v7",
+              "number": 8,
+              "startedAt": "2026-10-15T22:06:08Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T22:09:42Z",
+              "conclusion": "success",
+              "name": "Post Restore Rust build cache",
+              "number": 15,
+              "startedAt": "2026-10-15T22:06:16Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T22:09:45Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v7",
+              "number": 16,
+              "startedAt": "2026-10-15T22:09:42Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T22:09:45Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "startedAt": "2026-10-15T22:09:45Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/actions/runs/38804105174/job/116660371058"
+        },
+        {
+          "completedAt": "2026-10-15T20:42:23Z",
+          "conclusion": "skipped",
+          "databaseId": 116660373258,
+          "name": "GHCR Build (${{ matrix.platform }})",
+          "startedAt": "2026-10-15T20:42:23Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/actions/runs/38804105174/job/116660373258"
+        },
+        {
+          "completedAt": "2026-10-15T20:42:23Z",
+          "conclusion": "skipped",
+          "databaseId": 116660373892,
+          "name": "GHCR Merge Manifest",
+          "startedAt": "2026-10-15T20:42:24Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/actions/runs/38804105174/job/116660373892"
+        },
+        {
+          "completedAt": "2026-10-15T22:10:14Z",
+          "conclusion": "success",
+          "databaseId": 116697951936,
+          "name": "Publish immutable The Boss sidecar payload",
+          "startedAt": "2026-10-15T22:09:50Z",
+          "status": "completed",
+          "steps": [
+            {
+              "completedAt": "2026-10-15T22:09:52Z",
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "startedAt": "2026-10-15T22:09:51Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T22:10:02Z",
+              "conclusion": "success",
+              "name": "Run actions/checkout@v7",
+              "number": 2,
+              "startedAt": "2026-10-15T22:09:52Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T22:10:06Z",
+              "conclusion": "success",
+              "name": "Run actions/download-artifact@v8",
+              "number": 3,
+              "startedAt": "2026-10-15T22:10:02Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T22:10:12Z",
+              "conclusion": "success",
+              "name": "Publish GitHub Release",
+              "number": 4,
+              "startedAt": "2026-10-15T22:10:06Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T22:10:13Z",
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v7",
+              "number": 8,
+              "startedAt": "2026-10-15T22:10:12Z",
+              "status": "completed"
+            },
+            {
+              "completedAt": "2026-10-15T22:10:13Z",
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "startedAt": "2026-10-15T22:10:13Z",
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/actions/runs/38804105174/job/116697951936"
+        }
+      ],
+      "release": {
+        "assets": [
+          {
+            "apiUrl": "https://api.github.com/repos/Prometheus-AGS/universal-agent-runtime/releases/assets/645322664",
+            "contentType": "application/json",
+            "createdAt": "2026-10-15T22:10:07Z",
+            "digest": "sha256:9e70a593f64b4fd4633e750f9b80b63c9fb97afe07ffbd7bbda70e83b81eb1cb",
+            "downloadCount": 0,
+            "id": "RA_kwDOQ815F84mdteo",
+            "label": "",
+            "name": "uar-sidecar-win32-x64.json",
+            "size": 864,
+            "state": "uploaded",
+            "updatedAt": "2026-10-15T22:10:08Z",
+            "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.1.0-d815ef72/uar-sidecar-win32-x64.json"
+          },
+          {
+            "apiUrl": "https://api.github.com/repos/Prometheus-AGS/universal-agent-runtime/releases/assets/645322662",
+            "contentType": "application/x-gtar",
+            "createdAt": "2026-10-15T22:10:07Z",
+            "digest": "sha256:9af6692706e791affa6eb61e3c80d74bfd9de6d1dbd11971ff32bc53c3430a45",
+            "downloadCount": 0,
+            "id": "RA_kwDOQ815F84mdtem",
+            "label": "",
+            "name": "uar-sidecar-win32-x64.tar.gz",
+            "size": 134605025,
+            "state": "uploaded",
+            "updatedAt": "2026-10-15T22:10:11Z",
+            "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.1.0-d815ef72/uar-sidecar-win32-x64.tar.gz"
+          }
+        ],
+        "publishedAt": "2026-10-15T22:10:12Z",
+        "tagName": "boss-sidecar-win32-x64-v1.1.0-d815ef72",
+        "targetCommitish": "main",
+        "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/tag/boss-sidecar-win32-x64-v1.1.0-d815ef72"
+      },
+      "download": {
+        "recordPath": "/Users/gqadonis/Projects/prometheus/universal-agent-runtime/dist/boss-sidecar/v1.1.0-d815ef72/uar-sidecar-win32-x64.json",
+        "recordUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.1.0-d815ef72/uar-sidecar-win32-x64.json",
+        "recordSha256": "9e70a593f64b4fd4633e750f9b80b63c9fb97afe07ffbd7bbda70e83b81eb1cb",
+        "archivePath": "/Users/gqadonis/Projects/prometheus/universal-agent-runtime/dist/boss-sidecar/v1.1.0-d815ef72/uar-sidecar-win32-x64.tar.gz",
+        "archiveUrl": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.1.0-d815ef72/uar-sidecar-win32-x64.tar.gz",
+        "archiveSha256": "9af6692706e791affa6eb61e3c80d74bfd9de6d1dbd11971ff32bc53c3430a45",
+        "archiveSize": 134605025,
+        "payloadManifest": {
+          "schema": 1,
+          "name": "uar-sidecar",
+          "version": "1.1.0",
+          "platform": "win32-x64",
+          "source": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
+          "features": [
+            "server-full"
+          ],
+          "files": [
+            {
+              "path": "crc_fast-c45996daf34d96b5.dll",
+              "size": 991744,
+              "sha256": "0eb72bd17f832f0f4c78d55e2dee070ee73a304f725567cbca62dddc06b866c3"
+            },
+            {
+              "path": "LICENSE",
+              "size": 1092,
+              "sha256": "13ab1401206d8603fcc8f2ce9481246765cee2ccf9872bb2582f611d1e4c43a6"
+            },
+            {
+              "path": "policies/default.cedar",
+              "size": 282,
+              "sha256": "9f4dbdfbc1366c087dcbba45916ee52dcedf20353fbec1dcaa883e1050fc1c32"
+            },
+            {
+              "path": "policies/skill-mutation.cedar",
+              "size": 2434,
+              "sha256": "f1938c065dfd980a60c0c2134d936f7009acfbb5ebf0055bc3cd8097dc2b9f6f"
+            },
+            {
+              "path": "policies/tool-approval.cedar",
+              "size": 1239,
+              "sha256": "8a51dd0ae55f48ff6a19c5f3ce6c6e0f94dbc50cbc689fbc80e9d8f769361385"
+            },
+            {
+              "path": "sevenz_rust2-0296aedd6d6c479a.dll",
+              "size": 9216,
+              "sha256": "544232e387ccf4c6f6c4c93c50d86ba048e3667c443ff91bad8841d06b08cb83"
+            },
+            {
+              "path": "uar-models/bg-small-en-v1.5.onnx",
+              "size": 34014426,
+              "sha256": "6c9c6101a956d62dfb5e7190c538226c0c5bb9cb27b651234b6df063ee7dbfe4"
+            },
+            {
+              "path": "uar-models/config.json",
+              "size": 674,
+              "sha256": "f680f7ca1febf6b3a0fc8b6718a0f9d52bacc76f163e51d60ace892565d84311"
+            },
+            {
+              "path": "uar-models/MODEL-NOTICE.txt",
+              "size": 339,
+              "sha256": "ffeaaf6e090c973a1024e6eaf483db9faa62d8c2f0099351dc4759014c8d6b76"
+            },
+            {
+              "path": "uar-models/special_tokens_map.json",
+              "size": 132,
+              "sha256": "3c3507f36dff57bce437223db3b3081d1e2b52ec3e56ee55438193ecb2c94dd6"
+            },
+            {
+              "path": "uar-models/tokenizer_config.json",
+              "size": 381,
+              "sha256": "ac4db152b467998d8ded6c68803f885b964945df9dda3d58fea1f5d4cb55b882"
+            },
+            {
+              "path": "uar-models/tokenizer.json",
+              "size": 742067,
+              "sha256": "ffb28886478b9b17a8c06f4fe6741b970d5dd3de13330ccc3b9f686df8a0545a"
+            },
+            {
+              "path": "uar-sidecar.exe",
+              "size": 344108032,
+              "sha256": "9d3821212902ad2fbd85b58f35b5331013366a9b97bf51a924668685088b06fe"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "actions": [
+    {
+      "kind": "atomic_tag_push",
+      "status": "success",
+      "source": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326"
+    }
+  ],
+  "qualification": "Both native workflows succeeded at the exact stable source; published archives downloaded and SHA-256/size matched their records and GitHub release assets; embedded manifest identities matched. No product tests or runtime acceptance executed by this worker.",
+  "monitorInterruption": {
+    "reason": "Transient api.github.com connection failure stopped bounded monitor",
+    "recovery": "Both final run outcomes and release assets recovered directly; no build reruns"
+  }
+}

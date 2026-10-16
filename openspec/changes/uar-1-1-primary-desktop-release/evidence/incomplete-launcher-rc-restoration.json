@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "owned-incomplete-launcher-side-effect-restoration",
+  "authorization": "Release lead explicitly assigned restoration of exactly three verified RC backups.",
+  "startedAt": "2026-10-15T20:55:47.516Z",
+  "profile": "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/boss-launcher-isolation-Ks21f7",
+  "forensicDirectory": "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/boss-launcher-isolation-Ks21f7/forensics/restore-432689e8-10ef-4826-bda3-5a17668aee52",
+  "records": [
+    {
+      "target": "/Users/gqadonis/.bash_profile",
+      "backupPath": "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/boss-launcher-isolation-Ks21f7/config/rc-backups/09df322fc71f16b47aeb4fc2c2bef046df990f9d4363e0171e2bc6718a2945a3.bak",
+      "backupSha256": "144490a3d4b2013d916dae480f9d812b7cb4f0dce42016397267763f0612a142",
+      "mode": 384,
+      "status": "restored-to-verified-pre-operation-backup",
+      "beforeSha256": "7d766301487693a1609b64476ad45f4dce39ebabb4a9d6f2cf3c461e2d1081c2",
+      "currentMatchedOwnedBlockOnlyTransform": true,
+      "rollbackPath": "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/boss-launcher-isolation-Ks21f7/forensics/restore-432689e8-10ef-4826-bda3-5a17668aee52/09df322fc71f16b47aeb4fc2c2bef046df990f9d4363e0171e2bc6718a2945a3.bak.before-restore",
+      "afterSha256": "144490a3d4b2013d916dae480f9d812b7cb4f0dce42016397267763f0612a142",
+      "restoredMode": 384
+    },
+    {
+      "target": "/Users/gqadonis/.profile",
+      "backupPath": "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/boss-launcher-isolation-Ks21f7/config/rc-backups/18f4cf5f4570d282679208050339e227fa3983d700e80eb926321f3b53333a3a.bak",
+      "backupSha256": "f3b4570c4bbb6100e7d372cd72a0e5c3ae9b846aaaf3393697de8a95d2257a79",
+      "mode": 384,
+      "status": "restored-to-verified-pre-operation-backup",
+      "beforeSha256": "73df949a53ac2ba37bf984180ac31a0bdacb8ff1f6b862028824a23d162042ac",
+      "currentMatchedOwnedBlockOnlyTransform": true,
+      "rollbackPath": "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/boss-launcher-isolation-Ks21f7/forensics/restore-432689e8-10ef-4826-bda3-5a17668aee52/18f4cf5f4570d282679208050339e227fa3983d700e80eb926321f3b53333a3a.bak.before-restore",
+      "afterSha256": "f3b4570c4bbb6100e7d372cd72a0e5c3ae9b846aaaf3393697de8a95d2257a79",
+      "restoredMode": 384
+    },
+    {
+      "target": "/Users/gqadonis/.bashrc",
+      "backupPath": "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/boss-launcher-isolation-Ks21f7/config/rc-backups/4cfe1d6b8bf0106823a8bf323799efd5214d675267b228daa8323e4b0ef97393.bak",
+      "backupSha256": "372dbc5e9552dc738bb160e9652969de3307d339ce624ff999c5b083610d2952",
+      "mode": 384,
+      "status": "restored-to-verified-pre-operation-backup",
+      "beforeSha256": "51090fca5f9e2dedafde133156ff561695e57c6009b56ec9a828555ee7730538",
+      "currentMatchedOwnedBlockOnlyTransform": true,
+      "rollbackPath": "/private/var/folders/ln/0wnpd96j26z2qhvx9m6hwt2r0000gn/T/boss-launcher-isolation-Ks21f7/forensics/restore-432689e8-10ef-4826-bda3-5a17668aee52/4cfe1d6b8bf0106823a8bf323799efd5214d675267b228daa8323e4b0ef97393.bak.before-restore",
+      "afterSha256": "372dbc5e9552dc738bb160e9652969de3307d339ce624ff999c5b083610d2952",
+      "restoredMode": 384
+    }
+  ],
+  "rawContentsPrintedOrCommitted": false,
+  "applicationOperation": false,
+  "testsOrBuilds": false,
+  "status": "restored-exactly-three-files",
+  "finishedAt": "2026-10-15T20:55:47.803Z"
+}

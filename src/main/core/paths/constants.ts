@@ -21,6 +21,7 @@ import { app } from 'electron'
 
 type PrivateProfilePaths = Readonly<{
   root: string
+  home: string
   config: string
   userData: string
   sessionData: string
@@ -40,15 +41,17 @@ function resolvePrivateProfilePaths(): PrivateProfilePaths | undefined {
 
     const paths = Object.freeze({
       root,
+      home: path.join(root, 'home'),
       config: path.join(root, 'config'),
       userData: path.join(root, 'user-data'),
       sessionData: path.join(root, 'session-data'),
       logs: path.join(root, 'logs'),
       temp: path.join(root, 'temp')
     })
-    for (const directory of [paths.config, paths.userData, paths.sessionData, paths.logs, paths.temp]) {
+    for (const directory of [paths.home, paths.config, paths.userData, paths.sessionData, paths.logs, paths.temp]) {
       fs.mkdirSync(directory, { recursive: true })
     }
+    if (fs.realpathSync(paths.home) !== paths.home) throw new Error()
     app.setPath('userData', paths.userData)
     app.setPath('sessionData', paths.sessionData)
     app.setPath('temp', paths.temp)

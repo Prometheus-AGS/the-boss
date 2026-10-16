@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "source": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
+  "sourceRelease": "v1.1.0",
+  "dispatchedAt": "2026-10-15T20:42:23Z",
+  "platforms": [
+    {
+      "platform": "darwin-arm64",
+      "tag": "boss-sidecar-darwin-arm64-v1.1.0-d815ef72",
+      "workflow": 38804105095
+    },
+    {
+      "platform": "win32-x64",
+      "tag": "boss-sidecar-win32-x64-v1.1.0-d815ef72",
+      "workflow": 38804105174
+    }
+  ],
+  "status": "native-builds-in-progress",
+  "scope": "Only native sidecar build/package/publication; no product test/container acceptance or other platforms",
+  "operatorAuthority": "Proceed with UAR v1.1.0 update, build and publish Mac ARM64 and Windows x64."
+}

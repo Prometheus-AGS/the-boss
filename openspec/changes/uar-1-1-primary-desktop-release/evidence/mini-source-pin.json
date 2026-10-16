@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-15T21:13:59.051Z",
+  "previous": "52a84e7d19f3ffdae0b58bd1732a853abd06e748",
+  "selected": "7a500cf4b502ac6b8032d7144af59b45a754719f",
+  "repository": "Prometheus-AGS/prometheus-skills-mini",
+  "reason": "Include completed private-profile launcher correction in the same2.2.39 installer; local source commit is not installed qualification",
+  "publication": "pending completed installed operation; do not dispatch Windows CI until this commit is pushed"
+}

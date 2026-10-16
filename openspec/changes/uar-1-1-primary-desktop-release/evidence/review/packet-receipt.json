@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-15T21:04:03.807Z",
+  "sha256": "a0f5b8b948c94b7b9484c6af98247adf9123f0490cb97446c39da56d3f410d07",
+  "bytes": 142653,
+  "producer_model": "unknown",
+  "cross_model_check": "unverified-producer-unknown",
+  "driverSha256": "d8cdc086bd76480b1864fbe278fc8ecfd7a8b5d606428062330655b36b5d9d72",
+  "truncation": {
+    "field_cap_bytes": 40000,
+    "fields": {
+      "boss": {
+        "original_bytes": 15425,
+        "included_bytes": 15425,
+        "truncated": false
+      },
+      "full": {
+        "original_bytes": 4700,
+        "included_bytes": 4700,
+        "truncated": false
+      },
+      "mini": {
+        "original_bytes": 5837,
+        "included_bytes": 5837,
+        "truncated": false
+      },
+      "proposal.md": {
+        "original_bytes": 2309,
+        "included_bytes": 2309,
+        "truncated": false
+      },
+      "design.md": {
+        "original_bytes": 3668,
+        "included_bytes": 3668,
+        "truncated": false
+      },
+      "tasks.md": {
+        "original_bytes": 1981,
+        "included_bytes": 1981,
+        "truncated": false
+      },
+      "evidence/production-complete.md": {
+        "original_bytes": 2504,
+        "included_bytes": 2504,
+        "truncated": false
+      },
+      "evidence/desktop-applicability.md": {
+        "original_bytes": 24829,
+        "included_bytes": 24829,
+        "truncated": false
+      },
+      "evidence/uar110-prompt-operation.md": {
+        "original_bytes": 7488,
+        "included_bytes": 7488,
+        "truncated": false
+      },
+      "boss/scripts/release-profile.cjs": {
+        "original_bytes": 2327,
+        "included_bytes": 2327,
+        "truncated": false
+      },
+      "boss/scripts/public-release-profile.cjs": {
+        "original_bytes": 832,
+        "included_bytes": 832,
+        "truncated": false
+      },
+      "boss/scripts/uar-payload-integrity.cjs": {
+        "original_bytes": 9007,
+        "included_bytes": 9007,
+        "truncated": false
+      },
+      "boss/src/main/core/paths/constants.ts": {
+        "original_bytes": 6454,
+        "included_bytes": 6454,
+        "truncated": false
+      },
+      "full/boss-launch.mjs": {
+        "original_bytes": 10298,
+        "included_bytes": 10298,
+        "truncated": false
+      },
+      "full/process.mjs": {
+        "original_bytes": 5890,
+        "included_bytes": 5890,
+        "truncated": false
+      },
+      "boss/uar-artifact-current-records": {
+        "original_bytes": 2313,
+        "included_bytes": 2313,
+        "truncated": false
+      },
+      "boss-new-operation-driver": {
+        "original_bytes": 27610,
+        "included_bytes": 27610,
+        "truncated": false
+      }
+    },
+    "any_truncated": false
+  }
+}

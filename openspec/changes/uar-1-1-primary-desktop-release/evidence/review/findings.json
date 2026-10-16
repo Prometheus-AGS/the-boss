@@ -1,0 +1,86 @@
+{
+  "mode": "diff",
+  "target": "UAR 1.1.0 / Boss 2.2.39 completed production-source boundary",
+  "verdict": "PASS",
+  "judge_model": "gpt-6.1-sol",
+  "requested_judge_model": "gpt-6.1-sol",
+  "isolation_mode": "rest-gateway:http://127.0.0.1:8181/v1",
+  "producer_model": "unknown",
+  "cross_model_check": "unverified-producer-unknown",
+  "reviewedAt": "2026-10-15T21:04:26.588Z",
+  "packetSha256": "a0f5b8b948c94b7b9484c6af98247adf9123f0490cb97446c39da56d3f410d07",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "src/main/core/paths/constants.ts",
+      "line": 51,
+      "claim": "An existing private profile whose home directory is a symlink can still redirect shell registration into the user's real home.",
+      "evidence": "Source-flow reproducer, not an executed runtime reproduction: create an owned profile root with `<profile>/home` symlinked to the real home, then launch with THE_BOSS_PROFILE_ROOT selecting that profile. resolvePrivateProfilePaths() canonicalizes only root and calls mkdirSync(directory, { recursive: true }) on paths.home, which accepts a symlink to an existing directory. pathRegistry.ts then selects PRIVATE_PROFILE_PATHS.home for external.shell.home. The documented commandPath.ts flow writes shell startup files through that path, escaping the profile before the operation driver's later realpath check can detect it. This violates the constraint that the private fixture and real shell registration trust boundary require isolation.",
+      "suggested_fix": "Before returning the private paths or permitting initialization, reject a symlink at the private home directory and verify that its canonical path is contained within the canonical profile root. Fail closed before any shell registration writes.",
+      "id": "UAR110-SRC-1",
+      "reproduction_status": "source-flow-only; no tests/builds/app launches authorized for reviewer",
+      "status": "resolved",
+      "resolution_receipt": "correction-findings.json"
+    },
+    {
+      "severity": "CRITICAL",
+      "file": "skills/process/delivery-cadence/scripts/boss-launch.mjs",
+      "line": 84,
+      "claim": "Reusing a profile can cause the launcher to run its scenario against an already-running application rather than the process it spawned.",
+      "evidence": "Source-flow reproducer, not an executed runtime reproduction: keep one application running with profile P, then invoke launchBoss with THE_BOSS_PROFILE_ROOT=P. The new profile-selection branch reuses P/user-data, and the DevTools polling loop immediately accepts its existing DevToolsActivePort and the first matching main page. No check binds that endpoint to child.pid. ensureAlive() only checks whether the child has already emitted close/error, so it does not prevent attachment and scenario execution before a duplicate-instance process exits. The receipt can consequently identify the newly spawned PID/app while scenario mutations affect the existing instance. The same code is present in skills/delivery-cadence/scripts/boss-launch.mjs. This breaks the required owned-process/private-fixture isolation.",
+      "suggested_fix": "Apply the correction to both launcher copies: reject a reused profile with an existing DevToolsActivePort before spawning, without deleting or modifying that file. Require explicit resolution of a stale file after confirming the prior owned process exited; the operation wrapper already performs that cleanup for its normal reopen sequence.",
+      "id": "UAR110-SRC-2",
+      "reproduction_status": "source-flow-only; no tests/builds/app launches authorized for reviewer",
+      "status": "resolved",
+      "resolution_receipt": "correction-findings.json"
+    }
+  ],
+  "checked_classes": [],
+  "runtime_verification": "not-performed; outside reviewer ownership",
+  "artifact_materialization": "pending",
+  "sycophancy_screen": {
+    "available": true,
+    "tool": "mcp__sycophancy_correction__detect_sycophancy",
+    "score": 0.0803571417927742,
+    "reject_cap": 2,
+    "cap_overridden": false,
+    "cap_default": 2,
+    "correction_mandatory": false,
+    "classifications": [
+      {
+        "pattern_id": "S-03",
+        "severity": "high",
+        "rationale": "Substantive completion with no trade-offs, risks, alternatives, or surfaced gaps. Complete satisfaction of a request with zero friction is a structural sycophancy signal."
+      }
+    ],
+    "gate_status": "high-pattern-rejection-recorded",
+    "limitation": "Detector flagged S-03 despite two CRITICAL findings with source-flow reproducers, explicit unverified runtime limits and proposed corrections. Score below 0.4 and correction_mandatory=false. No anti-theater redispatch performed because review owner requested one REST dispatch; report remains BLOCK rather than gaining certification."
+  },
+  "original_verdict": "BLOCK",
+  "source_review_status": "Both original source-flow blockers resolved by one bounded isolated correction confirmation; no remaining source findings.",
+  "correction_confirmation": {
+    "receipt": "correction-findings.json",
+    "packet": "correction-packet.json",
+    "verdict": "RESOLVED",
+    "remaining_critical": 0,
+    "remaining_warning": 0,
+    "remaining_suggestion": 0,
+    "runtime_verified": false,
+    "sycophancy_screen": {
+      "receipt": "correction-screen.json",
+      "score": 0.0803571417927742,
+      "correction_mandatory": false,
+      "high_pattern": "S-03",
+      "gate_status": "high-pattern-rejection-recorded",
+      "limitation": "Same structural S-03 flag as initial blocked report; maximum authorized correction confirmation reached. Source issues are resolved, but automated anti-theater gate acceptance is not claimed."
+    }
+  },
+  "leadAntiTheaterDisposition": {
+    "status": "accepted-with-warning-at-bounded-rejection-cap",
+    "screens": 2,
+    "rejectCap": 2,
+    "authority": "adversarial-review default soft cap; no additional critique loop",
+    "reason": "Both bounded screens returned low score 0.080357 and correction_mandatory=false but generic high S-03. Initial review contained two explicit blocking risks and the confirmation retained pending runtime/publication, contradicting the zero-friction rationale. The structural flag remains preserved, not relabeled passed.",
+    "runtimeQualification": "not-performed"
+  }
+}

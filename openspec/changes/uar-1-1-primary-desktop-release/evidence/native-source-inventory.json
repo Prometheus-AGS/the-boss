@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-15T20:41:41.669Z",
+  "release": "UAR v1.1.0",
+  "source": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
+  "sourceTag": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
+  "features": [
+    "server-full"
+  ],
+  "platforms": [
+    "darwin-arm64",
+    "win32-x64"
+  ],
+  "targets": [
+    "aarch64-apple-darwin",
+    "x86_64-pc-windows-msvc"
+  ],
+  "sourceFiles": [
+    {
+      "path": "Cargo.toml",
+      "sha256": "5f5771ec6b71f359a59fb4f6088525730267ace43b6f28fec188b87e9919a939"
+    },
+    {
+      "path": "Cargo.lock",
+      "sha256": "4414ed4ee0d4ece15dac85a7bd3f7216c4d9a42bc4eef269cefca83ff0888800"
+    },
+    {
+      "path": "rust-toolchain.toml",
+      "sha256": "a5e62077b43810d2e552ece019765d2192222928f4b97b8d5c72c15abf8292f6"
+    },
+    {
+      "path": "scripts/package-boss-sidecar.mjs",
+      "sha256": "b8e792738da20a50ac66d104aab60b515ec309402fd9c1e0cc75d23f5efff866"
+    },
+    {
+      "path": ".github/workflows/deploy.yml",
+      "sha256": "480788873737c7b5064e48c5c7b322f78173ea9a90c2c70546877d97ec54a5a2"
+    }
+  ],
+  "submodules": "160000 commit f4bef4556a83ac22bf204bf69a01ddf0f9e007f2\tcrates/prometheus-skill-system\n160000 commit e446f5ef91003bbec5fce6b2f45fb94559dff335\tvendor/git/liter-llm\n160000 commit 01ae76b99db4b818458efe2dc5d76e70fa5eadb4\tvendor/git/rust-mcp-filesystem",
+  "compatibility": {
+    "nativeRuns": "supported; no request shape change observed",
+    "modelAndMemory": "unchanged interfaces; no migration",
+    "mcp": "saved policy hydration changed; optional restricted grants apply only when configured",
+    "separateAgui": "not adopted; existing native adapter retained"
+  },
+  "mini": {
+    "revision": "52a84e7d19f3ffdae0b58bd1732a853abd06e748",
+    "remoteMainMatches": true
+  },
+  "qualification": "source assessment only; native artifacts not yet built"
+}

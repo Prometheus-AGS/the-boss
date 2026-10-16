@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "status": "read-only-baseline-anchors-not-new-qualification",
+  "countingRule": "42 qualified + 1 historical skipped duplicate = 43 terminal; code 61/61, changes 20/20; no new credits",
+  "sources": [
+    {
+      "path": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence/.kbd-orchestrator/phases/agent-fabric-convergence/task-completion-markers.json",
+      "sha256": "44c263048f599927a6960f52834369918e70279c5182df48256c92dd58202d8c",
+      "bytes": 33019
+    },
+    {
+      "path": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence/.kbd-orchestrator/phases/agent-fabric-convergence/progress.json",
+      "sha256": "3466114d42b3bed93482d4ba85f0236ad54a832c067efc3395aad42b6e2f1494",
+      "bytes": 14780
+    },
+    {
+      "path": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence/receipts/phase-manual-closeout-20261011.json",
+      "sha256": "6b9909bec32323e1d9d8d18c1f7a18b005eb9482b98c1c5a7d906514c1909d32",
+      "bytes": 1547
+    },
+    {
+      "path": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence/receipts/kbd-retirement-after-20261014.json",
+      "sha256": "91495ffb847f0ed37260b8cdc8892b03fe1d63daee5650ef38605089607f3687",
+      "bytes": 1933
+    },
+    {
+      "path": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence/receipts/kbd-reconciliation-events-20261014.json",
+      "sha256": "16d0902c6e263755b1ca32d98b931a781863757aa49c2ce2deb2d4d2b06e6dd5",
+      "bytes": 9053
+    },
+    {
+      "path": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence/receipts/cadence-retirement-relocation-20261011.md",
+      "sha256": "890c414bcfe9f3ccfa3d20cf98c623b67e71bd29c607fd89c9efe396d0b0d64c",
+      "bytes": 4330
+    },
+    {
+      "path": "/Users/gqadonis/Projects/prometheus/phase-closeout-preservation-20261011/archive/cadence-retirement-2026-10-11T14-48-35-355Z/librefang/docs/plans/agent-fabric-convergence/.prometheus/cadence/event-archives.json",
+      "sha256": "3c35a8c7a7c0ef2cd9a748a59383c51f1e3f53d1e7bfda589f91cff42b567b88",
+      "bytes": 8920,
+      "privateArchive": true
+    },
+    {
+      "path": "/Users/gqadonis/Projects/prometheus/phase-closeout-preservation-20261011/archive/cadence-retirement-2026-10-11T14-48-35-355Z/librefang/docs/plans/agent-fabric-convergence/.prometheus/cadence/state.json",
+      "sha256": "70ec78c7c47dd81931e74f48295ae45faf7aa80f372e442a44384a532d623e70",
+      "bytes": 33105653,
+      "privateArchive": true
+    }
+  ],
+  "cadenceArchiveIndexNames": [
+    "event-archives.json",
+    "state.json"
+  ]
+}

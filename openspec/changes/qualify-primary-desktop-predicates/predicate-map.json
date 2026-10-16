@@ -1,0 +1,1360 @@
+{
+  "schemaVersion": 1,
+  "status": "proposed-not-applied",
+  "date": "2026-10-14",
+  "bossSourceHead": "35bb424e997748c56393d8d8a074e84db9c4da3d",
+  "release": "2.2.38",
+  "totalHistoricalUncheckedRows": 66,
+  "counts": {
+    "E": 22,
+    "S": 24,
+    "O": 19,
+    "D": 1
+  },
+  "records": [
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "1.1",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 6,
+      "original": "- [ ] 1.1 `git submodule add https://github.com/Prometheus-AGS/prometheus-skills-mini` under a path that fits the closed-set rule — confirm with the repo layout before choosing; do NOT create a new top-level directory.",
+      "disposition": "E",
+      "subject": "Mini submodule and closed-set location",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Record existing gitlink and package consumer; no clone.",
+      "evidence": [
+        "P"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "1.2",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 7,
+      "original": "- [ ] 1.2 Pin to a released commit. Record the SHA in the proposal.",
+      "disposition": "E",
+      "subject": "Released source pin",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Record mini 52a84e7d, version 1.12.1 from frozen manifests.",
+      "evidence": [
+        "P",
+        "R"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "1.3",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 8,
+      "original": "- [ ] 1.3 Vendor the `openspec` fork as a second submodule (goal B6) — `https://github.com/Prometheus-AGS/openspec`, pinned to the commit `the-boss-release-infrastructure` §3 releases. Confirm the path obeys the closed-set rule.",
+      "disposition": "S",
+      "subject": "OpenSpec fork submodule",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Current app consumes locked upstream Fission-AI npm 1.14.0, not the Prometheus fork. Recommend accepting this distribution explicitly; fork requirement otherwise remains pending.",
+      "evidence": [
+        "O"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "1.4",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 9,
+      "original": "- [ ] 1.4 Record which the-boss call sites consume it. **If none do today, say so plainly in the proposal rather than vendoring source nothing runs** — goal B6 says it must be used, so an unused submodule does not satisfy it.",
+      "disposition": "S",
+      "subject": "OpenSpec consumer paths",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Document the real shim → packaged JS consumer. Do not claim fork consumption.",
+      "evidence": [
+        "O"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "2.1",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 13,
+      "original": "- [ ] 2.1 Write `scripts/__tests__/sync-mini-skills.test.ts` FIRST: copies every skill dir; excludes `carried-payload.test.mjs` and `AGENTS.md`; `--check` exits non-zero when a tracked copy is missing or stale and zero when current.",
+      "disposition": "S",
+      "subject": "Skill synchronization contract",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Retire unit-first prescription only. Keep copy/exclusion/currentness outcomes; inspect retained source and receipts before any missing real-path operation.",
+      "evidence": [
+        "S"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "2.2",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 14,
+      "original": "- [ ] 2.2 Write `scripts/sync-mini-skills.ts` modelled on `scripts/generate-cherry-assistant-knowledge/index.ts:53-69`. Add `skills:sync:mini` and `skills:sync:mini:check` to `package.json`; wire the check into `ci:basic-check`.",
+      "disposition": "E",
+      "subject": "Synchronization and CI wiring",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Equivalent implementation is sync-prometheus-skills.ts and skills:sync:prometheus scripts; reconcile names.",
+      "evidence": [
+        "S"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "2.3",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 15,
+      "original": "- [ ] 2.3 Run it; commit the 22 resulting `resources/skills/` directories.",
+      "disposition": "E",
+      "subject": "Materialized skill inventory",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Use existing 101 mini + 7 Compass inventory; historical 22 remains historical. Do not resync unchanged payload.",
+      "evidence": [
+        "P",
+        "S"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "3.0",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 19,
+      "original": "- [ ] 3.0 Test first: after startup, `{userData}`-resolved pack root contains `scripts/doctor.mjs`, `lib/` and `rules/`, and `node scripts/doctor.mjs` from there exits 0 or 1 (never 2, which means it could not run). **`prometheus-003` and `prometheus-004` spawn these; shipping `skills/` alone would leave both spawning files that do not exist.**",
+      "disposition": "S",
+      "subject": "Complete writable pack and doctor entrypoint",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Retire test-first instruction; installed files exist. Only absent writable-root doctor execution evidence joins Q1.",
+      "evidence": [
+        "P",
+        "D"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "3.1b",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 20,
+      "original": "- [ ] 3.1b Copy the pack into app resources and install it into `{userData}` on startup, alongside the existing per-skill install. Paths via `application.getPath(...)`; no new top-level directory.",
+      "disposition": "E",
+      "subject": "Whole-pack startup installation",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Record existing runtime-copy source and actual payload; startup behavior beyond physical inclusion is Q1.",
+      "evidence": [
+        "P"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "4.1",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 24,
+      "original": "- [ ] 4.1 Test first: a builtin synced under namespace `prometheus` is rejected when a builtin of the same folder name exists under a different namespace (the guard at `SkillService.ts:1127-1137` already implements this — assert the contract, do not re-test the guard).",
+      "disposition": "S",
+      "subject": "Namespace collision protection",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Retire test-first prescription, preserve refusal of a conflicting namespace. If no applicable receipt, operate it once in Q1.",
+      "evidence": [
+        "S"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "4.2",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 25,
+      "original": "- [ ] 4.2 Pass `'prometheus'` as the fourth argument from `builtinSkills.ts:53` for directories originating in the submodule. Cherry's own five keep the default namespace.",
+      "disposition": "E",
+      "subject": "Prometheus namespace",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Source already supplies namespace; Cherry keeps its default.",
+      "evidence": [
+        "S"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "5.1",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 29,
+      "original": "- [ ] 5.1 `pnpm exec vitest run scripts/__tests__/sync-mini-skills.test.ts` and the SkillService suite.",
+      "disposition": "S",
+      "subject": "Historical unit-suite command",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Replace procedure with source/evidence inspection and missing production operations; no unit suite.",
+      "evidence": [
+        "S"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "5.2",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 30,
+      "original": "- [ ] 5.2 `pnpm lint` (covers format, typecheck, i18n:check).",
+      "disposition": "S",
+      "subject": "Historical lint command",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "No source edits planned; do not rerun broad write-capable lint to refresh a checkbox. Preserve historical outcomes.",
+      "evidence": [
+        "R"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "5.3",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 31,
+      "original": "- [ ] 5.3 Launch the app; confirm the 22 appear in `{userData}/Data/Skills/` and are mirrored into `CLAUDE_CONFIG_DIR/skills`. Paste the directory listing.",
+      "disposition": "O",
+      "subject": "Installed skills and Claude mirror",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Q1: fresh/upgrade profile registration, mirror, unchanged-launch behavior and user-owned preservation only where unproven.",
+      "evidence": [
+        "S",
+        "P"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-001-skills-bundling",
+      "task": "5.4",
+      "source": "openspec/changes/prometheus-001-skills-bundling/tasks.md",
+      "line": 32,
+      "original": "- [ ] 5.4 **Windows:** repeat 4.3 on a real Windows machine. Everything above is macOS-observed; the Windows claim is unverified until this runs.",
+      "disposition": "O",
+      "subject": "Native Windows skill installation",
+      "platforms": [
+        "windows-x64"
+      ],
+      "action": "Q1 on Windows x64. Fix dangling original reference 4.3 through an approved amendment to 5.3; no Windows ARM64.",
+      "evidence": [
+        "S",
+        "R"
+      ],
+      "originalFileSha256": "8a08b4fd47e387b199eaaae388b8f0726248e8323f01bac3d0c3b8565b1febb1",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Native Windows x64 operation matters; Mac repeat not needed. Other architectures in original row are deferred."
+    },
+    {
+      "change": "prometheus-002-binary-shipping",
+      "task": "1.1",
+      "source": "openspec/changes/prometheus-002-binary-shipping/tasks.md",
+      "line": 5,
+      "original": "- [ ] 1.1 Assert `gh release list` is non-empty for `GQAdonis/compass` and `GQAdonis/rust-mcp-filesystem`, and that each release carries all five target archives plus digests. Paste the asset lists.",
+      "disposition": "S",
+      "subject": "Release provenance for all five targets",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Selected two-platform payload evidence already exists. Amend archive-layout requirement; keep other platform clauses deferred. No asset-list polling.",
+      "evidence": [
+        "B",
+        "R"
+      ],
+      "originalFileSha256": "e6abf5d44b151addeb3b538da39d4c7f1db61cd51410e61fe5a738dc44c5a7a8",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-002-binary-shipping",
+      "task": "2.1",
+      "source": "openspec/changes/prometheus-002-binary-shipping/tasks.md",
+      "line": 9,
+      "original": "- [ ] 2.1 Add the `compass` `TOOLS[]` entry: `archive: 'tar.gz'`, `strip: 'compass-<target>'`, real `sha256` per package. Model it on the existing `rg` entry.",
+      "disposition": "S",
+      "subject": "Compass importer",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Current integration manifest/importer uses pinned raw binaries, not TOOLS tar stripping. Reconcile equivalent hash/consumer boundary.",
+      "evidence": [
+        "B"
+      ],
+      "originalFileSha256": "e6abf5d44b151addeb3b538da39d4c7f1db61cd51410e61fe5a738dc44c5a7a8",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-002-binary-shipping",
+      "task": "2.2",
+      "source": "openspec/changes/prometheus-002-binary-shipping/tasks.md",
+      "line": 10,
+      "original": "- [ ] 2.2 Add the `rust-mcp-filesystem` entry the same way, from its cargo-dist assets.",
+      "disposition": "S",
+      "subject": "Filesystem importer",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Same manifest reconciliation, preserving genuine source and hashes.",
+      "evidence": [
+        "B"
+      ],
+      "originalFileSha256": "e6abf5d44b151addeb3b538da39d4c7f1db61cd51410e61fe5a738dc44c5a7a8",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-002-binary-shipping",
+      "task": "2.3",
+      "source": "openspec/changes/prometheus-002-binary-shipping/tasks.md",
+      "line": 11,
+      "original": "- [ ] 2.3 `node scripts/download-binaries.js darwin arm64` then `win32 x64` then `win32 arm64`; confirm each lands in `resources/binaries/` and `verifyBundledBinaries` passes. Paste the output.",
+      "disposition": "S",
+      "subject": "Download and verify three architectures",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Reuse existing Mac ARM64/Windows x64 artifacts; do not redownload. Windows ARM64 remains deferred.",
+      "evidence": [
+        "B",
+        "R"
+      ],
+      "originalFileSha256": "e6abf5d44b151addeb3b538da39d4c7f1db61cd51410e61fe5a738dc44c5a7a8",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-002-binary-shipping",
+      "task": "3.1",
+      "source": "openspec/changes/prometheus-002-binary-shipping/tasks.md",
+      "line": 15,
+      "original": "- [ ] 3.1 Test first: compass resolves to the bundled path when absent from PATH, and reports `unresolved` with a reason when absent entirely.",
+      "disposition": "S",
+      "subject": "Bundled resolution and missing binary",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Retire test-first instruction. Bundled path/default are source evidence; missing-binary usable failure is Q4 if unproven.",
+      "evidence": [
+        "B",
+        "M"
+      ],
+      "originalFileSha256": "e6abf5d44b151addeb3b538da39d4c7f1db61cd51410e61fe5a738dc44c5a7a8",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-002-binary-shipping",
+      "task": "3.2",
+      "source": "openspec/changes/prometheus-002-binary-shipping/tasks.md",
+      "line": 16,
+      "original": "- [ ] 3.2 Register compass as stdio; register rust-mcp-filesystem with write off.",
+      "disposition": "E",
+      "subject": "Stdio and read-only defaults",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Record actual workspace registration and filesystem allowWrite:false; live connection is Q3.",
+      "evidence": [
+        "M"
+      ],
+      "originalFileSha256": "e6abf5d44b151addeb3b538da39d4c7f1db61cd51410e61fe5a738dc44c5a7a8",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-002-binary-shipping",
+      "task": "4.1",
+      "source": "openspec/changes/prometheus-002-binary-shipping/tasks.md",
+      "line": 20,
+      "original": "- [ ] 4.1 Targeted tests (`pnpm test:main <file>`), then `pnpm lint`.",
+      "disposition": "S",
+      "subject": "Unit and lint procedure",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "No repeated suite or lint for frozen source.",
+      "evidence": [
+        "R"
+      ],
+      "originalFileSha256": "e6abf5d44b151addeb3b538da39d4c7f1db61cd51410e61fe5a738dc44c5a7a8",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-002-binary-shipping",
+      "task": "4.2",
+      "source": "openspec/changes/prometheus-002-binary-shipping/tasks.md",
+      "line": 21,
+      "original": "- [ ] 4.2 `pnpm build:unpack` and confirm both binaries are in the packaged resources.",
+      "disposition": "E",
+      "subject": "Packaged native binaries",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Reuse physical installed/published-package inventory; no build:unpack.",
+      "evidence": [
+        "B",
+        "R"
+      ],
+      "originalFileSha256": "e6abf5d44b151addeb3b538da39d4c7f1db61cd51410e61fe5a738dc44c5a7a8",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-002-binary-shipping",
+      "task": "4.3",
+      "source": "openspec/changes/prometheus-002-binary-shipping/tasks.md",
+      "line": 22,
+      "original": "- [ ] 4.3 **Windows, both arches:** confirm `.exe` resolution and that each server starts. Unverified until run on real hardware.",
+      "disposition": "O",
+      "subject": "Native Windows executable startup",
+      "platforms": [
+        "windows-x64"
+      ],
+      "action": "Q3 Windows x64 .exe/startup. Windows ARM64 half remains deferred.",
+      "evidence": [
+        "B",
+        "M",
+        "R"
+      ],
+      "originalFileSha256": "e6abf5d44b151addeb3b538da39d4c7f1db61cd51410e61fe5a738dc44c5a7a8",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Native Windows x64 operation matters; Mac repeat not needed. Other architectures in original row are deferred."
+    },
+    {
+      "change": "prometheus-003-settings-and-doctor",
+      "task": "6.2",
+      "source": "openspec/changes/prometheus-003-settings-and-doctor/tasks.md",
+      "line": 33,
+      "original": "- [ ] 6.2 Exercise each §1.2 state in the running app; screenshot each.",
+      "disposition": "O",
+      "subject": "Settings and doctor states",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Q2 only unproved degraded/running/cancel/failure/repair states. Already-passed full-pack refusal is excluded. Doctor currently buffers stdout: do not assert progressive partial-result streaming.",
+      "evidence": [
+        "D",
+        "G"
+      ],
+      "originalFileSha256": "861096300460ef7e50a497ef8a1f117bb7dd0f45e444b52c5a28fca6bcd4efb3",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-003-settings-and-doctor",
+      "task": "6.4",
+      "source": "openspec/changes/prometheus-003-settings-and-doctor/tasks.md",
+      "line": 35,
+      "original": "- [ ] 6.4 **Windows:** repeat 6.2. Unverified until run.",
+      "disposition": "O",
+      "subject": "Native Windows settings states",
+      "platforms": [
+        "windows-x64"
+      ],
+      "action": "Q2 Windows x64, combined with other native operations; no second session solely for this row.",
+      "evidence": [
+        "D",
+        "R"
+      ],
+      "originalFileSha256": "861096300460ef7e50a497ef8a1f117bb7dd0f45e444b52c5a28fca6bcd4efb3",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Native Windows x64 operation matters; Mac repeat not needed. Other architectures in original row are deferred."
+    },
+    {
+      "change": "prometheus-004-docker-services",
+      "task": "1.1",
+      "source": "openspec/changes/prometheus-004-docker-services/tasks.md",
+      "line": 5,
+      "original": "- [ ] 1.1 Confirm the mini's `lib/platform/docker.mjs` and `scripts/services.mjs` exist in the app-data copy. Until then implement only the \"detection unavailable\" path and stop.",
+      "disposition": "E",
+      "subject": "Shipped service scripts",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Files physically present; obsolete stop-until-mini-lands instruction needs no operation.",
+      "evidence": [
+        "P"
+      ],
+      "originalFileSha256": "cb0e3d3443f7f79f209150741c4e0076c4e164c87be8fe0bded455d2a7db9f5a",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-004-docker-services",
+      "task": "2.1",
+      "source": "openspec/changes/prometheus-004-docker-services/tasks.md",
+      "line": 9,
+      "original": "- [ ] 2.1 Test first: each of `absent` / `daemon-down` / `ready` renders its own next step; a missing `services.mjs` reports unavailable rather than guessing; a spawn that fails does not raise a dialog.",
+      "disposition": "S",
+      "subject": "Degraded dependency failure contract",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Retire test-first instruction; missing-script/spawn-failure/absent/down feedback still matters. Only unproved approved clauses enter Q2.",
+      "evidence": [
+        "V",
+        "G"
+      ],
+      "originalFileSha256": "cb0e3d3443f7f79f209150741c4e0076c4e164c87be8fe0bded455d2a7db9f5a",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-004-docker-services",
+      "task": "2.2",
+      "source": "openspec/changes/prometheus-004-docker-services/tasks.md",
+      "line": 10,
+      "original": "- [ ] 2.2 Spawn `services.mjs status` through the same path `prometheus-003` uses for `doctor.mjs`.",
+      "disposition": "E",
+      "subject": "Production services status entrypoint",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Current service runner uses the installed Node entrypoint and configured endpoints.",
+      "evidence": [
+        "V"
+      ],
+      "originalFileSha256": "cb0e3d3443f7f79f209150741c4e0076c4e164c87be8fe0bded455d2a7db9f5a",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-004-docker-services",
+      "task": "3.1",
+      "source": "openspec/changes/prometheus-004-docker-services/tasks.md",
+      "line": 14,
+      "original": "- [ ] 3.1 Add the consent preference to `classification.json`; regenerate.",
+      "disposition": "S",
+      "subject": "Stored Docker consent",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Stored preference is absent. Recommend explicit owned Start/Restart as consent; requires approval, not a passed implementation claim.",
+      "evidence": [
+        "V"
+      ],
+      "originalFileSha256": "cb0e3d3443f7f79f209150741c4e0076c4e164c87be8fe0bded455d2a7db9f5a",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-004-docker-services",
+      "task": "3.2",
+      "source": "openspec/changes/prometheus-004-docker-services/tasks.md",
+      "line": 15,
+      "original": "- [ ] 3.2 Test first: `up` is unreachable without consent. Then wire `up`/`down` to explicit controls.",
+      "disposition": "S",
+      "subject": "Consent-gated lifecycle controls",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Current controls are explicit and no startup managed-service action was observed. Preserve no unapproved lifecycle/no external takeover; amend stored-consent requirement explicitly.",
+      "evidence": [
+        "V"
+      ],
+      "originalFileSha256": "cb0e3d3443f7f79f209150741c4e0076c4e164c87be8fe0bded455d2a7db9f5a",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-004-docker-services",
+      "task": "4.1",
+      "source": "openspec/changes/prometheus-004-docker-services/tasks.md",
+      "line": 19,
+      "original": "- [ ] 4.1 Targeted tests, then `pnpm lint`.",
+      "disposition": "S",
+      "subject": "Unit and lint procedure",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "No repeated unit/lint gate on unchanged source.",
+      "evidence": [
+        "R"
+      ],
+      "originalFileSha256": "cb0e3d3443f7f79f209150741c4e0076c4e164c87be8fe0bded455d2a7db9f5a",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-004-docker-services",
+      "task": "4.2",
+      "source": "openspec/changes/prometheus-004-docker-services/tasks.md",
+      "line": 20,
+      "original": "- [ ] 4.2 Exercise all three states on a machine with Docker, and confirm the app starts cleanly with Docker stopped.",
+      "disposition": "O",
+      "subject": "Absent/down/startup service feedback",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Q2 only missing absent/down/all-services-unavailable startup outcomes. Retain existing managed lifecycle/external-preservation evidence; no repeat of passing Gate B.",
+      "evidence": [
+        "V",
+        "G"
+      ],
+      "originalFileSha256": "cb0e3d3443f7f79f209150741c4e0076c4e164c87be8fe0bded455d2a7db9f5a",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-004-docker-services",
+      "task": "4.3",
+      "source": "openspec/changes/prometheus-004-docker-services/tasks.md",
+      "line": 21,
+      "original": "- [ ] 4.3 **Windows:** confirm no `wsl.exe` is ever invoked and the loopback endpoints are reachable once up. Unverified until run.",
+      "disposition": "O",
+      "subject": "Native Windows service connections",
+      "platforms": [
+        "windows-x64"
+      ],
+      "action": "Q2 Windows x64 selected loopback endpoints; source audit no WSL. Fixed ports are superseded by configured endpoints.",
+      "evidence": [
+        "V",
+        "R"
+      ],
+      "originalFileSha256": "cb0e3d3443f7f79f209150741c4e0076c4e164c87be8fe0bded455d2a7db9f5a",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Native Windows x64 operation matters; Mac repeat not needed. Other architectures in original row are deferred."
+    },
+    {
+      "change": "prometheus-005-mcp-server-presets",
+      "task": "1.1",
+      "source": "openspec/changes/prometheus-005-mcp-server-presets/tasks.md",
+      "line": 5,
+      "original": "- [ ] 1.1 Confirm `prometheus-002` has landed and `resources/binaries/` holds compass and rust-mcp-filesystem for this platform. sycophancy-correction waits on its release (`the-boss-release-infrastructure` §4) — add it last, or defer it to a follow-up rather than shipping a preset whose binary cannot exist.",
+      "disposition": "E",
+      "subject": "Available native payloads",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Compass/filesystem present. Optional unbundled and unadvertised sycophancy server explicitly deferred, not passed.",
+      "evidence": [
+        "B"
+      ],
+      "originalFileSha256": "a9d28aef33e95a18665baf72a5f6d4120af7c4d772686ab180e8a1116da4e2f7",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-005-mcp-server-presets",
+      "task": "2.1",
+      "source": "openspec/changes/prometheus-005-mcp-server-presets/tasks.md",
+      "line": 9,
+      "original": "- [ ] 2.1 Add the names to `BuiltinMcpServerNames` (`src/shared/utils/mcp.ts`) under `@prometheus/*`. It is a closed union; the type flows from it.",
+      "disposition": "S",
+      "subject": "Fixed builtin name union",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Prometheus names are not in original union: recommend current settings-visible workspace-managed records as the contract.",
+      "evidence": [
+        "M"
+      ],
+      "originalFileSha256": "a9d28aef33e95a18665baf72a5f6d4120af7c4d772686ab180e8a1116da4e2f7",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-005-mcp-server-presets",
+      "task": "2.2",
+      "source": "openspec/changes/prometheus-005-mcp-server-presets/tasks.md",
+      "line": 10,
+      "original": "- [ ] 2.2 Add the presets to `PRESET_MCP_SERVERS`. Model the filesystem one on the existing `@cherry/filesystem` entry, including its manual-approval tool list.",
+      "disposition": "S",
+      "subject": "Static preset registry",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Original PRESET entries absent; equivalent managed-workspace architecture requires explicit amendment.",
+      "evidence": [
+        "M"
+      ],
+      "originalFileSha256": "a9d28aef33e95a18665baf72a5f6d4120af7c4d772686ab180e8a1116da4e2f7",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-005-mcp-server-presets",
+      "task": "2.3",
+      "source": "openspec/changes/prometheus-005-mcp-server-presets/tasks.md",
+      "line": 11,
+      "original": "- [ ] 2.3 Test first: every preset name is in the union; every stdio preset names a command and no `baseUrl`; compass declares no HTTP transport; the filesystem preset lists write tools in `disabledAutoApproveTools`; all ship `isActive: false`.",
+      "disposition": "S",
+      "subject": "Transport/write/activation defaults",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Retire test-first. Preserve stdio and write approval. Current configured records may be active; all-inactive is not implemented and must be amended explicitly.",
+      "evidence": [
+        "M"
+      ],
+      "originalFileSha256": "a9d28aef33e95a18665baf72a5f6d4120af7c4d772686ab180e8a1116da4e2f7",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-005-mcp-server-presets",
+      "task": "3.1",
+      "source": "openspec/changes/prometheus-005-mcp-server-presets/tasks.md",
+      "line": 15,
+      "original": "- [ ] 3.1 Confirm `BuiltinMcpServerSeeder`'s `hashObject(PRESET_MCP_SERVERS)` version changes, and that an existing install picks up the new presets without disturbing user-owned fields (env, isActive, timeout).",
+      "disposition": "S",
+      "subject": "Seeder and user-field preservation",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Current workspace upsert is not the original hashed seeder. Approve ownership-separated managed records; preserve user-owned records, no false seeder credit.",
+      "evidence": [
+        "M"
+      ],
+      "originalFileSha256": "a9d28aef33e95a18665baf72a5f6d4120af7c4d772686ab180e8a1116da4e2f7",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-005-mcp-server-presets",
+      "task": "3.2",
+      "source": "openspec/changes/prometheus-005-mcp-server-presets/tasks.md",
+      "line": 16,
+      "original": "- [ ] 3.2 Add a description string per server in all 13 locales; `pnpm i18n:sync` then `pnpm i18n:check`.",
+      "disposition": "S",
+      "subject": "Preset descriptions and locales",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Four fixed preset descriptions do not exist; current workspace/settings labels do. Amend prescribed surface, retain usable localized explanations.",
+      "evidence": [
+        "M"
+      ],
+      "originalFileSha256": "a9d28aef33e95a18665baf72a5f6d4120af7c4d772686ab180e8a1116da4e2f7",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-005-mcp-server-presets",
+      "task": "4.1",
+      "source": "openspec/changes/prometheus-005-mcp-server-presets/tasks.md",
+      "line": 20,
+      "original": "- [ ] 4.1 Targeted tests, then `pnpm lint`.",
+      "disposition": "S",
+      "subject": "Unit and lint procedure",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "No repeated targeted suites or lint.",
+      "evidence": [
+        "R"
+      ],
+      "originalFileSha256": "a9d28aef33e95a18665baf72a5f6d4120af7c4d772686ab180e8a1116da4e2f7",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-005-mcp-server-presets",
+      "task": "4.2",
+      "source": "openspec/changes/prometheus-005-mcp-server-presets/tasks.md",
+      "line": 21,
+      "original": "- [ ] 4.2 In the running app: each appears in the catalog, each can be enabled, and each connects when its backing binary or container is present. Paste the tool list each exposes.",
+      "disposition": "O",
+      "subject": "Advertised server discovery/connect/tool lists",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Q3 available Compass/filesystem/shared-memory records only, where missing. Optional sycophancy preset remains deferred.",
+      "evidence": [
+        "M",
+        "G"
+      ],
+      "originalFileSha256": "a9d28aef33e95a18665baf72a5f6d4120af7c4d772686ab180e8a1116da4e2f7",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-005-mcp-server-presets",
+      "task": "4.3",
+      "source": "openspec/changes/prometheus-005-mcp-server-presets/tasks.md",
+      "line": 22,
+      "original": "- [ ] 4.3 With the binary absent, confirm the server reports unresolved and the app is unaffected.",
+      "disposition": "O",
+      "subject": "Missing binary failure",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Q4 jointly covers binary-shipping 3.1. Use an owned missing-path fixture, never remove installed user binaries.",
+      "evidence": [
+        "B",
+        "M"
+      ],
+      "originalFileSha256": "a9d28aef33e95a18665baf72a5f6d4120af7c4d772686ab180e8a1116da4e2f7",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "prometheus-005-mcp-server-presets",
+      "task": "4.4",
+      "source": "openspec/changes/prometheus-005-mcp-server-presets/tasks.md",
+      "line": 23,
+      "original": "- [ ] 4.4 **Windows:** confirm `.exe` resolution for all three stdio servers. Unverified until run.",
+      "disposition": "O",
+      "subject": "Native Windows stdio resolution",
+      "platforms": [
+        "windows-x64"
+      ],
+      "action": "Q3 Windows x64 two available .exe servers; third unbundled server deferred.",
+      "evidence": [
+        "B",
+        "M",
+        "R"
+      ],
+      "originalFileSha256": "a9d28aef33e95a18665baf72a5f6d4120af7c4d772686ab180e8a1116da4e2f7",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Native Windows x64 operation matters; Mac repeat not needed. Other architectures in original row are deferred."
+    },
+    {
+      "change": "uar-c09-team-execution-admin",
+      "task": "ordinal-5",
+      "source": "openspec/changes/uar-c09-team-execution-admin/tasks.md",
+      "line": 7,
+      "original": "- [ ] Lead: execute the coherent packaged production scenario and capture its actual receipts.",
+      "disposition": "E",
+      "subject": "Packaged team operation receipts",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Map Gate A, 14 staged Gate B cases and two public cases separately. Changed admission seams alone may join Q5.",
+      "evidence": [
+        "A",
+        "TB",
+        "BP"
+      ],
+      "originalFileSha256": "bf53e126ed5ca97c753808506268f5a4ebedfa34d54188d7b17a32cc85a42a92",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c09-team-execution-admin",
+      "task": "ordinal-6",
+      "source": "openspec/changes/uar-c09-team-execution-admin/tasks.md",
+      "line": 8,
+      "original": "- [ ] Lead: run the required macOS ARM64 package build and installed-app UX checks at the complete C09.3 boundary.",
+      "disposition": "O",
+      "subject": "Installed team UX and old build gate",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Build clause reuses R38; only unresolved current UI/control applicability joins Q5. No rebuild.",
+      "evidence": [
+        "A",
+        "BP",
+        "R"
+      ],
+      "originalFileSha256": "bf53e126ed5ca97c753808506268f5a4ebedfa34d54188d7b17a32cc85a42a92",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c09-team-execution-admin",
+      "task": "ordinal-7",
+      "source": "openspec/changes/uar-c09-team-execution-admin/tasks.md",
+      "line": 9,
+      "original": "- [ ] Independent verifier: review the completed increment once and resolve blocking findings in one batch.",
+      "disposition": "E",
+      "subject": "Independent increment review",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "One artifact/source review packet with practical preset task 4; no operation merely because review was missing.",
+      "evidence": [
+        "A",
+        "TB",
+        "BP"
+      ],
+      "originalFileSha256": "bf53e126ed5ca97c753808506268f5a4ebedfa34d54188d7b17a32cc85a42a92",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c09-team-execution-admin",
+      "task": "A1–A3",
+      "source": "openspec/changes/uar-c09-team-execution-admin/tasks.md",
+      "line": 15,
+      "original": "- [ ] A1–A3 dependency — Consume frozen UAR route/profile/settings/fit/diagnostic and single-executor/reclaim contracts; do not implement runtime authority in Boss.",
+      "disposition": "E",
+      "subject": "Runtime contract consumption",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Existing model/profile/ownership adapters; privileged takeover qualification deferred.",
+      "evidence": [
+        "A"
+      ],
+      "originalFileSha256": "bf53e126ed5ca97c753808506268f5a4ebedfa34d54188d7b17a32cc85a42a92",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c09-team-execution-admin",
+      "task": "A4",
+      "source": "openspec/changes/uar-c09-team-execution-admin/tasks.md",
+      "line": 16,
+      "original": "- [ ] A4 — Desktop/provider: lossless model settings/pricing read-edit-save, typed profile input, safe projection, protected credentials and explicit revisioned starter rebind; fixed scoped ownership/reclaim IPC and DTOs.",
+      "disposition": "O",
+      "subject": "Exact settings/rebind and privileged reclaim",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Source reconciliation first. Only current unproved read/save/rebind joins Q5; privileged replacement matrix deferred.",
+      "evidence": [
+        "A"
+      ],
+      "originalFileSha256": "bf53e126ed5ca97c753808506268f5a4ebedfa34d54188d7b17a32cc85a42a92",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c09-team-execution-admin",
+      "task": "A5",
+      "source": "openspec/changes/uar-c09-team-execution-admin/tasks.md",
+      "line": 17,
+      "original": "- [ ] A5 — Renderer/UX: requested/effective settings, default off/explicit refusal, known limits and no-fit label, safe failures and authorized recovery guidance; all 13 locales and accessible controls completed together.",
+      "disposition": "O",
+      "subject": "Effective settings and accessible errors",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Source/locales evidence first; unresolved current effective values/refusal/keyboard controls join Q5. No theme/locale sweep.",
+      "evidence": [
+        "A"
+      ],
+      "originalFileSha256": "bf53e126ed5ca97c753808506268f5a4ebedfa34d54188d7b17a32cc85a42a92",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c09-team-execution-admin",
+      "task": "A6",
+      "source": "openspec/changes/uar-c09-team-execution-admin/tasks.md",
+      "line": 18,
+      "original": "- [ ] A6 — Release/operation: exact runtime source/payload pins and receipts; only after all source/IPC/UI/locales/payload complete, required Mac ARM64 package build/launch and Gate A actual marker/settings/restart/context/control/ownership outcomes, including unauthorized/stale reclaim refusal.",
+      "disposition": "O",
+      "subject": "Pins, Gate A and ownership outcomes",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Build/pins are evidence-only. Changed current authority/control cases join Q5 only if old evidence inapplicable; exhaustive reclaim deferred.",
+      "evidence": [
+        "A",
+        "R"
+      ],
+      "originalFileSha256": "bf53e126ed5ca97c753808506268f5a4ebedfa34d54188d7b17a32cc85a42a92",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c09-team-execution-admin",
+      "task": "B1–B3",
+      "source": "openspec/changes/uar-c09-team-execution-admin/tasks.md",
+      "line": 24,
+      "original": "- [ ] B1–B3 dependency — Consume approved shared-context/directed-authorization/durable-tool/yield/wait/continuation contracts, preserving existing execution and task-state owner.",
+      "disposition": "E",
+      "subject": "Communication and continuation contracts",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Implemented contracts and retained actual operations; no new scheduler/source rewrite.",
+      "evidence": [
+        "TB",
+        "BP"
+      ],
+      "originalFileSha256": "bf53e126ed5ca97c753808506268f5a4ebedfa34d54188d7b17a32cc85a42a92",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c09-team-execution-admin",
+      "task": "B4",
+      "source": "openspec/changes/uar-c09-team-execution-admin/tasks.md",
+      "line": 25,
+      "original": "- [ ] B4 — Desktop/renderer/authoring: roster/messages and accepted-delivered-consumed state distinct from completion, waits/targets/blocked reasons/new continuation identity, safe effective context, all 13 locales and exact full/mini skill payload.",
+      "disposition": "E",
+      "subject": "Roster/messages/waits/context visibility",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Retain actual visibility/source evidence; only an invalidated clause joins Q5. Delivery is not task completion.",
+      "evidence": [
+        "BP",
+        "T"
+      ],
+      "originalFileSha256": "bf53e126ed5ca97c753808506268f5a4ebedfa34d54188d7b17a32cc85a42a92",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c09-team-execution-admin",
+      "task": "B5",
+      "source": "openspec/changes/uar-c09-team-execution-admin/tasks.md",
+      "line": 26,
+      "original": "- [ ] B5 — Release/operation: complete B before build/launch; actual one-slot coordinator/worker/continuation plus forbidden/revoked directed-edge disclosure/send/delegation denial, all-target failed/cancelled/cycle/reassignment and crash/duplicate/isolation/control receipts. No mock/build-only acceptance.",
+      "disposition": "O",
+      "subject": "Team controls and extended fault matrix",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Retain 14 staged cases and public subset. Q5 current cancellation/isolation/authority gaps only; exhaustive cycles/reassignment/crash matrix deferred.",
+      "evidence": [
+        "TB",
+        "BP"
+      ],
+      "originalFileSha256": "bf53e126ed5ca97c753808506268f5a4ebedfa34d54188d7b17a32cc85a42a92",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c10-workflow-decisions",
+      "task": "1.1",
+      "source": "openspec/changes/uar-c10-workflow-decisions/tasks.md",
+      "line": 3,
+      "original": "- [ ] 1.1 Freeze shared workflow DTOs and scoped UAR adapter with the provider owner; verify matching production request/response shapes at the completed operation boundary.",
+      "disposition": "E",
+      "subject": "Workflow DTO and scoped adapter",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Compare source/wire shapes against retained actual operation. No new API.",
+      "evidence": [
+        "W"
+      ],
+      "originalFileSha256": "299c777c04e79c91e1c4b97c02b6490eaed68b66fb1e92fc159ae98cf353bd1d",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c10-workflow-decisions",
+      "task": "1.2",
+      "source": "openspec/changes/uar-c10-workflow-decisions/tasks.md",
+      "line": 4,
+      "original": "- [ ] 1.2 Register typed IPC through the existing handler/barrel and generic preload; verify the packaged application invokes the named routes.",
+      "disposition": "E",
+      "subject": "Typed IPC in the package",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Actual prior operation traversed IPC; reconcile source applicability.",
+      "evidence": [
+        "W"
+      ],
+      "originalFileSha256": "299c777c04e79c91e1c4b97c02b6490eaed68b66fb1e92fc159ae98cf353bd1d",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c10-workflow-decisions",
+      "task": "2.1",
+      "source": "openspec/changes/uar-c10-workflow-decisions/tasks.md",
+      "line": 8,
+      "original": "- [ ] 2.1 Implement workflow selection, bounded feedback, member/reservation selection, durable run inspection and exact decision/cancel/recover controls; verify the real classify-to-draft-to-decision flow.",
+      "disposition": "O",
+      "subject": "Internal workflow decision/cancellation/recovery",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Retain classify/draft/exact decision. Q6 only uncovered stale/revoked decision, cancel and retained recovery; GitHub #63 not a substitute.",
+      "evidence": [
+        "W"
+      ],
+      "originalFileSha256": "299c777c04e79c91e1c4b97c02b6490eaed68b66fb1e92fc159ae98cf353bd1d",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c10-workflow-decisions",
+      "task": "2.2",
+      "source": "openspec/changes/uar-c10-workflow-decisions/tasks.md",
+      "line": 9,
+      "original": "- [ ] 2.2 Translate all new renderer keys and preserve accessible controls, responsive layout and semantic status; verify lint and completed keyboard/theme captures.",
+      "disposition": "O",
+      "subject": "Accessible workflow controls",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Locales/source evidence first. Keyboard reachability in Q6 if unproven; old lint/theme sweep superseded, not fabricated as passed.",
+      "evidence": [
+        "W"
+      ],
+      "originalFileSha256": "299c777c04e79c91e1c4b97c02b6490eaed68b66fb1e92fc159ae98cf353bd1d",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c10-workflow-decisions",
+      "task": "3.1",
+      "source": "openspec/changes/uar-c10-workflow-decisions/tasks.md",
+      "line": 13,
+      "original": "- [ ] 3.1 Run pnpm lint once after all production edits, then coordinated pnpm build:mac:arm64 with the accepted UAR payload; record exact results and changed boundary.",
+      "disposition": "S",
+      "subject": "Historical lint/build instruction",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Reuse completed R38 build; retain historical failed lint. No build or lint to refresh age.",
+      "evidence": [
+        "R",
+        "W"
+      ],
+      "originalFileSha256": "299c777c04e79c91e1c4b97c02b6490eaed68b66fb1e92fc159ae98cf353bd1d",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "uar-c10-workflow-decisions",
+      "task": "3.2",
+      "source": "openspec/changes/uar-c10-workflow-decisions/tasks.md",
+      "line": 14,
+      "original": "- [ ] 3.2 Exercise actual packaged Boss with live UAR through typed IPC and displayed controls, including restored wait, exact receipt, cancellation/recovery and truthful accounting; record immutable operation evidence through the initiative coordinator.",
+      "disposition": "O",
+      "subject": "Restored wait, control and truthful accounting",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Retained wait/decision/accounting evidence; remaining controls jointly covered by Q6, no second workflow run for this row.",
+      "evidence": [
+        "W"
+      ],
+      "originalFileSha256": "299c777c04e79c91e1c4b97c02b6490eaed68b66fb1e92fc159ae98cf353bd1d",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "c15-reviewed-skill-coverage",
+      "task": "1.1",
+      "source": "openspec/changes/c15-reviewed-skill-coverage/tasks.md",
+      "line": 3,
+      "original": "- [ ] 1.1 Pack owner: expose canonical complete per-skill runtime closure inventory and full signed-generation verification contract; distribute full/mini payloads without replacing user files.",
+      "disposition": "E",
+      "subject": "Complete closures and distribution",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Retained required core/full-mini source/distribution evidence. No fresh installation solely for freshness.",
+      "evidence": [
+        "S15"
+      ],
+      "originalFileSha256": "8d7226466776126dbadf503e78f2485b3aac38533c30b831e1e5e93719c18f68",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "c15-reviewed-skill-coverage",
+      "task": "1.2",
+      "source": "openspec/changes/c15-reviewed-skill-coverage/tasks.md",
+      "line": 4,
+      "original": "- [ ] 1.2 Runtime owner: extend existing private binding coverage and receipt, verify trusted baseline/current installed closure and revalidate; preserve legacy hosts as explicitly unreviewed and retain effect authority.",
+      "disposition": "O",
+      "subject": "Private trusted binding coverage",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Q7 only forged/missing private coverage preflight if existing trusted host context exposes it. Driver seam is absent; never add renderer authority to qualify. Otherwise explicitly pending.",
+      "evidence": [
+        "S15"
+      ],
+      "originalFileSha256": "8d7226466776126dbadf503e78f2485b3aac38533c30b831e1e5e93719c18f68",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "c15-reviewed-skill-coverage",
+      "task": "1.3",
+      "source": "openspec/changes/c15-reviewed-skill-coverage/tasks.md",
+      "line": 5,
+      "original": "- [ ] 1.3 Desktop owner: derive private verified coverage in main, integrate selected catalog/binding/host-scope checks, and finish selector statuses plus all locales.",
+      "disposition": "E",
+      "subject": "Host scope and selector statuses",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Retain actual catalog/tamper/tool-scope refusals and source; include changed visibility only if evidence invalidated.",
+      "evidence": [
+        "S15"
+      ],
+      "originalFileSha256": "8d7226466776126dbadf503e78f2485b3aac38533c30b831e1e5e93719c18f68",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "c15-reviewed-skill-coverage",
+      "task": "1.4",
+      "source": "openspec/changes/c15-reviewed-skill-coverage/tasks.md",
+      "line": 6,
+      "original": "- [ ] 1.4 Lead: pin source/native payloads, build Mac ARM64 once after complete wiring, launch and operate the new function, then publish scheduled Mac/Windows release and website.",
+      "disposition": "E",
+      "subject": "Pins/build/operate/publication",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Release clauses reuse existing receipts. Full private preflight remains separately pending; no rebuild/publication.",
+      "evidence": [
+        "S15",
+        "R"
+      ],
+      "originalFileSha256": "8d7226466776126dbadf503e78f2485b3aac38533c30b831e1e5e93719c18f68",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "c16-practical-team-presets",
+      "task": "4",
+      "source": "openspec/changes/c16-practical-team-presets/tasks.md",
+      "line": 11,
+      "original": "- [ ] 4. Build the complete package and execute the real operation; obtain independent review and record accepted artifacts/findings. Preserve native Windows and C10 connector-effect acceptance gaps.",
+      "disposition": "E",
+      "subject": "Missing independent artifact review",
+      "platforms": [
+        "mac-arm64",
+        "windows-x64"
+      ],
+      "action": "Five presets and twelve real artifacts already operated/assessed. Obtain distinct reviewer assessment of retained artifacts once; do not rerun inference/build.",
+      "evidence": [
+        "P16"
+      ],
+      "originalFileSha256": "d427cba43a9360f167ba0ab135d6cece81adf1dcbdd274fb153b5fb79d181912",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Retained source/customer behavior is relevant to both priority platforms. Separate native platform clauses and evidence-only prescriptions within the original row; no cross-platform pass inferred."
+    },
+    {
+      "change": "c16-specialist-team-authoring",
+      "task": "5",
+      "source": "openspec/changes/c16-specialist-team-authoring/tasks.md",
+      "line": 10,
+      "original": "- [ ] 5. After the full next increment, execute the real operation, required build/package checks and independent review; retain native Windows acceptance as pending until actually run.",
+      "disposition": "D",
+      "subject": "Full six-specialist qualification",
+      "platforms": [],
+      "action": "Optional wider specialist matrix; accepted product/design/reviewer evidence does not prove all six. Keep complete gate pending outside primary desktop closure.",
+      "evidence": [
+        "T"
+      ],
+      "originalFileSha256": "587d14bd1a3a916ae07c36ec17db779aacab4e088716256693fcf61d609f7b5e",
+      "applicabilityStatus": "proposed row-level relevance; exact candidate/atomic-clause receipt applicability not yet qualified",
+      "platformMeaning": "Expanded specialist gate deferred for both priority platforms."
+    }
+  ]
+}

@@ -209,26 +209,22 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.38 - Reliable workspace settings
+    The Boss 2.2.39 - UAR 1.1 desktop integration
 
-    - Keep integration settings available when a saved workspace directory has been removed.
-    - Preserve workspace history and strict execution paths; do not recreate missing folders or substitute another workspace.
-    - Recover integration projections when the registered directory returns.
-    - Correct documentation links and reconcile completed OpenSpec work without changing qualification records.
-    - Update the packaged UAR to merged revision ac097043, including scoped delegation identity repair, while retaining the existing BossFang configuration.
-    - Feature profile: UAR enabled. Mac ARM64 and Windows x64 release; Mac notarization deferred by operator.
-    - Refresh the Prometheus mini skill pack, including kbd-handoff and its MIT license.
-    - UAR preserves legacy authenticated history, knowledge and credentials; records lacking verified ownership need explicit authorized migration or reconfiguration.
+    - Update the packaged UAR server-full runtime to stable v1.1.0 (d815ef72) for Mac ARM64 and Windows x64.
+    - Preserve configured models, scoped memory, native approvals and BossFang delegation.
+    - Keep private application profiles and shell registration inside their selected profile.
+    - Include UAR provider timeout/retry inheritance and persisted MCP policy loading fixes.
+    - Build the standard local Mac installer with the same pinned public payload used for distribution; retain explicit local-source development mode.
+    - Keep installed acceptance separate from build/publication evidence. Mac notarization remains deferred by operator.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.38 - 可靠的工作区设置
+    The Boss 2.2.39 - UAR 1.1 桌面集成
 
-    - 即使已保存的工作区目录被移除，集成设置仍可正常使用。
-    - 保留工作区历史和严格的执行路径验证，不会重新创建缺失目录或替换工作区。
-    - 已登记的目录恢复后，恢复其集成投影。
-    - 修复文档链接并归档已完成的 OpenSpec 工作，不改变资格认证记录。
-    - 将打包的 UAR 更新到已合并的 ac097043 版本，修复限定委派身份并保留现有 BossFang 配置。
-    - 功能配置：启用 UAR。发布 Mac ARM64 和 Windows x64；按用户要求暂不进行 Mac 公证。
-    - 更新 Prometheus mini 技能包，包含 kbd-handoff 和 MIT 许可证。
-    - UAR 保留旧版已认证历史、知识和凭据；无法验证归属的记录需要明确授权的迁移或重新配置。
+    - 将 Mac ARM64 和 Windows x64 打包的 UAR server-full 运行时更新至稳定版 v1.1.0（d815ef72）。
+    - 保留已配置的模型、限定范围的记忆、原生审批和 BossFang 委派。
+    - 将私有应用配置和命令行注册限制在所选配置目录中。
+    - 包含 UAR 提供商超时与重试设置继承，以及持久化 MCP 策略加载修复。
+    - 标准本地 Mac 安装包使用与公开发行相同的固定载荷，并保留明确的本地源码开发模式。
+    - 将安装后验收与构建和发布证据分开记录；按用户要求暂不进行 Mac 公证。
     <!--LANG:END-->

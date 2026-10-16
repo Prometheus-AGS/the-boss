@@ -1,0 +1,414 @@
+{
+  "schemaVersion": 1,
+  "kind": "desktop-readonly-applicability-source-inventory",
+  "recordedAt": "2026-10-15T20:40:07.856Z",
+  "status": "preparation-only-no-new-operation",
+  "bossRepository": "/Users/gqadonis/Projects/prometheus/the-boss",
+  "inspectedBossHead": "35bb424e997748c56393d8d8a074e84db9c4da3d",
+  "baseline238BuiltSource": "2a508b433db5dea80073b46fee34b8c549043056",
+  "candidateUarTarget": {
+    "version": "1.1.0",
+    "revision": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
+    "source": "release proposal/design; native candidate not yet operated"
+  },
+  "candidateFreezeRequired": true,
+  "sourceFiles": [
+    {
+      "path": "scripts/package-prometheus.js",
+      "workingTreeSha256": "a4aa01e9d79a79be2d0a4ddb24d207b09501b10bcab7a3e948e92c10ba45390b",
+      "inspectedHeadSha256": "a4aa01e9d79a79be2d0a4ddb24d207b09501b10bcab7a3e948e92c10ba45390b",
+      "baseline238Sha256": "a4aa01e9d79a79be2d0a4ddb24d207b09501b10bcab7a3e948e92c10ba45390b",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "scripts/sync-prometheus-skills.ts",
+      "workingTreeSha256": "d5cb697b07fb317d15ace254c3860255276fd943b93cfde90736b58f62a0e147",
+      "inspectedHeadSha256": "d5cb697b07fb317d15ace254c3860255276fd943b93cfde90736b58f62a0e147",
+      "baseline238Sha256": "d5cb697b07fb317d15ace254c3860255276fd943b93cfde90736b58f62a0e147",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/utils/prometheusPack.ts",
+      "workingTreeSha256": "97e53ea07b9b1a0158299a8af0bd17a71fd36a4cce34051200e4b6c0a8fb608a",
+      "inspectedHeadSha256": "97e53ea07b9b1a0158299a8af0bd17a71fd36a4cce34051200e4b6c0a8fb608a",
+      "baseline238Sha256": "97e53ea07b9b1a0158299a8af0bd17a71fd36a4cce34051200e4b6c0a8fb608a",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/utils/builtinSkills.ts",
+      "workingTreeSha256": "98f793036187a8d8e636ae7a87747ac2644b0832e1686802aede2dc8923cf8a3",
+      "inspectedHeadSha256": "98f793036187a8d8e636ae7a87747ac2644b0832e1686802aede2dc8923cf8a3",
+      "baseline238Sha256": "98f793036187a8d8e636ae7a87747ac2644b0832e1686802aede2dc8923cf8a3",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/utils/binaryResolver.ts",
+      "workingTreeSha256": "3c0266e400d81bb061ab21a64d96ec4d43b010e01cc3b2f6cae3716ec9ebf227",
+      "inspectedHeadSha256": "3c0266e400d81bb061ab21a64d96ec4d43b010e01cc3b2f6cae3716ec9ebf227",
+      "baseline238Sha256": "3c0266e400d81bb061ab21a64d96ec4d43b010e01cc3b2f6cae3716ec9ebf227",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/ai/skills/SkillService.ts",
+      "workingTreeSha256": "b47f9ef3e42746df16aa222ef3dd86b7caf680c648c7173bc97f6223cd4785a1",
+      "inspectedHeadSha256": "b47f9ef3e42746df16aa222ef3dd86b7caf680c648c7173bc97f6223cd4785a1",
+      "baseline238Sha256": "b47f9ef3e42746df16aa222ef3dd86b7caf680c648c7173bc97f6223cd4785a1",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/ai/AiService.ts",
+      "workingTreeSha256": "970ccd8e6e8ba54fc022498dd9cf6a11ca63bc84b273375643e9ed65dda4bb5a",
+      "inspectedHeadSha256": "970ccd8e6e8ba54fc022498dd9cf6a11ca63bc84b273375643e9ed65dda4bb5a",
+      "baseline238Sha256": "970ccd8e6e8ba54fc022498dd9cf6a11ca63bc84b273375643e9ed65dda4bb5a",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/ai/mcp/servers/skills.ts",
+      "workingTreeSha256": "bc12167e3a8cb06e1ef5b8319715cbf7dc5697c1d1d2726060df6489607ef3c0",
+      "inspectedHeadSha256": "bc12167e3a8cb06e1ef5b8319715cbf7dc5697c1d1d2726060df6489607ef3c0",
+      "baseline238Sha256": "bc12167e3a8cb06e1ef5b8319715cbf7dc5697c1d1d2726060df6489607ef3c0",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/services/prometheus/miniCommands.ts",
+      "workingTreeSha256": "d7306bb182086851522cc8240375c3fe2e260da3e6fb6a0905e91ca076e321a0",
+      "inspectedHeadSha256": "d7306bb182086851522cc8240375c3fe2e260da3e6fb6a0905e91ca076e321a0",
+      "baseline238Sha256": "d7306bb182086851522cc8240375c3fe2e260da3e6fb6a0905e91ca076e321a0",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/services/prometheus/workspaceMcp.ts",
+      "workingTreeSha256": "5e2454022d06760640c96f37bc821faa4598e68778b7eda09ff26d932f5a76da",
+      "inspectedHeadSha256": "5e2454022d06760640c96f37bc821faa4598e68778b7eda09ff26d932f5a76da",
+      "baseline238Sha256": "5e2454022d06760640c96f37bc821faa4598e68778b7eda09ff26d932f5a76da",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/services/prometheus/prometheusDoctor.ts",
+      "workingTreeSha256": "0046e8d34f9f4576949237fa4f905ba2d64f921624a029e63853f4615e0a1492",
+      "inspectedHeadSha256": "0046e8d34f9f4576949237fa4f905ba2d64f921624a029e63853f4615e0a1492",
+      "baseline238Sha256": "0046e8d34f9f4576949237fa4f905ba2d64f921624a029e63853f4615e0a1492",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/services/prometheus/managedServices.ts",
+      "workingTreeSha256": "fe1c6510c9c7797013fb74f655eb7bf32bb0a9c40a9dd5cb4ddbdabb22266391",
+      "inspectedHeadSha256": "fe1c6510c9c7797013fb74f655eb7bf32bb0a9c40a9dd5cb4ddbdabb22266391",
+      "baseline238Sha256": "fe1c6510c9c7797013fb74f655eb7bf32bb0a9c40a9dd5cb4ddbdabb22266391",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/services/prometheus/integrationConfig.ts",
+      "workingTreeSha256": "37fe3c9d4e9bde4a0de98497cb4d3be17ae6b368f0d08a3421cc76d836a424d3",
+      "inspectedHeadSha256": "37fe3c9d4e9bde4a0de98497cb4d3be17ae6b368f0d08a3421cc76d836a424d3",
+      "baseline238Sha256": "37fe3c9d4e9bde4a0de98497cb4d3be17ae6b368f0d08a3421cc76d836a424d3",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/services/prometheus/PrometheusIntegrationService.ts",
+      "workingTreeSha256": "62428b225e852840427fa9c54dc92d8daedd17ff38c43cfc2f71edf8ffafd4e2",
+      "inspectedHeadSha256": "62428b225e852840427fa9c54dc92d8daedd17ff38c43cfc2f71edf8ffafd4e2",
+      "baseline238Sha256": "62428b225e852840427fa9c54dc92d8daedd17ff38c43cfc2f71edf8ffafd4e2",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/ai/runtime/uar/UarRuntimeConnection.ts",
+      "workingTreeSha256": "80911caffcef310080a291baeffe82efb9abd52e5eb538ba0cac2b5c7e98ab53",
+      "inspectedHeadSha256": "80911caffcef310080a291baeffe82efb9abd52e5eb538ba0cac2b5c7e98ab53",
+      "baseline238Sha256": "80911caffcef310080a291baeffe82efb9abd52e5eb538ba0cac2b5c7e98ab53",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/ai/runtime/uar/UarRunAdministrationAdapter.ts",
+      "workingTreeSha256": "a4fabc62ded75fb5f22cf5fa7bde98be13d3e05c4331a88d1ae98a60ed533707",
+      "inspectedHeadSha256": "a4fabc62ded75fb5f22cf5fa7bde98be13d3e05c4331a88d1ae98a60ed533707",
+      "baseline238Sha256": "a4fabc62ded75fb5f22cf5fa7bde98be13d3e05c4331a88d1ae98a60ed533707",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/ai/runtime/uar/UarToolApprovalController.ts",
+      "workingTreeSha256": "fd49f13619970d1abacfc36494f7a39fe3994e70b4c83c3335b5bc0c3a67bc76",
+      "inspectedHeadSha256": "fd49f13619970d1abacfc36494f7a39fe3994e70b4c83c3335b5bc0c3a67bc76",
+      "baseline238Sha256": "fd49f13619970d1abacfc36494f7a39fe3994e70b4c83c3335b5bc0c3a67bc76",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/shared/ipc/schemas/prometheus.ts",
+      "workingTreeSha256": "08db07a4e87b705f6faef481e07c84a7900a18899902b37a05852da00ec6d6fc",
+      "inspectedHeadSha256": "08db07a4e87b705f6faef481e07c84a7900a18899902b37a05852da00ec6d6fc",
+      "baseline238Sha256": "08db07a4e87b705f6faef481e07c84a7900a18899902b37a05852da00ec6d6fc",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/main/ipc/handlers/prometheus.ts",
+      "workingTreeSha256": "184a876eb5ac4e7d88289f55b954a3c18feb499d986e21e5854c1d96f48c5012",
+      "inspectedHeadSha256": "184a876eb5ac4e7d88289f55b954a3c18feb499d986e21e5854c1d96f48c5012",
+      "baseline238Sha256": "184a876eb5ac4e7d88289f55b954a3c18feb499d986e21e5854c1d96f48c5012",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/renderer/pages/settings/PrometheusSettings/ServicesSettings.tsx",
+      "workingTreeSha256": "26c0a4606bd692283d54a42c9f1c83fd76e64cdbe268d8816b2d1fed93341a92",
+      "inspectedHeadSha256": "26c0a4606bd692283d54a42c9f1c83fd76e64cdbe268d8816b2d1fed93341a92",
+      "baseline238Sha256": "26c0a4606bd692283d54a42c9f1c83fd76e64cdbe268d8816b2d1fed93341a92",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/renderer/pages/settings/PrometheusSettings/UarOperationalPanel.tsx",
+      "workingTreeSha256": "479be6a73bf1e73ba4f70c5ad1daefcb3a0bf94549c45a50922cb0047d0c44fb",
+      "inspectedHeadSha256": "479be6a73bf1e73ba4f70c5ad1daefcb3a0bf94549c45a50922cb0047d0c44fb",
+      "baseline238Sha256": "479be6a73bf1e73ba4f70c5ad1daefcb3a0bf94549c45a50922cb0047d0c44fb",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    },
+    {
+      "path": "src/renderer/pages/settings/PrometheusSettings/UarApprovalLifecyclePanel.tsx",
+      "workingTreeSha256": "7076514b7ebd91fd28b97342d90d876f851400e03ede3ce94b2b9cdfd7cf664a",
+      "inspectedHeadSha256": "7076514b7ebd91fd28b97342d90d876f851400e03ede3ce94b2b9cdfd7cf664a",
+      "baseline238Sha256": "7076514b7ebd91fd28b97342d90d876f851400e03ede3ce94b2b9cdfd7cf664a",
+      "committedSourceUnchangedFrom238": true,
+      "workingTreeMatchesInspectedHead": true
+    }
+  ],
+  "retainedDocuments": [
+    {
+      "path": "/Users/gqadonis/Projects/prometheus/the-boss/build/release-operation-2.2.38/operation.json",
+      "exists": true,
+      "bytes": 3790,
+      "sha256": "14852db6274e2620aed884997c0dedba2af2b9c297cfeb2955e58bcb7d5c88cb",
+      "meaning": "Retained document identity only; original platform, candidate and limitations remain authoritative."
+    },
+    {
+      "path": "/Users/gqadonis/Projects/prometheus/the-boss/build/release-operation-2.2.38/local-artifact.json",
+      "exists": true,
+      "bytes": 532,
+      "sha256": "704d63e964d672dd7f2689c189d589d45ef0fe8c4133665ce59933578d7c8e91",
+      "meaning": "Retained document identity only; original platform, candidate and limitations remain authoritative."
+    },
+    {
+      "path": "/Users/gqadonis/Projects/prometheus/the-boss/build/release-operation-2.2.38/publication.json",
+      "exists": true,
+      "bytes": 3798,
+      "sha256": "12a6b9b06afdfc72acc62fe035b434f6b05f6cd8be399fe0597789aadb689448",
+      "meaning": "Retained document identity only; original platform, candidate and limitations remain authoritative."
+    },
+    {
+      "path": "/Users/gqadonis/Projects/prometheus/prometheus-skills-mini/.kbd-orchestrator/phases/the-boss-shipping-and-settings/children/uar-working-agent/children/integration-administration/evidence/task-3.5-gate-b.md",
+      "exists": true,
+      "bytes": 1990,
+      "sha256": "150c28e8dc2feafab650e3b2ac73ed220600ab0d5e43a84b0841e30096fb6a25",
+      "meaning": "Retained document identity only; original platform, candidate and limitations remain authoritative."
+    },
+    {
+      "path": "/Users/gqadonis/Projects/prometheus/prometheus-skills-mini/.kbd-orchestrator/phases/the-boss-shipping-and-settings/children/uar-working-agent/children/integration-administration/evidence/gate-b.json",
+      "exists": true,
+      "bytes": 473,
+      "sha256": "07e2d482f7f849fd2d25de7fe35de7847e490c328e1a898e14e2d72d472d464f",
+      "meaning": "Retained document identity only; original platform, candidate and limitations remain authoritative."
+    },
+    {
+      "path": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence/openspec/changes/archive/2026-10-14-afc-c09-bounded-teams-and-shared-task-board/c09-3-evidence.md",
+      "exists": true,
+      "bytes": 11145,
+      "sha256": "1fe4d84d372ef3b2c8bf168a984feb01519c15d2b2a63abd501dcd0f398fa80e",
+      "meaning": "Retained document identity only; original platform, candidate and limitations remain authoritative."
+    },
+    {
+      "path": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence/openspec/changes/archive/2026-10-14-afc-c09-bounded-teams-and-shared-task-board/c09-4-gate-b-receipt.json",
+      "exists": true,
+      "bytes": 5308,
+      "sha256": "2c39718f13f20900b80665cf08a2f3d45423716139204689456622f7276a08d6",
+      "meaning": "Retained document identity only; original platform, candidate and limitations remain authoritative."
+    },
+    {
+      "path": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence/openspec/changes/archive/2026-10-14-afc-c09-bounded-teams-and-shared-task-board/c09-4-public-qualified-receipt.json",
+      "exists": true,
+      "bytes": 2680,
+      "sha256": "b122bef1dca33127a9ef0e8ee7ecc86f4fcebb40f457b3a206cd60743065aadc",
+      "meaning": "Retained document identity only; original platform, candidate and limitations remain authoritative."
+    },
+    {
+      "path": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence/c10-substrate-operation-receipt-20261005.md",
+      "exists": true,
+      "bytes": 2741,
+      "sha256": "ca5b1a073bc3f9ffb17705bed4a7af8c6f53258b9249c9c0e43a5c70db7b9763",
+      "meaning": "Retained document identity only; original platform, candidate and limitations remain authoritative."
+    },
+    {
+      "path": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence/receipts/customer-required-reviewed-skill-core-2.2.27-20261010.json",
+      "exists": true,
+      "bytes": 4077,
+      "sha256": "83df16c26ec361a431fb52f416ec88cdda048d4dabbe6fa6adaf6ec8210d8e66",
+      "meaning": "Retained document identity only; original platform, candidate and limitations remain authoritative."
+    },
+    {
+      "path": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence/receipts/integrated-reusable-team-core-passed-20261011.json",
+      "exists": true,
+      "bytes": 2077,
+      "sha256": "835fe4ef5b9bbb956cb2a4f70cb25e597b7b495de9789a6b71216cf3b62c2c01",
+      "meaning": "Retained document identity only; original platform, candidate and limitations remain authoritative."
+    },
+    {
+      "path": "/Users/gqadonis/Projects/references/librefang/docs/plans/agent-fabric-convergence/receipts/c16-practical-team-presets-20261008.json",
+      "exists": true,
+      "bytes": 5917,
+      "sha256": "f6ba96245151dcbb9bf6bfaba74d5865a25371323715aac9d504b60ff7c119af",
+      "meaning": "Retained document identity only; original platform, candidate and limitations remain authoritative."
+    }
+  ],
+  "launcher": {
+    "path": "/Users/gqadonis/Projects/prometheus/prometheus-skill-pack/skills/process/delivery-cadence/scripts/boss-launch.mjs",
+    "sha256": "1a5dffa5cd5a5eef2ab6a1ce4b4249a656040759387cdf01385e80821e79a726",
+    "inspectedOnly": true,
+    "supports": "macOS packaged .app with a newly created disposable userData profile",
+    "existingProfileArgument": false,
+    "homeIsolation": false,
+    "obsoleteDefaultPathExists": false
+  },
+  "host": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "installedAppPathExists": true,
+    "installedCandidateIdentity": "not inspected or accepted",
+    "nativeWindowsAccess": "unknown/unavailable in supplied execution surfaces; no connection attempted",
+    "trustedTrackedInstancePresent": false
+  },
+  "operationsRun": [],
+  "testsOrBuildsRun": [],
+  "serviceOrNetworkMutations": [],
+  "historicalMarkers": {
+    "codeTasks": "61/61",
+    "codeChanges": "20/20",
+    "portfolioTerminal": "43/61: 42 qualified and one historical skipped duplicate"
+  },
+  "limitations": [
+    "Source equality does not qualify changed native runtime or new package.",
+    "Retained receipt summaries are not newly verified raw runtime artifacts.",
+    "Mac and Windows operator acceptance remain separate."
+  ],
+  "gateToolingPreparation": {
+    "path": "scripts/operations/uar110-desktop-operation.mjs",
+    "sha256": "d8cdc086bd76480b1864fbe278fc8ecfd7a8b5d606428062330655b36b5d9d72",
+    "status": "source-authored-not-executed-or-syntax-test-checked",
+    "lines": 394,
+    "sourceCompleteFor": "Existing renderer IPC/DataApi subset with explicit pending native and platform clauses",
+    "launchPrerequisites": [
+      "Maintained launcher forwards THE_BOSS_PROFILE_ROOT and polls its actual userData DevTools path.",
+      "Boss private profile external.shell.home is corrected and package is rebuilt from frozen source.",
+      "Lead opens completed candidate operation boundary."
+    ],
+    "supportedBoundaries": [
+      "startup catalog/library/Claude mirror/whole pack/shim presence",
+      "doctor IPC",
+      "owned user skill and same-profile relaunch",
+      "owned workspace Compass index and real MCP connection/tool cache",
+      "separate readonly file.read IPC",
+      "owned missing executable refusal",
+      "external unreachable diagnostic endpoint status"
+    ],
+    "pending": [
+      "native persisted/empty MCP catalog mutation",
+      "MCP filesystem tool invocation",
+      "OpenSpec shim invocation",
+      "unconfigured shared-memory connection",
+      "current native cancellation without a normal owned Work run",
+      "Docker absent/daemon-down, offered repair, doctor incremental streaming",
+      "native Windows and human acceptance"
+    ],
+    "shutdownPolicy": "Keep open on success/failure; verify exact owned PID/executable/profile; SIGTERM exact PID, wait8s, no force.",
+    "allowedCandidateVersion": "2.2.39 only",
+    "nativePayloadIdentity": "Public packaged binaries/darwin-arm64/payload-manifest.json plus packaged prometheus-skills-mini/release-manifest.json sources/sourceIntent/toolVersion and .uar-sidecar-version; no local marker accepted.",
+    "reopenPortPolicy": "After verified exact owned PID exits, unlink only unchanged regular private-profile DevToolsActivePort; refuse if changed."
+  },
+  "uarHydrationSourceAnchors": {
+    "revision": "d815ef72ac7d2c57a9bd18b23fcc58ffb224f326",
+    "provenance": "Exact anchors supplied by release lead source comparison; desktop owner did not reread UAR checkout.",
+    "source": "src/uar/admin/mcp.rs",
+    "hydrateLine": 201,
+    "persistedLoadLine": 219,
+    "authoritativeEmptyAndFailClosedLine": 225,
+    "startupConsumer": "src/server.rs MCP bootstrap"
+  },
+  "privateProfileShellIsolationRepair": {
+    "status": "source-complete-not-tested-or-built",
+    "observedBoundary": "initialize -> installCommandPath -> shellBlocks -> external.shell.home -> updateShellRcFile",
+    "originalDefect": "external.shell.home ignored PRIVATE_PROFILE_PATHS and selected real sysHome.",
+    "sourceFiles": [
+      {
+        "path": "src/main/core/paths/constants.ts",
+        "sha256": "54ed6bb8a07744078b08e194c6cceaad6d478c26f1cbf93c6718549df4658ced"
+      },
+      {
+        "path": "src/main/core/paths/pathRegistry.ts",
+        "sha256": "6e10fbbab5638c8aa877b9761af72c356147abd966c69883d808d2298d57852d"
+      }
+    ],
+    "traceSources": [
+      {
+        "path": "src/main/services/prometheus/PrometheusIntegrationService.ts",
+        "sha256": "62428b225e852840427fa9c54dc92d8daedd17ff38c43cfc2f71edf8ffafd4e2"
+      },
+      {
+        "path": "src/main/services/prometheus/commandPath.ts",
+        "sha256": "eecd1bdeac8aceb6a2a16c133ee8d00bfce3542a6b6b56ec2ee7b527b9ee48d9"
+      },
+      {
+        "path": "src/main/services/prometheus/shellRcFile.ts",
+        "sha256": "6870cb70a029785eb6a3be9850d55802ddd12651f811107927829f448d12abac"
+      }
+    ],
+    "correction": "Typed private home directory created with existing profile directories; shell home registry uses private home before unchanged dev/default paths.",
+    "securityBoundary": "Actual user shell startup file writes during private-profile startup.",
+    "homeEnvironmentChanged": false,
+    "graph": {
+      "freshnessFilesPresent": false,
+      "boundedSearchAndImpact": "no_match; incomplete coverage",
+      "fallback": "direct source trace; graph absence is not lack of callers"
+    },
+    "incompleteOldCandidateAttempt": {
+      "provenance": "release lead report",
+      "candidate": "2.2.38",
+      "scope": "new launcher-isolation-only attempt",
+      "ownedAppPid": 34119,
+      "stop": "lead reported exact-PID SIGTERM after leak finding",
+      "receipt": "incomplete; no pass claimed",
+      "repeat": "forbidden; next operation only on completed built2.2.39",
+      "restoration": {
+        "path": "openspec/changes/uar-1-1-primary-desktop-release/evidence/incomplete-launcher-rc-restoration.json",
+        "sha256": "8ac691125aee54295b819356f4f934b1cd5d1abfb5a1671783a0943cb9419d8a",
+        "status": "exactly-three-verified-backups-restored-after-explicit-authorization",
+        "rawContentsRecorded": false
+      }
+    }
+  },
+  "normalPromptProcedure": {
+    "path": "openspec/changes/uar-1-1-primary-desktop-release/evidence/uar110-prompt-operation.md",
+    "sha256": "cdc8ab65cbbacfa8567ec85e92f59758e549e176f437360ed14a36fbe0f22666",
+    "status": "source-only-not-operated",
+    "bossfangRevision": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85"
+  },
+  "releaseNoteUpdate": {
+    "path": "resources/cherry-studio/release-history.json",
+    "scope": "Only first2.2.39 entry; English/Chinese private-profile line matches lead electron-builder notes; past entries unchanged."
+  }
+}

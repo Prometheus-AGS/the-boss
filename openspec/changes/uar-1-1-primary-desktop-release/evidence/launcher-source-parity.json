@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-15T21:14:15.247Z",
+  "miniRevision": "7a500cf4b502ac6b8032d7144af59b45a754719f",
+  "files": [
+    {
+      "path": "SKILL.md",
+      "sha256": "e33c198e23a22be3b0ff27ab8ea8b87cd986f8640a198e09538ffa46d8a323ad",
+      "identical": true
+    },
+    {
+      "path": "scripts/boss-launch.mjs",
+      "sha256": "1020e50d1fc3912e3342571d73b77deeade3d9f657aa26bc267390957effbe4d",
+      "identical": true
+    },
+    {
+      "path": "references/boss-profile.md",
+      "sha256": "dcb669dc4c880a71773649bda8872375b2057df60ebc5bcadc8b13277594d16b",
+      "identical": true
+    }
+  ],
+  "operation": "pending"
+}

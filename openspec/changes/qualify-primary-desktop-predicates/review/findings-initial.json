@@ -1,0 +1,53 @@
+{
+  "mode": "artifact",
+  "verdict": "BLOCK",
+  "findings": [
+    {
+      "severity": "CRITICAL",
+      "file": "predicate-matrix.md",
+      "claim": "The packet provides a complete 66-row predicate map to Mac ARM64 and Windows x64 relevance.",
+      "evidence": "The matrix says exact original text and line references are preserved in predicate-map.json, but predicate-map.json is not included in the supplied artifacts. The visible table contains paraphrases rather than original clauses and generally applies the blanket rule “Both selected platforms matter unless noted” instead of recording clause-level platform applicability. tasks.md 1.2 also schedules creation of the clause-level applicability register later, confirming that candidate/source/dependency/platform/receipt applicability is not present in this packet. Without the omitted source text and register, the 66 mappings cannot be checked for silently dropped clauses or incorrect platform scope.",
+      "suggested_fix": "Include predicate-map.json in the reviewed packet with every original unchecked row verbatim, immutable source path/line or identifier, atomic clause decomposition, Mac ARM64 and Windows x64 applicability, disposition, retained receipt, and status. Describe the current matrix as a preliminary row inventory until that artifact exists."
+    },
+    {
+      "severity": "WARNING",
+      "file": "predicate-matrix.md",
+      "claim": "The exclusive totals of 22 evidence/artifact rows, 24 amendment rows, 19 potentially missing-operation rows, and one deferred row accurately follow the category definitions.",
+      "evidence": "The E definition says “no scheduled fresh operation,” but E-classified row prometheus-001 task 3.1b says startup behavior “is Q1,” and E-classified c15 task 1.4 says full private preflight remains pending while design.md assigns task 1.4 to Q7 for a possible fresh operation. C09 B4 likewise allows an invalidated clause to join Q5. Thus rows counted in E can contain scheduled or conditionally scheduled operations, contradicting the stated exclusive category meaning and making the 22/19 split misleading even though the displayed row arithmetic sums to 66.",
+      "suggested_fix": "Classify atomic clauses rather than mixed rows, or redefine E as only the primary reconciliation action and explicitly report how many E rows also contain contingent operations. Recompute and publish the category totals after the applicability register determines those clauses."
+    },
+    {
+      "severity": "WARNING",
+      "file": "tasks.md",
+      "claim": "The plan obtains and preserves candidate-specific operator acceptance for 2.2.38 before closeout.",
+      "evidence": "Design sequencing says to record operator acceptance of the exact 2.2.38 candidate, and task 4.1 instructs the lead to record that acceptance and then archive satisfied changes. No task assigns a Mac or Windows operator to make an acceptance decision, defines the acceptance criteria, or produces an acceptance receipt. Tasks 3.1–3.4 produce operation receipts, which the packet itself distinguishes from candidate-specific customer acceptance. The closeout therefore assumes an acceptance artifact that the task plan never obtains.",
+      "suggested_fix": "Add an explicit post-operation acceptance task for the authorized operator on each required platform, with candidate identity, decision criteria, approver identity, date, and accepted/pending/rejected result. Make task 4.1 and archival conditional on those receipts rather than asking the lead merely to record acceptance."
+    },
+    {
+      "severity": "WARNING",
+      "file": "design.md",
+      "claim": "The historical completion baselines—61/61 code tasks, 20/20 changes, 43/61 terminal portfolio items, KBD revision 709, and 17 archived Cadence deliveries—are preserved from verifiable old evidence.",
+      "evidence": "These figures are asserted in proposal.md and design.md, but the evidence/source-key table contains no frozen ledger, KBD revision artifact, Cadence archive index, or source path supporting any of them. The packet therefore cannot independently distinguish the asserted baseline from a recalculated or altered ledger count.",
+      "suggested_fix": "Reference and include immutable snapshots or hashes for the code-task ledger, 20-change index, 61-item portfolio ledger, KBD revision 709, and Cadence archive index. State the exact counting rule for the skipped duplicate and avoid carrying these numbers into closeout until those artifacts are reconciled."
+    },
+    {
+      "severity": "WARNING",
+      "file": "design.md",
+      "claim": "The plan keeps original owning changes and generated projections immutable while recording approved amendments and archiving satisfied changes.",
+      "evidence": "The Migration Plan says to “append evidence/applicability/disposition records to owning changes,” while also saying to keep immutable originals and generated KBD projections intact. Decision 2 says approved requirement amendments must be recorded “in its owner,” and the closeout sequence says to archive fully satisfied changes. The packet does not identify an append-only sidecar or supported workflow that can perform those actions without modifying or relocating the original change ledger, so the preservation rule and planned closeout are operationally contradictory.",
+      "suggested_fix": "Name the exact append-only evidence/amendment location and archival mechanism. Require amendments to be separate versioned records that quote but do not rewrite original requirements, and prohibit checkbox, status, path, or generated-projection changes unless a separately approved ledger migration explicitly authorizes them."
+    },
+    {
+      "severity": "WARNING",
+      "file": "design.md",
+      "claim": "Q1 has an available real doctor/OpenSpec entrypoint suitable for qualification without production changes.",
+      "evidence": "Q1 requires a “real doctor/OpenSpec entrypoint,” but source key O establishes only an OpenSpec shim and packaged JS dependency closure, explicitly not runtime operation. No invocation path, UI route, IPC/API boundary, or retained receipt is named. Unlike Q7, Q1 has no explicit unavailable-entrypoint disposition, while tasks.md 3.1 directs the operator to complete residual Q1 clauses.",
+      "suggested_fix": "Identify the supported packaged invocation and source/receipt proving it is operator-accessible before placing this clause in Q1. If no entrypoint exists, classify the predicate as absent/pending or a separately scoped production defect rather than requiring the qualification operator to complete it."
+    }
+  ],
+  "judge_model": "gpt-5.6-sol",
+  "producer_model": "unknown",
+  "cross_model_check": "unverified-producer-unknown",
+  "isolation_mode": "rest-gateway:http://127.0.0.1:8181/v1",
+  "review_scope": "planning only; no product qualification"
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-15T21:04:15.871Z",
+  "from": "/Users/gqadonis/Projects/prometheus/the-boss/resources/binaries/darwin-arm64",
+  "to": "/Users/gqadonis/Projects/prometheus/the-boss/.context/cherry-electron-dev/prior-binaries-2.2.38",
+  "markers": [
+    ".uar-local-payload.json",
+    ".liter-local-payload.json"
+  ],
+  "reason": "Retain generated local-only2.2.38 staging for rollback; public2.2.39 packaging will download verified pinned payloads into an empty owned staging directory.",
+  "deletedFiles": 0
+}
