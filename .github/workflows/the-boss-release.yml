@@ -128,6 +128,11 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
+      - name: Select Xcode 26.3 for the Swift 6.2 speech helper
+        if: runner.os == 'macOS'
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_26.3.app/Contents/Developer
+          swift --version
       - name: Import complete UAR sidecar payload
         if: env.THE_BOSS_UAR_ENABLED == '1'
         env:
