@@ -231,7 +231,7 @@ export async function resolveProviderAiSdkConfig(
     { match: (p) => p.id === GROK_CLI_PROVIDER_ID, build: withProviderAuth('oauth', buildGrokCliConfig) },
     {
       match: (p) => isManagedCherryCloudModel(p.id),
-      build: withoutCredential((ctx) => buildCherryCloudProviderConfig(ctx.endpointType, ctx.endpoint))
+      build: withoutCredential((ctx) => buildCherryCloudProviderConfig(ctx.endpointType, ctx.endpoint, ctx.model.id))
     },
     { match: (p) => p.id === CHERRYAI_PROVIDER_ID, build: withSelectedApiKey(buildCherryAIConfig) },
     // Local embedding runs fully in-process (transformers.js in a worker): no
@@ -248,8 +248,8 @@ export async function resolveProviderAiSdkConfig(
       }))
     },
     { match: (p) => isOllamaProvider(p), build: withSelectedApiKey(buildOllamaConfig) },
-    // ComfyUI has no OpenAI fallback or credential, so its builder bypasses both.
-    { match: (p) => matchesPreset(p, SystemProviderIds.comfyui), build: withoutCredential(buildComfyuiConfig) },
+    // ComfyUI has no OpenAI fallback; its key is for partner nodes, not the server.
+    { match: (p) => matchesPreset(p, SystemProviderIds.comfyui), build: withSelectedApiKey(buildComfyuiConfig) },
     { match: (p) => isAzureOpenAIProvider(p), build: withSelectedApiKey(buildAzureConfig) },
     // DashScope chat is OpenAI-compatible, but Bailian rerank uses a provider-specific URL.
     // Only replace the OpenAI-compatible branch so other DashScope endpoint families stay routed normally.
@@ -502,7 +502,7 @@ function buildCodexFetch() {
  * proxy (`cli-chat-proxy.grok.com/v1/responses`) with OAuth bearer auth. The
  * per-request `fetch` injects a freshly-refreshed token + the Grok-CLI proxy
  * headers, and rewrites the body into the shape the proxy accepts (hoisting
- * system turns into `instructions`, dropping reasoning knobs) — none of which
+ * system turns into `instructions`, normalizing reasoning) — none of which
  * the generic Responses adapter does on its own.
  */
 function buildGrokCliConfig(ctx: BuilderContext): ProviderConfig<'openai'> {
@@ -611,10 +611,11 @@ function buildOllamaConfig(ctx: BuilderContext): ProviderConfig<'ollama'> {
 }
 
 /**
- * ComfyUI: a credential-free local server, so the host is the whole contract — no
- * `Authorization` even when a key field happens to be filled in (the extension's
- * `apiKey` is accepted for symmetry and never read). `baseURL` is the server root;
- * the transport appends its own paths (`/prompt`, `/history/{id}`, `/view?…`).
+ * ComfyUI: a credential-free local server, so no `Authorization` ever goes to it.
+ * The key, when one is set, is a Comfy API key: the transport hands it to the
+ * workflow's partner nodes (Flux Pro, Kling, …) in the `/prompt` body, which is
+ * where ComfyUI reads it. `baseURL` is the server root; the transport appends its
+ * own paths (`/prompt`, `/history/{id}`, `/view?…`).
  */
 function buildComfyuiConfig(ctx: BuilderContext): ProviderConfig<'comfyui'> {
   return {
@@ -962,7 +963,9 @@ function buildNewApiConfig(ctx: BuilderContext): ProviderConfig<'newapi'> {
     rawBaseURL = ctx.baseConfig.baseURL
   }
 
-  const baseURL = formatNewApiBaseURL(rawBaseURL, endpointType)
+  const baseURL = isWithTrailingSharp(ctx.resolvedBaseUrl)
+    ? ctx.baseConfig.baseURL
+    : formatNewApiBaseURL(rawBaseURL, endpointType)
 
   return {
     providerId: 'newapi',

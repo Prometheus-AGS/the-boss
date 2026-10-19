@@ -1,6 +1,9 @@
 # The Boss Contributor Guide
 
+English | [中文](CONTRIBUTING.zh.md)
+
 Contribute improvements to The Boss desktop workspace, documentation, or integrations through [this repository](https://github.com/Prometheus-AGS/the-boss). Start with an observed problem or explicit requirement, keep the change scoped, and preserve existing behavior outside that scope.
+
 
 ## Before you start
 

@@ -9,6 +9,7 @@
  * Helper constants must be primitives; put helper objects in a separate file.
  */
 
+import { createHash } from 'node:crypto'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -59,6 +60,7 @@ export function buildPathRegistry() {
   const appExtraResources = process.resourcesPath
   // `resources/` inside asar (bundled assets) — distinct from appExtraResources
   const appRootResources = path.join(app.getAppPath(), 'resources')
+  const voiceHelperFilename = process.platform === 'win32' ? 'cherry-system-speech.exe' : 'cherry-system-speech'
 
   return Object.freeze({
     // -- A. cherry.* — CHERRY_HOME infrastructure --
@@ -100,8 +102,24 @@ export function buildPathRegistry() {
       : path.join(__dirname, '../../migrations/sqlite-drizzle'),
 
     // -- D. feature.* — grouped by feature, physical location is irrelevant --
+    'feature.selection.native_panel_file': path.join(
+      appRootResources,
+      'binaries',
+      `darwin-${process.arch}`,
+      'selection-panel.node'
+    ),
 
     'feature.remote_access.identity_file': path.join(appUserDataRuntime, 'remote-identity.enc'),
+    // Plaintext fallback (0600) used only when no OS key store is available
+    'feature.remote_access.plain_identity_file': path.join(appUserDataRuntime, 'remote-identity.key'),
+
+    'feature.computer_use.runtime': app.isPackaged
+      ? path.join(
+          appExtraResources,
+          'computer-use',
+          isMac ? 'Cherry Computer Use.app' : isWin ? 'open-computer-use.exe' : 'open-computer-use'
+        )
+      : path.join(app.getAppPath(), '.context', isWin ? 'computer-use-runtime.exe' : 'computer-use-runtime'),
 
     // Provider registry data (models.json, providers.json, etc.)
     'feature.provider_registry.data': app.isPackaged
@@ -118,9 +136,21 @@ export function buildPathRegistry() {
     // Local embedding model cache (transformers.js HF cache root, downloaded on first use)
     'feature.embedding.models': path.join(appUserDataRuntime, 'models', 'qwen3-embedding'),
 
+    'feature.claude_code.binary': path.join(appUserDataToolchain, 'claude-agent-sdk'),
+
     // onnxruntime-node native binary (napi addon + shared lib), downloaded on first
     // use of local embedding or local OCR — see ai/localModel's shared artifacts.
     'feature.onnxruntime.binary': path.join(appUserDataToolchain, 'onnxruntime'),
+
+    // sherpa-onnx native binding and its private onnxruntime, downloaded on demand.
+    'feature.sherpa_onnx.binary': path.join(appUserDataToolchain, 'sherpa-onnx'),
+
+    // ASR model files, downloaded on demand.
+    'feature.asr.qwen3': path.join(appUserDataRuntime, 'models', 'qwen3-asr-1.7b-8bit'),
+    'feature.asr.funasr': path.join(appUserDataRuntime, 'models', 'funasr-nano'),
+    'feature.mlx.binary': path.join(appUserDataToolchain, 'mlx-node'),
+    'feature.tts.qwen3': path.join(appUserDataRuntime, 'models', 'qwen3-tts-0.6b-customvoice-8bit'),
+    'feature.tts.kokoro': path.join(appUserDataRuntime, 'models', 'kokoro-multi-lang-v1.1'),
 
     // BabelDOC runtime cache (layout model, fonts, CMap/tiktoken assets)
     'feature.pdf_translation.babeldoc': path.join(appUserDataRuntime, 'models', 'babeldoc'),
@@ -213,6 +243,8 @@ export function buildPathRegistry() {
       'workspaces',
       'personal'
     ),
+    'feature.agents.pi.vcc_file': path.join(app.getAppPath(), 'out', 'main', 'pi-vcc.mjs'),
+
     'feature.agents.data': path.join(appUserDataData, 'Agents'), // per-agent identity + memory data
     'feature.agents.forks': path.join(appUserDataData, 'Agents', '.forks'), // owned fork snapshots; retained for Pi lineage
     'feature.agents.system_workspaces': path.join(appUserDataData, 'Agents', 'system'), // app-owned session workspaces
@@ -279,6 +311,7 @@ export function buildPathRegistry() {
     // durable (see restoreJournal.ts). Never relocate the two independently.
     'feature.backup.restore.file': path.join(appUserDataData, 'restore-journal.json'),
     'feature.backup.restore.staging': path.join(appUserData, 'restore-staging'),
+    'feature.backup.restore.session': path.join(appUserData, 'restore-session'),
 
     // Stored in the profile it authorizes for reset.
     'feature.data_reset.marker_file': path.join(appUserData, 'data-reset.pending.json'),
@@ -295,7 +328,25 @@ export function buildPathRegistry() {
     'feature.mcp.resource_results.temp': path.join(appTemp, 'mcp-resource-results'),
     'feature.preprocess.temp': path.join(appTemp, 'preprocess'),
     'feature.pdf_translation.temp': path.join(appTemp, 'pdf-translation'),
-    'feature.lan_transfer.temp': path.join(appTemp, 'lan-transfer'),
+    'feature.files.intakes': path.join(appUserDataData, 'FileIntakes'),
+    'feature.voice.temp': path.join(
+      appTemp,
+      'voice',
+      createHash('sha256').update(path.resolve(appUserData)).digest('hex')
+    ),
+    'feature.voice.helper_file': app.isPackaged
+      ? process.platform === 'darwin'
+        ? path.join(appExtraResources, '..', 'Helpers', voiceHelperFilename)
+        : path.join(appExtraResources, 'system-speech', voiceHelperFilename)
+      : path.join(
+          app.getAppPath(),
+          'packages',
+          'system-speech',
+          'dist',
+          'native',
+          `${process.platform}-${process.arch}`,
+          voiceHelperFilename
+        ),
     // FileManager's `withTempCopy` escape hatch parent dir; each call mkdtemps a
     // unique sub-directory under here.
     'feature.files.tempcopy.temp': path.join(appTemp, 'files-tempcopy'),
@@ -307,7 +358,8 @@ export function buildPathRegistry() {
     'v1.agents.claude': path.join(appUserData, '.claude'),
 
     // -- F. external.* — third-party tool paths (Cherry reads/writes, does NOT own) --
-    'external.shell.home': PRIVATE_PROFILE_PATHS?.home ?? (DEV_PROFILE_ROOT ? path.join(DEV_PROFILE_ROOT, 'home') : sysHome),
+    'external.shell.home':
+      PRIVATE_PROFILE_PATHS?.home ?? (DEV_PROFILE_ROOT ? path.join(DEV_PROFILE_ROOT, 'home') : sysHome),
     'external.claude.config': path.join(sysHome, '.claude'),
     'external.browser.chrome': isMac
       ? path.join(sysHome, 'Library/Application Support/Google/Chrome')
@@ -399,13 +451,17 @@ const NO_ENSURE = [
   'app.install',
   'app.exe_file',
   'app.extra_resources',
+  'feature.voice.helper_file',
   'app.root.resources',
   'app.root.resources.scripts',
   'app.root.resources.binaries',
+  'feature.selection.native_panel_file',
   'app.utility_process',
   'app.session.webview',
+  'feature.backup.restore.session',
   'app.database.migrations',
   'feature.provider_registry.data',
+  'feature.computer_use.runtime',
   'feature.pdfjs.cmaps',
   'feature.pdfjs.standard_fonts',
   'feature.webview.preload_file',
@@ -418,6 +474,8 @@ const NO_ENSURE = [
   // The shell writer must create private backups with mode 0700 itself.
   'feature.prometheus.commands.rc_backups',
   'feature.prometheus.commands.legacy',
+  'feature.agents.pi.vcc_file',
+
   'feature.mini_app.builtin',
   // AgentSessionService stores this path through DataApi. The runtime creates
   // the concrete session directory later, keeping database writes filesystem-free.

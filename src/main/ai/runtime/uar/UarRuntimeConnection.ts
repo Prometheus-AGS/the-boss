@@ -14,10 +14,10 @@ import { resolveMountedMcpServers } from '@main/ai/agents/builtin/builtinAgentCa
 import {
   buildAgentMcpServers,
   resolveLinkedNotifyChannel,
+  warmAgentMcpToolCatalogs,
   type McpServerSnapshotMap
 } from '@main/ai/runtime/agentMcpServers'
 import { buildAgentUserContent } from '@main/ai/runtime/agentUserContent'
-import { warmMcpToolCatalogs } from '@main/ai/runtime/pi/piMcpToolAdapter'
 import { skillService } from '@main/ai/skills/SkillService'
 import { wrapSteerReminder } from '@main/ai/steerReminder'
 import { toolApprovalRegistry } from '@main/ai/toolApproval/ToolApprovalRegistry'
@@ -212,6 +212,10 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
   private async runTurn(input: AgentRuntimeUserInput, admitted: () => void): Promise<void> {
     let projection = createUarSecretProjection([])
     let bridge: UarHostMcpBridge | undefined
+    const closeBridge = () =>
+      bridge?.close().catch((error) => {
+        throw projection.error(error)
+      })
     try {
       const placement = this.placement
       if (!placement) throw new Error('UAR session placement is unavailable')
@@ -238,7 +242,10 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
           ? undefined
           : await resolveUarModelAssignment(storedAgent.configuration?.uar_model_assignment, this.input.modelId)
       if (desiredAssignment?.credential) {
-        projection = projection.withValues([desiredAssignment.credential.api_key, desiredAssignment.credential.base_url])
+        projection = projection.withValues([
+          desiredAssignment.credential.api_key,
+          desiredAssignment.credential.base_url
+        ])
       }
       const skillIds = await this.resolveSkillIds(agent.id)
       const catalog = await this.ensureCatalogAgent(storedAgent, desiredAssignment, skillIds, projection)
@@ -273,7 +280,12 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
         },
         ...(this.mapReasoningEffort() ? { reasoning_effort: this.mapReasoningEffort() } : {}),
         ...(coldSession && placementIntent === 'new'
-          ? { history: { session_id: placement.nativeSessionId, messages: projection.history(this.loadHistory(input.message.id)) } }
+          ? {
+              history: {
+                session_id: placement.nativeSessionId,
+                messages: projection.history(this.loadHistory(input.message.id))
+              }
+            }
           : {})
       }
       const runPath = this.reattaching
@@ -350,9 +362,8 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
           signal: abort.signal,
           bridge,
           projection,
-          emit: (event) => this.eventQueue.push(
-            event.type === 'error' ? { ...event, error: projection.error(event.error) } : event
-          ),
+          emit: (event) =>
+            this.eventQueue.push(event.type === 'error' ? { ...event, error: projection.error(event.error) } : event),
           isClosed: () => this.closed
         })
         let streamError: unknown = new Error('UAR stream ended before a terminal event')
@@ -388,11 +399,7 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
     } catch (error) {
       throw projection.error(error)
     } finally {
-      try {
-        await bridge?.close()
-      } catch (error) {
-        throw projection.error(error)
-      }
+      await closeBridge()
     }
   }
 
@@ -404,7 +411,7 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
     snapshots: McpServerSnapshotMap,
     getProjection: () => UarSecretProjection
   ): Promise<UarHostMcpBridge> {
-    await warmMcpToolCatalogs(agent.mcps ?? [])
+    await warmAgentMcpToolCatalogs(agent.mcps ?? [])
     const linkedChannel = resolveLinkedNotifyChannel(session.id, agent.id)
     const mountedServers = resolveMountedMcpServers(agent, {
       browserEnabled: application.get('PreferenceService').get('app.browser.agent_control.enabled'),
@@ -659,7 +666,10 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
     return (await response.json()) as UarAgentArtifact
   }
 
-  private async createCatalogAgent(artifact: UarAgentArtifact, projection: UarSecretProjection): Promise<UarAgentArtifact> {
+  private async createCatalogAgent(
+    artifact: UarAgentArtifact,
+    projection: UarSecretProjection
+  ): Promise<UarAgentArtifact> {
     const response = await this.runtimeRequest('/api/agents', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -736,11 +746,13 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
         )
     )
     if (!completed) return false
-    return !uarApprovalLifecycleStore.snapshot(this.input.sessionId).some(
-      (admission) =>
-        (admission.rootRunId === sourceRunId || admission.executingRunId === sourceRunId) &&
-        !['succeeded', 'failed', 'denied', 'cancelled', 'invalidated'].includes(admission.state)
-    )
+    return !uarApprovalLifecycleStore
+      .snapshot(this.input.sessionId)
+      .some(
+        (admission) =>
+          (admission.rootRunId === sourceRunId || admission.executingRunId === sourceRunId) &&
+          !['succeeded', 'failed', 'denied', 'cancelled', 'invalidated'].includes(admission.state)
+      )
   }
 
   private loadHistory(excludeMessageId: string): UarHistoryMessage[] {
@@ -835,7 +847,10 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
   }
 
   private async responseError(response: Response, prefix: string, projection: UarSecretProjection): Promise<Error> {
-    const detail = projection.text(await response.text()).slice(0, 1_000).trim()
+    const detail = projection
+      .text(await response.text())
+      .slice(0, 1_000)
+      .trim()
     return new Error(`${prefix} (HTTP ${response.status})${detail ? `: ${detail}` : ''}`)
   }
 }

@@ -27,7 +27,7 @@ const VARIANT_CLASS: Record<keyof typeof VARIANT_TAG, string> = {
 
 /** `Text` — the `uar.a2ui/1` typographic primitive. `text` supports simple Markdown-free formatting per the spec; we render it as plain text (no HTML injection). */
 export const UarText: FC<{ props: UarComponentProps<typeof TextApi> }> = ({ props }) => {
-  const variant = (props.variant ?? 'body') as keyof typeof VARIANT_TAG
+  const variant = props.variant ?? 'body'
   const Tag = VARIANT_TAG[variant] as ElementType
   return (
     <Tag

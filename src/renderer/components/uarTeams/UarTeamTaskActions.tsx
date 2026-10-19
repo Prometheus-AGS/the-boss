@@ -77,7 +77,7 @@ export function UarTeamTaskActions({ workspaceId, instance, task, ownership, onC
     const fingerprint = JSON.stringify([instance.id, task.id, task.revision, instance.revision, action, memberId])
     const intent =
       intents.current[action]?.fingerprint === fingerprint
-        ? intents.current[action]!
+        ? intents.current[action]
         : { fingerprint, commandId: crypto.randomUUID() }
     intents.current[action] = intent
     setBusy(action)

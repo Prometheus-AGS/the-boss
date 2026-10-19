@@ -7,9 +7,9 @@ import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/compon
 import { ipcApi } from '@renderer/ipc'
 import type { UarDurableOperation, UarInstanceAction, UarInstanceProfile } from '@shared/types/uarDurableAdministration'
 
-import { useUarDurableWorkspace } from './useUarDurableWorkspace'
 import { UarDurableTurnControls } from './UarDurableTurnControls'
 import { UarLifecycleActivity } from './UarLifecycleActivity'
+import { useUarDurableWorkspace } from './useUarDurableWorkspace'
 
 const ACTIONS: UarInstanceAction[] = ['activate', 'passivate', 'drain', 'disable', 'restart', 'cancel']
 const PROFILES: UarInstanceProfile[] = ['request', 'on_demand', 'resident']
@@ -259,7 +259,7 @@ export function UarDurableInstancesPanel({ workspaceId }: { workspaceId: string 
                     )}
                   </dl>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {ACTIONS.filter((action) => canUse(`agent-instances.${action}` as UarDurableOperation)).map((action) => {
+                    {ACTIONS.filter((action) => canUse(`agent-instances.${action}`)).map((action) => {
                       const operation = `agent-instances.${action}` as UarDurableOperation
                       return (
                         <Button
@@ -282,9 +282,15 @@ export function UarDurableInstancesPanel({ workspaceId }: { workspaceId: string 
                       )
                     })}
                   </div>
-                  <UarDurableTurnControls workspaceId={workspaceId} instance={instance}
-                    disabled={busy || refreshRequired || !canUse('agent-instances.turn')} refresh={refresh} />
-                  <dl className="mt-4"><UarLifecycleActivity instance={instance} /></dl>
+                  <UarDurableTurnControls
+                    workspaceId={workspaceId}
+                    instance={instance}
+                    disabled={busy || refreshRequired || !canUse('agent-instances.turn')}
+                    refresh={refresh}
+                  />
+                  <dl className="mt-4">
+                    <UarLifecycleActivity instance={instance} />
+                  </dl>
                 </article>
               ))}
             </div>

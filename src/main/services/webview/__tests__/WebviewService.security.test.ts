@@ -28,7 +28,7 @@ describe('the site webview preload', () => {
       fromPartition: vi.fn(() => ({
         getUserAgent: () => 'Mozilla/5.0 CherryStudio/1.0 Electron/30.0 Safari/537',
         setUserAgent: vi.fn(),
-        webRequest: { onBeforeSendHeaders: vi.fn() }
+        webRequest: { onBeforeSendHeaders: vi.fn(), onBeforeRequest: vi.fn() }
       }))
     })
     await (new WebviewService() as unknown as { onInit: () => Promise<void> }).onInit()

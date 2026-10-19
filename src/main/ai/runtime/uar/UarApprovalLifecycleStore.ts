@@ -37,7 +37,10 @@ const admissionStates = new Set<UarHostAdmissionState>([
 class UarApprovalLifecycleStore {
   persist(snapshot: UarHostAdmissionSnapshot): void {
     application.get('DbService').withWriteTx((tx) => {
-      const document = this.readDocument(tx.select({ value: appStateTable.value }).from(appStateTable).where(eq(appStateTable.key, STORE_KEY)).get()?.value)
+      const document = this.readDocument(
+        tx.select({ value: appStateTable.value }).from(appStateTable).where(eq(appStateTable.key, STORE_KEY)).get()
+          ?.value
+      )
       const records = this.reconcile(document.records)
       const index = records.findIndex((entry) => entry.admissionId === snapshot.admissionId)
       const next: StoredAdmission = { ...snapshot, processEpoch: PROCESS_EPOCH }
@@ -51,14 +54,21 @@ class UarApprovalLifecycleStore {
 
   snapshot(sessionId?: string): UarHostAdmissionSnapshot[] {
     return application.get('DbService').withWriteTx((tx) => {
-      const current = this.readDocument(tx.select({ value: appStateTable.value }).from(appStateTable).where(eq(appStateTable.key, STORE_KEY)).get()?.value)
+      const current = this.readDocument(
+        tx.select({ value: appStateTable.value }).from(appStateTable).where(eq(appStateTable.key, STORE_KEY)).get()
+          ?.value
+      )
       const records = this.reconcile(current.records)
       if (records.some((entry, index) => entry !== current.records[index])) {
         this.write(tx, { version: STORE_VERSION, records })
       }
       return records
         .filter((entry) => !sessionId || entry.sessionId === sessionId)
-        .map(({ processEpoch: _processEpoch, ...entry }) => entry)
+        .map((entry) => {
+          const snapshot = { ...entry }
+          Reflect.deleteProperty(snapshot, 'processEpoch')
+          return snapshot
+        })
     })
   }
 

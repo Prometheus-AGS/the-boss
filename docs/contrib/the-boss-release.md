@@ -32,7 +32,7 @@ version and customer profile. `release_version` must match `package.json`, and a
 version already associated with another source or profile is rejected. The
 `non-uar` profile publishes Windows x64/ARM64 and macOS arm64/x64 with
 `THE_BOSS_UAR_ENABLED=0`; it remains the emergency path when UAR sidecar payloads
-are unavailable. The 2.2.2 dispatch defaults to `uar-enabled`; selecting the
+are unavailable. The 2.2.40 dispatch defaults to `uar-enabled`; selecting the
 emergency profile is explicit.
 
 For a UAR customer release, dispatch the workflow with `release_profile` set to
@@ -85,20 +85,18 @@ set that development environment variable for the standard public build.
    inside the packaging commands are part of the build. Retain the separate
    Windows and macOS signing configuration and report actual signing status in
    the release metadata.
-6. Each successful native job uploads its installer and an immutable
-   `release-platform-v<version>-<profile>-<platform>-<arch>-<source>.json` asset to
-   GitHub Releases. It then submits that asset to the single publication queue.
-   Publication runs are serialized under `the-boss-release-publication`; native
-   builds remain independent. The coordinator reloads the current branch, merges
-   one idempotent platform record while retaining completed peers, and retries a
-   changed branch head instead of overwriting newer metadata.
-7. The coordinator makes the release public, downloads the installer, verifies
-   its recorded byte size and SHA-256, and dispatches
-   `boss_release_platform_published` to `Know-Me-Tools/boss-landing-spot`. The
-   repository secret `REPO_DISPATCH_TOKEN` must be authorized to dispatch that
-   repository. The landing receiver resolves the immutable manifest asset from
-   the public GitHub Release, regenerates and deploys its release data, and
-   verifies the public bytes before accepting the next queued platform.
+6. Each successful native job uploads its installer to the draft GitHub Release
+   and saves its platform manifest as a workflow artifact. Publication waits for
+   every selected native job to succeed. The final job downloads each installer
+   from the draft release and checks its byte size and SHA-256 against the native
+   manifest. It then uploads immutable
+   `release-platform-v<version>-<profile>-<platform>-<arch>-<source>.json` records.
+7. The final job writes one complete release metadata entry, confirms no platform
+   remains pending, and makes the GitHub Release public. It dispatches both
+   platform records to `Know-Me-Tools/boss-landing-spot`. The repository secret
+   `REPO_DISPATCH_TOKEN` must be authorized to dispatch that repository. Confirm
+   that the landing receiver processes both records and that both public links,
+   sizes, and SHA-256 values match the release manifests.
 
 For a failed native build, the payload workflow retains completed tool artifacts
 and compiler caches. Its `reuse_native_run`, `native_tools`, and `reuse_image_run`

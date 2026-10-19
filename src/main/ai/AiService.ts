@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import { isDeepStrictEqual } from 'node:util'
 
+import type { CreateMessageRequestParamsBase, CreateMessageResult } from '@modelcontextprotocol/client'
 import {
   type EmbeddingModelUsage,
+  type FinishReason,
   isToolUIPart,
   type LanguageModelUsage,
   type ModelMessage,
@@ -41,8 +43,8 @@ import { installPrometheusPack } from '@main/utils/prometheusPack'
 import type { CompactionSink } from '@shared/ai/compaction'
 import type { AiToolApprovalRespondRequest, AiToolApprovalRespondResponse } from '@shared/ai/transport'
 import { isDataApiNotFoundError } from '@shared/data/api/errors'
-import { OPENAI_CODEX_PROVIDER_ID } from '@shared/data/presets/codex'
 import type { JobSnapshot } from '@shared/data/api/schemas/jobs'
+import { OPENAI_CODEX_PROVIDER_ID } from '@shared/data/presets/codex'
 import { type Assistant } from '@shared/data/types/assistant'
 import type { CleanupPolicy, FileEntry } from '@shared/data/types/file'
 import type { ImageGenerationMode, ListedModels } from '@shared/data/types/model'
@@ -187,7 +189,9 @@ function resolveTextRetryPolicy(
       ...configured,
       enabled: true,
       maxAttempts:
-        requestMaxRetries === undefined ? Math.min(configured.maxAttempts, 2) : Math.max(1, Math.trunc(requestMaxRetries)),
+        requestMaxRetries === undefined
+          ? Math.min(configured.maxAttempts, 2)
+          : Math.max(1, Math.trunc(requestMaxRetries)),
       fallbackModelIds: []
     }
   }
@@ -204,19 +208,35 @@ function createCaptureContext(input: {
   credentialReceipt: Parameters<typeof createAiUsageCaptureContext>[0]['credentialReceipt']
   source?: SourceSnapshot | null
   messageRef?: MessageRef | null
-}): AiUsageCaptureContext {
-  return createAiUsageCaptureContext({
-    providerId: input.provider.id,
-    providerName: input.provider.name,
-    modelId: input.sdkModelId,
-    modelName: input.model.name,
-    pricing: input.model.pricing,
-    trustProviderReportedCost: input.provider.reportsActualCost,
-    reportedCostCurrency: input.provider.reportedCostCurrency,
-    credentialReceipt: input.credentialReceipt,
-    source: input.source,
-    messageRef: input.messageRef
-  })
+}): () => AiUsageCaptureContext {
+  return () => {
+    const modelId = parseUniqueModelId(input.model.id).modelId
+    let pricingSnapshot: AiUsageCaptureContext['pricingSnapshot'] = null
+    try {
+      const provider = providerService.getByProviderId(input.provider.id)
+      const model = modelService.getByKey(input.provider.id, modelId)
+      pricingSnapshot = createAiUsageCaptureContext({
+        providerId: provider.id,
+        modelId,
+        pricing: model.pricing,
+        billing: provider.settings.billing
+      }).pricingSnapshot
+    } catch (error) {
+      logger.warn('Could not capture invocation pricing', { error })
+    }
+    return createAiUsageCaptureContext({
+      providerId: input.provider.id,
+      providerName: input.provider.name,
+      modelId: input.sdkModelId,
+      modelName: input.model.name,
+      pricingSnapshot,
+      trustProviderReportedCost: input.provider.reportsActualCost,
+      reportedCostCurrency: input.provider.reportedCostCurrency,
+      credentialReceipt: input.credentialReceipt,
+      source: input.source,
+      messageRef: input.messageRef
+    })
+  }
 }
 
 function createProviderCallHandler(context: AiUsageCaptureContext): RuntimeProviderCallHandler {
@@ -297,6 +317,16 @@ export interface AiGenerateRequest extends AiChatRequest {
 export interface AiGenerateResult {
   text: string
   usage?: LanguageModelUsage
+  finishReason: FinishReason
+  rawFinishReason?: string
+}
+
+function toMcpSamplingStopReason(result: Pick<AiGenerateResult, 'finishReason' | 'rawFinishReason'>): string {
+  if (result.finishReason === 'length') return 'maxTokens'
+  if (result.finishReason !== 'stop') return result.rawFinishReason ?? result.finishReason
+
+  const rawReason = result.rawFinishReason?.replace(/[^a-z]/gi, '').toLowerCase()
+  return rawReason === 'stopsequence' ? 'stopSequence' : 'endTurn'
 }
 
 /** Image generation request. */
@@ -398,7 +428,7 @@ export interface AiRerankResult {
  */
 @Injectable('AiService')
 @ServicePhase(Phase.WhenReady)
-@DependsOn(['McpRuntimeService', 'McpCatalogService', 'AiStreamManager', 'JobManager'])
+@DependsOn(['McpRuntimeService', 'McpCatalogService', 'AiStreamManager', 'JobManager', 'AutomationReplService'])
 export class AiService extends BaseService {
   // Per-request AbortControllers for the cancellable one-shot routes (`ai.image.generate`,
   // `ai.text.generate`), paired with their `*.abort` routes. Key is the renderer-generated
@@ -674,7 +704,9 @@ export class AiService extends BaseService {
         extraFeatures,
         primaryCredentialReceipt: credentialReceipt,
         createUsagePlugin: (fallbackReceipt) =>
-          createAiUsagePlugin(createAiUsageCaptureContext({ ...usageContext, credentialReceipt: fallbackReceipt }))
+          createAiUsagePlugin(() =>
+            createAiUsageCaptureContext({ ...usageContext(), credentialReceipt: fallbackReceipt })
+          )
       })
       const retryPolicy = resolveTextRetryPolicy(
         readRetryPolicy(),
@@ -706,8 +738,8 @@ export class AiService extends BaseService {
                 model,
                 sdkModelId,
                 credentialReceipt,
-                source: usageContext.source,
-                messageRef: usageContext.messageRef
+                source: usageContext().source,
+                messageRef: usageContext().messageRef
               })
             )
         }),
@@ -795,6 +827,8 @@ export class AiService extends BaseService {
   ): Promise<AiGenerateResult> {
     logger.info('generateText started', { assistantId: request.assistantId })
     const signal = request.requestOptions?.signal
+    // Model messages go directly to generation, not the UI-message context scanner.
+    const { messages, ...parameterRequest } = request
 
     const repairUsagePlugins: { current?: AiPlugin[] } = {}
     const {
@@ -809,7 +843,7 @@ export class AiService extends BaseService {
       assistant,
       hookParts,
       nativeFileSupport
-    } = await this.buildAgentParamsFor(request, signal, extraFeatures, () => repairUsagePlugins.current ?? [])
+    } = await this.buildAgentParamsFor(parameterRequest, signal, extraFeatures, () => repairUsagePlugins.current ?? [])
     const usageContext = createCaptureContext({
       provider,
       model,
@@ -838,7 +872,9 @@ export class AiService extends BaseService {
         extraFeatures,
         primaryCredentialReceipt: credentialReceipt,
         createUsagePlugin: (fallbackReceipt) =>
-          createAiUsagePlugin(createAiUsageCaptureContext({ ...usageContext, credentialReceipt: fallbackReceipt }))
+          createAiUsagePlugin(() =>
+            createAiUsageCaptureContext({ ...usageContext(), credentialReceipt: fallbackReceipt })
+          )
       })
       const retryPolicy = resolveTextRetryPolicy(
         readRetryPolicy(),
@@ -866,8 +902,8 @@ export class AiService extends BaseService {
                 model,
                 sdkModelId,
                 credentialReceipt,
-                source: usageContext.source,
-                messageRef: usageContext.messageRef
+                source: usageContext().source,
+                messageRef: usageContext().messageRef
               })
             )
         }),
@@ -891,7 +927,7 @@ export class AiService extends BaseService {
       plugins: [...plugins, usagePlugin],
       wrapModel,
       tools,
-      system: request.system ?? system,
+      system,
       options: wrapModel ? { ...options, maxRetries: 0, repairToolCall } : options,
       hookParts: [this.analyticsHookPart(model, request.tokenUsageSource ?? 'chat'), ...hookParts],
       mediaCapabilities,
@@ -902,7 +938,63 @@ export class AiService extends BaseService {
     })
 
     // prompt and messages are mutually exclusive in AI SDK; preserve that.
-    return agent.generate(request.prompt ? { prompt: request.prompt } : { messages: request.messages ?? [] }, signal)
+    return agent.generate(request.prompt ? { prompt: request.prompt } : { messages: messages ?? [] }, signal)
+  }
+
+  /**
+   * Restricted host callback for an MCP embedded sampling request. The request
+   * is non-streaming and `disableTools` is enforced in buildAgentParams so an
+   * MCP server cannot recursively reach Cherry or MCP tools.
+   */
+  async generateMcpSampling(
+    model: `${string}::${string}`,
+    request: CreateMessageRequestParamsBase,
+    signal: AbortSignal
+  ): Promise<CreateMessageResult> {
+    const messages = request.messages.map((message): ModelMessage => {
+      const parts = Array.isArray(message.content) ? message.content : [message.content]
+      const content = parts.map((part) => {
+        switch (part.type) {
+          case 'text':
+            return { type: 'text' as const, text: part.text }
+          case 'image':
+            return { type: 'image' as const, image: part.data, mediaType: part.mimeType }
+          case 'audio':
+            return { type: 'file' as const, data: part.data, mediaType: part.mimeType }
+          default:
+            throw new Error(`Unsupported MCP sampling content type: ${part.type}`)
+        }
+      })
+      if (message.role === 'assistant') {
+        // AI SDK represents assistant media as files; image parts are user-only.
+        return {
+          role: 'assistant',
+          content: content.map((part) =>
+            part.type === 'image' ? { type: 'file', data: part.image, mediaType: part.mediaType } : part
+          )
+        }
+      }
+      return { role: message.role, content }
+    })
+    const result = await this.generateText({
+      uniqueModelId: model,
+      conversation: { id: `mcp-sampling:${randomUUID()}` },
+      system: request.systemPrompt,
+      messages,
+      disableTools: true,
+      callOverrides: {
+        maxOutputTokens: request.maxTokens,
+        ...(typeof request.temperature === 'number' ? { temperature: request.temperature } : {}),
+        ...(Array.isArray(request.stopSequences) ? { stopSequences: request.stopSequences } : {})
+      },
+      requestOptions: { signal }
+    })
+    return {
+      model,
+      role: 'assistant',
+      content: { type: 'text', text: result.text },
+      stopReason: toMcpSamplingStopReason(result)
+    }
   }
 
   // ── Image generation ──
@@ -1006,7 +1098,7 @@ export class AiService extends BaseService {
     })
     const result = await aiCoreGenerateImage<AppProviderSettingsMap>(sdkConfig.providerId, sdkConfig.providerSettings, {
       ...imageParams,
-      onProviderCall: createProviderCallHandler(imageUsageContext)
+      onProviderCallStart: () => createProviderCallHandler(imageUsageContext())
     })
 
     const dataUrls: Base64String[] = []
@@ -1181,7 +1273,7 @@ export class AiService extends BaseService {
       // Disabled-default 2 = AI SDK's default, so default-config embedding keeps
       // its prior transient-error resilience (this PR only adds, never removes).
       maxRetries: request.requestOptions?.maxRetries ?? (retryPolicy.enabled ? retryPolicy.maxAttempts : 2),
-      onProviderCall: createProviderCallHandler(usageContext),
+      onProviderCallStart: () => createProviderCallHandler(usageContext()),
       ...(signal ? { abortSignal: signal } : {})
     })
 
@@ -1222,7 +1314,7 @@ export class AiService extends BaseService {
       // exponential-backoff retry, defaulted from the retry preference. Rerank
       // already defaulted to 0 retries pre-feature, so keep that when disabled.
       maxRetries: request.requestOptions?.maxRetries ?? (retryPolicy.enabled ? retryPolicy.maxAttempts : 0),
-      onProviderCall: createProviderCallHandler(usageContext),
+      onProviderCallStart: () => createProviderCallHandler(usageContext()),
       ...(signal ? { abortSignal: signal } : {})
     }
 
@@ -1476,7 +1568,9 @@ export class AiService extends BaseService {
   }
 
   private async buildAgentParamsFor(
-    request: AsInProcessChat<AiChatRequest> & { messageId?: string },
+    request: AsInProcessChat<AiChatRequest> &
+      Pick<AiStreamRequest, 'messageId' | 'messages' | 'retainedContext'> &
+      Pick<AiGenerateRequest, 'system'>,
     signal: AbortSignal | undefined,
     extraFeatures: readonly RequestFeature[] = [],
     getRepairUsagePlugins?: () => AiPlugin[]

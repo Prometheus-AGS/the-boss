@@ -313,7 +313,8 @@ export async function resolveDshProviderInjectionFromSnapshot(
   reasoningEffort: ReasoningEffortOption = 'default'
 ): Promise<DshProviderInjection> {
   if (usesDshGateway(provider, model)) {
-    // Shared gateway sequence: consent (ApiGatewayNotRunningError), converge, materialize key.
+    if (!requiresAgentGateway(provider.id) && !application.get('ApiGatewayService').getCurrentConfig().enabled)
+      throw new ApiGatewayNotRunningError()
     const gateway = await resolveApiGatewayRuntime(sessionId)
     return buildDshGatewayInjection(provider, model, gateway, reasoningEffort)
   }

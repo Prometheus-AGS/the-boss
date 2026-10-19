@@ -29,7 +29,8 @@ export function readAuthoredTeamRecords(): AuthoredTeamRecord[] {
 }
 
 export function projectAuthoredTeam(record: AuthoredTeamRecord): UarAuthoredTeamRevision {
-  const { compiled: _compiled, ...snapshot } = record
+  const snapshot = { ...record }
+  Reflect.deleteProperty(snapshot, 'compiled')
   return snapshot
 }
 

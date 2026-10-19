@@ -6,7 +6,7 @@
  *
  * xAI's proxy speaks the OpenAI Responses surface but with stricter edges than
  * the generic adapter emits: it wants `system`/`developer` turns hoisted into
- * top-level `instructions`, rejects replayed `reasoning` items, and does not
+ * top-level `instructions`, requires encrypted reasoning on replay, and does not
  * implement a few OpenAI-only knobs. The pi-xai-oauth extension solves the same
  * path the same way.
  */
@@ -48,8 +48,8 @@ export function rewriteGrokCliResponsesBody(json: Record<string, any>): Record<s
     const instructionParts: string[] = []
     json.input = json.input.filter((item: Record<string, any>) => {
       if (!item || typeof item !== 'object') return true
-      // The proxy rejects replayed reasoning items and empty-content turns.
-      if (item.type === 'reasoning') return false
+      // Unsigned reasoning from other providers cannot be replayed to the proxy.
+      if (item.type === 'reasoning') return typeof item.encrypted_content === 'string' && !!item.encrypted_content
       if (typeof item.content === 'string' && item.content.length === 0) return false
       if (item.role !== 'developer' && item.role !== 'system') return true
       const text = textFromResponsesContent(item.content).trim()
@@ -68,14 +68,19 @@ export function rewriteGrokCliResponsesBody(json: Record<string, any>): Record<s
     delete json.response_format
   }
 
-  // grok-build / grok-composer-2.5-fast don't accept an explicit Responses
-  // reasoning effort; sending one 422s, so drop the reasoning knob entirely.
-  delete json.reasoning
-
-  if (Array.isArray(json.include)) {
-    json.include = json.include.filter((item: unknown) => item !== 'reasoning.encrypted_content')
-    if (json.include.length === 0) delete json.include
+  const modelId = normalizeGrokModelId(typeof json.model === 'string' ? json.model : '')
+  const effort = json.reasoning?.effort
+  // Legacy CLI models reject effort; newer models receive the already-resolved effort.
+  if (modelId && modelId !== 'grok-build' && modelId !== 'grok-composer-2.5-fast' && effort) {
+    json.reasoning = { effort }
+  } else {
+    delete json.reasoning
   }
+
+  json.store ??= false
+  const include = new Set<string>(Array.isArray(json.include) ? json.include : [])
+  include.add('reasoning.encrypted_content')
+  json.include = [...include]
 
   // xAI's proxy doesn't implement OpenAI's prompt_cache_retention knob.
   delete json.prompt_cache_retention

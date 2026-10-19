@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
+import type * as TomlEditorModule from '@rainbowatcher/toml-edit-js'
 import { dialog } from 'electron'
 
 import { application } from '@application'
@@ -18,7 +19,7 @@ import {
 import { integrationDirectory, readIntegrationConfig } from './integrationConfig'
 
 const ROLES = ['critic', 'judge', 'backup'] as const
-type TomlEditor = typeof import('@rainbowatcher/toml-edit-js')
+type TomlEditor = typeof TomlEditorModule
 
 let tomlEditorReady: Promise<TomlEditor> | undefined
 

@@ -1,8 +1,6 @@
 import { createHash } from 'node:crypto'
 
-import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
-import type { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js'
+import { Client, InMemoryTransport, type Tool } from '@modelcontextprotocol/client'
 
 import { application } from '@application'
 import type { BridgeToolCallResult, BridgeToolDescriptor } from '@cherrystudio/dsh-bridge'
@@ -12,6 +10,7 @@ import { MCP_FORWARDING_TIMEOUT_MS } from '@main/ai/mcp/mcpRequestOptions'
 import type { AgentMcpServer } from '@main/ai/runtime/agentMcpServers'
 import { listBuiltinToolPolicies } from '@main/ai/toolApproval/builtinToolPolicy'
 import { toCamelCase } from '@shared/ai/tools/mcpToolName'
+import { PRODUCT_NAME } from '@shared/utils/branding'
 
 import { dshToolResultErrorText, projectDshToolResult } from './dshToolResultProjection'
 
@@ -85,14 +84,16 @@ export async function buildDshCherryToolBridge(
   options: DshCherryToolBridgeOptions
 ): Promise<DshCherryToolBridge> {
   const clients: Client[] = []
+  const handles: Array<{ close(): Promise<void> }> = []
   const tools: BridgeToolDescriptor[] = []
   const bindings = new Map<string, DshToolBinding>()
 
   for (const [serverId, server] of Object.entries(servers)) {
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair()
-    const client = new Client({ name: `cherry-dsh-${serverId}`, version: '1.0.0' }, { capabilities: {} })
+    const client = new Client({ name: `${PRODUCT_NAME}-dsh-${serverId}`, version: '1.0.0' })
+    let handle: Awaited<ReturnType<AgentMcpServer['connect']>> | undefined
     try {
-      await server.instance.connect(serverTransport)
+      handle = await server.connect(serverTransport)
       await client.connect(clientTransport)
       const result = await client.listTools()
       const serverNames = new Set<string>()
@@ -107,14 +108,17 @@ export async function buildDshCherryToolBridge(
         serverNames.add(descriptor.name)
       }
       clients.push(client)
+      handles.push(handle)
       for (const { descriptor, rawName } of serverTools) {
         tools.push(descriptor)
         bindings.set(descriptor.name, { client, rawName })
       }
     } catch (error) {
       await client.close().catch(() => undefined)
+      await handle?.close().catch(() => undefined)
       if (error instanceof DshCherryToolIdentityError) {
         await Promise.allSettled(clients.map((connected) => connected.close()))
+        await Promise.allSettled(handles.map((connected) => connected.close()))
         throw error
       }
       logger.warn('Skipping unavailable MCP server for dsh session', { serverId, error })
@@ -126,12 +130,11 @@ export async function buildDshCherryToolBridge(
     async callTool(name, args, signal) {
       const binding = bindings.get(name)
       if (!binding) throw new Error(`Unknown dsh Cherry tool: ${name}`)
-      const result = (await binding.client.callTool(
+      const result = await binding.client.callTool(
         { name: binding.rawName, arguments: toToolArguments(args) },
-        undefined,
         // Forwarding only: no timeout policy at this layer — McpRuntimeService owns it (#20266).
         { signal, timeout: MCP_FORWARDING_TIMEOUT_MS }
-      )) as CallToolResult
+      )
       if (result.isError) throw new Error(dshToolResultErrorText(result.content, binding.rawName))
       const text = await projectDshToolResult(result.content, binding.rawName, {
         ...options,
@@ -141,6 +144,7 @@ export async function buildDshCherryToolBridge(
     },
     async close() {
       await Promise.allSettled(clients.map((client) => client.close()))
+      await Promise.allSettled(handles.map((handle) => handle.close()))
     }
   }
 }

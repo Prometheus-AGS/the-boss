@@ -1,6 +1,8 @@
+import { serveStdio } from '@modelcontextprotocol/server/stdio'
+
 import { application } from '@application'
 import { loggerService } from '@logger'
-import { FileSystemServer } from '@main/ai/mcp/servers/filesystem'
+import { createFileSystemServer } from '@main/ai/mcp/servers/filesystem'
 import { BaseService, Injectable, Phase, ServicePhase } from '@main/core/lifecycle'
 import { createSharedMemoryServer, sharedMemoryTools } from '@main/services/bossFang/sharedMemory/scoped'
 import { readIntegrationConfig } from '@main/services/prometheus/integrationConfig'
@@ -53,7 +55,10 @@ export class UarTeamHostService extends BaseService {
     }
     const bridge = await createUarHostMcpBridge(
       {
-        filesystem: { name: 'filesystem', createInstance: () => new FileSystemServer(directory).server },
+        filesystem: {
+          name: 'filesystem',
+          connect: async (transport) => serveStdio(() => createFileSystemServer(directory), { transport })
+        },
         ...(sharedMemory
           ? {
               shared_memory: {

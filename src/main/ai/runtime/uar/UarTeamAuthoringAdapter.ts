@@ -184,7 +184,8 @@ export async function deployUarAuthoredTeam(input: {
     bindingId,
     effectiveLimits: limits
   })
-  const { contentDigest: _digest, ...fields } = base
+  const fields = { ...base }
+  Reflect.deleteProperty(fields, 'contentDigest')
   const binding = document({
     ...fields,
     modelBindings,

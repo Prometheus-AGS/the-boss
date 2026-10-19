@@ -276,6 +276,7 @@ export function starterBinding(input: {
 
 /** Revalidate an explicit starter setup without widening its saved private scopes. */
 export function revisedStarterBinding(binding: Record<string, JsonValue>, revision: number, runtimeInstanceId: string) {
-  const { contentDigest: _contentDigest, ...fields } = binding
+  const fields = { ...binding }
+  Reflect.deleteProperty(fields, 'contentDigest')
   return document({ ...fields, revision, runtimeInstanceId })
 }

@@ -42,7 +42,7 @@ async function main(): Promise<void> {
     }
   })
   const bridge = await createUarHostMcpBridge(
-    { filesystem: { name: 'filesystem', instance: filesystem } },
+    { filesystem: { name: 'filesystem', createInstance: () => filesystem } },
     {
       ownerId,
       principalId,

@@ -41,10 +41,10 @@ describe('required DSH Bun runtime', () => {
     [
       'en-US',
       false,
-      'DSH could not start because its bundled runtime is unavailable. Run pnpm download:binaries in the development checkout and try again.'
+      'DSH could not start because its bundled Bun runtime is unavailable. Download the development binaries and try again.'
     ],
     ['zh-CN', true, 'DSH 无法启动，因为内置运行时不可用。请重新安装 The Boss 后重试。'],
-    ['zh-CN', false, 'DSH 无法启动，因为内置运行时不可用。请在开发仓库中运行 pnpm download:binaries 后重试。']
+    ['zh-CN', false, 'DSH 无法启动，因为捆绑的 Bun 运行时不可用。请下载开发用二进制文件后重试。']
   ] as const)(
     'localizes runtime recovery for %s (packaged: %s) and preserves the cause',
     async (language, isPackaged, message) => {

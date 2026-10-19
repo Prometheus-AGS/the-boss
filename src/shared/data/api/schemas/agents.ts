@@ -8,6 +8,7 @@
 
 import * as z from 'zod'
 
+import { MAX_HEARTBEAT_TIMEOUT_MINUTES } from '@shared/ai/agentHeartbeat'
 import { BUILTIN_AGENT_ROLE } from '@shared/ai/builtinAgent'
 import { AgentLanguageSchema } from '@shared/data/types/agentLanguage'
 import { ServiceTierSelectionSchema, UniqueModelIdSchema } from '@shared/data/types/model'
@@ -62,6 +63,7 @@ export const UarModelAssignmentSchema = z.discriminatedUnion('source', [
 ])
 export type UarModelAssignment = z.infer<typeof UarModelAssignmentSchema>
 export const AGENT_TYPES = ['claude-code', 'pi', 'dsh', 'uar'] as const
+
 export const AgentTypeSchema = z.enum(AGENT_TYPES)
 export type AgentType = z.infer<typeof AgentTypeSchema>
 export const AgentSchedulerTypeSchema = z.enum(['cron', 'interval', 'one-time'])
@@ -83,7 +85,10 @@ export const AgentConfigurationSchema = z
     scheduler_last_run: z.string().optional(),
     heartbeat_enabled: z.boolean().optional(),
     heartbeat_interval: z.number().optional(),
-    builtin_role: z.enum([BUILTIN_AGENT_ROLE.ASSISTANT, BUILTIN_AGENT_ROLE.SUPPORT]).optional(),
+    heartbeat_timeout_minutes: z.number().int().positive().max(MAX_HEARTBEAT_TIMEOUT_MINUTES).optional(),
+    builtin_role: z
+      .enum([BUILTIN_AGENT_ROLE.ASSISTANT, BUILTIN_AGENT_ROLE.SUPPORT, BUILTIN_AGENT_ROLE.DOCTOR])
+      .optional(),
     language: AgentLanguageSchema.nullable().optional(),
     /** Revision link to the Boss-owned definition in UAR's agent catalog. */
     uar_catalog_link: UarCatalogLinkSchema.optional(),

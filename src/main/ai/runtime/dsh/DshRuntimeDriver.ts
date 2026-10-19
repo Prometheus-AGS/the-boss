@@ -3,6 +3,7 @@ import path from 'node:path'
 import { application } from '@application'
 import { agentService } from '@data/services/AgentService'
 import { mcpServerService } from '@data/services/McpServerService'
+import { ApiGatewayNotRunningError } from '@main/ai/runtime/agentApiGateway'
 import { prepareAgentSessionWorkspaceDirectory } from '@main/ai/runtime/agentSessionWorkspace'
 import { isAgentSessionForkFailureReason } from '@shared/ai/agentSessionFork'
 import { DSH_BUILTIN_TOOLS } from '@shared/ai/dshBuiltinTools'
@@ -59,7 +60,13 @@ export class DshRuntimeDriver implements AgentSessionRuntimeDriver {
     await prepareAgentSessionWorkspaceDirectory(session)
     // Side-effect free: dispatch validation must not consume API-key rotation;
     // the concrete key is selected only when the runtime connection starts.
-    await assertDshProviderUsable(agent.model)
+    try {
+      await assertDshProviderUsable(agent.model)
+    } catch (error) {
+      if (error instanceof ApiGatewayNotRunningError)
+        application.get('IpcApiService').broadcast('api_gateway.required', { sessionId: session.id })
+      throw error
+    }
   }
 
   async listAvailableTools(mcpIds: string[]): Promise<Tool[]> {

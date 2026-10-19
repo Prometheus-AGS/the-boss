@@ -112,7 +112,8 @@ export const uarTeamDiagnosticDetailsSchema = z.object({
     ])
     .optional()
 })
-export interface UarTeamDiagnostic extends z.infer<typeof uarTeamDiagnosticDetailsSchema> {
+type UarTeamDiagnosticDetails = z.infer<typeof uarTeamDiagnosticDetailsSchema>
+export interface UarTeamDiagnostic extends UarTeamDiagnosticDetails {
   code: string
   field?: string
   retryable: boolean

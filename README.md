@@ -34,6 +34,7 @@ Provider access and optional integrations require their own configuration. See t
 
 ## UI/UX skills and project teams
 
+
 The current source distributes **97 mini skills**, including **40 portable UI/UX catalog entries**, through `resources/skills/`. The shared `prometheus-ui-ux` router selects project context, focused Pro Max guidance, craft, and platform instructions. `prometheus-ui-review` defines independent review at a completed UI phase; it does not automatically launch a browser or certify an application.
 
 The existing ten-role [boss-core team](.agent-team/boss-core/README.md) is adopted through the project routing record. UI work goes to `boss-ux` and `boss-renderer`; completed UI acceptance goes to `boss-verifier`. Existing tokens, Electron workflows, permissions, and ownership remain authoritative.

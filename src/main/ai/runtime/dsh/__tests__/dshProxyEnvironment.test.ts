@@ -9,6 +9,13 @@ const mocks = vi.hoisted(() => ({
   usesDshGateway: vi.fn()
 }))
 
+function gatewayOrigin(): string {
+  const { host, port } = mocks.getGatewayConfig()
+  const loopback =
+    host === '0.0.0.0' || !host ? '127.0.0.1' : host === '::' ? '[::1]' : host.includes(':') ? `[${host}]` : host
+  return `http://${loopback}:${port || 23333}`
+}
+
 vi.mock('@application', async () => {
   const { mockApplicationFactory } = await import('@test-mocks/main/application')
   const result = mockApplicationFactory()
@@ -17,6 +24,8 @@ vi.mock('@application', async () => {
     if (name === 'ApiGatewayService')
       return {
         getCurrentConfig: mocks.getGatewayConfig,
+        getInternalGatewayOrigin: gatewayOrigin,
+        ensureInternalGateway: async () => ({ baseUrl: gatewayOrigin(), apiKey: 'gateway-key' }),
         isRunning: () => true,
         ensureValidApiKey: async () => 'gateway-key',
         getAgentSessionUsageHeaders: () => ({}),

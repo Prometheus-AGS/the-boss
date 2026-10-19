@@ -1,9 +1,16 @@
 {
-  "extends": "./tsconfig.web.json",
+  "extends": "./tsconfig.node.json",
   "compilerOptions": {
     "composite": false,
     "incremental": false,
-    "types": ["node"]
+    "types": ["node", "electron-vite/node"]
   },
-  "include": ["tests/e2e/**/*.ts", "playwright.config.ts", "playwright.regression.config.ts", "src/preload/*.d.ts"]
+  "include": [
+    "tests/e2e/**/*.ts",
+    "playwright.config.ts",
+    "playwright.regression.config.ts",
+    "src/preload/*.d.ts",
+    "src/main/env.d.ts",
+    "src/main/services/automation/markdown.d.ts"
+  ]
 }

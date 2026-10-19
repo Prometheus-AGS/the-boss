@@ -80,8 +80,6 @@ const PI_BUILTIN_COMMANDS = [
   { command: '/compact', description: 'Compact conversation with optional focus instructions' }
 ] as const satisfies readonly SlashCommand[]
 
-// dsh commands are client-dispatched (the runtime never parses slash text), so this is
-// the set Cherry's composition mounts — dispatched over the bridge `command` frame.
 const DSH_BUILTIN_COMMANDS = [
   { command: '/compact', description: 'Compact conversation history to free up context' },
   { command: '/goal', description: 'Set or manage the session goal: [<objective>|edit <objective>|pause|resume|clear]' }
@@ -135,7 +133,7 @@ export const AGENT_RUNTIME_CAPABILITIES = {
     modelTiers: false,
     heartbeat: true,
     knowledgeBases: true,
-    // The complete session MCP set is bridged into approval-gated Pi custom tools.
+    // Native Pi MCP tools retain Cherry's approval gate.
     mcp: true,
     skills: true,
     claudeRegistryTools: false,

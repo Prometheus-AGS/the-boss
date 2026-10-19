@@ -95,15 +95,18 @@ export async function withShellRcLock<T>(file: string, work: (resolvedPath: stri
       await delay(50)
     }
   }
-  try {
-    if ((await resolveShellRcTarget(file)) !== target)
-      throw new Error('Shell startup target changed while acquiring its lock')
-    return await work(target)
-  } finally {
+  const releaseLock = async () => {
     const owner = await readLock(lock)
     if (owner?.pid !== process.pid || owner.nonce !== nonce) {
       throw new Error(`Shell startup lock ownership changed; inspect manually: ${lock}`)
     }
     await fs.unlink(lock)
+  }
+  try {
+    if ((await resolveShellRcTarget(file)) !== target)
+      throw new Error('Shell startup target changed while acquiring its lock')
+    return await work(target)
+  } finally {
+    await releaseLock()
   }
 }

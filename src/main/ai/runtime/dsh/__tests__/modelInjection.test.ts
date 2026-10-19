@@ -121,6 +121,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mocks.resolveApiGatewayRuntime.mockResolvedValue(GATEWAY)
   mocks.resolveApiKey.mockReturnValue({ value: 'sk-native', apiKeySelection: { attribution: 'unknown' } })
+  mocks.getCurrentConfig.mockReturnValue({ enabled: true })
 })
 
 describe('buildDshGatewayInjection', () => {
@@ -325,6 +326,15 @@ describe('resolveDshProviderInjectionFromSnapshot', () => {
     expect(injection.apiKey).toBe(GATEWAY_KEY)
     expect(injection.headers).toEqual(GATEWAY_USAGE_HEADERS)
     expect(injection.usageCapture).toEqual({ owner: 'provider-calls' })
+  })
+
+  it('does not start a fallback Gateway route without persisted enablement', async () => {
+    mocks.getCurrentConfig.mockReturnValue({ enabled: false })
+
+    await expect(resolveDshProviderInjectionFromSnapshot('session-1', vertexProvider, makeModel())).rejects.toThrow(
+      mocks.ApiGatewayNotRunningError
+    )
+    expect(mocks.resolveApiGatewayRuntime).not.toHaveBeenCalled()
   })
 
   it('routes Cloud through the same consented gateway runtime', async () => {

@@ -1,13 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { ApiGatewayNotRunningError } from '@main/ai/runtime/agentApiGateway'
+import type { AgentSessionEntity } from '@shared/data/api/schemas/agentSessions'
 import type { McpTool } from '@shared/types/mcp'
 
 const mocks = vi.hoisted(() => ({
   findByIdOrName: vi.fn(),
-  listTools: vi.fn()
+  listTools: vi.fn(),
+  getAgent: vi.fn(),
+  assertDshProviderUsable: vi.fn(),
+  broadcast: vi.fn()
 }))
 
-vi.mock('@data/services/AgentService', () => ({ agentService: {} }))
+vi.mock('@data/services/AgentService', () => ({ agentService: { getAgent: mocks.getAgent } }))
 vi.mock('@data/services/McpServerService', () => ({
   mcpServerService: { findByIdOrName: mocks.findByIdOrName }
 }))
@@ -15,6 +20,7 @@ vi.mock('@application', () => ({
   application: {
     get: (name: string) => {
       if (name === 'McpCatalogService') return { listTools: mocks.listTools }
+      if (name === 'IpcApiService') return { broadcast: mocks.broadcast }
       throw new Error(`unexpected service ${name}`)
     }
   }
@@ -22,7 +28,7 @@ vi.mock('@application', () => ({
 vi.mock('@main/ai/runtime/agentSessionWorkspace', () => ({
   prepareAgentSessionWorkspaceDirectory: vi.fn()
 }))
-vi.mock('./modelInjection', () => ({ assertDshProviderUsable: vi.fn() }))
+vi.mock('./modelInjection', () => ({ assertDshProviderUsable: mocks.assertDshProviderUsable }))
 vi.mock('./DshRuntimeConnection', () => ({ DshRuntimeConnection: vi.fn() }))
 
 const { DshRuntimeDriver } = await import('./DshRuntimeDriver')
@@ -30,6 +36,17 @@ const { DshRuntimeDriver } = await import('./DshRuntimeDriver')
 beforeEach(() => {
   vi.clearAllMocks()
   mocks.listTools.mockReturnValue([])
+})
+
+describe('DshRuntimeDriver.validateSession', () => {
+  it('prompts for persisted Gateway enablement when a fallback route is rejected at dispatch', async () => {
+    const session = { id: 'session-1', agentId: 'agent-1', workspace: { path: '/workspace' } } as AgentSessionEntity
+    mocks.getAgent.mockReturnValue({ model: 'vertexai::gemini-2.5-pro' })
+    mocks.assertDshProviderUsable.mockRejectedValue(new ApiGatewayNotRunningError())
+
+    await expect(new DshRuntimeDriver().validateSession(session)).rejects.toThrow(ApiGatewayNotRunningError)
+    expect(mocks.broadcast).toHaveBeenCalledWith('api_gateway.required', { sessionId: 'session-1' })
+  })
 })
 
 describe('DshRuntimeDriver.listAvailableTools', () => {

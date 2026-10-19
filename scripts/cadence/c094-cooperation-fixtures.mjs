@@ -15,6 +15,7 @@ const canonical = (value) =>
       : value
 function seal(value) {
   const { contentDigest: _old, ...fields } = value
+  void _old
   return { ...fields, contentDigest: digest(JSON.stringify(canonical(fields))) }
 }
 const ref = (value) => ({ id: value.id, version: value.version, digest: value.contentDigest })

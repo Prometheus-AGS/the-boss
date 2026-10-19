@@ -11,8 +11,12 @@ vi.mock('@application', () => ({
     getPath: (key: string) => {
       const map: Record<string, string> = {
         'feature.prometheus.commands': `${paths.root}/commands`,
+        'feature.prometheus.commands.legacy': `${paths.root}/legacy-commands`,
+        'feature.prometheus.commands.registration_file': `${paths.root}/config/path-registration.json`,
+        'feature.prometheus.commands.rc_backups': `${paths.root}/rc-backups`,
         'cherry.bin': `${paths.root}/bin`,
         'sys.home': `${paths.root}/home`,
+        'external.shell.home': `${paths.root}/home`,
         'app.exe_file': `${paths.root}/app/The Boss`
       }
       return map[key]
@@ -33,6 +37,7 @@ describe.skipIf(process.platform === 'win32')('installCommandPath', () => {
   beforeEach(async () => {
     paths.root = await fs.mkdtemp(path.join(os.tmpdir(), 'boss-command-path-'))
     await fs.mkdir(path.join(paths.root, 'bin'), { recursive: true })
+    await fs.mkdir(path.join(paths.root, 'home'), { recursive: true })
     for (const tool of tools) await fs.writeFile(path.join(paths.root, 'bin', tool), `#!/bin/sh\necho ${tool}\n`)
   })
 

@@ -97,7 +97,7 @@ export function useLiterGatewayAdministration() {
         literGatewayCatalogApi.selectGateway({
           ...selection,
           expectedRevision: catalog.revision
-        } as LiterGatewaySelection)
+        })
       )
       if (next) setCatalog(next)
       return next

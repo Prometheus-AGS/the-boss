@@ -14,6 +14,7 @@ const mockFs = vi.mocked(fs)
 const mockRenameSync = mockFs.renameSync
 
 const CONFIG_PATH = `/mock/home/${CHERRY_HOME_DIRNAME}/boot-config.json`
+
 const TEMP_PATH = `${CONFIG_PATH}.tmp`
 
 async function createService() {

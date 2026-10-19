@@ -222,7 +222,7 @@ export async function setupUarStarterTeam(workspaceId: string, model?: UarTeamMo
     runtimeInstanceId: capabilities.instance.id,
     storageBackend: capabilities.catalogStorage.backend,
     packageIdentity: starter.identity,
-    ...(selectedModel ?? {}),
+    ...selectedModel,
     bindingId: modelKey
       ? `urn:boss:starter:team-binding:v4:${resolved}:${modelKey}`
       : `urn:boss:starter:team-binding:v3:${resolved}`,

@@ -6,7 +6,7 @@ on:
       release_version:
         description: Frozen application version (must match package.json)
         required: true
-        default: 2.2.8
+        default: 2.2.40
         type: string
       release_profile:
         description: Customer release profile
@@ -46,19 +46,17 @@ on:
         description: Immutable darwin-x64 UAR sidecar release record URL (required for uar-enabled)
         required: false
         type: string
-  repository_dispatch:
-    types: [boss_release_platform_published]
 concurrency:
-  group: ${{ github.event_name == 'repository_dispatch' && 'the-boss-release-publication' || format('the-boss-release-{0}-{1}', github.ref, inputs.platforms) }}
+  group: ${{ format('the-boss-release-{0}-{1}', github.ref, inputs.platforms) }}
   cancel-in-progress: false
 env:
   NODE_OPTIONS: --max-old-space-size=8192
-  RELEASE_VERSION: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.version || inputs.release_version }}
-  THE_BOSS_UAR_ENABLED: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.profile == 'uar-enabled' && '1' || inputs.release_profile == 'uar-enabled' && '1' || '0' }}
-  UAR_WIN32_X64_RECORD_URL: ${{ github.event_name == 'workflow_dispatch' && inputs.uar_win32_x64_record_url || '' }}
-  UAR_WIN32_ARM64_RECORD_URL: ${{ github.event_name == 'workflow_dispatch' && inputs.uar_win32_arm64_record_url || '' }}
-  UAR_DARWIN_ARM64_RECORD_URL: ${{ github.event_name == 'workflow_dispatch' && inputs.uar_darwin_arm64_record_url || '' }}
-  UAR_DARWIN_X64_RECORD_URL: ${{ github.event_name == 'workflow_dispatch' && inputs.uar_darwin_x64_record_url || '' }}
+  RELEASE_VERSION: ${{ inputs.release_version }}
+  THE_BOSS_UAR_ENABLED: ${{ inputs.release_profile == 'uar-enabled' && '1' || '0' }}
+  UAR_WIN32_X64_RECORD_URL: ${{ inputs.uar_win32_x64_record_url || '' }}
+  UAR_WIN32_ARM64_RECORD_URL: ${{ inputs.uar_win32_arm64_record_url || '' }}
+  UAR_DARWIN_ARM64_RECORD_URL: ${{ inputs.uar_darwin_arm64_record_url || '' }}
+  UAR_DARWIN_X64_RECORD_URL: ${{ inputs.uar_darwin_x64_record_url || '' }}
 permissions:
   contents: read
 jobs:
@@ -237,10 +235,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/publish-installers.cjs
-      - name: Queue serialized metadata and site publication
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/queue-release-publication.cjs
       - name: Record release runner capacity
         run: node scripts/release-capacity.cjs --platform ${{ matrix.platform }}-${{ matrix.arch }} --report-only
       - uses: actions/upload-artifact@v5
@@ -249,34 +243,29 @@ jobs:
           path: installers-${{ matrix.platform }}-${{ matrix.arch }}.json
           if-no-files-found: error
           retention-days: 90
-  publish-platform:
-    if: github.event_name == 'repository_dispatch'
+  publish-complete-release:
+    if: github.event_name == 'workflow_dispatch'
+    needs: [platforms, build]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+      actions: read
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
-      - name: Merge, publish, verify, and dispatch platform
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: installers-*
+          merge-multiple: true
+      - name: Verify both installers and publish the complete release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LANDING_DISPATCH_TOKEN: ${{ secrets.REPO_DISPATCH_TOKEN }}
           LANDING_REPOSITORY: Know-Me-Tools/boss-landing-spot
-          RELEASE_ARCH: ${{ github.event.client_payload.arch }}
           RELEASE_BRANCH: ${{ github.event.repository.default_branch }}
-          RELEASE_MANIFEST_ASSET: ${{ github.event.client_payload.manifestAsset }}
-          RELEASE_PLATFORM: ${{ github.event.client_payload.platform }}
-          RELEASE_PROFILE: ${{ github.event.client_payload.profile }}
-          RELEASE_TAG: ${{ github.event.client_payload.tag }}
-        run: node scripts/coordinate-release-publication.cjs
-      - uses: actions/upload-artifact@v5
-        with:
-          name: published-${{ github.event.client_payload.platform }}-${{ github.event.client_payload.arch }}
-          path: |
-            release-manifest.json
-            RELEASES.md
+          RELEASE_PLATFORMS: ${{ needs.platforms.outputs.platforms }}
+        run: node scripts/publish-complete-release.cjs

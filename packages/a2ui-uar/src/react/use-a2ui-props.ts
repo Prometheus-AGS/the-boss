@@ -35,7 +35,7 @@ export function useA2uiProps<T>(context: ComponentContext, schema: z.ZodTypeAny)
     [binder]
   )
 
-  const getSnapshot = useCallback(() => binder.snapshot as T, [binder])
+  const getSnapshot = useCallback(() => binder.snapshot, [binder])
 
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
 }

@@ -67,21 +67,20 @@ describe('pushSkillsToHome', () => {
     }
   })
 
-  it('replaces a stale copy from an earlier app version', async () => {
+  it('updates an unmodified app-owned copy from an earlier app version', async () => {
     const target = path.join(home, '.agents', 'skills', 'a-skill')
-    await fs.mkdir(target, { recursive: true })
-    await fs.writeFile(path.join(target, 'SKILL.md'), 'STALE\n')
-
+    await pushSkillsToHome()
+    await fs.writeFile(path.join(skillSource, 'a-skill', 'SKILL.md'), '# Updated\n')
     await pushSkillsToHome()
 
-    await expect(fs.readFile(path.join(target, 'SKILL.md'), 'utf8')).resolves.toBe('# A\n')
+    await expect(fs.readFile(path.join(target, 'SKILL.md'), 'utf8')).resolves.toBe('# Updated\n')
   })
 
   it('removes a file the pack no longer ships', async () => {
     const target = path.join(home, '.claude', 'skills', 'a-skill')
-    await fs.mkdir(target, { recursive: true })
-    await fs.writeFile(path.join(target, 'removed-upstream.md'), 'old\n')
-
+    await fs.writeFile(path.join(skillSource, 'a-skill', 'removed-upstream.md'), 'old\n')
+    await pushSkillsToHome()
+    await fs.rm(path.join(skillSource, 'a-skill', 'removed-upstream.md'))
     await pushSkillsToHome()
 
     await expect(fs.access(path.join(target, 'removed-upstream.md'))).rejects.toThrow()

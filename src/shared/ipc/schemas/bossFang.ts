@@ -5,7 +5,8 @@ import {
   bossFangDiagnosticSchema,
   bossFangStatusSchema,
   bossFangModelSourceChoiceSchema,
-  bossFangModelSourceSelectionSchema
+  bossFangModelSourceSelectionSchema,
+  type BossFangDiagnostic
 } from '@shared/types/bossFang'
 import { bossFangDelegatedApprovalInspectionSchema } from '@shared/types/bossFangDelegatedApproval'
 
@@ -62,5 +63,5 @@ export const bossFangRequestSchemas = {
 }
 
 export type BossFangEventSchemas = {
-  'bossfang.diagnostic.progress': import('@shared/types/bossFang').BossFangDiagnostic
+  'bossfang.diagnostic.progress': BossFangDiagnostic
 }

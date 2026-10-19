@@ -100,7 +100,7 @@ describe('applyMigrations over a populated database', () => {
 
   it('preserves legacy paired devices and creates durable receipts with device cascade', () => {
     sqlite.pragma('foreign_keys = ON')
-    applyMigrations(db, baselineMigrationsFolder(join(tempDir, 'baseline'), '0025_remote-access'))
+    applyMigrations(db, baselineMigrationsFolder(join(tempDir, 'baseline'), '0026_romantic_iron_lad'))
     const insertDevice = sqlite.prepare(`INSERT INTO api_gateway_paired_device
       (id, name, platform, token_hash, created_at, updated_at)
       VALUES (?, ?, 'ios', ?, 1000, 2000)`)

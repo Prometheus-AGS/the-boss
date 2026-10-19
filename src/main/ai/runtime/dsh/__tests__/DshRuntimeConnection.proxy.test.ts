@@ -15,7 +15,14 @@ vi.mock('@application', async () => {
   const result = mockApplicationFactory()
   const get = result.application.getContainer().get.bind(result.application.getContainer())
   result.application.get.mockImplementation((name: string) => {
-    if (name === 'ApiGatewayService') return { getCurrentConfig: mocks.getGatewayConfig }
+    if (name === 'ApiGatewayService')
+      return {
+        getCurrentConfig: mocks.getGatewayConfig,
+        getInternalGatewayOrigin: () => {
+          const config = mocks.getGatewayConfig()
+          return `http://${config.host}:${config.port}`
+        }
+      }
     return get(name)
   })
   return result

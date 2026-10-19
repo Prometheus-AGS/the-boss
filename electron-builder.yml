@@ -21,6 +21,7 @@ protocols:
       - cherrystudio
 files:
   - "**/*"
+  - "!**/node_modules/@anthropic-ai/claude-agent-sdk-*/**"
   - "!**/{.vscode,.yarn,.yarn-lock,.github,.cursorrules,.prettierrc}"
   - "!electron.vite.config.{js,ts,mjs,cjs}}"
   - "!electron-builder.cn.config.cjs"
@@ -32,11 +33,13 @@ files:
   - "!**/{tsconfig.json,tsconfig.tsbuildinfo,tsconfig.node.json,tsconfig.web.json}"
   - "!**/{.editorconfig,.jekyll-metadata}"
   - "!src"
+  - "!native"
   - "!config"
   - "!patches"
   - "!**/node_modules/**/*.cpp"
   - "!**/node_modules/node-addon-api/**"
   - "!**/node_modules/prebuild-install/**"
+  - "!**/node_modules/@cherrystudio/computer-use-{darwin,win32,linux}-*/**"
   - "!scripts"
   - "!local"
   - "!docs"
@@ -79,6 +82,9 @@ files:
   - "!node_modules/onnxruntime-web/**" # transformers.js's browser/WASM backend; local inference always runs onnxruntime-node instead
   - "!node_modules/@huggingface/transformers/node_modules/onnxruntime-web/**" # same package, nested copy
   - "!node_modules/onnxruntime-node/bin/**" # native binary is downloaded on first use (Toolchain/onnxruntime), never bundled — see OnnxRuntimeBinaryService
+  - "!node_modules/sherpa-onnx-{darwin,linux,win}-*/**" # binaries are downloaded on first use; only the JS wrapper ships
+  - "!node_modules/@cherrystudio/system-speech/{native,windows,src,tests,scripts}/**"
+  - "!node_modules/@cherrystudio/system-speech/dist/native/**" # target helper is copied once through platform packaging
   - "!**/*.{h,iobj,ipdb,tlog,recipe,vcxproj,vcxproj.filters,Makefile,*.Makefile}" # filter .node build files
   - "resources/**/*" # include all files in resources, and unpack them from asar for runtime access
   - "!resources/prometheus-skills-mini/**" # ship the complete prepared payload below
@@ -89,7 +95,7 @@ asarUnpack:
   - "!resources/devtools/**"
   - "**/*.{metal,exp,lib}"
   - "node_modules/@img/sharp-*/**"
-  # DSH runs under bundled Bun: bundle its JS and unpack native/runtime files.
+  # DSH runs under bundled Bun and resolves its runtime entries from app.asar.unpacked.
   - "node_modules/@cherrystudio/dsh-bridge/dist/runtime/**"
   - "node_modules/sharp/**"
   - "node_modules/@img/colour/**"
@@ -110,7 +116,6 @@ asarUnpack:
   - "node_modules/@deepseek-ai/schemastery/**"
   - "node_modules/yaml/**"
   - "node_modules/@deepseek-ai/node-addon-system*/**"
-  - "node_modules/@anthropic-ai/claude-agent-sdk-*/**" # native CLI binary must live on disk to be spawned
   - "node_modules/@silvia-odwyer/photon-node/**" # pi SDK WASM dep: photon_rs.js does fs.readFileSync(__dirname/photon_rs_bg.wasm)
   - "node_modules/@aiany/sqlite-vec-*/**" # sqlite-vec extension (.dylib/.so/.dll) is dlopen'd at runtime — must live on disk
   - "node_modules/@node-rs/xxhash-*/**" # native N-API binary must be unpacked for runtime loading
@@ -120,6 +125,9 @@ asarUnpack:
 extraResources:
   - from: "build/prometheus-payload"
     to: "app.asar.unpacked/resources/prometheus-skills-mini"
+  - from: "src/main/ai/voice/localAdapters/NOTICE.txt"
+    to: "voice-audio/NOTICE.txt"
+
   - from: "migrations/sqlite-drizzle"
     to: "migrations/sqlite-drizzle"
   - from: "packages/provider-registry/data"
@@ -132,13 +140,15 @@ win:
   extraResources:
     - from: "node_modules/@anthropic-ai/claude-agent-sdk-win32-${arch}/claude.exe"
       to: "app.asar.unpacked/node_modules/@anthropic-ai/claude-agent-sdk-win32-${arch}/claude.exe"
+    # before-pack adds system-speech only for x64; extraResources .exe files use signtoolOptions below.
+
     - from: "node_modules/@aiany/sqlite-vec-windows-${arch}/vec0.dll"
       to: "app.asar.unpacked/node_modules/@aiany/sqlite-vec-windows-${arch}/vec0.dll"
   target:
     - target: nsis
     - target: portable
   signtoolOptions:
-    sign: scripts/win-sign.js
+    sign: scripts/packaging/win-sign.js
   signExts:
     - .node
   verifyUpdateCodeSignature: false
@@ -153,24 +163,29 @@ nsis:
   oneClick: false
   include: build/nsis-installer.nsh
   buildUniversalInstaller: false
-  differentialPackage: false
+  differentialPackage: true
 portable:
   artifactName: ${productName}-${version}-${arch}-portable.${ext}
   buildUniversalInstaller: false
   # electron-builder 26.15.6 uses true for a unique $PLUGINSDIR on every launch.
   unpackDirName: true
 mac:
+  extraFiles:
+    - from: packages/system-speech/dist/native/darwin-${arch}/cherry-system-speech
+      to: Helpers/cherry-system-speech
   entitlementsInherit: build/entitlements.mac.plist
+  sign: scripts/packaging/mac-sign.js
   notarize: false
   artifactName: ${productName}-${version}-${arch}.${ext}
   extraResources:
     - from: "node_modules/@anthropic-ai/claude-agent-sdk-darwin-${arch}/claude"
       to: "app.asar.unpacked/node_modules/@anthropic-ai/claude-agent-sdk-darwin-${arch}/claude"
   extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+    NSCameraUsageDescription: Application requests access to the device's camera.
+    NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+    NSSpeechRecognitionUsageDescription: The Boss transcribes voice recordings on this device.
+    NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+    NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   target:
     - target: dmg
     - target: zip
@@ -200,31 +215,31 @@ rpm:
 publish:
   provider: generic
   url: https://releases.cherry-ai.com
+  useMultipleRangeRequest: false
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/
-beforePack: scripts/before-pack.js
-afterPack: scripts/after-pack.js
-afterSign: scripts/notarize.js
-artifactBuildCompleted: scripts/artifact-build-completed.js
+beforePack: scripts/packaging/before-pack.js
+afterPack: scripts/packaging/after-pack.js
+afterSign: scripts/packaging/notarize.js
+artifactBuildCompleted: scripts/packaging/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.39 - UAR 1.1 desktop integration
+    The Boss 2.2.40 - updated runtime and skills
 
-    - Update the packaged UAR server-full runtime to stable v1.1.0 (d815ef72) for Mac ARM64 and Windows x64.
-    - Preserve configured models, scoped memory, native approvals and BossFang delegation.
-    - Keep private application profiles and shell registration inside their selected profile.
-    - Include UAR provider timeout/retry inheritance and persisted MCP policy loading fixes.
-    - Build the standard local Mac installer with the same pinned public payload used for distribution; retain explicit local-source development mode.
-    - Keep installed acceptance separate from build/publication evidence. Mac notarization remains deferred by operator.
+    - Update the Mac ARM64 and Windows x64 UAR sidecar to the 1.1.1 release candidate and Liter LLM to v2.3.0.
+    - Refresh the mini skill pack and incorporate compatible Cherry Studio upstream changes.
+    - Preserve The Boss's managed tools, DSH and UAR integrations, scoped memory, and approval behavior.
+    - Require Developer ID signing and notarization for the Mac release installer.
+    - UAR 1.1.1 has not passed its full qualification gate; the embedding-space mismatch proof remains open.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.39 - UAR 1.1 桌面集成
+    The Boss 2.2.40 - 运行时与技能更新
 
-    - 将 Mac ARM64 和 Windows x64 打包的 UAR server-full 运行时更新至稳定版 v1.1.0（d815ef72）。
-    - 保留已配置的模型、限定范围的记忆、原生审批和 BossFang 委派。
-    - 将私有应用配置和命令行注册限制在所选配置目录中。
-    - 包含 UAR 提供商超时与重试设置继承，以及持久化 MCP 策略加载修复。
-    - 标准本地 Mac 安装包使用与公开发行相同的固定载荷，并保留明确的本地源码开发模式。
-    - 将安装后验收与构建和发布证据分开记录；按用户要求暂不进行 Mac 公证。
+    - 将 Mac ARM64 和 Windows x64 的 UAR 辅助程序更新至 1.1.1 候选版本，并将 Liter LLM 更新至 v2.3.0。
+    - 更新迷你技能包，并合入兼容的 Cherry Studio 上游改动。
+    - 保留 The Boss 的托管工具、DSH 和 UAR 集成、限定范围的记忆及审批行为。
+    - Mac 发行安装包须经过 Developer ID 签名与公证。
+    - UAR 1.1.1 尚未通过完整资格验证；嵌入空间不匹配的验证仍未完成。
+
     <!--LANG:END-->

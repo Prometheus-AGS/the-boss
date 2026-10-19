@@ -11,7 +11,12 @@ import {
 import { REPO_URL } from '@shared/utils/branding'
 import { clampSurrogateBoundary } from '@shared/utils/text'
 
-import { ChannelAdapter, type ChannelAdapterConfig, type SendMessageOptions } from '../../ChannelAdapter'
+import {
+  ChannelAdapter,
+  type ChannelAdapterConfig,
+  type ChannelStreamErrorOptions,
+  type SendMessageOptions
+} from '../../ChannelAdapter'
 import { isSlashCommand, SLASH_COMMANDS } from '../../constants'
 import { FlushController } from '../../FlushController'
 import { splitMessage } from '../../utils'
@@ -734,11 +739,18 @@ class DiscordAdapter extends ChannelAdapter {
     }
   }
 
-  override async onStreamError(chatId: string, error: string): Promise<void> {
+  override async onStreamError(
+    chatId: string,
+    error: string,
+    _opts?: SendMessageOptions,
+    options?: ChannelStreamErrorOptions
+  ): Promise<boolean> {
     const controller = this.streamingControllers.get(chatId)
-    if (!controller) return
+    if (!controller) return false
     try {
-      await controller.error(error)
+      if (options?.suppressDelivery) controller.dispose()
+      else await controller.error(error)
+      return true
     } finally {
       this.streamingControllers.delete(chatId)
     }

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "TheBoss",
-    "version": "2.2.9",
+    "version": "2.2.40",
     "description": "The Boss — an agent studio for people who ship.",
     "homepage": "https://github.com/CherryHQ/cherry-studio"
   },
@@ -63,10 +63,12 @@
       "/settings/api-gateway",
       "/settings/appearance",
       "/settings/archive",
+      "/settings/bossfang",
       "/settings/browser",
       "/settings/channels",
       "/settings/code-execution",
       "/settings/compass",
+      "/settings/computer-use",
       "/settings/data",
       "/settings/dependencies",
       "/settings/device-connections",
@@ -78,6 +80,7 @@
       "/settings/model",
       "/settings/notifications",
       "/settings/ocr",
+      "/settings/profile",
       "/settings/prometheus",
       "/settings/prompts",
       "/settings/provider",
@@ -89,9 +92,11 @@
       "/settings/services",
       "/settings/shortcut",
       "/settings/skills",
+      "/settings/subscription",
       "/settings/system",
       "/settings/uar",
       "/settings/usage",
+      "/settings/voice",
       "/settings/websearch",
       "/app/mini-app/$appId",
       "/app/paintings/$",
@@ -501,8 +506,8 @@
     }
   ],
   "providers": {
-    "version": "dbca1ba38bf86df7",
-    "count": 65,
+    "version": "1b44511badb438e6",
+    "count": 66,
     "entries": [
       {
         "id": "cherryin",
@@ -595,6 +600,10 @@
       {
         "id": "lmstudio",
         "name": "LM Studio"
+      },
+      {
+        "id": "litellm",
+        "name": "LiteLLM"
       },
       {
         "id": "anthropic",
@@ -823,6 +832,11 @@
       "label": "Română"
     },
     {
+      "value": "th-TH",
+      "flag": "🇹🇭",
+      "label": "ภาษาไทย"
+    },
+    {
       "value": "vi-VN",
       "flag": "🇻🇳",
       "label": "Tiếng Việt"
@@ -839,6 +853,8 @@
       "feishu",
       "qq",
       "wechat",
+      "wecom",
+      "dingtalk",
       "discord",
       "slack"
     ],

@@ -2,6 +2,7 @@ import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'node:crypt
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http'
 
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
+import type { Transport as LegacyTransport } from '@modelcontextprotocol/sdk/shared/transport.js'
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js'
 
 import type { AgentMcpServer } from '@main/ai/runtime/agentMcpServers'
@@ -43,14 +44,19 @@ export interface UarHostMcpBridge {
   close(): Promise<void>
 }
 
-type McpInstance = Pick<AgentMcpServer['instance'], 'connect' | 'close'>
-type HostServer = { name: string } & ({ instance: McpInstance } | { createInstance: () => McpInstance })
-type ClientSession = { instance: McpInstance; transport: StreamableHTTPServerTransport }
+type LegacyMcpInstance = {
+  connect(transport: LegacyTransport): Promise<void>
+  close(): Promise<void>
+}
+type HostServer = AgentMcpServer | { name: string; createInstance: () => LegacyMcpInstance }
+type ClientSession = {
+  handle?: { close(): Promise<void> }
+  transport: StreamableHTTPServerTransport
+}
 
 type MountedServer = {
   path: string
   server: HostServer
-  transport?: StreamableHTTPServerTransport
   sessions: Map<string, ClientSession>
   ownedSessions: Set<ClientSession>
   projection: () => UarSecretProjection
@@ -129,10 +135,6 @@ async function connectServers(
         projection
       }
       mounted.push(entry)
-      if ('instance' in server) {
-        entry.transport = new StreamableHTTPServerTransport({ sessionIdGenerator: randomUUID })
-        await server.instance.connect(createUarProjectedMcpTransport(entry.transport, projection))
-      }
     }
     return mounted
   } catch (error) {
@@ -188,11 +190,11 @@ async function handleRequest(
     await admittedHostInvocation.run(claim.invocation, () => transport.handleRequest(request, response, body))
   } finally {
     // A rejected initialize owns no resumable session.
-    if ('createInstance' in mounted.server && !transport.sessionId) {
+    if (!transport.sessionId) {
       const session = [...mounted.ownedSessions].find((entry) => entry.transport === transport)
       if (session) {
         mounted.ownedSessions.delete(session)
-        await session.instance.close()
+        await session.handle?.close()
       }
     }
   }
@@ -204,7 +206,6 @@ async function clientTransport(
   response: ServerResponse,
   body: unknown
 ): Promise<StreamableHTTPServerTransport | undefined> {
-  if (mounted.transport) return mounted.transport
   const sessionId = request.headers['mcp-session-id']
   if (typeof sessionId === 'string') {
     const session = mounted.sessions.get(sessionId)
@@ -218,15 +219,13 @@ async function clientTransport(
     response.end()
     return
   }
-  if (!('createInstance' in mounted.server)) return
-  const instance = mounted.server.createInstance()
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: randomUUID,
     onsessioninitialized: (id) => {
       mounted.sessions.set(id, session)
     }
   })
-  const session: ClientSession = { instance, transport }
+  const session: ClientSession = { transport }
   mounted.ownedSessions.add(session)
   transport.onclose = () => {
     if (transport.sessionId && mounted.sessions.get(transport.sessionId) === session) {
@@ -235,11 +234,18 @@ async function clientTransport(
     mounted.ownedSessions.delete(session)
   }
   try {
-    await instance.connect(createUarProjectedMcpTransport(transport, mounted.projection))
+    const projected = createUarProjectedMcpTransport(transport, mounted.projection)
+    if ('connect' in mounted.server) {
+      session.handle = await mounted.server.connect(projected)
+    } else {
+      const instance = mounted.server.createInstance()
+      session.handle = instance
+      await instance.connect(projected)
+    }
     return transport
   } catch (error) {
     mounted.ownedSessions.delete(session)
-    await instance.close()
+    await session.handle?.close()
     throw error
   }
 }
@@ -292,11 +298,7 @@ function closeHttpServer(server: Server): Promise<void> {
 
 async function closeMountedServers(mounted: readonly MountedServer[]): Promise<void> {
   await Promise.allSettled(
-    mounted.flatMap((entry) =>
-      'instance' in entry.server
-        ? [entry.server.instance.close()]
-        : [...entry.ownedSessions].map((session) => session.instance.close())
-    )
+    mounted.flatMap((entry) => [...entry.ownedSessions].map((session) => session.handle?.close() ?? Promise.resolve()))
   )
 }
 

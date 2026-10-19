@@ -1,10 +1,11 @@
 import { realpath } from 'node:fs/promises'
 
+import { serveStdio } from '@modelcontextprotocol/server/stdio'
 import * as z from 'zod'
 
 import { application } from '@application'
 import { agentWorkspaceService } from '@data/services/AgentWorkspaceService'
-import { FileSystemServer } from '@main/ai/mcp/servers/filesystem'
+import { createFileSystemServer } from '@main/ai/mcp/servers/filesystem'
 import { rawPendingApproval } from '@main/ai/runtime/uar/uarApprovalLifecycle'
 import { uarApprovalLifecycleStore } from '@main/ai/runtime/uar/UarApprovalLifecycleStore'
 import { createUarAuthorityProvider } from '@main/ai/runtime/uar/UarAuthorityProvider'
@@ -106,7 +107,10 @@ export class DelegatedHostContext {
     const memory = readIntegrationConfig().services.memory
     context.bridge = await createUarHostMcpBridge(
       {
-        filesystem: { name: 'filesystem', createInstance: () => new FileSystemServer(directory).server },
+        filesystem: {
+          name: 'filesystem',
+          connect: async (transport) => serveStdio(() => createFileSystemServer(directory), { transport })
+        },
         shared_memory: {
           name: 'shared_memory',
           createInstance: () => createSharedMemoryServer(memory, authorization.workspaceId)

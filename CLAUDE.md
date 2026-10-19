@@ -56,6 +56,7 @@ Project-specific tools, paths, and conventions.
 - **Access paths centrally**: Use `application.getPath('namespace.key', filename?)` for all main-process filesystem paths—never call `app.getPath()`, `os.homedir()`, or construct paths ad-hoc. Import the singleton via `import { application } from '@application'`.
 - **Verify completed behavior at its real boundary**: finish the coherent production change first, then run the smallest integration flow that enters through the actual UI, IPC, process, filesystem, database, or protocol boundary. Unit, component-only, snapshot, filtered-function, and mock-only tests are not completion evidence. Run `pnpm lint` once at the completed change boundary when TypeScript changed. Reserve `pnpm build:check` and broad integration suites for the final applicable phase. Docs-only changes use `pnpm docs:check`.
 - **Hourly release boundary**: finish all production code, UI, IPC, translations, and packaging for the hour before testing. At that boundary, exercise only the new functionality through its real integration path and run `pnpm build:mac:arm64`; inspect the packaged application after the build when the scenario requires it. Do not retest earlier hours or run a broader suite for each hourly delivery. Fix a failure and rerun only its failed gate, then stop at the delivery boundary.
+
 - **Write conventional commits**: Commit small, focused changes using Conventional Commit messages (e.g., `feat(data-api):`, `fix(lifecycle):`, `refactor(quick-assistant):`, `docs(testing):`, `chore(deps):`, `test(window-manager):`). Scope must be a specific kebab-case module, never generic like `main` — when `git log` conflicts with this rule, this rule wins.
 - **Sign commits and sign off**: Every commit must be both cryptographically signed and DCO-signed off. Use `git commit -S --signoff` (not `--signoff` alone), verify the commit object contains a `gpgsig` header with `git cat-file commit HEAD`, and verify the pushed PR commits show `Verified` on GitHub.
 - **Target the right branch**: `main` is the default branch for all active development — submit features, refactors, optimizations, and fixes here.
@@ -71,6 +72,7 @@ Run `pnpm install` first (Node and pnpm versions are pinned in `package.json` �
 - `pnpm format` — Oxfmt format (write mode)
 - `pnpm docs:check` — the docs gate (`check-links` + structure closed-set + frontmatter/`sources` existence + generated-index freshness); the only thing `build:check` adds over `lint` + `test`. Run it for docs/markdown edits instead of the full gate. Docs under `docs/references/**` and `docs/contrib/**` carry `description`/`sources` frontmatter; `docs/README.md` is generated — edit frontmatter and run `pnpm docs:index`, never the index by hand.
 - `pnpm build:check` — `lint` + `docs:check` + the broad legacy suite; run once at the final applicable phase or release boundary. If it fails on i18n sort, run `pnpm i18n:sync` first; on formatting, run `pnpm format` first; on broken doc links, fix the link.
+
 - `pnpm test:lint` — the CI-equivalent lint gate: Oxlint errors and warnings block CI (`--deny-warnings`); ESLint errors block CI while its warnings remain non-blocking.
 
 ### Testing
@@ -80,6 +82,7 @@ Run `pnpm install` first (Node and pnpm versions are pinned in `package.json` �
 - **No behavior-pinning tests**: a scenario whose assertion merely records current output, mock calls, or an expected value re-derived from the implementation has zero value. Exercise real input through the production boundary and assert the promised outcome. Before adding an integration scenario, state the production defect it would catch; if none, do not add it.
 - **Frontend integration**: use the relevant production-flow guidance from [Frontend Testing Guidelines](docs/references/testing/frontend-testing.md); component-only guidance is not a completion gate.
 - **Mocks**: mock-only scenarios are not evidence. If maintaining a legacy test that requires a mock, use the unified system in [tests/__mocks__/README.md](tests/__mocks__/README.md) and do not cite the result as completion proof.
+
 - **Database Tests**: For any service/handler/seeder that reads or writes SQLite, use `setupTestDatabase()` from `@test-helpers/db` — it provides a real file-backed DB with production migrations. Do NOT hand-write `CREATE TABLE` SQL, override `@application`, or stub Drizzle chains. See [docs/references/testing/database-testing.md](docs/references/testing/database-testing.md).
 
 ### Patched Dependencies
@@ -129,7 +132,7 @@ logger.error("message", error);
 
 - All user-visible strings must use `i18next` — never hardcode UI strings
 - Locale catalogs live in `src/renderer/i18n/locales/` and `src/main/i18n/locales/`; both use `en-us.json` as the source of truth
-- Only when you add or change a key: edit `en-us.json`, run `pnpm i18n:sync` (fills the other locales with `[to be translated]:` placeholders), then translate every one. No separate `pnpm i18n:check` run needed — `pnpm lint` includes it, and it rejects leftover placeholders as well as empty values, interpolation/tag mismatches, and unsorted keys.
+- Only when you add or change a key: edit `en-us.json`, run `pnpm i18n:sync` (fills the other locales with `[to be translated]:` placeholders), then translate every one. `pnpm check` selects `i18n:check` for source changes; it rejects leftover placeholders as well as empty values, interpolation/tag mismatches, and unsorted keys.
 
 ### UI Design
 
@@ -167,7 +170,7 @@ Scope:
 
 Database: SQLite via **better-sqlite3** + Drizzle ORM — the driver is **synchronous** (queries and transactions run inline with no `await`, unlike the app's otherwise-async data layers), so `getDb()` queries and `withWriteTx(fn)` callbacks must be written synchronously. Schemas in `src/main/data/db/schemas/`, migrations via `pnpm db:migrations:generate`
 
-**Write atomicity**: use `application.get('DbService').withWriteTx(fn)` to commit multiple writes (or a read-then-write) all-or-nothing in one synchronous `BEGIN IMMEDIATE` transaction; `fn` must be synchronous. A single write doesn't need it — better-sqlite3 runs each statement atomically on its one connection. See [Database Patterns — Write Serialization](docs/references/data/database-patterns.md#write-serialization-dbservicewritewritetx).
+**Write atomicity**: use `application.get('DbService').withWriteTx(fn)` to commit multiple writes (or a read-then-write) all-or-nothing in one synchronous `BEGIN IMMEDIATE` transaction; `fn` must be synchronous. A single write doesn't need it — better-sqlite3 runs each statement atomically on its one connection. See [Database Patterns — Write Serialization](docs/references/data/database-patterns.md#write-serialization-dbservicewithwritetx).
 
 **DataApi boundary rule**: DataApi is for SQLite-backed business data only. No database table → no DataApi endpoint; use IPC instead. See [Scope & Boundaries](docs/references/data/api-design-guidelines.md#dataapi-scope--boundaries).
 

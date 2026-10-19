@@ -31,7 +31,16 @@ vi.mock('@application', async () => {
     if (name === 'McpCatalogService') return { listTools: mocks.listTools }
     if (name === 'AgentSessionRuntimeService')
       return { getTurnTrustedNotifyChannels: mocks.getTurnTrustedNotifyChannels }
-    if (name === 'ApiGatewayService') return { getCurrentConfig: mocks.getGatewayConfig }
+    if (name === 'PrometheusIntegrationService')
+      return { resolveSession: async (session: unknown, agent: unknown) => ({ session, agent }) }
+    if (name === 'ApiGatewayService')
+      return {
+        getCurrentConfig: mocks.getGatewayConfig,
+        getInternalGatewayOrigin: () => {
+          const config = mocks.getGatewayConfig()
+          return `http://${config.host}:${config.port}`
+        }
+      }
     return get(name)
   })
   return result

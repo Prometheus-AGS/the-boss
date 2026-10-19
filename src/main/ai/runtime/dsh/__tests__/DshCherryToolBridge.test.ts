@@ -15,6 +15,7 @@ import sharp from 'sharp'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { resolveDshRuntimeEntry } from '@cherrystudio/dsh-bridge'
+import type { AgentMcpServer } from '@main/ai/runtime/agentMcpServers'
 
 const mocks = vi.hoisted(() => ({
   findByIdOrName: vi.fn(),
@@ -43,6 +44,16 @@ function createServer(
     call(request.params.name, request.params.arguments ?? {}, extra.signal)
   )
   return server
+}
+
+function connectedServer(name: string, instance: McpServer): AgentMcpServer {
+  return {
+    name,
+    async connect(transport) {
+      await instance.connect(transport)
+      return { close: () => instance.close() }
+    }
+  }
 }
 
 const tool = (name: string): Tool => ({
@@ -91,8 +102,8 @@ describe('DshCherryToolBridge', () => {
     await expect(
       buildDshCherryToolBridge(
         {
-          first: { name: 'duplicate', instance: first },
-          second: { name: 'duplicate', instance: second }
+          first: connectedServer('duplicate', first),
+          second: connectedServer('duplicate', second)
         },
         bridgeOptions()
       )
@@ -111,8 +122,8 @@ describe('DshCherryToolBridge', () => {
 
     const bridge = await buildDshCherryToolBridge(
       {
-        unavailable: { name: 'offline', instance: unavailable },
-        available: { name: 'cherry-tools', instance: available }
+        unavailable: connectedServer('offline', unavailable),
+        available: connectedServer('cherry-tools', available)
       },
       bridgeOptions()
     )
@@ -160,7 +171,7 @@ describe('DshCherryToolBridge', () => {
       structuredContent: { total: 7 }
     }))
     const server = createServer([tool('run')], call)
-    const bridge = await buildDshCherryToolBridge({ server: { name: 'server', instance: server } }, bridgeOptions())
+    const bridge = await buildDshCherryToolBridge({ server: connectedServer('server', server) }, bridgeOptions())
 
     const imageHash = createHash('sha256').update(image).digest('hex')
     const audioHash = createHash('sha256').update(audio).digest('hex')
@@ -226,7 +237,7 @@ describe('DshCherryToolBridge', () => {
       })
       return { content: [{ type: 'text', text: 'cancelled' }], isError: true }
     })
-    const bridge = await buildDshCherryToolBridge({ server: { name: 'server', instance: server } }, bridgeOptions())
+    const bridge = await buildDshCherryToolBridge({ server: connectedServer('server', server) }, bridgeOptions())
     const controller = new AbortController()
 
     const pending = bridge.callTool('mcp__server__run', {}, controller.signal)
@@ -246,7 +257,7 @@ describe('DshCherryToolBridge', () => {
       ],
       isError: true
     }))
-    const bridge = await buildDshCherryToolBridge({ server: { name: 'server', instance: server } }, bridgeOptions())
+    const bridge = await buildDshCherryToolBridge({ server: connectedServer('server', server) }, bridgeOptions())
 
     await expect(bridge.callTool('mcp__server__run', {})).rejects.toThrow('tool failed')
     await expect(access(toolResultRoot)).rejects.toMatchObject({ code: 'ENOENT' })
@@ -270,7 +281,7 @@ describe('DshCherryToolBridge', () => {
         await new Promise((resolve) => setTimeout(resolve, 65_000))
         return { content: [{ type: 'text', text: 'slow but done' }] }
       })
-      const bridge = await buildDshCherryToolBridge({ server: { name: 'server', instance: server } }, bridgeOptions())
+      const bridge = await buildDshCherryToolBridge({ server: connectedServer('server', server) }, bridgeOptions())
 
       const completion = expect(bridge.callTool('mcp__server__run', { value: 'x' })).resolves.toMatchObject({
         text: 'slow but done'

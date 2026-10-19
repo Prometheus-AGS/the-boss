@@ -102,7 +102,7 @@ export function UarPresentationsPanel() {
         title: title.trim(),
         description: description.trim(),
         enabled,
-        template: template as unknown as Record<string, unknown>
+        template
       })
       setSnapshot(next)
       const saved = selected

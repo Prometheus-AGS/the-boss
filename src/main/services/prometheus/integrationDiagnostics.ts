@@ -54,61 +54,36 @@ export async function runIntegrationDiagnostics(
   }
   for (const server of servers) {
     await check(`mcp:${server.reference}`, async () => {
-      await runtime.withClient(server.id, async (client) => {
-        const { tools } = await client.listTools({}, { signal })
-        if (!tools.length) throw new Error('prometheus.error.noTools')
-        if (server.reference?.startsWith('filesystem:')) {
-          const directory = await fs.mkdtemp(path.join(workspace.path, '.the-boss-diagnostic-'))
-          const filename = path.join(directory, 'probe.txt')
-          const token = randomUUID()
-          try {
-            if (config.filesystem.allowWrite)
-              text(
-                await client.callTool(
-                  { name: 'write_file', arguments: { path: filename, content: token } },
-                  undefined,
-                  { signal }
-                )
-              )
-            else await fs.writeFile(filename, token)
-            const response = text(
-              await client.callTool({ name: 'read_text_file', arguments: { path: filename } }, undefined, { signal })
-            )
-            if (!response.includes(token)) throw new Error('prometheus.error.roundTrip')
-          } finally {
-            await fs.rm(directory, { recursive: true, force: true })
-          }
-        } else if (server.reference?.startsWith('compass:')) {
-          text(
-            await client.callTool({ name: 'query_graph', arguments: { query: 'find symbols named main' } }, undefined, {
-              signal
-            })
-          )
-        } else if (server.reference === 'surreal-memory') {
-          const token = `The Boss diagnostic ${randomUUID()}`
-          const created = JSON.parse(
-            text(
-              await client.callTool(
-                {
-                  name: 'add_memory',
-                  arguments: { content: token, agent_id: 'the-boss-diagnostics', user_id: 'anonymous' }
-                },
-                undefined,
-                { signal }
-              )
-            )
-          ) as { id: string }
-          if (!created.id) throw new Error('prometheus.error.roundTrip')
-          try {
-            const response = text(
-              await client.callTool({ name: 'get_memory', arguments: { id: created.id } }, undefined, { signal })
-            )
-            if (!response.includes(token)) throw new Error('prometheus.error.roundTrip')
-          } finally {
-            text(await client.callTool({ name: 'delete_memory', arguments: { id: created.id } }))
-          }
+      const callTool = (name: string, args: unknown) => runtime.callTool({ serverId: server.id, name, args, signal })
+      const tools = await runtime.listTools(server.id, 'refresh')
+      if (!tools.length) throw new Error('prometheus.error.noTools')
+      if (server.reference?.startsWith('filesystem:')) {
+        const directory = await fs.mkdtemp(path.join(workspace.path, '.the-boss-diagnostic-'))
+        const filename = path.join(directory, 'probe.txt')
+        const token = randomUUID()
+        try {
+          if (config.filesystem.allowWrite) text(await callTool('write_file', { path: filename, content: token }))
+          else await fs.writeFile(filename, token)
+          const response = text(await callTool('read_text_file', { path: filename }))
+          if (!response.includes(token)) throw new Error('prometheus.error.roundTrip')
+        } finally {
+          await fs.rm(directory, { recursive: true, force: true })
         }
-      })
+      } else if (server.reference?.startsWith('compass:')) {
+        text(await callTool('query_graph', { query: 'find symbols named main' }))
+      } else if (server.reference === 'surreal-memory') {
+        const token = `The Boss diagnostic ${randomUUID()}`
+        const created = JSON.parse(
+          text(await callTool('add_memory', { content: token, agent_id: 'the-boss-diagnostics', user_id: 'anonymous' }))
+        ) as { id: string }
+        if (!created.id) throw new Error('prometheus.error.roundTrip')
+        try {
+          const response = text(await callTool('get_memory', { id: created.id }))
+          if (!response.includes(token)) throw new Error('prometheus.error.roundTrip')
+        } finally {
+          text(await callTool('delete_memory', { id: created.id }))
+        }
+      }
     })
   }
   if (

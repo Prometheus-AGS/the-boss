@@ -54,7 +54,6 @@ export interface AgentConversationControlsProps {
   onModelSelect: (model: Model | undefined) => void
   onWorkspaceChange?: (workspaceId: string | null) => void | Promise<void>
   modelFilter?: ModelSelectorFilter
-  isModelDisabled?: ModelSelectorFilter
   onAgentDialogCloseAutoFocus?: () => void
 }
 
@@ -159,19 +158,10 @@ function ModelControl({
   side,
   iconOnly = false,
   onModelSelect,
-  modelFilter,
-  isModelDisabled
+  modelFilter
 }: Pick<
   AgentConversationControlsProps,
-  | 'agent'
-  | 'model'
-  | 'selectModelLabel'
-  | 'canChangeModel'
-  | 'side'
-  | 'iconOnly'
-  | 'onModelSelect'
-  | 'modelFilter'
-  | 'isModelDisabled'
+  'agent' | 'model' | 'selectModelLabel' | 'canChangeModel' | 'side' | 'iconOnly' | 'onModelSelect' | 'modelFilter'
 >) {
   const { t } = useTranslation()
   const catalogId =
@@ -251,8 +241,8 @@ function ModelControl({
       value={model}
       onSelect={onModelSelect}
       filter={modelFilter}
-      isModelDisabled={isModelDisabled}
-      shortcut={modelCanChange ? 'chat.model.select' : undefined}
+      shortcut={canChangeModel ? 'chat.model.select' : undefined}
+
       side={side}
       align="start"
       mountStrategy="lazy-keep"
@@ -292,18 +282,8 @@ function WorkspaceControl({
     : (workspace?.name ?? selectWorkspaceLabel)
   const canQuickClearWorkspace = Boolean(onWorkspaceChange && workspace && !iconOnly)
   if (!onWorkspaceChange && workspace?.type === 'user' && workspace.path) {
-    const openMenuTrigger = (
-      <Button
-        variant="ghost"
-        size="sm"
-        type="button"
-        className={cn(
-          baseTriggerClassName,
-          'relative',
-          iconOnly && COMPOSER_ICON_ONLY_SELECTOR_BUTTON_CLASS,
-          hasWarning && 'text-warning hover:text-warning'
-        )}
-        aria-label={workspaceWarning}>
+    const openButtonContent = (
+      <>
         {hasWarning ? (
           <TriangleAlert size={20} aria-hidden />
         ) : (
@@ -312,14 +292,24 @@ function WorkspaceControl({
           </span>
         )}
         <span className={cn('max-w-40 truncate', iconOnly && COMPOSER_ICON_ONLY_LABEL_CLASS)}>{workspaceLabel}</span>
-        <ChevronDown size={14} aria-hidden className={cn('text-muted-foreground', iconOnly && 'hidden')} />
-      </Button>
+      </>
     )
     return (
       <OpenTargetButton
         targetPath={workspace.path}
         pathKind="directory"
-        menuTrigger={openMenuTrigger}
+        primaryContent={openButtonContent}
+        primaryClassName={cn(
+          baseTriggerClassName,
+          'relative',
+          iconOnly && COMPOSER_ICON_ONLY_SELECTOR_BUTTON_CLASS,
+          hasWarning && 'text-warning hover:text-warning'
+        )}
+        menuClassName={cn(
+          baseTriggerClassName,
+          'px-0 text-muted-foreground',
+          hasWarning && 'text-warning hover:text-warning'
+        )}
         tooltip={workspaceWarning}
       />
     )

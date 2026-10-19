@@ -65,7 +65,8 @@ describe('AFC C02 governed-effect host integration gate', () => {
     expect(claimed.value).toEqual(resolved.value)
     expect(admission.claimToolCall(managedCall(invocation, claimed.value), invocation.mountedServerId)).toEqual({
       call: { id: 'call-1' },
-      admissionId: prepared.value.admissionId
+      admissionId: prepared.value.admissionId,
+      invocation
     })
 
     const changedPayload = nextInvocation(invocation)

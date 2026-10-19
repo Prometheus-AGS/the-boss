@@ -32,6 +32,7 @@ import { Route as SettingsBrowserRouteImport } from './routes/settings/browser'
 import { Route as SettingsChannelsRouteImport } from './routes/settings/channels'
 import { Route as SettingsCodeExecutionRouteImport } from './routes/settings/code-execution'
 import { Route as SettingsCompassRouteImport } from './routes/settings/compass'
+import { Route as SettingsComputerUseRouteImport } from './routes/settings/computer-use'
 import { Route as SettingsDataRouteImport } from './routes/settings/data'
 import { Route as SettingsDependenciesRouteImport } from './routes/settings/dependencies'
 import { Route as SettingsDeviceConnectionsRouteImport } from './routes/settings/device-connections'
@@ -43,6 +44,7 @@ import { Route as SettingsMcpRouteImport } from './routes/settings/mcp'
 import { Route as SettingsModelRouteImport } from './routes/settings/model'
 import { Route as SettingsNotificationsRouteImport } from './routes/settings/notifications'
 import { Route as SettingsOcrRouteImport } from './routes/settings/ocr'
+import { Route as SettingsProfileRouteImport } from './routes/settings/profile'
 import { Route as SettingsPrometheusRouteImport } from './routes/settings/prometheus'
 import { Route as SettingsPromptsRouteImport } from './routes/settings/prompts'
 import { Route as SettingsProviderRouteImport } from './routes/settings/provider'
@@ -54,9 +56,11 @@ import { Route as SettingsSelectionAssistantRouteImport } from './routes/setting
 import { Route as SettingsServicesRouteImport } from './routes/settings/services'
 import { Route as SettingsShortcutRouteImport } from './routes/settings/shortcut'
 import { Route as SettingsSkillsRouteImport } from './routes/settings/skills'
+import { Route as SettingsSubscriptionRouteImport } from './routes/settings/subscription'
 import { Route as SettingsSystemRouteImport } from './routes/settings/system'
 import { Route as SettingsUarRouteImport } from './routes/settings/uar'
 import { Route as SettingsUsageRouteImport } from './routes/settings/usage'
+import { Route as SettingsVoiceRouteImport } from './routes/settings/voice'
 import { Route as SettingsWebsearchRouteImport } from './routes/settings/websearch'
 import { Route as AppMiniAppIndexRouteImport } from './routes/app/mini-app.index'
 import { Route as AppMiniAppAppIdRouteImport } from './routes/app/mini-app/$appId'
@@ -190,6 +194,11 @@ const SettingsCompassRoute = SettingsCompassRouteImport.update({
   path: '/compass',
   getParentRoute: () => SettingsRoute,
 } as any)
+const SettingsComputerUseRoute = SettingsComputerUseRouteImport.update({
+  id: '/computer-use',
+  path: '/computer-use',
+  getParentRoute: () => SettingsRoute,
+} as any)
 const SettingsDataRoute = SettingsDataRouteImport.update({
   id: '/data',
   path: '/data',
@@ -244,6 +253,11 @@ const SettingsNotificationsRoute = SettingsNotificationsRouteImport.update({
 const SettingsOcrRoute = SettingsOcrRouteImport.update({
   id: '/ocr',
   path: '/ocr',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsProfileRoute = SettingsProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => SettingsRoute,
 } as any)
 const SettingsPrometheusRoute = SettingsPrometheusRouteImport.update({
@@ -302,6 +316,11 @@ const SettingsSkillsRoute = SettingsSkillsRouteImport.update({
   path: '/skills',
   getParentRoute: () => SettingsRoute,
 } as any)
+const SettingsSubscriptionRoute = SettingsSubscriptionRouteImport.update({
+  id: '/subscription',
+  path: '/subscription',
+  getParentRoute: () => SettingsRoute,
+} as any)
 const SettingsSystemRoute = SettingsSystemRouteImport.update({
   id: '/system',
   path: '/system',
@@ -315,6 +334,11 @@ const SettingsUarRoute = SettingsUarRouteImport.update({
 const SettingsUsageRoute = SettingsUsageRouteImport.update({
   id: '/usage',
   path: '/usage',
+  getParentRoute: () => SettingsRoute,
+} as any)
+const SettingsVoiceRoute = SettingsVoiceRouteImport.update({
+  id: '/voice',
+  path: '/voice',
   getParentRoute: () => SettingsRoute,
 } as any)
 const SettingsWebsearchRoute = SettingsWebsearchRouteImport.update({
@@ -429,6 +453,7 @@ export interface FileRoutesByFullPath {
   '/settings/channels': typeof SettingsChannelsRoute
   '/settings/code-execution': typeof SettingsCodeExecutionRoute
   '/settings/compass': typeof SettingsCompassRoute
+  '/settings/computer-use': typeof SettingsComputerUseRoute
   '/settings/data': typeof SettingsDataRoute
   '/settings/dependencies': typeof SettingsDependenciesRoute
   '/settings/device-connections': typeof SettingsDeviceConnectionsRoute
@@ -440,6 +465,7 @@ export interface FileRoutesByFullPath {
   '/settings/model': typeof SettingsModelRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/ocr': typeof SettingsOcrRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/settings/prometheus': typeof SettingsPrometheusRoute
   '/settings/prompts': typeof SettingsPromptsRoute
   '/settings/provider': typeof SettingsProviderRoute
@@ -451,9 +477,11 @@ export interface FileRoutesByFullPath {
   '/settings/services': typeof SettingsServicesRoute
   '/settings/shortcut': typeof SettingsShortcutRoute
   '/settings/skills': typeof SettingsSkillsRouteWithChildren
+  '/settings/subscription': typeof SettingsSubscriptionRoute
   '/settings/system': typeof SettingsSystemRoute
   '/settings/uar': typeof SettingsUarRoute
   '/settings/usage': typeof SettingsUsageRoute
+  '/settings/voice': typeof SettingsVoiceRoute
   '/settings/websearch': typeof SettingsWebsearchRoute
   '/settings/': typeof SettingsIndexRoute
   '/app/mini-app/$appId': typeof AppMiniAppAppIdRoute
@@ -495,6 +523,7 @@ export interface FileRoutesByTo {
   '/settings/channels': typeof SettingsChannelsRoute
   '/settings/code-execution': typeof SettingsCodeExecutionRoute
   '/settings/compass': typeof SettingsCompassRoute
+  '/settings/computer-use': typeof SettingsComputerUseRoute
   '/settings/data': typeof SettingsDataRoute
   '/settings/dependencies': typeof SettingsDependenciesRoute
   '/settings/device-connections': typeof SettingsDeviceConnectionsRoute
@@ -505,6 +534,7 @@ export interface FileRoutesByTo {
   '/settings/model': typeof SettingsModelRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/ocr': typeof SettingsOcrRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/settings/prometheus': typeof SettingsPrometheusRoute
   '/settings/prompts': typeof SettingsPromptsRoute
   '/settings/provider': typeof SettingsProviderRoute
@@ -514,9 +544,11 @@ export interface FileRoutesByTo {
   '/settings/selection-assistant': typeof SettingsSelectionAssistantRoute
   '/settings/services': typeof SettingsServicesRoute
   '/settings/shortcut': typeof SettingsShortcutRoute
+  '/settings/subscription': typeof SettingsSubscriptionRoute
   '/settings/system': typeof SettingsSystemRoute
   '/settings/uar': typeof SettingsUarRoute
   '/settings/usage': typeof SettingsUsageRoute
+  '/settings/voice': typeof SettingsVoiceRoute
   '/settings/websearch': typeof SettingsWebsearchRoute
   '/settings': typeof SettingsIndexRoute
   '/app/mini-app/$appId': typeof AppMiniAppAppIdRoute
@@ -560,6 +592,7 @@ export interface FileRoutesById {
   '/settings/channels': typeof SettingsChannelsRoute
   '/settings/code-execution': typeof SettingsCodeExecutionRoute
   '/settings/compass': typeof SettingsCompassRoute
+  '/settings/computer-use': typeof SettingsComputerUseRoute
   '/settings/data': typeof SettingsDataRoute
   '/settings/dependencies': typeof SettingsDependenciesRoute
   '/settings/device-connections': typeof SettingsDeviceConnectionsRoute
@@ -571,6 +604,7 @@ export interface FileRoutesById {
   '/settings/model': typeof SettingsModelRoute
   '/settings/notifications': typeof SettingsNotificationsRoute
   '/settings/ocr': typeof SettingsOcrRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/settings/prometheus': typeof SettingsPrometheusRoute
   '/settings/prompts': typeof SettingsPromptsRoute
   '/settings/provider': typeof SettingsProviderRoute
@@ -582,9 +616,11 @@ export interface FileRoutesById {
   '/settings/services': typeof SettingsServicesRoute
   '/settings/shortcut': typeof SettingsShortcutRoute
   '/settings/skills': typeof SettingsSkillsRouteWithChildren
+  '/settings/subscription': typeof SettingsSubscriptionRoute
   '/settings/system': typeof SettingsSystemRoute
   '/settings/uar': typeof SettingsUarRoute
   '/settings/usage': typeof SettingsUsageRoute
+  '/settings/voice': typeof SettingsVoiceRoute
   '/settings/websearch': typeof SettingsWebsearchRoute
   '/settings/': typeof SettingsIndexRoute
   '/app/mini-app/$appId': typeof AppMiniAppAppIdRoute
@@ -629,6 +665,7 @@ export interface FileRouteTypes {
     | '/settings/channels'
     | '/settings/code-execution'
     | '/settings/compass'
+    | '/settings/computer-use'
     | '/settings/data'
     | '/settings/dependencies'
     | '/settings/device-connections'
@@ -640,6 +677,7 @@ export interface FileRouteTypes {
     | '/settings/model'
     | '/settings/notifications'
     | '/settings/ocr'
+    | '/settings/profile'
     | '/settings/prometheus'
     | '/settings/prompts'
     | '/settings/provider'
@@ -651,9 +689,11 @@ export interface FileRouteTypes {
     | '/settings/services'
     | '/settings/shortcut'
     | '/settings/skills'
+    | '/settings/subscription'
     | '/settings/system'
     | '/settings/uar'
     | '/settings/usage'
+    | '/settings/voice'
     | '/settings/websearch'
     | '/settings/'
     | '/app/mini-app/$appId'
@@ -695,6 +735,7 @@ export interface FileRouteTypes {
     | '/settings/channels'
     | '/settings/code-execution'
     | '/settings/compass'
+    | '/settings/computer-use'
     | '/settings/data'
     | '/settings/dependencies'
     | '/settings/device-connections'
@@ -705,6 +746,7 @@ export interface FileRouteTypes {
     | '/settings/model'
     | '/settings/notifications'
     | '/settings/ocr'
+    | '/settings/profile'
     | '/settings/prometheus'
     | '/settings/prompts'
     | '/settings/provider'
@@ -714,9 +756,11 @@ export interface FileRouteTypes {
     | '/settings/selection-assistant'
     | '/settings/services'
     | '/settings/shortcut'
+    | '/settings/subscription'
     | '/settings/system'
     | '/settings/uar'
     | '/settings/usage'
+    | '/settings/voice'
     | '/settings/websearch'
     | '/settings'
     | '/app/mini-app/$appId'
@@ -759,6 +803,7 @@ export interface FileRouteTypes {
     | '/settings/channels'
     | '/settings/code-execution'
     | '/settings/compass'
+    | '/settings/computer-use'
     | '/settings/data'
     | '/settings/dependencies'
     | '/settings/device-connections'
@@ -770,6 +815,7 @@ export interface FileRouteTypes {
     | '/settings/model'
     | '/settings/notifications'
     | '/settings/ocr'
+    | '/settings/profile'
     | '/settings/prometheus'
     | '/settings/prompts'
     | '/settings/provider'
@@ -781,9 +827,11 @@ export interface FileRouteTypes {
     | '/settings/services'
     | '/settings/shortcut'
     | '/settings/skills'
+    | '/settings/subscription'
     | '/settings/system'
     | '/settings/uar'
     | '/settings/usage'
+    | '/settings/voice'
     | '/settings/websearch'
     | '/settings/'
     | '/app/mini-app/$appId'
@@ -972,6 +1020,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsCompassRouteImport
       parentRoute: typeof SettingsRoute
     }
+    '/settings/computer-use': {
+      id: '/settings/computer-use'
+      path: '/computer-use'
+      fullPath: '/settings/computer-use'
+      preLoaderRoute: typeof SettingsComputerUseRouteImport
+      parentRoute: typeof SettingsRoute
+    }
     '/settings/data': {
       id: '/settings/data'
       path: '/data'
@@ -1047,6 +1102,13 @@ declare module '@tanstack/react-router' {
       path: '/ocr'
       fullPath: '/settings/ocr'
       preLoaderRoute: typeof SettingsOcrRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/profile': {
+      id: '/settings/profile'
+      path: '/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof SettingsProfileRouteImport
       parentRoute: typeof SettingsRoute
     }
     '/settings/prometheus': {
@@ -1126,6 +1188,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsSkillsRouteImport
       parentRoute: typeof SettingsRoute
     }
+    '/settings/subscription': {
+      id: '/settings/subscription'
+      path: '/subscription'
+      fullPath: '/settings/subscription'
+      preLoaderRoute: typeof SettingsSubscriptionRouteImport
+      parentRoute: typeof SettingsRoute
+    }
     '/settings/system': {
       id: '/settings/system'
       path: '/system'
@@ -1145,6 +1214,13 @@ declare module '@tanstack/react-router' {
       path: '/usage'
       fullPath: '/settings/usage'
       preLoaderRoute: typeof SettingsUsageRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/voice': {
+      id: '/settings/voice'
+      path: '/voice'
+      fullPath: '/settings/voice'
+      preLoaderRoute: typeof SettingsVoiceRouteImport
       parentRoute: typeof SettingsRoute
     }
     '/settings/websearch': {
@@ -1373,6 +1449,7 @@ interface SettingsRouteChildren {
   SettingsChannelsRoute: typeof SettingsChannelsRoute
   SettingsCodeExecutionRoute: typeof SettingsCodeExecutionRoute
   SettingsCompassRoute: typeof SettingsCompassRoute
+  SettingsComputerUseRoute: typeof SettingsComputerUseRoute
   SettingsDataRoute: typeof SettingsDataRoute
   SettingsDependenciesRoute: typeof SettingsDependenciesRoute
   SettingsDeviceConnectionsRoute: typeof SettingsDeviceConnectionsRoute
@@ -1384,6 +1461,7 @@ interface SettingsRouteChildren {
   SettingsModelRoute: typeof SettingsModelRoute
   SettingsNotificationsRoute: typeof SettingsNotificationsRoute
   SettingsOcrRoute: typeof SettingsOcrRoute
+  SettingsProfileRoute: typeof SettingsProfileRoute
   SettingsPrometheusRoute: typeof SettingsPrometheusRoute
   SettingsPromptsRoute: typeof SettingsPromptsRoute
   SettingsProviderRoute: typeof SettingsProviderRoute
@@ -1395,9 +1473,11 @@ interface SettingsRouteChildren {
   SettingsServicesRoute: typeof SettingsServicesRoute
   SettingsShortcutRoute: typeof SettingsShortcutRoute
   SettingsSkillsRoute: typeof SettingsSkillsRouteWithChildren
+  SettingsSubscriptionRoute: typeof SettingsSubscriptionRoute
   SettingsSystemRoute: typeof SettingsSystemRoute
   SettingsUarRoute: typeof SettingsUarRoute
   SettingsUsageRoute: typeof SettingsUsageRoute
+  SettingsVoiceRoute: typeof SettingsVoiceRoute
   SettingsWebsearchRoute: typeof SettingsWebsearchRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
 }
@@ -1412,6 +1492,7 @@ const SettingsRouteChildren: SettingsRouteChildren = {
   SettingsChannelsRoute: SettingsChannelsRoute,
   SettingsCodeExecutionRoute: SettingsCodeExecutionRoute,
   SettingsCompassRoute: SettingsCompassRoute,
+  SettingsComputerUseRoute: SettingsComputerUseRoute,
   SettingsDataRoute: SettingsDataRoute,
   SettingsDependenciesRoute: SettingsDependenciesRoute,
   SettingsDeviceConnectionsRoute: SettingsDeviceConnectionsRoute,
@@ -1423,6 +1504,7 @@ const SettingsRouteChildren: SettingsRouteChildren = {
   SettingsModelRoute: SettingsModelRoute,
   SettingsNotificationsRoute: SettingsNotificationsRoute,
   SettingsOcrRoute: SettingsOcrRoute,
+  SettingsProfileRoute: SettingsProfileRoute,
   SettingsPrometheusRoute: SettingsPrometheusRoute,
   SettingsPromptsRoute: SettingsPromptsRoute,
   SettingsProviderRoute: SettingsProviderRoute,
@@ -1434,9 +1516,11 @@ const SettingsRouteChildren: SettingsRouteChildren = {
   SettingsServicesRoute: SettingsServicesRoute,
   SettingsShortcutRoute: SettingsShortcutRoute,
   SettingsSkillsRoute: SettingsSkillsRouteWithChildren,
+  SettingsSubscriptionRoute: SettingsSubscriptionRoute,
   SettingsSystemRoute: SettingsSystemRoute,
   SettingsUarRoute: SettingsUarRoute,
   SettingsUsageRoute: SettingsUsageRoute,
+  SettingsVoiceRoute: SettingsVoiceRoute,
   SettingsWebsearchRoute: SettingsWebsearchRoute,
   SettingsIndexRoute: SettingsIndexRoute,
 }

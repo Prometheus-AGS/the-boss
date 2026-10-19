@@ -40,6 +40,7 @@ async function writeSourcePack(root: string): Promise<void> {
   await fs.mkdir(path.join(root, 'rules'), { recursive: true })
   await fs.writeFile(path.join(root, 'rules', 'build.conf'), 'x\n')
   await fs.writeFile(path.join(root, 'package.json'), '{"name":"prometheus-skills-mini"}\n')
+  await fs.writeFile(path.join(root, 'release-manifest.json'), '{"version":"test-1"}\n')
   // Present in the submodule, deliberately NOT part of the runnable pack.
   await fs.mkdir(path.join(root, 'openspec'), { recursive: true })
   await fs.writeFile(path.join(root, 'openspec', 'config.yaml'), 'y\n')

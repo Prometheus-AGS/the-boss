@@ -83,7 +83,8 @@ export async function setupUarCodingTeam(workspaceId: string, model: UarTeamMode
     bindingId: 'urn:boss:coding:binding:' + state.workspaceId + ':' + preset.identity.version + ':' + modelKey,
     effectiveLimits: { concurrentTurns: 1, maxMembers: 3, maxDepth: 0, maxPendingTasks: 8 }
   })
-  const { contentDigest: _digest, ...fields } = base
+  const fields = { ...base }
+  Reflect.deleteProperty(fields, 'contentDigest')
   const binding = document({
     ...fields,
     requiredCapabilities: [...fields.requiredCapabilities, UAR_TEAM_HOST_CAPABILITY],

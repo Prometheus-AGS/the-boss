@@ -88,6 +88,34 @@ const BAN_DRIZZLE_MIGRATOR = {
   message:
     "Do not call drizzle's migrate() directly — its transaction makes drizzle-kit's `PRAGMA foreign_keys=OFF` a no-op, so any table-recreate migration silently cascades child rows away. Use applyMigrations() from @data/db/applyMigrations."
 }
+// MCP SDK v1 stays installed only as the Claude Agent SDK's type peer; app code uses v2.
+const BAN_MCP_SDK_V1 = {
+  group: ['@modelcontextprotocol/sdk', '@modelcontextprotocol/sdk/**'],
+  message:
+    'MCP SDK v1 is only a type peer of the Claude Agent SDK. Use @modelcontextprotocol/client, @modelcontextprotocol/server, or @modelcontextprotocol/core.'
+}
+
+const BAN_WEB_SEARCH_INTERNALS = {
+  group: ['**/packages/web-search/src/**', '@cherrystudio/web-search/src/**', '@cherrystudio/web-search/dist/**'],
+  message: 'Use the public @cherrystudio/web-search entries instead of importing package internals.'
+}
+
+// File preview is a portable package: host-app modules are off-limits to its source.
+const FILE_PREVIEW_HOST_IMPORTS = [
+  '@renderer',
+  '@renderer/**',
+  '@shared',
+  '@shared/**',
+  '@data',
+  '@data/**',
+  '@test-mocks',
+  '@test-mocks/**',
+  '@logger',
+  'electron',
+  '**/src/renderer/**',
+  '**/src/shared/**',
+  '**/src/main/**'
+]
 
 // Utility-process child code (protocol/runtime, entries, smoke entries) is bundled for a
 // separate process that has no lifecycle container, no logger, and no database. Importing a
@@ -566,7 +594,9 @@ export default defineConfig([
       'scripts/data-classify/**',
       // Vendored submodule: another repository's source, with its own toolchain, lint rules
       // and CI. Its Node `node:test` files trip rules that do not apply to it.
-      'resources/prometheus-skills-mini/**'
+      'resources/prometheus-skills-mini/**',
+      'resources/skills/**',
+      '.agents/skills/**'
     ]
   },
   // turn off oxlint supported rules.
@@ -958,6 +988,8 @@ export default defineConfig([
         'error',
         {
           patterns: [
+            BAN_MCP_SDK_V1,
+            BAN_WEB_SEARCH_INTERNALS,
             {
               group: ['@shared/ipc/schemas', '@shared/ipc/schemas/*'],
               allowTypeImports: true,
@@ -965,6 +997,29 @@ export default defineConfig([
                 'Renderer may only `import type` from @shared/ipc/schemas — a value import pulls the entire zod schema set into the renderer bundle.'
             }
           ]
+        }
+      ]
+    }
+  },
+  {
+    files: ['src/shared/**/*.{ts,tsx,js,jsx}'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [BAN_MCP_SDK_V1, BAN_WEB_SEARCH_INTERNALS]
+        }
+      ]
+    }
+  },
+  {
+    // Renderer tests are excluded from the bundle-value guard above, but still must not use MCP v1.
+    files: ['src/renderer/**/*.test.*', 'src/renderer/**/__tests__/**', 'src/renderer/**/__mocks__/**'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [BAN_MCP_SDK_V1, BAN_WEB_SEARCH_INTERNALS]
         }
       ]
     }
@@ -981,7 +1036,9 @@ export default defineConfig([
     rules: {
       '@typescript-eslint/no-restricted-imports': [
         'error',
-        { patterns: [BAN_RENDERER_FROM_MAIN, BAN_DRIZZLE_MIGRATOR] }
+        {
+          patterns: [BAN_MCP_SDK_V1, BAN_WEB_SEARCH_INTERNALS, BAN_RENDERER_FROM_MAIN, BAN_DRIZZLE_MIGRATOR]
+        }
       ]
     }
   },
@@ -995,9 +1052,117 @@ export default defineConfig([
     rules: {
       '@typescript-eslint/no-restricted-imports': [
         'error',
-        { patterns: [BAN_RENDERER_FROM_MAIN, BAN_DRIZZLE_MIGRATOR] }
+        { patterns: [BAN_WEB_SEARCH_INTERNALS, BAN_RENDERER_FROM_MAIN, BAN_DRIZZLE_MIGRATOR] }
       ],
       'import-x/no-restricted-paths': ['error', { basePath: RENDERER_DIRNAME, zones: [UTILITY_CHILD_ZONE] }]
+    }
+  },
+  {
+    // Workspace packages and repository scripts follow the same MCP v1 ban as src/.
+    files: ['packages/**/*.{ts,tsx}', 'scripts/**/*.{ts,tsx}', 'tests/**/*.{ts,tsx}', 'v2-refactor-temp/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [BAN_MCP_SDK_V1, BAN_WEB_SEARCH_INTERNALS]
+        }
+      ]
+    }
+  },
+  {
+    files: ['packages/web-search/src/**/*.ts'],
+    ignores: ['packages/web-search/src/**/__tests__/**'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            BAN_MCP_SDK_V1,
+            {
+              group: [
+                'node:*',
+                'electron',
+                'electron/**',
+                'react',
+                'react-native',
+                'react-native/**',
+                'expo',
+                'expo-*',
+                '@application',
+                '@logger',
+                '@main/**',
+                '@renderer/**',
+                '@shared/**',
+                '@data/**',
+                '@test-mocks/**',
+                '**/src/main/**',
+                '**/src/renderer/**',
+                '**/src/shared/**',
+                '**/src/backend/**'
+              ],
+              message: 'Web search protocols must use portable dependencies and host-injected transport.'
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    files: ['packages/file-preview/src/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            BAN_MCP_SDK_V1,
+            BAN_WEB_SEARCH_INTERNALS,
+            {
+              group: FILE_PREVIEW_HOST_IMPORTS,
+              message: 'File preview must use its portable source and host callbacks.'
+            }
+          ]
+        }
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'MemberExpression[object.name="window"][property.name="api"]',
+          message: 'File preview must not access the Electron preload bridge.'
+        },
+        {
+          selector: 'MemberExpression[object.name="window"][property.value="api"]',
+          message: 'File preview must not access the Electron preload bridge.'
+        }
+      ]
+    }
+  },
+  {
+    files: ['packages/file-preview/src/{core,source,selection,documentAnchor,officeZipPreflight}.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            BAN_MCP_SDK_V1,
+            BAN_WEB_SEARCH_INTERNALS,
+            {
+              group: [
+                ...FILE_PREVIEW_HOST_IMPORTS,
+                'react',
+                'react-dom',
+                'react-dom/**',
+                '@cherrystudio/ui',
+                '@cherrystudio/ui/**',
+                './plugins/**',
+                './Preview',
+                './react'
+              ],
+              message: 'The preview core has no DOM or React dependencies.'
+            }
+          ]
+        }
+      ],
+      'no-restricted-globals': ['error', 'window', 'document', 'Worker']
     }
   },
   // Renderer boundary block L: layer edges into shared buckets — Zone A (shared→pages/windows) + Zone C (utils impurity).
@@ -1098,6 +1263,40 @@ export default defineConfig([
       'barrel/no-nesting': 'error',
       'barrel/no-bucket-root': 'error'
     }
+  },
+  // The Boss's UAR and BossFang bridges retain their existing SDK v1 transport and direct UAR imports.
+  // These release-scoped exceptions preserve runtime behavior while upstream rules apply elsewhere.
+  {
+    files: [
+      'scripts/gates/bauar-secret-projection-mcp.ts',
+      'scripts/gates/uar-exact-tool-admission.ts',
+      'src/main/ai/runtime/dsh/__tests__/DshCherryToolBridge.test.ts',
+      'src/main/ai/runtime/dsh/__tests__/dshToolResultProjection.test.ts',
+      'src/main/ai/runtime/dsh/dshToolResultProjection.ts',
+      'src/main/ai/runtime/uar/UarHostMcpBridge.ts',
+      'src/main/ai/runtime/uar/uarProjectedMcpTransport.ts',
+      'src/main/services/bossFang/sharedMemory/{connection,scoped}.ts',
+      'src/main/services/prometheus/integrationDiagnostics.ts'
+    ],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        { patterns: [BAN_WEB_SEARCH_INTERNALS, BAN_RENDERER_FROM_MAIN, BAN_DRIZZLE_MIGRATOR] }
+      ]
+    }
+  },
+  {
+    files: [
+      'src/main/ai/runtime/uar/UarTeamHostService.ts',
+      'src/main/ipc/handlers/prometheus.ts',
+      'src/main/services/bossFang/**/*.ts',
+      'src/main/services/prometheus/PrometheusIntegrationService.ts'
+    ],
+    rules: { 'barrel/closed': 'off' }
+  },
+  {
+    files: ['src/main/services/bossFang/sharedMemory/index.ts'],
+    rules: { 'barrel/index-no-impl': 'off' }
   },
   // Directory & file naming rules (naming-conventions.md §3–§4, §6.6) — inline custom plugin.
   // Not tests-exempt (test file names follow the convention too); the __tests__/__mocks__/__snapshots__

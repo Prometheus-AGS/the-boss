@@ -43,7 +43,7 @@ describe('grok-cli adapter', () => {
   it('builds Grok-CLI headers with the OAuth bearer and model override', () => {
     const headers = adapter.buildHeaders({ accessToken: 'grok-token' }, 'grok-cli/grok-build')
     expect(headers.authorization).toBe('Bearer grok-token')
-    expect(headers['x-grok-client-identifier']).toBe('cherry-studio')
+    expect(headers['x-grok-client-identifier']).toBe('the-boss')
     expect(headers['x-xai-token-auth']).toBe('xai-grok-cli')
     // Model id is normalized (prefix dropped, lower-cased) for the override header.
     expect(headers['x-grok-model-override']).toBe('grok-build')

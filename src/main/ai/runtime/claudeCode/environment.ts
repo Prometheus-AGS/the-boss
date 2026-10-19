@@ -6,6 +6,8 @@
 
 import path from 'node:path'
 
+import { app } from 'electron'
+
 import { application } from '@application'
 import { modelService } from '@data/services/ModelService'
 import { loggerService } from '@logger'
@@ -24,8 +26,6 @@ import type { AgentEntity } from '@shared/data/api/schemas/agents'
 import { parseUniqueModelId } from '@shared/data/types/model'
 import type { Provider } from '@shared/data/types/provider'
 import { isExternalCliProvider } from '@shared/utils/provider'
-
-export { resolveClaudeExecutablePath } from '@main/utils/claudeExecutable'
 
 const logger = loggerService.withContext('ClaudeCodeEnvironment')
 
@@ -102,6 +102,10 @@ export function resolveRequestedOutputTokens(
   return Math.min(declared, MAX_REQUESTED_OUTPUT_TOKENS, inputRoom)
 }
 
+export function resolveClaudeExecutablePath(): string {
+  return application.get('ClaudeCodeBinaryService').requireExecutable()
+}
+
 export async function getClaudeCodeLoginShellEnvironment(
   currentProxyEnvironment: Environment
 ): Promise<Record<string, string | undefined>> {
@@ -160,6 +164,9 @@ export async function buildEnvironment(
     // Umbrella opt-out (telemetry, error reporting, autoupdater, /bug). Not blocked below, so an
     // agent env_var of '' re-enables it. https://code.claude.com/docs/en/env-vars
     CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1',
+    // On by default since SDK 0.3.284: a mid-conversation system turn per tool batch, which
+    // kills the prefix cache on endpoints that hoist system messages. Not blocked below.
+    CLAUDE_CODE_TOTAL_TOKENS_REMINDER: 'off',
     // ANTHROPIC_API_KEY and ANTHROPIC_BASE_URL are injected by the runtime query builder,
     // not duplicated here.
     ANTHROPIC_MODEL: apiModelId,
@@ -177,6 +184,11 @@ export async function buildEnvironment(
     CLAUDE_CODE_SIMPLE_SYSTEM_PROMPT: '1',
     CHERRY_STUDIO_BUN_PATH: bunPath,
     CHERRY_STUDIO_SKILLS_DIR: application.getPath('feature.agents.skills'),
+    // Identify Cherry Studio in the agent CLI's User-Agent (appends
+    // `client-app/cherry-studio/<version>`) so gateways and analytics can
+    // distinguish agent-mode traffic from a standalone Claude Code CLI.
+    // Documented in the Agent SDK `Options.env` JSDoc.
+    CLAUDE_AGENT_SDK_CLIENT_APP: `cherry-studio/${app.getVersion()}`,
     ...(customGitBashPath ? { CLAUDE_CODE_GIT_BASH_PATH: customGitBashPath } : {})
   }
 
@@ -202,6 +214,7 @@ export async function buildEnvironment(
       'CHERRY_STUDIO_NODE_PROXY_BYPASS_RULES',
       'CHERRY_STUDIO_BUN_PATH',
       'CHERRY_STUDIO_SKILLS_DIR',
+      'CLAUDE_AGENT_SDK_CLIENT_APP',
       'NODE_OPTIONS',
       '__PROTO__',
       'CONSTRUCTOR',

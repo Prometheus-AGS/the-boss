@@ -1,8 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { useOptionalTabsContext } from '@renderer/hooks/tab'
-import { toTransientMiniApp, useMiniAppPopup } from '@renderer/hooks/useMiniAppPopup'
+import { useMiniAppPopup } from '@renderer/hooks/useMiniAppPopup'
 import { useWindowFrame } from '@renderer/hooks/useWindowFrame'
 import { ipcApi } from '@renderer/ipc'
 import { loggerService } from '@renderer/services/LoggerService'
@@ -13,8 +12,7 @@ const logger = loggerService.withContext('BossFangDashboard')
 
 export function useBossFangDashboard() {
   const { t } = useTranslation()
-  const { openSmartMiniApp, openMiniAppKeepAlive } = useMiniAppPopup()
-  const tabs = useOptionalTabsContext()
+  const { openSmartMiniApp } = useMiniAppPopup()
   const { mode } = useWindowFrame()
   const [opening, setOpening] = useState(false)
 
@@ -46,8 +44,7 @@ export function useBossFangDashboard() {
         return false
       }
       const app = { appId: 'bossfang-dashboard', name: t('bossfang.title'), url: result.url }
-      if (tabs?.openTab) openSmartMiniApp(app)
-      else openMiniAppKeepAlive(toTransientMiniApp(app))
+      openSmartMiniApp(app)
       return true
     } catch (error) {
       logger.error('Failed to open BossFang dashboard', error as Error)
@@ -56,7 +53,7 @@ export function useBossFangDashboard() {
     } finally {
       setOpening(false)
     }
-  }, [openSmartMiniApp, openMiniAppKeepAlive, tabs, mode, t])
+  }, [openSmartMiniApp, mode, t])
 
   return { open, opening }
 }

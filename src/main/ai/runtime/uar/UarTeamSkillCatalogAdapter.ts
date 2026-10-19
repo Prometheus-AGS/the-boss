@@ -13,20 +13,22 @@ export const UAR_REVIEWED_SKILL_COVERAGE_EXTENSION = 'urn:prometheus:uar:reviewe
 const reviewedCoverageSchema = z
   .object({
     status: z.enum(['reviewed', 'unreviewed', 'blocked']),
-    reason: z.enum([
-      'verified-current-closure',
-      'trusted-source-unavailable',
-      'reviewed-closure-verification-failed'
-    ]),
+    reason: z.enum(['verified-current-closure', 'trusted-source-unavailable', 'reviewed-closure-verification-failed']),
     coverage: z
       .object({
         source: z.enum(['boss-packaged-mini', 'signed-full-generation']),
         closureDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/),
         inventoryDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/),
         locationDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/),
-        generationDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/).optional(),
+        generationDigest: z
+          .string()
+          .regex(/^sha256:[a-f0-9]{64}$/)
+          .optional(),
         signerKeyId: z.string().min(1).optional(),
-        trustRootDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/).optional()
+        trustRootDigest: z
+          .string()
+          .regex(/^sha256:[a-f0-9]{64}$/)
+          .optional()
       })
       .optional()
   })
@@ -48,9 +50,15 @@ const reviewedCoverageExtensionSchema = z
             closureDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/),
             inventoryDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/),
             locationDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/),
-            generationDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/).optional(),
+            generationDigest: z
+              .string()
+              .regex(/^sha256:[a-f0-9]{64}$/)
+              .optional(),
             signerKeyId: z.string().min(1).optional(),
-            trustRootDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/).optional()
+            trustRootDigest: z
+              .string()
+              .regex(/^sha256:[a-f0-9]{64}$/)
+              .optional()
           })
         )
       })
@@ -123,12 +131,18 @@ export async function readUarTeamSkillCatalog(): Promise<UarTeamSkillCatalog> {
   const catalog = await deploymentCatalog()
   return {
     schemaVersion: 1,
-    entries: catalog.entries.map(({ privateBinding: _binding, enabled: _enabled, tombstoned: _tombstoned, ...entry }) => ({
-      ...entry,
-      reviewedCoverage: entry.reviewedCoverage
-        ? { status: entry.reviewedCoverage.status, reason: entry.reviewedCoverage.reason }
-        : { status: 'unreviewed', reason: 'trusted-source-unavailable' }
-    }))
+    entries: catalog.entries.map((entry) => {
+      const visible = { ...entry }
+      Reflect.deleteProperty(visible, 'privateBinding')
+      Reflect.deleteProperty(visible, 'enabled')
+      Reflect.deleteProperty(visible, 'tombstoned')
+      return {
+        ...visible,
+        reviewedCoverage: entry.reviewedCoverage
+          ? { status: entry.reviewedCoverage.status, reason: entry.reviewedCoverage.reason }
+          : { status: 'unreviewed', reason: 'trusted-source-unavailable' }
+      }
+    })
   }
 }
 
@@ -138,17 +152,15 @@ export async function resolveAuthoredTeamSkills(team: UarAuthoredTeam, generatio
   const catalog = await deploymentCatalog(generation)
   const bindings = requested.map((skill) => {
     const entry = catalog.entries.find((item) => item.skillRef && sameCatalogSkillRef(item.skillRef, skill))
-    if (
-      !entry ||
-      entry.availability !== 'available' ||
-      !entry.enabled ||
-      entry.tombstoned ||
-      !entry.privateBinding
-    )
+    if (!entry || entry.availability !== 'available' || !entry.enabled || entry.tombstoned || !entry.privateBinding)
       throw new Error('UAR_TEAM_SKILL_STALE: ' + skill.id)
     if (skill.required && entry.reviewedCoverage?.status !== 'reviewed')
       throw new Error('UAR_TEAM_SKILL_REVIEW_REQUIRED: ' + skill.id)
-    return { skillRef: skill, installedLocation: entry.privateBinding.installedLocation, coverage: entry.reviewedCoverage }
+    return {
+      skillRef: skill,
+      installedLocation: entry.privateBinding.installedLocation,
+      coverage: entry.reviewedCoverage
+    }
   })
   const skillBindings = bindings.map(({ skillRef, installedLocation }) => ({ ...skillRef, installedLocation }))
   const distinctSkillBindings = new Map(skillBindings.map((entry) => [JSON.stringify(canonical(entry)), entry]))
@@ -159,7 +171,9 @@ export async function resolveAuthoredTeamSkills(team: UarAuthoredTeam, generatio
   return { skillBindings: [...distinctSkillBindings.values()], coverage: [...distinctCoverage.values()] }
 }
 
-export function reviewedSkillCoverageExtension(coverage: Awaited<ReturnType<typeof resolveAuthoredTeamSkills>>['coverage']) {
+export function reviewedSkillCoverageExtension(
+  coverage: Awaited<ReturnType<typeof resolveAuthoredTeamSkills>>['coverage']
+) {
   return reviewedCoverageExtensionSchema.parse({ required: true, value: { schemaVersion: 1, entries: coverage } })
 }
 

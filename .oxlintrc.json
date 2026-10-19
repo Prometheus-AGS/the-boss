@@ -16,6 +16,8 @@
     ".gitignore",
     "scripts/cloudflare-worker.js",
     "resources/prometheus-skills-mini/**",
+    "resources/skills/**",
+    ".agents/skills/**",
     "src/main/services/nutstore/sso/lib/**",
     "src/renderer/ui/**",
     "packages/**/dist",
@@ -47,6 +49,7 @@
         "src/renderer/**/*.{ts,tsx}",
         "packages/aiCore/**",
         "packages/extension-table-plus/**",
+        "packages/file-preview/src/**",
         "packages/ui/**"
       ]
     },
