@@ -1,5 +1,5 @@
 {
-  "version": "2.2.39",
+  "version": "2.2.40",
   "profile": "uar-enabled",
   "features": {
     "uar": true
@@ -8,31 +8,31 @@
     "darwin-arm64",
     "win32-x64"
   ],
-  "source": "2d2bbaf15271e1f5abc47ee38d4e80400159f31d",
-  "publishedAt": "2026-10-16T09:18:59.066Z",
+  "source": "a541eded9fcaf536f24708df1ddc6d791fa143b7",
+  "publishedAt": "2026-10-19T22:27:34.006Z",
   "pendingPlatforms": [],
   "artifacts": [
     {
-      "name": "The-Boss-2.2.39-mac-arm64.dmg",
-      "size": 1889334343,
-      "sha256": "fcbd0075427ef897cb015f5aafc20cca01d0ca732271f9a9ac9864f0a610a9dd",
-      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.39/The-Boss-2.2.39-mac-arm64.dmg",
-      "signing": "signed (not notarized)",
+      "name": "The-Boss-2.2.40-mac-arm64.dmg",
+      "size": 746852087,
+      "sha256": "e8a813668a74648f4198d333fbd91304253e9ce07cd06783afa3091ccd44beb0",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.40/The-Boss-2.2.40-mac-arm64.dmg",
+      "signing": "Developer ID (notarized)",
       "profile": "uar-enabled",
       "platform": "darwin",
       "arch": "arm64",
-      "source": "2d2bbaf15271e1f5abc47ee38d4e80400159f31d"
+      "source": "a541eded9fcaf536f24708df1ddc6d791fa143b7"
     },
     {
-      "name": "The-Boss-2.2.39-win-x64-setup.exe",
-      "size": 537698336,
-      "sha256": "8e0bd88c14aa29710339d59713359eb3df3e24f3b8fe8efeed562db98b227c49",
-      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.39/The-Boss-2.2.39-win-x64-setup.exe",
+      "name": "The-Boss-2.2.40-win-x64-setup.exe",
+      "size": 637068060,
+      "sha256": "cf8cdc55002f36d3cf55effc2b9ac69ea905a1e650dbfea441f5c074bea91ce7",
+      "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/v2.2.40/The-Boss-2.2.40-win-x64-setup.exe",
       "signing": "unsigned",
       "profile": "uar-enabled",
       "platform": "win32",
       "arch": "x64",
-      "source": "2d2bbaf15271e1f5abc47ee38d4e80400159f31d"
+      "source": "a541eded9fcaf536f24708df1ddc6d791fa143b7"
     }
   ]
 }
