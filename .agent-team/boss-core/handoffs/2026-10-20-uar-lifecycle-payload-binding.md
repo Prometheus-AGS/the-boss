@@ -135,3 +135,32 @@ policy validator or review command ran. Build provenance receipts, archive
 digests, inherited lifecycle interoperability and customer delivery remain
 unverified until the separately approved real production gates run. No other
 platform or public release payload was relabeled.
+
+## Docker repair and renewed source binding — 2026-10-20
+
+The lead reported that the first authorized ARM64 Docker delivery attempt
+failed with 19 integration compiler errors. After the source repair, the lead
+supplied actual immutable UAR commit
+`6d50cb8a05fb2af33e0928dc8d7ac3ff0c5f3e46`, superseding
+`ad557b0d00134c003bf0e87d248d1aef2e9ce4e5` for the next candidate. This entry
+preserves the earlier source-binding chronology; it does not reclassify the
+failed attempt as acceptance or claim that the repaired source compiles.
+
+`build/local-uar-source.json` and the exact source SHA strings in the English
+and Chinese proposed architecture notes now name the repaired commit. The
+sibling `.i18n.yaml` records the renewed Git blob identities of those authored
+notes. They remain proposed and unaccepted. Fingerprint authoring does not
+certify translation, pairing, compilation or delivery.
+
+This renewal changes only that local revision pin, the two note SHA strings,
+their authored fingerprint record and this appended handoff. No guards,
+behavior, public payload identity, other platform, history or personal setting
+changed. The writer releases these files to the lead for source publication
+and whole-phase inventory renewal. The lead owns Git and any explicitly
+authorized repeat of the same requested Docker delivery.
+
+Verification remains **CLOSED**. No check, test, build, Cargo/compiler, lint,
+format, typecheck, pairing validator, review gate, producer or packaging command
+ran for this renewal. Source inspection, writing, and Git blob fingerprint
+authoring were the only operations. The repaired build, candidate provenance,
+runtime protocol behavior and customer delivery remain unverified.

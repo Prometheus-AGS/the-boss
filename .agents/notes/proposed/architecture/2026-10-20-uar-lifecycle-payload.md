@@ -14,7 +14,7 @@ launcher also needs cancellable inherited input and an acknowledged child exit.
 
 Keep the operator-approved cross-repository lifecycle implementation in a draft
 until verification is authorized. Pin the explicit native local candidate to
-UAR commit `ad557b0d00134c003bf0e87d248d1aef2e9ce4e5`. Require the committed-object
+UAR commit `6d50cb8a05fb2af33e0928dc8d7ac3ff0c5f3e46`. Require the committed-object
 producer, a fresh target directory, and matching source/tree, platform, feature,
 protocol, executable, build-log, archive and file inventory identities. Existing
 public payloads keep their release identities. Legacy local mode retains its
