@@ -164,3 +164,28 @@ format, typecheck, pairing validator, review gate, producer or packaging command
 ran for this renewal. Source inspection, writing, and Git blob fingerprint
 authoring were the only operations. The repaired build, candidate provenance,
 runtime protocol behavior and customer delivery remain unverified.
+
+## Second bounded Docker repair and source renewal — 2026-10-20
+
+The lead reported that replacement ARM64 Docker run `39528865081` failed with
+two non-Send diagnostics from one startup tracing await. The bounded UAR repair
+moved two startup logging awaits into local values while retaining lifecycle
+ownership. The lead supplied actual committed and pushed UAR source
+`32cb3bcfc9691212ec0b0359ce22474968bc6850`, superseding
+`6d50cb8a05fb2af33e0928dc8d7ac3ff0c5f3e46` for the next candidate. The failed
+run remains a failure; this source renewal does not establish repaired build
+success or acceptance.
+
+Only the local revision pin, exact source SHA strings in both proposed
+architecture notes, their saved-byte Git blob fingerprints and this appended
+handoff changed. Earlier chronology remains intact. Both notes remain proposed
+and unaccepted. No guard, production behavior, public payload identity, other
+platform, personal configuration or unrelated checkout/gitlink was changed.
+These five assigned files are released to the lead, who owns source publication
+and the renewed whole-phase inventory.
+
+Verification remains **CLOSED**. Operations for this renewal were source
+inspection, authorized writing and authored Git blob fingerprints only. No
+producer, package script, pairing validator, test, lint, check, build, compiler
+or independent review ran. Repaired compilation, artifact provenance, lifecycle
+interoperability and customer delivery remain unverified.
