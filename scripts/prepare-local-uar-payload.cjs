@@ -1,6 +1,10 @@
-const { inspectLocalUarRecord } = require('./local-uar-payload.cjs')
+const { loadLocalUarPayload } = require('./local-uar-payload.cjs')
 
-const { record } = inspectLocalUarRecord()
-process.stdout.write(
-  `Local UAR payload ready: ${record.platform}, ${record.source}, ${record.binaries.length} files, archive ${record.sha256}\n`
-)
+const { marker, cleanup } = loadLocalUarPayload()
+try {
+  process.stdout.write(
+    `Local UAR payload ready: ${marker.platform}, ${marker.source}, ${marker.files.length} files, archive ${marker.archiveSha256}${marker.provenance ? `, lifecycle ${marker.provenance.lifecycleControl.version}` : ''}\n`
+  )
+} finally {
+  cleanup()
+}

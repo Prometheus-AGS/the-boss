@@ -1,7 +1,14 @@
 {
-  "schema": 1,
+  "schema": 2,
   "platform": "darwin-arm64",
   "repository": "Prometheus-AGS/universal-agent-runtime",
-  "revision": "84bf41bf28891d6075b898796a040b063298fad3",
-  "version": "1.1.1"
+  "revision": "ad557b0d00134c003bf0e87d248d1aef2e9ce4e5",
+  "version": "1.1.1",
+  "target": "aarch64-apple-darwin",
+  "features": ["server-full"],
+  "lifecycleControl": {
+    "transport": "inherited-stdin",
+    "version": 1,
+    "responsePrefix": "LIFECYCLE:"
+  }
 }

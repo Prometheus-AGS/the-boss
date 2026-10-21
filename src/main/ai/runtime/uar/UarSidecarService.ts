@@ -1,5 +1,5 @@
 import type { ChildProcess } from 'node:child_process'
-import { randomBytes } from 'node:crypto'
+import { randomBytes, randomUUID } from 'node:crypto'
 import { constants } from 'node:fs'
 import { chmod, copyFile, mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -16,7 +16,7 @@ import { isWin } from '@main/core/platform'
 import { ensureManagedSecrets } from '@main/services/prometheus/integrationConfig'
 import { readIntegrationConfig, readUarInstanceCredentials } from '@main/services/prometheus/integrationConfig'
 import { fetchWithRateLimitRetries } from '@main/utils/http'
-import { crossPlatformSpawn, terminateProcessTree, waitForProcessExit } from '@main/utils/processRunner'
+import { crossPlatformSpawn } from '@main/utils/processRunner'
 import { getRawShellEnv } from '@main/utils/shellEnv'
 import { assertUarEnabled, isUarEnabled } from '@shared/ai/agentRuntimeCapabilities'
 import { uarCapabilitiesResponseSchema, type UarAdministrationCapabilities } from '@shared/types/prometheusIntegration'
@@ -30,7 +30,6 @@ import { redactSecretText } from '@shared/utils/redaction'
 
 import { inspectUarPayload, requireUarPayload, type UarPayload } from './uarPayload'
 import { uarPrincipalForSession } from './uarPrincipal'
-import { UarStartupDiagnostic } from './uarStartupDiagnostic'
 import { reviewedSkillSources } from './uarReviewedSkillSources'
 import { type AppliedUarStorage, readAppliedUarStorage, writeAppliedUarStorage } from './uarStorageProfile'
 import { UarAdmissionCompatibilityError, UAR_TOOL_ADMISSION_V2_CAPABILITY } from './UarAdmissionCompatibilityError'
@@ -122,10 +121,104 @@ const safeInstanceTurnDiagnostic = z.object({
     attempt_id: z.uuid()
   })
 })
-// C10 packaged cold-start receipt (2026-10-09): READY after skill initialization took 34,651 ms.
-// This startup deadline is separate from capability and model request timeouts.
-const START_TIMEOUT_MS = 60_000
-const STOP_TIMEOUT_MS = 5_000
+const lifecycleGeneration = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER)
+const lifecycleDependencyFailureSchema = z.discriminatedUnion('category', [
+  z.object({
+    category: z.literal('missing_dependency'),
+    resource_id: z.string(),
+    dependency_id: z.string()
+  }),
+  z.object({ category: z.literal('dependency_cycle'), resource_ids: z.array(z.string()) })
+])
+const lifecycleCloseReportSchema = z.object({
+  resource_id: z.string(),
+  generation: lifecycleGeneration,
+  released: z.boolean(),
+  completed_operations: lifecycleGeneration,
+  completed_tasks: lifecycleGeneration,
+  failure_count: lifecycleGeneration,
+  unresolved_effects: z.array(z.string()),
+  dependency_failures: z.array(lifecycleDependencyFailureSchema),
+  get child_reports(): z.ZodArray<typeof lifecycleCloseReportSchema> {
+    return z.array(lifecycleCloseReportSchema)
+  }
+})
+const lifecycleTransportsSchema = z.record(
+  z.string(),
+  z.object({
+    generation: lifecycleGeneration.nullable(),
+    state: z.enum(['available', 'unavailable', 'released', 'observation_unavailable'])
+  })
+)
+const lifecycleSubscriptionGenerationsSchema = z.record(z.string(), lifecycleGeneration)
+const lifecycleSubscriptionsSchema = z.record(
+  z.string(),
+  z.record(z.string(), z.object({
+    generation: lifecycleGeneration,
+    ready: z.boolean(),
+    reason: z.string().nullable()
+  }))
+)
+const lifecycleSnapshotSchema = z.object({
+  resources: z.array(
+    z.object({
+      resource_id: z.string(),
+      owner: z.string(),
+      generation: lifecycleGeneration,
+      state: z.enum(['Registered', 'Ready', 'AdmissionClosed', 'Draining', 'Finalizing', 'Released', 'Failed']),
+      in_flight_operations: lifecycleGeneration,
+      outstanding_operation_ids: z.array(z.string()),
+      ownership: z.enum(['Owned', 'Borrowed']),
+      dependencies: z.array(z.string()),
+      tracked_tasks: lifecycleGeneration,
+      failure: z.literal('resource_failure').nullable(),
+      failure_categories: z.array(z.string()),
+      unresolved_effects: z.array(z.string()),
+      dependency_failures: z.array(lifecycleDependencyFailureSchema),
+      close_report: lifecycleCloseReportSchema.nullable()
+    })
+  ),
+  transports: lifecycleTransportsSchema,
+  subscription_generations: lifecycleSubscriptionGenerationsSchema,
+  subscriptions: lifecycleSubscriptionsSchema
+})
+const lifecycleReconnectSchema = z.object({
+  resource_id: z.string(),
+  generation: lifecycleGeneration,
+  outcome: z.literal('acknowledged')
+})
+const lifecycleReconnectFailureDetailsSchema = z.object({
+  resource_id: z.string(),
+  expected_generation: lifecycleGeneration,
+  transports: lifecycleTransportsSchema,
+  subscription_generations: lifecycleSubscriptionGenerationsSchema,
+  subscriptions: lifecycleSubscriptionsSchema
+})
+const lifecycleResponseSchema = z.union([
+  z.object({ version: z.literal(1), request_id: z.string(), error: z.literal('lifecycle_command_failed') }),
+  z.object({
+    version: z.literal(1),
+    request_id: z.string(),
+    error: z.literal('lifecycle_reconnect_failed'),
+    details: lifecycleReconnectFailureDetailsSchema
+  }),
+  z.object({ version: z.literal(1), request_id: z.string(), result: z.record(z.string(), z.unknown()) })
+])
+export class UarLifecycleReconnectError extends Error {
+  constructor(readonly details: z.infer<typeof lifecycleReconnectFailureDetailsSchema>) {
+    super('UAR lifecycle command failed (lifecycle_reconnect_failed)')
+    this.name = 'UarLifecycleReconnectError'
+  }
+}
+type LifecycleOperation =
+  | { kind: 'snapshot' }
+  | { kind: 'reconnect'; resource_id: string; expected_generation: number }
+type ChildCompletion = { code: number | null; signal: NodeJS.Signals | null; error?: Error }
+type LifecycleChannel = {
+  pending: Map<string, { operation: LifecycleOperation; resolve: (value: unknown) => void; reject: (error: Error) => void }>
+  failure?: Error
+  closed: boolean
+}
 const PROVIDER_CREDENTIAL_ENV_PATTERNS = [/_API_KEY$/i, /_API_TOKEN$/i, /_ACCESS_TOKEN$/i, /_SECRET_KEY$/i]
 const LEGACY_UAR_ENV_KEYS = new Set([
   'ANTHROPIC_API_KEY',
@@ -209,6 +302,10 @@ export class UarSidecarService extends BaseService {
   private readonly operation = new Mutex()
   private running?: RunningSidecar
   private startPromise?: Promise<RunningSidecar>
+  private ownedChild?: ChildProcess
+  private shutdown = new AbortController()
+  private readonly childCompletions = new WeakMap<ChildProcess, Promise<ChildCompletion>>()
+  private readonly lifecycleChannels = new WeakMap<ChildProcess, LifecycleChannel>()
   private generation = 0
   private stopping = false
   private readonly verifiedEndpoints = new Map<number, VerifiedEndpoint>()
@@ -224,11 +321,17 @@ export class UarSidecarService extends BaseService {
 
   protected onInit(): void {
     this.stopping = false
+    this.shutdown = new AbortController()
   }
 
   protected async onStop(): Promise<void> {
     this.stopping = true
-    await this.operation.runExclusive(() => this.stopOwnedProcess())
+    const child = this.ownedChild
+    this.shutdown.abort(new Error('UAR sidecar is shutting down'))
+    await this.operation.runExclusive(async () => {
+      await this.stopOwnedProcess()
+      if (child) await this.terminate(child)
+    })
   }
 
   async ensureReady(): Promise<UarSidecarEndpoint & { storage: NonNullable<UarSidecarEndpoint['storage']> }> {
@@ -452,6 +555,60 @@ export class UarSidecarService extends BaseService {
     return this.roleRequestInstance(endpoint, 'administration', pathname, init)
   }
 
+  /** Trusted launch-owner inspection remains available when database authorization is unavailable. */
+  async lifecycleSnapshot(expectedGeneration?: number) {
+    return lifecycleSnapshotSchema.parse(await this.lifecycleRequest({ kind: 'snapshot' }, expectedGeneration))
+  }
+
+  async reconnectLifecycleResource(
+    resourceId: string,
+    expectedResourceGeneration: number,
+    expectedGeneration?: number
+  ) {
+    const operation: LifecycleOperation = {
+      kind: 'reconnect',
+      resource_id: z.string().min(1).parse(resourceId),
+      expected_generation: lifecycleGeneration.parse(expectedResourceGeneration)
+    }
+    const result = lifecycleReconnectSchema.parse(await this.lifecycleRequest(operation, expectedGeneration))
+    if (result.resource_id !== resourceId) throw new Error('UAR lifecycle reconnect resource identity mismatch')
+    return result
+  }
+
+  private lifecycleRequest(operation: LifecycleOperation, expectedGeneration?: number): Promise<unknown> {
+    assertUarEnabled()
+    const child = this.ownedChild
+    if (this.stopping || !child || !this.isAlive(child)) {
+      return Promise.reject(new Error('UAR launch-owner control is unavailable'))
+    }
+    if (expectedGeneration !== undefined && this.running?.generation !== expectedGeneration) {
+      return Promise.reject(new Error('UAR sidecar restarted before the lifecycle request was admitted'))
+    }
+    const channel = this.lifecycleChannels.get(child)
+    const input = child.stdin
+    if (!channel || channel.closed || channel.failure || !input || input.destroyed || input.writableEnded) {
+      return Promise.reject(channel?.failure ?? new Error('UAR launch-owner control is closed'))
+    }
+    const requestId = randomUUID()
+    const command = JSON.stringify({ version: 1, request_id: requestId, operation })
+    if (Buffer.byteLength(command) > 8192) {
+      return Promise.reject(new Error('UAR lifecycle command exceeds protocol limit'))
+    }
+    return new Promise((resolve, reject) => {
+      channel.pending.set(requestId, { operation, resolve, reject })
+      try {
+        input.write(`${command}\n`, (error) => {
+          if (!error) return
+          channel.pending.delete(requestId)
+          reject(new Error('UAR lifecycle command write failed', { cause: error }))
+        })
+      } catch (error) {
+        channel.pending.delete(requestId)
+        reject(new Error('UAR lifecycle command write failed', { cause: error }))
+      }
+    })
+  }
+
   async modelRequest(pathname: string, init: RequestInit = {}, expectedGeneration?: number): Promise<Response> {
     return this.roleRequest('models', pathname, init, expectedGeneration)
   }
@@ -581,6 +738,7 @@ export class UarSidecarService extends BaseService {
 
   private async startOwnedProcess(storage: AppliedUarStorage): Promise<RunningSidecar> {
     assertUarEnabled()
+    this.shutdown.signal.throwIfAborted()
     const payload = requireUarPayload()
     const executable = payload.executable
     const launchToken = randomBytes(32).toString('hex')
@@ -638,6 +796,7 @@ export class UarSidecarService extends BaseService {
         ? { UAR_WORKFLOW_EXECUTION_PROFILE_STAGE: 'operation' }
         : {}),
       UAR_SIDECAR: '1',
+      ...(isWin ? { UAR_SIDECAR_STDIN_OVERLAPPED: '1' } : {}),
       UAR_SERVICE_INSTANCE__INSTANCE_ID: managedInstance.expectedRuntimeId,
       UAR_SERVICE_INSTANCE__WORKSPACE_LOCATION: managedInstance.workspaceLocation,
       UAR_SECURITY__SETTINGS_MUTATION_AUTH_REQUIRED: 'true',
@@ -654,20 +813,42 @@ export class UarSidecarService extends BaseService {
       UAR_NATIVE_TOOLS__WEB_FETCH_ENABLED: 'false',
       UAR_NATIVE_TOOLS__TERMINAL_EXEC_ENABLED: 'false'
     }
+    this.shutdown.signal.throwIfAborted()
     const child = crossPlatformSpawn(executable, ['--config', configFile, '--port', String(storage.profile.port)], {
       cwd: dataRoot,
       env,
       detached: !isWin,
-      stdio: ['pipe', 'pipe', 'pipe']
+      stdio: [isWin ? 'overlapped' : 'pipe', 'pipe', 'pipe']
     })
-    child.on('error', (error) => logger.warn('UAR sidecar process error', { error }))
+    this.ownedChild = child
+    let processError: Error | undefined
+    this.childCompletions.set(child, new Promise<ChildCompletion>((resolve) => {
+      child.once('close', (code, signal) => {
+        if (this.ownedChild === child) this.ownedChild = undefined
+        if (this.running?.child === child) {
+          this.verifiedEndpoints.delete(this.running.generation)
+          this.requestAdmissions.delete(this.running.generation)
+          this.running = undefined
+        }
+        if (code !== 0 || signal) logger.warn('UAR sidecar close was unsuccessful', { code, signal })
+        resolve({ code, signal, ...(processError ? { error: processError } : {}) })
+      })
+    }))
+    child.on('error', (error) => {
+      processError = error
+      logger.warn('UAR sidecar process error', { error })
+    })
+    this.observeLifecycleChannel(child)
     this.retainSafeProviderDiagnostics(child)
-    child.stdin?.write(`${launchToken}\n`)
 
     try {
-      const port = await this.waitForReady(child)
+      const port = await this.waitForReady(child, this.shutdown.signal, launchToken)
       const baseUrl = `http://127.0.0.1:${port}`
-      const capabilities = await this.readCapabilities(managedInstance, baseUrl, launchToken)
+      const capabilities = await this.readCapabilities(managedInstance, baseUrl, launchToken, this.shutdown.signal)
+      this.shutdown.signal.throwIfAborted()
+      if (!capabilities.capabilities.includes('host_lifecycle_control_v1')) {
+        throw new Error('Managed UAR sidecar is missing required capability: host_lifecycle_control_v1')
+      }
       if (!this.isAlive(child)) throw new Error('UAR sidecar exited immediately after becoming ready')
       const generation = ++this.generation
       const running: RunningSidecar = {
@@ -695,10 +876,6 @@ export class UarSidecarService extends BaseService {
         adminKey,
         storage: this.storageStatus(storage)
       })
-      child.once('exit', (code, signal) => {
-        if (this.running?.child === child) this.running = undefined
-        if (!this.stopping) logger.warn('UAR sidecar exited', { code, signal, generation })
-      })
       logger.info('UAR sidecar ready', {
         generation,
         version: running.uarVersion,
@@ -709,9 +886,64 @@ export class UarSidecarService extends BaseService {
       })
       return running
     } catch (error) {
-      await this.terminate(child)
+      try {
+        await this.terminate(child)
+      } catch (closeError) {
+        throw new AggregateError([error, closeError], 'UAR startup failed and process close was unsuccessful')
+      }
       throw error
     }
+  }
+
+  private observeLifecycleChannel(child: ChildProcess): void {
+    const channel: LifecycleChannel = { pending: new Map(), closed: false }
+    this.lifecycleChannels.set(child, channel)
+    const output = child.stdout ? readline.createInterface({ input: child.stdout }) : undefined
+    const failPending = (error: Error) => {
+      channel.failure = error
+      for (const pending of channel.pending.values()) pending.reject(error)
+      channel.pending.clear()
+    }
+    child.stdin?.on('error', () => failPending(new Error('UAR launch-owner input failed')))
+    output?.on('line', (line) => {
+      if (!line.startsWith('LIFECYCLE:')) return
+      let value: unknown
+      try {
+        value = JSON.parse(line.slice('LIFECYCLE:'.length))
+      } catch {
+        failPending(new Error('UAR lifecycle response is invalid'))
+        return
+      }
+      const parsed = lifecycleResponseSchema.safeParse(value)
+      if (!parsed.success) {
+        failPending(new Error('UAR lifecycle response is incompatible'))
+        return
+      }
+      const response = parsed.data
+      const pending = channel.pending.get(response.request_id)
+      if (!pending) return
+      channel.pending.delete(response.request_id)
+      if ('error' in response) {
+        if (response.error === 'lifecycle_reconnect_failed') {
+          if (
+            pending.operation.kind !== 'reconnect' ||
+            response.details.resource_id !== pending.operation.resource_id ||
+            response.details.expected_generation !== pending.operation.expected_generation
+          ) {
+            pending.reject(new Error('UAR lifecycle reconnect failure identity mismatch'))
+            return
+          }
+          pending.reject(new UarLifecycleReconnectError(response.details))
+        } else {
+          pending.reject(new Error(`UAR lifecycle command failed (${response.error})`))
+        }
+      } else pending.resolve(response.result)
+    })
+    child.once('close', (code, signal) => {
+      channel.closed = true
+      failPending(new Error(`UAR launch-owner control closed (${code ?? signal ?? 'unknown'})`))
+      output?.close()
+    })
   }
 
   /** Sidecar output is untrusted: retain only the named event's safe machine fields. */
@@ -777,44 +1009,44 @@ export class UarSidecarService extends BaseService {
     child.once('close', () => outputs.forEach((output) => output.close()))
   }
 
-  private waitForReady(child: ChildProcess): Promise<number> {
+  private waitForReady(child: ChildProcess, signal: AbortSignal, launchToken: string): Promise<number> {
     return new Promise((resolve, reject) => {
-      const output = readline.createInterface({ input: child.stdout! })
-      const diagnostic = new UarStartupDiagnostic()
+      const output = child.stdout ? readline.createInterface({ input: child.stdout }) : undefined
       let startupDiagnostic = ''
+      let settled = false
       const appendDiagnostic = (value: string) => {
         startupDiagnostic = `${startupDiagnostic}${redactSecretText(value)}`.slice(-2_000)
       }
-      const timeout = setTimeout(() => {
-        const summary = diagnostic.timeoutSummary(child.exitCode !== null, child.signalCode !== null)
-        settle(new Error(`UAR sidecar readiness timed out: ${summary}`))
-      }, START_TIMEOUT_MS)
-      timeout.unref()
       const settle = (error?: Error, port?: number) => {
-        clearTimeout(timeout)
-        output.removeAllListeners()
+        if (settled) return
+        settled = true
+        output?.close()
         child.stderr?.removeListener('data', onStderr)
+        child.stdin?.removeListener('error', onInputError)
         child.removeListener('error', onError)
-        child.removeListener('exit', onExit)
+        child.removeListener('close', onClose)
+        signal.removeEventListener('abort', onAbort)
         if (error) reject(error)
         else resolve(port!)
       }
       const onStderr = (chunk: Buffer | string) => {
-        diagnostic.observeStderr(String(chunk))
         appendDiagnostic(String(chunk))
       }
       const onError = (error: Error) => settle(new Error(`Failed to launch UAR sidecar: ${error.message}`))
-      const onExit = (code: number | null) =>
+      const onInputError = () => settle(new Error('UAR sidecar launch-owner input failed before readiness'))
+      const onAbort = () => settle(new Error('UAR sidecar startup cancelled', { cause: signal.reason }))
+      const onClose = (code: number | null, closeSignal: NodeJS.Signals | null) =>
         settle(
           new Error(
-            `UAR sidecar exited before readiness (${code ?? 'signal'})${startupDiagnostic ? ': ' + startupDiagnostic.trim() : ''}`
+            `UAR sidecar closed before readiness (${code ?? closeSignal ?? 'unknown'})${startupDiagnostic ? ': ' + startupDiagnostic.trim() : ''}`
           )
         )
       child.stderr?.on('data', onStderr)
+      child.stdin?.once('error', onInputError)
       child.once('error', onError)
-      child.once('exit', onExit)
-      output.on('line', (line) => {
-        diagnostic.observeLine(line)
+      child.once('close', onClose)
+      signal.addEventListener('abort', onAbort, { once: true })
+      output?.on('line', (line) => {
         const match = /^READY:(\d{1,5})$/.exec(line)
         if (!match) {
           appendDiagnostic(`${line}\n`)
@@ -827,13 +1059,24 @@ export class UarSidecarService extends BaseService {
         }
         settle(undefined, port)
       })
+      if (signal.aborted) {
+        onAbort()
+      } else {
+        try {
+          child.stdin?.write(`${launchToken}\n`, (error) => {
+            if (error) onInputError()
+          })
+        } catch {
+          onInputError()
+        }
+      }
     })
   }
 
-  private async readCapabilities(instance: UarRuntimeInstance, baseUrl: string, authToken: string) {
+  private async readCapabilities(instance: UarRuntimeInstance, baseUrl: string, authToken: string, signal?: AbortSignal) {
     const response = await fetchWithRateLimitRetries(new URL('/api/uar/capabilities', baseUrl), {
       headers: { authorization: `Bearer ${authToken}` },
-      signal: AbortSignal.timeout(5_000)
+      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(5_000)]) : AbortSignal.timeout(5_000)
     })
     if (!response.ok) throw new Error(`UAR sidecar capability check failed with HTTP ${response.status}`)
     const body = uarCapabilitiesResponseSchema.parse(await response.json())
@@ -964,18 +1207,25 @@ export class UarSidecarService extends BaseService {
   private async stopOwnedProcess(): Promise<void> {
     const running = this.running
     this.running = undefined
-    if (!running) return
-    this.verifiedEndpoints.delete(running.generation)
-    this.requestAdmissions.delete(running.generation)
-    await this.terminate(running.child)
+    if (running) {
+      this.verifiedEndpoints.delete(running.generation)
+      this.requestAdmissions.delete(running.generation)
+    }
+    const child = running?.child ?? this.ownedChild
+    if (child) await this.terminate(child)
   }
 
   private async terminate(child: ChildProcess): Promise<void> {
-    if (!this.isAlive(child)) return
-    child.stdin?.end()
-    if (await waitForProcessExit(child, STOP_TIMEOUT_MS)) return
-    await terminateProcessTree(child, true, 'UAR sidecar')
-    await waitForProcessExit(child, 1_000)
+    const completion = this.childCompletions.get(child)
+    if (!completion) throw new Error('UAR child completion was not registered at launch')
+    const channel = this.lifecycleChannels.get(child)
+    if (!channel?.closed && child.stdin && !child.stdin.destroyed && !child.stdin.writableEnded) child.stdin.end()
+    const result = await completion
+    if (result.error || result.code !== 0 || result.signal) {
+      throw new Error(`UAR sidecar close was unsuccessful (${result.code ?? result.signal ?? 'unknown'})`, {
+        cause: result.error
+      })
+    }
   }
 
   private isAlive(child: ChildProcess): boolean {

@@ -3,6 +3,7 @@ const { execFileSync } = require('node:child_process')
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
+const { requireCandidateBinding, requireCandidateManifest } = require('./uar-candidate-binding.cjs')
 
 const pin = require('../build/local-uar-source.json')
 const MARKER = '.uar-local-payload.json'
@@ -42,20 +43,32 @@ function inspectLocalUarRecord() {
     throw new Error('Local UAR payloads require a native Apple Silicon host')
   }
   const sourceDir = process.env.THE_BOSS_LOCAL_UAR_SOURCE_DIR?.trim()
-  if (!sourceDir) throw new Error('Set THE_BOSS_LOCAL_UAR_SOURCE_DIR to the clean, pinned UAR checkout')
+  if (!sourceDir) throw new Error('Set THE_BOSS_LOCAL_UAR_SOURCE_DIR to the UAR source repository')
   const root = fs.realpathSync(sourceDir)
   const git = (...args) => execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim()
   if (fs.realpathSync(git('rev-parse', '--show-toplevel')) !== root) {
     throw new Error('THE_BOSS_LOCAL_UAR_SOURCE_DIR must name the UAR checkout root')
   }
-  const source = git('rev-parse', 'HEAD')
-  if (source !== pin.revision) throw new Error(`Local UAR source ${source} does not match ${pin.revision}`)
-  if (git('status', '--porcelain', '--untracked-files=all', '--', '.', ':(exclude)dist/boss-sidecar')) {
-    throw new Error('Local UAR source checkout has uncommitted or untracked changes')
+  const candidateRecord = process.env.THE_BOSS_LOCAL_UAR_CANDIDATE_RECORD?.trim()
+  if (candidateRecord && !path.isAbsolute(candidateRecord)) {
+    throw new Error('THE_BOSS_LOCAL_UAR_CANDIDATE_RECORD must be an absolute immutable candidate record path')
   }
-
-  const output = path.join(root, 'dist', 'boss-sidecar')
-  const recordFile = path.join(output, `${PACKAGE}.json`)
+  if (candidateRecord) {
+    if (git('rev-parse', `${pin.revision}^{commit}`) !== pin.revision) {
+      throw new Error('Local UAR candidate source commit is unavailable')
+    }
+  } else {
+    const source = git('rev-parse', 'HEAD')
+    if (source !== pin.revision) throw new Error(`Local UAR source ${source} does not match ${pin.revision}`)
+    if (git('status', '--porcelain', '--untracked-files=all', '--', '.', ':(exclude)dist/boss-sidecar')) {
+      throw new Error('Local UAR source checkout has uncommitted or untracked changes')
+    }
+  }
+  const selectedRecord = candidateRecord || path.join(root, 'dist', 'boss-sidecar', `${PACKAGE}.json`)
+  requireFile(selectedRecord)
+  const recordFile = fs.realpathSync(selectedRecord)
+  const output = path.dirname(recordFile)
+  if (path.basename(recordFile) !== `${PACKAGE}.json`) throw new Error('Unexpected local UAR candidate record name')
   const record = JSON.parse(fs.readFileSync(recordFile, 'utf8'))
   if (
     record.name !== 'uar-sidecar' ||
@@ -70,14 +83,15 @@ function inspectLocalUarRecord() {
   ) {
     throw new Error('Local UAR payload record does not match the pinned source and platform')
   }
+  if (candidateRecord) requireCandidateBinding(record, pin, git('rev-parse', `${pin.revision}^{tree}`))
   const archive = path.join(output, record.asset)
   requireFile(archive)
   if (sha256(archive) !== record.sha256) throw new Error('Local UAR archive checksum does not match its record')
-  return { archive, record }
+  return { archive, record, candidate: Boolean(candidateRecord) }
 }
 
 function loadLocalUarPayload() {
-  const { archive, record } = inspectLocalUarRecord()
+  const { archive, record, candidate } = inspectLocalUarRecord()
   const packageRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'the-boss-local-uar-'))
   try {
     const archiveEntries = execFileSync('tar', ['tzf', archive], { encoding: 'utf8' }).trim().split('\n')
@@ -88,6 +102,15 @@ function loadLocalUarPayload() {
       )
     ) {
       throw new Error('Local UAR archive contains an unexpected path')
+    }
+    const archiveFiles = archiveEntries.filter((name) => !name.endsWith('/')).map((name) => name.slice(PACKAGE.length + 1))
+    if (new Set(archiveEntries).size !== archiveEntries.length ||
+        JSON.stringify([...archiveFiles].sort()) !== JSON.stringify([...record.binaries].sort())) {
+      throw new Error('Local UAR archive entries do not match its immutable record')
+    }
+    const archiveTypes = execFileSync('tar', ['tvzf', archive], { encoding: 'utf8' }).trim().split('\n')
+    if (archiveTypes.length !== archiveEntries.length || archiveTypes.some((entry) => !['-', 'd'].includes(entry[0]))) {
+      throw new Error('Local UAR archive must contain only regular files and directories')
     }
     execFileSync('tar', ['xzf', archive, '-C', packageRoot, '--strip-components=1'])
     const manifest = JSON.parse(fs.readFileSync(path.join(packageRoot, 'payload-manifest.json'), 'utf8'))
@@ -103,6 +126,7 @@ function loadLocalUarPayload() {
       throw new Error('Local UAR file manifest does not match the pinned source and platform')
     }
     const files = manifest.files
+    if (candidate) requireCandidateManifest(manifest, record)
     const names = files.map((entry) => entry.path)
     if (
       new Set(names).size !== names.length ||
@@ -139,6 +163,7 @@ function loadLocalUarPayload() {
         platform: pin.platform,
         source: pin.revision,
         archiveSha256: record.sha256,
+        provenance: record.provenance,
         files
       },
       cleanup: () => fs.rmSync(packageRoot, { recursive: true, force: true })
