@@ -8,6 +8,12 @@ metadata:
   tags: "delivery, cadence, kbd, recovery"
 ---
 
+> **Note — one referenced asset is absent.** This skill names
+> `scripts/refresh-skill-pack.sh`, which does not ship in the mini payload; the installed
+> skill-pack refresh procedure is unavailable in this project. See
+> [profile and commands](references/profile.md) for the exact boundary and
+> `docs/maintenance.md` for update/rollback through the owning harness installer.
+
 # Delivery Cadence
 
 The harness owns execution. This skill owns inspectable delivery metadata and procedures, not a second agent loop. Preserve the current goal, KBD phase approvals and canonical task ownership.
@@ -16,7 +22,7 @@ The harness owns execution. This skill owns inspectable delivery metadata and pr
 
 Read project instructions and current work first. Reuse existing choices. Configure iteration duration, build and functional-run commands, human review, publication frequency and explicit optimization bounds in a profile. See [profile and commands](references/profile.md).
 
-For refreshing an installed skill pack from merged `main` at a checkpoint, use `scripts/refresh-skill-pack.sh` (profile inputs, odd/even parity from `state.json`, fail-loud); see [the refresh procedure](references/profile.md#skill-pack-refresh-procedure).
+Refreshing an installed skill pack from merged `main` at a checkpoint is unavailable in this project — no refresh scripts ship in this payload (see the absent-asset note above). Update or roll back an installed payload through its owning harness installer per `docs/maintenance.md`.
 
 Invoke `node <this-skill>/scripts/cadence.mjs <command> --root <state-directory> --input <request.json>`. The default state directory is `.prometheus/cadence` in the current project. Use a stable `--command-id` when retrying a mutation.
 

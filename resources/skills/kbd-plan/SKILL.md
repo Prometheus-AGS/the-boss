@@ -96,10 +96,14 @@ Use the canonical phase name from the argument or `current-waypoint.json`. Emit 
 7. **Adversarial vet** — when `adversarial-review` is installed and
    `--skip-adversarial-review` was not passed, run it in artifact mode against
    the written plan. CRITICAL findings (ordering errors, missing dependencies,
-   untestable criteria) → revise `plan.md` and re-vet (max 2 rounds, then
-   accept with an "Unresolved review findings" section appended). WARNING
-   findings → carry into the stage handoff summary. Vet **before** emitting
-   change structures, so a corrected plan never leaves stale changes behind.
+   untestable criteria) → revise `plan.md` and re-vet (max 2 rounds). If
+   CRITICAL findings remain unresolved when the round ceiling is reached,
+   planning is **BLOCKED**: record the unresolved findings with their evidence
+   and stop — a bounded retry limit never converts an unmet required criterion
+   into acceptance (mini #59). WARNING/SUGGESTION findings → carry into the
+   stage handoff summary; they never invent new blocking work. Vet **before**
+   emitting change structures, so a corrected plan never leaves stale changes
+   behind.
 8. **Emit and reconcile change structures** via OpenSpec or native KBD. Add non-checkbox references to the scoped assignments, preserving task IDs and titles. Reconcile every emitted task with its row before handoff; revise and re-vet material changes to the reviewed draft.
 9. **Record the handoff and refresh projections** through the canonical KBD writer. Include assignment references, unresolved prerequisites and review findings; never hand-edit generated waypoints.
 
@@ -158,3 +162,21 @@ A missing required handoff fails with remediation: complete the predecessor
 stage, or record an explicit skip with its reason under project policy.
 A deliberate stage skip is recorded with
 `stageHandoffSkip('plan', '<reason>', { cwd })`.
+
+## Contract binding + single boundary packet (required, mini #60)
+
+Plan output must bind contract identity + digest, scenario→task coverage,
+worker routes, freshness keys, budgets, and ONE bounded boundary execution
+packet.
+
+Run from the consumer project. Replace `<package-root>` with the absolute root
+of the loaded mini package (the directory containing `scripts` and `lib`), or
+the source checkout root for development. Keep the consumer working directory;
+do not copy scripts into the project. Quote paths, including paths with spaces.
+
+Record adoption via
+`node "<package-root>/scripts/kbd-contract-adopt.mjs" ".kbd-orchestrator/phases/<phase>/adopted-contract.json"`
+before writing the identity-bound plan handoff (`ctx.identity` or
+`KBD_HANDOFF_IDENTITY_JSON`). See
+`skills/kbd-process-orchestrator/references/templates/adopted-contract.template.md`.
+Plans without an adopted contract cannot pass the Plan→Execute readiness gate.

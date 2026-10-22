@@ -98,3 +98,16 @@ stageHandoffWrite('spec', '<changes created>', [firstChangeSpecPath], { cwd });
 /kbd-spec                                # uses active waypoint phase
 /kbd-spec canonical-lifecycle            # explicit phase name
 ```
+
+## Finite scenario matrix + contract authoring (required, mini #60)
+
+Spec freezes the finite scenario matrix: stable scenario IDs (pattern
+`^[A-Z]+-[0-9]+$`), production entry point, real collaborators, oracle,
+negative control, fixture identity (scratch roots + digests), evidence
+requirements, and owning task ID per scenario — using
+`skills/kbd-process-orchestrator/references/templates/acceptance.template.md`
+fields. Separate functional scope from resilience scope; adopted resilience
+requirements never defer via budget overflow. Author the phase
+`adopted-contract.json` (schema:
+`skills/kbd-process-orchestrator/references/schemas/adopted-contract.schema.json`)
+in this stage.

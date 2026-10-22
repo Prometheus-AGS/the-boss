@@ -39,10 +39,10 @@ const LAUNCHPAD_ITEM_CLASS = 'mx-auto w-[92px]'
 const APP_ICON_TILE_CLASS =
   'flex size-14 items-center justify-center rounded-2xl border border-border-subtle bg-transparent'
 const APP_ICON_SURFACE_CLASS =
-  'relative flex size-14 items-center justify-center overflow-hidden rounded-2xl border border-border-subtle bg-card'
+  'relative flex size-14 items-center justify-center overflow-hidden rounded-2xl border border-border-subtle bg-transparent transition-[background-color] duration-[160ms] ease-in-out group-hover:bg-accent group-focus-visible:bg-accent motion-reduce:transition-none'
 const APP_ICON_FRAME_CLASS =
-  'relative flex size-[50px] shrink-0 items-center justify-center overflow-hidden rounded-xl select-none'
-const APP_ICON_CLASS = 'size-[50px] object-contain'
+  'relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl select-none'
+const APP_ICON_CLASS = 'size-11 object-contain'
 const SORTABLE_CONTENTS_STYLE = { display: 'contents' } as const
 
 const APP_ICON_SOURCES: Record<SidebarAppId, string> = {
@@ -204,8 +204,6 @@ export default function LaunchpadPage() {
     [isPinned, pinToSidebar, t, unpinFromSidebar]
   )
 
-  // Sidebar-backed app tiles keep their existing launchpad order. The direct
-  // Harness shortcut is fixed because it is not a sidebar destination.
   const appMenuItems = useMemo(
     () =>
       orderedAppIds.flatMap((favorite) => {

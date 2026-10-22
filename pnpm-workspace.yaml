@@ -13,6 +13,8 @@ packageExtensions:
 overrides:
   "@deepseek-ai/dsh-sdk-client@0.2.0-rc.2>@deepseek-ai/dsh": "-"
   "@deepseek-ai/dsh-llm-pi-ai>@earendil-works/pi-ai": "0.87.1"
+  # Linux x64 must stay usable without AVX/AVX2; the fork's prebuilt vec0.so requires them (#22048).
+  "@aiany/sqlite-vec-linux-x64": "npm:sqlite-vec-linux-x64@0.1.9"
   "@earendil-works/pi-ai@1.0.0>@google/genai": "2.23.0"
   picomatch: "4.0.4"
   "concurrently>shell-quote": "1.8.4"
@@ -125,6 +127,8 @@ patchedDependencies:
   "@sting8k/pi-vcc@0.8.1": patches/@sting8k__pi-vcc@0.8.1.patch
   # Normalize XML BOMs and propagate parsing failures instead of silently returning an empty deck.
   "@aiden0z/pptx-renderer@1.2.2": patches/@aiden0z__pptx-renderer@1.2.2.patch
+  # Normalize RTF byte representations before code-page decoding; preserve font resets and binary ranges.
+  rtf.js@3.0.9: patches/rtf.js@3.0.9.patch
 
 allowBuilds:
   "@deepseek-ai/dsh-subprocess-local": true
@@ -310,3 +314,4 @@ minimumReleaseAgeExclude:
   - "@cherrystudio/computer-use-linux-x64@0.1.9"
   - "@cherrystudio/computer-use-win32-x64@0.1.9"
   - "mediabunny@1.58.0"
+  - electron@44.9.3

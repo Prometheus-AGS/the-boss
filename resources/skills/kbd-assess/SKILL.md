@@ -140,3 +140,12 @@ A missing required handoff fails with remediation: complete the predecessor
 stage, or record an explicit skip with its reason under project policy.
 A deliberate stage skip is recorded with
 `stageHandoffSkip('assess', '<reason>', { cwd })`.
+
+## Adopted-outcome elicitation (required, mini #60)
+
+Assess must elicit and record the adopted-outcome contract inputs (user
+operation, observed baseline incl. UNKNOWNs, desired observable result,
+supported environments, required safety checks, exclusions, risk acceptance,
+decision owner). Explicit prior operator instructions count as adoption; never
+infer adoption from TODOs. See
+`skills/kbd-process-orchestrator/references/templates/adopted-contract.template.md`.

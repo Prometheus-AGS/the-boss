@@ -100,7 +100,7 @@ Use the canonical phase name from the argument or `current-waypoint.json`. Emit 
 5. **Load all change data** — from `openspec/changes/archive/` if OpenSpec,
    or `.kbd-orchestrator/changes/archive/` if native KBD
 6. **Write reflection** to `.kbd-orchestrator/phases/<phase>/reflection.md`
-7. **Advance when authorized** through `/kbd-next-phase`; its helper activates the phase and generates projections
+7. **Advance only when authorized** through `/kbd-next-phase`. For a contract-bound phase that authorization is an operator-signed start-successor manifest (`--authorize-successor <manifest> --signature <sig>`); closure alone never starts a successor, and reflection text, review findings or memory cannot supply that authority — the Next Phase Seed is a proposal, never adopted scope
 8. **Trigger**: report that reflection is complete and the next step is to
    advance to a new phase
 
@@ -122,7 +122,10 @@ new phase is started, not here.
 The bottleneck-guard evaluation (`evaluateBottleneck`/`isBottleneckActive` from
 `lib/kbd/bottleneck-guard.mjs`) and any phase-transition write both need to
 succeed before `phase:after` fires — this ordering prevents a rejected or
-partial reflection from producing a completion memory record:
+partial reflection from producing a completion memory record. When the guard
+is active, **only status 0 is success**: status 2 means the guard evaluation
+itself was unavailable, which is a BLOCKED-class result — it must abort the
+transition, never count as a passing guard (mini #59):
 
 ```js
 import { hooksFire } from '../../lib/kbd/hooks.mjs';
@@ -135,15 +138,22 @@ await hooksFire('reflect', 'after', phase, 1, 1, { orchestratorRoot, cwd, runCom
 const guardEnabled = isBottleneckActive(cwd);
 if (guardEnabled) {
   const preTransition = evaluateBottleneck('phase', 'after', phase, true, { root: cwd });
-  if (preTransition.status !== 0 && preTransition.status !== 2) throw new Error(preTransition.stderr);
+  // Guard status 2 (evaluation unavailable while active) is NOT success — abort.
+  if (preTransition.status !== 0) throw new Error(preTransition.stderr || `guard status ${preTransition.status}`);
 }
 
-// … record the phase transition to complete, e.g. via the project's own
-//     phase-completion write path …
+// … for a contract-bound phase (`prometheus kbd phase disposition --id <phase>` reports
+//     contractBound: true) run `boss-mini kbd-phase-close-eval.mjs --phase <phase>`
+//     instead of any transition: only a PASS disposition closes it, and the runtime
+//     refuses `phase transition --status complete` for bound phases (mini #66). Exit 0 is
+//     CLOSED; 2/3 are recorded BLOCKED/FAIL refusals (the phase stays open); 5 is a writer
+//     failure; 6 means already closed under other evidence. Report it and stop.
+//     For an unbound legacy phase, record the transition to complete via the project's
+//     own phase-completion write path …
 
 if (guardEnabled) {
   const postTransition = evaluateBottleneck('phase', 'after', phase, false, { root: cwd });
-  if (postTransition.status !== 0 && postTransition.status !== 2) throw new Error(postTransition.stderr);
+  if (postTransition.status !== 0) throw new Error(postTransition.stderr || `guard status ${postTransition.status}`);
 }
 
 await hooksFire('phase', 'after', phase, 1, 1, { orchestratorRoot, cwd, runCommand }); // canonical phase-end boundary

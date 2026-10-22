@@ -41,20 +41,42 @@ When the new phase is ready, emit:
 Completed kbd-next-phase — <new-phase-name> ready for /kbd-assess
 ```
 
+## Closing is not continuing (contract-bound phases)
+
+For a phase whose adopted contract is bound in canonical state (mini #66 / full #192):
+
+- The current phase must already be **CLOSED** — its terminal evaluator
+  (`boss-mini kbd-phase-close-eval.mjs --phase <id>`) records that. OPEN or REFUSED_*
+  exits 2 with nothing written; `--allow-incomplete-reflection` never bypasses this.
+- A closed phase starts a successor **only** with an operator-signed start-successor
+  manifest. Without one the driver exits 4 (`SUCCESSOR-UNAUTHORIZED`), writes nothing and
+  prints the commands: `boss-mini kbd-scope-authority-template.mjs start-successor
+  --phase <id> --successor <new-id> --title '<title>'`, then the operator's
+  `ssh-keygen -Y sign -n prometheus-kbd-scope-amendment`.
+- With the manifest, one runtime event defines and activates exactly the named successor; a
+  rerun reports `ALREADY-STARTED`. `goals.md` is written after canonical success and is
+  labelled reflection proposals — not adopted scope.
+
+Never write or sign a manifest yourself. Unbound legacy phases keep the flow below.
+
 ## Prerequisites
 
-- `/kbd-reflect` should have run for the current phase (warning issued if not).
+- Contract-bound phase: CLOSED plus a signed start-successor manifest (refused otherwise).
+- Unbound phase: `/kbd-reflect` must have run (the driver refuses otherwise unless
+  `--allow-incomplete-reflection` records an explicit operator authorization).
 - `reflection.md` should exist at `.kbd-orchestrator/phases/<phase>/reflection.md`.
 - The proposed new phase name must not already exist as a directory.
 
 ## How to invoke
 
 ```bash
-boss-mini kbd-next-phase.mjs [new-phase-name]
+boss-mini kbd-next-phase.mjs [new-phase-name] [--authorize-successor <manifest> --signature <sig>]
 ```
 
 1. Reads the current waypoint — confirms current phase name and stage.
-2. Warns if stage is not reflect_complete — recommends running `/kbd-reflect` first.
+2. Checks `prometheus kbd phase disposition --id <phase>`: a bound phase must be CLOSED and
+   come with a signed manifest; an unbound phase must have a completed reflection (the
+   driver refuses otherwise — it does not merely warn).
 3. Displays `goals.md` — show the user what was seeded so they can review/edit.
 4. Confirms next step — remind the user to run `/kbd-assess`.
 

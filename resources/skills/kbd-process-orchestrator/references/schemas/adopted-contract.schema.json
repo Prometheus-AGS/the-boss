@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prometheus-ags.dev/schemas/kbd/adopted-contract.schema.json",
+  "title": "KBD adopted completion contract",
+  "description": "Versioned finite completion contract for one useful runnable end-to-end KBD phase. Authored during Spec/Plan, frozen before production implementation, and adopted through the existing canonical writer (prometheus kbd decision record, via scripts/kbd-contract-adopt.mjs) carrying path + SHA-256 digest + plan revision. Amendments are new canonical decisions with supersedes lineage; stale digests are rejected by the readiness checker (scripts/kbd-phase-readiness-check.mjs).",
+  "type": "object",
+  "required": [
+    "contractVersion",
+    "kind",
+    "identity",
+    "digestNormalization",
+    "adoptionSource",
+    "decisionOwner",
+    "amendmentPolicy",
+    "releaseClaim",
+    "statusVocabulary",
+    "scenarioMatrix",
+    "functionalScope",
+    "resilienceScope",
+    "exclusions",
+    "requiredSafetyChecks",
+    "budgets",
+    "evidenceInvalidation",
+    "workerRoutes",
+    "boundaryPacket",
+    "status"
+  ],
+  "properties": {
+    "contractVersion": { "type": "string", "description": "Contract format version, e.g. \"1\". Bumped only by an amendment decision." },
+    "kind": { "const": "kbd.adopted-contract" },
+    "identity": {
+      "type": "object",
+      "required": ["projectId", "runId", "phaseId", "planRevision", "contractDigest"],
+      "properties": {
+        "projectId": { "type": "string", "description": "Canonical project UUID from .prometheus/project.json." },
+        "runId": { "type": "string", "description": "Canonical run id from prometheus kbd status." },
+        "phaseId": { "type": "string", "description": "Canonical phase id (kebab-case directory name under .kbd-orchestrator/phases/)." },
+        "planRevision": { "type": ["integer", "null"], "description": "Stamped by the adoption writer from canonical status at adoption time. Excluded from the digest; the canonical Decision binds plan_revision itself. Traceability metadata, not an equality gate.", "minimum": 0 },
+        "contractDigest": { "type": ["string", "null"], "description": "Stamped by the adoption writer AFTER digest computation. Excluded from the digest input to avoid self-referential recursion.", "pattern": "^[0-9a-f]{64}$" }
+      },
+      "additionalProperties": false
+    },
+    "digestNormalization": {
+      "type": "object",
+      "required": ["algorithm", "command", "stalenessRule"],
+      "properties": {
+        "algorithm": { "const": "sha256" },
+        "command": { "type": "string", "description": "Exact normalization used by BOTH writer and checker. In mini: lib/kbd/adopted-contract.mjs stableStringify(digestPayload(contract)) — recursively key-sorted compact JSON with identity.contractDigest and identity.planRevision deleted, hashed with node:crypto sha256 (the jq -S -c equivalent; no jq/shell dependency)." },
+        "rationale": { "type": "string" },
+        "stalenessRule": { "type": "string", "description": "Deterministic rule deciding REJECT-STALE, e.g. digest mismatch vs latest non-superseded adoption decision for this contract path." }
+      },
+      "additionalProperties": false
+    },
+    "adoptionSource": { "type": "string", "description": "Explicit operator instruction reference. Never inferred from TODOs or reflections." },
+    "decisionOwner": { "type": "string" },
+    "amendmentPolicy": { "type": "string", "description": "Material scope/acceptance changes require explicit operator version-adoption recorded as a new canonical decision with supersedes; suggestions never auto-enter task totals." },
+    "releaseClaim": {
+      "type": "object",
+      "required": ["userOperation", "supportedEnvironments", "currentCapabilities", "explicitUnknowns"],
+      "properties": {
+        "userOperation": { "type": "string", "description": "The real user operation this phase delivers." },
+        "supportedEnvironments": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "currentCapabilities": { "type": "string", "description": "Honest capability statement from code/capability inventory — never task counts." },
+        "explicitUnknowns": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "statusVocabulary": {
+      "type": "array",
+      "description": "Exactly the four verdict classes. Unknown is neither success nor observed failure.",
+      "items": { "type": "string" },
+      "minItems": 4
+    },
+    "scenarioMatrix": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Finite adopted acceptance set. Scenario IDs are stable and frozen before implementation.",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "ownerTask", "productionEntry", "oracle", "negativeControl", "fixtures", "evidence"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Z]+-[0-9]+$" },
+          "name": { "type": "string" },
+          "ownerTask": { "type": "string", "description": "Owning task ID(s) from tasks.json, e.g. \"T4+T5+T7\"." },
+          "productionEntry": { "type": "string", "description": "Shipped script/CLI path and exact invocation." },
+          "realCollaborators": { "type": "array", "items": { "type": "string" } },
+          "oracle": { "type": "string", "description": "Externally observable pass condition." },
+          "negativeControl": { "type": "string", "description": "The run that must NOT pass, proving the oracle discriminates." },
+          "fixtures": { "type": "string", "description": "Fixture identity: scratch roots, content digests, isolation guarantees." },
+          "evidence": { "type": "string", "description": "Required recorded evidence: argv, exit codes, stdout/stderr excerpts, digests." },
+          "classification": { "type": "string", "description": "Optional: marks delivery/packaging-only validation so its failure is never cascaded into product-failure claims." }
+        },
+        "additionalProperties": false
+      }
+    },
+    "functionalScope": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "resilienceScope": {
+      "type": "object",
+      "required": ["policy", "deferredOptional"],
+      "properties": {
+        "policy": { "type": "string", "description": "Adopted requirements never defer via budget overflow (exhaustion => checkpoint+BLOCKED); only never-adopted optional items may defer." },
+        "deferredOptional": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "exclusions": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "requiredSafetyChecks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Non-waivable checks. Never silently dropped, never downgraded by repair-budget exhaustion."
+    },
+    "budgets": {
+      "type": "object",
+      "required": ["timeMinutes", "toolCalls", "repairAttempts", "noProgressLimit", "tokenBudget", "exhaustion"],
+      "properties": {
+        "timeMinutes": { "type": "integer", "minimum": 1 },
+        "toolCalls": { "type": "integer", "minimum": 1 },
+        "repairAttempts": { "type": "integer", "minimum": 0 },
+        "noProgressLimit": { "type": "integer", "minimum": 1 },
+        "tokenBudget": { "type": "string", "description": "Measured value or the literal \"UNKNOWN\" with tokenFallback recorded." },
+        "tokenFallback": { "type": "string" },
+        "consumedAtAuthoring": { "type": "object" },
+        "exhaustion": { "type": "string", "description": "checkpoint + BLOCKED; never silent PASS; docs/state may be saved without running product tests." },
+        "extensions": {
+          "type": "array",
+          "description": "Approved amendments. A numeric field is an ADDITIVE allowance; an object field selects the operation explicitly ('add' | 'replace' | 'unchanged') so an additive time/tool extension can never silently double an unchanged no-progress threshold. The latest extension carrying explicit resultingCeilings replaces the running totals; consumption history is never reset.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "approvedAt": { "type": "string" },
+              "scope": { "type": "string" },
+              "operation": { "type": "string", "enum": ["add", "replace", "unchanged"] },
+              "timeMinutes": { "type": ["integer", "object"] },
+              "toolCalls": { "type": ["integer", "object"] },
+              "repairAttempts": { "type": ["integer", "object"] },
+              "noProgressLimit": { "type": ["integer", "object"] },
+              "resultingCeilings": { "type": "object" },
+              "cumulative": { "type": "string" },
+              "provenance": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidenceInvalidation": { "type": "string", "description": "Digest/revision/fixture-keyed invalidation; only affected evidence is invalidated; history preserved; no blanket re-review." },
+    "workerRoutes": {
+      "type": "object",
+      "required": ["agent", "model"],
+      "properties": {
+        "agent": { "type": "string" },
+        "model": { "type": "string" },
+        "billing": { "type": "string" },
+        "subagents": { "type": "string" },
+        "reviewRoundsMax": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "boundaryPacket": {
+      "type": "object",
+      "required": ["postImplementationOnly", "singleRun", "commands", "expectedEffects", "requiredApprovals", "receipts", "cleanup", "stopConditions"],
+      "properties": {
+        "postImplementationOnly": { "const": true, "description": "Boundary verification runs only after complete production implementation; no per-task test loops." },
+        "singleRun": { "const": true },
+        "commands": { "type": "array", "items": { "type": "string" }, "minItems": 1, "description": "Exact argv strings, run once, in order." },
+        "expectedEffects": { "type": "array", "items": { "type": "string" } },
+        "requiredApprovals": { "type": "string" },
+        "receipts": { "type": "array", "items": { "type": "string" } },
+        "cleanup": { "type": "array", "items": { "type": "string" } },
+        "stopConditions": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      },
+      "additionalProperties": false
+    },
+    "status": {
+      "type": "object",
+      "required": ["implementationComplete"],
+      "properties": {
+        "implementationComplete": { "type": "boolean", "description": "false at adoption; flipping to true is a content change requiring an amendment decision (new digest, supersedes)." }
+      }
+    }
+  },
+  "additionalProperties": false
+}
