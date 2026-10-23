@@ -1,8 +1,17 @@
 const { isDeepStrictEqual } = require('node:util')
 
 const BUILD_COMMAND = Object.freeze([
-  'cargo', 'build', '--release', '--locked', '--no-default-features', '--features', 'server-full',
-  '--bin', 'uar-sidecar', '--target', 'aarch64-apple-darwin'
+  'cargo',
+  'build',
+  '--release',
+  '--locked',
+  '--no-default-features',
+  '--features',
+  'server-full',
+  '--bin',
+  'uar-sidecar',
+  '--target',
+  'aarch64-apple-darwin'
 ])
 
 function requireCandidateBinding(record, pin, sourceTree) {
@@ -14,7 +23,9 @@ function requireCandidateBinding(record, pin, sourceTree) {
     pin.target !== 'aarch64-apple-darwin' ||
     !isDeepStrictEqual(pin.features, ['server-full']) ||
     !isDeepStrictEqual(pin.lifecycleControl, {
-      transport: 'inherited-stdin', version: 1, responsePrefix: 'LIFECYCLE:'
+      transport: 'inherited-stdin',
+      version: 1,
+      responsePrefix: 'LIFECYCLE:'
     }) ||
     !isDeepStrictEqual(record.features, pin.features) ||
     provenance?.schema !== 1 ||
@@ -40,8 +51,10 @@ function requireCandidateBinding(record, pin, sourceTree) {
 }
 
 function requireCandidateManifest(manifest, record) {
-  if (!isDeepStrictEqual(manifest.provenance, record.provenance) ||
-      !isDeepStrictEqual(manifest.features, record.features)) {
+  if (
+    !isDeepStrictEqual(manifest.provenance, record.provenance) ||
+    !isDeepStrictEqual(manifest.features, record.features)
+  ) {
     throw new Error('Local UAR candidate manifest and archive record disagree about build provenance')
   }
   for (const entry of [record.provenance.build.log, record.provenance.build.executable]) {

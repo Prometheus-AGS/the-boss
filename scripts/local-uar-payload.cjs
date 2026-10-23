@@ -103,9 +103,13 @@ function loadLocalUarPayload() {
     ) {
       throw new Error('Local UAR archive contains an unexpected path')
     }
-    const archiveFiles = archiveEntries.filter((name) => !name.endsWith('/')).map((name) => name.slice(PACKAGE.length + 1))
-    if (new Set(archiveEntries).size !== archiveEntries.length ||
-        JSON.stringify([...archiveFiles].sort()) !== JSON.stringify([...record.binaries].sort())) {
+    const archiveFiles = archiveEntries
+      .filter((name) => !name.endsWith('/'))
+      .map((name) => name.slice(PACKAGE.length + 1))
+    if (
+      new Set(archiveEntries).size !== archiveEntries.length ||
+      JSON.stringify([...archiveFiles].sort()) !== JSON.stringify([...record.binaries].sort())
+    ) {
       throw new Error('Local UAR archive entries do not match its immutable record')
     }
     const archiveTypes = execFileSync('tar', ['tvzf', archive], { encoding: 'utf8' }).trim().split('\n')
