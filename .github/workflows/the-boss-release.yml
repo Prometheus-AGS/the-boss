@@ -6,7 +6,7 @@ on:
       release_version:
         description: Frozen application version (must match package.json)
         required: true
-        default: 2.2.40
+        default: 2.2.41
         type: string
       release_profile:
         description: Customer release profile
@@ -266,7 +266,7 @@ jobs:
         with:
           pattern: installers-*
           merge-multiple: true
-      - name: Verify both installers and publish the complete release
+      - name: Verify all installers and publish the complete release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LANDING_DISPATCH_TOKEN: ${{ secrets.REPO_DISPATCH_TOKEN }}

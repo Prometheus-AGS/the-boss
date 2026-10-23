@@ -24,12 +24,12 @@
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "84bf41bf28891d6075b898796a040b063298fad3",
+      "revision": "c4a656251b643bd83c8f1407286480dbfac76708",
       "platformRevisions": {
-        "darwin-x64": "74194623b17e5db127534b0f0469f8557794d4bc",
-        "win32-arm64": "74194623b17e5db127534b0f0469f8557794d4bc",
-        "darwin-arm64": "84bf41bf28891d6075b898796a040b063298fad3",
-        "win32-x64": "84bf41bf28891d6075b898796a040b063298fad3"
+        "darwin-x64": "c4a656251b643bd83c8f1407286480dbfac76708",
+        "win32-arm64": "c4a656251b643bd83c8f1407286480dbfac76708",
+        "darwin-arm64": "c4a656251b643bd83c8f1407286480dbfac76708",
+        "win32-x64": "c4a656251b643bd83c8f1407286480dbfac76708"
       }
     },
     "surreal-memory": {
@@ -79,7 +79,7 @@
     "uar-sidecar": {
       "source": "uar",
       "package": "universal-agent-runtime",
-      "version": "1.1.1",
+      "version": "1.2.3",
       "features": "server-full"
     },
     "liter-llm": {

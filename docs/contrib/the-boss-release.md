@@ -20,7 +20,7 @@ sources:
 The Boss uses **The Boss integration payload** followed by **The Boss Release**.
 The upstream Cherry Studio release runbook describes a separate workflow. For this
 integration release, the operator has authorized commits and publication and has
-selected installed Windows x64 and Apple Silicon applications as the functional
+selected installed Windows x64 and macOS applications as the functional
 acceptance boundaries.
 Do not run intermediate test suites, review loops, or standalone verification
 builds. Fix compiler and packaging failures in the actual release builds.
@@ -32,21 +32,21 @@ version and customer profile. `release_version` must match `package.json`, and a
 version already associated with another source or profile is rejected. The
 `non-uar` profile publishes Windows x64/ARM64 and macOS arm64/x64 with
 `THE_BOSS_UAR_ENABLED=0`; it remains the emergency path when UAR sidecar payloads
-are unavailable. The 2.2.40 dispatch defaults to `uar-enabled`; selecting the
+are unavailable. The 2.2.41 dispatch defaults to `uar-enabled`; selecting the
 emergency profile is explicit.
 
 For a UAR customer release, dispatch the workflow with `release_profile` set to
-`uar-enabled` and provide both immutable sidecar release record URLs. The workflow
-imports and validates the complete Windows x64 and macOS arm64 payload set before
+`uar-enabled` and provide all three immutable sidecar release record URLs. The workflow
+imports and validates the complete Windows x64 and macOS arm64/x64 payload set before
 selecting jobs, repeats the import in each native job, and uses the explicit
-`build:win:x64:release:uar` and `build:mac:arm64:release:uar` package scripts.
+`build:win:x64:release:uar`, `build:mac:arm64:release:uar`, and
+`build:mac:x64:release:uar` package scripts.
 Those scripts set `THE_BOSS_UAR_ENABLED=1` for compilation, packaging, and package
 validation. Package validation probes the installed sidecar payload before an
 installer can be published, and release metadata must carry the same UAR profile.
 An existing GitHub release tag can only be resumed with its recorded profile, so
 switching between non-UAR and UAR requires a new application version and tag.
-The UAR profile supports only Windows x64 and macOS arm64 until additional
-sidecar payloads are published.
+The UAR profile supports Windows x64 and macOS arm64/x64 for this release.
 
 ### One Mac artifact for local operation and publication
 
@@ -80,8 +80,8 @@ set that development environment variable for the standard public build.
    release is created. Each native runner reports free disk, free/total memory,
    packaged payload size, and the immutable native payload identities before
    packaging. The non-UAR profile produces two Windows setup
-   installers and two macOS DMGs. The UAR profile requires both sidecar release
-   records and produces Windows x64 and macOS arm64 installers. Compiler checks
+   installers and two macOS DMGs. The UAR profile requires three sidecar release
+   records and produces Windows x64 and macOS arm64/x64 installers. Compiler checks
    inside the packaging commands are part of the build. Retain the separate
    Windows and macOS signing configuration and report actual signing status in
    the release metadata.
@@ -92,10 +92,10 @@ set that development environment variable for the standard public build.
    manifest. It then uploads immutable
    `release-platform-v<version>-<profile>-<platform>-<arch>-<source>.json` records.
 7. The final job writes one complete release metadata entry, confirms no platform
-   remains pending, and makes the GitHub Release public. It dispatches both
+   remains pending, and makes the GitHub Release public. It dispatches all three
    platform records to `Know-Me-Tools/boss-landing-spot`. The repository secret
    `REPO_DISPATCH_TOKEN` must be authorized to dispatch that repository. Confirm
-   that the landing receiver processes both records and that both public links,
+   that the landing receiver processes all three records and that all public links,
    sizes, and SHA-256 values match the release manifests.
 
 For a failed native build, the payload workflow retains completed tool artifacts
