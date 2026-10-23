@@ -1,5 +1,9 @@
 [
   {
+    "version": "2.2.41",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.41 - UAR 1.2.3 on three desktop platforms\n\n- Update the packaged UAR sidecar to released v1.2.3 for Windows x64, Mac ARM64, and Mac x64.\n- Refresh the mini skill pack and incorporate compatible Cherry Studio upstream changes.\n- Preserve The Boss's managed tools, DSH and UAR integrations, scoped memory, and approval behavior.\n- Require Developer ID signing and notarization for both Mac installers.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.41 - 三个平台的 UAR 1.2.3 更新\n\n- 将 Windows x64、Mac ARM64 和 Mac x64 打包的 UAR 辅助程序更新至已发布的 v1.2.3。\n- 更新迷你技能包，并合入兼容的 Cherry Studio 上游改动。\n- 保留 The Boss 的托管工具、DSH 和 UAR 集成、限定范围的记忆及审批行为。\n- 两个 Mac 发行安装包均须经过 Developer ID 签名与公证。\n\n<!--LANG:END-->"
+  },
+  {
     "version": "2.2.40",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.40 - updated runtime and skills\n\n- Update the Mac ARM64 and Windows x64 UAR sidecar to the 1.1.1 release candidate and Liter LLM to v2.3.0.\n- Refresh the mini skill pack and incorporate compatible Cherry Studio upstream changes.\n- Preserve The Boss's managed tools, DSH and UAR integrations, scoped memory, and approval behavior.\n- Require Developer ID signing and notarization for the Mac release installer.\n- UAR 1.1.1 has not passed its full qualification gate; the embedding-space mismatch proof remains open.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.40 - 运行时与技能更新\n\n- 将 Mac ARM64 和 Windows x64 的 UAR 辅助程序更新至 1.1.1 候选版本，并将 Liter LLM 更新至 v2.3.0。\n- 更新迷你技能包，并合入兼容的 Cherry Studio 上游改动。\n- 保留 The Boss 的托管工具、DSH 和 UAR 集成、限定范围的记忆及审批行为。\n- Mac 发行安装包须经过 Developer ID 签名与公证。\n- UAR 1.1.1 尚未通过完整资格验证；嵌入空间不匹配的验证仍未完成。\n\n<!--LANG:END-->"
   },
