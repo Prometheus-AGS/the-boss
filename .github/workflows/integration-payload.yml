@@ -63,7 +63,7 @@ jobs:
     if: (inputs.reuse_native_run == '' || inputs.native_tools != '') && !inputs.images_only
     name: Native tools (${{ matrix.platform }})
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 180
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.native-matrix.outputs.matrix) }}
