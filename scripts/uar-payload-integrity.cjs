@@ -178,9 +178,12 @@ function assertPackagedUarPayloadAbsent(resourcesDir, platformKey) {
 }
 
 function probePackagedUarSidecar(executable, payloadDir, platformKey) {
-  const result = spawnSync(executable, [], {
+  const isWindows = platformKey.startsWith('win32-')
+  const command = isWindows ? process.execPath : executable
+  const args = isWindows ? [path.join(__dirname, 'probe-uar-sidecar-win32.cjs'), executable] : []
+  const result = spawnSync(command, args, {
     cwd: payloadDir,
-    input: 'invalid-launch-token\n',
+    ...(!isWindows ? { input: 'invalid-launch-token\n' } : {}),
     encoding: 'utf8',
     timeout: 30_000,
     windowsHide: true
