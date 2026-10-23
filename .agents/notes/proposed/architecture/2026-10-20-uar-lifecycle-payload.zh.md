@@ -2,7 +2,7 @@
 
 Status: proposed
 
-English | Chinese counterpart: 2026-10-20-uar-lifecycle-payload.md
+[English](2026-10-20-uar-lifecycle-payload.md) | 中文
 
 ## 问题
 

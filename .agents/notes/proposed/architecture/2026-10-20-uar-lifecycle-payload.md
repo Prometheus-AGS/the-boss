@@ -2,7 +2,7 @@
 
 Status: proposed
 
-English | Chinese counterpart: 2026-10-20-uar-lifecycle-payload.zh.md
+English | [中文](2026-10-20-uar-lifecycle-payload.zh.md)
 
 ## Problem
 
@@ -38,9 +38,9 @@ approval on GitHub. The draft links the UAR OpenSpec and operator decision.
 
 ## Acceptance criteria
 
-- AC1 — The packaged local sidecar matches the pinned committed source and required lifecycle protocol; stale or inconsistent records are refused (verification: packaged artifact).
-- AC2 — EOF shutdown and explicit reconnect receive correlated lifecycle results, and owned child exit is observed before completion (verification: Electron).
-- AC3 — Windows inherited input cancellation completes through actual overlapped I/O and child reaping without a fixed success deadline (verification: packaged artifact).
+- AC1 — The packaged local sidecar matches the pinned committed source and required lifecycle protocol; stale or inconsistent records are refused (verification: packaged artifact)
+- AC2 — EOF shutdown and explicit reconnect receive correlated lifecycle results, and owned child exit is observed before completion (verification: Electron)
+- AC3 — Windows inherited input cancellation completes through actual overlapped I/O and child reaping without a fixed success deadline (verification: packaged artifact)
 
 ## Risks
 

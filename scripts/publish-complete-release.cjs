@@ -138,7 +138,7 @@ async function main() {
   const current = JSON.parse(run('git', ['show', `origin/${branch}:release-manifest.json`]))
   const alreadyCommitted = matchesCompleteMetadata(current)
   if (!release.isDraft && !alreadyCommitted) {
-    throw new Error('Public release metadata does not contain both frozen installers')
+    throw new Error('Public release metadata does not contain all frozen installers')
   }
   if (release.isDraft && !alreadyCommitted) {
     run('git', ['reset', '--hard', `origin/${branch}`])

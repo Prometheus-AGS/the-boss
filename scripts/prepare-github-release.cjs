@@ -18,7 +18,7 @@ const notes = [
   `The Boss ${version} — workspace-bound tools, managed services, and the complete Prometheus skill payload.`,
   '',
   profileNote,
-  `Platform targets: ${platforms.join(', ')}. Both installers are published together after validation; their checksums and signing status appear in RELEASES.md.`
+  `Platform targets: ${platforms.join(', ')}. All selected installers are published together after validation; their checksums and signing status appear in RELEASES.md.`
 ].join('\n')
 
 const existing = spawnSync(
