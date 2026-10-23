@@ -11,13 +11,13 @@
 ## 2. UAR 1.2.3 desktop payload
 
 - [x] 2.1 Update the Boss UAR source and version pins to the annotated 1.2.3 commit; verify local and integration descriptors agree with the release tag.
-- [ ] 2.2 Obtain the fresh exact instruction required by UAR's verification lock, publish native sidecar records for Windows x64, Mac ARM64, and Mac x64 from that commit, and verify each record's version, source, archive, and checksum.
-- [ ] 2.3 Import the three immutable UAR records into the Boss integration manifest and select all three UAR-enabled release targets; verify the platform map has no missing or stale source.
+- [x] 2.2 Obtain the fresh exact instruction required by UAR's verification lock, publish native sidecar records for Windows x64, Mac ARM64, and Mac x64 from that commit, and verify each record's version, source, archive, and checksum.
+- [x] 2.3 Import the three immutable UAR records into the Boss integration manifest and select all three UAR-enabled release targets; verify the platform map has no missing or stale source.
 
 ## 3. Complete release source and payload
 
 - [x] 3.1 Set Boss version 2.2.41 and update live release metadata while leaving historical 2.2.40 records unchanged; verify package, targets, and source descriptors agree.
-- [ ] 3.2 Produce and commit the refreshed integration payload through the existing workflow; verify its immutable records and public images identify the frozen source revisions and three native UAR payloads.
+- [x] 3.2 Produce and commit the refreshed integration payload through the existing workflow; verify its immutable records and public images identify the frozen source revisions and three native UAR payloads.
 - [ ] 3.3 At the completed source boundary, run the applicable local Boss integration, policy, lint, docs, and packaging gates once; inspect the results and repair observed failures before publication.
 
 ## 4. Native distribution and landing acceptance
