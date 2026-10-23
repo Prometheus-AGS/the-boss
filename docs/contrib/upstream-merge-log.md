@@ -11,6 +11,15 @@ What each merge actually hit. Rules belong in [the playbook](./upstream-merges.m
 this page is history and carry-over. Newest entry first. The `upstream-merge` skill
 appends here as its last step.
 
+## 2026-10-22 — upstream v2.1.7 (`909214f68d`)
+
+- **Taken:** 7 upstream commits from `41c240712e` through `909214f68d`, on top of the committed October 22 Boss integration branch.
+- **Conflicts:** none; the merge was previewed with `git merge-tree` and applied without unmerged paths.
+- **Rebranded:** no new product or assistant identity was introduced by this seven-commit delta.
+- **Retained:** Boss branding, UAR lifecycle integration, mini gitlink, and release workflow remained on the fork side of the merge. The earlier large integration merge is `a52f785e21`.
+- **Gate:** pending the completed 2.2.41 release source boundary.
+- **Lessons:** none.
+
 ## 2026-10-01 — Cherry Studio main (upstream Grok compatibility)
 
 - **Baseline:** Boss `7653c6a3e22a778f202b1d8a1f8a1edca36f47a1`; upstream `e2f53146eb6944718b091661df0854c75a4d933a` (94 incoming commits).

@@ -2,8 +2,8 @@
 
 ## 1. Freeze and merge source
 
-- [ ] 1.1 Record the fetched Cherry Studio `909214f68d`, mini `1066ad4008`, and released UAR `c4a656251b` revisions; verify each against its remote ref or annotated tag without moving the freeze later.
-- [ ] 1.2 Merge frozen upstream into the isolated Boss branch, resolve conflicts while preserving Boss branding, UAR lifecycle and approval behavior, packaged skills, and release workflow; verify the merge diff against the pre-merge Boss source and record any incompatibility.
+- [x] 1.1 Record the fetched Cherry Studio `909214f68d`, mini `1066ad4008`, and released UAR `c4a656251b` revisions; verify each against its remote ref or annotated tag without moving the freeze later.
+- [x] 1.2 Merge frozen upstream into the isolated Boss branch, resolve conflicts while preserving Boss branding, UAR lifecycle and approval behavior, packaged skills, and release workflow; verify the merge diff against the pre-merge Boss source and record any incompatibility.
 - [ ] 1.3 Confirm the mini gitlink and packaged skills use frozen mini main, with no changes to the dirty mini checkout; verify the gitlink, copied-skill inventory, and source manifest agree.
 
 ## 2. UAR 1.2.3 desktop payload
