@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import path from 'node:path'
 
 import { Arch } from 'electron-builder'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import afterPack, { installComputerUseRuntime } from '../packaging/after-pack'
 
@@ -12,6 +12,7 @@ const roots: string[] = []
 
 afterEach(() => {
   for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true })
+  vi.unstubAllEnvs()
 })
 
 function fixture(platform = 'darwin', arch = 'arm64') {
@@ -41,13 +42,18 @@ function fixture(platform = 'darwin', arch = 'arm64') {
   writeFileSync(path.join(native, 'LICENSE'), 'runtime license')
   writeFileSync(path.join(native, 'THIRD_PARTY_NOTICES.md'), 'runtime notices')
   if (platform === 'darwin') writeFileSync(path.join(native, 'runtime', name, 'Contents/Info.plist'), 'bundle identity')
-  const resources = path.join(root, 'output', 'resources')
+  const resources = path.join(
+    root,
+    'output',
+    ...(platform === 'darwin' ? ['Test.app', 'Contents', 'Resources'] : ['resources'])
+  )
   const context = {
     arch: arch === 'arm64' ? Arch.arm64 : Arch.x64,
     electronPlatformName: platform,
     appOutDir: path.join(root, 'output'),
     packager: {
       projectDir: root,
+      appInfo: { productFilename: 'Test' },
       platform: { name: platform === 'darwin' ? 'mac' : platform === 'win32' ? 'windows' : 'linux' },
       getResourcesDir: () => resources
     }
@@ -90,6 +96,14 @@ describe('packaged Computer Use runtime', () => {
 
   it('runs the installation in the production afterPack hook', async () => {
     const { resources, context } = fixture()
+    const claude = path.join(
+      resources,
+      'app.asar.unpacked/node_modules/@anthropic-ai/claude-agent-sdk-darwin-arm64/claude'
+    )
+    mkdirSync(path.dirname(claude), { recursive: true })
+    writeFileSync(claude, 'claude')
+    chmodSync(claude, 0o755)
+    vi.stubEnv('THE_BOSS_UAR_ENABLED', '0')
     await afterPack(context)
     expect(
       existsSync(path.join(resources, 'computer-use/Cherry Computer Use.app/Contents/MacOS/OpenComputerUse'))

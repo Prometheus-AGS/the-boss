@@ -65,9 +65,7 @@ describe('Cherry Assistant guide', () => {
 
     expect(agent.instructions['en-US']).toContain('built-in general-purpose Agent and onboarding guide')
     expect(agent.instructions['en-US']).toContain('complete any request using the available tools')
-    expect(agent.instructions['en-US']).toContain(
-      'taking particular ownership of helping them succeed with Cherry Studio'
-    )
+    expect(agent.instructions['en-US']).toContain('taking particular ownership of helping them succeed with The Boss')
     expect(agent.instructions['en-US']).toContain(
       'Use `cherry-studio-feedback` unless the user explicitly asks for a GitHub Issue'
     )
@@ -87,8 +85,8 @@ describe('Cherry Assistant guide', () => {
     }
     const soul = fs.readFileSync(SOUL_PATH, 'utf-8')
 
-    expect(agent.instructions['en-US']).toContain('getting started with Cherry Studio')
-    expect(agent.instructions['zh-CN']).toContain('帮助用户开始使用 Cherry Studio')
+    expect(agent.instructions['en-US']).toContain('getting started with The Boss')
+    expect(agent.instructions['zh-CN']).toContain('帮助用户开始使用 The Boss')
     expect(soul).toContain('Warm, patient, and practical')
     expect(soul).toContain("Mirror the user's terminology and level of formality")
     expect(soul).not.toContain("Match the user's language")
@@ -104,9 +102,9 @@ describe('Cherry Assistant guide', () => {
     }
     const soul = fs.readFileSync(SOUL_PATH, 'utf-8')
 
-    expect(agent.instructions['en-US']).toContain('introduce yourself as Cherry Assistant')
-    expect(agent.instructions['zh-CN']).toContain('自我介绍为 Cherry Assistant')
-    expect(agent.instructions['en-US']).toContain('serve as Cherry Assistant')
+    expect(agent.instructions['en-US']).toContain('introduce yourself as Boss Assistant')
+    expect(agent.instructions['zh-CN']).toContain('自我介绍为 Boss Assistant')
+    expect(agent.instructions['en-US']).toContain('serve as Boss Assistant')
     expect(agent.instructions['en-US']).not.toContain("You are Cherry Studio's built-in onboarding Agent")
     expect(soul).not.toContain('Cherry Assistant')
     expect(soul).not.toContain('general-purpose Agent')
@@ -220,13 +218,13 @@ describe('Cherry Assistant guide', () => {
     expect(supportingPrompts).not.toContain('q={query}')
   })
 
-  it('generates a dedicated Cherry Support identity with only the four support skills', () => {
+  it('generates a dedicated Boss Support identity with only the four support skills', () => {
     const template = JSON.parse(fs.readFileSync(SUPPORT_AGENT_TEMPLATE_PATH, 'utf-8'))
     const generated = JSON.parse(fs.readFileSync(SUPPORT_AGENT_PATH, 'utf-8'))
 
     expect(generated).toEqual(
       expect.objectContaining({
-        name: { 'en-US': 'Cherry Support', 'zh-CN': '产品反馈' },
+        name: { 'en-US': 'Boss Support', 'zh-CN': '产品反馈' },
         configuration: expect.objectContaining({
           avatar: '🧰',
           permission_mode: 'acceptEdits',
@@ -238,7 +236,7 @@ describe('Cherry Assistant guide', () => {
     )
     expect(generated.instructions['en-US']).toContain('Your scope has four parts')
     expect(generated.instructions['en-US']).toContain('Never introduce yourself as a general-purpose AI')
-    expect(generated.instructions['en-US']).toContain('direct the user to Cherry Assistant')
+    expect(generated.instructions['en-US']).toContain('direct the user to Boss Assistant')
     expect(generated.instructions['zh-CN']).toContain('答疑解惑')
     expect(generated.instructions['zh-CN']).toContain('使用帮助')
     expect(generated.instructions['zh-CN']).toContain('问题排查')

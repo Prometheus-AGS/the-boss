@@ -115,7 +115,8 @@ describe('BasicInfoStep', () => {
 
     expect(screen.getAllByRole('radio')).toEqual([
       screen.getByRole('radio', { name: /runtime.option.pi/ }),
-      screen.getByRole('radio', { name: /runtime.option.claude_code/ })
+      screen.getByRole('radio', { name: /runtime.option.claude_code/ }),
+      screen.getByRole('radio', { name: /runtime.option.uar/ })
     ])
     expect(screen.getByText('library.config.agent.field.runtime.immutable_hint')).toBeVisible()
     expect(screen.queryByRole('img', { name: /runtime\.immutable_hint/ })).not.toBeInTheDocument()

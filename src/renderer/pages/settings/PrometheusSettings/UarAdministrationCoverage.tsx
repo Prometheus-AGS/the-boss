@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 
 import { Badge } from '@cherrystudio/ui'
 import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/components/SettingsPrimitives'
-import { getSettingDomId } from '@renderer/pages/settings/settingsSearch/types'
 import type { UarAdministrationSnapshot } from '@shared/types/prometheusIntegration'
 
 type SurfaceProjection = UarAdministrationSnapshot['surfaces'][number]
@@ -62,7 +61,7 @@ export function CapabilitySurface({ surface }: { surface: SurfaceProjection }) {
   const { t } = useTranslation()
   const adapterFailures = surface.methods.filter((method) => method.adapter === 'unavailable').length
   return (
-    <SettingGroup id={getSettingDomId('/settings/uar', surface.id)} className="min-w-0 scroll-mt-6">
+    <SettingGroup className="min-w-0 scroll-mt-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <SettingTitle>{navText(t, `surface.${surface.id}`)}</SettingTitle>

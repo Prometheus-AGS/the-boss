@@ -75,7 +75,7 @@ describe('edition packaging', () => {
     expect(script).toContain(`--${arch}`)
   })
 
-  it('keeps the existing global product and update identity', () => {
+  it('keeps the Boss global product and update identity', () => {
     const config = parse(readFileSync(path.join(projectRoot, 'electron-builder.yml'), 'utf8'))
 
     expect({
@@ -87,10 +87,10 @@ describe('edition packaging', () => {
       publish: config.publish,
       windowsArtifactName: config.win.artifactName
     }).toEqual({
-      appId: 'com.kangfenmao.CherryStudio',
+      appId: 'tools.know-me.the-boss',
       edition: GLOBAL_EDITION,
       nsisGuid: '41a4ccd8-bcc0-5710-9eee-0e164da68057',
-      productName: 'Cherry Studio',
+      productName: 'The Boss',
       protocol: 'cherrystudio',
       publish: expect.objectContaining({ provider: 'generic', url: 'https://releases.cherry-ai.com' }),
       windowsArtifactName: '${productName}-${version}-${arch}-setup.${ext}'
@@ -104,7 +104,7 @@ describe('edition packaging', () => {
 
     expect(config).toEqual({
       extends: './electron-builder.yml',
-      appId: 'com.cherryai.cherrystudio.cn',
+      appId: 'tools.know-me.the-boss.cn',
       extraMetadata: {
         cherryEdition: CHINA_EDITION
       },
@@ -122,8 +122,8 @@ describe('edition packaging', () => {
     })
     const chinaPackageMetadata = { ...packageMetadata, ...config.extraMetadata }
 
-    expect(packageMetadata.productName ?? packageMetadata.name).toBe('CherryStudio')
-    expect(chinaPackageMetadata.productName ?? chinaPackageMetadata.name).toBe('CherryStudio')
+    expect(packageMetadata.productName ?? packageMetadata.name).toBe('TheBoss')
+    expect(chinaPackageMetadata.productName ?? chinaPackageMetadata.name).toBe('TheBoss')
   })
 
   it.each([

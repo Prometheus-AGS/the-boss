@@ -33,23 +33,66 @@ const globbedSearchModules = import.meta.glob('../../**/*.search.ts', { eager: t
 const SCAN_ROOTS = [resolve('src/renderer/pages/settings'), resolve('src/renderer/components/chat/settings')]
 
 /** Collects literal `id="setting-…"` / `'setting-…'` strings plus `id={`setting-…-${` dynamic prefixes */
-function collectAnchorIds(root: string, literals: Set<string>, dynamicPrefixes: Set<string>) {
+function collectAnchorIds(
+  root: string,
+  literals: Set<string>,
+  dynamicPrefixes: Set<string>,
+  selectedIdRoutes: Set<string>
+) {
   for (const name of readdirSync(root)) {
     const full = resolve(root, name)
     if (statSync(full).isDirectory()) {
       if (name === '__tests__') continue
-      collectAnchorIds(full, literals, dynamicPrefixes)
+      collectAnchorIds(full, literals, dynamicPrefixes, selectedIdRoutes)
     } else if (/\.tsx?$/.test(name)) {
       const src = readFileSync(full, 'utf8')
       for (const m of src.matchAll(/['"](setting-[a-z0-9-]+)['"]/g)) literals.add(m[1])
       for (const m of src.matchAll(/id=\{`(setting-[a-z0-9-]+)-\$\{/g)) dynamicPrefixes.add(m[1])
+      const route = src.match(/const ROUTE = ['"](\/settings\/[a-z0-9-]+)['"]/)?.[1]
+      if (route) {
+        for (const m of src.matchAll(/id=\{domId\(['"]([a-z0-9-]+)['"]\)\}/g)) {
+          literals.add(getSettingDomId(route, m[1]))
+        }
+      }
+      for (const m of src.matchAll(
+        /id=\{getSettingDomId\(['"](\/settings\/[a-z0-9-]+)['"], ['"]([a-z0-9-]+)['"]\)\}/g
+      )) {
+        literals.add(getSettingDomId(m[1], m[2]))
+      }
+      for (const m of src.matchAll(/id=\{getSettingDomId\(['"](\/settings\/[a-z0-9-]+)['"], selectedId\)\}/g)) {
+        selectedIdRoutes.add(m[1])
+      }
     }
   }
 }
 
 const literalAnchorIds = new Set<string>()
 const dynamicAnchorPrefixes = new Set<string>()
-for (const root of SCAN_ROOTS) collectAnchorIds(root, literalAnchorIds, dynamicAnchorPrefixes)
+const selectedIdRoutes = new Set<string>()
+for (const root of SCAN_ROOTS) collectAnchorIds(root, literalAnchorIds, dynamicAnchorPrefixes, selectedIdRoutes)
+
+// Searchable panels advertised by pinned UAR 1.2.3 or added by the Boss workspace.
+const UAR_SELECTABLE_PANELS = new Set([
+  'overview',
+  'instances',
+  'providers-models',
+  'runtime-settings',
+  'agents',
+  'collaboration-catalog',
+  'teams',
+  'durable-agent-instances',
+  'local-scoped-observers',
+  'compiler',
+  'skills',
+  'presentations',
+  'runs',
+  'knowledge',
+  'tools',
+  'security',
+  'protocols',
+  'diagnostics',
+  'legacy-api'
+])
 
 const anchorExists = (domId: string) =>
   literalAnchorIds.has(domId) || [...dynamicAnchorPrefixes].some((prefix) => domId.startsWith(`${prefix}-`))
@@ -109,7 +152,12 @@ describe('settings search index', () => {
     for (const section of settingsSearchSections) {
       for (const entry of section.entries) {
         const domId = getSettingDomId(entry.route ?? section.route, entry.anchorId)
-        expect(anchorExists(domId), `no JSX anchor found for ${domId}`).toBe(true)
+        const dynamicPanelAnchor =
+          selectedIdRoutes.has('/settings/uar') &&
+          (entry.route ?? section.route) === '/settings/uar' &&
+          entry.panel === entry.anchorId &&
+          UAR_SELECTABLE_PANELS.has(entry.anchorId)
+        expect(anchorExists(domId) || dynamicPanelAnchor, `no JSX anchor found for ${domId}`).toBe(true)
       }
     }
   })

@@ -18,7 +18,9 @@
 
 - [x] 3.1 Set Boss version 2.2.41 and update live release metadata while leaving historical 2.2.40 records unchanged; verify package, targets, and source descriptors agree.
 - [x] 3.2 Produce and commit the refreshed integration payload through the existing workflow; verify its immutable records and public images identify the frozen source revisions and three native UAR payloads.
-- [ ] 3.3 At the completed source boundary, run the applicable local Boss integration, policy, lint, docs, and packaging gates once; inspect the results and repair observed failures before publication.
+- [x] 3.3 At the completed source boundary, run the applicable local Boss integration, policy, lint, docs, and packaging gates once; inspect the results and repair observed failures before publication.
+
+  `pnpm build:check` passed format, docs, skills, migration, lint, type, and i18n checks before the broad suite reported 8 failed assertions and two failed imports across five files (39,201 tests passed). The observed failures were repaired; rerunning only those five failed files passed 75 tests. `pnpm typecheck:node`, `pnpm lint`, and `pnpm format:check` passed after the corrections. The broad suite was not repeated; native installer/package validation remains in 4.1.
 
 ## 4. Native distribution and landing acceptance
 

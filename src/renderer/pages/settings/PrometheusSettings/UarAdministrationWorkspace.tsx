@@ -263,7 +263,7 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
             </div>
           ))}
         </nav>
-        <section className="min-w-0" aria-live="polite">
+        <section id={getSettingDomId('/settings/uar', selectedId)} className="min-w-0 scroll-mt-6" aria-live="polite">
           {selectedId === 'overview' ? (
             <>
               {overview}
@@ -297,7 +297,7 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
           ) : selectedId === 'approvals' ? (
             <UarApprovalLifecyclePanel />
           ) : ['lifecycle', 'teams', 'durable-agent-instances', 'local-scoped-observers', 'connectors', 'feedback-governance', 'representation'].includes(selectedId) ? (
-            <div id={getSettingDomId('/settings/uar', selectedId)} className="scroll-mt-6">
+            <div className="scroll-mt-6">
               <SettingGroup className="mb-4">
                 <SettingTitle>{navText(t, 'durable.workspaceTitle')}</SettingTitle>
                 <SettingDescription>{navText(t, 'durable.workspaceDescription')}</SettingDescription>
