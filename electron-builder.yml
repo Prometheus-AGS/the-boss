@@ -231,6 +231,7 @@ releaseInfo:
     - Incorporate compatible Cherry Studio upstream changes and retain the current mini skill pack.
     - Preserve The Boss's managed tools, DSH and UAR integrations, scoped memory, and approval behavior.
     - Require Developer ID signing and notarization for both Mac installers.
+    - UAR 1.3.0 product acceptance remains pending; installed Boss use is part of its verification.
 
     <!--LANG:zh-CN-->
     The Boss 2.2.42 - 三个平台的 UAR 1.3.0 更新
@@ -239,5 +240,6 @@ releaseInfo:
     - 合入兼容的 Cherry Studio 上游改动，并保留当前迷你技能包。
     - 保留 The Boss 的托管工具、DSH 和 UAR 集成、限定范围的记忆及审批行为。
     - 两个 Mac 发行安装包均须经过 Developer ID 签名与公证。
+    - UAR 1.3.0 的产品验收尚未完成；安装后的 The Boss 使用将作为其验证的一部分。
 
     <!--LANG:END-->
