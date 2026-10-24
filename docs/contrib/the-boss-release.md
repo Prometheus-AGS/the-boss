@@ -32,7 +32,7 @@ version and customer profile. `release_version` must match `package.json`, and a
 version already associated with another source or profile is rejected. The
 `non-uar` profile publishes Windows x64/ARM64 and macOS arm64/x64 with
 `THE_BOSS_UAR_ENABLED=0`; it remains the emergency path when UAR sidecar payloads
-are unavailable. The 2.2.41 dispatch defaults to `uar-enabled`; selecting the
+are unavailable. The 2.2.42 dispatch defaults to `uar-enabled`; selecting the
 emergency profile is explicit.
 
 For a UAR customer release, dispatch the workflow with `release_profile` set to
