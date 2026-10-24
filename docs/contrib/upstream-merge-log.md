@@ -11,6 +11,15 @@ What each merge actually hit. Rules belong in [the playbook](./upstream-merges.m
 this page is history and carry-over. Newest entry first. The `upstream-merge` skill
 appends here as its last step.
 
+## 2026-10-24 — upstream v2.1.7 (`4558f53c96`)
+
+- **Taken:** 22 upstream commits from `909214f68d` through `4558f53c96` into the Boss 2.2.41 source.
+- **Conflict:** `src/shared/data/preference/preferenceSchemas.ts` — regenerated from the auto-merged target-key definitions, retaining both Boss integration preferences and upstream's `chat.message.keep_intermediate_text` preference. Timestamp-only generator changes in the other three outputs were discarded.
+- **Rebranded:** no new Cherry product or assistant identity was introduced by this upstream delta.
+- **Retained:** Boss branding, UAR lifecycle integration, mini gitlink, release workflow, and the existing Streamdown patch hunk. Upstream's additional Streamdown patch hunk and new code-highlighting dependencies were adopted; its retired `@streamdown/code` patch was removed with the upstream implementation.
+- **Gate:** static merge and fork-preservation review completed; full lint, integration, and release gates remain at the completed Boss release boundary.
+- **Lessons:** none.
+
 ## 2026-10-22 — upstream v2.1.7 (`909214f68d`)
 
 - **Taken:** 7 upstream commits from `41c240712e` through `909214f68d`, on top of the committed October 22 Boss integration branch.
