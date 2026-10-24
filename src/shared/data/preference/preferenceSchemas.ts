@@ -202,6 +202,8 @@ export interface PreferenceSchemas {
     'chat.message.font': string
     // redux/settings/fontSize
     'chat.message.font_size': number
+    // target-key-definitions/complex/complex
+    'chat.message.keep_intermediate_text': boolean
     // redux/settings/mathEnableSingleDollar
     'chat.message.math.single_dollar': boolean
     // redux/settings/foldDisplayMode
@@ -719,6 +721,7 @@ export const DefaultPreferences: PreferenceSchemas = {
     'chat.message.confirm_regenerate': true,
     'chat.message.font': 'system',
     'chat.message.font_size': 14,
+    'chat.message.keep_intermediate_text': false,
     'chat.message.math.single_dollar': true,
     'chat.message.multi_model.fold_display_mode': 'expanded',
     'chat.message.multi_model.grid_columns': 2,
@@ -941,7 +944,7 @@ export const DefaultPreferences: PreferenceSchemas = {
 
 /**
  * 生成统计:
- * - 总配置项: 297
+ * - 总配置项: 298
  * - electronStore项: 2
  * - redux项: 173
  * - localStorage项: 0
