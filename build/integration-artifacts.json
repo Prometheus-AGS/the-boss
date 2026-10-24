@@ -28,11 +28,11 @@
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "c4a656251b643bd83c8f1407286480dbfac76708",
+      "revision": "774469746fee4de99be41dc1cd231857067e4487",
       "platformRevisions": {
-        "darwin-arm64": "c4a656251b643bd83c8f1407286480dbfac76708",
-        "darwin-x64": "c4a656251b643bd83c8f1407286480dbfac76708",
-        "win32-x64": "c4a656251b643bd83c8f1407286480dbfac76708"
+        "darwin-arm64": "774469746fee4de99be41dc1cd231857067e4487",
+        "darwin-x64": "774469746fee4de99be41dc1cd231857067e4487",
+        "win32-x64": "774469746fee4de99be41dc1cd231857067e4487"
       }
     },
     "surreal-memory": {
@@ -72,7 +72,7 @@
             "compass"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/compass-darwin-arm64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/compass-darwin-arm64"
         },
         "darwin-x64": {
           "source": {
@@ -85,7 +85,7 @@
             "compass"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/compass-darwin-x64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/compass-darwin-x64"
         },
         "win32-x64": {
           "source": {
@@ -98,7 +98,7 @@
             "compass.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/compass-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/compass-win32-x64.exe"
         }
       }
     },
@@ -117,7 +117,7 @@
             "rust-mcp-filesystem"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/rust-mcp-filesystem-darwin-arm64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/rust-mcp-filesystem-darwin-arm64"
         },
         "darwin-x64": {
           "source": {
@@ -130,7 +130,7 @@
             "rust-mcp-filesystem"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/rust-mcp-filesystem-darwin-x64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/rust-mcp-filesystem-darwin-x64"
         },
         "win32-x64": {
           "source": {
@@ -143,7 +143,7 @@
             "rust-mcp-filesystem.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/rust-mcp-filesystem-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/rust-mcp-filesystem-win32-x64.exe"
         }
       }
     },
@@ -162,7 +162,7 @@
             "prometheus"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/prometheus-darwin-arm64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/prometheus-darwin-arm64"
         },
         "darwin-x64": {
           "source": {
@@ -175,7 +175,7 @@
             "prometheus"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/prometheus-darwin-x64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/prometheus-darwin-x64"
         },
         "win32-x64": {
           "source": {
@@ -188,7 +188,7 @@
             "prometheus.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/prometheus-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/prometheus-win32-x64.exe"
         }
       }
     },
@@ -207,7 +207,7 @@
             "pk"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/pk-darwin-arm64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/pk-darwin-arm64"
         },
         "darwin-x64": {
           "source": {
@@ -220,7 +220,7 @@
             "pk"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/pk-darwin-x64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/pk-darwin-x64"
         },
         "win32-x64": {
           "source": {
@@ -233,22 +233,22 @@
             "pk.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/pk-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/pk-win32-x64.exe"
         }
       }
     },
     {
       "name": "uar-sidecar",
-      "version": "1.2.3",
+      "version": "1.3.0",
       "packages": {
         "darwin-arm64": {
-          "source": "c4a656251b643bd83c8f1407286480dbfac76708",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.2.3-boss-2.2.41/uar-sidecar-darwin-arm64.tar.gz",
-          "sha256": "c83e75ed07c666fdfc1cdac266877dedf7abeb6da3bb33726456932d829cc740",
+          "source": "774469746fee4de99be41dc1cd231857067e4487",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-arm64-v1.3.0-boss-2.2.42/uar-sidecar-darwin-arm64.tar.gz",
+          "sha256": "89f1babe0b82784f77fceee4fd4a57d2ca2a560f5c21e7db40289ac0f0dfb1e5",
           "archive": "tar.gz",
           "binaries": [
-            "libcrc_fast-c9544bfaf069c5bc.dylib",
-            "libsevenz_rust2-bcd9d32571c57b36.dylib",
+            "libcrc_fast-2e9be7cd01a24969.dylib",
+            "libsevenz_rust2-65242750d7b5fbc3.dylib",
             "LICENSE",
             "policies/default.cedar",
             "policies/skill-mutation.cedar",
@@ -264,11 +264,13 @@
           ]
         },
         "darwin-x64": {
-          "source": "c4a656251b643bd83c8f1407286480dbfac76708",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.2.3-boss-2.2.41/uar-sidecar-darwin-x64.tar.gz",
-          "sha256": "3e45db13dd84a9f627fe0190dd601787ed68aef028bae66fb0b73fa78236ae55",
+          "source": "774469746fee4de99be41dc1cd231857067e4487",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.3.0-boss-2.2.42/uar-sidecar-darwin-x64.tar.gz",
+          "sha256": "cf44d51bc2b9935acaa1852eaabf42582bdbaf8e5afc668769a6ac98da15760c",
           "archive": "tar.gz",
           "binaries": [
+            "libcrc_fast-6ebcae43e7a1a705.dylib",
+            "libsevenz_rust2-165dbc65b3900a54.dylib",
             "LICENSE",
             "policies/default.cedar",
             "policies/skill-mutation.cedar",
@@ -284,17 +286,17 @@
           ]
         },
         "win32-x64": {
-          "source": "c4a656251b643bd83c8f1407286480dbfac76708",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.2.3-boss-2.2.41/uar-sidecar-win32-x64.tar.gz",
-          "sha256": "a98c383afd8e14ae3450a5c297328b17f6ba33a36532ad0df51042352dbeed26",
+          "source": "774469746fee4de99be41dc1cd231857067e4487",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.3.0-boss-2.2.42/uar-sidecar-win32-x64.tar.gz",
+          "sha256": "2f5150e92b08d61fb10f39ade9e91249e38a6c1971648418e12aea9968079462",
           "archive": "tar.gz",
           "binaries": [
-            "crc_fast-c45996daf34d96b5.dll",
+            "crc_fast-a88bb6e52d953dad.dll",
             "LICENSE",
             "policies/default.cedar",
             "policies/skill-mutation.cedar",
             "policies/tool-approval.cedar",
-            "sevenz_rust2-0296aedd6d6c479a.dll",
+            "sevenz_rust2-0b014bb90c61a71b.dll",
             "uar-models/bg-small-en-v1.5.onnx",
             "uar-models/config.json",
             "uar-models/MODEL-NOTICE.txt",
@@ -322,7 +324,7 @@
             "liter-llm"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/liter-llm-darwin-arm64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/liter-llm-darwin-arm64"
         },
         "darwin-x64": {
           "source": {
@@ -335,7 +337,7 @@
             "liter-llm"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/liter-llm-darwin-x64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/liter-llm-darwin-x64"
         },
         "win32-x64": {
           "source": {
@@ -348,7 +350,7 @@
             "liter-llm.exe"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/liter-llm-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/liter-llm-win32-x64.exe"
         }
       }
     },
@@ -1788,7 +1790,7 @@
             "uar-driver"
           ],
           "uarLifecycle": "connection-only",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/bossfang-darwin-arm64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/bossfang-darwin-arm64"
         },
         "win32-x64": {
           "source": {
@@ -3222,7 +3224,7 @@
             "uar-driver"
           ],
           "uarLifecycle": "connection-only",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/bossfang-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/bossfang-win32-x64.exe"
         },
         "darwin-x64": {
           "source": {
@@ -4656,7 +4658,7 @@
             "uar-driver"
           ],
           "uarLifecycle": "connection-only",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/bossfang-darwin-x64"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/bossfang-darwin-x64"
         }
       }
     },
@@ -4761,7 +4763,7 @@
     }
   },
   "compassSkills": {
-    "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.41-20261023-935bc3d/compass-skills.tar.gz",
+    "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.42-20261024-e0425b7/compass-skills.tar.gz",
     "sha256": "41b4cd584843e7770711e5ccc0b736124bcfc21d28f400fff5f38838784e3da9"
   }
 }

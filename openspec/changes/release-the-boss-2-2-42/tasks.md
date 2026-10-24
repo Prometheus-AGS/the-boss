@@ -9,13 +9,13 @@
 ## 2. UAR 1.3.0 desktop payload
 
 - [x] 2.1 Update Boss UAR source and version descriptors to `774469746fee4de99be41dc1cd231857067e4487` and 1.3.0; verify all selected platform pins agree.
-- [ ] 2.2 Build and package Windows x64, Mac ARM64, and Mac x64 UAR sidecars from the frozen source; verify each binary and immutable record's source, version, platform, and SHA-256.
-- [ ] 2.3 Import the three sidecar records into the integration payload and verify the UAR-enabled platform map has no stale source.
+- [x] 2.2 Build and package Windows x64, Mac ARM64, and Mac x64 UAR sidecars from the frozen source; verify each binary and immutable record's source, version, platform, and SHA-256.
+- [x] 2.3 Import the three sidecar records into the integration payload and verify the UAR-enabled platform map has no stale source.
 
 ## 3. Complete the Boss release source
 
 - [x] 3.1 Set the next Boss version to 2.2.42, update live release defaults and notes, and verify package, target, and release metadata agree while historical records stay intact.
-- [ ] 3.2 Produce and commit a refreshed integration payload with the frozen UAR and mini identities; verify native records and service image provenance.
+- [x] 3.2 Produce and commit a refreshed integration payload with the frozen UAR and mini identities; verify native records and service image provenance.
 - [ ] 3.3 At the completed source boundary, run the applicable Boss integration, policy, lint, docs, and packaging checks once; resolve observed failures and record exact results.
 
 ## 4. Native distribution and public acceptance
