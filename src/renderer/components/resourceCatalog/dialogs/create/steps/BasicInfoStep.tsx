@@ -73,6 +73,7 @@ function AgentRuntimeModelFields({
 }: ModelFieldProps) {
   const { t } = useTranslation()
   const agentType = useWatch({ control: form.control, name: 'agentType' })
+  const agentName = useWatch({ control: form.control, name: 'name' })
   const permissionModeCards = getPermissionModeCards(agentType)
 
   const handleRuntimeChange = (next: AgentType) => {
@@ -124,6 +125,7 @@ function AgentRuntimeModelFields({
               onValueChange={field.onChange}
               portalContainer={portalContainer}
               ariaLabel={t('library.config.agent.field.permission_mode.label')}
+              scopeName={agentName?.trim() || undefined}
               t={t}
             />
             <FormMessage />
