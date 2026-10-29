@@ -18,8 +18,8 @@ export const cherryCodeTheme: Theme = {
     prefix: '--cherry-code-',
     defaults: {
       background: 'transparent',
-      foreground: 'oklch(0.213 0 0)',
-      muted: 'oklch(0.556 0 0)',
+      foreground: 'oklch(0.1665 0.0124 254.2)',
+      muted: 'oklch(0.4461 0.0263 256.8)',
       selection: 'oklch(0.54 0.215 263 / 0.2)',
       keyword: 'oklch(0.49 0.242 292)',
       string: 'oklch(0.5 0.104 166)',
