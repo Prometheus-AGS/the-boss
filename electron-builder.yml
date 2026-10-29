@@ -186,6 +186,12 @@ mac:
     NSSpeechRecognitionUsageDescription: The Boss transcribes voice recordings on this device.
     NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+    NSCalendarsUsageDescription: The Boss allows local MCP servers to read and manage your calendar events.
+    NSCalendarsFullAccessUsageDescription: The Boss allows local MCP servers to read and manage your calendar events.
+    NSCalendarsWriteOnlyAccessUsageDescription: The Boss allows local MCP servers to create calendar events.
+    NSRemindersUsageDescription: The Boss allows local MCP servers to read and manage your reminders.
+    NSRemindersFullAccessUsageDescription: The Boss allows local MCP servers to read and manage your reminders.
+    NSAppleEventsUsageDescription: The Boss allows local MCP servers to control other applications using AppleScript.
   target:
     - target: dmg
     - target: zip

@@ -20,16 +20,16 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "1066ad4008f68bf0cc912573bf6496540ea93c27"
+      "revision": "8d23100d23fbe17371cc5d66cc12711707fc16e9"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "774469746fee4de99be41dc1cd231857067e4487",
+      "revision": "c212692f43227da9f42d7877d2cd3d58d73d71ef",
       "platformRevisions": {
-        "darwin-x64": "774469746fee4de99be41dc1cd231857067e4487",
-        "win32-arm64": "774469746fee4de99be41dc1cd231857067e4487",
-        "darwin-arm64": "774469746fee4de99be41dc1cd231857067e4487",
-        "win32-x64": "774469746fee4de99be41dc1cd231857067e4487"
+        "darwin-x64": "c212692f43227da9f42d7877d2cd3d58d73d71ef",
+        "win32-arm64": "c212692f43227da9f42d7877d2cd3d58d73d71ef",
+        "darwin-arm64": "c212692f43227da9f42d7877d2cd3d58d73d71ef",
+        "win32-x64": "c212692f43227da9f42d7877d2cd3d58d73d71ef"
       }
     },
     "surreal-memory": {
@@ -42,10 +42,11 @@
     },
     "bossfang": {
       "repository": "GQAdonis/librefang",
-      "revision": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85",
+      "revision": "a09747fa09ed873e2cc678d950a7ec81be2c4b31",
       "platformRevisions": {
-        "win32-x64": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85",
-        "darwin-arm64": "2ec0f66ec224ec60fe1b4aaecabbd6f735c73f85"
+        "win32-x64": "a09747fa09ed873e2cc678d950a7ec81be2c4b31",
+        "darwin-arm64": "a09747fa09ed873e2cc678d950a7ec81be2c4b31",
+        "darwin-x64": "a09747fa09ed873e2cc678d950a7ec81be2c4b31"
       }
     },
     "skill-pack": {
@@ -90,7 +91,7 @@
     "bossfang": {
       "source": "bossfang",
       "package": "librefang-cli",
-      "version": "2026.9.19+2ec0f66ec",
+      "version": "2026.10.16+a09747fa0",
       "features": "telemetry,surreal-backend,uar-driver"
     }
   },
