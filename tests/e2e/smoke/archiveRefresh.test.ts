@@ -21,10 +21,13 @@ const test = base.extend({
     const profile = testInfo.outputPath('profile')
     await mkdir(profile, { recursive: true })
     const env: NodeJS.ProcessEnv = { ...process.env, NODE_ENV: 'development', CS_DEV_PROFILE_ROOT: profile }
-    delete env.ELECTRON_RENDERER_URL
     const app = await electron.launch({
       args: ['.'],
-      env: Object.fromEntries(Object.entries(env).filter((pair): pair is [string, string] => pair[1] !== undefined)),
+      env: Object.fromEntries(
+        Object.entries(env).filter(
+          (pair): pair is [string, string] => pair[0] !== 'ELECTRON_RENDERER_URL' && pair[1] !== undefined
+        )
+      ),
       timeout: 60_000
     })
     try {
