@@ -13,7 +13,14 @@ function checkoutIntegrationSource(name, directory = path.join(root, 'build', 'i
   git('init')
   if (process.platform === 'win32') git('config', '--local', 'core.longpaths', 'true')
   const omitKbd = name === 'uar' && process.platform === 'win32'
-  if (git('status', '--porcelain', '--untracked-files=all', ...(omitKbd ? ['--', '.', ':(exclude).kbd-orchestrator'] : [])))
+  if (
+    git(
+      'status',
+      '--porcelain',
+      '--untracked-files=all',
+      ...(omitKbd ? ['--', '.', ':(exclude).kbd-orchestrator'] : [])
+    )
+  )
     throw new Error(`Integration source checkout has local changes: ${directory}`)
   try {
     git('rev-parse', '--verify', '--quiet', `${pin.revision}^{commit}`)
@@ -21,10 +28,11 @@ function checkoutIntegrationSource(name, directory = path.join(root, 'build', 'i
     git('fetch', '--depth=1', `https://github.com/${pin.repository}.git`, pin.revision)
   }
   if (omitKbd) {
-    const entries = git('ls-tree', '-z', pin.revision)
-      .split('\0')
-      .filter((entry) => entry && !entry.endsWith('\t.kbd-orchestrator'))
-      .join('\0') + '\0'
+    const entries =
+      git('ls-tree', '-z', pin.revision)
+        .split('\0')
+        .filter((entry) => entry && !entry.endsWith('\t.kbd-orchestrator'))
+        .join('\0') + '\0'
     const tree = execFileSync('git', ['mktree', '-z'], { cwd: directory, input: entries, encoding: 'utf8' }).trim()
     git('read-tree', '--reset', '-u', tree)
     git('update-ref', '--no-deref', 'HEAD', pin.revision)
