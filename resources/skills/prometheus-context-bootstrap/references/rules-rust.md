@@ -13,10 +13,11 @@ pins and protocol versions remain authoritative.
 
 - Batch related implementation and use static reasoning or rust-analyzer until a
   meaningful production path is complete.
-- Use a narrow package compiler check earlier only when required to unblock work.
-- At a completed change boundary, run the smallest integration target that enters
-  through a public API, binary, protocol, process, filesystem, database, or network
-  boundary with real collaborators.
+- Use a narrow package compiler check earlier only when required to unblock work
+  (never as a boundary under a selected VLBV phase; see the last section).
+- At a completed change boundary outside a selected VLBV phase, run the smallest
+  integration target that enters through a public API, binary, protocol, process,
+  filesystem, database, or network boundary with real collaborators.
 - Unit, module-local, mock-only, and filtered-function tests are not completion
   evidence. Do not escalate a passing targeted integration without a scope reason.
 - Serialize Cargo commands within a workspace and target directory. Account for an
@@ -27,4 +28,8 @@ pins and protocol versions remain authoritative.
 - After failure, read all diagnostics, batch fixes, and rerun only the smallest
   integration gate that confirms the completed behavior.
 - Report commands, results, intentional deferrals, and any remaining integration gate.
+
+## Selected phase method
+
+Before this stack work, recover the active phase `method-context.md` and adopted contract from signed canonical KBD status/decisions. For selected VLBV, complete the agreed whole value phase before generated-code builds, tests, imports, lint/typecheck or verification probes; a stack-specific compiler/check example is not permission. Surface host-policy conflicts before dependent action. Retain supersession, evidence/candidate freshness, consumed budgets and unresolved effects; reconcile uncertain effects before retry. This path rule is instruction-only, not universal interception.
 <!-- prometheus-mini-context:end -->

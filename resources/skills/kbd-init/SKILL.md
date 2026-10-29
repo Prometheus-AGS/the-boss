@@ -253,3 +253,11 @@ Use the project name from the argument or the discovered project name. Emit to p
 Run `/kbd-status` to confirm KBD is correctly initialized, then start the
 first phase — or run `/kbd-assess` directly if a phase is already defined in
 `activePhase` (readers also accept the legacy `active_phase` alias).
+
+## Selected-method recovery and authority
+
+Before dependent work, run `node <pack-root>/scripts/kbd-method-context.mjs --project <project-root> --phase <canonical-phase-id> --write` (or read the phase's current `method-context.md` when a recovery surface cannot invoke Node). It resolves the latest non-superseded canonical `KBD-METHOD` decision and the adopted contract; preserve the same references in role inputs, dispatch and handoff read order. See [method-context](../kbd-process-orchestrator/references/method-context.md). A missing or changed method, contract, calibration or supersession is explicit; a prior command, memory or tool inventory is not fresh authority.
+
+For a selected VLBV phase, define acceptance and scenarios before generation and complete the entire agreed value phase before generated-code verification. Executable authoring follows governing host policy. Task, hour, commit and reviewer requests, compiler problems and renamed slices create no new boundary; an independently shipping hourly iteration (constitution A-9) is not the VLBV whole-phase gate. Surface host/skill conflicts before dependent action; do not rewrite operator-owned policy or infer early-check permission. Preserve original evidence, source/build/configuration/fixture/candidate freshness, consumed budgets and unresolved effects, and reconcile uncertain effects before retry. Recovered instructions are instruction-only unless a named runtime or host boundary enforces them; no release or automatic-successor authority follows.
+
+At this stage also discover the project's governing host instructions and the actual host capability (instruction-only, observed, enforced within a named boundary, or unsupported), and report an existing policy conflict, such as a compiler exception under VLBV, before dependent execution.

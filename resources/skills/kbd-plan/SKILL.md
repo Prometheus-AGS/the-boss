@@ -180,3 +180,15 @@ before writing the identity-bound plan handoff (`ctx.identity` or
 `KBD_HANDOFF_IDENTITY_JSON`). See
 `skills/kbd-process-orchestrator/references/templates/adopted-contract.template.md`.
 Plans without an adopted contract cannot pass the Plan→Execute readiness gate.
+
+Map adopted discovery candidates (`value-scenario-discovery`) into the existing
+finite `scenarioMatrix` and bind any acceptance-bearing calibration reference
+through the contract adoption above before generation. Definition is distinct
+from executable authoring (`bdd-cucumber-js author-only`) and from the single
+boundary run (`value-scenario-verify`); neither is scheduled as a per-task test.
+
+## Selected-method recovery and authority
+
+Before dependent work, run `node <pack-root>/scripts/kbd-method-context.mjs --project <project-root> --phase <canonical-phase-id> --write` (or read the phase's current `method-context.md` when a recovery surface cannot invoke Node). It resolves the latest non-superseded canonical `KBD-METHOD` decision and the adopted contract; preserve the same references in role inputs, dispatch and handoff read order. See [method-context](../kbd-process-orchestrator/references/method-context.md). A missing or changed method, contract, calibration or supersession is explicit; a prior command, memory or tool inventory is not fresh authority.
+
+For a selected VLBV phase, define acceptance and scenarios before generation and complete the entire agreed value phase before generated-code verification. Executable authoring follows governing host policy. Task, hour, commit and reviewer requests, compiler problems and renamed slices create no new boundary; an independently shipping hourly iteration (constitution A-9) is not the VLBV whole-phase gate. Surface host/skill conflicts before dependent action; do not rewrite operator-owned policy or infer early-check permission. Preserve original evidence, source/build/configuration/fixture/candidate freshness, consumed budgets and unresolved effects, and reconcile uncertain effects before retry. Recovered instructions are instruction-only unless a named runtime or host boundary enforces them; no release or automatic-successor authority follows.
