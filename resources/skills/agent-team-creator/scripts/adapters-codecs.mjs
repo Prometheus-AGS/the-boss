@@ -1,4 +1,5 @@
 import { uiRoleInstructions } from './ui-bindings.mjs';
+import { rolePhasePolicyPrompt } from './phase-policy.mjs';
 export const json = (value) => `${JSON.stringify(value, null, 2)}\n`;
 export const object = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 /** Arrays replace; objects merge recursively; own keys (including __proto__) survive. */
@@ -58,5 +59,6 @@ export function prompt(team, role) {
         `Owns: ${JSON.stringify(role.owns)}\nInputs: ${JSON.stringify(role.inputs)}\n` +
         `Outputs: ${JSON.stringify(role.outputs)}\nDependencies: ${JSON.stringify(role.dependsOn)}\n` +
         `Requested skills: ${JSON.stringify(role.skills)}\n` +
-        'Ownership and skill names are coordination instructions; native permissions and installed skills remain authoritative.' + uiRoleInstructions(role);
+        'Ownership and skill names are coordination instructions; native permissions and installed skills remain authoritative.\n' +
+        rolePhasePolicyPrompt(role) + uiRoleInstructions(role);
 }

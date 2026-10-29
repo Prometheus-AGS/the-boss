@@ -40,6 +40,18 @@ The active event journal is bounded and older events are kept as checksummed gzi
 
 A clock tick stops new scope admission, never certifies unfinished code. Finish the committed increment with an honest overrun; a hard budget or operator stop takes precedence. If the harness cannot continue autonomously, leave durable state and a resume instruction; never claim background execution.
 
+When VLBV is selected, cadence increments must be prospectively agreed complete
+value phases under the current adopted contract. Recover the method-context
+(`scripts/kbd-method-context.mjs`) and the latest authorized supersession before
+choosing the next action; preserve original evidence, candidate freshness,
+consumed budgets and unresolved effects. A task, hour, commit, compiler problem or
+reviewer request never authorizes generated-code verification of an incomplete
+phase, and an hourly build-and-run boundary never becomes the VLBV whole-phase
+gate. Resolve governing-policy conflicts before dependent action without
+rewriting owner rules. Publication intervals do not certify implementation or
+acceptance, grant release authority or create a successor. These instructions do
+not claim universal tool interception.
+
 ## Events and reports
 
 Use `hooks scaffold`, `hooks add`, `hooks list`, `hooks enable`, `hooks disable`, `hooks remove` and deliberate `hooks retry`. Read [JavaScript hooks](references/hooks.md) before registration. Scripts have the user's privileges; registration is explicit trust, not a sandbox. Never send mail or other external effects without the configured authorization.

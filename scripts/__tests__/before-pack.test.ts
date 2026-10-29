@@ -4,7 +4,7 @@
  * stopped materialising both CPU architectures for the host OS — the packaging bug that
  * shipped a macOS x64 build without `@img/sharp-darwin-x64`.
  */
-import { readFileSync } from 'node:fs'
+import fs, { readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { Arch } from 'electron-builder'
@@ -20,7 +20,6 @@ import {
 } from '../packaging/before-pack'
 
 const hostPlatform = process.platform === 'darwin' ? 'darwin' : process.platform === 'win32' ? 'win32' : 'linux'
-const foreignPlatform = hostPlatform === 'darwin' ? 'win32' : 'darwin'
 
 describe('prepareSystemSpeechHelper', () => {
   it('ships the x64 helper once and removes it before an ARM64 packaging pass', () => {
@@ -67,11 +66,19 @@ describe('assertPrebuiltPackages', () => {
   })
 
   it('reports the missing packages by name', () => {
-    // Only the host OS's binaries are installed (supportedArchitectures.os is `current`),
-    // so another platform stands in for an install that skipped an architecture.
-    expect(() => assertPrebuiltPackages(foreignPlatform, 'x64')).toThrow(
-      /Missing prebuilt packages for .+-x64: .*@img\/sharp-/
-    )
+    const packageName = `@img/sharp-${hostPlatform}-x64`
+    const packagePath = path.join(process.cwd(), 'node_modules', packageName)
+    const existsSync = fs.existsSync
+    const spy = vi
+      .spyOn(fs, 'existsSync')
+      .mockImplementation((filePath) => (filePath === packagePath ? false : existsSync(filePath)))
+    try {
+      expect(() => assertPrebuiltPackages(hostPlatform, 'x64')).toThrow(
+        `Missing prebuilt packages for ${hostPlatform}-x64: ${packageName}`
+      )
+    } finally {
+      spy.mockRestore()
+    }
   })
 })
 

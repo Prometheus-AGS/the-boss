@@ -14,6 +14,10 @@ on:
         description: Optional exact UAR revision assertion; must match the source pin
         required: false
         type: string
+      native_cache_key:
+        description: Optional exact native cache key for a single selected platform
+        required: false
+        type: string
       platforms:
         description: Ready Mac/Windows platforms from the selected native run
         required: true
@@ -82,7 +86,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             build/integration-source/**/target
-          key: native-${{ matrix.platform }}-${{ hashFiles('build/integration-sources.json') }}
+          key: ${{ inputs.native_cache_key || format('native-{0}-{1}', matrix.platform, hashFiles('build/integration-sources.json')) }}
       - name: Require exact completed native build cache
         if: steps.native-cache.outputs.cache-hit != 'true'
         run: exit 1

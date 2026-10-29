@@ -5,6 +5,7 @@ import type { HandoffCanonicalIdentity, HandoffFileIdentity, HandoffMemoryIdenti
 import { assertNoCredentials } from './models-http.mjs';
 import { observeCanonicalTask } from './state-kbd.mjs';
 import { object, strings, text, validateState } from './state-validation.mjs';
+import { phasePolicyReferences } from './phase-policy.mjs';
 
 function canonical(value: Json): string {
   if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
@@ -60,7 +61,11 @@ export function captureProvenance(state: TeamState, task: TeamTask, cwd: string,
     throw new Error('Unsupported handoff provenance selection field');
   }
   assertNoCredentials(selected);
-  const files = (key: string): HandoffFileIdentity[] => strings(selected[key] ?? [], key).map(path => fileIdentity(path, cwd));
+  const files = (key: string): HandoffFileIdentity[] => {
+    const paths = strings(selected[key] ?? [], key);
+    if (key === 'sourceFiles') paths.push(...phasePolicyReferences(cwd, task.kbd?.phaseId));
+    return [...new Set(paths)].map(path => fileIdentity(path, cwd));
+  };
   const reader = selected.kbdCli === undefined ? undefined : text(selected.kbdCli, 'kbdCli');
   const directory = selected.kbdPath === undefined ? cwd : text(selected.kbdPath, 'kbdPath');
   const result: HandoffProvenance = { schemaVersion: 1, capturedAt: new Date().toISOString(),
@@ -75,6 +80,7 @@ export function captureProvenance(state: TeamState, task: TeamTask, cwd: string,
 type Comparison = 'matches' | 'changed' | 'missing' | 'unobserved';
 function comparison(captured: { observation: string }, current: { observation: string }): Comparison {
   if (current.observation === 'missing') return 'missing';
+  if (captured.observation === 'missing' && current.observation === 'observed') return 'changed';
   if (captured.observation !== 'observed' || current.observation !== 'observed') return 'unobserved';
   return digest(captured) === digest(current) ? 'matches' : 'changed';
 }
@@ -115,5 +121,5 @@ export function inspectHandoff(state: TeamState, id: string, cwd: string, input:
 export function provenancePrompt(provenance: HandoffProvenance): string {
   return 'Selected provenance (identities and hashes only; inspect current references before accepting):\n' +
     JSON.stringify(provenance, null, 2) +
-    '\nCanonical observation, Karpathy references and memory receipts do not certify execution or transfer authority.';
+    '\nCanonical observation, Karpathy references and memory receipts do not certify execution or transfer authority. Method-context and contract source identities must be re-resolved against current canonical decisions; changed/missing references do not grant a retry or reset consumed budgets.';
 }

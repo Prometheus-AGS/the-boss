@@ -186,6 +186,12 @@ mac:
     NSSpeechRecognitionUsageDescription: The Boss transcribes voice recordings on this device.
     NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+    NSCalendarsUsageDescription: The Boss allows local MCP servers to read and manage your calendar events.
+    NSCalendarsFullAccessUsageDescription: The Boss allows local MCP servers to read and manage your calendar events.
+    NSCalendarsWriteOnlyAccessUsageDescription: The Boss allows local MCP servers to create calendar events.
+    NSRemindersUsageDescription: The Boss allows local MCP servers to read and manage your reminders.
+    NSRemindersFullAccessUsageDescription: The Boss allows local MCP servers to read and manage your reminders.
+    NSAppleEventsUsageDescription: The Boss allows local MCP servers to control other applications using AppleScript.
   target:
     - target: dmg
     - target: zip
@@ -225,21 +231,17 @@ artifactBuildCompleted: scripts/packaging/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.42 - UAR 1.3.0 on three desktop platforms
+    The Boss 2.2.43 - updated upstream and integrations
 
-    - Update the packaged UAR sidecar to the v1.3.0 source for Windows x64, Mac ARM64, and Mac x64.
-    - Incorporate compatible Cherry Studio upstream changes and retain the current mini skill pack.
-    - Preserve The Boss's managed tools, DSH and UAR integrations, scoped memory, and approval behavior.
-    - Require Developer ID signing and notarization for both Mac installers.
-    - UAR 1.3.0 product acceptance remains pending; installed Boss use is part of its verification.
+    - Incorporate Cherry Studio upstream improvements, including QwenCloud and Desearch support.
+    - Update the packaged universal agent runtime, BossFang and mini skill pack.
+    - Include Windows x64 and Mac ARM64 and x64 installer targets.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.42 - 三个平台的 UAR 1.3.0 更新
+    The Boss 2.2.43 - 更新上游代码和集成
 
-    - 将 Windows x64、Mac ARM64 和 Mac x64 打包的 UAR 辅助程序更新至 v1.3.0 源代码。
-    - 合入兼容的 Cherry Studio 上游改动，并保留当前迷你技能包。
-    - 保留 The Boss 的托管工具、DSH 和 UAR 集成、限定范围的记忆及审批行为。
-    - 两个 Mac 发行安装包均须经过 Developer ID 签名与公证。
-    - UAR 1.3.0 的产品验收尚未完成；安装后的 The Boss 使用将作为其验证的一部分。
+    - 合入 Cherry Studio 上游改进，包括对 QwenCloud 和 Desearch 的支持。
+    - 更新打包的通用智能体运行时、BossFang 和迷你技能包。
+    - 提供 Windows x64、Mac ARM64 和 Mac x64 安装包目标。
 
     <!--LANG:END-->

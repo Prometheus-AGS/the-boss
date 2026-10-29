@@ -17,6 +17,7 @@ import {
 import { isSafeExternalUrl } from '../../utils/externalUrlSafety'
 import { exportAnnotationDocument } from './annotationExport'
 import { AnnotationSession } from './AnnotationSession'
+import { HiddenGuestFreezer } from './HiddenGuestFreezer'
 import { RemoteDebuggingMonitor } from './RemoteDebuggingMonitor'
 
 const logger = loggerService.withContext('WebviewService')
@@ -79,6 +80,7 @@ export class WebviewService extends BaseService {
   private debuggingMonitor?: RemoteDebuggingMonitor
   private debuggingRevision = 0
   private readonly debuggingTargets = new Map<string, number>()
+  private readonly hiddenGuests = new HiddenGuestFreezer((guest) => this.isGuestDebugging(guest.id))
 
   protected async onInit() {
     this.initSessionUserAgent()
@@ -109,6 +111,7 @@ export class WebviewService extends BaseService {
 
   protected async onStop() {
     this.debuggingMonitor?.stop()
+    this.hiddenGuests.dispose()
     const annotationSessions = [...this.annotationSessions.values()]
     for (const annotationSession of annotationSessions) annotationSession.dispose()
     await Promise.all(annotationSessions.map((annotationSession) => annotationSession.waitForIdle()))
@@ -337,6 +340,11 @@ export class WebviewService extends BaseService {
 
   setSpellCheckerEnabled(webviewId: number, isEnable: boolean, senderId: WindowId | null): void {
     this.findOwnedGuest(webviewId, senderId)?.session.setSpellCheckerEnabled(isEnable)
+  }
+
+  setGuestVisible(webviewId: number, visible: boolean, senderId: WindowId | null): void {
+    const guest = this.findOwnedGuest(webviewId, senderId)
+    if (guest) this.hiddenGuests.setVisible(guest, visible)
   }
 
   setOpenLinkExternal(webviewId: number, isExternal: boolean, senderId: WindowId | null): void {

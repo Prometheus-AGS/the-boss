@@ -30,6 +30,7 @@ import { isProtectedBuiltinAgentRole } from '@shared/ai/builtinAgent'
 import type { OnboardingProviderSetupStatus } from '@shared/data/preference/preferenceTypes'
 import { CHERRYAI_DEFAULT_UNIQUE_MODEL_ID, isManagedCherryProviderId } from '@shared/data/presets/cherryai'
 import type { Model, UniqueModelId } from '@shared/data/types/model'
+import { PRODUCT_NAME } from '@shared/utils/branding'
 import { LATEST_PRIVACY_POLICY_VERSION } from '@shared/utils/constants'
 import { defaultLanguage } from '@shared/utils/languages'
 import { isNonChatModel } from '@shared/utils/model'
@@ -273,7 +274,7 @@ export default function OnboardingPage(_props: OnboardingPageProps) {
             {step === 'welcome' && (
               <div className="flex h-full w-full items-center justify-center px-6 pb-20">
                 <div className="flex w-full max-w-[420px] flex-col items-center">
-                  <img src={AppLogo} alt="Cherry Studio" className="size-16 rounded-xl" />
+                  <img src={AppLogo} alt={PRODUCT_NAME} className="size-16 rounded-xl" />
                   <div className="mt-5 flex flex-col gap-2 text-center">
                     <h1 className="m-0 font-semibold text-2xl text-foreground">{t('onboarding.welcome.title')}</h1>
                     <p className="m-0 text-muted-foreground text-sm">{t('onboarding.welcome.subtitle')}</p>

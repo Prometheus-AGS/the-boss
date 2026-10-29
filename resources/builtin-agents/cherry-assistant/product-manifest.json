@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "TheBoss",
-    "version": "2.2.42",
+    "version": "2.2.43",
     "description": "The Boss — an agent studio for people who ship.",
     "homepage": "https://github.com/CherryHQ/cherry-studio"
   },
@@ -506,8 +506,8 @@
     }
   ],
   "providers": {
-    "version": "afa17e5976dcef2e",
-    "count": 66,
+    "version": "5e1a39c021b56ec0",
+    "count": 67,
     "entries": [
       {
         "id": "cherryin",
@@ -663,7 +663,11 @@
       },
       {
         "id": "dashscope",
-        "name": "Bailian"
+        "name": "Qwen AI Platform"
+      },
+      {
+        "id": "qwencloud",
+        "name": "QwenCloud"
       },
       {
         "id": "stepfun",

@@ -20,6 +20,29 @@ When the harness provides an agent team, implementation roles work first and rev
 audit, verification, and integration-checker roles remain dormant until that boundary.
 Unit, mock-only, filtered-function, and per-edit test loops do not count as proof.
 
+## Selected method and phase authority
+
+The managed resident and path-scoped templates carry compact references to the
+active phase's `method-context.md` and adopted contract, not another authority
+ledger. Signed canonical KBD status/decisions remain authoritative; the waypoint
+is their derived position view. Session-start and pre-compaction hooks restore
+pointers and a labelled derived snapshot (`lib/hooks/method-reanchor.mjs`); a
+missing or stale index is reported explicitly. The index is produced by
+`scripts/kbd-method-context.mjs` in the mini pack; a bootstrapped project without
+the pack reads the existing index and does not invent one.
+
+Recovery preserves the latest authorized supersession, original evidence,
+candidate freshness, consumed budgets and unresolved effects, and reconciles
+uncertain effects before retry. For a selected VLBV phase the templates retain the
+complete agreed value-phase boundary and keep execution authority separate: no
+task, hour, commit, reviewer or compiler boundary, and no stack-rule compiler or
+completed-change example, opens generated-code verification. Host compiler or
+skill-policy conflicts are surfaced before dependent action without changing
+operator-owned prose outside the marked regions. Template guidance is
+instruction-only unless a named host boundary enforces it; no global context
+rewrite, universal interception, release or automatic-successor authority is
+implied.
+
 ## Run from the mini pack
 
 From a standalone mini checkout:
