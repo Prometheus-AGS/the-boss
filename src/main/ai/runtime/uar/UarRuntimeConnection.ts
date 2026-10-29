@@ -27,8 +27,8 @@ import type { UarCatalogLink } from '@shared/data/api/schemas/agents'
 import type { AgentSessionMessageEntity } from '@shared/data/api/schemas/agentSessionMessages'
 import type { AgentSessionEntity } from '@shared/data/api/schemas/agentSessions'
 import type { UarSessionPlacement } from '@shared/types/uarServiceInstance'
+import { AsyncEventQueue } from '@shared/utils/async'
 
-import { AsyncEventQueue } from '../AsyncEventQueue'
 import type {
   AgentRuntimeConnectInput,
   AgentRuntimeConnection,

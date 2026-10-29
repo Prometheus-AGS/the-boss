@@ -41,9 +41,9 @@ import { type DshBuiltinToolDescriptor, getDshRuntimeBuiltinTools } from '@share
 import type { AgentPermissionMode } from '@shared/data/api/schemas/agents'
 import type { UniqueModelId } from '@shared/data/types/model'
 import type { ReasoningEffortOption } from '@shared/types/aiSdk'
+import { AsyncEventQueue } from '@shared/utils/async'
 
 import { ApiGatewayNotRunningError } from '../agentApiGateway'
-import { AsyncEventQueue } from '../AsyncEventQueue'
 import type {
   AgentRuntimeConnectInput,
   AgentRuntimeConnection,
