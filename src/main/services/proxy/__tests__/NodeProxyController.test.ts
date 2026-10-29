@@ -223,12 +223,7 @@ describe('NodeProxyController', () => {
   })
 
   it('lets a bare * bypass hostname and IP-literal targets alike (NO_PROXY=* parity)', async () => {
-    // 127.0.0.2 is an IP literal the controller's appended defaults do not name — only a
-    // working match-all rule keeps it off the proxy.
-    const aliasedServer = createServer((_request, response) => {
-      response.setHeader('content-type', 'application/json')
-      response.end(JSON.stringify({ source: 'local' }))
-    })
+    // The mapped IP literal is not named by the controller's appended loopback defaults.
     const localServer = createServer((_request, response) => {
       response.setHeader('content-type', 'application/json')
       response.end(JSON.stringify({ source: 'local' }))
@@ -242,17 +237,6 @@ describe('NodeProxyController', () => {
     proxyServer.on('connect', (request, clientSocket) => {
       tunnels.push(request.url ?? '')
       clientSocket.end('HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\n\r\n')
-    })
-    const aliasedPort = await new Promise<number>((resolve, reject) => {
-      aliasedServer.once('error', reject)
-      aliasedServer.listen(0, '127.0.0.2', () => {
-        const address = aliasedServer.address()
-        if (!address || typeof address === 'string') {
-          reject(new Error('Missing aliased server port'))
-          return
-        }
-        resolve(address.port)
-      })
     })
     const localPort = await listen(localServer)
     const proxyPort = await listen(proxyServer)
@@ -282,7 +266,7 @@ describe('NodeProxyController', () => {
       })
       for (const [hostname, port] of [
         ['localhost', localPort],
-        ['127.0.0.2', aliasedPort]
+        ['[::ffff:127.0.0.1]', localPort]
       ] as const) {
         const response = await fetch(`http://${hostname}:${port}/models`, { signal: AbortSignal.timeout(5000) })
         expect(await response.json()).toEqual({ source: 'local' })
@@ -296,7 +280,6 @@ describe('NodeProxyController', () => {
         if (value === undefined) delete process.env[key]
         else process.env[key] = value
       }
-      aliasedServer.close()
       await Promise.all([close(localServer), close(proxyServer)])
     }
   })

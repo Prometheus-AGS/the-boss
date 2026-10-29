@@ -704,8 +704,8 @@ describe('main web search API providers', () => {
       headers: {
         accept: 'application/json',
         authorization: 'desearch-key',
-        'http-referer': 'https://cherry-ai.com',
-        'x-title': 'Cherry Studio'
+        'http-referer': ATTRIBUTION_URL,
+        'x-title': ATTRIBUTION_NAME
       },
       method: 'GET',
       url: 'https://api.desearch.ai/web?query=latest%20web%20research'
