@@ -24,12 +24,12 @@
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "c212692f43227da9f42d7877d2cd3d58d73d71ef",
+      "revision": "5b1e1dcde39b174735cadd105d548172a389ec55",
       "platformRevisions": {
-        "darwin-x64": "c212692f43227da9f42d7877d2cd3d58d73d71ef",
-        "win32-arm64": "c212692f43227da9f42d7877d2cd3d58d73d71ef",
-        "darwin-arm64": "c212692f43227da9f42d7877d2cd3d58d73d71ef",
-        "win32-x64": "c212692f43227da9f42d7877d2cd3d58d73d71ef"
+        "darwin-x64": "5b1e1dcde39b174735cadd105d548172a389ec55",
+        "win32-arm64": "5b1e1dcde39b174735cadd105d548172a389ec55",
+        "darwin-arm64": "5b1e1dcde39b174735cadd105d548172a389ec55",
+        "win32-x64": "5b1e1dcde39b174735cadd105d548172a389ec55"
       }
     },
     "surreal-memory": {
