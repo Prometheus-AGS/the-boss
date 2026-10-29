@@ -42,11 +42,11 @@
     },
     "bossfang": {
       "repository": "GQAdonis/librefang",
-      "revision": "a09747fa09ed873e2cc678d950a7ec81be2c4b31",
+      "revision": "29b3e56d7c8bde33330cd634af74ad4477222632",
       "platformRevisions": {
-        "win32-x64": "a09747fa09ed873e2cc678d950a7ec81be2c4b31",
-        "darwin-arm64": "a09747fa09ed873e2cc678d950a7ec81be2c4b31",
-        "darwin-x64": "a09747fa09ed873e2cc678d950a7ec81be2c4b31"
+        "win32-x64": "29b3e56d7c8bde33330cd634af74ad4477222632",
+        "darwin-arm64": "29b3e56d7c8bde33330cd634af74ad4477222632",
+        "darwin-x64": "29b3e56d7c8bde33330cd634af74ad4477222632"
       }
     },
     "skill-pack": {
@@ -91,7 +91,7 @@
     "bossfang": {
       "source": "bossfang",
       "package": "librefang-cli",
-      "version": "2026.10.16+a09747fa0",
+      "version": "2026.10.16+29b3e56d7",
       "features": "telemetry,surreal-backend,uar-driver"
     }
   },
