@@ -14,6 +14,8 @@ function checkoutIntegrationSource(name, directory = path.join(root, 'build', 'i
   if (process.platform === 'win32') git('config', '--local', 'core.longpaths', 'true')
   if (git('status', '--porcelain', '--untracked-files=all'))
     throw new Error(`Integration source checkout has local changes: ${directory}`)
+  if (name === 'uar' && process.platform === 'win32')
+    git('sparse-checkout', 'set', '--no-cone', '/*', '!/.kbd-orchestrator/')
   try {
     git('rev-parse', '--verify', '--quiet', `${pin.revision}^{commit}`)
   } catch {

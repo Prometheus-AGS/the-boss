@@ -11,6 +11,15 @@ What each merge actually hit. Rules belong in [the playbook](./upstream-merges.m
 this page is history and carry-over. Newest entry first. The `upstream-merge` skill
 appends here as its last step.
 
+## 2026-10-29 — upstream v2.1.8 (`4637aa0b56`)
+
+- **Taken:** 66 upstream commits after the existing fork baseline, through `4637aa0b56`.
+- **Conflicts:** kept The Boss documentation links in the MCP preset and settings, combined the fork’s DeepSeek dependencies with upstream Pi 1.4.0, regenerated the lockfile and preference schema from the merged definitions.
+- **Rebranded:** new macOS permission descriptions and tool-install error messages.
+- **Retained:** The Boss identity, integration settings, UAR and BossFang packaging, and the mini skill-pack gitlink. Upstream’s Pi 1.4.0 patch replaces its 1.0.0 predecessor; the fresh dependency installation applied the merged patch set.
+- **Gate:** native payload builds, packaged Mac build, integration validation, and release publication remain pending. Windows payload preparation exposed an invalid UAR KBD symlink; the build checkout excludes KBD history on Windows with operator approval.
+- **Lessons:** none.
+
 ## 2026-10-24 — upstream v2.1.7 (`4558f53c96`)
 
 - **Taken:** 22 upstream commits from `909214f68d` through `4558f53c96` into the Boss 2.2.41 source.
