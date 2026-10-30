@@ -1,5 +1,9 @@
 [
   {
+    "version": "2.2.44",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.44 - runtime reconnect and product branding\n\n- Restore runtime connectivity automatically after a remote SurrealDB restart.\n- Display The Boss as the product name on the About screen.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.44 - 运行时重连和产品品牌修复\n\n- 远程 SurrealDB 重启后自动恢复运行时连接。\n- 关于页面的产品名称显示为 The Boss。\n\n<!--LANG:END-->"
+  },
+  {
     "version": "2.2.43",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.43 - updated upstream and integrations\n\n- Incorporate Cherry Studio upstream improvements, including QwenCloud and Desearch support.\n- Update the packaged universal agent runtime, BossFang and mini skill pack.\n- Include Windows x64 and Mac ARM64 and x64 installer targets.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.43 - 更新上游代码和集成\n\n- 合入 Cherry Studio 上游改进，包括对 QwenCloud 和 Desearch 的支持。\n- 更新打包的通用智能体运行时、BossFang 和迷你技能包。\n- 提供 Windows x64、Mac ARM64 和 Mac x64 安装包目标。\n\n<!--LANG:END-->"
   },
