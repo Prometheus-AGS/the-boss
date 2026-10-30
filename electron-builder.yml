@@ -231,14 +231,14 @@ artifactBuildCompleted: scripts/packaging/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.43 - updated upstream and integrations
+    The Boss 2.2.44 - runtime reconnect and product branding
 
     - Incorporate Cherry Studio upstream improvements, including QwenCloud and Desearch support.
     - Update the packaged universal agent runtime, BossFang and mini skill pack.
     - Include Windows x64 and Mac ARM64 and x64 installer targets.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.43 - 更新上游代码和集成
+    The Boss 2.2.44 - 运行时重连和产品品牌修复
 
     - 合入 Cherry Studio 上游改进，包括对 QwenCloud 和 Desearch 的支持。
     - 更新打包的通用智能体运行时、BossFang 和迷你技能包。
