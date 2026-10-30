@@ -32,7 +32,7 @@
       "platformRevisions": {
         "darwin-arm64": "1109d569149014f7efb7e4f0ae42fe3b31fcf79a",
         "win32-x64": "1109d569149014f7efb7e4f0ae42fe3b31fcf79a",
-        "darwin-x64": "8c95b85abe807752d18350cc2edb9462a98c6928"
+        "darwin-x64": "1109d569149014f7efb7e4f0ae42fe3b31fcf79a"
       }
     },
     "surreal-memory": {
@@ -4750,9 +4750,9 @@
           ]
         },
         "darwin-x64": {
-          "source": "8c95b85abe807752d18350cc2edb9462a98c6928",
-          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.4.0-rc.1-8c95b85/uar-sidecar-darwin-x64.tar.gz",
-          "sha256": "2c4f04268ffe76813769e20754233c44e9f786a572927c637c6c6f528127846a",
+          "source": "1109d569149014f7efb7e4f0ae42fe3b31fcf79a",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.4.0-rc.1-1109d56/uar-sidecar-darwin-x64.tar.gz",
+          "sha256": "052031fb3faccc6a984d8f0ff3c57f7b966082e9fe3955493c7df708a0e7925a",
           "archive": "tar.gz",
           "binaries": [
             "libcrc_fast-6ebcae43e7a1a705.dylib",
