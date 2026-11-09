@@ -232,6 +232,7 @@ releaseInfo:
     - Update Cherry Studio features through 2.1.10.
     - Update the Universal Agent Runtime to 1.4.0-rc.3.
     - Update the bundled Prometheus mini skills package.
+    - Update Compass CLI and its bundled skills to 0.4.2.
     - Upgrade the managed Docker stack to SurrealDB 4.0.0 and Surreal Memory Server 1.11.0. Action required for existing SurrealDB 3.x data: back up the volume and follow the SurrealDB 4.0 upgrade guide.
 
     <!--LANG:zh-CN-->
@@ -239,5 +240,6 @@ releaseInfo:
     - 合并 Cherry Studio 2.1.10 的功能更新。
     - 将 Universal Agent Runtime 更新至 1.4.0-rc.3。
     - 更新内置的 Prometheus mini 技能包。
+    - 将 Compass CLI 及其内置技能更新至 0.4.2。
     - 将托管 Docker 服务升级至 SurrealDB 4.0.0 和 Surreal Memory Server 1.11.0。若已有 SurrealDB 3.x 数据，请先备份数据卷，并遵循 SurrealDB 4.0 升级指南。
     <!--LANG:END-->

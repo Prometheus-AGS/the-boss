@@ -8,7 +8,7 @@
   "sources": {
     "compass": {
       "repository": "GQAdonis/compass",
-      "revision": "1ddd1d07979d67aa8ca715aec27fe8f3936bbb43"
+      "revision": "6dd2d24d9c15aa1afe46ec6e75cd2df5207c271a"
     },
     "filesystem": {
       "repository": "GQAdonis/rust-mcp-filesystem",
@@ -58,46 +58,20 @@
   "tools": [
     {
       "name": "compass",
-      "version": "0.3.29",
+      "version": "0.4.2",
       "packages": {
         "darwin-arm64": {
           "source": {
             "repository": "GQAdonis/compass",
-            "revision": "1ddd1d07979d67aa8ca715aec27fe8f3936bbb43"
+            "revision": "6dd2d24d9c15aa1afe46ec6e75cd2df5207c271a"
           },
-          "size": 185778240,
-          "sha256": "8930dfcbfc2a0722bd2679396f7890ebf256b42d005ec0f3082cb072279cb6b5",
+          "size": 187683888,
+          "sha256": "cf41ca4f1fc353ea47461abd02180edb0d0bd155f2df26fafbb3177d34fd963c",
           "binaries": [
             "compass"
           ],
           "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.43-47f875e/compass-darwin-arm64"
-        },
-        "darwin-x64": {
-          "source": {
-            "repository": "GQAdonis/compass",
-            "revision": "1ddd1d07979d67aa8ca715aec27fe8f3936bbb43"
-          },
-          "size": 176397180,
-          "sha256": "7970f0906f81c27ae7ea1a277d362e19a0b12063073dde24163c4edc1b3d6c7a",
-          "binaries": [
-            "compass"
-          ],
-          "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.43-47f875e/compass-darwin-x64"
-        },
-        "win32-x64": {
-          "source": {
-            "repository": "GQAdonis/compass",
-            "revision": "1ddd1d07979d67aa8ca715aec27fe8f3936bbb43"
-          },
-          "size": 196916224,
-          "sha256": "874a310504cfe5a89a81463be46127895250db00d4e42fc867f43b97fb932785",
-          "binaries": [
-            "compass.exe"
-          ],
-          "archive": "none",
-          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.43-47f875e/compass-win32-x64.exe"
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.45-compass-6dd2d24d/compass-darwin-arm64"
         }
       }
     },
@@ -4766,7 +4740,11 @@
     }
   },
   "compassSkills": {
-    "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.43-47f875e/compass-skills.tar.gz",
-    "sha256": "41b4cd584843e7770711e5ccc0b736124bcfc21d28f400fff5f38838784e3da9"
+    "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.45-compass-6dd2d24d/compass-skills.tar.gz",
+    "sha256": "53b225e5702cd548219a9b07e35c32fa3427b4a4032e1c74c7267b4215452026",
+    "source": {
+      "repository": "GQAdonis/compass",
+      "revision": "6dd2d24d9c15aa1afe46ec6e75cd2df5207c271a"
+    }
   }
 }

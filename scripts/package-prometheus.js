@@ -187,11 +187,18 @@ function packagePrometheus() {
   // electron-builder drops a top-level node_modules from extraResources; the installer restores the name.
   const compass = path.join(root, 'build', 'compass-skills')
   const archive = path.join(root, 'build', 'compass-skills.download')
-  if (!artifacts.compassSkills?.sha256 || !artifacts.compassSkills?.url)
-    throw new Error('Compass skill archive is not pinned')
-  require('./download-binaries').download(artifacts.compassSkills.url, archive)
-  const checksum = crypto.createHash('sha256').update(fs.readFileSync(archive)).digest('hex')
-  if (checksum !== artifacts.compassSkills.sha256) throw new Error('Compass skills checksum mismatch')
+  const skillsAsset = artifacts.compassSkills
+  if (
+    !/^[a-f0-9]{64}$/.test(skillsAsset?.sha256 ?? '') ||
+    !skillsAsset?.url?.startsWith('https://') ||
+    skillsAsset.source?.repository !== pins.sources.compass.repository ||
+    skillsAsset.source?.revision !== pins.sources.compass.revision
+  ) throw new Error('Compass skill archive is not pinned to the selected Compass source')
+  const checksum = () => crypto.createHash('sha256').update(fs.readFileSync(archive)).digest('hex')
+  if (!fs.existsSync(archive) || checksum() !== skillsAsset.sha256) {
+    require('./download-binaries').download(skillsAsset.url, archive)
+  }
+  if (checksum() !== skillsAsset.sha256) throw new Error('Compass skills checksum mismatch')
   fs.rmSync(compass, { recursive: true, force: true })
   fs.mkdirSync(compass, { recursive: true })
   execFileSync('tar', ['xzf', archive, '-C', compass, '--strip-components=1'], { stdio: 'inherit' })

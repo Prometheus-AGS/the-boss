@@ -83,6 +83,9 @@ for (const service of ['surreal-memory', 'liter-llm']) {
   imageProvenance[service] = record
 }
 const skills = JSON.parse(fs.readFileSync(path.join(directory, 'compass-skills.json')))
+if (skills.source?.repository !== pins.sources.compass.repository ||
+    skills.source?.revision !== pins.sources.compass.revision)
+  throw new Error('Compass skills archive does not match the pinned Compass source')
 const manifest = {
   schema: 1,
   platforms,
@@ -91,7 +94,7 @@ const manifest = {
   images,
   imageProvenance,
   catalogs: pins.catalogs,
-  compassSkills: { url: url(skills.asset), sha256: skills.sha256 }
+  compassSkills: { url: url(skills.asset), sha256: skills.sha256, source: skills.source }
 }
 fs.writeFileSync(path.join(directory, 'integration-artifacts.json'), JSON.stringify(manifest, null, 2) + '\n')
 const assets = fs

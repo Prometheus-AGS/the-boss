@@ -121,7 +121,11 @@ async function main() {
       run('tar', ['czf', path.join(output, 'compass-skills.tar.gz'), '-C', output, 'compass-skills'], root)
       fs.writeFileSync(
         path.join(output, 'compass-skills.json'),
-        JSON.stringify({ asset: 'compass-skills.tar.gz', sha256: hash(path.join(output, 'compass-skills.tar.gz')) })
+        JSON.stringify({
+          asset: 'compass-skills.tar.gz',
+          sha256: hash(path.join(output, 'compass-skills.tar.gz')),
+          source: pins.sources.compass
+        })
       )
       fs.rmSync(skills, { recursive: true })
     }

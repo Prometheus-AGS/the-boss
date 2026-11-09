@@ -1,7 +1,7 @@
 [
   {
     "version": "2.2.45",
-    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.45\n- Update Cherry Studio features through 2.1.10.\n- Update the Universal Agent Runtime to 1.4.0-rc.3.\n- Update the bundled Prometheus mini skills package.\n- Upgrade the managed Docker stack to SurrealDB 4.0.0 and Surreal Memory Server 1.11.0. Action required for existing SurrealDB 3.x data: back up the volume and follow the SurrealDB 4.0 upgrade guide.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.45\n- 合并 Cherry Studio 2.1.10 的功能更新。\n- 将 Universal Agent Runtime 更新至 1.4.0-rc.3。\n- 更新内置的 Prometheus mini 技能包。\n- 将托管 Docker 服务升级至 SurrealDB 4.0.0 和 Surreal Memory Server 1.11.0。若已有 SurrealDB 3.x 数据，请先备份数据卷，并遵循 SurrealDB 4.0 升级指南。\n<!--LANG:END-->"
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.45\n- Update Cherry Studio features through 2.1.10.\n- Update the Universal Agent Runtime to 1.4.0-rc.3.\n- Update the bundled Prometheus mini skills package.\n- Update Compass CLI and its bundled skills to 0.4.2.\n- Upgrade the managed Docker stack to SurrealDB 4.0.0 and Surreal Memory Server 1.11.0. Action required for existing SurrealDB 3.x data: back up the volume and follow the SurrealDB 4.0 upgrade guide.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.45\n- 合并 Cherry Studio 2.1.10 的功能更新。\n- 将 Universal Agent Runtime 更新至 1.4.0-rc.3。\n- 更新内置的 Prometheus mini 技能包。\n- 将 Compass CLI 及其内置技能更新至 0.4.2。\n- 将托管 Docker 服务升级至 SurrealDB 4.0.0 和 Surreal Memory Server 1.11.0。若已有 SurrealDB 3.x 数据，请先备份数据卷，并遵循 SurrealDB 4.0 升级指南。\n<!--LANG:END-->"
   },
   {
     "version": "2.2.44",

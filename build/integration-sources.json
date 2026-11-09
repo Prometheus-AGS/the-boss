@@ -4,7 +4,7 @@
   "sources": {
     "compass": {
       "repository": "GQAdonis/compass",
-      "revision": "1ddd1d07979d67aa8ca715aec27fe8f3936bbb43"
+      "revision": "6dd2d24d9c15aa1afe46ec6e75cd2df5207c271a"
     },
     "filesystem": {
       "repository": "GQAdonis/rust-mcp-filesystem",
@@ -58,7 +58,7 @@
     "compass": {
       "source": "compass",
       "package": "compass-cli",
-      "version": "0.3.29",
+      "version": "0.4.2",
       "features": "surreal-remote"
     },
     "rust-mcp-filesystem": {

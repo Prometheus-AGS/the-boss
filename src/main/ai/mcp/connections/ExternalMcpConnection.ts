@@ -92,6 +92,10 @@ function createClient(
   )
 }
 
+function isManagedCompass(server: McpServer): boolean {
+  return Boolean(server.tags?.includes('the-boss:workspace-managed') && server.reference?.startsWith('compass:'))
+}
+
 export async function createExternalMcpConnection({
   server,
   appVersion,
@@ -321,9 +325,11 @@ export async function createExternalMcpConnection({
   try {
     const candidates = transportCandidates(server) ?? [undefined]
     let lastError: unknown
+    // Compass 0.4.2 advertises the newer protocol but omits its required tool catalog cache metadata.
+    const versionMode = isManagedCompass(server) ? 'legacy' : 'auto'
 
     for (const candidate of candidates) {
-      let connection = createClient(appVersion, events)
+      let connection = createClient(appVersion, events, versionMode)
       activeConnection = connection
       let transport = await createTransport(candidate)
       try {
@@ -343,7 +349,7 @@ export async function createExternalMcpConnection({
             if (error instanceof McpAuthorizationCompleted) authProvider.reloadCredentials()
             else await authenticate(transport, initialAuthorization)
             await connection.close().catch(() => undefined)
-            connection = createClient(appVersion, events)
+            connection = createClient(appVersion, events, versionMode)
             activeConnection = connection
             transport = await createTransport(candidate)
             await authProvider.withAuthorizationFlow(() =>
