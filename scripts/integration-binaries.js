@@ -36,6 +36,8 @@ function loadIntegrationBinaries({ required = false, platform: targetPlatform } 
         const expected = pin.platformRevisions?.[platform] ?? pin.revision
         if (source !== expected)
           throw new Error(`Publish and import ${name} ${platform} from pinned source ${expected} before packaging`)
+        if (name === 'uar-sidecar' && platform.startsWith('win32-') && asset.patchSha256 !== pin.windowsPatch?.sha256)
+          throw new Error(`UAR sidecar ${platform} patch does not match the source pin`)
       }
     }
   }

@@ -30,6 +30,10 @@
         "win32-arm64": "1109d569149014f7efb7e4f0ae42fe3b31fcf79a",
         "darwin-arm64": "70ec0cffc59490e5a37359a1385f74b2e0d29f97",
         "win32-x64": "70ec0cffc59490e5a37359a1385f74b2e0d29f97"
+      },
+      "windowsPatch": {
+        "path": "build/patches/uar-1.4.0-rc.3-windows-host-routes.patch",
+        "sha256": "50befa4acacc75228c77a8ce25e5782b28618d1a10e1109188c8a79a68d432f8"
       }
     },
     "surreal-memory": {
