@@ -96,7 +96,7 @@ Use a verified tracked Electron instance for applicable window widths, light/dar
 
 The [packaged-helper receipt](../../../.agent-team/boss-core/ui-routing-packaged-evidence.json) records a macOS offline materialization and helper run with 40 portable skills, preserving 50 native definitions and ten role ownership records. The [pin/sync receipt](../../../.agent-team/boss-core/ui-routing-pin-sync-evidence.json) records synchronization and unchanged anti-shadowing implementation. These are source/payload evidence, not installer or Electron acceptance.
 
-The [mini delivery record](../../resources/prometheus-skills-mini/docs/research/ui-ux-routing/DELIVERY.md) separates macOS/Linux helper evidence and independent skill-contract review from release gaps. Native Windows execution, live invocation across every supported harness, and a full installed Electron run remain unverified for this adoption. The prior Boss repository lint stopped on bundled creator diagnostics; later pipeline stages were not proved. No rendered product UI changed in the routing implementation, so its receipt has no product screenshot acceptance claim.
+The [mini delivery record](../../../resources/prometheus-skills-mini/docs/research/ui-ux-routing/DELIVERY.md) separates macOS/Linux helper evidence and independent skill-contract review from release gaps. Native Windows execution, live invocation across every supported harness, and a full installed Electron run remain unverified for this adoption. The prior Boss repository lint stopped on bundled creator diagnostics; later pipeline stages were not proved. No rendered product UI changed in the routing implementation, so its receipt has no product screenshot acceptance claim.
 
 ## Documentation surface
 
