@@ -1,0 +1,60 @@
+name: Finalize The Boss release
+run-name: Finalize The Boss ${{ inputs.release_version }} @ ${{ inputs.source_sha }}
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: Frozen application version
+        required: true
+        type: string
+      source_sha:
+        description: Frozen installer source commit
+        required: true
+        type: string
+      installer_runs:
+        description: Comma-separated runs with successful native installer jobs
+        required: true
+        type: string
+      release_profile:
+        description: Profile recorded by the native installer jobs
+        required: true
+        default: uar-enabled
+        type: choice
+        options: [uar-enabled, non-uar]
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: the-boss-finalize-${{ inputs.release_version }}
+  cancel-in-progress: false
+env:
+  RELEASE_VERSION: ${{ inputs.release_version }}
+  RELEASE_SOURCE_SHA: ${{ inputs.source_sha }}
+  RELEASE_BRANCH: ${{ github.event.repository.default_branch }}
+  THE_BOSS_UAR_ENABLED: ${{ inputs.release_profile == 'uar-enabled' && '1' || '0' }}
+  THE_BOSS_UAR_LOCAL: '0'
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+      - name: Collect verified native installer records
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_INSTALLER_RUNS: ${{ inputs.installer_runs }}
+        run: node scripts/collect-installer-records.cjs
+      - name: Verify and publish the frozen release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LANDING_DISPATCH_TOKEN: ${{ secrets.REPO_DISPATCH_TOKEN }}
+          LANDING_REPOSITORY: Know-Me-Tools/boss-landing-spot
+        run: |
+          git checkout --detach "$RELEASE_SOURCE_SHA"
+          test "$(node -p 'require("./package.json").version')" = "$RELEASE_VERSION"
+          release_platforms=$(node -e 'const { resolveReleaseTargets, resolveReleaseProfile } = require("./scripts/release-profile.cjs"); process.stdout.write(resolveReleaseTargets(process.env.RELEASE_VERSION, resolveReleaseProfile()).join(","))')
+          GITHUB_SHA="$RELEASE_SOURCE_SHA" RELEASE_PLATFORMS="$release_platforms" node scripts/publish-complete-release.cjs
