@@ -6,8 +6,8 @@ description: Merge upstream CherryHQ/cherry-studio main into The Boss fork witho
 # Upstream Merge
 
 Absorb upstream `CherryHQ/cherry-studio` into this fork (The Boss). Rules live in
-[`docs/contrib/upstream-merges.md`](../../../docs/contrib/upstream-merges.md) (the playbook) and history in
-[`docs/contrib/upstream-merge-log.md`](../../../docs/contrib/upstream-merge-log.md) (the log). Read both before
+[`docs/contrib/upstream-merges.md`](../../../docs/dev/contrib/upstream-merges.md) (the playbook) and history in
+[`docs/contrib/upstream-merge-log.md`](../../../docs/dev/contrib/upstream-merge-log.md) (the log). Read both before
 starting — the log's **Open items** often say what this merge must also handle. This skill is the procedure;
 when a rule here and the playbook disagree, the playbook wins and this file gets fixed.
 

@@ -228,18 +228,16 @@ artifactBuildCompleted: scripts/packaging/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.45
-    - Update Cherry Studio features through 2.1.10.
-    - Update the Universal Agent Runtime to 1.4.0-rc.3.
-    - Update the bundled Prometheus mini skills package.
-    - Update Compass CLI and its bundled skills to 0.4.2.
-    - Upgrade the managed Docker stack to SurrealDB 4.0.0 and Surreal Memory Server 1.11.0. Action required for existing SurrealDB 3.x data: back up the volume and follow the SurrealDB 4.0 upgrade guide.
+    The Boss 2.2.46
+    - Fix BossFang startup and model setup with authenticated external UAR.
+    - Offer an existing UAR on port 1906 when its discovery is available. Managed UAR falls back to a free port.
+    - Set the managed ingestion directory in UAR Settings. The setting takes effect on restart.
+    - Retain active work and chat sessions on their original runtime when switching.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.45
-    - 合并 Cherry Studio 2.1.10 的功能更新。
-    - 将 Universal Agent Runtime 更新至 1.4.0-rc.3。
-    - 更新内置的 Prometheus mini 技能包。
-    - 将 Compass CLI 及其内置技能更新至 0.4.2。
-    - 将托管 Docker 服务升级至 SurrealDB 4.0.0 和 Surreal Memory Server 1.11.0。若已有 SurrealDB 3.x 数据，请先备份数据卷，并遵循 SurrealDB 4.0 升级指南。
+    The Boss 2.2.46
+    - 修复通过身份验证的外部 UAR 导致 BossFang 启动和模型配置失败的问题。
+    - 如果 1906 端口上的 UAR 提供发现信息，可选择使用该实例。托管 UAR 会使用可用端口。
+    - 可在 UAR 设置中配置托管摄取目录，重启后生效。
+    - 切换运行时时，正在执行的任务和聊天会话会保留其原有运行时。
     <!--LANG:END-->
