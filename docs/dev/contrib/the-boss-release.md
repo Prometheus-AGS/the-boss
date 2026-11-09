@@ -108,6 +108,8 @@ inputs allow completed payloads to be reused while rebuilding affected tools.
 Publication still requires every tool/platform record. An `images_only` run can
 repair service images independently.
 
+If GitHub schedules only part of the installer matrix, dispatch the missing platforms at the same frozen source. After the native jobs succeed, dispatch **Finalize The Boss release** with the frozen version, source commit, profile and the completed installer run IDs. It checks every platform record and draft installer before publishing and notifying the landing site.
+
 ## Installed Windows walkthrough
 
 This walkthrough is for the operator's PC after downloading the published setup
