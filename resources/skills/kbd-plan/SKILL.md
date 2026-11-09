@@ -36,16 +36,21 @@ before ordering changes:
 
 When no `library-candidates.json` exists (Analyze skipped), plan as before.
 
-## OpenSpec Detection
+## Spec engine detection
 
-Before emitting changes, detect the change management backend:
+OpenSpec (1.16.0+) is the primary spec engine and GitHub Spec Kit the backup;
+native KBD change files remain for projects that already use them. Resolve the
+engine exactly as `kbd-apply detect` does:
 
-1. **Check for `openspec/` directory** at project root
-2. **Check for `openspec/` directory** inside the skill being developed
-3. **Check `.kbd-orchestrator/project.json`** for `"change_backend": "openspec"`
+1. **`.kbd-orchestrator/project.json` `specBackend`** — an explicit pin wins
+2. **The change's existing store** — native, then OpenSpec, then Spec Kit
+3. **`openspec/` directory** at project root → OpenSpec
+4. **`.specify/` or `specs/*/tasks.md`** → Spec Kit
+5. **Native changes** under `.kbd-orchestrator/changes/` → native KBD
 
-If any of these exist, emit changes as OpenSpec structures. Otherwise, use
-native KBD change files.
+When nothing resolves, do not fall back to native files: initialize OpenSpec
+with `node "<mini-pack-root>/lib/platform/openspec/cli.mjs" init --project "<project-root>"` and pin
+`"specBackend": "openspec"` (or use Spec Kit when the operator chose it).
 
 When the KBD runtime is authoritative, register each change's tasks with the
 backend task ID (the ordinal that `kbd-apply list <change>` prints), so
@@ -56,7 +61,9 @@ OpenSpec detected?
   YES → emit /opsx:new <change-id> commands
       → create openspec/changes/<change-id>/proposal.md
       → tasks tracked in openspec/changes/<change-id>/tasks.md
-  NO  → create .kbd-orchestrator/changes/<change-id>/change.md
+  SPEC KIT → create specs/<change-id>/{spec.md,plan.md,tasks.md}
+  NATIVE (existing native projects only)
+      → create .kbd-orchestrator/changes/<change-id>/change.md
       → tasks tracked inline with [ ] / [/] / [x] markers
 ```
 
@@ -91,7 +98,7 @@ Use the canonical phase name from the argument or `current-waypoint.json`. Emit 
 2. **Confirm the active phase** — from argument or waypoint
 3. **Load assessment** — from `.kbd-orchestrator/phases/<phase>/assessment.md`
 4. **Read project constraints** — from `AGENTS.md` and project spec files
-5. **Detect change backend** — OpenSpec or native KBD (see OpenSpec Detection)
+5. **Detect change backend** — OpenSpec, Spec Kit or native KBD (see Spec engine detection)
 6. **Draft tasks and model assignments** — read [task model selection](references/task-model-selection.md). Draft backend task identities, analyze each task's requirements, discover configured models and the installed harness's controls, then write the ordered change list and one scoped concrete model/route assignment per task in `plan.md`. Quality-first is the default within explicit policy and budget constraints; a model class or agent recommendation per change is insufficient. Record unresolved routes without launching workers or configuring providers.
 7. **Adversarial vet** — when `adversarial-review` is installed and
    `--skip-adversarial-review` was not passed, run it in artifact mode against

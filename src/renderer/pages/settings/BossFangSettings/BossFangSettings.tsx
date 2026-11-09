@@ -2,9 +2,8 @@ import { Link } from '@tanstack/react-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Button } from '@cherrystudio/ui'
+import { Button, ScrollArea } from '@cherrystudio/ui'
 import bossFangMascot from '@renderer/assets/images/bossfang.png'
-import Scrollbar from '@renderer/components/Scrollbar'
 import {
   SettingDescription,
   SettingGroup,
@@ -132,7 +131,7 @@ export default function BossFangSettings() {
     })
   return (
     <SettingsContentColumn>
-      <Scrollbar className="min-h-0 flex-1">
+      <ScrollArea className="min-h-0 flex-1">
         <SettingsContentBody>
           <div className="mb-5 flex items-center gap-3">
             <img src={bossFangMascot} alt="" className="size-14 object-contain" />
@@ -544,7 +543,7 @@ export default function BossFangSettings() {
             </p>
           )}
         </SettingsContentBody>
-      </Scrollbar>
+      </ScrollArea>
     </SettingsContentColumn>
   )
 }

@@ -25,6 +25,7 @@ const dotenv = (value: string) =>
   `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r/g, '').replace(/\n/g, '\\n')}'`
 
 type ComposeService = {
+  image?: string
   environment?: Record<string, string>
   depends_on?: unknown
 }
@@ -40,7 +41,12 @@ function containerSurrealEndpoint(endpoint: string): string {
   return url.href.replace(/\/$/, '')
 }
 
-async function writeManagedCompose(config: IntegrationConfig, source: string, destination: string): Promise<void> {
+async function writeManagedCompose(
+  config: IntegrationConfig,
+  source: string,
+  destination: string,
+  surrealImage: string
+): Promise<void> {
   const document = parse(await fs.readFile(source, 'utf8')) as ComposeDocument
   const memory = document.services['surreal-memory']
   if (config.services.memory.ownership === 'managed' && config.services.surrealdb.ownership === 'external') {
@@ -48,6 +54,7 @@ async function writeManagedCompose(config: IntegrationConfig, source: string, de
     memory.environment!.SURREAL_ENDPOINT = containerSurrealEndpoint(config.services.surrealdb.endpoint)
   }
   if (config.services.surrealdb.ownership === 'external') delete document.services.surrealdb
+  else document.services.surrealdb.image = surrealImage
   if (config.services.memory.ownership === 'external') delete document.services['surreal-memory']
   if (config.services.liter.ownership === 'external') delete document.services['liter-llm']
   await fs.writeFile(destination, stringify(document))
@@ -58,11 +65,20 @@ export async function prepareManagedServices(config: IntegrationConfig): Promise
   const manifest = JSON.parse(await fs.readFile(path.join(root, 'release-manifest.json'), 'utf8')) as {
     images: Record<string, string>
   }
+  for (const service of ['surrealdb', 'surreal-memory', 'liter-llm']) {
+    if (!/@sha256:[a-f0-9]{64}$/.test(manifest.images[service] ?? ''))
+      throw new Error('prometheus.error.imageManifest')
+  }
   const secrets = await ensureManagedSecrets()
   await writeMiniConfiguration()
   const directory = serviceDirectory()
   await fs.mkdir(directory, { recursive: true, mode: 0o700 })
-  await writeManagedCompose(config, path.join(root, 'docker', 'compose.yaml'), path.join(directory, 'compose.yaml'))
+  await writeManagedCompose(
+    config,
+    path.join(root, 'docker', 'compose.yaml'),
+    path.join(directory, 'compose.yaml'),
+    manifest.images.surrealdb
+  )
   const values = {
     SURREAL_ROOT_USERNAME: 'root',
     SURREAL_ROOT_PASSWORD: secrets.rootPassword!,
@@ -78,9 +94,6 @@ export async function prepareManagedServices(config: IntegrationConfig): Promise
     SURREAL_PORT: String(config.services.surrealPort),
     MEMORY_PORT: String(config.services.memoryPort),
     LITER_PORT: String(config.services.literPort)
-  }
-  for (const image of [values.SURREAL_MEMORY_IMAGE, values.LITER_LLM_IMAGE]) {
-    if (!image || !/@sha256:[a-f0-9]{64}$/.test(image)) throw new Error('prometheus.error.imageManifest')
   }
   await fs.writeFile(
     path.join(directory, '.env'),

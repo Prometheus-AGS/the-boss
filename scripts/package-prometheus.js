@@ -119,13 +119,13 @@ function packagePrometheus() {
   )
     throw new Error('Publish and import the pinned Liter managed image before public UAR packaging')
   const revision = execFileSync('git', ['-C', source, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
-  const gitlink = execFileSync('git', ['ls-tree', 'HEAD', 'resources/prometheus-skills-mini'], {
+  const gitlink = execFileSync('git', ['ls-files', '--stage', 'resources/prometheus-skills-mini'], {
     cwd: root,
     encoding: 'utf8'
   })
     .trim()
-    .split(/\s+/)[2]
-  if (revision !== gitlink) throw new Error('Commit the mini submodule pin before packaging the release')
+    .match(/^160000 ([a-f0-9]{40}) 0\tresources\/prometheus-skills-mini$/)?.[1]
+  if (revision !== gitlink) throw new Error('Stage the mini submodule pin before packaging the release')
   if (revision !== artifacts.sources.mini.revision)
     throw new Error('The packaged mini revision does not match the pinned integration revision')
   fs.rmSync(destination, { recursive: true, force: true })

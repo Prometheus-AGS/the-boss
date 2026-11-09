@@ -10,7 +10,7 @@
   <a href="https://the-boss.know-me.tools">Website</a> ·
   <a href="https://github.com/Prometheus-AGS/the-boss/releases">Downloads</a> ·
   <a href="./docs/README.md">Documentation</a> ·
-  <a href="./docs/contrib/development.md">Development</a> ·
+  <a href="./docs/dev/contrib/development.md">Development</a> ·
   <a href="https://github.com/Prometheus-AGS/the-boss/issues">Issues</a>
 </p>
 
@@ -20,7 +20,7 @@ The Boss is the Know Me Tools desktop workspace built on [Cherry Studio](https:/
 
 Download the installer for your platform and architecture from [The Boss releases](https://github.com/Prometheus-AGS/the-boss/releases). Read that release's notes and platform records for its available installers, UAR profile, signing status, and acceptance evidence. Source support for a platform does not establish that a tested installer is available for it.
 
-The documentation on `main` describes current source. The UI/UX catalog and team-routing adoption described below were merged after the existing 2.2.2 release; that merge does **not** establish that the 2.2.2 installers contain them. Use the [release runbook](docs/contrib/the-boss-release.md) for packaging and installed acceptance.
+The documentation on `main` describes current source. The UI/UX catalog and team-routing adoption described below were merged after the existing 2.2.2 release; that merge does **not** establish that the 2.2.2 installers contain them. Use the [release runbook](docs/dev/contrib/the-boss-release.md) for packaging and installed acceptance.
 
 ## Workspace capabilities
 
@@ -39,17 +39,17 @@ The current source distributes **97 mini skills**, including **40 portable UI/UX
 
 The existing ten-role [boss-core team](.agent-team/boss-core/README.md) is adopted through the project routing record. UI work goes to `boss-ux` and `boss-renderer`; completed UI acceptance goes to `boss-verifier`. Existing tokens, Electron workflows, permissions, and ownership remain authoritative.
 
-Read [UI/UX routing and team adoption](docs/contrib/ui-ux-routing.md) for commands, prerequisites, installation boundaries, deferred engine support, and evidence limits.
+Read [UI/UX routing and team adoption](docs/dev/contrib/ui-ux-routing.md) for commands, prerequisites, installation boundaries, deferred engine support, and evidence limits.
 
 ## Develop and contribute
 
-Use the Node version in [.node-version](.node-version), the engine range and pnpm pin in [package.json](package.json), and the [development guide](docs/contrib/development.md). Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the repository instructions in [CLAUDE.md](CLAUDE.md). Active development targets this repository's `main` branch.
+Use the Node version in [.node-version](.node-version), the engine range and pnpm pin in [package.json](package.json), and the [development guide](docs/dev/contrib/development.md). Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the repository instructions in [CLAUDE.md](CLAUDE.md). Active development targets this repository's `main` branch.
 
 - [Documentation index](docs/README.md)
-- [UI/UX routing and team adoption](docs/contrib/ui-ux-routing.md)
+- [UI/UX routing and team adoption](docs/dev/contrib/ui-ux-routing.md)
 - [Design system](DESIGN.md)
-- [The Boss release workflow](docs/contrib/the-boss-release.md)
-- [Upstream merge policy](docs/contrib/upstream-merges.md)
+- [The Boss release workflow](docs/dev/contrib/the-boss-release.md)
+- [Upstream merge policy](docs/dev/contrib/upstream-merges.md)
 
 Documentation lives in this repository as Markdown. The index is generated from document headings and frontmatter with `pnpm docs:index`; the completed documentation gate is `pnpm docs:check`.
 

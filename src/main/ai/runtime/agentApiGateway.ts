@@ -1,6 +1,5 @@
 /**
- * Runtime-neutral local API Gateway route resolution, shared by drivers whose
- * provider policy or wire protocol requires the gateway. Agent traffic always uses
+ * Runtime-neutral local API Gateway route resolution for Cherry-managed models. Agent traffic uses
  * the internal loopback listener, never the user-facing gateway.
  */
 import { application } from '@application'

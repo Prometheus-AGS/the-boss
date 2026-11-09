@@ -47,9 +47,7 @@ for (const name of Object.keys(pins.tools)) {
   }
 }
 tools.set('node', JSON.parse(fs.readFileSync(path.join(root, 'build/node-artifacts.json'))))
-const images = {
-  surrealdb: 'surrealdb/surrealdb:v3.3.0@sha256:681c6c22c287421b5c7d99e0fde79b6e0d32c36c1ddeaab2762a1661cb04cd20'
-}
+const images = { surrealdb: pins.images.surrealdb }
 const imageProvenance = {}
 let reusedImagePins
 for (const service of ['surreal-memory', 'liter-llm']) {

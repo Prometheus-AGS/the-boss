@@ -7,13 +7,13 @@ Contribute improvements to The Boss desktop workspace, documentation, or integra
 
 ## Before you start
 
-Read the [Code of Conduct](CODE_OF_CONDUCT.md), [LICENSE](LICENSE), and repository instructions in [CLAUDE.md](CLAUDE.md). Follow the [development guide](docs/contrib/development.md) for the pinned Node/pnpm environment and local setup. Active development targets this repository's `main` branch.
+Read the [Code of Conduct](CODE_OF_CONDUCT.md), [LICENSE](LICENSE), and repository instructions in [CLAUDE.md](CLAUDE.md). Follow the [development guide](docs/dev/contrib/development.md) for the pinned Node/pnpm environment and local setup. Active development targets this repository's `main` branch.
 
 Use [GitHub Issues](https://github.com/Prometheus-AGS/the-boss/issues) for reproducible defects or proposed work. Include the affected platform, version, steps, expected behavior, and relevant evidence without credentials or private user data.
 
 ## UI/UX and team workflow
 
-Read [UI/UX routing and team adoption](docs/contrib/ui-ux-routing.md) for the portable catalog, project installation, and evidence limits. The existing [boss-core team](.agent-team/boss-core/README.md) provides role instructions: `boss-ux` owns usability/design artifacts, `boss-renderer` implements renderer changes, and `boss-verifier` reviews completed acceptance independently where the harness supports it.
+Read [UI/UX routing and team adoption](docs/dev/contrib/ui-ux-routing.md) for the portable catalog, project installation, and evidence limits. The existing [boss-core team](.agent-team/boss-core/README.md) provides role instructions: `boss-ux` owns usability/design artifacts, `boss-renderer` implements renderer changes, and `boss-verifier` reviews completed acceptance independently where the harness supports it.
 
 Follow [DESIGN.md](DESIGN.md), the shared token system, and existing Electron tooling. Routing guidance does not authorize a new palette, framework, dependency, or redesign. Backend-only tasks use the relevant team role without loading UI guidance.
 
@@ -41,6 +41,6 @@ This is a human certification, distinct from cryptographic commit signing. Agent
 
 ## Releases and upstream
 
-Use [The Boss release workflow](docs/contrib/the-boss-release.md) for fork releases and installed acceptance. A source merge does not establish inclusion in an existing published installer.
+Use [The Boss release workflow](docs/dev/contrib/the-boss-release.md) for fork releases and installed acceptance. A source merge does not establish inclusion in an existing published installer.
 
-This project derives from Cherry Studio. Preserve upstream attribution, notices, and compatibility identifiers. Follow the [upstream merge policy](docs/contrib/upstream-merges.md); upstream service names and historical data identifiers are not cosmetic branding.
+This project derives from Cherry Studio. Preserve upstream attribution, notices, and compatibility identifiers. Follow the [upstream merge policy](docs/dev/contrib/upstream-merges.md); upstream service names and historical data identifiers are not cosmetic branding.

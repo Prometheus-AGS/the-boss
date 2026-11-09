@@ -1,7 +1,14 @@
 import '@testing-library/jest-dom/vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type * as ReactI18nextModule from 'react-i18next'
+import type * as StreamdownModule from 'streamdown'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import enUS from '@renderer/i18n/locales/en-us.json'
+import i18n from '@renderer/i18n/resolver'
+
+vi.unmock('@cherrystudio/ui')
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
@@ -34,7 +41,8 @@ vi.mock('@renderer/hooks/useAppUpdateState', () => ({
       downloadProgress: 0,
       info: null
     },
-    updateAppUpdateState: vi.fn()
+    updateAppUpdateState: vi.fn(),
+    checkForUpdate: vi.fn()
   })
 }))
 
@@ -54,13 +62,22 @@ vi.mock('@renderer/components/UpdateDialogPopup', () => ({
   default: { show: vi.fn() }
 }))
 
-vi.mock('react-i18next', () => ({
+vi.mock('react-i18next', async (importOriginal) => ({
+  ...(await importOriginal<typeof ReactI18nextModule>()),
   useTranslation: () => ({
-    t: (key: string) => (key === 'settings.doctor.entry.title' ? 'System diagnostics' : key)
+    t: (key: string) =>
+      key === 'settings.about.repository.button' ||
+      key === 'settings.about.repository.title' ||
+      key === 'settings.about.contact.title'
+        ? enUS[key as keyof typeof enUS]
+        : key === 'settings.doctor.entry.title'
+          ? 'System diagnostics'
+          : key
   })
 }))
 
-vi.mock('streamdown', () => ({
+vi.mock('streamdown', async (importOriginal) => ({
+  ...(await importOriginal<typeof StreamdownModule>()),
   Streamdown: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
 }))
 
@@ -69,11 +86,13 @@ vi.mock('@renderer/components/icons/LogoAvatar', () => ({
   default: ({ logo, alt }: { logo: string; alt?: string }) => <img src={logo} alt={alt} />
 }))
 
-import { REPO_URL } from '@shared/utils/branding'
+import { DOCS_URL, REPO_URL, WEBSITE_URL } from '@shared/utils/branding'
 
 import { AboutSettings } from '..'
 
 const REPOSITORY_URL = REPO_URL
+
+afterEach(cleanup)
 
 async function renderAboutSettings() {
   render(<AboutSettings />)
@@ -133,9 +152,11 @@ describe('AboutSettings diagnostics entry', () => {
     const user = userEvent.setup()
     await renderAboutSettings()
 
+    expect(screen.queryByText('Contact')).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'settings.about.feedback.button' }))
 
     expect(screen.getByRole('heading', { name: 'settings.about.feedback.dialog.title' })).toBeVisible()
+    expect(screen.getByRole('button', { name: /Contact/ })).toBeVisible()
     expect(mocks.showDoctor).not.toHaveBeenCalled()
   })
 })
@@ -150,19 +171,54 @@ describe('AboutSettings repository controls accessibility', () => {
     })
   })
 
-  it('names the GitHub icon and app logo by their repository destination and hides decorative media', async () => {
+  it('names the app logo by its repository destination and hides decorative media', async () => {
     const user = userEvent.setup()
     await renderAboutSettings()
 
-    const repositoryButtons = screen.getAllByRole('button', { name: 'settings.about.repository' })
-    expect(repositoryButtons).toHaveLength(2)
+    const repositoryButton = screen.getByRole('button', { name: 'settings.about.repository' })
     expect(screen.queryByRole('button', { name: 'Cherry Studio' })).not.toBeInTheDocument()
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
 
-    await user.click(repositoryButtons[0])
+    await user.click(repositoryButton)
     expect(mocks.request).toHaveBeenCalledWith('system.shell.open_external_website', REPOSITORY_URL)
+  })
+})
 
-    await user.click(repositoryButtons[1])
+describe('AboutSettings repository entry', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mocks.search = {}
+    mocks.request.mockImplementation(async (route: string) => {
+      if (route === 'app.get_info') return { isPortable: false, version: '2.0.0' }
+      return undefined
+    })
+  })
+
+  it('opens the project repository from the list entry', async () => {
+    const user = userEvent.setup()
+    await renderAboutSettings()
+
+    expect(screen.getByText('Open-source project')).toBeVisible()
+    await user.click(screen.getByRole('button', { name: 'Support' }))
+
     expect(mocks.request).toHaveBeenCalledWith('system.shell.open_external_website', REPOSITORY_URL)
+  })
+
+  it.each(['zh-CN', 'zh-TW', 'en-US', 'ja-JP'])('opens The Boss website and docs for %s', async (language) => {
+    const previousLanguage = i18n.language
+    await i18n.changeLanguage(language)
+    try {
+      const user = userEvent.setup()
+      await renderAboutSettings()
+
+      for (const button of screen.getAllByRole('button', { name: 'settings.about.website.button' })) {
+        await user.click(button)
+      }
+
+      expect(mocks.request).toHaveBeenCalledWith('system.shell.open_external_website', DOCS_URL)
+      expect(mocks.request).toHaveBeenCalledWith('system.shell.open_external_website', WEBSITE_URL)
+    } finally {
+      await i18n.changeLanguage(previousLanguage)
+    }
   })
 })

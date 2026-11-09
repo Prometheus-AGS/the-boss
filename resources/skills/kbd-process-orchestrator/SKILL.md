@@ -23,7 +23,7 @@ At session startup, resume, and before creating or entering a phase, run
 node "<mini-pack-root>/lib/platform/openspec/cli.mjs" refresh --project "<project-root>"
 ```
 
-The pack standard is the latest stable upstream OpenSpec (release baseline **1.14.0**, checked 2026-10-03). The managed Node runner checks the official npm registry, installs that exact version in the user's cache, and runs upstream `update` for existing KBD/OpenSpec projects. It refreshes generated skills/commands with a backup and receipt; it preserves authored specs, changes, configuration, task completion, and KBD state. OpenSpec does not give all authored Markdown a common version field: report compatibility problems instead of relabeling or rewriting their meaning. Read the helper [lifecycle contract](../../lib/platform/openspec/README.md) for overrides, offline status, backups, and recovery.
+The pack standard is the latest stable upstream OpenSpec (release baseline **1.16.0**, checked 2026-11-05; it needs Node.js 22.12.0 or newer, and the runner refuses an older Node with a failed receipt). The managed Node runner checks the official npm registry, installs that exact version in the user's cache, and runs upstream `update` for existing KBD/OpenSpec projects. It refreshes generated skills/commands with a backup and receipt; it preserves authored specs, changes, configuration, task completion, and KBD state. OpenSpec does not give all authored Markdown a common version field: report compatibility problems instead of relabeling or rewriting their meaning. Read the helper [lifecycle contract](../../lib/platform/openspec/README.md) for overrides, offline status, backups, and recovery.
 
 Use the same selected CLI for subsequent OpenSpec operations:
 
@@ -31,7 +31,7 @@ Use the same selected CLI for subsequent OpenSpec operations:
 node "<mini-pack-root>/lib/platform/openspec/cli.mjs" run --project "<project-root>" -- <OpenSpec arguments>
 ```
 
-SessionStart and phase scripts automate this preflight. Harnesses without hooks and direct `prometheus kbd phase` invocations must perform it explicitly before phase work. A failed startup refresh is a visible pending prerequisite; retry at the phase boundary before OpenSpec work. Offline cached operation reports latest-unverified rather than current. Native-only KBD projects remain usable without OpenSpec. Explicit operator overrides remain visible. Project testing/authorization rules take precedence over generated upstream suggestions.
+SessionStart and phase scripts automate this preflight. Harnesses without hooks and direct `prometheus kbd phase` invocations must perform it explicitly before phase work. A failed startup refresh is a visible pending prerequisite; retry at the phase boundary before OpenSpec work. Offline cached operation reports latest-unverified rather than current. OpenSpec is the primary spec engine for new projects (`/kbd-init` initializes it with `node "<mini-pack-root>/lib/platform/openspec/cli.mjs" init --project "<project-root>"`) and GitHub Spec Kit is the backup; existing native-only KBD projects remain usable without OpenSpec. Explicit operator overrides remain visible. Project testing/authorization rules take precedence over generated upstream suggestions.
 
 ## Progress Signals (MANDATORY)
 

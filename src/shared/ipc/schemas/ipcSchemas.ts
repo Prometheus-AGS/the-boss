@@ -1,4 +1,5 @@
 import type { RouteDef } from '../define'
+import { agentRequestSchemas } from './agent'
 import { type AiEventSchemas, aiRequestSchemas } from './ai'
 import { type ApiGatewayEventSchemas, apiGatewayRequestSchemas } from './apiGateway'
 import { type AppEventSchemas, appRequestSchemas } from './app'
@@ -11,7 +12,7 @@ import { type CherryCloudEventSchemas, cherryCloudRequestSchemas } from './cherr
 import { cherryinRequestSchemas } from './cherryin'
 import { citationRequestSchemas } from './citation'
 import { codeCliRequestSchemas } from './codeCli'
-import { computerUseRequestSchemas } from './computerUse'
+import { type ComputerUseEventSchemas, computerUseRequestSchemas } from './computerUse'
 import { deepSeekHarnessRequestSchemas } from './deepSeekHarness'
 import { diagnosticsRequestSchemas } from './diagnostics'
 import { doctorRequestSchemas } from './doctor'
@@ -35,6 +36,7 @@ import { printRequestSchemas } from './print'
 import { profileRequestSchemas } from './profile'
 import { type PrometheusEventSchemas, prometheusRequestSchemas } from './prometheus'
 import { providerRequestSchemas } from './provider'
+import { proxyRequestSchemas } from './proxy'
 import { type QuickAssistantEventSchemas, quickAssistantRequestSchemas } from './quickAssistant'
 import { type ScreenshotEventSchemas, screenshotRequestSchemas } from './screenshot'
 import { screenshotChatRequestSchemas, type ScreenshotChatEventSchemas } from './screenshotChat'
@@ -46,7 +48,7 @@ import { toolResultRequestSchemas } from './toolResult'
 import { type TranslateEventSchemas, translateRequestSchemas } from './translate'
 import { trashRequestSchemas } from './trash'
 import { type VoiceEventSchemas, voiceRequestSchemas } from './voice'
-import { webSearchRequestSchemas } from './webSearch'
+import { type WebSearchEventSchemas, webSearchRequestSchemas } from './webSearch'
 import { type WebviewEventSchemas, webviewRequestSchemas } from './webview'
 import { type WindowEventSchemas, windowRequestSchemas } from './window'
 
@@ -59,6 +61,7 @@ import { type WindowEventSchemas, windowRequestSchemas } from './window'
  */
 export const ipcRequestSchemas = {
   ...aiRequestSchemas,
+  ...agentRequestSchemas,
   ...voiceRequestSchemas,
   ...apiGatewayRequestSchemas,
   ...appRequestSchemas,
@@ -95,6 +98,7 @@ export const ipcRequestSchemas = {
   ...pdfjsRequestSchemas,
   ...printRequestSchemas,
   ...profileRequestSchemas,
+  ...proxyRequestSchemas,
   ...providerRequestSchemas,
   ...quickAssistantRequestSchemas,
   ...screenshotRequestSchemas,
@@ -129,6 +133,7 @@ export type IpcEventSchemas = BossFangEventSchemas &
   BrowserEventSchemas &
   ChannelEventSchemas &
   CherryCloudEventSchemas &
+  ComputerUseEventSchemas &
   FileEventSchemas &
   McpEventSchemas &
   MiniAppEventSchemas &
@@ -143,6 +148,7 @@ export type IpcEventSchemas = BossFangEventSchemas &
   TabEventSchemas &
   TranslateEventSchemas &
   VoiceEventSchemas &
+  WebSearchEventSchemas &
   WebviewEventSchemas &
   WindowEventSchemas
 /** Union of all declared event names. */

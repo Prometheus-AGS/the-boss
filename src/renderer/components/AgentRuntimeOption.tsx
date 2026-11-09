@@ -32,6 +32,7 @@ const UarIcon: IconComponent = (props) => <Bot {...props} />
 const RUNTIME_ICONS = {
   'claude-code': ClaudeCode,
   pi: PiCli,
+  'pi-durable': PiCli,
   dsh: Deepseek,
   uar: UarIcon
 } satisfies Record<AgentType, IconComponent>
@@ -39,6 +40,7 @@ const RUNTIME_ICONS = {
 const COMPACT_RUNTIME_ICON_CLASS: Record<AgentType, string> = {
   'claude-code': 'size-6',
   pi: 'size-4',
+  'pi-durable': 'size-4',
   dsh: 'size-7',
   uar: 'size-5'
 }
@@ -48,13 +50,17 @@ const RUNTIME_DESCRIPTION_KEYS: Record<AgentType, string> = {
   'claude-code': 'library.config.agent.field.runtime.option_description.claude_code',
   // t('library.config.agent.field.runtime.option_description.pi')
   pi: 'library.config.agent.field.runtime.option_description.pi',
+  // t('library.config.agent.field.runtime.option_description.pi_durable')
+  'pi-durable': 'library.config.agent.field.runtime.option_description.pi_durable',
   // t('library.config.agent.field.runtime.option_description.dsh')
   dsh: 'library.config.agent.field.runtime.option_description.dsh',
   // t('library.config.agent.field.runtime.option_description.uar')
   uar: 'library.config.agent.field.runtime.option_description.uar'
 }
 
-const RUNTIMES = (['pi', 'claude-code', 'uar'] as AgentType[]).filter((runtime) => runtime !== 'uar' || isUarEnabled())
+const RUNTIMES = (['pi', 'pi-durable', 'claude-code', 'uar'] satisfies AgentType[]).filter(
+  (runtime) => runtime !== 'uar' || isUarEnabled()
+)
 
 const RUNTIME_CARD_CLASS_NAME = 'w-full items-center gap-2 rounded-lg px-3 py-1.5 font-normal'
 

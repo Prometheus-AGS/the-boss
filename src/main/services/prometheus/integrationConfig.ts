@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto'
+import { randomBytes, randomUUID } from 'node:crypto'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
@@ -23,6 +23,7 @@ type ManagedIntegrationSecret =
   | IntegrationSecret
   | 'uarAdminKey'
   | 'uarCredentialEncryptionKey'
+  | 'uarCredentialInstallationId'
   | 'memoryCredentialEndpoint'
   | 'literCredentialEndpoint'
   | 'literExternalCredentials'
@@ -458,6 +459,10 @@ export async function ensureManagedSecrets(): Promise<Partial<Record<ManagedInte
       secrets[key] = randomBytes(32).toString('hex')
       changed = true
     }
+  }
+  if (isUarEnabled() && !secrets.uarCredentialInstallationId) {
+    secrets.uarCredentialInstallationId = randomUUID()
+    changed = true
   }
   if (changed) await replaceSecrets(secrets)
   return secrets

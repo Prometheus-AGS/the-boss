@@ -33,7 +33,7 @@ import {
   DialogTitle,
   DialogTrigger,
   error as showErrorToast,
-  Scrollbar,
+  ScrollArea,
   Select,
   SelectContent,
   SelectItem,
@@ -715,7 +715,7 @@ const MigrationApp: React.FC = () => {
                     <DialogTitle>{t('migration.completed.warning_heading', { count: warnings.length })}</DialogTitle>
                     <DialogDescription>{t('migration.completed.warning_description')}</DialogDescription>
                   </DialogHeader>
-                  <Scrollbar className="max-h-[50vh]">
+                  <ScrollArea className="max-h-[50vh]">
                     <ul className="text-foreground text-sm leading-relaxed">
                       {warnings.map((warning, index) => (
                         <li key={index} className="wrap-break-words">
@@ -723,7 +723,7 @@ const MigrationApp: React.FC = () => {
                         </li>
                       ))}
                     </ul>
-                  </Scrollbar>
+                  </ScrollArea>
                   <Button
                     type="button"
                     variant="emphasis"

@@ -21,7 +21,14 @@ explicit tasks as required by the project schema. Execute those tasks through
 The reusable backend library also supports existing native-kbd changes, but
 that portability capability does not override this repository’s OpenSpec
 policy. Detection honors the explicit pin first, then change-local evidence,
-then repository evidence; an empty result is not a native-kbd default.
+then repository evidence; an empty result is not a native-kbd default. When
+nothing resolves — no pin, no `openspec/`, no Spec Kit tree and no native
+changes — initialize OpenSpec (1.16.0+) with
+`node "<mini-pack-root>/lib/platform/openspec/cli.mjs" init --project "<project-root>"` and set
+`"specBackend": "openspec"` in `project.json`, unless the operator chose Spec
+Kit (see `/kbd-init --spec-engine`). Every `Scenario:` carries a WHEN (or
+GIVEN) step and a THEN step; `openspec validate --strict` fails a scenario
+missing either.
 
 ## Progress Signals (MANDATORY)
 
