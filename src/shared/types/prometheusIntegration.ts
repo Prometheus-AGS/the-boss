@@ -290,7 +290,7 @@ const uarAdministrationSurfaceSchema = z.object({
   methods: z.array(uarAdministrationMethodSchema)
 })
 export const uarAdministrationCapabilitiesSchema = z.object({
-  schema_version: z.literal(5),
+  schema_version: z.literal([5, 6]),
   scopes: z.tuple([z.literal('public'), z.literal('admin'), z.literal('owner'), z.literal('host')]),
   surfaces: z.array(uarAdministrationSurfaceSchema)
 })

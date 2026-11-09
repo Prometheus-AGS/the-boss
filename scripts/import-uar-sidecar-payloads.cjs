@@ -136,6 +136,10 @@ async function loadRecord(recordUrl, pins, expectedVersion) {
   if (record.source !== expectedSource) {
     throw new Error(`UAR sidecar ${record.platform} source ${record.source} does not match ${expectedSource}`)
   }
+  const expectedPatch = record.platform.startsWith('win32-') ? pins.windowsPatch?.sha256 : undefined
+  if (record.patchSha256 !== expectedPatch) {
+    throw new Error(`UAR sidecar ${record.platform} patch does not match the source pin`)
+  }
 
   const expectedAsset = `uar-sidecar-${record.platform}.tar.gz`
   if (record.asset !== expectedAsset) {
@@ -154,6 +158,7 @@ async function loadRecord(recordUrl, pins, expectedVersion) {
       source: record.source,
       url: `https://${url.host}/${pins.repository}/releases/download/${tag}/${expectedAsset}`,
       sha256: record.sha256,
+      ...(expectedPatch ? { patchSha256: expectedPatch } : {}),
       archive: record.archive,
       binaries: validateBinaries(record.binaries, record.platform)
     }

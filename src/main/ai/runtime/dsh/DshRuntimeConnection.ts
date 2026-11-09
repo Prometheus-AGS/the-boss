@@ -8,6 +8,7 @@ import type { SessionEventNotification } from '@deepseek-ai/dsh-sdk-protocol'
 import type { SessionEvent, TurnEndReason } from '@deepseek-ai/dsh-session'
 
 import { application } from '@application'
+import type { ContextCategory, OperationResult, ThreadContextUsage } from '@cherrystudio/agent-runtime'
 import type { DshAssistantChunk } from '@cherrystudio/dsh-bridge'
 import {
   BRIDGE_SOCKET_ENV,
@@ -30,7 +31,6 @@ import { chatErrorContext } from '@main/ai/utils/chatErrorContext'
 import { resolveKnowledgeBaseScope } from '@main/ai/utils/knowledgeScope'
 import { mergeBinaryExecutionEnv } from '@main/utils/binaryEnv'
 import { getPathFromEnvironment, getShellEnv } from '@main/utils/shellEnv'
-import type { AgentSessionContextUsage } from '@shared/ai/agentSessionContextUsage'
 import {
   KB_READ_TOOL_NAME,
   KB_SEARCH_TOOL_NAME,
@@ -636,37 +636,52 @@ export class DshRuntimeConnection implements AgentRuntimeConnection {
   /**
    * Live context occupancy from the plugin's `ctx.tokenMeter.measure()` over the
    * bridge. Pull-only: the host reads this on connect-active, turn-complete, and
-   * the throttled hover refresh. Null before the first provider request (a 0%
-   * projection would mislead — pi precedent) and whenever the bridge is gone.
+   * the throttled hover refresh. Unknown before the first provider request and
+   * whenever the bridge is gone.
    */
   refreshTraceContext(context: AgentRuntimeTraceContext): void {
     this.traceContext = context
   }
 
-  async getContextUsage(): Promise<AgentSessionContextUsage | null> {
+  async getContextUsage(): Promise<OperationResult<ThreadContextUsage>> {
+    const unknown = (code: string, message: string): OperationResult<ThreadContextUsage> => ({
+      status: 'unknown',
+      error: { operation: 'contextUsage', code, message }
+    })
     const bridge = this.bridge
-    if (!bridge || this.closed) return null
+    if (!bridge || this.closed) return unknown('not-connected', 'Runtime not connected')
     let usage
     try {
       usage = await bridge.requestContextUsage(this.runtimeSessionId, { timeoutMs: 5_000 })
     } catch (error) {
       logger.warn('dsh context usage query failed', { error })
-      return null
+      return unknown('query-failed', 'DSH context usage query failed')
     }
-    if (usage.totalTokens <= 0) return null
-    const maxTokens = this.contextWindow
-    // Names must match the renderer's CATEGORY_NAME_KEYS map (Claude vocabulary).
-    const categories = [
-      { name: 'System prompt', tokens: finiteTokenCount(usage.systemTokens) },
-      { name: 'System tools', tokens: finiteTokenCount(usage.toolsTokens) },
-      { name: 'Messages', tokens: finiteTokenCount(usage.messageTokens) }
-    ].filter((category) => category.tokens > 0)
+    if (usage.totalTokens <= 0) return unknown('no-context-usage', 'DSH has no context usage reading')
+    const estimates = [
+      ['system-prompt', usage.systemTokens],
+      ['system-tools', usage.toolsTokens],
+      ['messages', usage.messageTokens]
+    ] as const
+    const categories = estimates
+      .map(([key, tokens]): ContextCategory => ({
+        id: key,
+        key,
+        tokens: finiteTokenCount(tokens),
+        precision: 'estimated',
+        occupancy: 'included'
+      }))
+      .filter((category) => category.tokens > 0)
     return {
-      categories,
-      totalTokens: usage.totalTokens,
-      maxTokens,
-      percentage: maxTokens > 0 ? Math.min(100, (usage.totalTokens / maxTokens) * 100) : 0,
-      model: this.modelId
+      status: 'confirmed',
+      value: {
+        model: this.modelId,
+        revision: JSON.stringify([this.modelId, this.contextWindow, usage]),
+        contextWindow: this.contextWindow,
+        used: { tokens: usage.totalTokens, precision: 'estimated' },
+        basis: 'current-context',
+        ...(categories.length > 0 ? { breakdown: { coverage: 'partial', categories } } : {})
+      }
     }
   }
 

@@ -1,0 +1,13 @@
+diff --git a/src/server/windows_service.rs b/src/server/windows_service.rs
+index 4507503b..88047cdc 100644
+--- a/src/server/windows_service.rs
++++ b/src/server/windows_service.rs
+@@ -105,7 +105,7 @@ fn run_service() -> anyhow::Result<()> {
+                 let (ready_tx, mut ready_rx) = tokio::sync::oneshot::channel();
+                 let server = super::start_server_with_listener(
+                     config_manager, None, None, None, Some(ready_tx), None,
+-                    Some(shutdown.clone()), false, None, None,
++                    Some(shutdown.clone()), false, None, None, None,
+                 );
+                 tokio::pin!(server);
+                 let mut status_errors = Vec::new();

@@ -6,13 +6,13 @@
 
 ## 开始之前
 
-请阅读[行为准则](CODE_OF_CONDUCT.md)、[许可证](LICENSE)及 [CLAUDE.md](CLAUDE.md) 中的仓库说明。请按[开发指南](docs/contrib/development.md)配置固定版本的 Node/pnpm 环境。当前开发以本仓库的 `main` 分支为目标。
+请阅读[行为准则](CODE_OF_CONDUCT.md)、[许可证](LICENSE)及 [CLAUDE.md](CLAUDE.md) 中的仓库说明。请按[开发指南](docs/dev/contrib/development.md)配置固定版本的 Node/pnpm 环境。当前开发以本仓库的 `main` 分支为目标。
 
 请通过 [GitHub Issues](https://github.com/Prometheus-AGS/the-boss/issues) 报告可复现的缺陷或提出工作建议。提供相关平台、版本、步骤、预期行为和证据，不要包含凭据或私人用户数据。
 
 ## UI/UX 与团队工作流程
 
-请阅读 [UI/UX 路由与团队采用指南](docs/contrib/ui-ux-routing.md)，了解可移植技能目录、项目安装和证据限制。现有的 [boss-core 团队](.agent-team/boss-core/README.md)规定角色职责：`boss-ux` 负责可用性与设计材料，`boss-renderer` 实现渲染器变更，`boss-verifier` 在工具支持时独立审查已完成的验收工作。
+请阅读 [UI/UX 路由与团队采用指南](docs/dev/contrib/ui-ux-routing.md)，了解可移植技能目录、项目安装和证据限制。现有的 [boss-core 团队](.agent-team/boss-core/README.md)规定角色职责：`boss-ux` 负责可用性与设计材料，`boss-renderer` 实现渲染器变更，`boss-verifier` 在工具支持时独立审查已完成的验收工作。
 
 遵循 [DESIGN.md](DESIGN.md)、共享设计令牌和现有 Electron 工具。路由指南不授权新配色、框架、依赖或重新设计。仅涉及后端的任务使用相应团队角色，不加载 UI 指南。
 
@@ -40,6 +40,6 @@ Signed-off-by: Your Name <your.email@example.com>
 
 ## 发布与上游
 
-请使用 [The Boss 发布工作流程](docs/contrib/the-boss-release.md)进行分叉版本发布和安装后的验收。源码合并不能证明其已包含在现有的已发布安装包中。
+请使用 [The Boss 发布工作流程](docs/dev/contrib/the-boss-release.md)进行分叉版本发布和安装后的验收。源码合并不能证明其已包含在现有的已发布安装包中。
 
-本项目源自 Cherry Studio。保留上游归属、声明和兼容性标识。遵循[上游合并政策](docs/contrib/upstream-merges.md)；上游服务名称和历史数据标识并非表面品牌文字。
+本项目源自 Cherry Studio。保留上游归属、声明和兼容性标识。遵循[上游合并政策](docs/dev/contrib/upstream-merges.md)；上游服务名称和历史数据标识并非表面品牌文字。

@@ -81,6 +81,9 @@ AGENTS.override.md
 # Local Electron development
 .context/cherry-electron-dev/
 
+# Website documentation renderer
+.context/website-docs-renderer/
+
 # vitest
 coverage
 .vitest-cache
@@ -117,3 +120,4 @@ YOUR_MEMORY_FILE_PATH
 
 # Local desktop context stays in local installed-operation captures.
 build/release-operation-2.2.38/*.png
+/native/external-app/build/

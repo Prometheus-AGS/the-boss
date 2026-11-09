@@ -1,6 +1,7 @@
 import { net } from 'electron'
 import WebSocket from 'ws'
 
+import { t } from '@main/i18n'
 import {
   downloadFileAsBase64,
   downloadImageAsBase64,
@@ -96,7 +97,7 @@ class DiscordStreamingController {
   }
 
   async onText(text: string): Promise<void> {
-    if (this._completed) return
+    if (this._completed || (!text && !this.messageId && !this.messageCreationPromise)) return
     this.currentText = text
     await this.ensureMessageCreated()
     if (this.messageId) {
@@ -194,9 +195,9 @@ class DiscordStreamingController {
   }
 
   private async performFlush(): Promise<void> {
-    if (!this.messageId || !this.currentText) return
+    if (!this.messageId) return
     try {
-      await this.editMessage(this.currentText)
+      await this.editMessage(this.currentText || t('common.channel_processing'))
     } catch {
       // Swallow flush errors — FlushController will reflush if needed
     }
@@ -436,6 +437,12 @@ class DiscordAdapter extends ChannelAdapter {
           os: process.platform,
           browser: 'cherry-studio',
           device: 'cherry-studio'
+        },
+        presence: {
+          since: null,
+          activities: [],
+          status: 'online',
+          afk: false
         }
       }
     })

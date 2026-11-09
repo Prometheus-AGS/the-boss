@@ -1,7 +1,7 @@
 import type { ChildProcess } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
 import { constants } from 'node:fs'
-import { chmod, copyFile, mkdir, writeFile } from 'node:fs/promises'
+import { chmod, copyFile, mkdir, unlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import readline from 'node:readline'
 import { setTimeout as delay } from 'node:timers/promises'
@@ -26,7 +26,7 @@ import {
   type UarRuntimeInstance
 } from '@shared/types/uarServiceInstance'
 import { uarTeamDiagnosticDetailsSchema } from '@shared/types/uarTeamProfiles'
-import { redactSecretText } from '@shared/utils/redaction'
+import { redactLiteral, redactSecretText } from '@shared/utils/redaction'
 
 import { inspectUarPayload, requireUarPayload, type UarPayload } from './uarPayload'
 import { uarPrincipalForSession } from './uarPrincipal'
@@ -745,7 +745,9 @@ export class UarSidecarService extends BaseService {
     const managedSecrets = await ensureManagedSecrets()
     const adminKey = managedSecrets.uarAdminKey
     const credentialEncryptionKey = managedSecrets.uarCredentialEncryptionKey
-    if (!adminKey || !credentialEncryptionKey) throw new Error('UAR protected authority could not be provisioned')
+    const installationId = managedSecrets.uarCredentialInstallationId
+    if (!adminKey || !credentialEncryptionKey || !installationId)
+      throw new Error('UAR protected authority could not be provisioned')
     const dataRoot = application.getPath('feature.agents.uar.data')
     const managedInstance = readIntegrationConfig().uar.instances.find(
       (instance) => instance.id === MANAGED_UAR_INSTANCE_ID && instance.ownership === 'managed'
@@ -754,6 +756,17 @@ export class UarSidecarService extends BaseService {
     const configFile = path.join(dataRoot, 'sidecar.yaml')
     const dotenvFile = path.join(dataRoot, '.env')
     await mkdir(dataRoot, { recursive: true, mode: 0o700 })
+    const ingestionDirectory = path.join(dataRoot, 'ingest')
+    const ingestionProbe = path.join(ingestionDirectory, `.boss-write-check-${randomUUID()}`)
+    try {
+      await mkdir(ingestionDirectory, { recursive: true, mode: 0o700 })
+      await writeFile(ingestionProbe, '', { flag: 'wx', mode: 0o600 })
+      await unlink(ingestionProbe)
+    } catch (error) {
+      throw new Error(`UAR cannot write to ${ingestionDirectory}. Check that the directory is writable and try again.`, {
+        cause: error
+      })
+    }
     const policiesDirectory = path.join(dataRoot, 'policies')
     await mkdir(policiesDirectory, { recursive: true, mode: 0o700 })
     for (const policy of ['default.cedar', 'skill-mutation.cedar', 'tool-approval.cedar']) {
@@ -802,6 +815,8 @@ export class UarSidecarService extends BaseService {
       UAR_SECURITY__SETTINGS_MUTATION_AUTH_REQUIRED: 'true',
       UAR_SECURITY__SETTINGS_ADMIN_KEY: adminKey,
       CREDENTIAL_ENCRYPTION_KEY: credentialEncryptionKey,
+      UAR_SECURITY__PROVIDER_CREDENTIALS__INSTALLATION_ID: installationId,
+      UAR_SERVER__INGEST_DIRECTORY: ingestionDirectory,
       UAR_PERSISTENCE__PROVIDER: 'surreal',
       ...persistence,
       ELECTRON_RUN_AS_NODE: '1',
@@ -842,7 +857,11 @@ export class UarSidecarService extends BaseService {
     this.retainSafeProviderDiagnostics(child)
 
     try {
-      const port = await this.waitForReady(child, this.shutdown.signal, launchToken)
+      const port = await this.waitForReady(child, this.shutdown.signal, launchToken, [
+        adminKey,
+        credentialEncryptionKey,
+        storage.password
+      ])
       const baseUrl = `http://127.0.0.1:${port}`
       const capabilities = await this.readCapabilities(managedInstance, baseUrl, launchToken, this.shutdown.signal)
       this.shutdown.signal.throwIfAborted()
@@ -889,7 +908,11 @@ export class UarSidecarService extends BaseService {
       try {
         await this.terminate(child)
       } catch (closeError) {
-        throw new AggregateError([error, closeError], 'UAR startup failed and process close was unsuccessful')
+        const startupMessage = [launchToken, adminKey, credentialEncryptionKey, storage.password].reduce<string>(
+          (message, secret) => redactLiteral(message, secret),
+          redactSecretText(error instanceof Error ? error.message : String(error))
+        )
+        throw new AggregateError([error, closeError], `${startupMessage} (process close was also unsuccessful)`)
       }
       throw error
     }
@@ -1009,13 +1032,23 @@ export class UarSidecarService extends BaseService {
     child.once('close', () => outputs.forEach((output) => output.close()))
   }
 
-  private waitForReady(child: ChildProcess, signal: AbortSignal, launchToken: string): Promise<number> {
+  private waitForReady(
+    child: ChildProcess,
+    signal: AbortSignal,
+    launchToken: string,
+    secrets: (string | undefined)[]
+  ): Promise<number> {
     return new Promise((resolve, reject) => {
       const output = child.stdout ? readline.createInterface({ input: child.stdout }) : undefined
       let startupDiagnostic = ''
+      let diagnosticOverflow = false
       let settled = false
       const appendDiagnostic = (value: string) => {
-        startupDiagnostic = `${startupDiagnostic}${redactSecretText(value)}`.slice(-2_000)
+        if (diagnosticOverflow) return
+        if (startupDiagnostic.length + value.length > 16_000) {
+          startupDiagnostic = ''
+          diagnosticOverflow = true
+        } else startupDiagnostic += value
       }
       const settle = (error?: Error, port?: number) => {
         if (settled) return
@@ -1035,12 +1068,17 @@ export class UarSidecarService extends BaseService {
       const onError = (error: Error) => settle(new Error(`Failed to launch UAR sidecar: ${error.message}`))
       const onInputError = () => settle(new Error('UAR sidecar launch-owner input failed before readiness'))
       const onAbort = () => settle(new Error('UAR sidecar startup cancelled', { cause: signal.reason }))
-      const onClose = (code: number | null, closeSignal: NodeJS.Signals | null) =>
+      const onClose = (code: number | null, closeSignal: NodeJS.Signals | null) => {
+        const diagnostic = [launchToken, ...secrets]
+          .reduce<string>((message, secret) => redactLiteral(message, secret), redactSecretText(startupDiagnostic))
+          .trim()
+          .slice(-2_000)
         settle(
           new Error(
-            `UAR sidecar closed before readiness (${code ?? closeSignal ?? 'unknown'})${startupDiagnostic ? ': ' + startupDiagnostic.trim() : ''}`
+            `UAR sidecar closed before readiness (${code ?? closeSignal ?? 'unknown'})${diagnostic ? ': ' + diagnostic : ''}`
           )
         )
+      }
       child.stderr?.on('data', onStderr)
       child.stdin?.once('error', onInputError)
       child.once('error', onError)

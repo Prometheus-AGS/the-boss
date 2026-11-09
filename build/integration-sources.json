@@ -4,7 +4,7 @@
   "sources": {
     "compass": {
       "repository": "GQAdonis/compass",
-      "revision": "1ddd1d07979d67aa8ca715aec27fe8f3936bbb43"
+      "revision": "6dd2d24d9c15aa1afe46ec6e75cd2df5207c271a"
     },
     "filesystem": {
       "repository": "GQAdonis/rust-mcp-filesystem",
@@ -20,21 +20,25 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "8d23100d23fbe17371cc5d66cc12711707fc16e9"
+      "revision": "2b7f8b4aad9f533c4dd0997e7550e944ec97ae66"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "1109d569149014f7efb7e4f0ae42fe3b31fcf79a",
+      "revision": "70ec0cffc59490e5a37359a1385f74b2e0d29f97",
       "platformRevisions": {
-        "darwin-x64": "1109d569149014f7efb7e4f0ae42fe3b31fcf79a",
+        "darwin-x64": "70ec0cffc59490e5a37359a1385f74b2e0d29f97",
         "win32-arm64": "1109d569149014f7efb7e4f0ae42fe3b31fcf79a",
-        "darwin-arm64": "1109d569149014f7efb7e4f0ae42fe3b31fcf79a",
-        "win32-x64": "1109d569149014f7efb7e4f0ae42fe3b31fcf79a"
+        "darwin-arm64": "70ec0cffc59490e5a37359a1385f74b2e0d29f97",
+        "win32-x64": "70ec0cffc59490e5a37359a1385f74b2e0d29f97"
+      },
+      "windowsPatch": {
+        "path": "build/patches/uar-1.4.0-rc.3-windows-host-routes.patch",
+        "sha256": "50befa4acacc75228c77a8ce25e5782b28618d1a10e1109188c8a79a68d432f8"
       }
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
-      "revision": "63eb413ebf520a4a525ffd3b8d1d07f1389d48d4"
+      "revision": "88122324e50a8ca249c4d17ca43bba454dc8d0ef"
     },
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
@@ -58,7 +62,7 @@
     "compass": {
       "source": "compass",
       "package": "compass-cli",
-      "version": "0.3.29",
+      "version": "0.4.2",
       "features": "surreal-remote"
     },
     "rust-mcp-filesystem": {
@@ -80,7 +84,7 @@
     "uar-sidecar": {
       "source": "uar",
       "package": "universal-agent-runtime",
-      "version": "1.4.0-rc.1",
+      "version": "1.4.0-rc.3",
       "features": "server-full"
     },
     "liter-llm": {
@@ -104,5 +108,8 @@
   "parser": {
     "url": "https://github.com/xberg-io/tree-sitter-language-pack/releases/download/v1.13.1/parser-sources-1.13.1.tar.zst",
     "sha256": "411bc912ca9b6fa43f75aeff0ad9df419b2b425e99795c66ab253f2970e2afd3"
+  },
+  "images": {
+    "surrealdb": "surrealdb/surrealdb:v4.0.0@sha256:c35893410644e65fa90aa1bef446ac9cb0a0c2733b9d405ce3eb56754b85c330"
   }
 }

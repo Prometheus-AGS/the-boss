@@ -68,23 +68,33 @@ async function main() {
       CARGO_BUILD_BUILD_DIR: path.join(cwd, 'target'),
       ...(name === 'compass' ? { PROJECT_ROOT: await parserSources(), TSLP_OFFLINE: '1' } : {})
     }
-    run(
-      'cargo',
-      [
-        'build',
-        '--release',
-        '--locked',
-        '-p',
-        recipe.package,
-        '--bin',
-        name,
-        '--target',
-        target,
-        ...(effectiveFeatures ? ['--features', effectiveFeatures] : [])
-      ],
-      cwd,
-      env
-    )
+    const windowsPatch = name === 'uar-sidecar' && platform.startsWith('win32-') ? pins.sources.uar.windowsPatch : undefined
+    const patch = windowsPatch && path.join(root, windowsPatch.path)
+    if (patch) {
+      if (hash(patch) !== windowsPatch.sha256) throw new Error('UAR Windows patch checksum mismatch')
+      run('git', ['apply', '--whitespace=error', patch], source)
+    }
+    try {
+      run(
+        'cargo',
+        [
+          'build',
+          '--release',
+          '--locked',
+          '-p',
+          recipe.package,
+          '--bin',
+          name,
+          '--target',
+          target,
+          ...(effectiveFeatures ? ['--features', effectiveFeatures] : [])
+        ],
+        cwd,
+        env
+      )
+    } finally {
+      if (patch) run('git', ['apply', '--reverse', patch], source)
+    }
     const binary = name + (process.platform === 'win32' ? '.exe' : '')
     const asset = `${name}-${platform}${process.platform === 'win32' ? '.exe' : ''}`
     fs.copyFileSync(path.join(cwd, 'target', target, 'release', binary), path.join(output, asset))
@@ -98,6 +108,7 @@ async function main() {
       sha256: hash(path.join(output, asset)),
       binaries: [binary],
       archive: 'none',
+      ...(windowsPatch ? { patchSha256: windowsPatch.sha256 } : {}),
       ...(name === 'uar-sidecar' ? { features: effectiveFeatures.split(',') } : {}),
       ...(dashboard ? { dashboard, features: recipe.features.split(','), uarLifecycle: 'connection-only' } : {})
     })
@@ -121,7 +132,11 @@ async function main() {
       run('tar', ['czf', path.join(output, 'compass-skills.tar.gz'), '-C', output, 'compass-skills'], root)
       fs.writeFileSync(
         path.join(output, 'compass-skills.json'),
-        JSON.stringify({ asset: 'compass-skills.tar.gz', sha256: hash(path.join(output, 'compass-skills.tar.gz')) })
+        JSON.stringify({
+          asset: 'compass-skills.tar.gz',
+          sha256: hash(path.join(output, 'compass-skills.tar.gz')),
+          source: pins.sources.compass
+        })
       )
       fs.rmSync(skills, { recursive: true })
     }

@@ -30,12 +30,14 @@ function loadIntegrationBinaries({ required = false, platform: targetPlatform } 
         throw new Error(`Unpinned integration artifact: ${name} ${platform}`)
       if (name === 'bossfang' && (asset.dashboard?.embedded !== true || asset.dashboard?.basePath !== '/dashboard/'))
         throw new Error(`BossFang dashboard assets are not pinned for ${platform}`)
-      if (required && ['uar-sidecar', 'liter-llm', 'bossfang'].includes(name)) {
+      if (required && ['uar-sidecar', 'liter-llm', 'bossfang', 'compass'].includes(name)) {
         const source = typeof asset.source === 'string' ? asset.source : asset.source?.revision
         const pin = pins.sources[name === 'uar-sidecar' ? 'uar' : name]
         const expected = pin.platformRevisions?.[platform] ?? pin.revision
         if (source !== expected)
           throw new Error(`Publish and import ${name} ${platform} from pinned source ${expected} before packaging`)
+        if (name === 'uar-sidecar' && platform.startsWith('win32-') && asset.patchSha256 !== pin.windowsPatch?.sha256)
+          throw new Error(`UAR sidecar ${platform} patch does not match the source pin`)
       }
     }
   }
@@ -45,7 +47,9 @@ function loadIntegrationBinaries({ required = false, platform: targetPlatform } 
       ...tool,
       required,
       versionFile: `.${tool.name}-version`,
-      ...(tool.name === 'bossfang' && targetPlatform ? { contentSha256: tool.packages[targetPlatform]?.sha256 } : {}),
+      ...(['bossfang', 'compass'].includes(tool.name) && targetPlatform
+        ? { contentSha256: tool.packages[targetPlatform]?.sha256 }
+        : {}),
       ...(tool.name === 'uar-sidecar'
         ? {
             payloadIdentity: {

@@ -51,17 +51,10 @@ type BasicInfoStepProps = {
   fallbackAvatar: string
   modelFilter?: ModelSelectorFilter
   isModelDisabled?: ModelSelectorFilter
-  /** Agent create flows expose a runtime selector that drives the model filter (D8). */
-  runtimeSelectable?: boolean
+  showAgentFields?: boolean
   onSettingsNavigate?: (navigate: () => void) => void
 }
 
-/**
- * Runtime selector + model picker for agent create flows. Isolated into its own
- * component so `useAgentModelFilter` (and its provider subscription) only mounts
- * for agents — assistants keep using the static `modelFilter` prop and never
- * touch the agent-runtime filter.
- */
 function AgentRuntimeModelFields({
   form,
   portalContainer,
@@ -174,7 +167,7 @@ export function BasicInfoStep({
   fallbackAvatar,
   modelFilter,
   isModelDisabled,
-  runtimeSelectable = false,
+  showAgentFields = false,
   onSettingsNavigate
 }: BasicInfoStepProps) {
   const { t } = useTranslation()
@@ -222,7 +215,7 @@ export function BasicInfoStep({
         )}
       />
 
-      {runtimeSelectable ? (
+      {showAgentFields ? (
         <AgentRuntimeModelFields
           form={form}
           portalContainer={portalContainer}

@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises'
+import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -33,7 +34,7 @@ vi.mock('@main/ai/skills/SkillService', () => ({
 }))
 
 // Matches the stub in tests/main.setup.ts → mockApplicationFactory().getPath
-const resourceSkillsPath = '/mock/feature.agents.skills.builtin'
+const resourceSkillsPath = path.resolve('/mock/feature.agents.skills.builtin')
 beforeEach(() => {
   vi.clearAllMocks()
   mockSyncBuiltinSkill.mockResolvedValue(false)
@@ -60,7 +61,7 @@ describe('installBuiltinSkills', () => {
     await installBuiltinSkills()
 
     // Fourth argument is the namespace: `null` for Cherry's own builtins.
-    expect(mockSyncBuiltinSkill).toHaveBeenCalledWith('my-skill', `${resourceSkillsPath}/my-skill`, '2.0.0', null)
+    expect(mockSyncBuiltinSkill).toHaveBeenCalledWith('my-skill', path.join(resourceSkillsPath, 'my-skill'), '2.0.0', null)
   })
 
   it('namespaces a skill that the Prometheus submodule ships, and only that one', async () => {
@@ -77,11 +78,11 @@ describe('installBuiltinSkills', () => {
 
     expect(mockSyncBuiltinSkill).toHaveBeenCalledWith(
       'from-the-pack',
-      `${resourceSkillsPath}/from-the-pack`,
+      path.join(resourceSkillsPath, 'from-the-pack'),
       '2.0.0',
       'prometheus'
     )
-    expect(mockSyncBuiltinSkill).toHaveBeenCalledWith('cherry-own', `${resourceSkillsPath}/cherry-own`, '2.0.0', null)
+    expect(mockSyncBuiltinSkill).toHaveBeenCalledWith('cherry-own', path.join(resourceSkillsPath, 'cherry-own'), '2.0.0', null)
   })
 
   it('falls back to the default namespace for every skill when the submodule cannot be read', async () => {
@@ -94,7 +95,7 @@ describe('installBuiltinSkills', () => {
 
     expect(mockSyncBuiltinSkill).toHaveBeenCalledWith(
       'from-the-pack',
-      `${resourceSkillsPath}/from-the-pack`,
+      path.join(resourceSkillsPath, 'from-the-pack'),
       '2.0.0',
       null
     )

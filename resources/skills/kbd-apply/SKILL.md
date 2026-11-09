@@ -1,6 +1,6 @@
 ---
 name: kbd-apply
-description: KBD-owned spec-apply driver. Wraps a spec backend — openspec (the default engine), speckit (GitHub Spec Kit), or native-kbd (the always-available fallback) — and drives it ONE task at a time, so KBD stays the source of truth — every task boundary fires KBD hooks, emits a plain-text position signal, and syncs progress.json and the waypoint. Replaces the broken pattern of handing the turn to a bare "implement everything" command that runs outside KBD.
+description: KBD-owned spec-apply driver. Wraps a spec backend — openspec (the default engine), speckit (GitHub Spec Kit), or native-kbd (compatibility for projects that already keep native changes) — and drives it ONE task at a time, so KBD stays the source of truth — every task boundary fires KBD hooks, emits a plain-text position signal, and syncs progress.json and the waypoint. Replaces the broken pattern of handing the turn to a bare "implement everything" command that runs outside KBD.
 ---
 
 # /kbd-apply
@@ -127,9 +127,9 @@ registry in `lib/kbd/spec-backend.mjs` (metadata and version pins live in
 
 | Engine | Adapter | Notes |
 |---|---|---|
-| **openspec** (default) | `os*` — via the real `openspec` CLI, spawned with no shell | The default engine: when a repo carries more than one backend's evidence and nothing is pinned, detection resolves to openspec |
-| **speckit** | `sk*` — pure filesystem markdown parsing of `specs/<change>/{spec,plan,tasks}.md`; the `specify` CLI is never invoked | `verify` = all checkboxes checked AND `specs/<change>/spec.md` exists; `archive` moves `specs/<change>` → `specs/archive/<date>-<change>` |
-| **native-kbd** | `nk*` — `.kbd-orchestrator/changes/<change>/tasks.json` | The always-available fallback |
+| **openspec** (primary) | `os*` — via the real `openspec` CLI, spawned with no shell | The default engine: when a repo carries more than one backend's evidence and nothing is pinned, detection resolves to openspec |
+| **speckit** (backup) | `sk*` — pure filesystem markdown parsing of `specs/<change>/{spec,plan,tasks}.md`; the `specify` CLI is never invoked | `verify` = all checkboxes checked AND `specs/<change>/spec.md` exists; `archive` moves `specs/<change>` → `specs/archive/<date>-<change>` |
+| **native-kbd** | `nk*` — `.kbd-orchestrator/changes/<change>/tasks.json` | Compatibility engine for projects that already keep native changes or pin `native-kbd` |
 
 Detection order: **pinned > openspec > speckit > native-kbd**. Pin a specific
 engine via `.kbd-orchestrator/project.json`:
@@ -141,7 +141,7 @@ engine via `.kbd-orchestrator/project.json`:
 Valid pin values: `openspec`, `speckit`, `native-kbd` (`auto`/absent = detect).
 
 **Engine version pins.** Each engine's pinned upstream version (openspec
-1.14.0 from `package.json`; spec-kit 1.1.2) is recorded in
+1.16.0 from `package.json`, which needs Node.js 22.12.0+; spec-kit 1.3.0) is recorded in
 `config/spec-engines.json` with its rationale. The speckit adapter is
 markdown-based, so the pin exists for *layout* conformance: when a new Spec Kit
 release ships, check whether `specs/<slug>/{spec.md,plan.md,tasks.md}` or the

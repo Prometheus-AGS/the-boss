@@ -23,11 +23,13 @@ const asset = path.join(output, `uar-sidecar-${platform}${platform.startsWith('w
 const cached = path.join(release, executable)
 const records = JSON.parse(fs.readFileSync(path.join(output, `tools-${platform}.json`), 'utf8'))
 const record = records.find((entry) => entry.name === 'uar-sidecar' && entry.platform === platform)
+const patchSha256 = platform.startsWith('win32-') ? pins.sources.uar.windowsPatch?.sha256 : undefined
 const hash = (file) => createHash('sha256').update(fs.readFileSync(file)).digest('hex')
 const checkout = execFileSync('git', ['-C', directory, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
 
 if (checkout !== source || !record || record.source?.revision !== source || record.version !== pins.tools['uar-sidecar'].version)
   throw new Error('UAR native artifact and source checkout do not match the pinned release')
+if (record.patchSha256 !== patchSha256) throw new Error('UAR native artifact patch does not match the source pin')
 if (record.sha256 !== hash(asset) || record.size !== fs.statSync(asset).size)
   throw new Error(`Native UAR artifact checksum mismatch: ${platform}`)
 if (!fs.existsSync(cached) || hash(cached) !== record.sha256)
@@ -41,7 +43,8 @@ execFileSync('node', [path.join(directory, 'scripts/package-boss-sidecar.mjs'), 
 })
 
 const packaged = path.join(directory, 'dist/boss-sidecar')
-const packageRecord = JSON.parse(fs.readFileSync(path.join(packaged, `uar-sidecar-${platform}.json`), 'utf8'))
+const recordFile = path.join(packaged, `uar-sidecar-${platform}.json`)
+const packageRecord = JSON.parse(fs.readFileSync(recordFile, 'utf8'))
 const archive = path.join(packaged, packageRecord.asset)
 for (const required of [
   executable,
@@ -57,5 +60,6 @@ if (packageRecord.source !== source || packageRecord.platform !== platform || ha
   throw new Error(`Packaged UAR payload source or checksum mismatch: ${platform}`)
 if (platform.startsWith('win32-') && !packageRecord.binaries.some((file) => file.endsWith('.dll')))
   throw new Error(`Cached Windows UAR payload has no runtime DLLs: ${platform}`)
+if (patchSha256) fs.writeFileSync(recordFile, JSON.stringify({ ...packageRecord, patchSha256 }, null, 2) + '\n')
 
 console.log(`Reused exact native build to package ${platform} from ${source}: ${packageRecord.sha256}`)

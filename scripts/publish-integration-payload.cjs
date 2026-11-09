@@ -47,9 +47,7 @@ for (const name of Object.keys(pins.tools)) {
   }
 }
 tools.set('node', JSON.parse(fs.readFileSync(path.join(root, 'build/node-artifacts.json'))))
-const images = {
-  surrealdb: 'surrealdb/surrealdb:v3.3.0@sha256:681c6c22c287421b5c7d99e0fde79b6e0d32c36c1ddeaab2762a1661cb04cd20'
-}
+const images = { surrealdb: pins.images.surrealdb }
 const imageProvenance = {}
 let reusedImagePins
 for (const service of ['surreal-memory', 'liter-llm']) {
@@ -85,6 +83,9 @@ for (const service of ['surreal-memory', 'liter-llm']) {
   imageProvenance[service] = record
 }
 const skills = JSON.parse(fs.readFileSync(path.join(directory, 'compass-skills.json')))
+if (skills.source?.repository !== pins.sources.compass.repository ||
+    skills.source?.revision !== pins.sources.compass.revision)
+  throw new Error('Compass skills archive does not match the pinned Compass source')
 const manifest = {
   schema: 1,
   platforms,
@@ -93,7 +94,7 @@ const manifest = {
   images,
   imageProvenance,
   catalogs: pins.catalogs,
-  compassSkills: { url: url(skills.asset), sha256: skills.sha256 }
+  compassSkills: { url: url(skills.asset), sha256: skills.sha256, source: skills.source }
 }
 fs.writeFileSync(path.join(directory, 'integration-artifacts.json'), JSON.stringify(manifest, null, 2) + '\n')
 const assets = fs
