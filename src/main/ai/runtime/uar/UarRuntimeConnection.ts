@@ -134,17 +134,19 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
   }
 
   async start(): Promise<this> {
-    const config = readIntegrationConfig().uar
     const placement = decodeUarSessionPlacement(
       this.input.resumeToken,
       this.input.nativeSessionId ?? this.input.sessionId
     )
-    if (!placement.instanceId) placement.instanceId = config.selectedInstanceId
+    const sidecar = application.get('UarSidecarService')
+    this.endpoint = placement.instanceId
+      ? await sidecar.resolveInstance(placement.instanceId)
+      : await sidecar.resolveSelected()
+    placement.instanceId = this.endpoint.instanceId
     this.reattaching = Boolean(
       this.input.resumeToken && placement.sourceRunId && !this.hasCompletedSourceRun(placement.sourceRunId)
     )
     this.placement = placement
-    this.endpoint = await application.get('UarSidecarService').resolveInstance(placement.instanceId)
     const agent = agentService.getAgent(this.input.agentId)
     if (!agent) throw new Error(`UAR agent ${this.input.agentId} is unavailable`)
     this._usageCapture =

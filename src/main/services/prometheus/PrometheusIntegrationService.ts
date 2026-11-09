@@ -99,7 +99,20 @@ export class PrometheusIntegrationService extends BaseService {
   private literCatalogGeneration = 0
 
   protected onAllReady(): void {
-    void this.ensureInitialized().catch(() => undefined)
+    void this.ensureInitialized()
+      .then(() => {
+        this.startSelectedUar()
+        if (isUarEnabled()) application.get('BossFangService').resumeAfterUarSelection()
+      })
+      .catch(() => undefined)
+  }
+
+  private startSelectedUar(): void {
+    if (isUarEnabled())
+      void application
+        .get('UarSidecarService')
+        .resolveSelected()
+        .catch(() => undefined)
   }
 
   private ensureInitialized(): Promise<void> {
@@ -167,11 +180,12 @@ export class PrometheusIntegrationService extends BaseService {
       const selectedInstance = instanceInventory.instances.find((instance) => instance.selected)
       const uarPayload = uarService.payload()
       const runningUar = uarService.status()
+      const selectedManaged = selectedInstance?.ownership === 'managed' ? runningUar : undefined
       const selectedExternal = selectedInstance?.ownership === 'external' ? selectedInstance.observed : undefined
       const uarBinaryPath = uarPayload?.executable
       const appliedUar = runningUar?.storage ?? (await readAppliedUarStorage())
       uar = {
-        state: runningUar || selectedExternal ? 'running' : uarBinaryPath ? 'stopped' : 'unavailable',
+        state: selectedManaged || selectedExternal ? 'running' : uarBinaryPath ? 'stopped' : 'unavailable',
         ...(!uarBinaryPath
           ? {}
           : {
@@ -181,14 +195,14 @@ export class PrometheusIntegrationService extends BaseService {
               ...(uarPayload?.sourceCommit ? { binarySourceCommit: uarPayload.sourceCommit } : {}),
               ...(uarPayload?.archiveSha256 ? { binaryArchiveSha256: uarPayload.archiveSha256 } : {})
             }),
-        ...(runningUar
+        ...(selectedManaged
           ? {
-              runtimeVersion: runningUar.uarVersion,
-              capabilities: [...runningUar.capabilities],
-              baseUrl: runningUar.baseUrl,
-              effectivePort: runningUar.effectivePort,
-              ...(runningUar.processId ? { processId: runningUar.processId } : {}),
-              startedAt: runningUar.startedAt
+              runtimeVersion: selectedManaged.uarVersion,
+              capabilities: [...selectedManaged.capabilities],
+              baseUrl: selectedManaged.baseUrl,
+              effectivePort: selectedManaged.effectivePort,
+              ...(selectedManaged.processId ? { processId: selectedManaged.processId } : {}),
+              startedAt: selectedManaged.startedAt
             }
           : selectedExternal
             ? {
@@ -346,6 +360,15 @@ export class PrometheusIntegrationService extends BaseService {
     }
   }
 
+  async readUarDiscovery() {
+    if (!isUarEnabled()) return { detected: false, decision: 'ask' as const }
+    await this.ensureInitialized()
+    const { localDiscoveryDecision: decision } = readIntegrationConfig().uar
+    const sidecar = application.get('UarSidecarService')
+    const detected = sidecar.status()?.effectivePort !== 1906 && (await sidecar.probeLocalUar()) === 'detected'
+    return { detected, decision }
+  }
+
   async saveUarInstance(
     expectedRevision: number,
     instance: UarRuntimeInstance,
@@ -456,9 +479,15 @@ export class PrometheusIntegrationService extends BaseService {
       }
       const selected = document.config.uar.instances.find((instance) => instance.id === instanceId)
       if (!selected?.enabled) throw new Error(`UAR instance ${instanceId} is unavailable or disabled`)
+      if (selected.ownership === 'external')
+        await application.get('UarSidecarService').resolveInstance(instanceId, true)
       const config = integrationConfigSchema.parse({
         ...document.config,
-        uar: { ...document.config.uar, selectedInstanceId: instanceId }
+        uar: {
+          ...document.config.uar,
+          selectedInstanceId: instanceId,
+          localDiscoveryDecision: selected.ownership === 'managed' ? 'managed' : 'external'
+        }
       })
       await writeIntegrationDocument({
         schemaVersion: 4,
@@ -466,6 +495,8 @@ export class PrometheusIntegrationService extends BaseService {
         config
       })
     })
+    this.startSelectedUar()
+    application.get('BossFangService').resumeAfterUarSelection()
     return this.readUarInstanceInventory()
   }
 
@@ -473,7 +504,7 @@ export class PrometheusIntegrationService extends BaseService {
     assertUarEnabled()
     await this.ensureInitialized()
     try {
-      await application.get('UarSidecarService').resolveInstance(instanceId)
+      await application.get('UarSidecarService').resolveInstance(instanceId, true)
     } catch (error) {
       if (!(error instanceof UarAdmissionCompatibilityError)) throw error
     }
@@ -754,6 +785,7 @@ export class PrometheusIntegrationService extends BaseService {
       if (
         update.feature === 'uar' &&
         (update.value.selectedInstanceId !== document.config.uar.selectedInstanceId ||
+          update.value.localDiscoveryDecision !== document.config.uar.localDiscoveryDecision ||
           JSON.stringify(update.value.instances) !== JSON.stringify(document.config.uar.instances))
       ) {
         throw new Error('UAR instance inventory changes require the dedicated revisioned instance API')

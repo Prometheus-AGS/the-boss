@@ -276,6 +276,8 @@ const prometheusHandlerImplementations: IpcHandlersFor<typeof prometheusRequestS
   'prometheus.uar.admin.diagnose_authority': async () => diagnoseUarAuthority(),
   'prometheus.uar.instances.read': async () =>
     application.get('PrometheusIntegrationService').readUarInstanceInventory(),
+  'prometheus.uar.discovery.read': async () =>
+    application.get('PrometheusIntegrationService').readUarDiscovery(),
   'prometheus.uar.instances.save': async ({ expectedRevision, instance, runtimeCredential, adminCredential }) =>
     withIntegrationRevision(() =>
       application

@@ -5,46 +5,13 @@ import { useTranslation } from 'react-i18next'
 import { Badge, Button } from '@cherrystudio/ui'
 import { SettingDescription, SettingGroup, SettingTitle } from '@renderer/components/SettingsPrimitives'
 import { ipcApi } from '@renderer/ipc'
-import { UAR_EXECUTION_PROFILE, type UarInstanceInventorySnapshot } from '@shared/types/uarServiceInstance'
+import type { IntegrationConfig } from '@shared/types/prometheusIntegration'
+import { MANAGED_UAR_INSTANCE_ID, type UarInstanceInventorySnapshot } from '@shared/types/uarServiceInstance'
 
 import { IntegrationChoice, IntegrationField, IntegrationToggle } from './IntegrationFields'
+import { discoveredUarInstanceDraft, editUarInstanceDraft, emptyUarInstanceDraft } from './uarInstanceDraft'
 
-type Draft = {
-  id: string
-  name: string
-  enabled: boolean
-  expectedRuntimeId: string
-  profile: string
-  minimumVersion: string
-  workspaceLocation: 'local' | 'remote'
-  workspaceRoots: string
-  requiredCapabilities: string
-  runtime: string
-  administration: string
-  models: string
-  console: string
-  runtimeCredential: string
-  adminCredential: string
-}
-
-const emptyDraft = (): Draft => ({
-  id: '',
-  name: '',
-  enabled: true,
-  expectedRuntimeId: '',
-  profile: UAR_EXECUTION_PROFILE,
-  minimumVersion: '',
-  workspaceLocation: 'local',
-  workspaceRoots: '',
-  requiredCapabilities: '',
-  runtime: '',
-  administration: '',
-  models: '',
-  console: '',
-  runtimeCredential: '',
-  adminCredential: ''
-})
-
+type Discovery = { detected: boolean; decision: IntegrationConfig['uar']['localDiscoveryDecision'] }
 const INSTANCE_TRANSLATION_KEYS = {
   addDescription: 'settings.prometheus.integration.uarAdmin.instances.addDescription',
   addTitle: 'settings.prometheus.integration.uarAdmin.instances.addTitle',
@@ -92,22 +59,32 @@ const INSTANCE_TRANSLATION_KEYS = {
 type InstanceTranslationKey = keyof typeof INSTANCE_TRANSLATION_KEYS
 const INSTANCE_CHECK_KEYS = ['configured', 'reachable', 'authenticated', 'compatible', 'operational'] as const
 
-export function UarInstancesPanel() {
+export function UarInstancesPanel({ onSelectionChanged }: { onSelectionChanged: () => void }) {
   const { t } = useTranslation()
   const tr = (key: InstanceTranslationKey, options?: Record<string, unknown>) =>
     t(INSTANCE_TRANSLATION_KEYS[key], options)
   const [snapshot, setSnapshot] = useState<UarInstanceInventorySnapshot>()
-  const [draft, setDraft] = useState<Draft>(emptyDraft)
+  const [draft, setDraft] = useState(emptyUarInstanceDraft)
   const [editingId, setEditingId] = useState<string>()
+  const [discovery, setDiscovery] = useState<Discovery>()
+  const [connectingDetected, setConnectingDetected] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [feedbackTarget, setFeedbackTarget] = useState<'discovery' | 'instances' | 'form'>('instances')
   const [error, setError] = useState<string>()
   const [status, setStatus] = useState<string>()
 
   const load = useCallback(async () => {
     setBusy(true)
+    setFeedbackTarget('instances')
     setError(undefined)
+    setStatus(undefined)
     try {
-      setSnapshot(await ipcApi.request('prometheus.uar.instances.read', {}))
+      const [inventory, localDiscovery] = await Promise.all([
+        ipcApi.request('prometheus.uar.instances.read', {}),
+        ipcApi.request('prometheus.uar.discovery.read', {})
+      ])
+      setSnapshot(inventory)
+      setDiscovery(localDiscovery)
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
     } finally {
@@ -120,6 +97,8 @@ export function UarInstancesPanel() {
   const act = async (action: 'select' | 'test' | 'delete', instanceId: string) => {
     if (!snapshot) return
     setBusy(true)
+    const startingManaged = action === 'select' && instanceId === MANAGED_UAR_INSTANCE_ID
+    setFeedbackTarget(startingManaged && discovery?.detected ? 'discovery' : 'instances')
     setError(undefined)
     setStatus(undefined)
     try {
@@ -136,6 +115,17 @@ export function UarInstancesPanel() {
                 instanceId
               })
       setSnapshot(next)
+      if (action === 'select') {
+        setDiscovery((current) => current && { ...current, decision: startingManaged ? 'managed' : 'external' })
+        if (startingManaged && connectingDetected) resetDraft()
+      }
+      const checked = startingManaged ? await ipcApi.request('prometheus.uar.instances.test', { instanceId }) : next
+      if (startingManaged) setSnapshot(checked)
+      const diagnostic =
+        (startingManaged || action === 'test') &&
+        checked.instances.find((instance) => instance.id === instanceId)?.diagnostic
+      if (diagnostic) throw new Error(diagnostic)
+      if (action === 'select') onSelectionChanged()
       setStatus(
         action === 'test'
           ? tr('testSucceeded')
@@ -153,6 +143,7 @@ export function UarInstancesPanel() {
   const save = async () => {
     if (!snapshot) return
     setBusy(true)
+    setFeedbackTarget('form')
     setError(undefined)
     setStatus(undefined)
     try {
@@ -193,9 +184,18 @@ export function UarInstancesPanel() {
           : { operation: 'unchanged' }
       })
       setSnapshot(next)
-      setDraft(emptyDraft())
-      setEditingId(undefined)
-      setStatus(t('common.saved'))
+      if (connectingDetected) {
+        setDraft((current) => ({ ...current, runtimeCredential: '', adminCredential: '' }))
+        const selected = await ipcApi.request('prometheus.uar.instances.select', {
+          expectedRevision: next.revision,
+          instanceId: id
+        })
+        setSnapshot(selected)
+        setDiscovery((current) => current && { ...current, decision: 'external' })
+        onSelectionChanged()
+      }
+      resetDraft()
+      setStatus(connectingDetected ? tr('defaultChanged') : t('common.saved'))
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
     } finally {
@@ -203,31 +203,75 @@ export function UarInstancesPanel() {
     }
   }
 
-  const edit = (instance: UarInstanceInventorySnapshot['instances'][number]) => {
-    setEditingId(instance.id)
-    setDraft({
-      id: instance.id,
-      name: instance.name,
-      enabled: instance.enabled,
-      expectedRuntimeId: instance.expectedRuntimeId,
-      profile: instance.profile,
-      minimumVersion: instance.minimumVersion,
-      workspaceLocation: instance.workspaceLocation,
-      workspaceRoots: instance.workspaceRoots.join('\n'),
-      requiredCapabilities: instance.requiredCapabilities.join(', '),
-      runtime: instance.endpoints.runtime,
-      administration: instance.endpoints.administration,
-      models: instance.endpoints.models,
-      console: instance.endpoints.console ?? '',
-      runtimeCredential: '',
-      adminCredential: ''
-    })
+  const resetDraft = () => {
+    setDraft(emptyUarInstanceDraft())
+    setEditingId(undefined)
+    setConnectingDetected(false)
     setError(undefined)
     setStatus(undefined)
   }
 
+  const edit = (instance: UarInstanceInventorySnapshot['instances'][number]) => {
+    setEditingId(instance.id)
+    setDraft(editUarInstanceDraft(instance))
+    setConnectingDetected(false)
+    setError(undefined)
+    setStatus(undefined)
+  }
+
+  const prepareDetected = () => {
+    if (!snapshot) return
+    const draft = discoveredUarInstanceDraft(
+      snapshot.instances,
+      t('settings.prometheus.integration.uarDiscoveryInstance')
+    )
+    setDraft(draft)
+    setEditingId(draft.id)
+    setConnectingDetected(true)
+    setError(undefined)
+    setStatus(undefined)
+    document.getElementById('uar-external-instance-form')?.focus()
+  }
+
+  const managedReady =
+    discovery?.decision === 'managed' &&
+    snapshot?.instances.some(
+      (instance) => instance.id === MANAGED_UAR_INSTANCE_ID && instance.compatibility === 'operational'
+    )
+  const feedback = error ? (
+    <div className="mt-3 text-sm text-error" role="alert">
+      {error}
+    </div>
+  ) : status ? (
+    <div className="mt-3 text-sm text-success" role="status">
+      {status}
+    </div>
+  ) : null
+
   return (
     <div className="space-y-5">
+      {discovery?.detected && (
+        <SettingGroup data-ui="uar-discovery">
+          <SettingTitle>{t('settings.prometheus.integration.uarDiscoveryTitle')}</SettingTitle>
+          <SettingDescription>{t('settings.prometheus.integration.uarDiscoveryDescription')}</SettingDescription>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              data-ui="uar-discovery-use-existing"
+              disabled={busy || !snapshot || connectingDetected}
+              onClick={prepareDetected}>
+              {t('settings.prometheus.integration.uarDiscoveryUseExisting')}
+            </Button>
+            <Button
+              data-ui="uar-discovery-start-managed"
+              variant="outline"
+              disabled={busy || !snapshot || managedReady}
+              onClick={() => void act('select', MANAGED_UAR_INSTANCE_ID)}>
+              {t('settings.prometheus.integration.uarDiscoveryStartManaged')}
+            </Button>
+          </div>
+          {feedbackTarget === 'discovery' && feedback}
+        </SettingGroup>
+      )}
       <SettingGroup>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -359,11 +403,20 @@ export function UarInstancesPanel() {
             migration={String(snapshot.migration.supported)} · {snapshot.migration.reason}
           </div>
         )}
+        {feedbackTarget === 'instances' && feedback}
       </SettingGroup>
 
-      <SettingGroup>
-        <SettingTitle>{tr('addTitle')}</SettingTitle>
-        <SettingDescription>{tr('addDescription')}</SettingDescription>
+      <SettingGroup
+        id="uar-external-instance-form"
+        role="group"
+        tabIndex={-1}
+        aria-labelledby="uar-external-instance-title">
+        <SettingTitle id="uar-external-instance-title">
+          {connectingDetected ? t('settings.prometheus.integration.uarDiscoveryUseExisting') : tr('addTitle')}
+        </SettingTitle>
+        <SettingDescription>
+          {connectingDetected ? t('settings.prometheus.integration.uarDiscoveryConnectHelp') : tr('addDescription')}
+        </SettingDescription>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <IntegrationField
             label={tr('id')}
@@ -441,31 +494,19 @@ export function UarInstancesPanel() {
           />
         </div>
         <div className="mt-4 flex gap-2">
-          <Button disabled={busy} onClick={() => void save()}>
-            {t('common.save')}
+          <Button
+            data-ui="uar-instance-save"
+            disabled={busy || !snapshot || (connectingDetected && !draft.expectedRuntimeId.trim())}
+            onClick={() => void save()}>
+            {connectingDetected ? t('settings.prometheus.integration.uarDiscoverySaveConnect') : t('common.save')}
           </Button>
           {editingId && (
-            <Button
-              variant="outline"
-              disabled={busy}
-              onClick={() => {
-                setEditingId(undefined)
-                setDraft(emptyDraft())
-              }}>
+            <Button variant="outline" disabled={busy} onClick={resetDraft}>
               {t('common.cancel')}
             </Button>
           )}
         </div>
-        {error && (
-          <div className="mt-3 text-sm text-error" role="alert">
-            {error}
-          </div>
-        )}
-        {status && (
-          <div className="mt-3 text-sm text-success" role="status">
-            {status}
-          </div>
-        )}
+        {feedbackTarget === 'form' && feedback}
       </SettingGroup>
     </div>
   )
