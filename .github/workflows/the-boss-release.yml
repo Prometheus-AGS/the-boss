@@ -1,5 +1,5 @@
 name: The Boss Release
-run-name: ${{ github.event_name == 'repository_dispatch' && format('Publish {0}-{1} {2}', github.event.client_payload.platform, github.event.client_payload.arch, github.event.client_payload.tag) || format('Installers ({0}) {1} @ {2}', inputs.release_profile, inputs.release_version, github.sha) }}
+run-name: ${{ format('Installers ({0}) {1} @ {2}', inputs.release_profile, inputs.release_version, github.sha) }}
 on:
   workflow_dispatch:
     inputs:
@@ -60,9 +60,10 @@ env:
 permissions:
   contents: read
 jobs:
-  platforms:
-    if: github.event_name == 'workflow_dispatch'
+  prepare-release:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     outputs:
       matrix: ${{ steps.select.outputs.matrix }}
       platforms: ${{ steps.select.outputs.platforms }}
@@ -72,36 +73,27 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
-      - name: Freeze release version, profile, and source
-        env:
-          REPLACE_PUBLISHED_PLATFORMS: ${{ inputs.replace_published_platforms && '1' || '0' }}
-          RELEASE_PLATFORMS: ${{ inputs.platforms }}
-        run: node scripts/release-preflight.cjs
-      - name: Import complete UAR sidecar payload
-        if: env.THE_BOSS_UAR_ENABLED == '1'
-        env:
-          RELEASE_PLATFORMS: ${{ inputs.platforms }}
-        run: node scripts/import-uar-sidecar-payloads.cjs
       - id: select
         env:
           RELEASE_PLATFORMS: ${{ inputs.platforms }}
         run: node scripts/release-platforms.cjs
-  prepare-release:
-    if: github.event_name == 'workflow_dispatch'
-    needs: platforms
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v7
+      - name: Freeze release version, profile, and source
+        env:
+          REPLACE_PUBLISHED_PLATFORMS: ${{ inputs.replace_published_platforms && '1' || '0' }}
+          RELEASE_PLATFORMS: ${{ steps.select.outputs.platforms }}
+        run: node scripts/release-preflight.cjs
+      - name: Import complete UAR sidecar payload
+        if: env.THE_BOSS_UAR_ENABLED == '1'
+        env:
+          RELEASE_PLATFORMS: ${{ steps.select.outputs.platforms }}
+        run: node scripts/import-uar-sidecar-payloads.cjs
       - name: Prepare versioned GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPLACE_PUBLISHED_PLATFORMS: ${{ inputs.replace_published_platforms && '1' || '0' }}
         run: node scripts/prepare-github-release.cjs
   build:
-    if: github.event_name == 'workflow_dispatch'
-    needs: [platforms, prepare-release]
+    needs: prepare-release
     name: Installer (${{ matrix.platform }}-${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
@@ -114,7 +106,7 @@ jobs:
       contents: write
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.platforms.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.prepare-release.outputs.matrix) }}
     steps:
       - name: Enable Windows long paths
         if: runner.os == 'Windows'
@@ -249,8 +241,7 @@ jobs:
           if-no-files-found: error
           retention-days: 90
   publish-complete-release:
-    if: github.event_name == 'workflow_dispatch'
-    needs: [platforms, build]
+    needs: [prepare-release, build]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -272,5 +263,5 @@ jobs:
           LANDING_DISPATCH_TOKEN: ${{ secrets.REPO_DISPATCH_TOKEN }}
           LANDING_REPOSITORY: Know-Me-Tools/boss-landing-spot
           RELEASE_BRANCH: ${{ github.event.repository.default_branch }}
-          RELEASE_PLATFORMS: ${{ needs.platforms.outputs.platforms }}
+          RELEASE_PLATFORMS: ${{ needs.prepare-release.outputs.platforms }}
         run: node scripts/publish-complete-release.cjs

@@ -12,7 +12,7 @@ const selectedPlatforms = new Set(
     : requiredPlatforms
 )
 const cliRecordUrls = process.argv.slice(2)
-const recordUrls =
+const suppliedRecordUrls =
   cliRecordUrls.length > 0
     ? cliRecordUrls
     : [
@@ -21,6 +21,10 @@ const recordUrls =
         process.env.UAR_DARWIN_ARM64_RECORD_URL,
         process.env.UAR_DARWIN_X64_RECORD_URL
       ].filter(Boolean)
+const pinnedPackages = loadJson(manifestPath).tools?.find((tool) => tool.name === 'uar-sidecar')?.packages
+const recordUrls = suppliedRecordUrls.length
+  ? suppliedRecordUrls
+  : [...selectedPlatforms].map((platform) => pinnedPackages?.[platform]?.url?.replace(/\.tar\.gz$/, '.json'))
 
 if (
   selectedPlatforms.size === 0 ||
