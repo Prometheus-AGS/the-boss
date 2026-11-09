@@ -40,7 +40,7 @@ are unavailable. The 2.2.42 dispatch defaults to `uar-enabled`; selecting the
 emergency profile is explicit.
 
 For a UAR customer release, dispatch the workflow with `release_profile` set to
-`uar-enabled` and provide all three immutable sidecar release record URLs. The workflow
+`uar-enabled`. The workflow reads immutable sidecar records from the committed integration manifest. Supply explicit record URLs when selecting an alternate published payload for the same source pins. The workflow
 imports and validates the complete Windows x64 and macOS arm64/x64 payload set before
 selecting jobs, repeats the import in each native job, and uses the explicit
 `build:win:x64:release:uar`, `build:mac:arm64:release:uar`, and
