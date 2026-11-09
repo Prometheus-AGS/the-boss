@@ -30,7 +30,13 @@
       "repository": "Prometheus-AGS/universal-agent-runtime",
       "revision": "70ec0cffc59490e5a37359a1385f74b2e0d29f97",
       "platformRevisions": {
-        "darwin-arm64": "70ec0cffc59490e5a37359a1385f74b2e0d29f97"
+        "darwin-arm64": "70ec0cffc59490e5a37359a1385f74b2e0d29f97",
+        "darwin-x64": "70ec0cffc59490e5a37359a1385f74b2e0d29f97",
+        "win32-x64": "70ec0cffc59490e5a37359a1385f74b2e0d29f97"
+      },
+      "windowsPatch": {
+        "path": "build/patches/uar-1.4.0-rc.3-windows-host-routes.patch",
+        "sha256": "50befa4acacc75228c77a8ce25e5782b28618d1a10e1109188c8a79a68d432f8"
       }
     },
     "surreal-memory": {
@@ -72,6 +78,32 @@
           ],
           "archive": "none",
           "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.45-compass-6dd2d24d/compass-darwin-arm64"
+        },
+        "darwin-x64": {
+          "source": {
+            "repository": "GQAdonis/compass",
+            "revision": "6dd2d24d9c15aa1afe46ec6e75cd2df5207c271a"
+          },
+          "size": 178881548,
+          "sha256": "b58700e07412f41cc6432afbbafd2fe135545851c8fd060e8e1ffe340272e313",
+          "archive": "none",
+          "binaries": [
+            "compass"
+          ],
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.45-compass-6dd2d24d/compass-darwin-x64"
+        },
+        "win32-x64": {
+          "source": {
+            "repository": "GQAdonis/compass",
+            "revision": "6dd2d24d9c15aa1afe46ec6e75cd2df5207c271a"
+          },
+          "size": 199287808,
+          "sha256": "9deff91a43e4386959fa525b36d7e7bd6000bc1fbe21fa6a66ff0ea6d56b8f00",
+          "archive": "none",
+          "binaries": [
+            "compass.exe"
+          ],
+          "url": "https://github.com/Prometheus-AGS/the-boss/releases/download/boss-tools-2.2.45-compass-6dd2d24d/compass-win32-x64.exe"
         }
       }
     },
@@ -4694,6 +4726,51 @@
             "uar-models/tokenizer_config.json",
             "uar-models/tokenizer.json",
             "uar-sidecar",
+            "payload-manifest.json"
+          ]
+        },
+        "darwin-x64": {
+          "source": "70ec0cffc59490e5a37359a1385f74b2e0d29f97",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-darwin-x64-v1.4.0-rc.3-70ec0cff/uar-sidecar-darwin-x64.tar.gz",
+          "sha256": "5cb5bf8853cf4a82527ef222df5ac25302d8af3c47a848cdccb9c402430c44fc",
+          "archive": "tar.gz",
+          "binaries": [
+            "libcrc_fast-6ebcae43e7a1a705.dylib",
+            "libsevenz_rust2-cd632bb2f0d94f9a.dylib",
+            "LICENSE",
+            "policies/default.cedar",
+            "policies/skill-mutation.cedar",
+            "policies/tool-approval.cedar",
+            "uar-models/bg-small-en-v1.5.onnx",
+            "uar-models/config.json",
+            "uar-models/MODEL-NOTICE.txt",
+            "uar-models/special_tokens_map.json",
+            "uar-models/tokenizer_config.json",
+            "uar-models/tokenizer.json",
+            "uar-sidecar",
+            "payload-manifest.json"
+          ]
+        },
+        "win32-x64": {
+          "source": "70ec0cffc59490e5a37359a1385f74b2e0d29f97",
+          "url": "https://github.com/Prometheus-AGS/universal-agent-runtime/releases/download/boss-sidecar-win32-x64-v1.4.0-rc.3-70ec0cff-50befa4a/uar-sidecar-win32-x64.tar.gz",
+          "sha256": "11dac12fadd2fe0538762fbbb03b7490bf89704c1b8bdd367b939f4dfe08dfae",
+          "patchSha256": "50befa4acacc75228c77a8ce25e5782b28618d1a10e1109188c8a79a68d432f8",
+          "archive": "tar.gz",
+          "binaries": [
+            "crc_fast-a88bb6e52d953dad.dll",
+            "LICENSE",
+            "policies/default.cedar",
+            "policies/skill-mutation.cedar",
+            "policies/tool-approval.cedar",
+            "sevenz_rust2-93da486c24c06f3e.dll",
+            "uar-models/bg-small-en-v1.5.onnx",
+            "uar-models/config.json",
+            "uar-models/MODEL-NOTICE.txt",
+            "uar-models/special_tokens_map.json",
+            "uar-models/tokenizer_config.json",
+            "uar-models/tokenizer.json",
+            "uar-sidecar.exe",
             "payload-manifest.json"
           ]
         }
