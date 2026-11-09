@@ -1,3 +1,4 @@
+import { t } from 'i18next'
 import { lazy, Suspense, useEffect, useMemo } from 'react'
 
 import { usePreference } from '@data/hooks/usePreference'
@@ -28,7 +29,10 @@ import { useAutoReadPreferenceSync } from '@renderer/hooks/useAutoReadPreference
 import { useIsPrivacyUpdateRequired } from '@renderer/hooks/useIsPrivacyUpdateRequired'
 import { useStorageMonitorNotification } from '@renderer/hooks/useStorageMonitorNotification'
 import { useWindowRuntime } from '@renderer/hooks/useWindowRuntime'
+import { ipcApi } from '@renderer/ipc'
 import { registerImageModeChooser } from '@renderer/services/imageExportModeChooser'
+import { openRoute } from '@renderer/services/mainWindowNavigation'
+import { toast } from '@renderer/services/toast'
 import { getSidebarDefaultLandingUrl } from '@renderer/utils/sidebar'
 import { WindowFileEditRecovery } from '@renderer/windows/WindowFileEditRecovery'
 import type { Tab } from '@shared/data/cache/cacheValueTypes'
@@ -65,10 +69,39 @@ function BootFallback(): React.ReactElement {
 //
 // Headless: it runs hooks and renders nothing. The popup/toast hosts are explicit
 // siblings in the App JSX below, so a window's host composition is visible there.
-function MainWindowRuntime(): null {
+function MainWindowRuntime({ canNotifyUarDiscovery }: { canNotifyUarDiscovery: boolean }): null {
   useWindowRuntime()
   useAutoReadPreferenceSync()
   useMainWindowNavigation()
+
+  useEffect(() => {
+    if (!canNotifyUarDiscovery) return
+    let active = true
+    const key = 'uar-local-discovery'
+    void ipcApi
+      .request('prometheus.uar.discovery.read', {})
+      .then(({ detected, decision }) => {
+        if (!active || !detected || decision !== 'ask') return
+        toast.info({
+          key,
+          timeout: 0,
+          title: t('settings.prometheus.integration.uarDiscoveryTitle'),
+          description: t('settings.prometheus.integration.uarDiscoveryDescription'),
+          action: {
+            label: t('common.settings'),
+            onClick: () => {
+              openRoute('/settings/uar', { panel: 'instances' })
+              toast.closeToast(key)
+            }
+          }
+        })
+      })
+      .catch((error) => logger.warn('Failed to check for an existing UAR', { error }))
+    return () => {
+      active = false
+      toast.closeToast(key)
+    }
+  }, [canNotifyUarDiscovery])
 
   // Register the real (component-layer) image-mode popup behind the services seam.
   // subWindow registers the same effect (SubWindowApp) — detached tabs render the
@@ -131,7 +164,7 @@ export function MainWindowContent(): React.ReactElement {
           ) : (
             <AppShell />
           )}
-          <MainWindowRuntime />
+          <MainWindowRuntime canNotifyUarDiscovery={providerSetupStatus !== 'pending' && !privacyGateOpen} />
           <ConversationNotificationRuntime />
           <McpInteractionHost />
           <PopupHost />

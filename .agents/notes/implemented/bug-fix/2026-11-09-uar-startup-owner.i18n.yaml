@@ -1,0 +1,5 @@
+# Bilingual-pair consistency record (docs/dev/i18n/README.md).
+# After editing either side, update its counterpart and re-record with:
+#   pnpm docs:check-pairing --write .agents/notes/implemented/bug-fix/2026-11-09-uar-startup-owner.md
+2026-11-09-uar-startup-owner.md: 4d11e083320ff72d5feea42937e433d02fbeb7a5
+2026-11-09-uar-startup-owner.zh.md: 6df915ed6aef889d44b2097f74fa16bd754976f6

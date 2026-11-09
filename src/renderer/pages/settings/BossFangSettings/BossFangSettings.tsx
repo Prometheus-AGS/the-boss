@@ -285,17 +285,14 @@ export default function BossFangSettings() {
             </SettingGroup>
             <SettingGroup id={getSettingDomId('/settings/bossfang', 'connection')}>
               <SettingTitle>{t('bossfang.uarConnection')}</SettingTitle>
-              <SettingDescription>{t('bossfang.connectionIndependent')}</SettingDescription>
+              <SettingDescription>{t('bossfang.connectionFollowsUar')}</SettingDescription>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <Choice
-                  token="bossfang-uar-instance"
-                  label={t('bossfang.uarInstance')}
-                  value={draft.uarInstanceId}
-                  onChange={(uarInstanceId) => update({ uarInstanceId })}
-                  options={(inventory?.instances ?? [])
-                    .filter((x) => x.enabled)
-                    .map((x) => ({ value: x.id, label: x.name }))}
-                />
+                <dl className="min-w-0 space-y-1.5">
+                  <dt className="text-sm font-medium">{t('bossfang.uarInstance')}</dt>
+                  <dd className="break-words text-sm">
+                    {inventory?.instances.find((instance) => instance.selected)?.name ?? status.requested.uarInstanceId}
+                  </dd>
+                </dl>
                 <Choice
                   token="bossfang-workspace"
                   label={t('bossfang.workspace')}
@@ -324,7 +321,7 @@ export default function BossFangSettings() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button
                   data-ui="bossfang-connect"
-                  disabled={dirty || status.status !== 'running'}
+                  disabled={dirty || status.status === 'starting'}
                   onClick={() =>
                     void act(async () => {
                       const next = await ipcApi.request('bossfang.connect')
@@ -346,7 +343,11 @@ export default function BossFangSettings() {
                   }>
                   {t('bossfang.disconnect')}
                 </Button>
-                <Link data-ui="bossfang-settings-link" to="/settings/uar" className="self-center text-sm text-link">
+                <Link
+                  data-ui="bossfang-settings-link"
+                  to="/settings/uar"
+                  search={{ panel: 'instances' }}
+                  className="self-center text-sm text-link">
                   {t('bossfang.configureUar')}
                 </Link>
               </div>
@@ -366,7 +367,7 @@ export default function BossFangSettings() {
               </SettingGroup>
             )}
             <ModelSources
-              instanceId={draft.uarInstanceId}
+              instanceId={status.requested.uarInstanceId}
               disabled={dirty || status.configurationPending}
               onConfigured={async (id) => {
                 setModels(await ipcApi.request('bossfang.models'))
@@ -499,7 +500,7 @@ export default function BossFangSettings() {
                         }
                         const token = {
                           configure_credentials: 'bossfang-username',
-                          select_uar: 'bossfang-uar-instance',
+                          select_uar: 'bossfang-settings-link',
                           select_workspace: 'bossfang-workspace',
                           select_model: 'bossfang-model',
                           retry: 'bossfang-diagnostic-start'

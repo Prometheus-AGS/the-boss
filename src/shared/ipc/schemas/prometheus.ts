@@ -780,6 +780,10 @@ export const prometheusRequestSchemas = {
     input: z.object({}).strict(),
     output: z.custom<UarInstanceInventorySnapshot>()
   }),
+  'prometheus.uar.discovery.read': defineRoute({
+    input: z.object({}).strict(),
+    output: z.object({ detected: z.boolean(), decision: z.enum(['ask', 'managed', 'external']) })
+  }),
   'prometheus.uar.instances.save': defineRoute({
     input: uarInstanceSaveSchema,
     output: z.custom<UarInstanceInventorySnapshot>()

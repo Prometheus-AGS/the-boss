@@ -91,6 +91,8 @@ export const uarStorageConfigSchema = z
     backend: z.enum(['embedded', 'remote']).default('embedded'),
     remoteDurabilityAttested: z.boolean().default(false),
     port: z.number().int().min(1).max(65535).default(1906),
+    ingestionDirectory: z.string().trim().max(4096).default(''),
+    localDiscoveryDecision: z.enum(['ask', 'managed', 'external']).default('ask'),
     endpoint: uarEndpoint.default('http://127.0.0.1:28000'),
     namespace: z
       .string()

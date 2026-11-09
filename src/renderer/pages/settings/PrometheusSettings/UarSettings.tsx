@@ -49,7 +49,7 @@ export default function UarSettings() {
                   <Link data-ui="bossfang-settings-entry" to="/settings/bossfang" className="text-link">
                     {t('bossfang.settingsLink')}
                   </Link>
-                  <SettingHelpText>{t('bossfang.connectionIndependent')}</SettingHelpText>
+                  <SettingHelpText>{t('bossfang.connectionFollowsUar')}</SettingHelpText>
                 </SettingGroup>
                 <UarIntegrationStatus
                   snapshot={snapshot}
@@ -69,6 +69,12 @@ export default function UarSettings() {
                   <SettingDescription>{integrationText(t, 'uarConfigurationDescription')}</SettingDescription>
                   <SettingDivider />
                   <div className="space-y-4">
+                    <IntegrationField
+                      label={integrationText(t, 'uarIngestionDirectory')}
+                      value={controller.draft.uar.ingestionDirectory}
+                      help={integrationText(t, 'uarIngestionDirectoryHelp')}
+                      onChange={(ingestionDirectory) => controller.update('uar', { ingestionDirectory })}
+                    />
                     <IntegrationField
                       label={integrationText(t, 'uarPreferredPort')}
                       type="number"

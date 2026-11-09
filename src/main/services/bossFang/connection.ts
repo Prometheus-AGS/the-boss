@@ -41,10 +41,10 @@ export class BossFangConnection {
   get expiresAt(): string | null {
     return this.current?.grant?.expires_at ?? null
   }
-  async connect(config: BossFangConfig) {
-    return this.mutex.runExclusive(() => this.connectUnlocked(config))
+  async connect(config: BossFangConfig, endpoint: UarSidecarEndpoint) {
+    return this.mutex.runExclusive(() => this.connectUnlocked(config, endpoint))
   }
-  private async connectUnlocked(config: BossFangConfig) {
+  private async connectUnlocked(config: BossFangConfig, endpoint?: UarSidecarEndpoint) {
     this.stopped = false
     this.config = structuredClone(config)
     this.retryConnection = false
@@ -53,7 +53,7 @@ export class BossFangConnection {
     let candidate: PrivateUarAuthorization | undefined,
       applied = false
     try {
-      candidate = await this.retained.create(config.uarInstanceId, config.workspaceId)
+      candidate = await this.retained.create(config.uarInstanceId, config.workspaceId, undefined, endpoint)
       const response = await this.request('/api/uar/connect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

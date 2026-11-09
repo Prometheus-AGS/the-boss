@@ -174,7 +174,7 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
     void navigate({ search: (previous) => ({ ...previous, panel }), replace: false })
   }
 
-  if (loading && selectedId !== 'lifecycle') return <LoadingWorkspace />
+  if (loading && selectedId !== 'lifecycle' && selectedId !== 'instances') return <LoadingWorkspace />
   if ((error || !snapshot) && selectedId === 'overview') {
     return (
       <div className="space-y-5">
@@ -189,7 +189,8 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
         <Button variant="outline" size="sm" onClick={() => selectSurface('lifecycle')}>
           {navText(t, 'surface.lifecycle')}
         </Button>
-        <UarInstancesPanel />
+        <UarInstancesPanel onSelectionChanged={() => void load()} />
+        {overview}
       </div>
     )
   }
@@ -283,7 +284,10 @@ export function UarAdministrationWorkspace({ overview, onReady }: { overview: Re
           ) : selectedId === 'runtime-settings' ? (
             <UarRuntimeSettingsPanel />
           ) : selectedId === 'instances' ? (
-            <UarInstancesPanel />
+            <UarInstancesPanel onSelectionChanged={() => {
+              void loadInventory()
+              void load()
+            }} />
           ) : selectedId === 'providers-models' ? (
             <UarProvidersModelsPanel />
           ) : selectedId === 'agents' ? (
