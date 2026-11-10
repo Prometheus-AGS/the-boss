@@ -98,6 +98,51 @@ const finishEvent = () =>
 
 const { PdfTranslationService } = await import('../PdfTranslationService')
 
+type TestChild = EventEmitter & { stderr: PassThrough; stdout: PassThrough; kill: ReturnType<typeof vi.fn> }
+
+function holdSidecars(...jobIds: string[]) {
+  const children = new Map<string, TestChild>()
+  const spawned = Promise.withResolvers<void>()
+  let draining = false
+
+  mocks.spawn.mockImplementation((_command: string, args: string[]) => {
+    const outputDir = args[args.indexOf('--output') + 1]
+    const child = new EventEmitter() as TestChild
+    child.stderr = new PassThrough()
+    child.stdout = new PassThrough()
+    child.kill = vi.fn(() => {
+      if (draining) queueMicrotask(() => child.emit('close', null, 'SIGTERM'))
+    })
+    children.set(path.basename(outputDir), child)
+    if (jobIds.every((jobId) => children.has(jobId))) spawned.resolve()
+    return child
+  })
+
+  return {
+    children,
+    async wait(...translations: Promise<unknown>[]) {
+      const timer = setTimeout(() => spawned.reject(new Error('Timed out waiting for BabelDOC to spawn')), 10_000)
+      try {
+        await Promise.race([
+          spawned.promise,
+          ...translations.map((translation) =>
+            translation.then(() => {
+              throw new Error('PDF translation completed before its sidecar was ready')
+            })
+          )
+        ])
+      } finally {
+        clearTimeout(timer)
+      }
+    },
+    async drain(service: InstanceType<typeof PdfTranslationService>, ...translations: Promise<unknown>[]) {
+      draining = true
+      for (const jobId of jobIds) service.cancel(jobId)
+      await Promise.allSettled(translations)
+    }
+  }
+}
+
 describe('PdfTranslationService', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -623,14 +668,7 @@ describe('PdfTranslationService', () => {
   })
 
   it('terminates the sidecar and cleans partial output when the job is cancelled', async () => {
-    let child: (EventEmitter & { stderr: PassThrough; stdout: PassThrough; kill: ReturnType<typeof vi.fn> }) | undefined
-    mocks.spawn.mockImplementationOnce(() => {
-      child = new EventEmitter() as typeof child & EventEmitter
-      child.stderr = new PassThrough()
-      child.stdout = new PassThrough()
-      child.kill = vi.fn()
-      return child
-    })
+    const sidecars = holdSidecars('job-cancel')
     const service = new PdfTranslationService()
     const pending = service.translate({
       jobId: 'job-cancel',
@@ -640,12 +678,17 @@ describe('PdfTranslationService', () => {
       targetLangCode: 'zh-cn'
     })
 
-    await vi.waitFor(() => expect(child).toBeDefined())
-    service.cancel('job-cancel')
-    child!.emit('close', null, 'SIGTERM')
+    try {
+      await sidecars.wait(pending)
+      const child = sidecars.children.get('job-cancel')!
+      service.cancel('job-cancel')
+      child.emit('close', null, 'SIGTERM')
 
-    await expect(pending).rejects.toThrow('PDF translation cancelled')
-    expect(child!.kill).toHaveBeenCalledTimes(1)
+      await expect(pending).rejects.toThrow('PDF translation cancelled')
+      expect(child.kill).toHaveBeenCalledTimes(1)
+    } finally {
+      await sidecars.drain(service, pending)
+    }
     expect(disposeCredential).toHaveBeenCalledOnce()
     expect(fs.existsSync(path.join(TEST_ROOT, 'job-cancel'))).toBe(false)
     // Cancellation is expected — it must not be logged as a failure.
@@ -657,7 +700,6 @@ describe('PdfTranslationService', () => {
   })
 
   it('kills the sidecar when cancel lands in the window between the last check and spawn', async () => {
-    type TestChild = EventEmitter & { stderr: PassThrough; stdout: PassThrough; kill: ReturnType<typeof vi.fn> }
     let child: TestChild | undefined
     const service = new PdfTranslationService()
     mocks.spawn.mockImplementationOnce(() => {
@@ -686,15 +728,7 @@ describe('PdfTranslationService', () => {
   })
 
   it('waits for active translation cleanup before stopping', async () => {
-    type TestChild = EventEmitter & { stderr: PassThrough; stdout: PassThrough; kill: ReturnType<typeof vi.fn> }
-    let child: TestChild | undefined
-    mocks.spawn.mockImplementationOnce(() => {
-      child = new EventEmitter() as TestChild
-      child.stderr = new PassThrough()
-      child.stdout = new PassThrough()
-      child.kill = vi.fn()
-      return child
-    })
+    const sidecars = holdSidecars('job-stop')
     class TestPdfTranslationService extends PdfTranslationService {
       public stopForTest() {
         return this.onStop()
@@ -709,41 +743,44 @@ describe('PdfTranslationService', () => {
       targetLangCode: 'zh-cn'
     })
 
-    await vi.waitFor(() => expect(child).toBeDefined())
-    let stopped = false
-    const stopping = service.stopForTest().then(() => {
-      stopped = true
-    })
-    await Promise.resolve()
+    try {
+      await sidecars.wait(translation)
+      const child = sidecars.children.get('job-stop')!
+      let stopped = false
+      const stopping = service.stopForTest().then(() => {
+        stopped = true
+      })
+      await Promise.resolve()
 
-    expect(child!.kill).toHaveBeenCalledTimes(1)
-    expect(stopped).toBe(false)
+      expect(child.kill).toHaveBeenCalledTimes(1)
+      expect(stopped).toBe(false)
 
-    child!.emit('close', null, 'SIGTERM')
-    await Promise.all([stopping, expect(translation).rejects.toThrow('PDF translation cancelled')])
+      child.emit('close', null, 'SIGTERM')
+      await Promise.all([stopping, expect(translation).rejects.toThrow('PDF translation cancelled')])
+    } finally {
+      await sidecars.drain(service, translation)
+    }
 
     expect(fs.existsSync(path.join(TEST_ROOT, 'job-stop'))).toBe(false)
   })
 
   it('takes and releases exactly one gateway lease per concurrent job', async () => {
-    type TestChild = EventEmitter & { stderr: PassThrough; stdout: PassThrough; kill: ReturnType<typeof vi.fn> }
-    const children = new Map<string, TestChild>()
-    mocks.spawn.mockImplementation((_command: string, args: string[]) => {
-      const child = new EventEmitter() as TestChild
-      child.stderr = new PassThrough()
-      child.stdout = new PassThrough()
-      child.kill = vi.fn()
-      const outputDir = args[args.indexOf('--output') + 1]
-      fs.mkdirSync(outputDir, { recursive: true })
-      fs.writeFileSync(path.join(outputDir, 'research paper.no_watermark.zh-CN.mono.pdf'), '%PDF-mono')
-      children.set(path.basename(outputDir), child)
-      return child
-    })
+    const sidecars = holdSidecars('job-first', 'job-second')
+    const disposeFirst = vi.fn()
+    const disposeSecond = vi.fn()
+    mocks.modelGetByKey.mockImplementation((_provider: string, apiModelId: string) => ({ apiModelId }))
+    apiGateway.createScopedCredential.mockImplementation(({ model }: { model: string }) =>
+      Promise.resolve({
+        baseUrl: 'http://127.0.0.1:23333',
+        apiKey: 'cs-sk-test',
+        dispose: model === 'openai:job-first' ? disposeFirst : disposeSecond
+      })
+    )
     const service = new PdfTranslationService()
     const translate = (jobId: string) =>
       service.translate({
         jobId,
-        modelId: 'openai::gpt-4.1-internal',
+        modelId: `openai::${jobId}`,
         sourcePath: SOURCE_PATH,
         sourceLangCode: 'en-us',
         targetLangCode: 'zh-cn'
@@ -751,15 +788,39 @@ describe('PdfTranslationService', () => {
 
     const first = translate('job-first')
     const second = translate('job-second')
-    await vi.waitFor(() => expect(children.size).toBe(2))
+    const finish = (jobId: string) => {
+      const child = sidecars.children.get(jobId)!
+      fs.writeFileSync(path.join(TEST_ROOT, jobId, 'research paper.no_watermark.zh-CN.mono.pdf'), '%PDF-mono')
+      child.stdout.write(finishEvent())
+      child.emit('close', 0, null)
+    }
 
-    children.get('job-first')!.stdout.write(finishEvent())
-    children.get('job-first')!.emit('close', 0, null)
-    await first
+    try {
+      await sidecars.wait(first, second)
+      expect(apiGateway.createScopedCredential).toHaveBeenCalledTimes(2)
+      expect(apiGateway.createScopedCredential).toHaveBeenCalledWith({
+        path: '/v1/chat/completions',
+        model: 'openai:job-first'
+      })
+      expect(apiGateway.createScopedCredential).toHaveBeenCalledWith({
+        path: '/v1/chat/completions',
+        model: 'openai:job-second'
+      })
+      expect(disposeFirst).not.toHaveBeenCalled()
+      expect(disposeSecond).not.toHaveBeenCalled()
 
-    children.get('job-second')!.stdout.write(finishEvent())
-    children.get('job-second')!.emit('close', 0, null)
-    await second
+      finish('job-first')
+      await first
+      expect(disposeFirst).toHaveBeenCalledOnce()
+      expect(disposeSecond).not.toHaveBeenCalled()
+
+      finish('job-second')
+      await second
+      expect(disposeFirst).toHaveBeenCalledOnce()
+      expect(disposeSecond).toHaveBeenCalledOnce()
+    } finally {
+      await sidecars.drain(service, first, second)
+    }
   })
 
   it('logs the failure and surfaces the stderr tail when the sidecar exits non-zero', async () => {
