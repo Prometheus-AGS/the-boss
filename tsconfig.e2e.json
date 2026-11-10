@@ -12,6 +12,7 @@
     "playwright.regression.config.ts",
     "src/preload/*.d.ts",
     "src/main/env.d.ts",
-    "src/main/services/automation/markdown.d.ts"
+    "src/main/services/automation/markdown.d.ts",
+    "src/main/utils/nodeMacPermissions.d.ts"
   ]
 }

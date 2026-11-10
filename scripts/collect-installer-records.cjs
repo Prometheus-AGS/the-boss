@@ -20,8 +20,14 @@ function run(command, args) {
   return execFileSync(command, args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }).trim()
 }
 
-if (!repository || !branch || !/^[a-f0-9]{40}$/.test(source ?? '') || !/^\d+\.\d+\.\d+$/.test(version ?? '') ||
-    runIds.some((id) => !/^\d+$/.test(id)) || new Set(runIds).size !== runIds.length) {
+if (
+  !repository ||
+  !branch ||
+  !/^[a-f0-9]{40}$/.test(source ?? '') ||
+  !/^\d+\.\d+\.\d+$/.test(version ?? '') ||
+  runIds.some((id) => !/^\d+$/.test(id)) ||
+  new Set(runIds).size !== runIds.length
+) {
   throw new Error('Supply the frozen source, version and unique native installer run IDs')
 }
 run('git', ['merge-base', '--is-ancestor', source, `origin/${branch}`])
@@ -31,8 +37,11 @@ try {
   for (const id of runIds) {
     const endpoint = `repos/${repository}/actions/runs/${id}`
     const releaseRun = JSON.parse(run('gh', ['api', endpoint]))
-    if (releaseRun.head_sha !== source || releaseRun.path !== '.github/workflows/the-boss-release.yml' ||
-        releaseRun.status !== 'completed') {
+    if (
+      releaseRun.head_sha !== source ||
+      releaseRun.path !== '.github/workflows/the-boss-release.yml' ||
+      releaseRun.status !== 'completed'
+    ) {
       throw new Error(`Run ${id} is not a completed installer run at the frozen source`)
     }
     const { jobs } = JSON.parse(run('gh', ['api', `${endpoint}/jobs?per_page=100`]))
@@ -45,8 +54,12 @@ try {
       run('gh', ['run', 'download', id, '--repo', repository, '--name', basename, '--dir', directory])
       const file = path.join(directory, `${basename}.json`)
       const record = JSON.parse(fs.readFileSync(file, 'utf8'))
-      if (record.source !== source || record.version !== version || record.profile !== profile.id ||
-          `${record.platform}-${record.arch}` !== platform) {
+      if (
+        record.source !== source ||
+        record.version !== version ||
+        record.profile !== profile.id ||
+        `${record.platform}-${record.arch}` !== platform
+      ) {
         throw new Error(`Installer record for ${platform} does not match the frozen release`)
       }
       records.set(platform, file)

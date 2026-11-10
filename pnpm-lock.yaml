@@ -275,15 +275,9 @@ importers:
 
   .:
     dependencies:
-      '@a2ui/web_core':
-        specifier: 0.10.6
-        version: 0.10.6
       '@anthropic-ai/claude-agent-sdk':
         specifier: 0.3.311
         version: 0.3.311(patch_hash=b89b3f4bbaf29e79be6f1de79f027ab65862b7656ce3d1c3ae7481f016093abe)(@anthropic-ai/sdk@0.93.0(zod@4.4.3))(@modelcontextprotocol/sdk@1.32.0(@cfworker/json-schema@4.1.1)(supports-color@8.1.1)(zod@4.4.3))(zod@4.4.3)
-      '@base-ui/react':
-        specifier: 1.7.0
-        version: 1.7.0(@date-fns/tz@1.4.1)(@types/react@19.2.7)(date-fns@4.4.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@cherrystudio/agent-behavior':
         specifier: workspace:*
         version: link:packages/agent-behavior
@@ -356,12 +350,6 @@ importers:
       '@paymoapp/electron-shutdown-handler':
         specifier: 1.2.0
         version: 1.2.0
-      '@prometheus-ags/a2ui-core':
-        specifier: workspace:*
-        version: link:packages/a2ui-core
-      '@prometheus-ags/a2ui-uar':
-        specifier: workspace:*
-        version: link:packages/a2ui-uar
       '@rainbowatcher/toml-edit-js':
         specifier: 0.6.5
         version: 0.6.5
@@ -413,9 +401,6 @@ importers:
       range-parser:
         specifier: 1.2.1
         version: 1.2.1
-      react-aria-components:
-        specifier: ^1.20.0
-        version: 1.22.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       registry-js:
         specifier: 1.16.1
         version: 1.16.1
@@ -444,6 +429,9 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
+      '@a2ui/web_core':
+        specifier: 0.10.6
+        version: 0.10.6
       '@ai-sdk/amazon-bedrock':
         specifier: ^4.0.96
         version: 4.0.96(patch_hash=7f2fa5c38067d9e6a9f575a279b30ca54ee5bfc4984d97ad2f13a7c2662d85ee)(zod@4.4.3)
@@ -522,6 +510,9 @@ importers:
       '@babel/runtime':
         specifier: ^7.29.7
         version: 7.29.7
+      '@base-ui/react':
+        specifier: 1.7.0
+        version: 1.7.0(@date-fns/tz@1.4.1)(@types/react@19.2.7)(date-fns@4.4.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@changesets/changelog-github':
         specifier: ^1.0.1
         version: 1.0.1
@@ -744,6 +735,12 @@ importers:
       '@playwright/test':
         specifier: ^1.62.1
         version: 1.62.1
+      '@prometheus-ags/a2ui-core':
+        specifier: workspace:*
+        version: link:packages/a2ui-core
+      '@prometheus-ags/a2ui-uar':
+        specifier: workspace:*
+        version: link:packages/a2ui-uar
       '@radix-ui/react-context-menu':
         specifier: ^2.3.3
         version: 2.3.3(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -1374,6 +1371,9 @@ importers:
       react:
         specifier: ^19.3.1
         version: 19.3.1
+      react-aria-components:
+        specifier: ^1.20.0
+        version: 1.22.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       react-dom:
         specifier: ^19.3.1
         version: 19.3.1(react@19.3.1)
@@ -2105,6 +2105,9 @@ importers:
       '@deepseek-ai/dsh-attachment-local':
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-attachment@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-brand@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))(@deepseek-ai/dsh-home-paths@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@types/node@24.10.4)
+      '@deepseek-ai/dsh-authorization':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-credentials@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
       '@deepseek-ai/dsh-bash-local':
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-shell@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-sandbox@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-session@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-scope@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))))(@deepseek-ai/dsh-subprocess@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-http-proxy@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))))(@deepseek-ai/dsh-subprocess@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-http-proxy@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))(@deepseek-ai/dsh-timeout@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
@@ -2135,6 +2138,9 @@ importers:
       '@deepseek-ai/dsh-credentials':
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
+      '@deepseek-ai/dsh-deepseek-llm-api-extensions':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-fs':
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-brand@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-sandbox@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-session@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-scope@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))))
@@ -2148,6 +2154,9 @@ importers:
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(95a583d913aaf9da283cd98c2121b4a4)
       '@deepseek-ai/dsh-home-paths':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
+      '@deepseek-ai/dsh-http-proxy':
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/dsh-invariants':
@@ -2165,6 +2174,9 @@ importers:
       '@deepseek-ai/dsh-llm-deepseek':
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(92203fffa8eb22d3bf471936e9f2add5)
+      '@deepseek-ai/dsh-llm-deepseek-api-key':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis-plugin-loader@1.0.5)(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-credentials@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))(@deepseek-ai/dsh-launch-environment@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-llm-deepseek@0.2.0-rc.2(92203fffa8eb22d3bf471936e9f2add5))(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
       '@deepseek-ai/dsh-llm-pi-ai':
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(patch_hash=22e1bba3e6b5d2567a6c64821bc2310147b41f8f6d993774d1c65b249f7d6d78)(7734a073776129db1461879fd3ccf32d)
@@ -2177,6 +2189,9 @@ importers:
       '@deepseek-ai/dsh-plan-mode':
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(7585d9181a66a0f732bf6a1d4f23833d)
+      '@deepseek-ai/dsh-ptc-runtime':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-sandbox@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-session@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-scope@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))))
       '@deepseek-ai/dsh-pwsh-local':
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-shell@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-sandbox@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-session@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-scope@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))))(@deepseek-ai/dsh-subprocess@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-http-proxy@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))))(@deepseek-ai/dsh-subprocess@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-http-proxy@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))(@deepseek-ai/dsh-timeout@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
@@ -2309,6 +2324,9 @@ importers:
       '@deepseek-ai/dsh-user-questions':
         specifier: 0.2.0-rc.2
         version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-agent@0.2.0-rc.2(b872d4d836bb263e5b3a50782f98c977))(@deepseek-ai/dsh-llm@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))(@deepseek-ai/dsh-scope@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))(@deepseek-ai/dsh-session-projection@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-session@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-scope@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)))))(@deepseek-ai/dsh-session@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-scope@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)(@deepseek-ai/dsh-invariants@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))))(@deepseek-ai/dsh-typert-protocol@0.2.0-rc.2(@deepseek-ai/cordis@4.0.4))
+      '@deepseek-ai/dsh-util-time':
+        specifier: 0.2.0-rc.2
+        version: 0.2.0-rc.2(@deepseek-ai/cordis@4.0.4)
       '@deepseek-ai/node-addon-system':
         specifier: 0.1.2
         version: 0.1.2

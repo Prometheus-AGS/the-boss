@@ -40,19 +40,19 @@ describe('AppMenuService official website', () => {
   })
 
   it.each([
-    ['zh-CN', 'https://cherryai.com.cn'],
-    ['zh-TW', 'https://cherryai.com.cn'],
-    ['en-US', 'https://cherryai.com'],
-    ['ja-JP', 'https://cherryai.com']
-  ] as const)('opens the official site and documentation for %s', async (language, websiteUrl) => {
+    ['zh-CN', 'https://cherryai.com.cn/docs'],
+    ['zh-TW', 'https://cherryai.com.cn/docs'],
+    ['en-US', 'https://cherryai.com/docs'],
+    ['ja-JP', 'https://cherryai.com/docs']
+  ] as const)('opens The Boss website and localized documentation for %s', async (language, docsUrl) => {
     MockMainPreferenceServiceUtils.setPreferenceValue('app.language', language)
     await service._doInit()
     const template = menu.buildFromTemplate.mock.calls.at(-1)?.[0] as MenuItemConstructorOptions[]
     const help = template.at(-1)?.submenu as MenuItemConstructorOptions[]
 
     for (const [label, url] of [
-      [t('appMenu.website'), websiteUrl],
-      [t('appMenu.documentation'), `${websiteUrl}/docs`]
+      [t('appMenu.website'), 'https://the-boss.know-me.tools'],
+      [t('appMenu.documentation'), docsUrl]
     ]) {
       const item = help.find((entry) => entry.label === label)
       expect(item?.click).toBeTypeOf('function')

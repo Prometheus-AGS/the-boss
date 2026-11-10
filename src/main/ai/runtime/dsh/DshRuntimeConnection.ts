@@ -664,13 +664,15 @@ export class DshRuntimeConnection implements AgentRuntimeConnection {
       ['messages', usage.messageTokens]
     ] as const
     const categories = estimates
-      .map(([key, tokens]): ContextCategory => ({
-        id: key,
-        key,
-        tokens: finiteTokenCount(tokens),
-        precision: 'estimated',
-        occupancy: 'included'
-      }))
+      .map(
+        ([key, tokens]): ContextCategory => ({
+          id: key,
+          key,
+          tokens: finiteTokenCount(tokens),
+          precision: 'estimated',
+          occupancy: 'included'
+        })
+      )
       .filter((category) => category.tokens > 0)
     return {
       status: 'confirmed',

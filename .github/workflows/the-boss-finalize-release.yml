@@ -32,7 +32,7 @@ env:
   RELEASE_SOURCE_SHA: ${{ inputs.source_sha }}
   RELEASE_BRANCH: ${{ github.event.repository.default_branch }}
   THE_BOSS_UAR_ENABLED: ${{ inputs.release_profile == 'uar-enabled' && '1' || '0' }}
-  THE_BOSS_UAR_LOCAL: '0'
+  THE_BOSS_UAR_LOCAL: "0"
 jobs:
   publish:
     runs-on: ubuntu-24.04

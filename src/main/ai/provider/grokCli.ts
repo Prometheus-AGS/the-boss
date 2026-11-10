@@ -4,7 +4,6 @@ import { gte, valid as validSemver } from 'semver'
 
 import { application } from '@application'
 import { loggerService } from '@logger'
-
 /**
  * Request shaping for the Grok CLI provider (xAI's `cli-chat-proxy.grok.com`
  * Responses endpoint). Kept in its own module, apart from `config.ts`, so the
@@ -16,7 +15,6 @@ import { loggerService } from '@logger'
  * implement a few OpenAI-only knobs. The pi-xai-oauth extension solves the same
  * path the same way.
  */
-
 import { GROK_CLI_COMPATIBILITY_VERSION } from '@shared/data/presets/grokCli'
 
 const logger = loggerService.withContext('GrokCli')

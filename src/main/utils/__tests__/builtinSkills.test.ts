@@ -61,7 +61,12 @@ describe('installBuiltinSkills', () => {
     await installBuiltinSkills()
 
     // Fourth argument is the namespace: `null` for Cherry's own builtins.
-    expect(mockSyncBuiltinSkill).toHaveBeenCalledWith('my-skill', path.join(resourceSkillsPath, 'my-skill'), '2.0.0', null)
+    expect(mockSyncBuiltinSkill).toHaveBeenCalledWith(
+      'my-skill',
+      path.join(resourceSkillsPath, 'my-skill'),
+      '2.0.0',
+      null
+    )
   })
 
   it('namespaces a skill that the Prometheus submodule ships, and only that one', async () => {
@@ -82,7 +87,12 @@ describe('installBuiltinSkills', () => {
       '2.0.0',
       'prometheus'
     )
-    expect(mockSyncBuiltinSkill).toHaveBeenCalledWith('cherry-own', path.join(resourceSkillsPath, 'cherry-own'), '2.0.0', null)
+    expect(mockSyncBuiltinSkill).toHaveBeenCalledWith(
+      'cherry-own',
+      path.join(resourceSkillsPath, 'cherry-own'),
+      '2.0.0',
+      null
+    )
   })
 
   it('falls back to the default namespace for every skill when the submodule cannot be read', async () => {
