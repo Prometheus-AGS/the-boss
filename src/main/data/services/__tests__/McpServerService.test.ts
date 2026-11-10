@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { mcpServerTable } from '@data/db/schemas/mcpServer'
 import { mcpServerService } from '@data/services/McpServerService'
 import { DataApiError, ErrorCode } from '@shared/data/api/errors'
+import { ATTRIBUTION_NAME, ATTRIBUTION_URL } from '@shared/utils/branding'
 
 describe('McpServerService', () => {
   const dbh = setupTestDatabase()
@@ -59,7 +60,7 @@ describe('McpServerService', () => {
             name: 'test-server',
             type,
             baseUrl: 'https://example.com',
-            headers: { 'HTTP-Referer': 'https://cherry-ai.com', 'X-Title': 'Cherry Studio' }
+            headers: { 'HTTP-Referer': ATTRIBUTION_URL, 'X-Title': ATTRIBUTION_NAME }
           })?.id
         ).toBe('srv-1')
       }

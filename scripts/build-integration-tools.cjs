@@ -68,7 +68,8 @@ async function main() {
       CARGO_BUILD_BUILD_DIR: path.join(cwd, 'target'),
       ...(name === 'compass' ? { PROJECT_ROOT: await parserSources(), TSLP_OFFLINE: '1' } : {})
     }
-    const windowsPatch = name === 'uar-sidecar' && platform.startsWith('win32-') ? pins.sources.uar.windowsPatch : undefined
+    const windowsPatch =
+      name === 'uar-sidecar' && platform.startsWith('win32-') ? pins.sources.uar.windowsPatch : undefined
     const patch = windowsPatch && path.join(root, windowsPatch.path)
     if (patch) {
       if (hash(patch) !== windowsPatch.sha256) throw new Error('UAR Windows patch checksum mismatch')

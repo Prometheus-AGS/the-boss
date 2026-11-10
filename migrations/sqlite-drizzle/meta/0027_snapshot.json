@@ -2,7 +2,7 @@
   "version": "6",
   "dialect": "sqlite",
   "id": "d7821b2f-98c4-4781-a3fb-0afaea036bdb",
-  "prevId": "ba5e70d9-757c-413b-85b9-073af609895f",
+  "prevId": "60fb8dda-4439-4bc1-b2f3-b918d0c512cb",
   "tables": {
     "agent": {
       "name": "agent",
@@ -4071,6 +4071,13 @@
         },
         "registry_url": {
           "name": "registry_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "cwd": {
+          "name": "cwd",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

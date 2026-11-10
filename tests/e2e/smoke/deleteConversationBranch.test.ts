@@ -16,7 +16,7 @@ const TOPIC = 'Delete one exclusive conversation branch'
 
 function launch(profile: string) {
   const env: NodeJS.ProcessEnv = { ...process.env, NODE_ENV: 'development', CS_DEV_PROFILE_ROOT: profile }
-  delete env.ELECTRON_RENDERER_URL
+  Reflect.deleteProperty(env, 'ELECTRON_RENDERER_URL')
   return electron.launch({
     args: ['.'],
     env: Object.fromEntries(Object.entries(env).filter((pair): pair is [string, string] => pair[1] !== undefined)),

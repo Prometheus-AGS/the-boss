@@ -66,8 +66,7 @@ export async function prepareManagedServices(config: IntegrationConfig): Promise
     images: Record<string, string>
   }
   for (const service of ['surrealdb', 'surreal-memory', 'liter-llm']) {
-    if (!/@sha256:[a-f0-9]{64}$/.test(manifest.images[service] ?? ''))
-      throw new Error('prometheus.error.imageManifest')
+    if (!/@sha256:[a-f0-9]{64}$/.test(manifest.images[service] ?? '')) throw new Error('prometheus.error.imageManifest')
   }
   const secrets = await ensureManagedSecrets()
   await writeMiniConfiguration()
