@@ -37,4 +37,7 @@ runs:
           ${{ runner.os }}-pnpm-
     - name: Install dependencies
       shell: bash
+      env:
+        # Linux validation uses the bundled CPU runtime and does not need the CUDA download.
+        ONNXRUNTIME_NODE_INSTALL: ${{ runner.os == 'Linux' && 'skip' || '' }}
       run: pnpm install --frozen-lockfile
