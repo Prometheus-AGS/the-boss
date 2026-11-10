@@ -228,16 +228,12 @@ artifactBuildCompleted: scripts/packaging/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.46
-    - Fix BossFang startup and model setup with authenticated external UAR.
-    - Offer an existing UAR on port 1906 when its discovery is available. Managed UAR falls back to a free port.
-    - Set the managed ingestion directory in UAR Settings. The setting takes effect on restart.
-    - Retain active work and chat sessions on their original runtime when switching.
+    The Boss 2.2.47
+    - Include the runtime libraries required for DeepSeek sessions in the installed app.
+    - Show the current app version in the built-in assistant’s product information.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.46
-    - 修复通过身份验证的外部 UAR 导致 BossFang 启动和模型配置失败的问题。
-    - 如果 1906 端口上的 UAR 提供发现信息，可选择使用该实例。托管 UAR 会使用可用端口。
-    - 可在 UAR 设置中配置托管摄取目录，重启后生效。
-    - 切换运行时时，正在执行的任务和聊天会话会保留其原有运行时。
+    The Boss 2.2.47
+    - 在安装包中包含 DeepSeek 会话所需的运行库。
+    - 在内置助手的产品信息中显示当前应用版本。
     <!--LANG:END-->
