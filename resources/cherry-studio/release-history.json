@@ -1,5 +1,9 @@
 [
   {
+    "version": "2.2.47",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.47\n- Include the runtime libraries required for DeepSeek sessions in the installed app.\n- Show the current app version in the built-in assistant’s product information.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.47\n- 在安装包中包含 DeepSeek 会话所需的运行库。\n- 在内置助手的产品信息中显示当前应用版本。\n<!--LANG:END-->"
+  },
+  {
     "version": "2.2.46",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.46\n- Fix BossFang startup and model setup with authenticated external UAR.\n- Offer an existing UAR on port 1906 when its discovery is available. Managed UAR falls back to a free port.\n- Set the managed ingestion directory in UAR Settings. The setting takes effect on restart.\n- Retain active work and chat sessions on their original runtime when switching.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.46\n- 修复通过身份验证的外部 UAR 导致 BossFang 启动和模型配置失败的问题。\n- 如果 1906 端口上的 UAR 提供发现信息，可选择使用该实例。托管 UAR 会使用可用端口。\n- 可在 UAR 设置中配置托管摄取目录，重启后生效。\n- 切换运行时时，正在执行的任务和聊天会话会保留其原有运行时。\n<!--LANG:END-->"
   },
