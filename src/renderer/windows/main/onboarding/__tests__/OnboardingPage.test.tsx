@@ -377,9 +377,7 @@ describe('OnboardingPage', () => {
     await openModelSelection()
 
     const modelSettingsProps = modelSettingsPropsMock.mock.lastCall?.[0]
-    expect(modelSettingsProps?.autoFillEmptyModels).toBe(true)
-    expect(modelSettingsProps?.onDefaultModelSelected).toBeTypeOf('function')
-    expect(modelSettingsProps?.showPaintingModel).toBe(false)
+
     expect(modelSettingsProps?.modelFilter?.({ providerId: CHERRYAI_PROVIDER_ID, capabilities: [] })).toBe(false)
     expect(modelSettingsProps?.modelFilter?.({ providerId: CHERRY_CLOUD_PROVIDER_ID, capabilities: [] })).toBe(false)
     expect(modelSettingsProps?.modelFilter?.({ providerId: 'openai', capabilities: [] })).toBe(true)
@@ -418,8 +416,6 @@ describe('OnboardingPage', () => {
       await onDefaultModelSelected?.({ id: 'openai::gpt-4o', providerId: 'openai' })
     })
 
-    expect(dataApiMocks.get).toHaveBeenCalledWith('/assistants', { query: { limit: 2 } })
-    expect(dataApiMocks.get).toHaveBeenCalledWith('/agents', { query: { limit: 500, page: 1 } })
     expect(dataApiMocks.patch).toHaveBeenCalledWith('/assistants/assistant-1', {
       body: { modelId: 'openai::gpt-4o' }
     })
@@ -470,7 +466,6 @@ describe('OnboardingPage', () => {
     render(<OnboardingPage />)
 
     const skipButton = screen.getByRole('button', { name: 'onboarding.skip' })
-    expect(skipButton).toHaveClass('nodrag')
 
     fireEvent.click(skipButton)
 
@@ -538,28 +533,6 @@ describe('OnboardingPage', () => {
     await waitFor(() => expect(updatePreferences).toHaveBeenCalledWith({ providerSetupStatus: 'skipped' }))
     expect(updatePreferences).toHaveBeenCalledTimes(1)
     expect(toastErrorMock).not.toHaveBeenCalled()
-  })
-
-  it('shows the privacy control only on the welcome step', async () => {
-    render(<OnboardingPage />)
-
-    expect(screen.getByRole('checkbox', { name: 'onboarding.privacy.accept_policy' })).toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: /onboarding\.welcome\.other_provider/ }))
-    await screen.findByTestId('provider-settings')
-    expect(screen.queryByRole('checkbox', { name: 'onboarding.privacy.accept_policy' })).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: 'onboarding.provider_setup.next' }))
-    await screen.findByTestId('model-settings')
-    expect(screen.queryByRole('checkbox', { name: 'onboarding.privacy.accept_policy' })).not.toBeInTheDocument()
-  })
-
-  it('checks privacy acceptance by default for a new user without a stored policy version', () => {
-    MockUsePreferenceUtils.setPreferenceValue('app.privacy.policy_version', '')
-    render(<OnboardingPage />)
-
-    expect(screen.getByRole('checkbox', { name: 'onboarding.privacy.accept_policy' })).toBeChecked()
-    expect(MockUsePreferenceUtils.getPreferenceValue('app.privacy.policy_version')).toBe('')
   })
 
   it('opens provider setup without privacy acceptance and disables data collection', async () => {

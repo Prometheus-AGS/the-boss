@@ -40,4 +40,6 @@ runs:
       env:
         # Linux validation uses the bundled CPU runtime and does not need the CUDA download.
         ONNXRUNTIME_NODE_INSTALL: ${{ runner.os == 'Linux' && 'skip' || '' }}
-      run: pnpm install --frozen-lockfile
+      run: |
+        pnpm install --frozen-lockfile
+        echo "VALIDATION_WORKSPACE_PREPARED=true" >> "$GITHUB_ENV"

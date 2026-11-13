@@ -57,10 +57,11 @@ The UAR profile supports Windows x64 and macOS arm64/x64 for this release.
 `pnpm build:mac:arm64` uses the public UAR-enabled profile and the immutable
 payload records in `build/integration-artifacts.json`. Operate that packaged
 application, then publish the same DMG; a second Mac compilation is unnecessary.
-The explicitly named `pnpm build:mac:arm64:local` retains development against a
-clean checkout selected by `THE_BOSS_LOCAL_UAR_SOURCE_DIR` and the local source
-pin. Its local-only artifacts remain ineligible for public publication. Do not
-set that development environment variable for the standard public build.
+For a local native UAR candidate, run `pnpm build:mac:arm64` with
+`THE_BOSS_UAR_LOCAL=1`, `THE_BOSS_LOCAL_UAR_SOURCE_DIR` and
+`THE_BOSS_LOCAL_UAR_CANDIDATE_RECORD`. The local profile verifies the
+candidate against `build/local-uar-source.json`. The resulting installer is
+local-only. Release jobs use the explicit release scripts above.
 
 ## Produce the payload and installers
 

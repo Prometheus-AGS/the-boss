@@ -11,6 +11,13 @@ What each merge actually hit. Rules belong in [the playbook](./upstream-merges.m
 this page is history and carry-over. Newest entry first. The `upstream-merge` skill
 appends here as its last step.
 
+## 2026-11-13 — upstream v2.2.1 (`89ed7aa1df`)
+
+- **Taken:** 144 upstream commits since the previous merge, including Pi 1.5.2, updated MCP OAuth and Polish localization.
+- **Identity:** retained The Boss 2.2.47 and kept upstream 2.2.0 and 2.2.1 notes under separate headings in the matching historical entries.
+- **Persistence:** carried the fork’s MCP working directory through the two new upstream SQLite snapshots.
+- **Integrations:** pinned Prometheus mini skills 1.15.0 and UAR main `713466935665` for the local Apple Silicon candidate.
+
 ## 2026-11-09 — upstream v2.1.10 (2a5a12a179)
 
 - **Taken:** 403 upstream commits through 2a5a12a179.

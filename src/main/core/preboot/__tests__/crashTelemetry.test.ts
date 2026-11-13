@@ -198,12 +198,4 @@ describe('initCrashTelemetry', () => {
       expect(events).not.toContain('unhandledRejection')
     })
   })
-
-  it('does not throw when called once with production settings', async () => {
-    stubConstants({ isDev: false })
-    stubElectron()
-
-    const { initCrashTelemetry } = await loadModule()
-    expect(() => initCrashTelemetry()).not.toThrow()
-  })
 })

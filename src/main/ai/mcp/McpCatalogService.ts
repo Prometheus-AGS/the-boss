@@ -18,7 +18,7 @@ const failedToolsBackoffKey = (serverId: string) => `mcp:tools-failed-backoff:${
 const PREWARM_CONCURRENCY = 3
 const FAILED_TOOLS_RETRY_MS = 30 * 1000
 
-type ListToolsOptions = { includeDisabled?: boolean; cacheMode?: CacheMode }
+type ListToolsOptions = { includeDisabled?: boolean; cacheMode?: CacheMode; windowId?: string | null }
 
 @Injectable('McpCatalogService')
 @ServicePhase(Phase.WhenReady)
@@ -134,9 +134,14 @@ export class McpCatalogService extends BaseService {
     }))
   }
 
-  private async listToolsImpl(server: McpServer, cacheMode: CacheMode): Promise<McpTool[]> {
+  private async listToolsImpl(server: McpServer, cacheMode: CacheMode, windowId?: string | null): Promise<McpTool[]> {
     try {
-      const tools = await application.get('McpRuntimeService').listTools(server.id, cacheMode)
+      const runtime = application.get('McpRuntimeService')
+      // A window context lets an OAuth-only server open the sign-in browser on first connect;
+      // background warmers still use the non-interactive path.
+      const tools = windowId
+        ? await runtime.listToolsWithContext(server.id, { windowId }, cacheMode)
+        : await runtime.listTools(server.id, cacheMode)
       return this.projectTools(server, tools)
     } catch (error: unknown) {
       logger.error('Failed to list tools', error as Error, { serverId: server.id, serverName: server.name })
@@ -153,7 +158,7 @@ export class McpCatalogService extends BaseService {
 
     const listFunc = (identity: { serverId: string }) => {
       void identity
-      return this.listToolsImpl(server, options.cacheMode ?? 'use')
+      return this.listToolsImpl(server, options.cacheMode ?? 'use', options.windowId)
     }
     const revision = this.projectionRevisions.get(server.id)
 
@@ -237,8 +242,8 @@ export class McpCatalogService extends BaseService {
     return this.runtimeService().listPrompts(serverId)
   }
 
-  public async refreshTools(serverId: string): Promise<void> {
-    await this.getCurrentTools(serverId, { includeDisabled: true, cacheMode: 'refresh' })
+  public async refreshTools(serverId: string, windowId?: string | null): Promise<void> {
+    await this.getCurrentTools(serverId, { includeDisabled: true, cacheMode: 'refresh', windowId })
   }
 
   public async getCurrentTools(serverId: string, options: ListToolsOptions = {}): Promise<McpTool[]> {

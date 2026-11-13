@@ -82,7 +82,7 @@ export const { uarEnabled } = resolveReleaseProfile(process.env)
 const sentryBuildContext = getSentryBuildContext(pkg.name, pkg.version, rendererEdition)
 const { sourceMapUploadEnabled } = resolveSentryBuildSettings(process.env)
 const sentrySourceMap = sourceMapUploadEnabled ? ('hidden' as const) : isDev
-const sentrySourceMapPlugins = (outputDirectory: 'main' | 'preload' | 'renderer') =>
+export const sentrySourceMapPlugins = (outputDirectory: 'main' | 'preload' | 'renderer' | 'utility-process') =>
   sourceMapUploadEnabled
     ? sentryVitePlugin({
         authToken: process.env.SENTRY_AUTH_TOKEN,
@@ -159,6 +159,7 @@ export const mainResolveAlias = {
   '@cherrystudio/web-search/providers/exa': resolve('packages/web-search/src/providers/exa.ts'),
   '@cherrystudio/web-search/providers/exa-mcp': resolve('packages/web-search/src/providers/exaMcp.ts'),
   '@cherrystudio/web-search/providers/bocha': resolve('packages/web-search/src/providers/bocha.ts'),
+  '@cherrystudio/web-search/providers/stepfun': resolve('packages/web-search/src/providers/stepfun.ts'),
   '@cherrystudio/web-search/providers/querit': resolve('packages/web-search/src/providers/querit.ts'),
   '@cherrystudio/web-search/providers/jina': resolve('packages/web-search/src/providers/jina.ts'),
   '@cherrystudio/web-search/providers/firecrawl': resolve('packages/web-search/src/providers/firecrawl.ts'),
@@ -169,6 +170,7 @@ export const mainResolveAlias = {
   '@cherrystudio/web-search/providers/deepseek': resolve('packages/web-search/src/providers/deepseek.ts'),
   '@cherrystudio/web-search/providers/desearch': resolve('packages/web-search/src/providers/desearch.ts'),
   '@cherrystudio/web-search/providers/searchapi': resolve('packages/web-search/src/providers/searchapi.ts'),
+  '@cherrystudio/web-search/providers/serpkite': resolve('packages/web-search/src/providers/serpkite.ts'),
   '@cherrystudio/web-search/tools/config': resolve('packages/web-search/src/tools/config.ts'),
   '@cherrystudio/web-search/tools/url-filter': resolve('packages/web-search/src/tools/urlFilter.ts'),
   '@cherrystudio/web-search/tools/content': resolve('packages/web-search/src/tools/content.ts'),
@@ -189,7 +191,7 @@ export default defineConfig({
         name: 'cherry-selection-panel',
         buildStart() {
           this.addWatchFile(selectionPanelSource)
-          buildSelectionPanel()
+          if (process.env.CHERRY_RELEASE_JS_ONLY !== 'true') buildSelectionPanel()
         }
       },
       {
@@ -197,7 +199,7 @@ export default defineConfig({
         apply: 'build',
         buildStart() {
           for (const file of externalAppSources) this.addWatchFile(file)
-          buildExternalApp()
+          if (process.env.CHERRY_RELEASE_JS_ONLY !== 'true') buildExternalApp()
         }
       },
       chunkExportGuardPlugin(),
@@ -314,6 +316,7 @@ export default defineConfig({
         '@cherrystudio/web-search/providers/exa': resolve('packages/web-search/src/providers/exa.ts'),
         '@cherrystudio/web-search/providers/exa-mcp': resolve('packages/web-search/src/providers/exaMcp.ts'),
         '@cherrystudio/web-search/providers/bocha': resolve('packages/web-search/src/providers/bocha.ts'),
+        '@cherrystudio/web-search/providers/stepfun': resolve('packages/web-search/src/providers/stepfun.ts'),
         '@cherrystudio/web-search/providers/querit': resolve('packages/web-search/src/providers/querit.ts'),
         '@cherrystudio/web-search/providers/jina': resolve('packages/web-search/src/providers/jina.ts'),
         '@cherrystudio/web-search/providers/firecrawl': resolve('packages/web-search/src/providers/firecrawl.ts'),
@@ -323,6 +326,7 @@ export default defineConfig({
         '@cherrystudio/web-search/providers/deepseek': resolve('packages/web-search/src/providers/deepseek.ts'),
         '@cherrystudio/web-search/providers/desearch': resolve('packages/web-search/src/providers/desearch.ts'),
         '@cherrystudio/web-search/providers/searchapi': resolve('packages/web-search/src/providers/searchapi.ts'),
+        '@cherrystudio/web-search/providers/serpkite': resolve('packages/web-search/src/providers/serpkite.ts'),
         '@cherrystudio/web-search/tools/config': resolve('packages/web-search/src/tools/config.ts'),
         '@cherrystudio/web-search/tools/url-filter': resolve('packages/web-search/src/tools/urlFilter.ts'),
         '@cherrystudio/web-search/tools/content': resolve('packages/web-search/src/tools/content.ts'),

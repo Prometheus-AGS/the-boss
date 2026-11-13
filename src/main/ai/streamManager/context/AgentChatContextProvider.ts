@@ -170,6 +170,7 @@ export class AgentChatContextProvider implements ChatContextProvider {
         name: agent.name,
         // Normalized effective avatar (mirrors renderer `getAgentAvatar`).
         emoji: agent.configuration?.avatar?.trim() || '🤖',
+        ...(agent.avatarFileId ? { avatarFileId: agent.avatarFileId } : {}),
         model:
           agent.type === 'uar' && agent.configuration?.uar_catalog_link?.authority !== 'catalog'
             ? modelSnapshotForUarAssignment(agent.configuration?.uar_model_assignment, {

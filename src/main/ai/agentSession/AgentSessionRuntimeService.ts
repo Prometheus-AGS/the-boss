@@ -813,6 +813,7 @@ export class AgentSessionRuntimeService extends BaseService {
     if (turn && correlation && !responseId) this.bindUsage(entry, correlation, turn)
     return {
       agentSessionId: sessionId,
+      traceContext: this.sessionTraceContext(entry, turn?.modelId),
       ...(turn ? { assistantMessageId: turn.assistantMessageId } : {}),
       source:
         sourceSnapshotFromMessageSnapshot(turn?.messageSnapshot ?? entry.messageSnapshot) ??
@@ -1749,6 +1750,8 @@ export class AgentSessionRuntimeService extends BaseService {
       }
       return { ok: false, reason: 'rejected' }
     }
+
+    if (pending.presentation === 'application') return { ok: false, reason: 'rejected' }
 
     if (pending.presentation === 'message') {
       if (!anchorId) {
@@ -2964,6 +2967,22 @@ export class AgentSessionRuntimeService extends BaseService {
 
   private handleToolApprovalRequest(entry: AgentSessionRuntimeEntry, request: AgentRuntimeToolApprovalRequest): void {
     if (request.presentation === 'stream') {
+      const turn = getAgentSessionRuntimeNativeTurn(entry.runtimeState)
+      const contextId = this.currentConnection(entry)?.contextId
+      if (turn) {
+        const projection = turn.projection ?? (contextId ? this.rootProjection(entry, contextId) : undefined)
+        if (projection) {
+          turn.projection = projection
+          projection.control(turn.assistantMessageId, {
+            type: 'tool-input-available',
+            toolCallId: request.toolCallId,
+            toolName: request.toolName,
+            input: request.input,
+            providerExecuted: true,
+            dynamic: true
+          })
+        }
+      }
       const chunk: UIMessageChunk = {
         type: 'tool-approval-request',
         approvalId: request.approvalId,

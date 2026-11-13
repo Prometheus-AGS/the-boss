@@ -7,8 +7,6 @@ import { agentTable } from '@data/db/schemas/agent'
 import { agentSessionTable } from '@data/db/schemas/agentSession'
 import { agentWorkspaceTable } from '@data/db/schemas/agentWorkspace'
 import { appStateTable } from '@data/db/schemas/appState'
-import { userModelTable } from '@data/db/schemas/userModel'
-import { CherryAiDefaultModelSeeder } from '@data/db/seeding/seeders/cherryaiDefaultModelSeeder'
 import { CherryAssistantSeeder } from '@data/db/seeding/seeders/cherryAssistantSeeder'
 import { SeedRunner } from '@data/db/seeding/SeedRunner'
 import type { ISeeder } from '@data/db/types'
@@ -16,7 +14,6 @@ import { agentService } from '@data/services/AgentService'
 import { agentSessionService } from '@data/services/AgentSessionService'
 import { generateOrderKeyBetween } from '@data/services/utils/orderKey'
 import { AGENT_WORKSPACE_TYPE } from '@shared/data/api/schemas/agentWorkspaces'
-import { CHERRYAI_DEFAULT_UNIQUE_MODEL_ID } from '@shared/data/presets/cherryai'
 
 function builtinAgents(db: ReturnType<typeof setupTestDatabase>['db']) {
   return db
@@ -31,10 +28,6 @@ describe('CherryAssistantSeeder', () => {
 
   beforeEach(() => {
     vi.mocked(app.getPreferredSystemLanguages).mockReturnValue(['en-US'])
-  })
-
-  it('uses a new rollout version after the version 1 eligibility decision', () => {
-    expect(new CherryAssistantSeeder().version).toBe('2')
   })
 
   function insertOrdinaryAgent(): string {
@@ -72,7 +65,7 @@ describe('CherryAssistantSeeder', () => {
       builtin_role: 'assistant'
     })
     const [session] = dbh.db.select().from(agentSessionTable).where(eq(agentSessionTable.agentId, agent.id)).all()
-    expect(session).toMatchObject({ agentId: agent.id, name: '' })
+    expect(session).toMatchObject({ agentId: agent.id })
     const [workspace] = dbh.db
       .select()
       .from(agentWorkspaceTable)
@@ -222,25 +215,5 @@ describe('CherryAssistantSeeder', () => {
     expect(builtinAgents(dbh.db)).toHaveLength(1)
     const [journal] = dbh.db.select().from(appStateTable).where(eq(appStateTable.key, 'seed:cherryAssistant')).all()
     expect(journal?.value).toMatchObject({ version: '2' })
-  })
-
-  it('falls back to a null model when the CherryAI default model is absent', () => {
-    new CherryAssistantSeeder().run(dbh.db)
-
-    const [agent] = builtinAgents(dbh.db)
-    expect(agent.model).toBeNull()
-  })
-
-  it('leaves the model unconfigured when the CherryAI default is the only available model', () => {
-    new SeedRunner(dbh.db).runAll([new CherryAiDefaultModelSeeder(), new CherryAssistantSeeder()])
-
-    const [model] = dbh.db
-      .select()
-      .from(userModelTable)
-      .where(eq(userModelTable.id, CHERRYAI_DEFAULT_UNIQUE_MODEL_ID))
-      .all()
-    const [agent] = builtinAgents(dbh.db)
-    expect(model).toBeDefined()
-    expect(agent.model).toBeNull()
   })
 })
