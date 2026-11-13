@@ -9,6 +9,8 @@ export type { AiTurnTraceHandle, AiTurnTraceMeta } from './core/AiTurnTrace'
 export {
   deriveRootSpanId,
   type AgentRuntimeTraceContext,
+  endAgentRuntimeSpan,
+  startAgentRuntimeChildSpan,
   startAiChildTurnSpan,
   startAiTurnTrace
 } from './core/AiTurnTrace'
