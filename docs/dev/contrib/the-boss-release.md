@@ -63,6 +63,20 @@ For a local native UAR candidate, run `pnpm build:mac:arm64` with
 candidate against `build/local-uar-source.json`. The resulting installer is
 local-only. Release jobs use the explicit release scripts above.
 
+### Existing embedded UAR data
+
+The managed UAR startup path upgrades a legacy SurrealDB 3.x SurrealKV data
+directory before the RC4 sidecar starts. It holds the database lock while
+copying and verifying the data, runs the sidecar's offline migration against
+the copy, then retains the original under `.runtime-db-upgrade/original` next
+to the live database. A retry restores the original path if startup was
+interrupted between the two cutover renames. External UAR and managed remote
+persistence continue to use their own storage lifecycle.
+
+The RC4 release payload must include the sidecar's offline migration and
+locking commands. Validate a populated private profile through the packaged
+app before promoting the payload or publishing installers.
+
 ## Produce the payload and installers
 
 1. Commit the complete production changes in each source repository. Freeze those
