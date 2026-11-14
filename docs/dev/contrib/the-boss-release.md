@@ -19,7 +19,7 @@ sources:
 
 The 2.2.45 managed Docker stack uses SurrealDB 4.0.0 and Surreal Memory Server 1.11.0. Fresh installations use the image digests in the packaged manifest. For an existing 3.x datastore, back up the volume and follow the [SurrealDB 4.0 upgrade guide](https://surrealdb.com/docs/build/migrating/from-old-surrealdb-versions/3x-to-4x) before starting the upgraded managed stack.
 
-The macOS and Windows RC4 sidecars share the commit pinned in `build/integration-sources.json`. The Windows service fix is part of that source. Each desktop payload is published under a platform-specific tag with the source SHA, and the application manifest pins the archive checksum.
+The RC4 sidecars use the commits pinned in `build/integration-sources.json`. The Windows build includes a follow-up for MSVC and the Windows service wrapper. Each desktop payload is published under a platform-specific tag with the source SHA, and the application manifest pins the archive checksum.
 
 The Boss uses **The Boss integration payload** followed by **The Boss Release**.
 The upstream Cherry Studio release runbook describes a separate workflow. For this
