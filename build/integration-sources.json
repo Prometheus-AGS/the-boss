@@ -24,7 +24,7 @@
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
-      "revision": "48620ba92d7e1f3ee77671ddfca51f957692974d",
+      "revision": "7ef5c61acd0aa21fc909bafc390c61ee1878f8d1",
       "platformRevisions": {
         "win32-x64": "c37d779aec5cf23cf71b24632ffa34292903f940"
       }
