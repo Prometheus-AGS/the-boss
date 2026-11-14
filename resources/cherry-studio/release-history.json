@@ -1,5 +1,9 @@
 [
   {
+    "version": "2.2.48",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.48\n- Upgrade existing managed UAR databases to SurrealDB 4.0 automatically and retain the original database for recovery.\n- Bundle UAR 1.4.0-rc.4 and Prometheus mini skills 1.15.0.\n- Include upstream Cherry Studio updates through 2.2.1.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.48\n- 自动将现有的托管 UAR 数据库升级至 SurrealDB 4.0，并保留原始数据库供恢复使用。\n- 内置 UAR 1.4.0-rc.4 和 Prometheus mini skills 1.15.0。\n- 包含截至 Cherry Studio 2.2.1 的上游更新。\n<!--LANG:END-->\n"
+  },
+  {
     "version": "2.2.47",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.47\n- Include the runtime libraries required for DeepSeek sessions in the installed app.\n- Show the current app version in the built-in assistant’s product information.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.47\n- 在安装包中包含 DeepSeek 会话所需的运行库。\n- 在内置助手的产品信息中显示当前应用版本。\n<!--LANG:END-->"
   },
