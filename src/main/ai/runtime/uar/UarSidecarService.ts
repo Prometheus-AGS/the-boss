@@ -7,6 +7,7 @@ import readline from 'node:readline'
 import { setTimeout as delay } from 'node:timers/promises'
 
 import { Mutex } from 'async-mutex'
+import { gte, valid } from 'semver'
 import * as z from 'zod'
 
 import { application } from '@application'
@@ -33,6 +34,7 @@ import {
 import { uarTeamDiagnosticDetailsSchema } from '@shared/types/uarTeamProfiles'
 import { redactLiteral, redactSecretText } from '@shared/utils/redaction'
 
+import { upgradeEmbeddedUarDatabase } from './uarEmbeddedUpgrade'
 import { inspectUarPayload, requireUarPayload, type UarPayload } from './uarPayload'
 import { uarPrincipalForSession } from './uarPrincipal'
 import { reviewedSkillSources } from './uarReviewedSkillSources'
@@ -836,6 +838,14 @@ export class UarSidecarService extends BaseService {
     const dotenvFile = path.join(dataRoot, '.env')
     await mkdir(dataRoot, { recursive: true, mode: 0o700 })
     const ingestionDirectory = await prepareIngestionDirectory(dataRoot, storage.profile.ingestionDirectory)
+    if (
+      storage.profile.backend === 'embedded' &&
+      payload.version &&
+      valid(payload.version) &&
+      gte(payload.version, '1.4.0-rc.4')
+    ) {
+      await upgradeEmbeddedUarDatabase(dataRoot, executable, this.shutdown.signal)
+    }
     const policiesDirectory = path.join(dataRoot, 'policies')
     await mkdir(policiesDirectory, { recursive: true, mode: 0o700 })
     for (const policy of ['default.cedar', 'skill-mutation.cedar', 'tool-approval.cedar']) {

@@ -42,6 +42,17 @@ describe('rehypePrefixSvgReferences', () => {
     expect(output).not.toContain('user-content-icon')
   })
 
+  it('rewrites references in SVG animation values', () => {
+    const output = processHtml(`
+      <svg>
+        <defs><linearGradient id="user-content-gradient"></linearGradient></defs>
+        <rect><animate attributeName="fill" values="url(#gradient);url(#gradient)"></animate></rect>
+      </svg>
+    `)
+
+    expect(output).toContain('values="url(#user-content-gradient);url(#user-content-gradient)"')
+  })
+
   it('rewrites array-valued SVG properties', () => {
     const tree: Root = {
       type: 'root',

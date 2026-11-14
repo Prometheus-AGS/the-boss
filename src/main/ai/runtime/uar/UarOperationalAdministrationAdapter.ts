@@ -128,7 +128,7 @@ export function owners(): UarAdministrationOwner[] {
   const result: UarAdministrationOwner[] = []
   let cursor: string | undefined
   do {
-    const page = agentSessionService.listByCursor({ cursor, limit: 200 })
+    const page = agentSessionService.listByCursor({ scope: 'all-conversations', cursor, limit: 200 })
     for (const session of page.items) {
       if (!session.agentId) continue
       const agent = agentService.getAgent(session.agentId)

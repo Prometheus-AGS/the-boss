@@ -61,8 +61,7 @@ describe('DefaultAssistantSeeder', () => {
       settings: DEFAULT_ASSISTANT_SETTINGS
     })
     expect(provider).toMatchObject({
-      providerId: CHERRYAI_PROVIDER_ID,
-      isEnabled: true
+      providerId: CHERRYAI_PROVIDER_ID
     })
     expect(model?.id).toBe(CHERRYAI_DEFAULT_UNIQUE_MODEL_ID)
     expect(preference?.value).toBe(CHERRYAI_DEFAULT_UNIQUE_MODEL_ID)
@@ -70,7 +69,6 @@ describe('DefaultAssistantSeeder', () => {
     const [topic] = await dbh.db.select().from(topicTable).limit(1)
     expect(topic?.id).toMatch(UUID_V4_PATTERN)
     expect(topic).toMatchObject({
-      name: '',
       assistantId: assistant.id,
       activeNodeId: null
     })

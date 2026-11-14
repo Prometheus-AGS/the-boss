@@ -49,6 +49,12 @@ needs no browser. A mock that replaces the behavior under test is a substituted
 boundary, recorded as such. A missing runner, permission, fixture, identity or
 isolation is BLOCKED; never install tools or silently skip an adopted case.
 
+Invoke each packet command exactly as given, once: no appended commands, pipes,
+`echo` wrappers or retries. The runner's receipt records its own exit status and
+observations. Read receipts, results and evidence files with file-reading tools;
+do not run additional commands to inspect, re-run or summarize them. Any command
+outside the packet is outside this boundary's authority.
+
 Freeze source, configuration, fixture and candidate digests before running.
 Assert the contract's externally meaningful observation against an independent
 source of truth. Then challenge each material oracle family safely: run the

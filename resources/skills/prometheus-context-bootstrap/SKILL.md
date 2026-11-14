@@ -4,7 +4,7 @@ description: Install compact, layered Prometheus agent context into a project wi
 license: MIT
 compatibility: Node.js LTS (>= 22.12.0); no shell, Python, symlinks, or executable bit required
 metadata:
-  version: '1.0.0'
+  version: '1.1.0'
 ---
 
 # Prometheus Context Bootstrap
@@ -58,6 +58,12 @@ From the copy vendored inside `the-boss`:
 node resources/prometheus-skills-mini/scripts/prometheus-context-bootstrap.mjs --path . --stacks typescript,rust
 node resources/prometheus-skills-mini/scripts/prometheus-context-bootstrap.mjs --path . --stacks typescript,rust --check
 ```
+
+Every run prints a `RESIDENT` line: the words in the managed region against a
+900-word ceiling, plus the project's own words outside it. Only the managed
+region counts toward the ceiling; operator prose and other tools' regions are
+reported, never charged. `--check` fails when the managed region exceeds the
+ceiling.
 
 Use `--dry-run` to print the complete write plan without changing files. If
 `--stacks` is absent, a root `Cargo.toml` selects Rust and a root `package.json`

@@ -25,6 +25,7 @@ files:
   - "!**/{.vscode,.yarn,.yarn-lock,.github,.cursorrules,.prettierrc}"
   - "!electron.vite.config.{js,ts,mjs,cjs}}"
   - "!electron-builder.cn.config.cjs"
+  - "!release-bundle.json"
   - "!electron.vite.entries.config.ts"
   - "!.*"
   - "!components.json"
@@ -194,6 +195,20 @@ mac:
 dmg:
   format: ULFO
   writeUpdateInfo: false
+  # PNGs are rendered from build/dmg-background.svg; Finder's title bar hides the bottom 32px.
+  background: build/dmg-background.png
+  window:
+    width: 600
+    height: 380
+  iconSize: 128
+  contents:
+    - x: 150
+      y: 154
+      type: file
+    - x: 450
+      y: 154
+      type: link
+      path: /Applications
 toolsets:
   appimage: "1.0.3"
 linux:
@@ -228,12 +243,14 @@ artifactBuildCompleted: scripts/packaging/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.47
-    - Include the runtime libraries required for DeepSeek sessions in the installed app.
-    - Show the current app version in the built-in assistant’s product information.
+    The Boss 2.2.48
+    - Upgrade existing managed UAR databases to SurrealDB 4.0 automatically and retain the original database for recovery.
+    - Bundle UAR 1.4.0-rc.4 and Prometheus mini skills 1.15.0.
+    - Include upstream Cherry Studio updates through 2.2.1.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.47
-    - 在安装包中包含 DeepSeek 会话所需的运行库。
-    - 在内置助手的产品信息中显示当前应用版本。
+    The Boss 2.2.48
+    - 自动将现有的托管 UAR 数据库升级至 SurrealDB 4.0，并保留原始数据库供恢复使用。
+    - 内置 UAR 1.4.0-rc.4 和 Prometheus mini skills 1.15.0。
+    - 包含截至 Cherry Studio 2.2.1 的上游更新。
     <!--LANG:END-->
