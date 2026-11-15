@@ -15,13 +15,16 @@ const tag = `v${version}`
 const profile = assertPublicReleaseProfile()
 const platforms = resolveReleaseTargets(version, profile)
 const selected = (process.env.RELEASE_PLATFORMS || '').split(',')
-const landingRepository = process.env.LANDING_REPOSITORY
-const landingToken = process.env.LANDING_DISPATCH_TOKEN
 
-if (!repository || !branch || !landingRepository || !landingToken || !/^[a-f0-9]{40}$/.test(source || '')) {
-  throw new Error('Complete release publication requires repository, branch, source, and landing credentials')
+if (!repository || !branch || !/^[a-f0-9]{40}$/.test(source || '')) {
+  throw new Error('Complete release publication requires repository, branch, and source')
 }
-if (selected.length !== platforms.length || selected.some((platform) => !platforms.includes(platform))) {
+if (
+  selected.length !== platforms.length ||
+  new Set(selected).size !== platforms.length ||
+  selected.some((platform) => !platforms.includes(platform)) ||
+  !['darwin-arm64', 'darwin-x64', 'win32-x64'].every((platform) => selected.includes(platform))
+) {
   throw new Error('Publication must include every frozen customer release platform')
 }
 
@@ -49,6 +52,7 @@ function matchesCompleteMetadata(metadata) {
     metadata.features?.uar === profile.uarEnabled &&
     metadata.source === source &&
     metadata.pendingPlatforms?.length === 0 &&
+    metadata.artifacts?.length === manifests.length &&
     manifests.every((item) => {
       const expected = item.manifest.artifacts[0]
       return metadata.artifacts?.some(
@@ -109,10 +113,10 @@ async function main() {
   }
 
   const release = JSON.parse(
-    run('gh', ['release', 'view', tag, '--repo', repository, '--json', 'isDraft,targetCommitish'])
+    run('gh', ['release', 'view', tag, '--repo', repository, '--json', 'isDraft,isPrerelease,targetCommitish'])
   )
-  if (release.targetCommitish !== source) {
-    throw new Error('Release is not anchored at the frozen source')
+  if (release.isPrerelease || release.targetCommitish !== source) {
+    throw new Error('Release is not a stable release anchored at the frozen source')
   }
   for (const item of manifests) {
     const assetName = `release-platform-${tag}-${profile.id}-${item.platform}-${item.arch}-${source}.json`
@@ -137,10 +141,14 @@ async function main() {
   run('git', ['fetch', 'origin', branch])
   const current = JSON.parse(run('git', ['show', `origin/${branch}:release-manifest.json`]))
   const alreadyCommitted = matchesCompleteMetadata(current)
-  if (!release.isDraft && !alreadyCommitted) {
-    throw new Error('Public release metadata does not contain all frozen installers')
+  if (current.version.localeCompare(version, 'en', { numeric: true }) > 0) {
+    throw new Error('The public release manifest already advertises a newer version')
   }
-  if (release.isDraft && !alreadyCommitted) {
+  if (current.version === version && !alreadyCommitted) {
+    throw new Error('The existing release manifest disagrees with the frozen installers')
+  }
+
+  if (!alreadyCommitted) {
     run('git', ['reset', '--hard', `origin/${branch}`])
     const directory = path.join(root, 'manifests')
     fs.rmSync(directory, { recursive: true, force: true })
@@ -160,33 +168,17 @@ async function main() {
     })
     const releaseManifest = JSON.parse(fs.readFileSync(path.join(root, 'release-manifest.json'), 'utf8'))
     if (!matchesCompleteMetadata(releaseManifest)) throw new Error('Release metadata is incomplete')
+    // The download page reads this commit, so all three URLs must already be public.
+    if (release.isDraft) run('gh', ['release', 'edit', tag, '--repo', repository, '--draft=false', '--latest'])
     execFileSync(process.execPath, [path.join(__dirname, 'commit-release-entry.cjs')], {
       cwd: root,
       env: environment,
       stdio: 'inherit'
     })
+  } else if (release.isDraft) {
+    run('gh', ['release', 'edit', tag, '--repo', repository, '--draft=false', '--latest'])
   }
-  if (release.isDraft) run('gh', ['release', 'edit', tag, '--repo', repository, '--draft=false', '--latest'])
-
-  for (const item of manifests) {
-    const payload = {
-      event_type: 'boss_release_platform_published',
-      client_payload: {
-        repository,
-        tag,
-        version,
-        profile: profile.id,
-        platform: item.platform,
-        arch: item.arch,
-        manifestAsset: `release-platform-${tag}-${profile.id}-${item.platform}-${item.arch}-${source}.json`
-      }
-    }
-    run('gh', ['api', `repos/${landingRepository}/dispatches`, '--input', '-'], {
-      env: { ...process.env, GH_TOKEN: landingToken },
-      input: JSON.stringify(payload)
-    })
-  }
-  console.log(`Published complete ${tag} release and dispatched ${manifests.length} landing records`)
+  console.log(`Published complete ${tag} release and manifest for ${manifests.length} platforms`)
 }
 
 main()

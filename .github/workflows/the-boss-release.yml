@@ -241,6 +241,9 @@ jobs:
           if-no-files-found: error
           retention-days: 90
   publish-complete-release:
+    concurrency:
+      group: the-boss-public-release-${{ inputs.release_version }}
+      cancel-in-progress: false
     needs: [prepare-release, build]
     runs-on: ubuntu-24.04
     permissions:
@@ -260,8 +263,6 @@ jobs:
       - name: Verify all installers and publish the complete release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LANDING_DISPATCH_TOKEN: ${{ secrets.REPO_DISPATCH_TOKEN }}
-          LANDING_REPOSITORY: Know-Me-Tools/boss-landing-spot
           RELEASE_BRANCH: ${{ github.event.repository.default_branch }}
           RELEASE_PLATFORMS: ${{ needs.prepare-release.outputs.platforms }}
         run: node scripts/publish-complete-release.cjs
