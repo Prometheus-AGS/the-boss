@@ -27,7 +27,7 @@
     },
     {
       "path": "docs/dev/contrib/the-boss-release.md",
-      "sources": [".github/workflows/integration-payload.yml",".github/workflows/the-boss-release.yml","build/integration-sources.json","scripts/coordinate-release-publication.cjs","scripts/import-uar-sidecar-payloads.cjs","scripts/package-prometheus.js","scripts/queue-release-publication.cjs","scripts/release-capacity.cjs","scripts/release-preflight.cjs","scripts/release-profile.cjs","scripts/update-release-entry.cjs","src/renderer/pages/settings/PrometheusSettings/IntegrationPage.tsx"]
+      "sources": [".github/workflows/integration-payload.yml",".github/workflows/the-boss-finalize-release.yml",".github/workflows/the-boss-release.yml","build/integration-sources.json","scripts/import-uar-sidecar-payloads.cjs","scripts/package-prometheus.js","scripts/publish-complete-release.cjs","scripts/release-capacity.cjs","scripts/release-preflight.cjs","scripts/release-profile.cjs","scripts/update-release-entry.cjs","src/renderer/pages/settings/PrometheusSettings/IntegrationPage.tsx"]
     },
     {
       "path": "docs/dev/contrib/uar-durable-standalone-approval-repair.md",

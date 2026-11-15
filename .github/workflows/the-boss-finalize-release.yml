@@ -25,7 +25,7 @@ permissions:
   contents: write
   actions: read
 concurrency:
-  group: the-boss-finalize-${{ inputs.release_version }}
+  group: the-boss-public-release-${{ inputs.release_version }}
   cancel-in-progress: false
 env:
   RELEASE_VERSION: ${{ inputs.release_version }}
@@ -51,10 +51,9 @@ jobs:
       - name: Verify and publish the frozen release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          LANDING_DISPATCH_TOKEN: ${{ secrets.REPO_DISPATCH_TOKEN }}
-          LANDING_REPOSITORY: Know-Me-Tools/boss-landing-spot
         run: |
           git checkout --detach "$RELEASE_SOURCE_SHA"
+          git show "$GITHUB_WORKFLOW_SHA:scripts/publish-complete-release.cjs" > scripts/publish-complete-release.cjs
           test "$(node -p 'require("./package.json").version')" = "$RELEASE_VERSION"
           release_platforms=$(node -e 'const { resolveReleaseTargets, resolveReleaseProfile } = require("./scripts/release-profile.cjs"); process.stdout.write(resolveReleaseTargets(process.env.RELEASE_VERSION, resolveReleaseProfile()).join(","))')
           GITHUB_SHA="$RELEASE_SOURCE_SHA" RELEASE_PLATFORMS="$release_platforms" node scripts/publish-complete-release.cjs

@@ -6,8 +6,8 @@ sources:
   - build/integration-sources.json
   - scripts/import-uar-sidecar-payloads.cjs
   - scripts/package-prometheus.js
-  - scripts/coordinate-release-publication.cjs
-  - scripts/queue-release-publication.cjs
+  - .github/workflows/the-boss-finalize-release.yml
+  - scripts/publish-complete-release.cjs
   - scripts/release-capacity.cjs
   - scripts/release-preflight.cjs
   - scripts/release-profile.cjs
@@ -110,12 +110,12 @@ app before promoting the payload or publishing installers.
    from the draft release and checks its byte size and SHA-256 against the native
    manifest. It then uploads immutable
    `release-platform-v<version>-<profile>-<platform>-<arch>-<source>.json` records.
-7. The final job writes one complete release metadata entry, confirms no platform
-   remains pending, and makes the GitHub Release public. It dispatches all three
-   platform records to `Know-Me-Tools/boss-landing-spot`. The repository secret
-   `REPO_DISPATCH_TOKEN` must be authorized to dispatch that repository. Confirm
-   that the landing receiver processes all three records and that all public links,
-   sizes, and SHA-256 values match the release manifests.
+7. The final job generates one complete release manifest and confirms no
+   platform remains pending. It makes the GitHub Release public before committing
+   the manifest to the default branch. The live download page reads that manifest
+   directly, with normal GitHub CDN caching. All three download links update
+   together without a landing workflow or Lovable republish. Confirm the live
+   page shows the intended version and all three links after publication.
 
 For a failed native build, the payload workflow retains completed tool artifacts
 and compiler caches. Its `reuse_native_run`, `native_tools`, and `reuse_image_run`
@@ -123,7 +123,7 @@ inputs allow completed payloads to be reused while rebuilding affected tools.
 Publication still requires every tool/platform record. An `images_only` run can
 repair service images independently.
 
-If GitHub schedules only part of the installer matrix, dispatch the missing platforms at the same frozen source. After the native jobs succeed, dispatch **Finalize The Boss release** with the frozen version, source commit, profile and the completed installer run IDs. It checks every platform record and draft installer before publishing and notifying the landing site.
+If GitHub schedules only part of the installer matrix, dispatch the missing platforms at the same frozen source. After the native jobs succeed, dispatch **Finalize The Boss release** with the frozen version, source commit, profile and the completed installer run IDs. It checks every platform record and draft installer before publishing the complete manifest. If publication was interrupted after the GitHub Release became public, rerun the same finalizer to finish committing the manifest.
 
 ## Installed Windows walkthrough
 
