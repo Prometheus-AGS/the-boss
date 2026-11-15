@@ -42,7 +42,6 @@ vi.mock('@main/services/RegionService', () => ({
   regionService: { isInChina: mocks.isInChina }
 }))
 
-
 import { ApiKeyRotationState } from '../../utils/provider'
 import { BochaProvider } from '../api/BochaProvider'
 import { Crawl4AIProvider } from '../api/Crawl4AIProvider'
