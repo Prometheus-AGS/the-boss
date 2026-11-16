@@ -24,7 +24,7 @@
     },
     "mini": {
       "repository": "Prometheus-AGS/prometheus-skills-mini",
-      "revision": "cb6694c92297f9d35c58868bd11a47f44b386bb0"
+      "revision": "de297c81a4f951c29d8637db03383ea63e8a4999"
     },
     "uar": {
       "repository": "Prometheus-AGS/universal-agent-runtime",
@@ -37,7 +37,7 @@
     },
     "surreal-memory": {
       "repository": "Prometheus-AGS/surreal-memory-server",
-      "revision": "88122324e50a8ca249c4d17ca43bba454dc8d0ef"
+      "revision": "dfae3099b0fe723538927abf6a6cbd46cac5c138"
     },
     "liter-llm": {
       "repository": "GQAdonis/liter-llm",
@@ -4774,22 +4774,22 @@
   ],
   "images": {
     "surrealdb": "surrealdb/surrealdb:v4.0.0@sha256:c35893410644e65fa90aa1bef446ac9cb0a0c2733b9d405ce3eb56754b85c330",
-    "surreal-memory": "ghcr.io/prometheus-ags/surreal-memory-server@sha256:b045b6e117d16e3666533af84d5492c487c78bbd26657959e027dd836b36fec9",
+    "surreal-memory": "ghcr.io/prometheus-ags/surreal-memory-server@sha256:9b5e216132b3a679f25507016ea0a7c23ebc4eb9a43455ef3a5be19b62c918ca",
     "liter-llm": "ghcr.io/prometheus-ags/the-boss-liter-llm@sha256:c85c408dc30f23852f6c29cdd86b0da8771f78c34e0388a02230b9195b02c6b5"
   },
   "imageProvenance": {
     "surreal-memory": {
       "image": "ghcr.io/prometheus-ags/surreal-memory-server",
-      "digest": "sha256:b045b6e117d16e3666533af84d5492c487c78bbd26657959e027dd836b36fec9",
+      "digest": "sha256:9b5e216132b3a679f25507016ea0a7c23ebc4eb9a43455ef3a5be19b62c918ca",
       "source": {
         "repository": "Prometheus-AGS/surreal-memory-server",
-        "revision": "88122324e50a8ca249c4d17ca43bba454dc8d0ef"
+        "revision": "dfae3099b0fe723538927abf6a6cbd46cac5c138"
       },
       "recipeSource": {
         "repository": "Prometheus-AGS/surreal-memory-server",
-        "revision": "88122324e50a8ca249c4d17ca43bba454dc8d0ef"
+        "revision": "dfae3099b0fe723538927abf6a6cbd46cac5c138"
       },
-      "workflowRun": "42030124572"
+      "workflowRun": "43826737281"
     },
     "liter-llm": {
       "image": "ghcr.io/prometheus-ags/the-boss-liter-llm",
