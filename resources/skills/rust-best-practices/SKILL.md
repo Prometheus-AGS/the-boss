@@ -18,7 +18,7 @@ allowed-tools: Bash(cargo:*) Bash(rustc:*) Bash(rustfmt:*) Bash(clippy:*) Read W
 
 ## Prometheus execution policy
 
-Load this skill only for relevant Rust work. Finish the production implementation before testing; use meaningful integration scenarios at completed change or phase boundaries. Unit tests, snapshots, repeated compiler loops, and routine Clippy runs below are not required gates. User instructions and pinned project dependencies take precedence over all examples. Read only references relevant to the current task.
+Load this skill only for relevant Rust work. Finish the production implementation before testing; run meaningful integration scenarios only as boundary-packet entries at the value-phase boundary (B4) or an authorized repair (B5) — never at a change boundary, and with no intermediate compiler check (`kbd-process-orchestrator/references/boundaries.md`). Unit tests, snapshots, repeated compiler loops, and routine Clippy runs below are not required gates. User instructions and pinned project dependencies take precedence over all examples. Read only references relevant to the current task.
 
 # Rust Best Practices
 

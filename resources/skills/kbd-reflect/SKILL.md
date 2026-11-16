@@ -13,52 +13,50 @@ Generates `.kbd-orchestrator/phases/<phase-name>/reflection.md` summarizing:
 
 - Goal achievement percentage (MET / PARTIAL / NOT MET per goal)
 - Delivered changes (from progress.json and archive)
-- **Artifact quality summary** (from artifact-refiner logs, when installed)
+- **Contract accuracy** (closure packet, boundary results, contract lineage)
 - Technical debt introduced
 - Lessons captured for the knowledge base
 - Recommended focus for next phase
 
-## Artifact Quality Summary
+## Contract accuracy (VLBV)
 
-When `artifact-refiner` is installed, aggregate its results from all changes
-in the phase:
+Reflection measures how accurate the phase's adopted contract was, so the next
+phase's spec starts from real numbers. Read the counts from the closure packet
+(`closure-packet.md`, `closure.json`), `boundary-results.json`, the contract
+lineage and the KBD journal — never estimate:
 
-1. **Read refinement logs** — `.refiner/artifacts/<change-id>/refinement_log.md`
-   for each change in `progress.json`
-2. **Compute pass rate** — `changes_passed / total_changes`
-3. **List constraint violations** — group by constraint name, count occurrences
-4. **Identify recurring patterns** — constraints that failed across 2+ changes
+| Metric | Value |
+| --- | --- |
+| Contract amendments after adoption | 1 (scope correction, signed) |
+| BLOCKED caused by the contract (missing fixture, wrong entry point, unrunnable oracle) | 0 |
+| NOT_EXERCISED scenarios | 1 (SCN-7, fixture unavailable) |
+| Repair attempts used / allowed | 1 / 2 |
+| Post-closure escapes (defects found after CLOSED that a scenario should have caught) | 0 |
+| Static QA / review findings at B4 step 5 (critical / warning) | 0 / 3 |
+| Pre-authorization runner artifacts listed in the closure packet | 0 |
 
-Include in `reflection.md` under `## Artifact Quality Summary`:
-
-```markdown
-## Artifact Quality Summary
-
-| Metric                       | Value     |
-| ---------------------------- | --------- |
-| Changes with QA              | 8/10      |
-| First-pass pass rate         | 6/8 (75%) |
-| Changes requiring refinement | 2         |
-| Total refinement iterations  | 5         |
-
-### Recurring Constraint Violations
-
-- `no-any-types`: 3 changes (change-002, change-005, change-007)
-- `test-coverage-80`: 2 changes (change-003, change-008)
-```
+Write the same block to `.kbd-orchestrator/phases/<phase>/accuracy.json` so the
+next phase's discovery and spec review can cite it. Recurring constraint
+violations from the B4 step-5 refiner pass (when `artifact-refiner` is installed)
+are listed underneath, by constraint and file — not by change.
 
 ## Prerequisites
 
-All changes for this phase must be:
+The phase must have completed the B4 sequence
+([`kbd-process-orchestrator/references/boundaries.md`](../kbd-process-orchestrator/references/boundaries.md)):
 
-- Implemented (`implementation_status: COMPLETE` in `progress.json`)
-- QA gate passed (when `artifact-refiner` is installed, unless skipped)
-- If OpenSpec: verified (`kbd-apply verify`) and archived (`kbd-apply archive`)
-- If native KBD: moved to `.kbd-orchestrator/changes/archive/<date>-<id>/`
+- Every change implemented (`implementation_status: COMPLETE` in `progress.json`)
+- The boundary packet ran once (plus any authorized B5 repair) and
+  `boundary-results.json` exists
+- The cumulative B4 step-5 QA and adversarial review ran (or carry a signed waiver)
+- `scripts/kbd-phase-close-eval.mjs` wrote the closure object and `closure-packet.md`
+- After CLOSED: OpenSpec changes verified and archived through `kbd-apply`; native
+  changes moved to `.kbd-orchestrator/changes/archive/<date>-<id>/`
 
 These are separate prerequisites: implementation completion drives the N/N
-counter, while QA, verification, and archival drive evidence, certification,
-and publication/lifecycle fields.
+counter, while the boundary verdicts, QA, verification and archival drive
+evidence, certification and publication/lifecycle fields. A phase closed unmet
+(FAIL or BLOCKED) is still reflected; record what remains.
 
 ## Progress Signals (MANDATORY)
 
@@ -96,7 +94,7 @@ Use the canonical phase name from the argument or `current-waypoint.json`. Emit 
    inspected directly, without reopening or replaying their tasks. Use
    `--repair` only for supported active-phase drift. Keep separately waived or
    deferred acceptance and certification visible; reconciliation does not pass them.
-4. **Read artifact-refiner logs** — aggregate QA results, when installed
+4. **Read the closure packet and boundary results** — `closure-packet.md`, `closure.json`, `boundary-results.json` and the B4 step-5 QA/review receipts; compute the contract-accuracy metrics
 5. **Load all change data** — from `openspec/changes/archive/` if OpenSpec,
    or `.kbd-orchestrator/changes/archive/` if native KBD
 6. **Write reflection** to `.kbd-orchestrator/phases/<phase>/reflection.md`

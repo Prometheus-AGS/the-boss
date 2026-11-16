@@ -26,6 +26,7 @@ Parse the arguments for:
 - `--feature-name <kebab-name>` (required) — used to name the component (PascalCase) and the hook
 - `--output <path-to-tsx>` (required)
 - `--ambiguous-sidecar <path>` (optional; default `<output>.ambiguous.md`)
+- `--manifest <path-to-od-prototype.json>` (optional) — a KnowDesign prototype manifest (`htmx-alpine-prototype` template). With it, routes become typed TanStack Query hooks and matching `hx-*` calls name the hook to use (see below).
 
 ## Procedure
 
@@ -55,6 +56,15 @@ The script:
    - HTMX `hx-*` behaviors (`hx-get`, `hx-post`, `hx-target`, `hx-swap`)
    - `x-show`, `x-model`, `x-if` (non-trivial Alpine constructs)
    - Complex Alpine expressions
+
+## Manifest input (KnowDesign prototypes)
+
+Prototypes from KnowDesign's `htmx-alpine-prototype` template ship `od-prototype.json` beside the page (routes, components, Alpine state, entities, token roles). Pass it with `--manifest`:
+
+- The script also writes `<output>.api.ts`: one `<Entity>Item` interface per entity, plus one hook per route. GET routes become `useQuery` (`use<Entity>List`, `use<Entity>Detail(id)`); writes become `useMutation` with cache invalidation (`use<Entity>Create`, `Update`, `Delete`, `Toggle`). `form` routes are UI-only and get no hook.
+- An `hx-get`/`hx-post`/`hx-put`/`hx-patch`/`hx-delete` whose method and path match a manifest route is reported as `htmx-manifest` in the sidecar, naming the exact hook. Unmatched `hx-*` calls keep the generic recommendation.
+- Hooks call the routes as JSON endpoints (`Accept: application/json`) under `VITE_API_BASE`. KnowDesign's `od-axum-export` server answers them with fragments today; a JSON variant is the next step.
+- Route fragments inside `<template data-od-route>` are not walked (parse5 keeps template content separate). Their actions are covered by the generated hooks, not by per-element sidecar entries.
 
 ## Reviewing Ambiguous Regions
 

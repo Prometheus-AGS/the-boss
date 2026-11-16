@@ -9,4 +9,4 @@ Use for Rust MCP server scaffolding or transport integration. Read the project's
 
 For scaffolding or concrete server examples, load [generator reference](references/generator.md) only when needed. Treat its versions and APIs as examples, checking them against the pinned SDK.
 
-Finish complete production functionality before testing. Use meaningful integration scenarios at completed change or phase boundaries. Unit tests, snapshots, routine Clippy runs, and repeated compiler loops in the reference are not required gates. User instructions and project pins take precedence.
+Finish complete production functionality before testing. Run meaningful integration scenarios only as boundary-packet entries at the value-phase boundary (B4) or an authorized repair (B5) — never at a change boundary, and with no intermediate compiler check (`kbd-process-orchestrator/references/boundaries.md`). Unit tests, snapshots, routine Clippy runs, and repeated compiler loops in the reference are not required gates. User instructions and project pins take precedence.

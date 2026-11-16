@@ -4,14 +4,17 @@ description: Verify an adopted finite scenario set at the authorized completed v
 license: MIT
 compatibility: Node.js 22 or newer. Runs the runner and commands named in the adopted contract's boundaryPacket; API and CLI scenarios need no browser, Rust toolchain, shell or Python helper, or background service.
 metadata:
-  version: "1.0.0"
+  version: "1.2.0"
   tags: "testing, verification, vlbv, evidence, kbd"
 ---
 
 # Value scenario verification
 
-Invoke `/value-scenario-verify <contract-reference>`. This instruction-only
-procedure routes an adopted boundary packet through existing tools. It does not
+Invoke the `value-scenario-verify` skill with a contract reference. This
+instruction-only procedure is steps 1–4 of the B4 sequence (admit, freeze, run the
+boundary packet once, record) and the targeted rerun of an authorized B5 repair,
+as defined once in `kbd-process-orchestrator/references/boundaries.md`. It routes
+an adopted boundary packet through existing tools. It does not
 intercept commands and grants no permission the host does not provide.
 
 Emit `Starting value-scenario-verify — <phase>` before work. Emit completion with
@@ -35,6 +38,14 @@ adoption path with `--supersedes`; never edit a bound contract or forge approval
 
 ```
 node "<package-root>/scripts/kbd-phase-readiness-check.mjs" --phase "<phase>"
+```
+
+Then record the owner's boundary authorization once, before the first attempt
+(B4; `--boundary B5` for an authorized repair). Closure lists runner output under
+`boundaryPacket.runnerOutputGlobs` that is older than this event (report only):
+
+```
+node "<package-root>/scripts/kbd-boundary-authorize.mjs" --phase "<phase>" --authorizer "<who>"
 ```
 
 Replace `<package-root>` with the absolute root of the loaded mini package; keep
@@ -83,7 +94,9 @@ uncertain effects, restoration and cleanup.
 
 Never overwrite an earlier failure with a later green receipt. Budget exhaustion
 checkpoints BLOCKED without dropping mandatory constraints. An authorized repair
-finishes its complete implementation batch before one targeted reverification;
+(B5) finishes its complete implementation batch before one targeted reverification
+of only the affected scenarios and their negative controls, consuming
+`budgets.repairAttempts`;
 preserve prior consumption and re-evaluate affected evidence. Start no automatic
 repair loop, new task, new phase, publication or successor.
 
@@ -91,10 +104,12 @@ repair loop, new task, new phase, publication or successor.
 
 Write the existing `boundary-results.json` the mini evaluator already reads:
 `phase`, `projectId`, `runId`, `contractDigest`, `sourceDigests`, `scenarios`
-(each with `id`, `status`, `attempted`, `observed`, `evidence`) and
+(each with `id`, `status`, `attempted`, `observed`, `evidence`), `executedBy`
+(`harness`, `version`, `model` of the session that ran the packet) and
 `budgetConsumption` (with its source and measured/estimate/unknown classes). Keep
 assertions and negative-control receipts linked from `evidence`. Do not derive
-fields from an exit code, and add no new ledger or schema field. Then:
+fields from an exit code, and add no other ledger or schema field. Then (it also writes `closure.json` and
+`closure-packet.md`):
 
 ```
 node "<package-root>/scripts/kbd-phase-close-eval.mjs" --phase "<phase>"

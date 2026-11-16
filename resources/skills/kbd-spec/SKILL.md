@@ -23,7 +23,7 @@ that portability capability does not override this repository’s OpenSpec
 policy. Detection honors the explicit pin first, then change-local evidence,
 then repository evidence; an empty result is not a native-kbd default. When
 nothing resolves — no pin, no `openspec/`, no Spec Kit tree and no native
-changes — initialize OpenSpec (1.16.0+) with
+changes — initialize OpenSpec (2.0.0, pack-pinned) with
 `node "<mini-pack-root>/lib/platform/openspec/cli.mjs" init --project "<project-root>"` and set
 `"specBackend": "openspec"` in `project.json`, unless the operator chose Spec
 Kit (see `/kbd-init --spec-engine`). Every `Scenario:` carries a WHEN (or
@@ -109,7 +109,7 @@ stageHandoffWrite('spec', '<changes created>', [firstChangeSpecPath], { cwd });
 ## Finite scenario matrix + contract authoring (required, mini #60)
 
 Spec freezes the finite scenario matrix: stable scenario IDs (pattern
-`^[A-Z]+-[0-9]+$`), production entry point, real collaborators, oracle,
+`^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*-[0-9]+$`, e.g. `SCN-AUTH-001`), production entry point, real collaborators, oracle,
 negative control, fixture identity (scratch roots + digests), evidence
 requirements, and owning task ID per scenario — using
 `skills/kbd-process-orchestrator/references/templates/acceptance.template.md`
@@ -117,7 +117,15 @@ fields. Separate functional scope from resilience scope; adopted resilience
 requirements never defer via budget overflow. Author the phase
 `adopted-contract.json` (schema:
 `skills/kbd-process-orchestrator/references/schemas/adopted-contract.schema.json`)
-in this stage.
+in this stage. New contracts use version 2 (VLBV: selection rationale, structured
+oracles with an independent truth source, negative controls bound to typed packet
+commands, real and substituted boundaries, limitations, per-scenario invalidation
+keys and restoration, optional stochastic profile, calibration, method identity
+with `method.specDeltaDigest`, four closure states); version 1 contracts stay valid
+until their phase closes. Check the draft with
+`node "<package-root>/scripts/kbd-contract-adopt.mjs" --lint-only "<contract>"`
+(document checks only; nothing executes).
+
 
 Before freezing the matrix, run `value-scenario-discovery` for the candidate
 frontier; only owner-adopted candidates enter `scenarioMatrix`, with stable IDs
@@ -130,8 +138,8 @@ execution is `value-scenario-verify` at the authorized completed boundary.
 Before dependent work, run `node <pack-root>/scripts/kbd-method-context.mjs --project <project-root> --phase <canonical-phase-id> --write` (or read the phase-local `method-context.md` when Node is unavailable) and act on its `status`:
 
 - `RESOLVED_REFERENCES` — continue with the recovered method, contract and stage authority; preserve the same references in role inputs, dispatch and handoff read order.
-- `BLOCKED` — a method decision, contract, calibration or supersession is missing or changed, or canonical status is unavailable; resolve it explicitly. Prior commands, memory and tool inventories are not fresh authority.
-- `CONFLICT` — governing host policy conflicts with the selected method. Stop before dependent work and show the conflict; continue only after the operator records a `KBD-POLICY-ACK` decision for that file's current hash. Never rewrite operator-owned policy. When host policy grants an exception — for example one narrow, targeted compiler check after a blocking compile error, or an hourly integration gate — name it as host policy, state that it conflicts with the selected method, and say it does not authorize tests, dry-runs or generated-code verification.
+- `BLOCKED` — the contract, its binding, a calibration reference, a supersession or a deviation's cadence/reason is missing or changed, or canonical status is unavailable; resolve it explicitly. Prior commands, memory and tool inventories are not fresh authority.
+- `CONFLICT` — a governing rule file the active harness loads grants an exception VLBV forbids (for example a compiler check or an hourly integration gate during generation). Stop before dependent work and show the conflict; continue only after the operator records a `KBD-POLICY-ACK` decision for that file's current hash. Never rewrite operator-owned policy, and never treat an exception as authority for tests, builds, dry-runs or generated-code verification.
 
-For selected VLBV, define acceptance before generation and finish the whole agreed value phase before any generated-code verification; tasks, hours, commits, reviewer requests and compiler problems create no boundary. Preserve original evidence, consumed budgets and unresolved effects across resume and supersession; reconcile an uncertain effect before any retry. Full rules: `kbd-process-orchestrator/references/method-context.md`.
+VLBV is the method for every phase (project default `verificationMethod: "VLBV"`); a deviation exists only as a signed `KBD-METHOD` decision naming the method, its execution cadence and its reason, and it is disclosed in the closure packet. Define acceptance before generation; generated code executes only at the value-phase boundary (B4) and, after an authorized repair, at B5 — see `kbd-process-orchestrator/references/boundaries.md`. Tasks, hours, commits, reviewer requests and compiler problems create no boundary. Preserve original evidence, consumed budgets and unresolved effects across resume and supersession; reconcile an uncertain effect before any retry. Full rules: `kbd-process-orchestrator/references/method-context.md`.
 
