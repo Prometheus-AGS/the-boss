@@ -237,6 +237,7 @@ function ModelControl({
   if (agent?.type === 'uar') return trigger
   return (
     <ModelSelector
+      allowPresentationSwitch
       multiple={false}
       includeAgentOnlyModels
       value={model}

@@ -42,6 +42,8 @@
 !prepare-release/**
 !stakeholder-map/
 !stakeholder-map/**
+!product-guide/
+!product-guide/**
 !translate-docs/
 !translate-docs/**
 !upstream-merge/

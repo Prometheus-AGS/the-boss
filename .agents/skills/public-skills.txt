@@ -24,3 +24,4 @@ create-prd
 stakeholder-map
 a11y-gate
 vercel-composition-patterns
+product-guide

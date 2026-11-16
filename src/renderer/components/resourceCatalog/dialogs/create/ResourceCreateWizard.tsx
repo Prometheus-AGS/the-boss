@@ -75,6 +75,7 @@ function WizardFooter({
   stepIndex,
   isLast,
   isSubmitting,
+  imagePending,
   onCancel,
   onBack,
   onNext,
@@ -84,6 +85,7 @@ function WizardFooter({
   stepIndex: number
   isLast: boolean
   isSubmitting: boolean
+  imagePending: boolean
   onCancel: () => void
   onBack: () => void
   onNext: () => void
@@ -107,16 +109,16 @@ function WizardFooter({
         {t('common.cancel')}
       </Button>
       {stepIndex > 0 ? (
-        <Button type="button" variant="outline" disabled={submitting} onClick={onBack}>
+        <Button type="button" variant="outline" disabled={submitting || imagePending} onClick={onBack}>
           {t('library.config.dialogs.create.back')}
         </Button>
       ) : null}
       {isLast ? (
-        <Button type="button" loading={submitting} disabled={!basicValid} onClick={onCreate}>
+        <Button type="button" loading={submitting} disabled={!basicValid || imagePending} onClick={onCreate}>
           {t('library.config.dialogs.create.submit')}
         </Button>
       ) : (
-        <Button type="button" disabled={!canProceed} onClick={onNext}>
+        <Button type="button" disabled={!canProceed || submitting || imagePending} onClick={onNext}>
           {t('library.config.dialogs.create.next')}
         </Button>
       )}
@@ -169,6 +171,8 @@ export function ResourceCreateWizard({
       : null
   const autoSelectedDefaultModelIdRef = useRef<UniqueModelId | null>(null)
   const [stepIndex, setStepIndex] = useState(0)
+  const [imagePending, setImagePending] = useState(false)
+  const submitPendingRef = useRef(false)
   const [dialogContentElement, setDialogContentElement] = useState<HTMLDivElement | null>(null)
   const [dialogKey, setDialogKey] = useState(0)
   const pendingCloseActionRef = useRef<(() => void) | null>(null)
@@ -296,12 +300,13 @@ export function ResourceCreateWizard({
     return () => window.cancelAnimationFrame(frameId)
   }, [open, runPendingCloseAction])
 
-  const handleCreate = form.handleSubmit(async (values) => {
+  const submitForm = form.handleSubmit(async (values) => {
     if (!values.modelId || (kind === 'agent' && values.agentType === 'uar' && !values.uarModelAssignment)) return
     form.clearErrors('root')
     try {
       await onSubmit({
         avatar: values.avatar,
+        ...(kind === 'agent' && values.avatarImage ? { avatarImage: values.avatarImage } : {}),
         agentType: values.agentType,
         permissionMode: values.permissionMode,
         name: values.name.trim(),
@@ -320,6 +325,15 @@ export function ResourceCreateWizard({
       form.setError('root', { message })
     }
   })
+  const handleCreate = async () => {
+    if (submitPendingRef.current || submitting || imagePending) return
+    submitPendingRef.current = true
+    try {
+      await submitForm()
+    } finally {
+      submitPendingRef.current = false
+    }
+  }
 
   const title = t(
     kind === 'assistant' ? 'library.config.dialogs.create.assistant_title' : 'library.config.dialogs.create.agent_title'
@@ -327,7 +341,10 @@ export function ResourceCreateWizard({
   const currentStep = steps[Math.min(stepIndex, steps.length - 1)]
 
   return (
-    <Dialog key={dialogKey} open={open} onOpenChange={(nextOpen) => !submitting && onOpenChange(nextOpen)}>
+    <Dialog
+      key={dialogKey}
+      open={open}
+      onOpenChange={(nextOpen) => !submitPendingRef.current && !submitting && onOpenChange(nextOpen)}>
       <DialogContent
         ref={setDialogContentElement}
         closeOnOverlayClick={!submitting}
@@ -367,7 +384,7 @@ export function ResourceCreateWizard({
                         }
                         label={step.label}
                         active={active}
-                        disabled={!done}
+                        disabled={!done || submitting || imagePending}
                         onClick={() => done && setStepIndex(index)}
                         aria-current={active ? 'step' : undefined}
                         className={cn(resourceDialogRailItemClassName, 'disabled:opacity-100')}
@@ -383,6 +400,9 @@ export function ResourceCreateWizard({
                 className="min-w-0 flex-1">
                 {currentStep.id === 'basic' ? (
                   <BasicInfoStep
+                    active={open}
+                    disabled={submitting}
+                    onImagePendingChange={setImagePending}
                     form={form}
                     portalContainer={dialogContentElement}
                     fallbackAvatar={getResourceCreateDefaultAvatar(kind)}
@@ -408,7 +428,8 @@ export function ResourceCreateWizard({
               stepIndex={stepIndex}
               isLast={isLast}
               isSubmitting={isSubmitting}
-              onCancel={() => onOpenChange(false)}
+              imagePending={imagePending}
+              onCancel={() => !submitPendingRef.current && !submitting && onOpenChange(false)}
               onBack={goBack}
               onNext={goNext}
               onCreate={() => void handleCreate()}

@@ -430,6 +430,7 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
         agentDataPath,
         this.input.knowledgeBaseIds,
         undefined,
+        this.input.modelId,
         {
           text: (value) => getProjection().text(value),
           value: (value) => getProjection().value(value),
