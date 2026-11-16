@@ -71,14 +71,13 @@ export async function captureDshConnectionSnapshot(
   selectedKnowledgeBaseIds?: readonly string[]
 ): Promise<DshConnectionSnapshot> {
   const session = agentSessionService.getById(sessionId)
-  let agent = agentService.getAgent(agentId)
-  if (!session?.agentId || session.agentId !== agentId || !agent?.model) {
+  const sourceAgent = agentService.getAgent(agentId)
+  const modelId = requestedModelId ?? sourceAgent?.model
+  if (!session?.agentId || session.agentId !== agentId || !sourceAgent || !modelId) {
     throw new DshInvalidConnectionSnapshotError(`Invalid dsh session snapshot: ${sessionId}`)
   }
 
-  const managed = await application.get('PrometheusIntegrationService').resolveSession(session, agent)
-  agent = managed.agent
-  const modelId = requestedModelId ?? agent.model!
+  const { agent } = await application.get('PrometheusIntegrationService').resolveSession(session, sourceAgent)
   const parsed = parseUniqueModelId(modelId)
   const provider = providerService.getByProviderId(parsed.providerId)
   const model = modelService.getByKey(parsed.providerId, parsed.modelId)
