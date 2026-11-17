@@ -41,6 +41,7 @@ try {
   assert(installed.roles[1].skills.includes('prometheus-ui-review'));
   assert(installed.roles[1].skills.includes('interface-review'));
   results.push({ status: 'passed', name: 'real export and installed Claude definitions defer conditional and user-only skills while retaining manifest bindings' });
+  // oxlint-disable-next-line no-restricted-globals -- Mutate an override fixture without affecting the original team.
   const overridden = structuredClone(team);
   overridden.roles[1].native = { claude: { skills: ['interface-review'], model: 'operator-model', permissionMode: 'plan' } };
   const overrideOutput = path.join(temporary, 'override-proposal');

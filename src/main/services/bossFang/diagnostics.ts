@@ -58,6 +58,7 @@ export class BossFangDiagnostics {
   status(id: string): BossFangDiagnostic {
     const result = this.records.get(id)
     if (!result) throw new Error('Diagnostic record is unavailable; reopen the dashboard to inspect existing runs')
+    // oxlint-disable-next-line no-restricted-globals -- Detach the diagnostic snapshot from the live run.
     return structuredClone(result)
   }
   async restore(id: string) {
@@ -75,6 +76,7 @@ export class BossFangDiagnostics {
     return this.status(id)
   }
   private publish(record: BossFangDiagnostic) {
+    // oxlint-disable-next-line no-restricted-globals -- Broadcast a stable diagnostic snapshot while the run can still update.
     application.get('IpcApiService').broadcast('bossfang.diagnostic.progress', structuredClone(record))
     this.lastId = record.id
     const body = JSON.stringify(record)

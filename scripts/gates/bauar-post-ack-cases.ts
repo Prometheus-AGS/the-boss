@@ -46,6 +46,7 @@ const progress: CaseProgress[] = ['post_ack_positive_calibration', 'post_ack_pre
   (category) => ({ category, status: 'unrun', stage: 'artifact_binding', cleanupConfirmed: false })
 )
 export function postAckCaseProgress(): CaseProgress[] {
+  // oxlint-disable-next-line no-restricted-globals -- Return a stable copy of the acknowledgement evidence.
   return structuredClone(progress)
 }
 

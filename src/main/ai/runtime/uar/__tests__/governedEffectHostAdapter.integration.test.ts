@@ -295,6 +295,7 @@ function preparedInvocation(hostEpoch: string): UarPreparedInvocation {
 
 function nextInvocation(invocation: UarPreparedInvocation): UarPreparedInvocation {
   return {
+    // oxlint-disable-next-line no-restricted-globals -- Each invocation fixture must own its nested arguments.
     ...structuredClone(invocation),
     invocationId: randomUUID(),
     modelToolCallId: randomUUID()

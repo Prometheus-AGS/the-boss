@@ -624,6 +624,7 @@ export class UarRuntimeConnection implements AgentRuntimeConnection {
   }
 
   private definitionRevision(artifact: UarAgentArtifact): string {
+    // oxlint-disable-next-line no-restricted-globals -- Isolate revision normalization from the cached definition and its nested metadata.
     const value = structuredClone(artifact)
     delete value.extensions['uar.catalog']
     return this.artifactDigest(value)

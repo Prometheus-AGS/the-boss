@@ -161,6 +161,7 @@ class FlintUarAuthorityProvider implements UarAuthorityProvider {
       bindingRevision: digest(value.binding),
       ...(typeof value.challenge_id === 'string' ? { challengeId: value.challenge_id } : {}),
       reason: typeof value.reason === 'string' ? value.reason : disposition,
+      // oxlint-disable-next-line no-restricted-globals -- Isolate the returned provider binding from the stored decision.
       providerBinding: structuredClone(value.binding)
     }
   }

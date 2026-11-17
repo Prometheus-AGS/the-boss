@@ -170,6 +170,7 @@ export class UarHostToolAdmission {
       return { call, error: 'Managed tool claim evidence could not be persisted; dispatch was blocked' }
     }
     record.managedDispatchClaimed = true
+    // oxlint-disable-next-line no-restricted-globals -- Isolate the validated arguments from mutation during dispatch.
     return { call, admissionId: record.admissionId, invocation: structuredClone(invocation) }
   }
 
@@ -262,6 +263,7 @@ export class UarHostToolAdmission {
     const hostDisposition = composeDisposition(localDisposition, authority.disposition)
     const record: AdmissionRecord = {
       admissionId,
+      // oxlint-disable-next-line no-restricted-globals -- Snapshot the admitted arguments before retaining them for later dispatch.
       invocation: structuredClone(invocation),
       argumentDigest: argumentDigest(invocation.validatedArguments),
       hostDisposition,

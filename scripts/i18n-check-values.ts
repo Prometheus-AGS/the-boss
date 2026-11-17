@@ -2,6 +2,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
+import { PRODUCT_NAME } from '../src/shared/utils/branding'
 import { localeKeySpec } from './i18n-plurals'
 
 /** Catalogs are flat: every key is a dotted path mapping straight to its translated string. */
@@ -58,7 +59,8 @@ export const validate = (english: string, translation: string, doNotTranslate: s
   const foldedTranslation = foldForTermMatch(text)
   for (const term of doNotTranslate) {
     const foldedTerm = foldForTermMatch(term)
-    if (foldedEnglish.includes(foldedTerm) && !foldedTranslation.includes(foldedTerm)) {
+    const usesForkBrand = term === 'Cherry Studio' && foldedTranslation.includes(foldForTermMatch(PRODUCT_NAME))
+    if (foldedEnglish.includes(foldedTerm) && !foldedTranslation.includes(foldedTerm) && !usesForkBrand) {
       return `dropped untranslatable term "${term}"`
     }
   }
