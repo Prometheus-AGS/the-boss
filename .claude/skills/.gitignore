@@ -22,6 +22,7 @@
 !openspec-propose
 !prepare-release
 !stakeholder-map
+!product-guide
 !translate-docs
 !upstream-merge
 !vercel-composition-patterns

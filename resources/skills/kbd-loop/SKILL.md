@@ -15,7 +15,7 @@ Use `node <delivery-cadence>/scripts/cadence.mjs resume --root <cadence-root>` o
 
 Use the current harness's available continuation capability. Never start another scheduler or assume a slash command/API exists. When unavailable, operate in the current turn and leave a resume command.
 
-Select a complete usable increment; delegate disjoint production ownership to the selected team. At its boundary BUILD then RUN the program's completed function. No test suites, per-task verifier or reviewer loop. Fix any build/launch/function errors before promoting the next increment. Record completion through kbd-apply and its canonical backend; cadence reports reference that evidence. Honor profile review, budget, publication and pending-hook constraints.
+Select a complete usable increment; delegate disjoint production ownership to the selected team. At its boundary BUILD then RUN the program's completed function. No test suites, per-task verifier or reviewer loop. Build and run are the boundary packet's `build`/`run` entries (B4, `kbd-process-orchestrator/references/boundaries.md`); a failure is fixed only through an owner-authorized B5 repair before the next increment is promoted. Record completion through kbd-apply and its canonical backend; cadence reports reference that evidence. Honor profile review, budget, publication and pending-hook constraints.
 
 ## Cadence child recovery
 

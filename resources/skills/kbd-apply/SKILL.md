@@ -11,7 +11,7 @@ the dispatch contract; **`/kbd-apply` walks the tasks.**
 ## Why this exists
 
 Handing implementation to a backend's bare "implement everything" command
-(OpenSpec's `/opsx:apply`, Spec Kit's `/speckit.implement`) fires no KBD
+(the `openspec-apply-change` skill, Spec Kit's `/speckit.implement`) fires no KBD
 hooks, writes no `progress.json`, refreshes no waypoint — it funnels the user
 out of the execute phase and loses the connection back to it. This driver
 fixes that by making **KBD own the loop** and calling the spec backend per
@@ -48,7 +48,7 @@ $APPLY end-task "$CHANGE" "$ID" "$I" "$TOTAL" "$TITLE"
 #     fires task:after, prints "Completed task <I> of <TOTAL>: <TITLE>"
 #   → on the final task, closes change:after
 
-# 3. Only at the complete production delivery boundary, run this repo's final QA gate, then:
+# 3. Only after the phase is CLOSED (B4 step 7, kbd-process-orchestrator/references/boundaries.md):
 $APPLY verify  "$CHANGE"   # backend verify (openspec validate; speckit structural check)
 $APPLY archive "$CHANGE"   # backend archive
 ```
@@ -141,7 +141,7 @@ engine via `.kbd-orchestrator/project.json`:
 Valid pin values: `openspec`, `speckit`, `native-kbd` (`auto`/absent = detect).
 
 **Engine version pins.** Each engine's pinned upstream version (openspec
-1.16.0 from `package.json`, which needs Node.js 22.12.0+; spec-kit 1.3.0) is recorded in
+2.0.0, the managed runner's exact pin, also in `package.json`; it needs Node.js 22.12.0+; spec-kit 1.3.0) is recorded in
 `config/spec-engines.json` with its rationale. The speckit adapter is
 markdown-based, so the pin exists for *layout* conformance: when a new Spec Kit
 release ships, check whether `specs/<slug>/{spec.md,plan.md,tasks.md}` or the

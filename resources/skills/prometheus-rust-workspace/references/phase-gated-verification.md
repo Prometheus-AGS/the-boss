@@ -1,112 +1,84 @@
-# Phase-gated Cargo verification
+# Phase-gated Cargo verification (VLBV)
 
-Optimize for development throughput. Rust builds and tests are expensive and may
-contend for Cargo package-cache, registry-cache, build-directory, or workspace locks.
-Do not run compilation, linting, testing, benchmarking, documentation, installation,
-or dependency-update commands after every edit.
+Rust work follows VLBV, the pack's single verification method. Boundaries are
+defined once in `skills/kbd-process-orchestrator/references/boundaries.md`;
+this page only says how Cargo commands fit into them.
 
-## Change and phase boundaries
+**Cargo commands that build, check, lint, test, document or run the workspace
+execute only as entries of the phase's adopted boundary packet — at B4, once, and
+after an authorized repair at B5.** There is no change-level gate and no
+intermediate compiler check. rust-analyzer / LSP diagnostics read in the editor
+are static reading and are allowed throughout.
 
-A validation boundary exists when a meaningful set of requested production
-functionality is fully implemented and wired through a real public entry point. This
-can be a completed change or a phase boundary. The user may also request validation.
-A narrow compiler check before that boundary is allowed only to diagnose a blocker
-that static inspection cannot reasonably resolve.
+## During the phase (B0–B3)
 
-During a phase:
-
-- inspect and edit without repeatedly compiling;
-- batch related edits before validation;
+- inspect and edit; batch related edits;
 - use rust-analyzer diagnostics and static reasoning for intermediate feedback;
-- do not run tests merely because a file changed;
-- do not add or run unit, module-local, mock-only, or filtered function tests as
+- do not run `cargo check`, `cargo build`, `cargo clippy`, `cargo test`,
+  `cargo run`, `cargo doc` or any compiler probe — not after a file changes, not
+  after a change or task completes, and not to diagnose a compile error;
+- do not add or run unit, module-local, mock-only or filtered function tests as
   completion evidence;
-- do not rerun Cargo after a small follow-up unless it meaningfully invalidates the
-  previous result;
-- do not start background Cargo commands, test watchers, or repeated check loops;
-- do not run multiple Cargo commands concurrently against the same workspace or
-  target directory.
+- do not start background Cargo commands, test watchers or check loops.
 
-At a completed change or phase boundary, choose the smallest integration gate that
-exercises the production entry point and real collaborating components. Repository
-commands remain authoritative. Do not run a broader command merely because it exists.
+A compile error found by reading is fixed by reading. If static inspection
+genuinely cannot resolve a blocker, record it, finish the rest of the agreed
+production work, and let the boundary packet's `build` entry report it.
 
-## Level 1 — targeted integration
+## The boundary packet (B4)
 
-Use for completed behavior localized to one package or integration target:
+Choose the smallest set of packet entries that exercises the production entry
+point and real collaborating components. Repository commands remain authoritative.
+Typical typed entries (contract v2):
 
-```bash
-cargo test -p <package> --test <integration-target>
+```json
+{ "id": "build",  "kind": "build",    "argv": ["cargo", "build", "-p", "<package>", "--bin", "<bin>"] },
+{ "id": "scn-1",  "kind": "scenario", "argv": ["cargo", "test", "-p", "<package>", "--test", "<integration-target>"], "scenarioIds": ["SCN-1"] },
+{ "id": "neg-1",  "kind": "negativeControl", "argv": ["cargo", "test", "-p", "<package>", "--test", "<integration-target>", "--", "--ignored", "negative_scn_1"], "scenarioIds": ["SCN-1"] }
 ```
 
-The test must enter through a public API, binary, protocol, process, filesystem,
-database, or network boundary. Do not use a unit-test name filter as a substitute.
-Do not automatically escalate when the targeted integration succeeds.
+- A scenario entry enters through a public API, binary, protocol, process,
+  filesystem, database or network boundary. A unit-test name filter is not a
+  substitute.
+- Add only the feature flags the scenario needs; `--all-features` only when the
+  project supports it.
+- Prefer an integration-only selector; never a broad selector that silently adds
+  unit-test harnesses.
+- Workspace-wide formatting and lint (`cargo fmt --check`, `cargo clippy
+  --workspace --all-targets -- -D warnings`) are packet entries when the contract
+  lists them, typically for a phase touching shared public APIs, workspace
+  configuration or dependencies.
 
-## Level 2 — affected integration surfaces
+The packet runs once. Each entry's receipt is kept; a failed entry is FAIL or
+BLOCKED and is not rerun.
 
-Use when completed behavior affects multiple public surfaces, feature profiles, or
-downstream packages. Run each relevant integration target once using the repository's
-documented selectors, for example:
+## Repair (B5)
 
-```bash
-cargo test -p <package> --test <integration-target-a>
-cargo test -p <package> --test <integration-target-b> --features <relevant-features>
-```
+Only after the owner authorizes a bounded repair within `budgets.repairAttempts`:
 
-Add only feature flags relevant to the change. Do not use `--all-features` by
-default.
+1. Read all relevant diagnostics from the existing receipts.
+2. Complete the agreed repair, batching the fixes.
+3. Rerun only the affected scenarios' entries and their negative controls.
 
-## Level 3 — phase integration gate
+## Locks, caches and formatting
 
-Reserve this for a completed phase, cross-workspace behavior, shared public APIs,
-workspace configuration or dependency changes, release preparation, CI-equivalent
-local verification, or an explicit user request. Prefer the repository's documented
-integration-only selector, for example:
-
-```bash
-cargo fmt --check
-cargo clippy --workspace --all-targets -- -D warnings
-cargo test --workspace --test '*'
-```
-
-Use `--all-features` only when the project explicitly supports building all features
-together or the user requests it. Do not use a broad selector that silently adds unit
-test harnesses when an integration-only selector is available.
-
-## Failure and escalation
-
-1. Read all relevant diagnostics from the existing command.
-2. Batch the necessary fixes.
-3. Do not rerun after each individual edit.
-4. Rerun only the smallest integration command that can confirm the fixes.
-5. Escalate only when the failure or change crosses package boundaries.
-
-A successful targeted integration does not require an immediate workspace-wide gate.
-Defer the broader integration suite until the complete phase is finished.
-
-## Locks, caches, and formatting
-
-- Serialize Cargo commands for a workspace unless the user explicitly requests an
-  isolated concurrent build.
-- Account for any Cargo process already running before starting an expensive command.
+- Only one Cargo/rustc build process runs on the machine at a time; check for an
+  active one and wait for or reuse it.
 - Reuse the workspace target directory; do not clear caches or run `cargo clean`.
 - Do not change `Cargo.lock` unless dependency resolution is part of the task.
-- If Cargo waits for a lock, identify or wait for the existing process and reuse its
-  results when possible. Do not spawn retries.
-- Do not create a separate `CARGO_TARGET_DIR` merely to bypass ordinary contention;
-  it may duplicate the full compilation cost.
-- Format once at a coherent phase boundary or before final verification. Prefer the
-  affected files or package and avoid unrelated churn.
+- Do not create a separate `CARGO_TARGET_DIR` merely to bypass ordinary contention.
+- Format once, as a packet entry or at the end of the agreed production work,
+  limited to the affected files or package.
 
 ## Opt-in commands
 
-Run audit, deny, Miri, benchmarks, documentation, fuzzing, Loom, sanitizers,
-coverage, cross-compilation, full feature matrices, and release builds only at a
-final task, release, or security boundary; when directly relevant to the requested
-change; or when explicitly requested.
+Audit, deny, Miri, benchmarks, documentation, fuzzing, Loom, sanitizers, coverage,
+cross-compilation, full feature matrices and release builds are packet entries only
+when the contract names them (a release or security boundary), or run after the
+phase closes on explicit request.
 
 ## Reporting
 
-Report commands run, success or failure, intentional deferrals, and whether full
-workspace validation remains recommended. Never claim that a deferred check passed.
+Report the packet entries that ran, their verdicts, intentional deferrals, and
+whether broader validation remains recommended. Never claim that a deferred check
+passed.

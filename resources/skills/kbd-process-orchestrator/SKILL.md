@@ -17,13 +17,19 @@ explicit prompt arguments). Do not hard-code project names into this skill.
 
 ## OpenSpec lifecycle preflight
 
-At session startup, resume, and before creating or entering a phase, run
+At session startup and on resume, run the read-only check:
+
+```text
+node "<mini-pack-root>/lib/platform/openspec/cli.mjs" verify --project "<project-root>"
+```
+
+Before creating or entering a phase, run the mutating refresh:
 
 ```text
 node "<mini-pack-root>/lib/platform/openspec/cli.mjs" refresh --project "<project-root>"
 ```
 
-The pack standard is the latest stable upstream OpenSpec (release baseline **1.16.0**, checked 2026-11-05; it needs Node.js 22.12.0 or newer, and the runner refuses an older Node with a failed receipt). The managed Node runner checks the official npm registry, installs that exact version in the user's cache, and runs upstream `update` for existing KBD/OpenSpec projects. It refreshes generated skills/commands with a backup and receipt; it preserves authored specs, changes, configuration, task completion, and KBD state. OpenSpec does not give all authored Markdown a common version field: report compatibility problems instead of relabeling or rewriting their meaning. Read the helper [lifecycle contract](../../lib/platform/openspec/README.md) for overrides, offline status, backups, and recovery.
+The pack is certified against **exactly OpenSpec 2.0.0** (the runner's pinned version; it needs Node.js 22.12.0 or newer, and the runner refuses an older Node with a failed receipt). The managed Node runner installs that exact version in the user's cache; the npm registry is consulted only to report `newerAvailable` / `migrationRequired`, never to move the selection. `verify` never installs or writes project files; `refresh` runs upstream `update` for existing KBD/OpenSpec projects, refreshing generated skills with a backup and receipt while preserving authored specs, changes, configuration, task completion and KBD state. Never refresh while a bound phase is open (procedure text must not change under a bound contract). OpenSpec does not give all authored Markdown a common version field: report compatibility problems instead of relabeling or rewriting their meaning. Read the helper [lifecycle contract](../../lib/platform/openspec/README.md) for overrides, offline status, backups, and recovery.
 
 Use the same selected CLI for subsequent OpenSpec operations:
 
@@ -31,7 +37,7 @@ Use the same selected CLI for subsequent OpenSpec operations:
 node "<mini-pack-root>/lib/platform/openspec/cli.mjs" run --project "<project-root>" -- <OpenSpec arguments>
 ```
 
-SessionStart and phase scripts automate this preflight. Harnesses without hooks and direct `prometheus kbd phase` invocations must perform it explicitly before phase work. A failed startup refresh is a visible pending prerequisite; retry at the phase boundary before OpenSpec work. Offline cached operation reports latest-unverified rather than current. OpenSpec is the primary spec engine for new projects (`/kbd-init` initializes it with `node "<mini-pack-root>/lib/platform/openspec/cli.mjs" init --project "<project-root>"`) and GitHub Spec Kit is the backup; existing native-only KBD projects remain usable without OpenSpec. Explicit operator overrides remain visible. Project testing/authorization rules take precedence over generated upstream suggestions.
+Session start verifies; phase entry refreshes. SessionStart runs `verify` and phase scripts run `refresh`; harnesses without hooks and direct `prometheus kbd phase` invocations must perform both explicitly. A `refresh-needed` verify result or a failed phase-entry refresh is a visible pending prerequisite; retry at the phase boundary before OpenSpec work. OpenSpec `verify`/archive of changes runs only after the phase is CLOSED (`references/boundaries.md`, B4 step 7). OpenSpec is the primary spec engine for new projects (`/kbd-init` initializes it with `node "<mini-pack-root>/lib/platform/openspec/cli.mjs" init --project "<project-root>"`) and GitHub Spec Kit is the backup; existing native-only KBD projects remain usable without OpenSpec. Explicit operator overrides remain visible. Project testing/authorization rules take precedence over generated upstream suggestions.
 
 ## Progress Signals (MANDATORY)
 
@@ -88,7 +94,7 @@ with designated AI tools performing tasks through `kbd-apply`.
 A change is created during **spec/plan**, then driven task-by-task in
 **execute** by the shipped `kbd-apply` skill and `scripts/kbd-apply.mjs`.
 Use `begin-task` / `end-task` for every task, then driver `verify` → `archive`
-after QA and independent review. Never invoke bare OpenSpec apply inside KBD.
+only after the phase is CLOSED (B4 step 7 in `references/boundaries.md`). Never invoke bare OpenSpec apply inside KBD.
 The parent Execute stage remains active through all assigned changes/tasks and
 their required gates. `execution.md` and `execute-dispatch.json` record dispatch;
 only the completed boundary gets `execute:after` and
@@ -98,7 +104,16 @@ completion checklist.
 ### Level 3 — Artifact QA (innermost)
 
 `artifact-refiner` Specify → Plan → Execute → Reflect → Persist, when that
-skill is installed in this project.
+skill is installed in this project. It runs once, cumulatively over the
+whole phase diff, at B4 step 5 and triggers no build.
+
+### Verification method
+
+VLBV is the single verification method (`vlbv` skill). Gates, checkpoints and
+boundaries are defined once in [`references/boundaries.md`](references/boundaries.md)
+(B0–B6 and the eight-step B4 sequence); generated code executes only at B4 and an
+authorized B5 repair. There is no compiler exception. Method selection and
+deviation: [`references/method-context.md`](references/method-context.md).
 
 ---
 

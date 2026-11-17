@@ -15,7 +15,7 @@ Initialize the KBD orchestrator for the **current project**.
 
 ## OpenSpec lifecycle preflight
 
-Before this stage, follow the [orchestrator preflight](../kbd-process-orchestrator/SKILL.md#openspec-lifecycle-preflight): refresh existing KBD/OpenSpec projects with the managed latest-stable CLI, then use that same runner for OpenSpec commands. Retry a pending startup refresh before OpenSpec work; preserve authored specs and task state. Phase scripts run this automatically, including canonical-runtime paths.
+Before this stage, follow the [orchestrator preflight](../kbd-process-orchestrator/SKILL.md#openspec-lifecycle-preflight): use the pinned OpenSpec 2.0.0 CLI through the managed runner — session start runs the read-only `verify`; phase entry runs `refresh`, which updates existing KBD/OpenSpec projects — then use that same runner for OpenSpec commands. Retry a pending phase-entry refresh before OpenSpec work; preserve authored specs and task state. Phase scripts run this automatically, including canonical-runtime paths.
 
 ## What this does
 
@@ -99,7 +99,7 @@ Check in order:
 
 ### Step 4a: Spec engine
 
-OpenSpec (1.16.0+) is the primary spec engine; GitHub Spec Kit is the supported
+OpenSpec (2.0.0, pack-pinned) is the primary spec engine; GitHub Spec Kit is the supported
 backup. Take `--spec-engine openspec|speckit|native-kbd` (default `openspec`)
 and record the choice as `"specBackend"` in `project.json`.
 
@@ -124,6 +124,22 @@ and record the choice as `"specBackend"` in `project.json`.
 - **`native-kbd`** — only on explicit request; no external CLI is needed.
 
 Set `openspec_available` to `true` only when `openspec/` exists after this step.
+
+OpenSpec 2.0 writes its skills once to `.agents/skills/openspec-*`; the pack copies
+them (never links) into the other harness skill roots, and OpenSpec 2.0 creates no
+`/opsx:*` commands. Never edit an `openspec-*` skill — put project instructions in
+`openspec/config.yaml` (`context`, `rules`).
+
+### Step 4b: Verification method
+
+Write `"verificationMethod": "VLBV"` to `project.json` (keep an existing value).
+VLBV is the pack's single verification method: acceptance scenarios are adopted
+before generation, and generated code executes only at the value-phase boundary
+(B4) or an authorized repair (B5) —
+`kbd-process-orchestrator/references/boundaries.md`. A phase that must deviate
+records a signed `KBD-METHOD` decision naming the method, its execution cadence and
+its reason; no per-phase decision is needed to use VLBV, and a different value in
+`project.json` cannot deviate (method-context reports it as a blocker).
 
 ### Step 5: Constraints
 
@@ -189,6 +205,7 @@ discovered values and conforming to
   "name": "<discovered project name>",
   "description": "<discovered one-line description>",
   "activePhase": null,
+  "verificationMethod": "VLBV",
   "focus_project_path": "<absolute path to focus project root>",
   "spec_paths": ["<discovered spec paths>"],
   "openspec_available": true,
@@ -288,10 +305,10 @@ first phase — or run `/kbd-assess` directly if a phase is already defined in
 Before dependent work, run `node <pack-root>/scripts/kbd-method-context.mjs --project <project-root> --phase <canonical-phase-id> --write` (or read the phase-local `method-context.md` when Node is unavailable) and act on its `status`:
 
 - `RESOLVED_REFERENCES` — continue with the recovered method, contract and stage authority; preserve the same references in role inputs, dispatch and handoff read order.
-- `BLOCKED` — a method decision, contract, calibration or supersession is missing or changed, or canonical status is unavailable; resolve it explicitly. Prior commands, memory and tool inventories are not fresh authority.
-- `CONFLICT` — governing host policy conflicts with the selected method. Stop before dependent work and show the conflict; continue only after the operator records a `KBD-POLICY-ACK` decision for that file's current hash. Never rewrite operator-owned policy. When host policy grants an exception — for example one narrow, targeted compiler check after a blocking compile error, or an hourly integration gate — name it as host policy, state that it conflicts with the selected method, and say it does not authorize tests, dry-runs or generated-code verification.
+- `BLOCKED` — the contract, its binding, a calibration reference, a supersession or a deviation's cadence/reason is missing or changed, or canonical status is unavailable; resolve it explicitly. Prior commands, memory and tool inventories are not fresh authority.
+- `CONFLICT` — a governing rule file the active harness loads grants an exception VLBV forbids (for example a compiler check or an hourly integration gate during generation). Stop before dependent work and show the conflict; continue only after the operator records a `KBD-POLICY-ACK` decision for that file's current hash. Never rewrite operator-owned policy, and never treat an exception as authority for tests, builds, dry-runs or generated-code verification.
 
-For selected VLBV, define acceptance before generation and finish the whole agreed value phase before any generated-code verification; tasks, hours, commits, reviewer requests and compiler problems create no boundary. Preserve original evidence, consumed budgets and unresolved effects across resume and supersession; reconcile an uncertain effect before any retry. Full rules: `kbd-process-orchestrator/references/method-context.md`.
+VLBV is the method for every phase (project default `verificationMethod: "VLBV"`); a deviation exists only as a signed `KBD-METHOD` decision naming the method, its execution cadence and its reason, and it is disclosed in the closure packet. Define acceptance before generation; generated code executes only at the value-phase boundary (B4) and, after an authorized repair, at B5 — see `kbd-process-orchestrator/references/boundaries.md`. Tasks, hours, commits, reviewer requests and compiler problems create no boundary. Preserve original evidence, consumed budgets and unresolved effects across resume and supersession; reconcile an uncertain effect before any retry. Full rules: `kbd-process-orchestrator/references/method-context.md`.
 
 ## Host policy discovery
 

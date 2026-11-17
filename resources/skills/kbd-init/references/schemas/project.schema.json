@@ -8,7 +8,8 @@
     "description": { "type": "string" },
     "activePhase": { "type": ["string", "null"] },
     "updatedAt": { "type": "string", "format": "date-time" },
-    "model_policy": { "type": "object" }
+    "model_policy": { "type": "object" },
+    "verificationMethod": { "type": "string", "default": "VLBV", "pattern": "^[A-Za-z0-9][A-Za-z0-9._ -]{0,63}$", "description": "Project verification method. VLBV is the pack default; per-phase deviations are signed KBD-METHOD decisions (kbd-process-orchestrator/references/method-context.md)." }
   },
   "not": { "required": ["active_phase"] },
   "additionalProperties": true

@@ -36,3 +36,16 @@ Load these files in order when this skill activates:
 - **Use deterministic execution** for measurable requirements (code interpreter or e2b sandbox)
 - **Validate outputs** against schema contracts before termination
 - **Never rely on conversational context** for state
+
+## Under KBD (VLBV)
+
+When a KBD phase invokes this skill, it is the **static quality-assurance pass**
+over the whole value phase: **one cumulative pass at B4 step 5**
+(`kbd-process-orchestrator/references/boundaries.md`), after the boundary packet has
+run and recorded `boundary-results.json`, and before
+`scripts/kbd-phase-close-eval.mjs`. It never runs per task or per change (B1/B2
+invoke nothing), and it **never triggers a build, test or compiler check** —
+generated code executes only inside the boundary packet. Deterministic execution
+above applies to the artifacts this skill itself measures, not to the project's
+generated code. Constraint-driven refinement of repaired artifacts runs only inside
+an owner-authorized B5 repair. State: `.refiner/artifacts/<phase-id>/`.

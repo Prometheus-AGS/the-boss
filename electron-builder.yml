@@ -63,8 +63,7 @@ files:
   - "!**/{.DS_Store,Thumbs.db,thumbs.db,__pycache__}"
   - "!**/{LICENSE,license,LICENSE.*,*.LICENSE.txt,NOTICE.txt,README.md,readme.md,CHANGELOG.md}"
   - "!node_modules/mammoth/{mammoth.browser.js,mammoth.browser.min.js}"
-  - "!**/node_modules/better-sqlite3/{bin,deps,src}/**"
-  - "!**/node_modules/better-sqlite3/build/{Debug,Release/obj}/**"
+  - "!**/node_modules/better-sqlite3/{bin,build,deps,src}/**"
   - "!**/node_modules/{selection-hook,@earendil-works/pi-coding-agent}/docs/**"
   # node-gyp-build prefers build/Release over prebuilds/, so ship the prebuilds and drop the
   # host-arch rebuild — a cross-built arm64 package would otherwise load the x86-64 binary (#20530).
@@ -74,6 +73,7 @@ files:
   - "!node_modules/tesseract.js-core/{tesseract-core.js,tesseract-core.wasm,tesseract-core.wasm.js}" # we don't need source files
   - "!node_modules/tesseract.js-core/{tesseract-core-lstm.js,tesseract-core-lstm.wasm,tesseract-core-lstm.wasm.js}" # we don't need source files
   - "!node_modules/tesseract.js-core/{tesseract-core-simd.js,tesseract-core-simd.wasm,tesseract-core-simd.wasm.js}" # tesseract.js loads tesseract-core-simd-lstm (default LSTM_ONLY OEM on SIMD)
+  - "!**/node_modules/tesseract.js-core/tesseract-core-simd-lstm.wasm.js"
   - "!node_modules/onnxruntime-web/**" # transformers.js's browser/WASM backend; local inference always runs onnxruntime-node instead
   - "!node_modules/@huggingface/transformers/node_modules/onnxruntime-web/**" # same package, nested copy
   - "!node_modules/onnxruntime-node/bin/**" # native binary is downloaded on first use (Toolchain/onnxruntime), never bundled — see OnnxRuntimeBinaryService
@@ -146,6 +146,7 @@ win:
     - target: portable
   signtoolOptions:
     sign: scripts/packaging/win-sign.js
+    signingHashAlgorithms: [sha256]
   signExts:
     - .node
   verifyUpdateCodeSignature: false
@@ -243,14 +244,14 @@ artifactBuildCompleted: scripts/packaging/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.48
-    - Upgrade existing managed UAR databases to SurrealDB 4.0 automatically and retain the original database for recovery.
-    - Bundle UAR 1.4.0-rc.4 and Prometheus mini skills 1.15.0.
-    - Include upstream Cherry Studio updates through 2.2.1.
+    The Boss 2.2.49
+    - Merge upstream Cherry Studio updates, including the 2.2.2 release.
+    - Bundle Prometheus Mini Skills 1.16.0 and use the updated Surreal Memory Server image with SurrealDB 4.0.0.
+    - The local Apple Silicon build includes UAR 1.4.0-rc.5.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.48
-    - 自动将现有的托管 UAR 数据库升级至 SurrealDB 4.0，并保留原始数据库供恢复使用。
-    - 内置 UAR 1.4.0-rc.4 和 Prometheus mini skills 1.15.0。
-    - 包含截至 Cherry Studio 2.2.1 的上游更新。
+    The Boss 2.2.49
+    - 合并 Cherry Studio 上游更新，包括 2.2.2 版本。
+    - 内置 Prometheus Mini Skills 1.16.0，并更新使用 SurrealDB 4.0.0 的 Surreal Memory Server 镜像。
+    - 本地 Apple Silicon 版本内置 UAR 1.4.0-rc.5。
     <!--LANG:END-->

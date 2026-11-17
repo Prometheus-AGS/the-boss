@@ -4,7 +4,7 @@ description: Install compact, layered Prometheus agent context into a project wi
 license: MIT
 compatibility: Node.js LTS (>= 22.12.0); no shell, Python, symlinks, or executable bit required
 metadata:
-  version: '1.1.0'
+  version: '1.2.0'
 ---
 
 # Prometheus Context Bootstrap
@@ -14,11 +14,16 @@ skill copies. The bootstrap owns only marked regions. It preserves prose outside
 those markers and refuses a corrupt marker pair or a symlink that resolves outside
 the target project.
 
-The generated policy finishes every planned production change in the phase before
-testing. It runs one real integration flow at the final phase boundary as evidence.
-When the harness provides an agent team, implementation roles work first and review,
-audit, verification, and integration-checker roles remain dormant until that boundary.
-Unit, mock-only, filtered-function, and per-edit test loops do not count as proof.
+Generated files carry VLBV as the single verification method: the marked
+`<!-- kbd-policy:begin/end -->` block (verification VLBV, compiler exception
+retired, no cadence exception, execution only at B4 — the boundary packet, once —
+or B5, an owner-authorized repair rerunning only affected checks), a first-action
+recovery protocol that works without hooks, and precedence over built-in TDD,
+verify and apply workflow skills. `CLAUDE.md` imports `@AGENTS.md`, so Claude
+Code reads the same policy. When the harness provides an agent team, review,
+audit, verification, and integration-checker roles remain dormant until B4. Unit,
+mock-only, filtered-function, and per-edit test loops do not count as proof.
+Boundaries are defined in `kbd-process-orchestrator/references/boundaries.md`.
 
 ## Selected method and phase authority
 
@@ -33,11 +38,10 @@ the pack reads the existing index and does not invent one.
 
 Recovery preserves the latest authorized supersession, original evidence,
 candidate freshness, consumed budgets and unresolved effects, and reconciles
-uncertain effects before retry. For a selected VLBV phase the templates retain the
-complete agreed value-phase boundary and keep execution authority separate: no
-task, hour, commit, reviewer or compiler boundary, and no stack-rule compiler or
-completed-change example, opens generated-code verification. Host compiler or
-skill-policy conflicts are surfaced before dependent action without changing
+uncertain effects before retry. The templates retain the complete agreed
+value-phase boundary and keep execution authority separate: no task, hour,
+commit, reviewer or compiler boundary, and no stack-rule compiler or
+completed-change example, opens generated-code verification. Host-policy conflicts are surfaced before dependent action without changing
 operator-owned prose outside the marked regions. Template guidance is
 instruction-only unless a named host boundary enforces it; no global context
 rewrite, universal interception, release or automatic-successor authority is
@@ -64,6 +68,13 @@ Every run prints a `RESIDENT` line: the words in the managed region against a
 region counts toward the ceiling; operator prose and other tools' regions are
 reported, never charged. `--check` fails when the managed region exceeds the
 ceiling.
+
+Every run also prints a `POLICY` line. `--check` fails when the governing file
+lacks exactly one `kbd-policy` block stating `verification: VLBV`, or when the
+managed region of the governing file or a stack rule carries retired
+compiler-exception or opt-in VLBV wording or an `/opsx:*` command (removed in
+OpenSpec 2.0). The same wording in operator prose outside the markers is printed
+as `STALE` for manual cleanup and never rewritten.
 
 Use `--dry-run` to print the complete write plan without changing files. If
 `--stacks` is absent, a root `Cargo.toml` selects Rust and a root `package.json`

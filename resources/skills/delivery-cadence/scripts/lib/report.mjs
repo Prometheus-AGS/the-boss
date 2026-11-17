@@ -1,6 +1,7 @@
 // Reports derive only from persisted observations. Missing coverage is not active work.
 import { publicationStatus } from './delivery-contract.mjs';
 import { pipelineReport } from './pipeline-report.mjs';
+import { outcomeFromClosure } from './vlbv.mjs';
 const dimensions = ['tasks', 'changes', 'phases'];
 const timingKinds = ['planning', 'implementation', 'build', 'run', 'feature-operation', 'rework', 'coordination', 'resource-wait', 'publication', 'human-wait', 'hook'];
 const workKinds = timingKinds.filter(kind => !['human-wait', 'resource-wait'].includes(kind));
@@ -113,6 +114,8 @@ export function iterationReport(iteration, context = {}) {
   return {
     schemaVersion: iteration.contractVersion >= 3 ? 3 : 2, id: iteration.id, index: iteration.index, status: iteration.status, workOutcome: iteration.workOutcome,
     failureResolution: iteration.failureResolution ?? null,
+    // VLBV (CR-14): the increment's outcome derives from the canonical KBD closure; cadence holds no verdict.
+    canonicalOutcome: context.state ? outcomeFromClosure(context.state, iteration.phaseId) : null,
     selected, completed: progress.net, carryover, counts: progress.counts.net, grossCompleted: progress.gross,
     grossCounts: progress.counts.gross, reopenedCounts: progress.counts.reopened, netCounts: progress.counts.net,
     unresolvedReopened: progress.unresolved, uncertainCompletionOrder: progress.uncertain, completionTimeline: timeline,
@@ -222,7 +225,7 @@ function followups(state) {
 export function makeReport(state) {
   const recommendation = optimize(state);
   const iterations = (state.iterations ?? []).map(iteration => iterationReport(iteration, {
-    publications: publicationObservations(state), recommendation: iteration.id === state.iterations.at(-1)?.id ? recommendation : null,
+    publications: publicationObservations(state), recommendation: iteration.id === state.iterations.at(-1)?.id ? recommendation : null, state,
   })).map((report, index) => ({ ...report,
     frozenSourceReconciliation: (state.frozenSourceReconciliations ?? []).findLast(item => item.iterationId === state.iterations[index].id) ?? null
   }));

@@ -50,6 +50,7 @@ import { BinaryManager } from '@main/services/binaryManager'
 import { BossFangService } from '@main/services/bossFang'
 import { CherryCloudNotificationService } from '@main/services/cherryCloud/CherryCloudNotificationService'
 import { CherryCloudService } from '@main/services/cherryCloud/CherryCloudService'
+import { CherryInModelSyncService } from '@main/services/CherryInModelSyncService'
 import { CitationPreviewService } from '@main/services/CitationPreviewService'
 import { CodeCliService } from '@main/services/codeCli'
 import { CommandService } from '@main/services/CommandService'
@@ -219,6 +220,7 @@ export const services = {
   AppUpdaterService,
   AutoBackupService,
   ProviderRegistryUpdaterService,
+  CherryInModelSyncService,
   SchedulerService,
   JobManager,
   TrashService

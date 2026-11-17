@@ -6,6 +6,7 @@ import { assertOperationReady, validateFeatureOperation } from './delivery-contr
 import { publicationAdmission } from './publication.mjs';
 import { handleActivity } from './activity.mjs';
 import { fail, clone, strings, timestamp, findCandidate, candidateId, candidateDigest, iterationFor, physicalPath, overlaps, rootsOf, nonempty } from './pipeline-data.mjs';
+import { workAheadContractStatus } from './vlbv.mjs';
 
 const open = state => (state.workAhead ?? []).filter(item => !['promoted', 'cancelled'].includes(item.state));
 function blockers(state, item) {
@@ -77,6 +78,8 @@ export async function handleWorkAhead(state, action, input = {}) {
     const item = { id: input.id ?? randomUUID(), predecessorCandidateId: candidateId(previous), authorityRefs, canonicalScopeRefs,
       owner: input.owner, ownedPaths, scope, outcome: scope.outcomes, featureOperation, baseSourceRefs, ...roots,
       checkpoints: clone(profile.checkpoints), phaseId: input.phaseId ?? null,
+      // VLBV (CR-14): without the successor phase's adopted contract, work-ahead is exploratory and not promotable.
+      vlbv: workAheadContractStatus(state, input),
       dependencyClass: input.dependencyClass, changesReleaseVersion: input.changesReleaseVersion === true,
       admittedAt: timestamp(), firstWorkAt: null, activities: [], activityRefs: [], blockers: [], repairedBaseRef: null, state: 'admitted' };
     if (state.workAhead.some(prior => prior.id === item.id)) fail('Work-ahead ID already exists; retry original command');
@@ -114,6 +117,7 @@ export async function handleWorkAhead(state, action, input = {}) {
     item.blockers = blockers(state, item); return item;
   }
   if (action === 'promote') {
+    if (item.vlbv && item.vlbv.promotable === false) fail(`Work-ahead promotion refused: ${item.vlbv.reason} (VLBV: a successor contract must exist before generation)`);
     item.blockers = blockers(state, item);
     if (item.blockers.length) fail(`Work-ahead promotion blocked: ${item.blockers.join(', ')}`);
     if (!item.firstWorkAt) fail('Work-ahead promotion requires recorded firstWorkAt');

@@ -23,6 +23,20 @@ One JSON object per line, one per check, then a summary line. Exit `0` when noth
 
 For a human reader, `boss-mini doctor.mjs --human` renders a table instead.
 
+## Harness capability profile
+
+```bash
+boss-mini doctor.mjs profile            # $PROMETHEUS_HARNESS
+boss-mini doctor.mjs profile codex --json
+```
+
+Prints the harness profile from `config/harnesses/capabilities.json`: rule-file precedence,
+skill roots, explicit invocation, each capability status, the verifying run and the built-in
+skills to suppress before B4. Anything not `SUPPORTED` is UNKNOWN or UNSUPPORTED — never
+rely on it. A field becomes `supported` only with committed evidence, enforced by
+`npm run check:harness-capabilities`. This view is separate from the check stream above,
+whose JSON-lines format does not change.
+
 ## Reading the result
 
 | Status | Means | What to do |

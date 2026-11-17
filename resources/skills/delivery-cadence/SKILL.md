@@ -4,7 +4,7 @@ description: Operate timed usable deliveries with frozen delivery candidates, bo
 license: MIT
 compatibility: Node.js 22 or newer. Build tools belong to the selected project. Optional KBD, Compass, memory and native goal capabilities are detected, never assumed.
 metadata:
-  version: "1.2.9"
+  version: "1.3.0"
   tags: "delivery, cadence, kbd, recovery"
 ---
 
@@ -30,7 +30,7 @@ Invoke `node <this-skill>/scripts/cadence.mjs <command> --root <state-directory>
 2. `start` selects one independently usable increment, with explicit tasks, owners, outcomes and source revisions.
 3. Implement the complete increment, including its UI, strings, persistence and packaging. Keep reviewers dormant. Attach problem/architecture child phases to this delivery using `child enter`; the clock continues. Read [child recovery](references/child-recovery.md) before entry or resume.
 4. `ready` records completed production scope; `candidate freeze` pins its inputs and operation contract. `checkpoint` builds the frozen deliverable, then launches it and exercises its actual function. These are product operations, **not test-suite execution**. Read [pipeline contracts](references/pipeline-contract.md) when admitting work-ahead or adopting existing receipts.
-5. Once the current candidate is frozen, `work-ahead admit` may authorize one independent scope in isolated source/output roots while the current build or publication runs. It is not another active iteration or KBD phase. Fix current delivery failures before promotion; only disjoint authorized edits continue during repair. Repeat only failed boundary procedures.
+5. Once the current candidate is frozen, `work-ahead admit` may authorize one independent scope in isolated source/output roots while the current build or publication runs. It is not another active iteration or KBD phase. Fix current delivery failures before promotion; only disjoint authorized edits continue during repair. A failed boundary procedure is never simply repeated: the owner authorizes a bounded B5 repair, after which only the affected scenarios rerun.
 6. `finish` records the work outcome, dispatches approved hooks and emits the final report. If the last candidate failed, start an evidence-linked corrective iteration, or finalize and explicitly retire that failed iteration with `failure resolve` before unrelated work. Retirement records a failed outcome, never a successful delivery or phase completion. `review` records actual operator approval when a human boundary is due. Never fabricate approval.
 7. `tick` evaluates configured publication opportunities without a daemon. Use `publication attempt/reconcile` for candidate-specific obligations and immutable platform/metadata/site receipts. For an already published release with scope-bound historical debt, use `publication adopt-historical`; read [historical publication](references/historical-publication.md). A dispatch is not publication. Keep one full release in flight and one pending candidate; preserve old debt and separately pending installed acceptance.
 
@@ -38,19 +38,37 @@ New state/reports use schema version 3; profiles and public hook events retain v
 
 The active event journal is bounded and older events are kept as checksummed gzip segments under `archives/`, listed with sequence ranges in `event-archives.json`. Rotation streams sequence validation and compression without parsing historical full-state events into memory. The latest state still comes from the committed event; `state.json` is a recovery snapshot. Keep both the manifest and segments when moving or backing up a run. Do not delete or hand-edit them to clear an oversized journal.
 
-A clock tick stops new scope admission, never certifies unfinished code. Finish the committed increment with an honest overrun; a hard budget or operator stop takes precedence. If the harness cannot continue autonomously, leave durable state and a resume instruction; never claim background execution.
+A clock tick (B3) stops new scope admission, never certifies unfinished code. Finish the committed increment and report the overrun honestly; the adopted contract's budgets and an operator stop are hard limits that take precedence (budget exhaustion checkpoints the phase BLOCKED). If the harness cannot continue autonomously, leave durable state and a resume instruction; never claim background execution.
 
-When VLBV is selected, cadence increments must be prospectively agreed complete
-value phases under the current adopted contract. Recover the method-context
-(`scripts/kbd-method-context.mjs`) and the latest authorized supersession before
-choosing the next action; preserve original evidence, candidate freshness,
-consumed budgets and unresolved effects. A task, hour, commit, compiler problem or
-reviewer request never authorizes generated-code verification of an incomplete
-phase, and an hourly build-and-run boundary never becomes the VLBV whole-phase
-gate. Resolve governing-policy conflicts before dependent action without
-rewriting owner rules. Publication intervals do not certify implementation or
-acceptance, grant release authority or create a successor. These instructions do
-not claim universal tool interception.
+### VLBV attachment (KBD mode)
+
+Cadence owns delivery rhythm and publication only; acceptance belongs to the KBD
+phase and its adopted contract. Boundaries are defined once in
+`kbd-process-orchestrator/references/boundaries.md`. Under VLBV (the method for
+every phase; a deviation is a signed `KBD-METHOD` decision recorded in the phase's
+method-context):
+
+| Cadence concept | Becomes |
+|---|---|
+| Increment | Exactly one value phase with one adopted contract |
+| `ready` | The contract amendment to `implementationComplete` |
+| `candidate freeze` | B4 step 2 |
+| `checkpoint` build and functional run | The `build` and `run` entries of the boundary packet (B4 step 3). In KBD mode `checkpoint` refuses a step whose argv is not a packet entry |
+| `accepted` / `pending` / `blocked` | Derived from the canonical closure (`report` → `canonicalOutcome`): CLOSED with all PASS → accepted; open phase → pending; any FAIL, BLOCKED or NOT_EXERCISED → blocked, with the real verdicts shown |
+| `review` | A pointer to the canonical decision id; it holds no approval of its own |
+| Corrective iteration | A B5 repair under the same contract, or a new phase with a new contract |
+| `work-ahead admit` | Requires the successor phase's adopted contract (`successorPhaseId`); without it the scope is exploratory and `promote` refuses it |
+| Clock tick | B3: stops admitting new scope. Contract budgets are the hard limits; iteration duration is a planning target |
+| Skill-pack refresh | Not shipped in mini (see the note above); never refresh procedure text while a bound phase is open |
+
+Recover the method-context (`scripts/kbd-method-context.mjs`) and the latest
+authorized supersession before choosing the next action; preserve original
+evidence, candidate freshness, consumed budgets and unresolved effects. A task,
+hour, commit, compiler problem or reviewer request never authorizes generated-code
+verification of an incomplete phase. Resolve governing-policy conflicts before
+dependent action without rewriting owner rules. Publication intervals do not
+certify implementation or acceptance, grant release authority or create a
+successor. These instructions do not claim universal tool interception.
 
 ## Events and reports
 

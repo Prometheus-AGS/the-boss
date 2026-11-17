@@ -10,6 +10,7 @@ import { claimCommand, jobTransaction, immutableJson, attemptDirectory, reconcil
 import { assertChildrenResolved } from './children.mjs';
 import { saveEvent, atomicJson } from './storage.mjs';
 import { checkpointPurpose, evidenceInterval, publicationRequirements, assertOperationReady } from './delivery-contract.mjs';
+import { assertCheckpointInBoundaryPacket } from './vlbv.mjs';
 
 const exec = promisify(execFile);
 async function git(repository, args, encoding = 'utf8') {
@@ -158,6 +159,8 @@ export async function dispatchCheckpoint(root, input = {}, args = {}) {
     const step = iteration.profile.checkpoints.find(c => c.id === input.id);
     if (!step) throw new Error(`No configured checkpoint ${input.id}`);
     prerequisites(iteration, step);
+    // VLBV (CR-14): in KBD mode a checkpoint runs only as a boundary-packet entry (B4 step 3).
+    const boundaryEntry = assertCheckpointInBoundaryPacket(state, iteration, step);
     if (input.timeoutMs !== undefined && (!Number.isSafeInteger(input.timeoutMs) || input.timeoutMs <= 0 || !input.reason?.trim())) throw new Error('Timeout adjustment requires positive integer milliseconds and reason');
     if (step.kind === 'build' && iteration.checkpoints.some(c => c.id === step.id) && !input.reason?.trim()) throw new Error('Repeated builds require a recorded reason');
     const requestedTimeoutMs = input.timeoutMs ?? step.timeoutMs ?? 14_400_000;
@@ -171,7 +174,7 @@ export async function dispatchCheckpoint(root, input = {}, args = {}) {
       registry: state.profile.resources?.registryRoot ?? state.profile.resourceRegistryRoot, requestedTimeoutMs, resourceClaims: [] };
     const receipt = { id: step.id, attemptId: job.id, candidateId, commandId: args.commandId, kind: step.kind, purpose: checkpointPurpose(iteration, step), status: 'running', startedAt: job.claimedAt,
       sourceRefs: job.sourceRefs, contentManifestDigest: job.contentManifestDigest, reason: input.reason ?? 'Initial delivery checkpoint', configuredTimeoutMs: step.timeoutMs ?? 14_400_000, requestedTimeoutMs,
-      command: step.command, args: step.args, cwd: path.resolve(step.cwd), hostname: os.hostname(), ...(checkpointPurpose(iteration, step) === 'feature' ? { featureOperationId: iteration.featureOperation.id } : {}) };
+      command: step.command, args: step.args, cwd: path.resolve(step.cwd), hostname: os.hostname(), ...(boundaryEntry ? { boundaryPacket: { contract: boundaryEntry.contractFile, entry: boundaryEntry.entry } } : {}), ...(checkpointPurpose(iteration, step) === 'feature' ? { featureOperationId: iteration.featureOperation.id } : {}) };
     state.jobs ??= []; state.jobs.push(job); iteration.checkpoints.push(receipt); iteration.status = 'checkpoint-running';
     await immutableJson(path.join(attemptDirectory(root, job.id), 'claim.json'), job);
     await saveEvent(root, state, 'job.claimed', { attemptId: job.id, candidateId });
