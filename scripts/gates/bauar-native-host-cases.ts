@@ -41,6 +41,7 @@ export function lifecycleFixture(directory: string) {
       const fd = openSync(pending, 'r')
       try { fsyncSync(fd) } finally { closeSync(fd) }
       renameSync(pending, path)
+      // oxlint-disable-next-line no-restricted-globals -- Record a stable snapshot of the input to the fake store.
       records.set(snapshot.admissionId, structuredClone(snapshot))
     },
     fail(id?: unknown, state = 'claimed') { fault = id === undefined ? undefined : { id: String(id), state } },

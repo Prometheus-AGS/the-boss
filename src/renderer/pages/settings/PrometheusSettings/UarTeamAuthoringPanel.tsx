@@ -166,6 +166,7 @@ export function UarTeamAuthoringPanel({
             const selected = snapshot?.revisions.find((item) => item.team.id + ':' + item.revision === value)
             if (selected) {
               setSaved(selected)
+              // oxlint-disable-next-line no-restricted-globals -- Detach the editable draft from the saved team and its nested member policies.
               setDraft(structuredClone(selected.team))
               setDeployed(undefined)
               setError(undefined)

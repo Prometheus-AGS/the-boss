@@ -642,6 +642,7 @@ export async function prepareProjectionToolAgent(
       const catalog = await api.request('prometheus.uar.catalog.read', {})
       const source = catalog.agents.find((entry: any) => entry.id === input.sourceCatalogId)
       if (!source) throw new Error('projection_catalog_source_missing')
+      // oxlint-disable-next-line no-restricted-globals -- Create a private definition for the admission fixture.
       const definition = structuredClone(source.definition)
       definition.id = input.catalogId
       definition.metadata.title = `Projection ${input.profile} tool fixture`

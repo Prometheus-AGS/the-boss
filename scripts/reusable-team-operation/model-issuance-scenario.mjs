@@ -152,9 +152,11 @@ export async function scenario({ evaluate, signal, targets }, configuration) {
     evidence.checks.push('real-bundled-unknown-metadata-selection-import-save-reopen-retains-main-issuance')
     stage = 'forged-renderer-target-and-issued-fields-refused'
     const before = (await authoring()).revisions
+    // oxlint-disable-next-line no-restricted-globals -- Mutate a private target fixture while keeping the original team for comparison.
     const forgedTarget = structuredClone(first.team)
     forgedTarget.members[0].reviewedModelPolicy.bindingTarget.modelId = targetB.modelId
     await refused(evaluate, route('save_authoring'), { team: forgedTarget, expectedRevision: first.revision }, 'UAR_TEAM_MODEL_POLICY_ISSUANCE_MISMATCH', evidence)
+    // oxlint-disable-next-line no-restricted-globals -- Mutate a private source fixture while keeping the original team for comparison.
     const forgedSource = structuredClone(first.team)
     const policy = forgedSource.members[0].reviewedModelPolicy
     policy.result.explanation += ' Renderer-altered issued field.'

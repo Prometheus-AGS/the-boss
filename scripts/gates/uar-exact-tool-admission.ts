@@ -113,6 +113,7 @@ async function main(): Promise<void> {
       assert.equal(result.body.executionKind, value.executionKind)
       assert.equal(result.body.hostEpoch, bridge.toolAdmission.hostEpoch)
       assert.equal(result.body.authorityRevision, value.authorityRevision)
+      // oxlint-disable-next-line no-restricted-globals -- Retain the tested invocation independently of later fixture mutations.
       preparedInvocations.set(result.body.admissionId, structuredClone(value))
       assert(!JSON.stringify(result.body.actionDisplay).includes('protected'))
       return result.body

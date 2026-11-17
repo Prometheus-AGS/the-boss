@@ -260,6 +260,7 @@ export class BossFangService extends BaseService {
       },
       sharedMemory: this.sharedMemory.status,
       lastDiagnosticId: this.diagnostics.lastId,
+      // oxlint-disable-next-line no-restricted-globals -- Detach the bounded log snapshot from the service buffer.
       logs: structuredClone(this.logs)
     }
   }
@@ -436,6 +437,7 @@ export class BossFangService extends BaseService {
       this.status = 'running'
       await this.login()
       this.credentialChanges = false
+      // oxlint-disable-next-line no-restricted-globals -- Retain the applied configuration independently of later mutations.
       this.effectiveConfig = structuredClone(config)
       await this.restoreConnection(endpoint)
       this.selectionPendingReason = null

@@ -80,6 +80,7 @@ function presentationSelection(definition?: Record<string, unknown>): UarPresent
 }
 
 function withModel(definition: Record<string, unknown>, providerId: string, modelId: string) {
+  // oxlint-disable-next-line no-restricted-globals -- Keep unsaved model policy edits isolated from the catalog definition.
   const next = structuredClone(definition)
   const policy = (next.policy ??= {}) as Record<string, unknown>
   const provider = (policy.provider ??= {}) as Record<string, unknown>
@@ -88,6 +89,7 @@ function withModel(definition: Record<string, unknown>, providerId: string, mode
 }
 
 function withPresentation(definition: Record<string, unknown>, selection: UarPresentationSelection) {
+  // oxlint-disable-next-line no-restricted-globals -- Keep unsaved presentation edits isolated from the catalog definition.
   const next = structuredClone(definition)
   const extensions = (next.extensions ??= {}) as Record<string, unknown>
   const runPolicy = (extensions['uar.run_policy'] ??= { version: 1 }) as Record<string, unknown>

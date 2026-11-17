@@ -123,11 +123,13 @@ export async function scopedRequest(
   }
   const key = JSON.stringify([endpoint?.instanceId ?? null, workspaceId, generation, pathname])
   const pending = pendingScopedReads.get(key)
+  // oxlint-disable-next-line no-restricted-globals -- Give each caller a private copy of the shared in-flight response.
   if (pending) return structuredClone(await pending)
   const request = sendScopedRequest(workspaceId, pathname, generation, method, undefined, endpoint).finally(() => {
     if (pendingScopedReads.get(key) === request) pendingScopedReads.delete(key)
   })
   pendingScopedReads.set(key, request)
+  // oxlint-disable-next-line no-restricted-globals -- Keep the shared request result isolated from the first caller.
   return structuredClone(await request)
 }
 

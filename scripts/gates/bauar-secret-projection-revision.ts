@@ -188,6 +188,7 @@ export async function installCapture(app: ElectronApplication, canary: string, f
           if (metadata.source.kind !== 'the_boss' || metadata.source.id !== input.raceAgentId) {
             throw new Error('Catalog race fixture refused an entry it does not own')
           }
+          // oxlint-disable-next-line no-restricted-globals -- Inject a catalog revision change without mutating the expected fixture.
           const changed = structuredClone(catalog)
           changed.prompt.system += ' Projection catalog race marker.'
           const headers = new Headers(init.headers)

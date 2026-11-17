@@ -46,6 +46,7 @@ export class BossFangConnection {
   }
   private async connectUnlocked(config: BossFangConfig, endpoint?: UarSidecarEndpoint) {
     this.stopped = false
+    // oxlint-disable-next-line no-restricted-globals -- Capture the nested settings used by reconnection before returning to the caller.
     this.config = structuredClone(config)
     this.retryConnection = false
     this.state = 'connecting'
