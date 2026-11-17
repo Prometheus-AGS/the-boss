@@ -40,10 +40,10 @@
 !openspec-propose/**
 !prepare-release/
 !prepare-release/**
-!stakeholder-map/
-!stakeholder-map/**
 !product-guide/
 !product-guide/**
+!stakeholder-map/
+!stakeholder-map/**
 !translate-docs/
 !translate-docs/**
 !upstream-merge/

@@ -21,8 +21,8 @@
 !gh-stack
 !openspec-propose
 !prepare-release
-!stakeholder-map
 !product-guide
+!stakeholder-map
 !translate-docs
 !upstream-merge
 !vercel-composition-patterns
