@@ -134,6 +134,7 @@ export async function installNativeControls(app: ElectronApplication, profile: s
           const legacy = { ...prior, admissionId, state: 'claimed', executionKind: undefined,
             ...(versionOne ? { version: 1 } : {}) }
           history.records.push(legacy)
+          // oxlint-disable-next-line no-restricted-globals -- Give the replay fixture private arguments so it cannot mutate the original claim.
           replay.push({ ...structuredClone(claims[0]), admissionId,
             invocation: { ...claims[0].invocation, executionKind: undefined, ...(versionOne ? { version: 1 } : {}) },
             receipt: { ...claims[0].receipt, admissionId, executionKind: undefined, ...(versionOne ? { version: 1 } : {}) } })
@@ -205,6 +206,7 @@ export async function installNativeControls(app: ElectronApplication, profile: s
           const stored = storage.document().records.find((record: any) => record.admissionId === request.body.admissionId)
           if (stored?.state !== 'claimed') throw new Error('Native acknowledgment preceded durable consumption')
           observation.durableConsumes += 1
+          // oxlint-disable-next-line no-restricted-globals -- Record the request evidence before the fixture handles or drops the acknowledgement.
           claims.push(structuredClone(request.body))
           if (input.mode === 'drop_ack') { observation.dropped += 1; this.destroy(); return this }
           if (input.mode === 'hold_ack') {

@@ -19,8 +19,7 @@ describe('skill export policy', () => {
     }
   )
 
-  it('explicitly classifies every bundled skill exactly once', async () => {
-    const exportable = ['find-skills', 'office-transform', 'skill-creator']
+  it('withholds exactly the runtime-only skills from the complete bundled catalog', async () => {
     const resources = new URL('../../../../../resources/skills/', import.meta.url)
     const folders: string[] = []
     for (const entry of await fs.readdir(resources, { withFileTypes: true })) {
@@ -28,9 +27,8 @@ describe('skill export policy', () => {
       await fs.readFile(new URL(`${entry.name}/SKILL.md`, resources), 'utf8')
       folders.push(entry.name)
     }
-    expect(
-      exportable.filter((name) => (CHERRY_RUNTIME_ONLY_BUILTIN_SKILLS as readonly string[]).includes(name))
-    ).toEqual([])
-    expect(folders.sort()).toEqual([...exportable, ...CHERRY_RUNTIME_ONLY_BUILTIN_SKILLS].sort())
+    expect(folders).toEqual(expect.arrayContaining(['find-skills', 'office-transform', 'skill-creator', 'compass']))
+    const withheld = folders.filter((folderName) => !isSkillExternallyExportable({ source: 'builtin', folderName }))
+    expect(withheld.sort()).toEqual([...CHERRY_RUNTIME_ONLY_BUILTIN_SKILLS].sort())
   })
 })

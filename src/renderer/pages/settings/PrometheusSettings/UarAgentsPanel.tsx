@@ -20,6 +20,7 @@ function downloadJson(name: string, value: unknown) {
 }
 
 function cloneDefinition(agent: UarAgentCatalogItem): Record<string, unknown> {
+  // oxlint-disable-next-line no-restricted-globals -- Detach the editable definition before removing catalog-owned metadata.
   const definition = structuredClone(agent.definition)
   delete (definition.extensions as Record<string, unknown> | undefined)?.['uar.catalog']
   return definition

@@ -43,6 +43,7 @@ const progress: Receipt[] = categories.map((category) => ({
   cleanupConfirmed: false
 }))
 export function providerNegativeCaseProgress(): Receipt[] {
+  // oxlint-disable-next-line no-restricted-globals -- Return a stable copy of the negative-case evidence.
   return structuredClone(progress)
 }
 
@@ -132,6 +133,7 @@ class NegativeConversation implements ProjectionProviderDriver {
       assert(JSON.stringify(results[0].message.content).includes(this.target))
       this.originalMatched = true
       this.originalTargetAdvertised = true
+      // oxlint-disable-next-line no-restricted-globals -- Amend the test response independently of the original request body.
       const copy = structuredClone(body)
       const resultIndex = start + 1 + results[0].index
       if (this.category === 'unadvertised_target_after_discovery') {

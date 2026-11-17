@@ -2845,6 +2845,7 @@ export class AgentSessionRuntimeService extends BaseService {
         const seed: CherryUIMessage = {
           id: messageId,
           role: 'assistant',
+          // oxlint-disable-next-line no-restricted-globals -- Detach restored assistant parts from the persisted message before rebuilding the runtime snapshot.
           parts: structuredClone(stored.data.parts ?? [])
         }
         let controller!: ReadableStreamDefaultController<UIMessageChunk>
