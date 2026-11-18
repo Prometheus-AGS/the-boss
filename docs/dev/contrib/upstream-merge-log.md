@@ -17,7 +17,7 @@ appends here as its last step.
 - **Conflicts:** combined upstream failure classification with Boss MCP output projection, retained Boss backup identity compatibility, adopted the moved error-reporting tests, and retained both chat integration imports. Regenerated the dependency lock from the merged manifests.
 - **Integrations:** pinned Mini Skills 1.17.0 at `2b085a88e834e8af62a59ce46dd7cc5b37eeb619` and refreshed the bundled skill mirror.
 - **Startup:** compare bundled and installed Mini semantic versions. Equal, newer, and uncomparable populated installations are preserved. Interrupted upgrades retain their prior version and retry. Individual Mini skill synchronization uses the installed pack and its version.
-- **Gate:** completed-candidate ARM64 packaging and isolated startup verification are recorded with the local delivery.
+- **Gate:** `pnpm build:mac:arm64` passed, including DMG checksums and the mounted application signature. Nine isolated packaged startup scenarios passed, covering upgrades, equal/newer preservation, interrupted-copy retry, stale-marker recovery, unknown-version preservation, fresh installation, and user-authored skill preservation. Source lint had zero errors; documentation and 149045 translation checks passed. The local DMG is Developer ID signed and unnotarized.
 
 ## 2026-11-13 — upstream v2.2.1 (`89ed7aa1df`)
 
