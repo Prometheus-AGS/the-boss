@@ -11,6 +11,7 @@ description: >
 license: MIT
 compatibility: Rust 1.70+, Cargo
 metadata:
+  tags: 'rust, idiomatic, best-practices, review'
   author: apollographql
   version: "1.1.1"
 allowed-tools: Bash(cargo:*) Bash(rustc:*) Bash(rustfmt:*) Bash(clippy:*) Read Write Edit Glob Grep

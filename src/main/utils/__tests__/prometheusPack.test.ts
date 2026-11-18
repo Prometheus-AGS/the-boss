@@ -31,7 +31,7 @@ vi.mock('@logger', () => ({
   loggerService: { withContext: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }) }
 }))
 
-/** Builds a miniature pack: the three directories the doctor needs, plus a stray one it does not. */
+/** Builds a miniature pack: the directories the runtime needs, plus a stray one it does not. */
 async function writeSourcePack(root: string): Promise<void> {
   await fs.mkdir(path.join(root, 'scripts'), { recursive: true })
   await fs.writeFile(path.join(root, 'scripts', 'doctor.mjs'), 'export const version = 1\n')
@@ -39,8 +39,13 @@ async function writeSourcePack(root: string): Promise<void> {
   await fs.writeFile(path.join(root, 'lib', 'doctor', 'registry.mjs'), 'export const checks = []\n')
   await fs.mkdir(path.join(root, 'rules'), { recursive: true })
   await fs.writeFile(path.join(root, 'rules', 'build.conf'), 'x\n')
-  await fs.writeFile(path.join(root, 'package.json'), '{"name":"prometheus-skills-mini"}\n')
-  await fs.writeFile(path.join(root, 'release-manifest.json'), '{"version":"test-1"}\n')
+  await fs.mkdir(path.join(root, 'skills'), { recursive: true })
+  await fs.mkdir(path.join(root, 'node_modules'), { recursive: true })
+  await fs.writeFile(path.join(root, 'package.json'), '{"name":"prometheus-skills-mini","version":"1.17.0"}\n')
+  await fs.writeFile(path.join(root, 'release-manifest.json'), '{"version":"1.17.0"}\n')
+  for (const file of ['package-lock.json', 'versions.toml', 'skill-system.json', 'reviewed-skill-closures.json']) {
+    await fs.writeFile(path.join(root, file), '{}\n')
+  }
   // Present in the submodule, deliberately NOT part of the runnable pack.
   await fs.mkdir(path.join(root, 'openspec'), { recursive: true })
   await fs.writeFile(path.join(root, 'openspec', 'config.yaml'), 'y\n')
@@ -61,8 +66,9 @@ beforeEach(async () => {
   vi.mocked(application.getPath).mockImplementation(mockGetPath as never)
 })
 
-afterEach(() => {
+afterEach(async () => {
   vi.clearAllMocks()
+  await fs.rm(path.dirname(sourceRoot), { recursive: true, force: true })
 })
 
 describe('installPrometheusPack', () => {
@@ -88,6 +94,7 @@ describe('installPrometheusPack', () => {
   it('replaces a stale file from a previous app version', async () => {
     await fs.mkdir(path.join(runtimeRoot, 'scripts'), { recursive: true })
     await fs.writeFile(path.join(runtimeRoot, 'scripts', 'doctor.mjs'), 'STALE\n')
+    await fs.writeFile(path.join(runtimeRoot, 'package.json'), '{"version":"1.16.0"}')
 
     await installPrometheusPack()
 
@@ -98,6 +105,7 @@ describe('installPrometheusPack', () => {
   it('removes a file the pack no longer ships', async () => {
     await fs.mkdir(path.join(runtimeRoot, 'scripts'), { recursive: true })
     await fs.writeFile(path.join(runtimeRoot, 'scripts', 'removed-upstream.mjs'), 'old\n')
+    await fs.writeFile(path.join(runtimeRoot, 'package.json'), '{"version":"1.16.0"}')
 
     await installPrometheusPack()
 
@@ -111,6 +119,79 @@ describe('installPrometheusPack', () => {
 
     const entries = await fs.readdir(path.join(runtimeRoot, 'scripts'))
     expect(entries).toEqual(['doctor.mjs'])
+  })
+
+  it.each(['1.16.9', '1.17.0-rc.1'])('upgrades an older installed version %s', async (version) => {
+    await fs.mkdir(path.join(runtimeRoot, 'scripts'), { recursive: true })
+    await fs.writeFile(path.join(runtimeRoot, 'scripts', 'doctor.mjs'), 'OLD\n')
+    await fs.writeFile(path.join(runtimeRoot, 'release-manifest.json'), JSON.stringify({ version }))
+
+    await installPrometheusPack()
+
+    expect(await fs.readFile(path.join(runtimeRoot, 'scripts', 'doctor.mjs'), 'utf8')).toBe(
+      'export const version = 1\n'
+    )
+    expect(JSON.parse(await fs.readFile(path.join(runtimeRoot, 'release-manifest.json'), 'utf8')).version).toBe(
+      '1.17.0'
+    )
+  })
+
+  it.each(['1.17.0', '1.17.0+local', '1.18.0'])('preserves an equal or newer installed version %s', async (version) => {
+    await fs.mkdir(path.join(runtimeRoot, 'scripts'), { recursive: true })
+    await fs.writeFile(path.join(runtimeRoot, 'scripts', 'doctor.mjs'), 'KEEP\n')
+    const manifest = JSON.stringify({ version, revision: 'different-build' })
+    await fs.writeFile(path.join(runtimeRoot, 'release-manifest.json'), manifest)
+
+    await installPrometheusPack()
+
+    expect(await fs.readFile(path.join(runtimeRoot, 'scripts', 'doctor.mjs'), 'utf8')).toBe('KEEP\n')
+    expect(await fs.readFile(path.join(runtimeRoot, 'release-manifest.json'), 'utf8')).toBe(manifest)
+  })
+
+  it.each(['1.17.0', '1.18.0'])('preserves legacy installs identified by package version %s', async (version) => {
+    await fs.mkdir(path.join(runtimeRoot, 'scripts'), { recursive: true })
+    await fs.writeFile(path.join(runtimeRoot, 'scripts', 'doctor.mjs'), 'KEEP\n')
+    await fs.writeFile(path.join(runtimeRoot, 'release-manifest.json'), '{"revision":"legacy"}')
+    await fs.writeFile(path.join(runtimeRoot, 'package.json'), JSON.stringify({ version }))
+
+    await installPrometheusPack()
+
+    expect(await fs.readFile(path.join(runtimeRoot, 'scripts', 'doctor.mjs'), 'utf8')).toBe('KEEP\n')
+  })
+
+  it.each(['invalid', null])('preserves an installed pack with uncomparable version %s', async (version) => {
+    await fs.mkdir(runtimeRoot, { recursive: true })
+    const metadata = JSON.stringify({ version })
+    await fs.writeFile(path.join(runtimeRoot, 'package.json'), metadata)
+
+    await installPrometheusPack()
+
+    expect(await fs.readFile(path.join(runtimeRoot, 'package.json'), 'utf8')).toBe(metadata)
+    await expect(fs.access(path.join(runtimeRoot, 'scripts'))).rejects.toThrow()
+  })
+
+  it('retries a failed legacy upgrade after package.json has already copied', async () => {
+    await fs.mkdir(runtimeRoot, { recursive: true })
+    await fs.writeFile(path.join(runtimeRoot, 'package.json'), '{"version":"1.16.0"}')
+    await fs.writeFile(path.join(runtimeRoot, 'release-manifest.json'), '{"revision":"legacy"}')
+    await fs.rm(path.join(sourceRoot, 'reviewed-skill-closures.json'))
+
+    await installPrometheusPack()
+
+    expect(JSON.parse(await fs.readFile(path.join(runtimeRoot, 'package.json'), 'utf8')).version).toBe('1.17.0')
+    expect(await fs.readFile(path.join(runtimeRoot, 'release-manifest.json'), 'utf8')).toBe('{"revision":"legacy"}')
+    await fs.writeFile(path.join(sourceRoot, 'reviewed-skill-closures.json'), '{}\n')
+    await fs.writeFile(path.join(runtimeRoot, 'scripts', 'doctor.mjs'), 'INCOMPLETE\n')
+
+    await installPrometheusPack()
+
+    expect(await fs.readFile(path.join(runtimeRoot, 'scripts', 'doctor.mjs'), 'utf8')).toBe(
+      'export const version = 1\n'
+    )
+    expect(JSON.parse(await fs.readFile(path.join(runtimeRoot, 'release-manifest.json'), 'utf8')).version).toBe(
+      '1.17.0'
+    )
+    await expect(fs.access(path.join(runtimeRoot, '.installing.json'))).rejects.toThrow()
   })
 
   it('does not throw when the submodule is not checked out', async () => {

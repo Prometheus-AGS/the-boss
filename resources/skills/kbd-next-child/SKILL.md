@@ -1,6 +1,10 @@
 ---
 name: kbd-next-child
 description: Advance childPointer to the next entry in childPhases[], or jump to a named child directly. Fires child:after for the closing child and child:before for the new active child. Refuses to advance past the last child (suggesting /kbd-reflect + /kbd-next-phase instead).
+license: MIT
+metadata:
+  version: '1.0.0'
+  tags: 'process, orchestration, automation, nested-phases'
 ---
 
 # /kbd-next-child

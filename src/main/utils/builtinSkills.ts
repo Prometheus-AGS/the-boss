@@ -8,29 +8,20 @@ import { loggerService } from '@logger'
 import { skillService } from '@main/ai/skills/SkillService'
 
 import { toAsarUnpackedPath } from './asar'
+import { pathExists } from './legacyFile'
 
 const logger = loggerService.withContext('builtinSkills')
 
 /** Owns the skills the Prometheus pack ships, so a name clash with a Cherry builtin is refused. */
 const PROMETHEUS_NAMESPACE = 'prometheus'
 
-/**
- * The skill folder names the Prometheus submodule ships.
- *
- * Read from the submodule rather than a hardcoded list so adding or removing a skill
- * upstream needs no change here. An unreadable submodule yields an empty set, which means
- * every skill installs under the default namespace exactly as before this existed —
- * degraded, never blocking a launch.
- */
-async function listPrometheusSkillNames(): Promise<Set<string>> {
-  const packSkills = toAsarUnpackedPath(
-    path.join(application.getPath('app.root.resources'), 'prometheus-skills-mini', 'skills')
-  )
+async function listSkillDirectories(root: string): Promise<string[]> {
   try {
-    const entries = await fs.readdir(packSkills, { withFileTypes: true })
-    return new Set(entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name))
-  } catch {
-    return new Set()
+    const entries = await fs.readdir(root, { withFileTypes: true })
+    return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name)
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []
+    throw error
   }
 }
 
@@ -45,9 +36,8 @@ async function listPrometheusSkillNames(): Promise<Set<string>> {
  * disables it, so a synced `agent_global_skill` row is enabled everywhere
  * without any `agent_skill` rows.
  *
- * Each installed skill gets a `.version` file recording the app version.
- * Startup sync compares both that version and the full bundled content hash,
- * so changed builtins refresh even within the same development app version.
+ * Mini skills use the installed pack and its version after the startup upgrade
+ * check. Other builtins use the application version and bundled content hash.
  */
 // TODO: v2-backup
 export async function installBuiltinSkills(): Promise<void> {
@@ -67,28 +57,51 @@ export async function installBuiltinSkills(): Promise<void> {
     return sourcePath.startsWith(resourceSkillsPath + path.sep)
   })
 
-  // Which of these came from the Prometheus pack. Both sets live in `resources/skills/`
-  // — `scripts/sync-prometheus-skills.ts` copies the pack's into the same directory — so
-  // the submodule is what distinguishes them. Namespacing makes a folder-name clash a
-  // refusal by the ownership guard in `syncBuiltinSkill` rather than a silent overwrite;
-  // there is no clash today, but the two sets are maintained in different repositories.
-  const prometheusSkills = await listPrometheusSkillNames()
+  const bundledPack = toAsarUnpackedPath(application.getPath('feature.prometheus.pack.builtin'))
+  const bundledMiniSkills = new Set(await listSkillDirectories(path.join(bundledPack, 'skills')))
+  const sources = new Map(
+    dirs
+      .filter((entry) => !bundledMiniSkills.has(entry.name))
+      .map((entry) => [
+        entry.name,
+        { path: path.join(resourceSkillsPath, entry.name), version: appVersion, namespace: null as string | null }
+      ])
+  )
+  const runtimePack = application.getPath('feature.prometheus.pack.runtime')
+  try {
+    if (!(await pathExists(path.join(runtimePack, '.installing.json')))) {
+      const metadata = JSON.parse(await fs.readFile(path.join(runtimePack, 'package.json'), 'utf8'))
+      const manifest = JSON.parse(await fs.readFile(path.join(runtimePack, 'release-manifest.json'), 'utf8'))
+      if (typeof metadata.version !== 'string' || (manifest.version && manifest.version !== metadata.version)) {
+        throw new Error('Installed Prometheus pack metadata versions disagree')
+      }
+      for (const name of await listSkillDirectories(path.join(runtimePack, 'skills'))) {
+        sources.set(name, {
+          path: path.join(runtimePack, 'skills', name),
+          version: metadata.version,
+          namespace: PROMETHEUS_NAMESPACE
+        })
+      }
+    }
+  } catch (error) {
+    logger.warn('Installed Prometheus skills are unavailable for synchronization', { error })
+  }
 
   let installed = 0
   // Process sequentially to avoid interleaved delete+insert on the skills
   // table when multiple builtins require a metadata refresh.
-  for (const entry of dirs) {
+  for (const [folderName, source] of sources) {
     try {
       const filesUpdated = await skillService.syncBuiltinSkill(
-        entry.name,
-        path.join(resourceSkillsPath, entry.name),
-        appVersion,
-        prometheusSkills.has(entry.name) ? PROMETHEUS_NAMESPACE : null
+        folderName,
+        source.path,
+        source.version,
+        source.namespace
       )
       if (filesUpdated) installed++
     } catch (error) {
       logger.warn('Failed to sync built-in skill to DB', {
-        folderName: entry.name,
+        folderName,
         error: error instanceof Error ? error.message : String(error)
       })
     }

@@ -3,6 +3,11 @@ name: refine-ui
 description: >
   Quick-start React/HTML UI component refinement. Use when the user wants to
   create or refine UI components, design systems, or interactive interfaces.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, refine, ui'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 > **Note — one referenced asset is absent.** This skill names

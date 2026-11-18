@@ -10,7 +10,7 @@ sources:
   - src/main/services/ProviderRegistryUpdaterService.ts
   - src/main/services/diagnostics/CherryDiagnosticUploadClient.ts
   - src/main/services/AnalyticsService.ts
-  - src/main/services/sentry.ts
+  - src/main/services/errorReporting/sentry.ts
   - packages/provider-registry/src/providers/cherryin.ts
   - src/shared/utils/branding.ts
 ---
@@ -293,7 +293,7 @@ Collection requires data-collection consent under the current privacy policy; re
 
 ### Sentry
 
-[Main-process Sentry setup](../../../src/main/services/sentry.ts) embeds an upstream project DSN. Replace it with your own hosted project or [self-hosted Sentry](https://github.com/getsentry/self-hosted); the renderer bridge is initialized separately but uses the Electron integration. Production and consent checks apply, and events are sanitized.
+[Main-process Sentry setup](../../../src/main/services/errorReporting/sentry.ts) embeds an upstream project DSN. Replace it with your own hosted project or [self-hosted Sentry](https://github.com/getsentry/self-hosted); the renderer bridge is initialized separately but uses the Electron integration. Production and consent checks apply, and events are sanitized.
 
 The `.env.example` `SENTRY_*` source-map upload settings do **not** replace the runtime DSN. Configure source-map upload ownership and runtime event routing separately. A reverse proxy to Cherry's project would still deliver data to Cherry; point to a project you operate.
 

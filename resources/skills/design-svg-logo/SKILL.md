@@ -4,6 +4,11 @@ description: >
   Lightweight SVG logo creation for ideation. Mode-switching between LLM-suggested
   SVG (with strict parseability + XSS validation) and a deterministic Minijinja
   placeholder. Exports PNG raster set when `rsvg-convert` is available.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, design, svg, logo'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 # Design SVG Logo

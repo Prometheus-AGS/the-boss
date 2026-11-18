@@ -6,6 +6,11 @@ description: >
   The Vite dist is served by Tauri's WebView; the React app's responsive
   primitives (useBreakpoint, ResponsiveShell) drive form-factor switching
   automatically.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, scaffold, react, vite, tauri'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 > ## UNAVAILABLE IN THIS PROJECT

@@ -4,6 +4,10 @@ description: >
   Use this skill when creating or iteratively refining artifacts (logos, UI components,
   A2UI specifications, images, or content) using structured PMPO orchestration with
   explicit constraints, deterministic execution, and persistent artifact state.
+license: MIT
+metadata:
+  version: '1.4.1'
+  tags: 'artifact-refiner, pmpo, refinement, artifacts'
 ---
 
 # Artifact Refiner — Claude Plugin Adapter

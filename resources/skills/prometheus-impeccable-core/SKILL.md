@@ -2,8 +2,8 @@
 name: prometheus-impeccable-core
 description: Load incumbent design context, surface mode and bounded phase review for UI tasks. Portable Prometheus adaptation of Impeccable guidance; not the native engine.
 license: Apache-2.0
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, prometheus-impeccable-core
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

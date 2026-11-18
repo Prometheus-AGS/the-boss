@@ -1,6 +1,10 @@
 ---
 name: doctor
 description: Use when checking whether this pack's environment is healthy — Node version, version authority, submodules, Docker, the two services, pk, sycophancy-correction, home-directory skill copies, KBD position, and the install-scope rule. Also use before reporting that something "is not installed" or "is not running", so the claim is a verdict rather than a guess.
+license: MIT
+metadata:
+  version: '1.0.0'
+  tags: 'doctor, health, environment, diagnostics, windows'
 ---
 
 # Doctor

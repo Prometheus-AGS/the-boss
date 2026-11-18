@@ -5,6 +5,11 @@ description: >
   for the scaffold-react-vite pipeline. Mechanical transforms run via a Node
   script; HTMX/Alpine constructs requiring judgment are surfaced as a sidecar
   markdown for review.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, convert, htmx, react'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 # Convert HTMX ↔ React

@@ -2,8 +2,8 @@
 name: ui-ux-pro-max
 description: Search bundled UI/UX product, style, color, typography, accessibility and platform knowledge; generate a reasoned design-system recommendation when establishing visual direction. Portable Node implementation of the pinned UI/UX Pro Max catalog.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, ui-ux-pro-max
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

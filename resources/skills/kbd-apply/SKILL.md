@@ -1,6 +1,10 @@
 ---
 name: kbd-apply
 description: KBD-owned spec-apply driver. Wraps a spec backend — openspec (the default engine), speckit (GitHub Spec Kit), or native-kbd (compatibility for projects that already keep native changes) — and drives it ONE task at a time, so KBD stays the source of truth — every task boundary fires KBD hooks, emits a plain-text position signal, and syncs progress.json and the waypoint. Replaces the broken pattern of handing the turn to a bare "implement everything" command that runs outside KBD.
+license: MIT
+metadata:
+  version: '1.0.0'
+  tags: 'process, orchestration, automation, openspec, spec-kit'
 ---
 
 # /kbd-apply
@@ -141,7 +145,7 @@ engine via `.kbd-orchestrator/project.json`:
 Valid pin values: `openspec`, `speckit`, `native-kbd` (`auto`/absent = detect).
 
 **Engine version pins.** Each engine's pinned upstream version (openspec
-2.0.0, the managed runner's exact pin, also in `package.json`; it needs Node.js 22.12.0+; spec-kit 1.3.0) is recorded in
+2.1.0, the managed runner's exact pin, also in `package.json`; it needs Node.js 22.20.0+; spec-kit 1.3.0) is recorded in
 `config/spec-engines.json` with its rationale. The speckit adapter is
 markdown-based, so the pin exists for *layout* conformance: when a new Spec Kit
 release ships, check whether `specs/<slug>/{spec.md,plan.md,tasks.md}` or the
@@ -163,6 +167,10 @@ the driver's `begin-task`/`end-task` — relay them verbatim to the user.
 
 ## Relationship to other skills
 
+- **`vlbv`** is the verification method for every KBD phase. Load it before the
+  phase gates: no test, build or compiler check runs while tasks are being
+  implemented, and the boundary packet runs once. The operator may name another
+  method; a signed `KBD-METHOD` decision records it.
 - `/kbd-execute` — selects backend, writes `execution.md`, then defers task
   execution to this skill.
 - `/kbd-reflect` — consumes the per-task `progress.json` this driver maintains.

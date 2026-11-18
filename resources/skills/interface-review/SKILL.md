@@ -3,8 +3,8 @@ name: interface-review
 disable-model-invocation: true
 description: Reviews your work across multiple categories like UI, typography, layout, color, writing and accessibility and gives you a detailed analysis of the findings.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, interface-review
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

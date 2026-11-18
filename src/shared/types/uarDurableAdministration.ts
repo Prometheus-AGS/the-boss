@@ -2,6 +2,7 @@ import type { UarTeamApprovalHistory } from './uarApprovalRecords'
 import type { UarTeamApproval } from './uarTeams'
 import type { uarTeamRunEventsSchema } from './uarTeamRunEvents'
 import type * as z from 'zod'
+import type { UarBindingPosture, UarBindingPreflightDiagnostic } from './uarBindingPosture'
 
 export interface UarDurableRunSnapshot {
   instanceId: string
@@ -179,4 +180,3 @@ export interface UarDurableWorkspaceSnapshot {
   instances: UarDurableInstance[]
   observers: UarDurableObserver[]
 }
-import type { UarBindingPosture, UarBindingPreflightDiagnostic } from './uarBindingPosture'

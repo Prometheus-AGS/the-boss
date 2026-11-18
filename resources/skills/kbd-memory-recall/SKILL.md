@@ -1,6 +1,10 @@
 ---
 name: kbd-memory-recall
 description: Query surreal-memory for prior similar KBD work and write a markdown digest at .kbd-orchestrator/phases/<phase>/prior-context.md. Used as planning input before /kbd-assess. Degrades gracefully when the memory endpoint is unreachable.
+license: MIT
+metadata:
+  version: '2.0.0'
+  tags: 'process, orchestration, memory, learning'
 ---
 
 # /kbd-memory-recall

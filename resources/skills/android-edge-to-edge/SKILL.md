@@ -6,6 +6,7 @@ description: Use this skill to migrate your Jetpack Compose app to add adaptive 
   status bar, fix IME insets, and fix system bar legibility.
 license: Complete terms in LICENSE.txt
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, android-edge-to-edge
   version-origin: Prometheus packaging version; upstream did not declare a version
   author: Google LLC
@@ -17,7 +18,6 @@ metadata:
   - edge-to-edge
   - status bar
   - navigation bar
-version: 1.0.0-prometheus.1
 ---
 
 ## Prometheus distribution contract

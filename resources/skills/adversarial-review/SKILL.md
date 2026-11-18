@@ -1,7 +1,6 @@
 ---
 license: MIT
 name: adversarial-review
-version: '1.0.0'
 description: >
   Isolated, cross-model adversarial review of KBD artifacts and change diffs.
   Dispatches a fresh-context LLM judge over an OpenAI-compatible REST gateway
@@ -35,7 +34,8 @@ triggers:
     or of a KBD assessment/analysis/plan artifact against phase goals, using
     a different model than the one that produced the work.
 metadata:
-  tags: [process, review, quality, llm-as-judge, kbd]
+  version: '1.0.0'
+  tags: 'process, review, quality, llm-as-judge, kbd'
 ---
 
 # /adversarial-review

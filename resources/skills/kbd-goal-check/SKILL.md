@@ -1,6 +1,10 @@
 ---
 name: kbd-goal-check
 description: Use after each execution turn within a goal-driven KBD phase to evaluate whether the active phase's stopping condition has been met, without the implementer agent grading its own work — returns PASS (with evidence) or CONTINUE (with the next action). Implements the maker-is-not-evaluator pattern for harnesses whose loop is a queue rather than a condition-based loop.
+license: MIT
+metadata:
+  version: '1.0.0'
+  tags: 'process, goal, evaluator, kimi, loop, condition-check'
 ---
 
 # /kbd-goal-check

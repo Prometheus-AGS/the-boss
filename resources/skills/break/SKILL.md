@@ -3,8 +3,8 @@ name: break
 description: Renders a component you choose in every state and scenario on a temporary page and stress tests it.
 disable-model-invocation: true
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, break
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

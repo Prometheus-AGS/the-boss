@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: tokio-task-command-plan
+expected_outcome: |
+  Outlines the change and defers all Cargo verification to the change or phase boundary. Does not propose cargo check or cargo test loops during implementation.

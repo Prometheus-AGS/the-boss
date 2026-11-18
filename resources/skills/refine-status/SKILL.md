@@ -3,6 +3,11 @@ name: refine-status
 description: >
   Check the current status of an active artifact refinement session.
   Shows iteration count, constraint satisfaction, and convergence progress.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, refine, status'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 # Refine Status

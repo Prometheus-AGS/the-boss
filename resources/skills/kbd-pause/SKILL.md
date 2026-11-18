@@ -1,6 +1,10 @@
 ---
 name: kbd-pause
 description: Use to gracefully pause the active KBD run, checkpoint its exact position, and prevent every harness from steering execution until an operator resumes it. Operator intent always outranks agent continuation.
+license: MIT
+metadata:
+  version: '1.0.0'
+  tags: 'process, orchestration, control, pause'
 ---
 
 # /kbd-pause

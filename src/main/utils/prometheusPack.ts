@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
+import { gt, valid } from 'semver'
+
 import { application } from '@application'
 import { loggerService } from '@logger'
 import { copyDirectoryRecursive } from '@main/utils/fileOperations'
@@ -39,8 +41,7 @@ const PACK_FILES = [
   'package-lock.json',
   'versions.toml',
   'skill-system.json',
-  'reviewed-skill-closures.json',
-  'release-manifest.json'
+  'reviewed-skill-closures.json'
 ] as const
 
 /** Trust the application's packaged baseline, never the writable installed manifest. */
@@ -66,8 +67,8 @@ export async function readPackagedSkillInventoryDigest(): Promise<string | undef
  * The doctor's own checks are read-only, but its `--fix copy-skills` path and any future fix
  * resolve paths from the pack root, so the root has to live somewhere writable.
  *
- * The installed manifest identifies the complete payload. Matching launches reuse
- * it; an upgrade replaces app-owned runtime assets before installing its manifest.
+ * Only a newer bundled version replaces an installed pack. Unversioned legacy
+ * installs bootstrap once; the manifest is committed after all runtime assets.
  */
 export function installPrometheusPack(): Promise<void> {
   const source = toAsarUnpackedPath(application.getPath('feature.prometheus.pack.builtin'))
@@ -92,13 +93,40 @@ async function performPrometheusPackInstall(source: string, destination: string)
   }
 
   try {
-    await fs.mkdir(destination, { recursive: true })
-    const manifest = await fs.readFile(path.join(source, 'release-manifest.json'))
-    try {
-      if (manifest.equals(await fs.readFile(path.join(destination, 'release-manifest.json')))) return
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+    const manifest = JSON.parse(await fs.readFile(path.join(source, 'release-manifest.json'), 'utf8'))
+    const bundledVersion = await readPackVersion(path.join(source, 'package.json'))
+    if (!bundledVersion) throw new Error('Bundled Prometheus pack has no version')
+    if (manifest.version !== undefined && valid(manifest.version) !== bundledVersion) {
+      throw new Error('Bundled Prometheus pack metadata versions disagree')
     }
+
+    const installedManifest = path.join(destination, 'release-manifest.json')
+    const pending = path.join(destination, '.installing.json')
+    const committedVersion = await readPackVersion(installedManifest)
+    const pendingExists = await pathExists(pending)
+    const installedVersion =
+      committedVersion ?? (await readPackVersion(pendingExists ? pending : path.join(destination, 'package.json')))
+    if (installedVersion && !gt(bundledVersion, installedVersion)) {
+      if (committedVersion && pendingExists) {
+        const previousVersion = await readPackVersion(pending)
+        if (!previousVersion || gt(committedVersion, previousVersion)) await fs.rm(pending, { force: true })
+      }
+      return
+    }
+
+    if (
+      !installedVersion &&
+      !pendingExists &&
+      (await pathExists(destination)) &&
+      (await fs.readdir(destination)).length > 0
+    ) {
+      throw new Error('Installed Prometheus pack has no comparable version; preserving its files')
+    }
+
+    await fs.mkdir(destination, { recursive: true })
+    // Preserve the old version if package.json copies successfully but a later file fails.
+    await fs.writeFile(`${pending}.tmp`, JSON.stringify({ version: installedVersion ?? null }))
+    await fs.rename(`${pending}.tmp`, pending)
 
     for (const entry of PACK_ENTRIES) {
       // Packaged builds ship node_modules as pack_modules; a dev source tree keeps node_modules.
@@ -108,10 +136,14 @@ async function performPrometheusPackInstall(source: string, destination: string)
       const to = path.join(destination, entry)
       try {
         await fs.access(from)
-      } catch {
-        logger[entry === 'node_modules' ? 'error' : 'warn']('Prometheus pack entry is missing from the bundle', {
-          entry
-        })
+      } catch (error) {
+        if (
+          (error as NodeJS.ErrnoException).code !== 'ENOENT' ||
+          ['scripts', 'lib', 'skills', 'node_modules'].includes(entry)
+        ) {
+          throw error
+        }
+        logger.warn('Optional Prometheus pack entry is missing from the bundle', { entry })
         continue
       }
       // Removed first so a file deleted upstream does not linger and keep being executed.
@@ -120,18 +152,27 @@ async function performPrometheusPackInstall(source: string, destination: string)
     }
 
     for (const file of PACK_FILES) {
-      try {
-        await fs.copyFile(path.join(source, file), path.join(destination, file))
-      } catch (error) {
-        logger.warn('Failed to copy a Prometheus pack file', {
-          file,
-          error: error instanceof Error ? error.message : String(error)
-        })
-      }
+      await fs.copyFile(path.join(source, file), path.join(destination, file))
     }
 
-    logger.info('Prometheus pack installed', { destination })
+    await fs.writeFile(`${installedManifest}.tmp`, JSON.stringify({ ...manifest, version: bundledVersion }) + '\n')
+    await fs.rename(`${installedManifest}.tmp`, installedManifest)
+    await fs.rm(pending, { force: true })
+    logger.info('Prometheus pack installed', { destination, version: bundledVersion })
   } catch (error) {
     logger.error('Failed to install the Prometheus pack', error as Error)
+  }
+}
+
+async function readPackVersion(filename: string): Promise<string | undefined> {
+  try {
+    const metadata = JSON.parse(await fs.readFile(filename, 'utf8'))
+    if (metadata.version === undefined || metadata.version === null) return undefined
+    const version = typeof metadata.version === 'string' ? valid(metadata.version) : null
+    if (!version) throw new Error(`Invalid Prometheus pack version in ${filename}`)
+    return version
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined
+    throw error
   }
 }

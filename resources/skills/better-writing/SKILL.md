@@ -2,8 +2,8 @@
 name: better-writing
 description: Focuses on improving product copy in your project.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, better-writing
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

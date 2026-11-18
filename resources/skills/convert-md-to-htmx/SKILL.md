@@ -4,6 +4,11 @@ description: >
   Convert a Markdown document into a self-contained branded HTMX artifact via
   the deterministic markdown-it pipeline with frontmatter support, semantic
   HTML wrapping, and brand-CSS injection.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, convert, md, to, htmx'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 # Convert Markdown to HTMX

@@ -1,6 +1,10 @@
 ---
 name: kbd-next-phase
 description: Continue to the next KBD phase after Reflect has completed and the operator has authorized the next scope; seeds proposals (never adopted scope) from the previous phase's reflection. Reads the "Recommended Next Phase" section of reflection.md, initializes the new phase directory with goals.md and a skeleton progress.json, updates current-waypoint.json to point to /kbd-assess, and updates project.json activePhase.
+license: MIT
+metadata:
+  version: '1.1.1'
+  tags: 'process, orchestration, automation'
 ---
 
 # /kbd-next-phase
