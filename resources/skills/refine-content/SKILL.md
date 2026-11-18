@@ -3,6 +3,11 @@ name: refine-content
 description: >
   Quick-start content and Markdown refinement. Use when the user wants to
   refine blog posts, documentation, README files, or other written content.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, refine, content'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 # Refine Content

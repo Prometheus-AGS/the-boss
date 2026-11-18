@@ -3,6 +3,11 @@ name: refine-logo
 description: >
   Quick-start logo and brand system refinement. Use when the user wants to
   create or refine a logo, brand identity, icons, wordmarks, or favicon sets.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, refine, logo'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 # Refine Logo

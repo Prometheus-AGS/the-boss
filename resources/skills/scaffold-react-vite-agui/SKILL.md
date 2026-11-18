@@ -7,6 +7,11 @@ description: >
   streams agent responses under `pnpm dev` with no second process. The mock
   endpoint is development-only; production needs a real backend implementing the
   same contract.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, scaffold, react, vite, agui'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 > ## UNAVAILABLE IN THIS PROJECT

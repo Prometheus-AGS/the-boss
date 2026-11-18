@@ -4,6 +4,7 @@ description: Run an approved KBD execution phase with a delivery-cadence profile
 license: MIT
 compatibility: Requires the delivery-cadence skill and an existing approved KBD execution phase.
 metadata:
+  tags: 'kbd, process, delivery-cadence, execution'
   version: "1.0.0"
 ---
 

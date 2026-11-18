@@ -3,6 +3,11 @@ name: refine-validate
 description: >
   Run all validation checks on the current refinement state.
   Validates schemas, file integrity, constraint satisfaction, and completeness.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, refine, validate'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 # Refine Validate

@@ -4,6 +4,11 @@ description: >
   Swap one brand's tokens for another's inside a TSX artifact. Mechanical AST
   rewrite swaps matching hex literals; regenerates the brand-vars CSS via
   template-forge. WCAG contrast is reported, not gated.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, rebrand, artifact'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 # Rebrand Artifact

@@ -4,6 +4,7 @@ description: Bind an approved KBD goal to delivery-cadence while retaining the c
 license: MIT
 compatibility: Node.js 22 or newer and delivery-cadence. Native goal tools are optional and must be discovered.
 metadata:
+  tags: 'process, orchestration, goal, autonomous, loop, multi-platform'
   version: "1.0.0"
 ---
 

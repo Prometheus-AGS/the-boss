@@ -1,6 +1,10 @@
 ---
 name: kbd-assess
 description: "Use when starting or resuming the KBD lifecycle for a project — inspects the current codebase against the active phase's goals and produces a structured gap report at .kbd-orchestrator/phases/<phase>/assessment.md. Project-agnostic: reads AGENTS.md, spec files, and the codebase itself. Also reads progress.json to account for cross-tool work done since the last session."
+license: MIT
+metadata:
+  version: '1.1.0'
+  tags: 'process, orchestration, automation'
 ---
 
 # /kbd-assess

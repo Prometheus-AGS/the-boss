@@ -3,8 +3,8 @@ name: variant
 description: Builds multiple variants of a component you're working on and helps you iterate and pick one.
 disable-model-invocation: true
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, variant
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

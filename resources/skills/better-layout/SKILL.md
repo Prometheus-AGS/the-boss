@@ -2,8 +2,8 @@
 name: better-layout
 description: Helps with grouping, alignment, reading order, progressive disclosure and other details that make a good layout.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, better-layout
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

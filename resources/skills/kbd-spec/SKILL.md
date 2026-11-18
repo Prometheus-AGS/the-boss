@@ -1,6 +1,10 @@
 ---
 name: kbd-spec
 description: Use to run the Spec stage of the KBD lifecycle (between Analyze and Plan) — turn an assessment and analysis into concrete, ordered OpenSpec changes for KBD task execution.
+license: MIT
+metadata:
+  version: '1.1.0'
+  tags: 'process, orchestration, automation'
 ---
 
 # /kbd-spec

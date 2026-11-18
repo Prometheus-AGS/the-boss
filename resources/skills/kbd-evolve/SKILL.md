@@ -1,6 +1,10 @@
 ---
 name: kbd-evolve
 description: Use for domain-landscape-first evolution of a KBD project — when the roadmap is empty, exhausted, or you want to recalibrate against external reality rather than follow internal plans. Surveys the external landscape of the project's problem domain, scores improvement opportunities against configurable criteria, and produces a ranked evolution brief that a new phase can consume as its seed.
+license: MIT
+metadata:
+  version: '1.0.0'
+  tags: 'process, orchestration, evolution, research, landscape, kbd, pmpo'
 ---
 
 # kbd-evolve

@@ -9,6 +9,7 @@ vi.mock('node:fs/promises', () => ({
   default: {
     access: vi.fn(),
     readdir: vi.fn(),
+    readFile: vi.fn(),
     readlink: vi.fn()
   }
 }))
@@ -19,6 +20,10 @@ vi.mock('electron', () => ({
     getPath: vi.fn(() => '/userData'),
     getVersion: vi.fn(() => '2.0.0')
   }
+}))
+
+vi.mock('../legacyFile', () => ({
+  pathExists: vi.fn().mockResolvedValue(false)
 }))
 
 vi.mock('../asar', () => ({
@@ -35,8 +40,11 @@ vi.mock('@main/ai/skills/SkillService', () => ({
 
 // Matches the stub in tests/main.setup.ts → mockApplicationFactory().getPath
 const resourceSkillsPath = path.resolve('/mock/feature.agents.skills.builtin')
+const runtimeSkillsPath = path.resolve('/mock/feature.prometheus.pack.runtime/skills')
 beforeEach(() => {
   vi.clearAllMocks()
+  vi.mocked(fs.readdir).mockReset().mockResolvedValue([])
+  vi.mocked(fs.readFile).mockReset().mockResolvedValue('{"version":"1.18.0"}')
   mockSyncBuiltinSkill.mockResolvedValue(false)
 })
 
@@ -60,22 +68,24 @@ describe('installBuiltinSkills', () => {
     )
   })
 
-  it('namespaces a skill that the Prometheus submodule ships, and only that one', async () => {
+  it('publishes Mini skills from the retained runtime pack and other builtins from resources', async () => {
     vi.mocked(fs.access).mockResolvedValueOnce(undefined)
     // First readdir: resources/skills — both sets live here after the sync script runs.
     vi.mocked(fs.readdir).mockResolvedValueOnce([
       { name: 'from-the-pack', isDirectory: () => true },
       { name: 'cherry-own', isDirectory: () => true }
     ] as any)
-    // Second readdir: the submodule, which is what distinguishes them.
+    // Second readdir: bundled Mini names distinguish them from app-owned builtins.
+    vi.mocked(fs.readdir).mockResolvedValueOnce([{ name: 'from-the-pack', isDirectory: () => true }] as any)
+    // Third readdir: the retained runtime pack supplies Mini content.
     vi.mocked(fs.readdir).mockResolvedValueOnce([{ name: 'from-the-pack', isDirectory: () => true }] as any)
 
     await installBuiltinSkills()
 
     expect(mockSyncBuiltinSkill).toHaveBeenCalledWith(
       'from-the-pack',
-      path.join(resourceSkillsPath, 'from-the-pack'),
-      '2.0.0',
+      path.join(runtimeSkillsPath, 'from-the-pack'),
+      '1.18.0',
       'prometheus'
     )
     expect(mockSyncBuiltinSkill).toHaveBeenCalledWith(
@@ -90,7 +100,7 @@ describe('installBuiltinSkills', () => {
     vi.mocked(fs.access).mockResolvedValueOnce(undefined)
     vi.mocked(fs.readdir).mockResolvedValueOnce([{ name: 'from-the-pack', isDirectory: () => true }] as any)
     // An absent submodule checkout must degrade, never block the launch.
-    vi.mocked(fs.readdir).mockRejectedValueOnce(new Error('ENOENT'))
+    vi.mocked(fs.readdir).mockRejectedValueOnce(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }))
 
     await installBuiltinSkills()
 

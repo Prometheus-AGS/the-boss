@@ -1,6 +1,11 @@
 ---
 name: refine-mcp-ui
 description: Refine an MCP-UI resource — a ui:// resource carrying an A2UI surface, delivered over MCP tool results. Use for MCP server UI, agent tool output rendering, or cross-transport UI parity with AG-UI and Flutter hosts.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, refine, mcp, ui'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 > ## UNAVAILABLE IN THIS PROJECT

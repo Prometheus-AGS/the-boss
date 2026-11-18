@@ -2,12 +2,12 @@
 name: flutter-build-responsive-layout
 description: Use `LayoutBuilder`, `MediaQuery`, or `Expanded/Flexible` to create a layout that adapts to different screen sizes. Use when you need the UI to look good on both mobile and tablet/desktop form factors.
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, flutter-build-responsive-layout
   version-origin: Prometheus packaging version; upstream did not declare a version
   model: models/gemini-3.1-pro-preview
   last_modified: Tue, 21 Apr 2026 20:17:40 GMT
 license: BSD-3-Clause
-version: 1.0.0-prometheus.1
 ---
 
 ## Prometheus distribution contract

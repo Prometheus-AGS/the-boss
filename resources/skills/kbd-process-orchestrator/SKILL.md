@@ -1,6 +1,10 @@
 ---
 name: kbd-process-orchestrator
 description: Use to coordinate the full KBD (Knowledge-Based Development) lifecycle for any project — Assess, Analyze, Plan, Execute, Reflect — at every granularity level (global phases, spec-backed changes, and artifact-level QA). This is the coordination and reference document for the kbd-* sub-skills; it documents the progress.json schema, the waypoint contract, the hook taxonomy, and the sub-skill list. It has no executable logic of its own — read it once, then invoke the specific kbd-<stage> skill for the work itself.
+license: MIT
+metadata:
+  version: '2.0.0'
+  tags: 'process, orchestration, automation'
 ---
 
 # KBD Process Orchestrator
@@ -29,7 +33,7 @@ Before creating or entering a phase, run the mutating refresh:
 node "<mini-pack-root>/lib/platform/openspec/cli.mjs" refresh --project "<project-root>"
 ```
 
-The pack is certified against **exactly OpenSpec 2.0.0** (the runner's pinned version; it needs Node.js 22.12.0 or newer, and the runner refuses an older Node with a failed receipt). The managed Node runner installs that exact version in the user's cache; the npm registry is consulted only to report `newerAvailable` / `migrationRequired`, never to move the selection. `verify` never installs or writes project files; `refresh` runs upstream `update` for existing KBD/OpenSpec projects, refreshing generated skills with a backup and receipt while preserving authored specs, changes, configuration, task completion and KBD state. Never refresh while a bound phase is open (procedure text must not change under a bound contract). OpenSpec does not give all authored Markdown a common version field: report compatibility problems instead of relabeling or rewriting their meaning. Read the helper [lifecycle contract](../../lib/platform/openspec/README.md) for overrides, offline status, backups, and recovery.
+The pack is certified against **exactly OpenSpec 2.1.0** (the runner's pinned version; it needs Node.js 22.20.0 or newer, and the runner refuses an older Node with a failed receipt). The managed Node runner installs that exact version in the user's cache; the npm registry is consulted only to report `newerAvailable` / `migrationRequired`, never to move the selection. `verify` never installs or writes project files; `refresh` runs upstream `update` for existing KBD/OpenSpec projects, refreshing generated skills with a backup and receipt while preserving authored specs, changes, configuration, task completion and KBD state. Never refresh while a bound phase is open (procedure text must not change under a bound contract). OpenSpec does not give all authored Markdown a common version field: report compatibility problems instead of relabeling or rewriting their meaning. Read the helper [lifecycle contract](../../lib/platform/openspec/README.md) for overrides, offline status, backups, and recovery.
 
 Use the same selected CLI for subsequent OpenSpec operations:
 

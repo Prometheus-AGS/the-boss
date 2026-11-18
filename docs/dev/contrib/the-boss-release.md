@@ -6,6 +6,8 @@ sources:
   - build/integration-sources.json
   - scripts/import-uar-sidecar-payloads.cjs
   - scripts/package-prometheus.js
+  - src/main/utils/prometheusPack.ts
+  - src/main/utils/builtinSkills.ts
   - .github/workflows/the-boss-finalize-release.yml
   - scripts/publish-complete-release.cjs
   - scripts/release-capacity.cjs
@@ -62,6 +64,21 @@ For a local native UAR candidate, run `pnpm build:mac:arm64` with
 `THE_BOSS_LOCAL_UAR_CANDIDATE_RECORD`. The local profile verifies the
 candidate against `build/local-uar-source.json`. The resulting installer is
 local-only. Release jobs use the explicit release scripts above.
+
+### Mini Skills startup upgrades
+
+Application startup compares the bundled Mini Skills semantic version with the
+installed pack's completed manifest version, falling back to `package.json` for
+older installations. The app upgrades only when its bundled version is greater.
+Equal and newer installed versions are reused. An existing pack with missing or
+invalid version metadata is preserved and the reason is logged.
+
+A new installation is copied automatically. During an upgrade, the previous
+version remains recorded until all required assets finish copying. Interrupted
+copies retry at the next launch. Individual built-in Mini skills are synchronized
+from this installed pack using the pack version, so launching an older app
+preserves a newer Mini installation. User-authored skills retain their ownership
+protection.
 
 ### Existing embedded UAR data
 

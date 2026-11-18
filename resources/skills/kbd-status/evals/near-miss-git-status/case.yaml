@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: near-miss-git-status
+expected_outcome: |
+  Answers the git question. The KBD status skill is not needed.

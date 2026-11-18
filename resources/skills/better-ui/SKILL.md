@@ -2,8 +2,8 @@
 name: better-ui
 description: Polishes and improves the UI in your project. Covers concentric border radius, optical alignment, surface depth, contextual icons, hit areas and more.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, better-ui
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

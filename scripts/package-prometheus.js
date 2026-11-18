@@ -235,6 +235,7 @@ function packagePrometheus() {
     })
   const manifest = {
     schema: 1,
+    version: JSON.parse(fs.readFileSync(path.join(source, 'package.json'), 'utf8')).version,
     revision,
     skills,
     tools: Object.fromEntries(artifacts.tools.map((tool) => [tool.name, tool.version])),

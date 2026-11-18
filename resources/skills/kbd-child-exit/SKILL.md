@@ -1,6 +1,10 @@
 ---
 name: kbd-child-exit
 description: "Exit the active KBD child loop: write its handoff-out, roll its progress up to the parent node, pop the position path, and return control to the parent. The --enter companion descends into a selected child so new children nest under it."
+license: MIT
+metadata:
+  version: '1.0.0'
+  tags: 'process, orchestration, automation'
 ---
 
 # /kbd-child-exit

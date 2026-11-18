@@ -2,8 +2,8 @@
 name: prometheus-ui-review
 description: Automatically review completed UI work for scope, incumbent identity, accessibility and platform behavior in a separate read-only context, without taste-driven redesign.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, prometheus-ui-review
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

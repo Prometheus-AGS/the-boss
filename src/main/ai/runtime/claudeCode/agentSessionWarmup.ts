@@ -412,6 +412,7 @@ async function deriveConnectionConfigFromSnapshot(
   const proxyEnvironmentFingerprint =
     materialized?.proxyEnvironmentFingerprint ?? (await deriveAgentProxyEnvironmentFingerprint(agent, routeFacts))
   const rebuildFacts = {
+    promptSuggestions: !headless && application.get('PreferenceService').get('agent.input.suggestions.enabled'),
     modelId: uniqueModelId,
     contextWindow,
     maxOutputTokens,
@@ -630,6 +631,8 @@ export async function buildClaudeCodeQueryRequestForAgentSession(
     settings,
     effectiveResume: resumeSessionId ?? settings.resume
   })
+
+  options.promptSuggestions = !headless && application.get('PreferenceService').get('agent.input.suggestions.enabled')
 
   return {
     connectionConfig,
@@ -942,8 +945,7 @@ export async function buildClaudeCodeWarmQueryRequestForAgentSession(
   if (!session?.agentId) return undefined
   const agent = agentService.getAgent(session.agentId)
   if (!agent) return undefined
-  // Prewarm the agent default — headless runs ignore session overrides, and interactive
-  // turns pass their effective model when connecting.
+  // Prewarm interactive use of the agent default. Headless turns reconcile their own options.
   const request = await buildClaudeCodeQueryRequestForAgentSession(
     sessionId,
     undefined,
@@ -952,7 +954,7 @@ export async function buildClaudeCodeWarmQueryRequestForAgentSession(
     false,
     [],
     'standard',
-    true
+    false
   )
   if (!request) return undefined
   return {

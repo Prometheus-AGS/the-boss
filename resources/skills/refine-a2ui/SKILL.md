@@ -3,6 +3,11 @@ name: refine-a2ui
 description: >
   Quick-start A2UI specification refinement. Use when the user wants to
   create or refine A2UI (Artifact-to-UI) protocol specifications.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, refine, a2ui'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 # Refine A2UI

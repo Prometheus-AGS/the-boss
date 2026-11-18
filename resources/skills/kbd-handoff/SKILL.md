@@ -1,6 +1,10 @@
 ---
 name: kbd-handoff
 description: Hand the active KBD phase to another harness (claude-code, codex, opencode, kimi-code) by writing a read-only handoff packet — position, repo state, files to read, operator gates, task rules, never-do list, open prerequisites and the exact start prompt. Refuses on open boundary obligations or a missing phase. No lease; never edits KBD state.
+license: MIT
+metadata:
+  version: '2.0.0'
+  tags: 'process, orchestration, handoff, cross-harness'
 ---
 
 # /kbd-handoff
