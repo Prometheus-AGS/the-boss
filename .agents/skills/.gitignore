@@ -40,6 +40,8 @@
 !openspec-propose/**
 !prepare-release/
 !prepare-release/**
+!product-guide/
+!product-guide/**
 !stakeholder-map/
 !stakeholder-map/**
 !product-guide/
