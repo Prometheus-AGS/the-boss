@@ -118,7 +118,7 @@ async function performPrometheusPackInstall(source: string, destination: string)
       !installedVersion &&
       !pendingExists &&
       (await pathExists(destination)) &&
-      (await fs.readdir(destination)).length > 0
+      (await fs.readdir(destination)).some((entry) => entry !== '.installing.json.tmp')
     ) {
       throw new Error('Installed Prometheus pack has no comparable version; preserving its files')
     }
