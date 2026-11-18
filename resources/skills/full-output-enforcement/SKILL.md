@@ -2,8 +2,8 @@
 name: full-output-enforcement
 description: Overrides default LLM truncation behavior. Enforces complete code generation, bans placeholder patterns, and handles token-limit splits cleanly. Apply to any task requiring exhaustive, unabridged output.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, full-output-enforcement
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

@@ -2,8 +2,8 @@
 name: redesign-existing-projects
 description: Upgrades existing websites and apps to premium quality. Audits current design, identifies generic AI patterns, and applies high-end design standards without breaking functionality. Works with any CSS framework or vanilla CSS.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, redesign-existing-projects
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

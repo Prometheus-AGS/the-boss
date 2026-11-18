@@ -2,8 +2,8 @@
 name: stitch-design-taste
 description: Semantic Design System Skill for Google Stitch. Generates agent-friendly DESIGN.stitch.md files that enforce premium, anti-generic UI standards — strict typography, calibrated color, asymmetric layouts, perpetual micro-motion, and hardware-accelerated performance.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, stitch-design-taste
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

@@ -6,6 +6,11 @@ description: >
   names and feature-based clean architecture. Optionally wrap the project in
   a self-contained Rust + Axum binary that embeds the dist via rust-embed and
   serves the SPA from a single executable.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, scaffold, react, vite'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 > ## UNAVAILABLE IN THIS PROJECT

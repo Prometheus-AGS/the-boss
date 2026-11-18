@@ -2,8 +2,9 @@
 name: prometheus-context-bootstrap
 description: Install compact, layered Prometheus agent context into a project with Node-only, copy-mode behavior. Use when initializing or refreshing AGENTS.md, CLAUDE.md, path-scoped Rust or TypeScript rules, and project-local Rust skill routing on Windows, macOS, or Linux. Do NOT use for global skill installation or for replacing operator-owned project prose.
 license: MIT
-compatibility: Node.js LTS (>= 22.12.0); no shell, Python, symlinks, or executable bit required
+compatibility: Node.js LTS (>= 22.20.0); no shell, Python, symlinks, or executable bit required
 metadata:
+  tags: 'bootstrap, context-engineering, agents-md, claude-md, hooks, scaffold'
   version: '1.2.0'
 ---
 

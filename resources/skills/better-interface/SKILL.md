@@ -2,8 +2,8 @@
 name: better-interface
 description: Combines all of the `better-*` skills into a single review across accessibility, layout, writing, typography, color and UI polish.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, better-interface
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

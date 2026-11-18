@@ -1,6 +1,10 @@
 ---
 name: kbd-reflect
 description: Use to generate the phase reflection report after all changes in a KBD phase are complete — goal achievement, delivered changes, artifact quality summary, technical debt, lessons captured, and recommended focus for the next phase. Seeds the next phase's planning inputs.
+license: MIT
+metadata:
+  version: '1.2.0'
+  tags: 'process, orchestration, automation'
 ---
 
 # /kbd-reflect

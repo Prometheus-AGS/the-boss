@@ -2,12 +2,12 @@
 name: ideation-mindmap
 description: Takes a one-line business or product concept and generates a 6-branch concept mindmap via surreal-memory's generate_ideation_mindmap tool, structuring raw ideas into actionable branches through independent generation, pooling, and critic scoring.
 license: MIT
-version: '1.0.0'
 authors:
   - Prometheus AGS
 metadata:
+  version: '1.0.0'
   category: process
-  tags: [ideation, mindmap, surreal-memory]
+  tags: 'ideation, mindmap, surreal-memory'
 triggers:
   keywords:
     - ideation mindmap

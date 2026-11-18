@@ -4,6 +4,11 @@ description: >
   Synthesize a single-file HTMX moodboard from a use-case brief. LLM-primary
   (the LLM produces structured JSON; a Minijinja template renders the HTML).
   Falls back to placeholder mode when the inference proxy is unreachable.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, refine, moodboard'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 # Refine Moodboard

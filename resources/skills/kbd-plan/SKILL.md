@@ -1,6 +1,10 @@
 ---
 name: kbd-plan
 description: Use to create an ordered KBD phase plan with evidenced, quality-first model and execution-route recommendations for every task, preserving task identity across OpenSpec and native KBD.
+license: MIT
+metadata:
+  version: '1.1.0'
+  tags: 'process, orchestration, automation'
 ---
 
 # /kbd-plan

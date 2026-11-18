@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: phase-end-verification-command
+expected_outcome: |
+  Recommends a targeted integration-test command (cargo test -p learner-model --test rpc_roundtrip) rather than bare cargo test, and mentions that only one Cargo build should run at a time.

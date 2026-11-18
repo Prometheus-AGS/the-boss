@@ -9,6 +9,7 @@ description: Instructions to make or update an app's UI so that it adapts to dif
   areas - nav rails and nav bars) using the Compose Grid and FlexBox APIs.
 license: Complete terms in LICENSE.txt
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, android-compose-adaptive
   version-origin: Prometheus packaging version; upstream did not declare a version
   author: Google LLC
@@ -21,7 +22,6 @@ metadata:
   - FlexBox
   - MediaQuery
   - navigation
-version: 1.0.0-prometheus.1
 ---
 
 ## Prometheus distribution contract

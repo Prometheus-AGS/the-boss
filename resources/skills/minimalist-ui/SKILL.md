@@ -2,8 +2,8 @@
 name: minimalist-ui
 description: Clean editorial-style interfaces. Warm monochrome palette, typographic contrast, flat bento grids, muted pastels. No gradients, no heavy shadows.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, minimalist-ui
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

@@ -1,6 +1,10 @@
 ---
 name: rust-mcp-server-generator
 description: 'Generate a complete Rust Model Context Protocol server project with tools, prompts, resources, and tests using the official rmcp SDK'
+license: MIT
+metadata:
+  version: '1.0.0'
+  tags: 'rust, mcp, rmcp, codegen'
 ---
 
 # Rust MCP Server Generator

@@ -6,7 +6,6 @@ description: >
   recovering work after context loss, or when KBD progress must survive a
   memory-service outage without editing generated projections. Do NOT use for
   changing KBD position or status; use kbd-process-orchestrator instead.
-version: '1.0.0'
 license: MIT
 compatibility: Node.js LTS (>= 22), git, prometheus CLI; pk optional
 allowed-tools: file_system
@@ -14,7 +13,7 @@ metadata:
   author: Prometheus AGS
   version: '1.0.0'
   category: process
-  tags: [process, kbd, progress, memory, recovery]
+  tags: 'process, kbd, progress, memory, recovery'
 ---
 
 # Karpathy Progress Memory

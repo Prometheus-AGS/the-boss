@@ -2,8 +2,8 @@
 name: design-taste-frontend-v1
 description: The original v1 taste-skill, preserved for projects depending on its exact behavior. The current default is `design-taste-frontend` (v2 experimental), which is a substantial rewrite. Use this v1 install name only if you need exact backward compatibility.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, design-taste-frontend-v1
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

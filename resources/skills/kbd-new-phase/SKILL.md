@@ -1,6 +1,10 @@
 ---
 name: kbd-new-phase
 description: Manually create a new top-level KBD phase. Accepts <name> [goals…] and initialises the phase directory, waypoint, project.json activePhase, and fires phase:before. Use this when no prior reflection exists (e.g. very first phase of a new project), when pivoting away from /kbd-next-phase's suggestion, or when initialising state by hand.
+license: MIT
+metadata:
+  version: '1.0.0'
+  tags: 'process, orchestration, automation'
 ---
 
 # /kbd-new-phase

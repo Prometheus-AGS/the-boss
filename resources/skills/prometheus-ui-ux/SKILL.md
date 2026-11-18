@@ -2,8 +2,8 @@
 name: prometheus-ui-ux
 description: Route UI and UX work for designers, creative directors, implementers and reviewers through project context, Pro Max, craft and platform guidance. Use for rendered UI, styles, tokens, interaction, motion or on-screen copy; not backend-only tasks.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, prometheus-ui-ux
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

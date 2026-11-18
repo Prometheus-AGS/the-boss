@@ -1,10 +1,23 @@
 ---
 name: vlbv
-description: Value-Led Behavioral Verification — the pack's single verification method and its entry skill. States the boundary rule (generated code executes only at the value-phase boundary B4 and an authorized repair B5), routes to scenario discovery, author-only BDD and boundary verification, and carries the hash-pinned method text (VLBV 01–22, AT 01–22, operating checklist, supersession record) so it works offline on any harness.
+description: >
+  The verification method for KBD processes (Value-Led Behavioral
+  Verification, VLBV). Use in a KBD-managed project, or wherever VLBV has been
+  enabled, whenever you are about to run, write or plan tests, builds, compiler
+  checks, lint or type checks on code just written; when the user asks whether
+  to test now, what to run before committing, or how to report results; and
+  when deciding if work is verified, accepted or releasable. States the
+  boundary rule (generated code executes only at the
+  value-phase boundary B4 and an authorized repair B5), routes to scenario
+  discovery, author-only BDD and boundary verification, and carries the
+  hash-pinned method text so it works offline on any harness. Do NOT use outside a
+  KBD process unless VLBV is enabled or asked for, when the operator has named
+  a different verification method, or for debugging a failure in code outside
+  the current change.
 license: MIT
-compatibility: Instruction-only. Node.js 22.12 or newer is needed only by the KBD scripts it points to; no shell, Python helper, browser or service is required.
+compatibility: Instruction-only. Node.js 22.20 or newer is needed only by the KBD scripts it points to; no shell, Python helper, browser or service is required.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   tags: "testing, verification, vlbv, method, kbd, bdd, boundary"
 ---
 
@@ -13,6 +26,27 @@ metadata:
 VLBV is the verification method for every phase in this pack. A different method
 for one phase exists only as a signed `KBD-METHOD` decision that names the method,
 its execution cadence and its reason; the closure packet discloses it.
+
+## Where it applies
+
+VLBV is the default in a **KBD-managed project** (a `.kbd-orchestrator/`
+directory at or above the project directory). A session-start hook
+(`lib/hooks/sessionstart-vlbv.mjs`) states the boundary rule there, so the
+default does not depend on this skill being selected.
+
+Outside a KBD process it is optional. Turn it on, or off, with the first of these
+that is set:
+
+| Setting | Scope |
+|---|---|
+| `PROMETHEUS_VLBV_DEFAULT` environment variable | the shell that starts the harness |
+| `<project>/.prometheus/vlbv-default` (one word) | one project |
+| `<home>/.prometheus/config/vlbv-default` (one word) | the user |
+
+Values: `kbd` (the built-in default: KBD projects only), `always` (every
+session) and `off` (never). An unrecognised value falls back to `kbd`. The
+operator can name another method for a task at any time; in a KBD phase a signed
+`KBD-METHOD` decision records it.
 
 ## The boundary rule
 

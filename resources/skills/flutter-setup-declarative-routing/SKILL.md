@@ -2,12 +2,12 @@
 name: flutter-setup-declarative-routing
 description: Configure `MaterialApp.router` using a package like `go_router` for advanced URL-based navigation. Use when developing web applications or mobile apps that require specific deep linking and browser history support.
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, flutter-setup-declarative-routing
   version-origin: Prometheus packaging version; upstream did not declare a version
   model: models/gemini-3.1-pro-preview
   last_modified: Tue, 21 Apr 2026 21:08:03 GMT
 license: BSD-3-Clause
-version: 1.0.0-prometheus.1
 ---
 
 ## Prometheus distribution contract

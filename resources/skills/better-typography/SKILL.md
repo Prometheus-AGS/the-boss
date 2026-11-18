@@ -2,8 +2,8 @@
 name: better-typography
 description: Focuses on type scale, spacing, sizing, variable fonts, OpenType features, wrapping, truncation and other details that make typography feel great across your product.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, better-typography
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

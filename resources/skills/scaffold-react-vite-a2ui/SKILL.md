@@ -7,6 +7,11 @@ description: >
   mock message source so the app runs without an agent. The generated app
   renders agent-described UI under `pnpm dev` with no second process. The mock
   source is development-only; production needs a real message transport.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, scaffold, react, vite, a2ui'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 > ## UNAVAILABLE IN THIS PROJECT

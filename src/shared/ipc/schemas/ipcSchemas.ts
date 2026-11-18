@@ -21,6 +21,7 @@ import { doctorAgentRequestSchemas } from './doctorAgent'
 import { exportRequestSchemas } from './export'
 import { externalAppRequestSchemas } from './externalApp'
 import { type FileEventSchemas, fileRequestSchemas } from './file'
+import { type FileObservationEventSchemas, fileObservationRequestSchemas } from './fileObservation'
 import { fileProcessingRequestSchemas } from './fileProcessing'
 import { hermesDashboardRequestSchemas } from './hermesDashboard'
 import { knowledgeRequestSchemas } from './knowledge'
@@ -86,6 +87,7 @@ export const ipcRequestSchemas = {
   ...externalAppRequestSchemas,
   ...hermesDashboardRequestSchemas,
   ...fileRequestSchemas,
+  ...fileObservationRequestSchemas,
   ...fileProcessingRequestSchemas,
   ...knowledgeRequestSchemas,
   ...localModelRequestSchemas,
@@ -137,6 +139,7 @@ export type IpcEventSchemas = BossFangEventSchemas &
   CherryCloudEventSchemas &
   ComputerUseEventSchemas &
   FileEventSchemas &
+  FileObservationEventSchemas &
   McpEventSchemas &
   MiniAppEventSchemas &
   NavigationEventSchemas &

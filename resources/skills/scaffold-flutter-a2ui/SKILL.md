@@ -1,6 +1,11 @@
 ---
 name: scaffold-flutter-a2ui
 description: Layer an A2UI rendering host onto a Flutter project, with a parity test asserting the same output as the web and MCP-UI hosts. Use for mobile agent UI, cross-platform A2UI rendering, or Flutter surfaces driven by agent output.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, scaffold, flutter, a2ui'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 > ## UNAVAILABLE IN THIS PROJECT

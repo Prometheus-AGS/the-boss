@@ -1,6 +1,10 @@
 ---
 name: kbd-init
 description: Use once per project, before any other KBD command — auto-discovers project identity, stack, and constraints from existing context files (AGENTS.md, CLAUDE.md, README.md, package.json, Cargo.toml, pyproject.toml, etc.) and generates .kbd-orchestrator/project.json and .kbd-orchestrator/constraints.md.
+license: MIT
+metadata:
+  version: '1.2.0'
+  tags: 'process, orchestration, automation'
 ---
 
 # /kbd-init
@@ -15,7 +19,7 @@ Initialize the KBD orchestrator for the **current project**.
 
 ## OpenSpec lifecycle preflight
 
-Before this stage, follow the [orchestrator preflight](../kbd-process-orchestrator/SKILL.md#openspec-lifecycle-preflight): use the pinned OpenSpec 2.0.0 CLI through the managed runner — session start runs the read-only `verify`; phase entry runs `refresh`, which updates existing KBD/OpenSpec projects — then use that same runner for OpenSpec commands. Retry a pending phase-entry refresh before OpenSpec work; preserve authored specs and task state. Phase scripts run this automatically, including canonical-runtime paths.
+Before this stage, follow the [orchestrator preflight](../kbd-process-orchestrator/SKILL.md#openspec-lifecycle-preflight): use the pinned OpenSpec 2.1.0 CLI through the managed runner — session start runs the read-only `verify`; phase entry runs `refresh`, which updates existing KBD/OpenSpec projects — then use that same runner for OpenSpec commands. Retry a pending phase-entry refresh before OpenSpec work; preserve authored specs and task state. Phase scripts run this automatically, including canonical-runtime paths.
 
 ## What this does
 
@@ -115,7 +119,7 @@ and record the choice as `"specBackend"` in `project.json`.
   ```
 
   The receipt reports `already-initialized` when `openspec/` exists. A failed
-  receipt (for example Node.js below 22.12.0) leaves the project unpinned;
+  receipt (for example Node.js below 22.20.0) leaves the project unpinned;
   report it instead of falling back to native files.
 - **`speckit`** — run `specify init --here --force --non-interactive --integration <harness>`
   (Spec Kit CLI pinned in `config/spec-engines.json`, installed with

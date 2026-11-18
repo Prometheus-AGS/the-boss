@@ -1,6 +1,10 @@
 ---
 name: kbd-execute
 description: Use to select an execution backend for the active KBD phase, write canonical phase execution state, dispatch the phase, and maintain KBD as the source of truth. Supports multi-tool handoff via the progress.json protocol. Runs the B4 boundary sequence once at phase completion.
+license: MIT
+metadata:
+  version: '1.0.0'
+  tags: 'process, orchestration, automation'
 ---
 
 # /kbd-execute

@@ -2,8 +2,8 @@
 name: better-colors
 description: Helps you build a color system and answer anything about color in your project. You can generate palettes, use semantic tokens, convert between formats, check contrast and more.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, better-colors
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

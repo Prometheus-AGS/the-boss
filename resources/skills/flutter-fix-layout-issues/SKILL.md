@@ -2,12 +2,12 @@
 name: flutter-fix-layout-issues
 description: Fixes Flutter layout errors (overflows, unbounded constraints) using Dart and Flutter MCP tools. Use when addressing "RenderFlex overflowed", "Vertical viewport was given unbounded height", or similar layout issues.
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, flutter-fix-layout-issues
   version-origin: Prometheus packaging version; upstream did not declare a version
   model: models/gemini-3.1-pro-preview
   last_modified: Tue, 21 Apr 2026 19:45:59 GMT
 license: BSD-3-Clause
-version: 1.0.0-prometheus.1
 ---
 
 ## Prometheus distribution contract

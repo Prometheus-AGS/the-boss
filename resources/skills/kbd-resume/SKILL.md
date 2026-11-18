@@ -1,6 +1,10 @@
 ---
 name: kbd-resume
 description: Use to resume a paused KBD run after validating its checkpoint and plan revision. A normal assistant response is never a resume signal — resuming requires this explicit skill.
+license: MIT
+metadata:
+  version: '1.0.0'
+  tags: 'process, orchestration, control, resume'
 ---
 
 # /kbd-resume

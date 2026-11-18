@@ -1,6 +1,10 @@
 ---
 name: kbd-cancel
 description: Use to gracefully cancel the active KBD run while preserving its checkpoint and immutable audit history. Requires a non-empty cancellation reason. Cancellation is terminal.
+license: MIT
+metadata:
+  version: '1.0.0'
+  tags: 'process, orchestration, control, cancel'
 ---
 
 # /kbd-cancel

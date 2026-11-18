@@ -1,6 +1,10 @@
 ---
 name: kbd-audit
 description: Use for a read-only causal audit of the active KBD run — exact position, lifecycle history, plan revision, ownership, blockers, and uncommitted work — without mutating anything.
+license: MIT
+metadata:
+  version: '1.0.0'
+  tags: 'process, orchestration, control, audit'
 ---
 
 # /kbd-audit

@@ -5,6 +5,11 @@ description: >
   headless Chromium — with embedded fonts, a running header and page numbers,
   pagination discipline that prevents orphaned pages and split components, and
   a verification loop that proves the output before it ships.
+license: MIT
+metadata:
+  version: '1.0.0-prometheus.1'
+  tags: 'artifact-refiner, convert, htmx, pdf'
+  version-origin: 'Prometheus packaging version; upstream did not declare a version'
 ---
 
 # Convert HTMX to Paginated PDF

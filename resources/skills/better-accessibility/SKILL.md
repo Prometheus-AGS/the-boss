@@ -2,8 +2,8 @@
 name: better-accessibility
 description: Helps your project comply with accessibility standards and best practices.
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, better-accessibility
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---

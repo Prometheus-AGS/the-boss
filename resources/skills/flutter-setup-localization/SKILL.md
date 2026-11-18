@@ -2,12 +2,12 @@
 name: flutter-setup-localization
 description: Add `flutter_localizations` and `intl` dependencies, enable "generate true" in `pubspec.yaml`, and create an `l10n.yaml` configuration file. Use when initializing localization support for a new Flutter project.
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, flutter-setup-localization
   version-origin: Prometheus packaging version; upstream did not declare a version
   model: models/gemini-3.1-pro-preview
   last_modified: Tue, 21 Apr 2026 21:27:35 GMT
 license: BSD-3-Clause
-version: 1.0.0-prometheus.1
 ---
 
 ## Prometheus distribution contract

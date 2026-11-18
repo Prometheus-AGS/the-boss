@@ -3,8 +3,8 @@ name: explain-interface
 description: Helps you figure out how something was built on the web.
 disable-model-invocation: true
 license: MIT
-version: 1.0.0-prometheus.1
 metadata:
+  version: '1.0.0-prometheus.1'
   tags: ui, ux, explain-interface
   version-origin: Prometheus packaging version; upstream did not declare a version
 ---
