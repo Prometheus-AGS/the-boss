@@ -22,6 +22,7 @@ import type { McpServer, McpServerType } from '@shared/data/types/mcpServer'
 import { PRODUCT_NAME } from '@shared/utils/branding'
 import { BuiltinMcpServerNames } from '@shared/utils/mcp'
 
+import { McpConfigurationError, normalizeMcpTransportError } from '../failureFacts'
 import { buildStdioEnvironment } from '../mcpLaunch'
 import { resolveStdioLaunch } from '../mcpStdioLaunch'
 import { CallBackServer } from '../oauth/callback'
@@ -175,16 +176,21 @@ export async function createExternalMcpConnection({
   const createTransport = async (typeOverride?: McpServerType): Promise<Transport> => {
     if (server.baseUrl) {
       const serverUrl = new URL(server.baseUrl)
-      const fetchUrl = (input: RequestInfo | URL, init?: RequestInit) => {
+      const fetchUrl = async (input: RequestInfo | URL, init?: RequestInit) => {
         const target = input.toString()
+        let requestInit = init
         if (fallbackAuthorization && target === serverUrl.href) {
           const merged = new Headers(init?.headers)
           if (!merged.has('authorization')) {
             merged.set('authorization', fallbackAuthorization)
-            return net.fetch(target, { ...init, headers: merged })
+            requestInit = { ...init, headers: merged }
           }
         }
-        return net.fetch(target, init)
+        try {
+          return await net.fetch(target, requestInit)
+        } catch (error) {
+          throw normalizeMcpTransportError(error)
+        }
       }
       const type = typeOverride ?? server.type ?? 'sse'
       if (type === 'streamableHttp') {
@@ -209,7 +215,7 @@ export async function createExternalMcpConnection({
     }
 
     if (!server.command) {
-      throw new Error('Either baseUrl or command must be provided')
+      throw new McpConfigurationError('Either baseUrl or command must be provided')
     }
 
     const { launch, loginShellEnv, serverEnv } = await resolveStdioLaunch({
@@ -217,7 +223,7 @@ export async function createExternalMcpConnection({
       args,
       logger: loggerService.withContext('ExternalMcpConnection', { serverId: server.id })
     })
-    if (launch.unavailableReason) throw new Error(launch.unavailableReason)
+    if (launch.unavailableReason) throw new McpConfigurationError(launch.unavailableReason)
     if (launch.resolution === 'unresolved') {
       log.warn('Could not resolve the stdio command; attempting the configured command', { command: launch.command })
     }
