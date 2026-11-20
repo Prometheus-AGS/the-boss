@@ -23,6 +23,35 @@ metadata:
 
 # VLBV — Value-Led Behavioral Verification
 
+## Mandatory value and business-rule trace
+
+Always think in terms of user goals and value—not in tests or assumptions.
+
+Before selecting work or defining acceptance, state the real actor's intended
+outcome and its value. In the existing accepted specification or behavior
+contract, write plain-language business rules: conditions, expected outcome,
+exact representative examples/evidence, exceptions, and unresolved assumptions.
+Do not proceed on an unresolved assumption that changes the intended outcome.
+Every adopted VLBV scenario must identify the rule it verifies through the
+existing `sourceRequirement`, explain value in `usefulOutcome` and `reasonNow`,
+and bind its oracle, controls and evidence to that outcome. A labelled assumption
+is not a confirmed business rule; use existing owner calibration/adoption to
+resolve it before claiming acceptance.
+
+Include only reachable real user journeys, plausible supported failures,
+material risks or required safeguards. Omit impossible/artificial cases and
+outcomes nobody values; do not invent cases to satisfy counts. Positive and
+negative controls remain required where the adopted contract requires them and
+must materially distinguish the intended outcome from a false positive.
+
+When a case fails, classify its impact on a reachable, material accepted outcome
+before a repair loop. An out-of-scope test failure does not justify changing
+proven infrastructure or blocking review. Record and route genuine scope/check
+conflicts through existing governance; never silently delete, mask, or weaken a
+required check or signed scope. Preserve current phase-end BDD/VLBV, build,
+release and approval processes. Tests verify business value, not define it.
+
+
 VLBV is the verification method for every phase in this pack. A different method
 for one phase exists only as a signed `KBD-METHOD` decision that names the method,
 its execution cadence and its reason; the closure packet discloses it.

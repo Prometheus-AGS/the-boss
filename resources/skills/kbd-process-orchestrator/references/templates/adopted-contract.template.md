@@ -1,5 +1,44 @@
 # Adopted completion contract — authoring template
 
+## Outcome-based exit contract
+
+Done requires the actual agreed user goal and value to be achieved, supported by relevant end-of-phase VLBV evidence against accepted business rules and all existing mandatory exit criteria. Deliver the necessary user guidance and access, verify the observable outcome, disclose limits and remaining risks, and record reflection. Review-ready means a coherent change is ready for maintainer assessment, not that the user outcome is already delivered. Preserve existing approval, release and verification boundaries; tests alone are not completion.
+
+## Mandatory value and business-rule trace
+
+Always think in terms of user goals and value—not in tests or assumptions.
+
+Before selecting work or defining acceptance, state the real actor's intended
+outcome and its value. In the existing accepted specification or behavior
+contract, write plain-language business rules: conditions, expected outcome,
+exact representative examples/evidence, exceptions, and unresolved assumptions.
+Do not proceed on an unresolved assumption that changes the intended outcome.
+Every adopted VLBV scenario must identify the rule it verifies through the
+existing `sourceRequirement`, explain value in `usefulOutcome` and `reasonNow`,
+and bind its oracle, controls and evidence to that outcome. A labelled assumption
+is not a confirmed business rule; use existing owner calibration/adoption to
+resolve it before claiming acceptance.
+
+Include only reachable real user journeys, plausible supported failures,
+material risks or required safeguards. Omit impossible/artificial cases and
+outcomes nobody values; do not invent cases to satisfy counts. Positive and
+negative controls remain required where the adopted contract requires them and
+must materially distinguish the intended outcome from a false positive.
+
+When a case fails, classify its impact on a reachable, material accepted outcome
+before a repair loop. An out-of-scope test failure does not justify changing
+proven infrastructure or blocking review. Record and route genuine scope/check
+conflicts through existing governance; never silently delete, mask, or weaken a
+required check or signed scope. Preserve current phase-end BDD/VLBV, build,
+release and approval processes. Tests verify business value, not define it.
+
+### Business rules to complete before solution/query/test design
+
+| Rule/reference | Actor and conditions | Expected outcome/value | Exact evidence/examples | Exceptions | Unresolved assumptions | Scenario IDs |
+|---|---|---|---|---|---|---|
+| REQUIRED: existing accepted specification reference | REQUIRED | REQUIRED | REQUIRED | Explicit, or none | Explicit, or none | Trace every adopted case |
+
+
 Author this during Spec/Plan, freeze it before production implementation, and
 adopt it through the existing canonical writer. The machine-checked artifact is
 `adopted-contract.json` in the phase directory, validated against
@@ -120,9 +159,9 @@ Contract (v2) required top-level fields: `contractVersion`, `kind`, `identity`, 
 | `evidence` | yes | string | Required recorded evidence: argv, exit codes, stdout/stderr excerpts, digests. |
 | `classification` | no | string | Optional: marks delivery/packaging-only validation so its failure is never cascaded into product-failure claims. |
 | `actor` | yes | string | Who needs the behavior (VLBV 01). |
-| `usefulOutcome` | yes | string | The observable value delivered (VLBV 01). |
-| `sourceRequirement` | yes | string | OpenSpec requirement reference (openspec:<capability>#<requirement>), another backend reference, or an explicit 'assumption: <text>' (VLBV 01). |
-| `reasonNow` | yes | string | Why this scenario matters in this phase (VLBV 01). |
+| `usefulOutcome` | yes | string | The reachable observable user outcome and business value, not a test pass (VLBV 01). |
+| `sourceRequirement` | yes | string | Reference the plain-language business rule in the accepted specification (conditions, outcome, examples/evidence, exceptions and unknowns), using openspec:<capability>#<requirement> or another backend reference. An explicit 'assumption: <text>' remains unresolved until owner calibration/adoption; it is not a confirmed rule (VLBV 01). |
+| `reasonNow` | yes | string | Why this reachable journey, plausible supported failure, material risk or required safeguard matters in this phase; no artificial cases for counts (VLBV 01). |
 | `likelihood` | yes | string | Sourced estimate, a qualitative judgment, or the literal UNKNOWN. Never an invented probability. |
 | `mandatory` | yes | boolean | A mandatory gate, as opposed to ordinary priority (VLBV 03). |
 | `scopeRefs` | no | array | functionalScope items (exact text) this scenario covers. |
