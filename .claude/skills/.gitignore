@@ -23,7 +23,6 @@
 !prepare-release
 !product-guide
 !stakeholder-map
-!product-guide
 !translate-docs
 !upstream-merge
 !vercel-composition-patterns

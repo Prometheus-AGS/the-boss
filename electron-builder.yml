@@ -244,14 +244,12 @@ artifactBuildCompleted: scripts/packaging/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.49
-    - Merge upstream Cherry Studio updates, including the 2.2.2 release.
-    - Bundle Prometheus Mini Skills 1.16.0 and use the updated Surreal Memory Server image with SurrealDB 4.0.0.
-    - The local Apple Silicon build includes UAR 1.4.0-rc.5.
+    The Boss 2.2.51
+    - Includes Prometheus Mini Skills 1.18.2. Review existing project instructions without changing files, then preview and explicitly approve the exact update.
+    - Keep existing project rules and managed sections. Start planning and verification from what the user needs the software to do.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.49
-    - 合并 Cherry Studio 上游更新，包括 2.2.2 版本。
-    - 内置 Prometheus Mini Skills 1.16.0，并更新使用 SurrealDB 4.0.0 的 Surreal Memory Server 镜像。
-    - 本地 Apple Silicon 版本内置 UAR 1.4.0-rc.5。
+    The Boss 2.2.51
+    - 内置 Prometheus Mini Skills 1.18.2。无需修改文件即可检查现有项目指令，之后可预览并明确批准具体更新。
+    - 保留现有项目规则和受管理的区块；从用户需要软件实现的目标出发进行规划和验证。
     <!--LANG:END-->

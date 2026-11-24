@@ -59,19 +59,19 @@ describe('dshGatewayBypassRule', () => {
   })
 
   it.each([
-    ['', 0, 'http://127.0.0.1:23333', '127.0.0.1'],
-    ['127.0.0.2', 24444, 'http://127.0.0.2:24444', '127.0.0.2'],
-    ['0.0.0.0', 24444, 'http://127.0.0.1:24444', '127.0.0.1'],
-    ['::', 24444, 'http://[::1]:24444', '[::1]'],
-    ['::2', 24444, 'http://[::2]:24444', '[::2]'],
-    ['gateway.local', 24444, 'http://gateway.local:24444', 'gateway.local']
-  ])('keeps the gateway route and proxy bypass aligned for %s:%i', async (host, port, origin, hostname) => {
+    ['', 0, 'http://127.0.0.1:23333', '127.0.0.1', '127.0.0.1'],
+    ['127.0.0.2', 24444, 'http://127.0.0.2:24444', '127.0.0.2', '127.0.0.2'],
+    ['0.0.0.0', 24444, 'http://127.0.0.1:24444', '127.0.0.1', '127.0.0.1'],
+    ['::', 24444, 'http://[::1]:24444', '[::1]', '::1'],
+    ['::2', 24444, 'http://[::2]:24444', '[::2]', '::2'],
+    ['gateway.local', 24444, 'http://gateway.local:24444', 'gateway.local', 'gateway.local']
+  ])('keeps the gateway route and proxy bypass aligned for %s:%i', async (host, port, origin, hostname, bypassRule) => {
     mocks.usesDshGateway.mockReturnValue(true)
     mocks.getGatewayConfig.mockReturnValue({ enabled: true, host, port })
 
     expect((await resolveApiGatewayRuntime('session-1')).baseUrl).toBe(origin)
     expect(dshGatewayBypassRule(provider, model)).toBe(hostname)
-    expect(buildDshProxyEnvironment(provider, model, PROXY_ENV).NO_PROXY?.split(',')).toContain(hostname)
+    expect(buildDshProxyEnvironment(provider, model, PROXY_ENV).NO_PROXY?.split(',')).toContain(bypassRule)
   })
 })
 

@@ -1,14 +1,30 @@
 ---
 name: prometheus-context-bootstrap
-description: Install compact, layered Prometheus agent context into a project with Node-only, copy-mode behavior. Use when initializing or refreshing AGENTS.md, CLAUDE.md, path-scoped Rust or TypeScript rules, and project-local Rust skill routing on Windows, macOS, or Linux. Do NOT use for global skill installation or for replacing operator-owned project prose.
+description: Install compact, layered Prometheus agent context into a project with Node-only, copy-mode behavior. Use when auditing, previewing or explicitly updating an existing project, or initializing or refreshing AGENTS.md, CLAUDE.md, path-scoped Rust or TypeScript rules, and project-local Rust skill routing on Windows, macOS, or Linux. Do NOT use for global skill installation or for replacing operator-owned project prose.
 license: MIT
 compatibility: Node.js LTS (>= 22.20.0); no shell, Python, symlinks, or executable bit required
 metadata:
   tags: 'bootstrap, context-engineering, agents-md, claude-md, hooks, scaffold'
-  version: '1.2.0'
+  version: '1.2.1'
 ---
 
 # Prometheus Context Bootstrap
+
+## User goals, value, and business rules
+
+Always think in terms of user goals and value—not in tests or assumptions.
+
+Before selecting or planning a unit of work, state the user's intended outcome
+and why it matters. Anchor intended behavior in exact representative examples
+and observed evidence; distinguish confirmed requirements from assumptions.
+Before proposing a solution, query, or test, record plain-language, verifiable
+business rules in the existing accepted specification or behavior contract:
+condition, expected outcome, supporting evidence, exceptions, and unresolved
+assumptions. Do not invent a separate workflow or treat assumptions as rules.
+Trace scoped end-of-phase BDD scenarios to those rules. Test outcomes verify
+user value; they do not define it. Preserve established build, release, phase-end
+BDD/VLBV processes and approval gates unchanged.
+
 
 Install the compact resident contract, path-scoped stack rules, and project-local
 skill copies. The bootstrap owns only marked regions. It preserves prose outside
@@ -80,6 +96,33 @@ as `STALE` for manual cleanup and never rewritten.
 Use `--dry-run` to print the complete write plan without changing files. If
 `--stacks` is absent, a root `Cargo.toml` selects Rust and a root `package.json`
 selects TypeScript.
+
+## Maintain instructions in an existing project
+
+From the Mini repository, run the existing CLI with the project's exact Git root:
+
+```text
+boss-mini prometheus-context-bootstrap.mjs --path <project-root> --audit
+boss-mini prometheus-context-bootstrap.mjs --path <project-root> --preview
+boss-mini prometheus-context-bootstrap.mjs --path <project-root> --apply <PLAN_SHA256>
+```
+
+In an installed skill, call its bundled `scripts/maintain-project.mjs` with the same
+arguments. These modes are exclusive; they do not take stack or scaffold flags.
+Audit lists coverage and planned changes without printing file content. Preview
+adds a local unified diff and `PLAN_SHA256`. Inspect it before explicit apply;
+do not share local diffs containing private prose. Apply requires the same root
+and fresh digest. No file is staged in Git or enrolled into the installer.
+
+The modes touch only the named root instruction files. They preserve dirty
+prose, recognised relative canonical references, existing in-root entrypoint
+symlinks, and managed block bytes. An ignored named entrypoint, broken or
+conflicting topology, malformed/partial recognised policy, or unsafe generated
+authority is blocked for manual review. Natural-language conflicts are not fully
+machine-detectable. Run apply with no concurrent editor. If a filesystem failure
+partially applies, audit and reconcile before repeating; separate named writes
+are not a multi-file transaction. A fresh preview after a complete apply is
+a no-op. The legacy initializer, `--dry-run` and `--check` are unchanged.
 
 ## Installed context
 

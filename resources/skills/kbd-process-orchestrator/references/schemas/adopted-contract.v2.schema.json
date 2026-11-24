@@ -275,17 +275,17 @@
           "usefulOutcome": {
             "type": "string",
             "minLength": 1,
-            "description": "The observable value delivered (VLBV 01)."
+            "description": "The reachable observable user outcome and business value, not a test pass (VLBV 01)."
           },
           "sourceRequirement": {
             "type": "string",
             "pattern": "^(openspec:|speckit:|native:|assumption: ).+",
-            "description": "OpenSpec requirement reference (openspec:<capability>#<requirement>), another backend reference, or an explicit 'assumption: <text>' (VLBV 01)."
+            "description": "Reference the plain-language business rule in the accepted specification (conditions, outcome, examples/evidence, exceptions and unknowns), using openspec:<capability>#<requirement> or another backend reference. An explicit 'assumption: <text>' remains unresolved until owner calibration/adoption; it is not a confirmed rule (VLBV 01)."
           },
           "reasonNow": {
             "type": "string",
             "minLength": 1,
-            "description": "Why this scenario matters in this phase (VLBV 01)."
+            "description": "Why this reachable journey, plausible supported failure, material risk or required safeguard matters in this phase; no artificial cases for counts (VLBV 01)."
           },
           "likelihood": {
             "type": "string",

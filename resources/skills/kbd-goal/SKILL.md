@@ -10,6 +10,23 @@ metadata:
 
 # KBD Goal
 
+## User goals, value, and business rules
+
+Always think in terms of user goals and value—not in tests or assumptions.
+
+Before selecting or planning a unit of work, state the user's intended outcome
+and why it matters. Anchor intended behavior in exact representative examples
+and observed evidence; distinguish confirmed requirements from assumptions.
+Before proposing a solution, query, or test, record plain-language, verifiable
+business rules in the existing accepted specification or behavior contract:
+condition, expected outcome, supporting evidence, exceptions, and unresolved
+assumptions. Do not invent a separate workflow or treat assumptions as rules.
+Trace scoped end-of-phase BDD scenarios to those rules. Test outcomes verify
+user value; they do not define it. Preserve established build, release, phase-end
+BDD/VLBV processes and approval gates unchanged.
+
+
+
 Reuse the current goal when one exists. Only create a goal when explicitly requested and through an actually available native goal tool. Do not invent goal CLI commands, install plugins, or start a second loop.
 
 Load delivery-cadence. Initialize or resume the selected profile with mode `goal` and a binding identifying the existing goal, approved phase and canonical project. The profile controls delivery intervals, not architecture approval. Preserve native budgets and termination conditions.

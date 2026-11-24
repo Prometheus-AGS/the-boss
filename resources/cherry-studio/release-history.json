@@ -1,5 +1,13 @@
 [
   {
+    "version": "2.2.51",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.51\n- Includes Prometheus Mini Skills 1.18.2. Review existing project instructions without changing files, then preview and explicitly approve the exact update.\n- Keep existing project rules and managed sections. Start planning and verification from what the user needs the software to do.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.51\n- 内置 Prometheus Mini Skills 1.18.2。无需修改文件即可检查现有项目指令，之后可预览并明确批准具体更新。\n- 保留现有项目规则和受管理的区块；从用户需要软件实现的目标出发进行规划和验证。\n<!--LANG:END-->"
+  },
+  {
+    "version": "2.2.50",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.50\n- Automatically upgrade an existing Prometheus Mini Skills installation to bundled version 1.17.0 when The Boss starts.\n- Preserve equal or newer installed packs and user-authored skills; retry interrupted upgrades on the next launch.\n- Include the latest merged Cherry Studio fixes and retain UAR 1.4.0-rc.5.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.50\n- 启动 The Boss 时，自动将已有的 Prometheus Mini Skills 安装升级至内置的 1.17.0 版本。\n- 保留相同或更高版本的技能包及用户自建技能；下次启动时重试中断的升级。\n- 包含最新合并的 Cherry Studio 修复，并保留 UAR 1.4.0-rc.5。\n<!--LANG:END-->"
+  },
+  {
     "version": "2.2.49",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.49\n- Merge upstream Cherry Studio updates, including the 2.2.2 release.\n- Bundle Prometheus Mini Skills 1.16.0 and use the updated Surreal Memory Server image with SurrealDB 4.0.0.\n- The local Apple Silicon build includes UAR 1.4.0-rc.5.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.49\n- 合并 Cherry Studio 上游更新，包括 2.2.2 版本。\n- 内置 Prometheus Mini Skills 1.16.0，并更新使用 SurrealDB 4.0.0 的 Surreal Memory Server 镜像。\n- 本地 Apple Silicon 版本内置 UAR 1.4.0-rc.5。\n<!--LANG:END-->"
   },
