@@ -10,6 +10,7 @@ import { agentChannelService } from '@data/services/AgentChannelService'
 import { agentSessionService } from '@data/services/AgentSessionService'
 import { ErrorCode } from '@shared/data/api/errors'
 import { UpdateAgentChannelSchema } from '@shared/data/api/schemas/agentChannels'
+import type { AgentType } from '@shared/data/types/agent'
 
 const notifyDataApiDataChange = vi.hoisted(() => vi.fn())
 vi.mock('@data/dataApiDataChange', () => ({ notifyDataApiDataChange }))
@@ -26,10 +27,10 @@ describe('AgentChannelService', () => {
   })
 
   /** Insert a minimal agent row directly so agentId FK constraints are satisfied. */
-  async function insertAgent(id: string): Promise<void> {
+  async function insertAgent(id: string, type: AgentType = 'claude-code'): Promise<void> {
     await dbh.db.insert(agentTable).values({
       id,
-      type: 'claude-code',
+      type,
       name: `Agent ${id}`,
       instructions: 'test',
       model: null,
@@ -227,6 +228,54 @@ describe('AgentChannelService', () => {
       const channels = agentChannelService.listChannels({ agentId, type: 'telegram' })
       expect(channels.length).toBeGreaterThanOrEqual(1)
       expect(channels.every((c) => c.agentId === agentId && c.type === 'telegram')).toBe(true)
+    })
+  })
+
+  // Pi has no Plan mode; a saved Plan override made every inbound turn on the channel fail.
+  describe('permission mode against the bound Agent runtime', () => {
+    it.each(['pi', 'pi-durable', 'uar', 'dsh'] as const)('refuses to save Plan on a %s channel', async (type) => {
+      await insertAgent('pi-agent', type)
+
+      expect(() =>
+        agentChannelService.createChannel({
+          type: 'telegram',
+          name: 'Pi',
+          agentId: 'pi-agent',
+          workspace: SYSTEM_WORKSPACE,
+          config: TELEGRAM_CONFIG,
+          permissionMode: 'plan'
+        })
+      ).toThrow(/not supported/)
+      const channel = agentChannelService.createChannel({
+        type: 'telegram',
+        name: 'Pi',
+        agentId: 'pi-agent',
+        workspace: SYSTEM_WORKSPACE,
+        config: TELEGRAM_CONFIG
+      })
+      expect(() => agentChannelService.updateChannel(channel.id, { permissionMode: 'plan' })).toThrow(/not supported/)
+      expect(agentChannelService.getChannel(channel.id)?.permissionMode).toBeUndefined()
+    })
+
+    it('drops a Plan override when the channel is rebound to a Pi Agent, and keeps one Pi supports', async () => {
+      await insertAgent('claude-agent')
+      await insertAgent('pi-agent', 'pi')
+      const create = (permissionMode: 'plan' | 'acceptEdits') =>
+        agentChannelService.createChannel({
+          type: 'telegram',
+          name: permissionMode,
+          agentId: 'claude-agent',
+          workspace: SYSTEM_WORKSPACE,
+          config: TELEGRAM_CONFIG,
+          permissionMode
+        })
+      const plan = create('plan')
+      const acceptEdits = create('acceptEdits')
+
+      expect(agentChannelService.updateChannel(plan.id, { agentId: 'pi-agent' })?.permissionMode).toBeUndefined()
+      expect(agentChannelService.updateChannel(acceptEdits.id, { agentId: 'pi-agent' })?.permissionMode).toBe(
+        'acceptEdits'
+      )
     })
   })
 

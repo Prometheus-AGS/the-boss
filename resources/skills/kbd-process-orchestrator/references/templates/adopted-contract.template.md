@@ -32,6 +32,16 @@ conflicts through existing governance; never silently delete, mask, or weaken a
 required check or signed scope. Preserve current phase-end BDD/VLBV, build,
 release and approval processes. Tests verify business value, not define it.
 
+### Reachable exit and bounded recovery
+
+Name the end user's real task and expected value in the Origin/Before evidence.
+Bind one useful increment, exact candidate and prerequisite identities, real
+path, independent success observation, material negatives and existing required
+release checks. Resolve mismatched, missing or circular prerequisites before
+adopting the packet. Map each receipt to the inputs it actually covers so a
+test-only repair preserves unchanged product artifacts and unaffected receipts
+when the bound dependencies still match. Preserve the original attempt, keep a
+finite recovery budget, and require existing signature and execution admission.
 ### Business rules to complete before solution/query/test design
 
 | Rule/reference | Actor and conditions | Expected outcome/value | Exact evidence/examples | Exceptions | Unresolved assumptions | Scenario IDs |

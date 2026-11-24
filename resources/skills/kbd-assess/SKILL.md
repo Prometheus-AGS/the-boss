@@ -32,6 +32,15 @@ Run the **Assess** phase of the KBD lifecycle for any project.
 
 Before this stage, follow the [orchestrator preflight](../kbd-process-orchestrator/SKILL.md#openspec-lifecycle-preflight): use the pinned OpenSpec 2.0.0 CLI through the managed runner — session start runs the read-only `verify`; phase entry runs `refresh`, which updates existing KBD/OpenSpec projects — then use that same runner for OpenSpec commands. Retry a pending phase-entry refresh before OpenSpec work; preserve authored specs and task state. Phase scripts run this automatically, including canonical-runtime paths.
 
+## Start from the user's Before story
+
+In `assessment.md`, cite the Origin/Before revision or the best confirmed user
+evidence, then name the end user, their current obstacle, the task they need to
+finish, expected value, and what they can actually observe. Select the smallest
+independently useful outcome; name its real boundaries, material failure modes,
+and out-of-scope work. Separate verified facts from unresolved feasibility.
+Do not substitute test counts or ceremony for value. Escalate an unresolved
+choice only if it changes the outcome or makes the proposed exit unreachable.
 ## What this does
 
 Inspects the current codebase and produces a structured gap report against the

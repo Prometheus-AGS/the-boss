@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => ({
   getApiKeys: vi.fn(),
   listSkills: vi.fn(),
   listLocalSkillPaths: vi.fn(),
-  getSkillDirectory: vi.fn(),
+  getInstalledSkillDirectory: vi.fn(),
   findMcp: vi.fn(),
   listTools: vi.fn(),
   findBySessionId: vi.fn(),
@@ -59,7 +59,7 @@ vi.mock('@main/ai/skills/SkillService', () => ({
   skillService: {
     list: mocks.listSkills,
     listLocalSkillPaths: mocks.listLocalSkillPaths,
-    getSkillDirectory: mocks.getSkillDirectory
+    getInstalledSkillDirectory: mocks.getInstalledSkillDirectory
   }
 }))
 
@@ -108,9 +108,11 @@ beforeEach(() => {
   mocks.getProvider.mockReturnValue({ id: 'provider', updatedAt: 1 })
   mocks.getModel.mockReturnValue({ id: 'provider::model', updatedAt: 1 })
   mocks.getApiKeys.mockReturnValue([{ id: 'key-1', key: 'secret', enabled: true }])
-  mocks.listSkills.mockResolvedValue([{ id: 'skill-1', isEnabled: true, updatedAt: 1 }])
+  mocks.listSkills.mockResolvedValue([{ id: 'skill-1', folderName: 'skill-1', isEnabled: true, updatedAt: 1 }])
   mocks.listLocalSkillPaths.mockResolvedValue([])
-  mocks.getSkillDirectory.mockImplementation((folderName: string) => `/skills/${folderName}`)
+  mocks.getInstalledSkillDirectory.mockImplementation(
+    ({ folderName }: { folderName: string }) => `/skills/${folderName}`
+  )
   mocks.findMcp.mockReturnValue({ id: 'mcp-1', name: 'server', updatedAt: 1 })
   mocks.listTools.mockReturnValue([{ name: 'search', inputSchema: { type: 'object' } }])
   mocks.findBySessionId.mockReturnValue(null)

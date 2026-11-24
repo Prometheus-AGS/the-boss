@@ -192,6 +192,22 @@ stage, or record an explicit skip with its reason under project policy.
 A deliberate stage skip is recorded with
 `stageHandoffSkip('plan', '<reason>', { cwd })`.
 
+## Make exit reachable before adoption
+
+Trace each predicate to the assessed end-user task and value in the exact
+Origin/Before evidence. Bind the candidate selection and provenance, real entry
+point and collaborators, fixtures, command and step map, independent comparator,
+material negative controls, existing mandatory release prerequisites and
+authorized effect bounds. Describe which dependencies each receipt relies on
+and a finite affected-only recovery route. Do not optimize for scenario counts.
+
+Statically check selectors/step mappings, fixture identity and inputs, available
+prerequisites, command ordering and comparator independence. Flag a missing,
+mismatched or circular prerequisite, including any artifact obtainable only
+after the exit that requires it. Resolve or record the specific blocker before
+adoption; do not repeatedly run a gate to discover an already-known mismatch.
+Executable preflight requires the applicable adopted cadence and authority;
+no preflight supplies product acceptance or changes a proven release process.
 ## Contract binding + single boundary packet (required, mini #60)
 
 Plan output must bind contract identity + digest, scenario→task coverage,

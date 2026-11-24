@@ -78,12 +78,10 @@ When all steps are complete, emit:
 Completed kbd-reflect — <phase-name> (step N of T)
 ```
 
-**How to get N and T (MANDATORY — never estimate):** read
-`completion.implementation.completed`/`.total` from `progress.json` via
-`implementationCompleted(progress)`/`implementationTotal(progress)`
-(`lib/kbd/progress.mjs`), falling back to `current-waypoint.json`'s
-`implementationCompleted`/`implementationTotal` when `progress.json` is
-absent.
+**How to get N and T:** use the phase-scoped `taskCounts.runtime.completed` and `.total` in the JSON
+report from `boss-mini kbd-apply.mjs reconcile <phase> --json`. Include
+the progress projection and backend counts where they disagree. For a legacy
+project without runtime state, label its counts as projection-only.
 
 Use the canonical phase name from the argument or `current-waypoint.json`. Emit to plain response text — no tool call needed.
 
@@ -115,54 +113,17 @@ Use the canonical phase name from the argument or `current-waypoint.json`. Emit 
 
 ## Hook integration
 
-`/kbd-reflect` is the canonical *phase-end* boundary. After the reflection
-report is written, fire `reflect:after`, then immediately fire `phase:after`
-for the closing phase, via `hooksFire('reflect'|'phase', 'before'|'after', name, index, total, ctx)`
-from `lib/kbd/hooks.mjs`. `phase:before` for the *next* phase is fired when a
-new phase is started, not here.
-
-The bottleneck-guard evaluation (`evaluateBottleneck`/`isBottleneckActive` from
-`lib/kbd/bottleneck-guard.mjs`) and any phase-transition write both need to
-succeed before `phase:after` fires — this ordering prevents a rejected or
-partial reflection from producing a completion memory record. When the guard
-is active, **only status 0 is success**: status 2 means the guard evaluation
-itself was unavailable, which is a BLOCKED-class result — it must abort the
-transition, never count as a passing guard (mini #59):
-
-```js
-import { hooksFire } from '../../lib/kbd/hooks.mjs';
-import { isBottleneckActive, evaluateBottleneck } from '../../lib/kbd/bottleneck-guard.mjs';
-
-await hooksFire('reflect', 'before', phase, 1, 1, { orchestratorRoot, cwd, runCommand });
-// … write reflection.md …
-await hooksFire('reflect', 'after', phase, 1, 1, { orchestratorRoot, cwd, runCommand });
-
-const guardEnabled = isBottleneckActive(cwd);
-if (guardEnabled) {
-  const preTransition = evaluateBottleneck('phase', 'after', phase, true, { root: cwd });
-  // Guard status 2 (evaluation unavailable while active) is NOT success — abort.
-  if (preTransition.status !== 0) throw new Error(preTransition.stderr || `guard status ${preTransition.status}`);
-}
-
-// … for a contract-bound phase (`prometheus kbd phase disposition --id <phase>` reports
-//     contractBound: true) run `boss-mini kbd-phase-close-eval.mjs --phase <phase>`
-//     instead of any transition: only a PASS disposition closes it, and the runtime
-//     refuses `phase transition --status complete` for bound phases (mini #66). Exit 0 is
-//     CLOSED; 2/3 are recorded BLOCKED/FAIL refusals (the phase stays open); 5 is a writer
-//     failure; 6 means already closed under other evidence. Report it and stop.
-//     For an unbound legacy phase, record the transition to complete via the project's
-//     own phase-completion write path …
-
-if (guardEnabled) {
-  const postTransition = evaluateBottleneck('phase', 'after', phase, false, { root: cwd });
-  if (postTransition.status !== 0) throw new Error(postTransition.stderr || `guard status ${postTransition.status}`);
-}
-
-await hooksFire('phase', 'after', phase, 1, 1, { orchestratorRoot, cwd, runCommand }); // canonical phase-end boundary
-```
-
-See the parent `kbd-process-orchestrator` skill's "Hooks" section for taxonomy
-and payload.
+After the execute handoff and reflection review have been accepted, run the
+installed package's `node <pack-root>/scripts/kbd-reflection-finalize.mjs
+--phase <id> --accepted` from the consumer project. This executable writes
+accepted reflection lessons and dispatches phase completion after canonical
+closure. Retry the same command to complete pending actions. For a signed
+operator exit, supply `--superseded <manifest> --signature <signature>` to
+the evaluator. Read its canonical closure packet before writing the reflection.
+In the goal table show each exercised verdict, withdrawal destination, budget
+basis and explicit limits. Put only withdrawn work assigned to the proposed
+successor into Next Phase Seed. Keep the terminal token visible, including
+`CLOSED_UNMET` for an exit with no exercised evidence.
 
 ## Stage gate & handoff
 

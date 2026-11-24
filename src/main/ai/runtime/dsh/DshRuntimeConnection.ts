@@ -18,11 +18,14 @@ import {
 } from '@cherrystudio/dsh-bridge'
 import { loggerService } from '@logger'
 import { ensureAgentDataDirectory } from '@main/ai/agents/agentDataDirectory'
-import { resolveAgentCapabilities, resolveMountedMcpServers } from '@main/ai/agents/builtin/builtinAgentCapabilities'
+import {
+  resolveAgentCapabilities,
+  resolveAgentMcpToolExposure,
+  resolveMountedMcpServers
+} from '@main/ai/agents/builtin/builtinAgentCapabilities'
+import { buildAgentPrompt } from '@main/ai/agents/prompt/buildAgentPrompt'
 import { buildAgentMcpServers } from '@main/ai/runtime/agentMcpServers'
-import { buildAgentRuntimePrompt } from '@main/ai/runtime/agentPrompt'
 import { buildAgentUserContent } from '@main/ai/runtime/agentUserContent'
-import { buildCitationsGuidance } from '@main/ai/runtime/citationsGuidance'
 import { wrapSteerReminder } from '@main/ai/steerReminder'
 import { getAutoApprovedBrowserTools, resolveBrowserToolPermission } from '@main/ai/toolApproval/browserToolPolicy'
 import { toolApprovalRegistry } from '@main/ai/toolApproval/ToolApprovalRegistry'
@@ -31,12 +34,6 @@ import { chatErrorContext } from '@main/ai/utils/chatErrorContext'
 import { resolveKnowledgeBaseScope } from '@main/ai/utils/knowledgeScope'
 import { mergeBinaryExecutionEnv } from '@main/utils/binaryEnv'
 import { getPathFromEnvironment, getShellEnv } from '@main/utils/shellEnv'
-import {
-  KB_READ_TOOL_NAME,
-  KB_SEARCH_TOOL_NAME,
-  WEB_FETCH_TOOL_NAME,
-  WEB_SEARCH_TOOL_NAME
-} from '@shared/ai/builtinTools'
 import { type DshBuiltinToolDescriptor, getDshRuntimeBuiltinTools } from '@shared/ai/dshBuiltinTools'
 import type { AgentPermissionMode } from '@shared/data/api/schemas/agents'
 import type { UniqueModelId } from '@shared/data/types/model'
@@ -338,19 +335,16 @@ export class DshRuntimeConnection implements AgentRuntimeConnection {
     const toolResultRoot = path.join(this.agentDataPath, 'tool-results', 'v1', 'objects')
 
     const knowledgeBaseScope = resolveKnowledgeBaseScope(agent.knowledgeBaseIds, this.input.knowledgeBaseIds)
-    const isToolEnabled = (serverName: string, toolName: string) =>
-      !this.disabledTools.has(buildDshCherryToolName(serverName, toolName))
-    const citationsGuidance = buildCitationsGuidance({
-      web: isToolEnabled('cherry-tools', WEB_SEARCH_TOOL_NAME) || isToolEnabled('cherry-tools', WEB_FETCH_TOOL_NAME),
-      kb:
-        (resolveAgentCapabilities(agent).allKnowledgeBases || knowledgeBaseScope.length > 0) &&
-        (isToolEnabled('cherry-tools', KB_SEARCH_TOOL_NAME) || isToolEnabled('cherry-tools', KB_READ_TOOL_NAME))
-    })
-    const prompt = await buildAgentRuntimePrompt({
+    const { allowsTool } = resolveAgentMcpToolExposure(agent, { channelLinked: snapshot.linkedChannel !== null })
+    const prompt = await buildAgentPrompt({
       workspacePath,
       agentDataPath: this.agentDataPath,
       agent,
-      citationsGuidance,
+      referenceTool: (server, tool) => {
+        const name = buildDshCherryToolName(server, tool)
+        return allowsTool(server, tool) && !this.disabledTools.has(name) ? `\`${name}\`` : undefined
+      },
+      includeKnowledgeCitations: resolveAgentCapabilities(agent).allKnowledgeBases || knowledgeBaseScope.length > 0,
       effectiveLanguage: snapshot.effectiveLanguage,
       // Compensates a custom base for the workspace context the native base owns (claude parity).
       customBaseContext: [

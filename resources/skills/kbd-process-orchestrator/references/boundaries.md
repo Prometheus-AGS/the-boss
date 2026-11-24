@@ -6,10 +6,13 @@ here and defines none of its own. VLBV is the method for every phase (see
 `method-context.md`); a signed `KBD-METHOD` deviation may name another execution
 cadence for one phase, and the closure packet discloses it.
 
-Generated code executes at **B4**, once, and — only after an authorized repair —
-at **B5**. Nowhere else. Editor/LSP diagnostics read while writing code are static
-reading, not execution. There is no compiler exception: a compiler check during
-generation is execution of generated code.
+Product acceptance executes at **B4** once, then only at **B5** for an admitted
+affected repair. Early static runner, fixture, selector/step mapping and oracle
+review, source inspection, and editor/LSP diagnostics are developer feedback,
+not an execution or acceptance event. A compiler, test, build, or validator
+that runs generated code requires the applicable adopted cadence and explicit
+admission; only a signed method decision can specify another execution cadence.
+A tier label, hook, marker, or clock never confers authority.
 
 `<pack-root>` below is the installed mini pack root (the directory holding
 `scripts/` and `lib/`). Every command is a Node ESM entry point run as
@@ -22,7 +25,7 @@ generation is execution of generated code.
 | B2 | Change end | Last task of a change | Record implementation complete; `openspec validate --strict` through the managed runner (a static check of spec documents only) | Refiner, adversarial review, OpenSpec verify, archive, tests, build |
 | B3 | Checkpoint | Cadence tick, time limit, compaction, pause, harness handoff | Save state, stop admitting new scope, write the handoff | Any execution; refreshing the pack or OpenSpec |
 | B4 | Value-phase boundary | All planned production complete, contract amended to `implementationComplete`, separate current authority | The boundary packet, once, in order (below) | Commands outside the packet; retries |
-| B5 | Repair boundary | B4 produced FAIL and the owner authorizes a bounded repair within `budgets.repairAttempts` | Complete the agreed repair, then rerun only the affected scenarios and their negative controls; invalidate affected evidence | New scope; weakening an oracle without a signed amendment |
+| B5 | Repair boundary | An attempt is recorded and the current owner-bound contract and admission cover a bounded repair within `budgets.repairAttempts` | Complete the agreed repair, then rerun only the affected scenarios and their negative controls; invalidate affected evidence | New scope; weakening an oracle without a signed amendment |
 | B6 | Release and publication | Phase CLOSED and release authority given | Delivery-cadence publication procedures | Treating publication as acceptance |
 
 ## The B4 sequence
@@ -61,8 +64,16 @@ One normative sequence. `kbd-execute`, `value-scenario-verify`, `delivery-cadenc
 8. **Reflect.** Plan-versus-outcome differences and contract-accuracy metrics
    (`kbd-reflect`).
 
-If step 3 yields any FAIL, steps 5–7 do not run: the owner either authorizes B5 or
-closes the phase unmet. A later green receipt never overwrites an earlier failure.
+If a valid product oracle reports the required outcome unmet, record FAIL. A
+broken runner, fixture, environment or unusable oracle is BLOCKED; record
+unexecuted cases as NOT_EXERCISED. Neither can yield accepted closure. For a
+harness-only defect, preserve the original receipt and consumption and use only
+the existing signed recovery/admission for the affected check and unexercised
+required cases. Retain an unaffected receipt and identical build artifact only
+if its bound source, build, configuration, runtime, fixture and oracle inputs still
+match. A fixture typo alone is not cause for a full rebuild or retest. Where no
+supported recovery is admitted, stop and report the exact blocker. A later
+green receipt never overwrites an earlier attempt.
 
 ## Closure states
 

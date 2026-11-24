@@ -24,7 +24,7 @@ files:
   - "!**/node_modules/@anthropic-ai/claude-agent-sdk-*/**" # ClaudeCodeBinaryService downloads the native runtime on demand
   - "!**/{.vscode,.yarn,.yarn-lock,.github,.cursorrules,.prettierrc}"
   - "!electron.vite.config.{js,ts,mjs,cjs}}"
-  - "!electron-builder.cn.config.cjs"
+  - "!electron-builder.*.config.cjs"
   - "!release-bundle.json"
   - "!electron.vite.entries.config.ts"
   - "!.*"
@@ -244,12 +244,12 @@ artifactBuildCompleted: scripts/packaging/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    The Boss 2.2.51
-    - Includes Prometheus Mini Skills 1.18.2. Review existing project instructions without changing files, then preview and explicitly approve the exact update.
-    - Keep existing project rules and managed sections. Start planning and verification from what the user needs the software to do.
+    The Boss 2.2.52
+    - Merge Cherry Studio 2.2.3 and subsequent upstream fixes.
+    - Bundle UAR 1.4.0-rc.6 and Prometheus Mini Skills 1.21.0.
 
     <!--LANG:zh-CN-->
-    The Boss 2.2.51
-    - 内置 Prometheus Mini Skills 1.18.2。无需修改文件即可检查现有项目指令，之后可预览并明确批准具体更新。
-    - 保留现有项目规则和受管理的区块；从用户需要软件实现的目标出发进行规划和验证。
+    The Boss 2.2.52
+    - 合并 Cherry Studio 2.2.3 及后续上游修复。
+    - 内置 UAR 1.4.0-rc.6 和 Prometheus Mini Skills 1.21.0。
     <!--LANG:END-->
