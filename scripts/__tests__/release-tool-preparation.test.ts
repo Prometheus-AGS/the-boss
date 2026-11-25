@@ -103,16 +103,21 @@ describe('release tool preparation', () => {
       const check = preflight.run.split('\n').find((line: string) => line.includes('PACKAGING_DOWNLOAD_VERSION'))
       const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'tool-interface-'))
       try {
-        const scripts = path.join(directory, sourcePath, 'scripts')
-        fs.mkdirSync(path.join(scripts, 'release'), { recursive: true })
-        fs.copyFileSync(
-          path.resolve(import.meta.dirname, '../download-binaries.js'),
-          path.join(scripts, 'download-binaries.js')
-        )
-        fs.copyFileSync(
-          path.resolve(import.meta.dirname, '../release/prepare-tools.js'),
-          path.join(scripts, 'release/prepare-tools.js')
-        )
+        const source = path.join(directory, sourcePath)
+        for (const file of [
+          'scripts/download-binaries.js',
+          'scripts/integration-binaries.js',
+          'scripts/release-profile.cjs',
+          'scripts/release/prepare-tools.js',
+          'build/integration-artifacts.json',
+          'build/integration-sources.json',
+          'build/customer-release-targets.json',
+          'package.json'
+        ]) {
+          const target = path.join(source, file)
+          fs.mkdirSync(path.dirname(target), { recursive: true })
+          fs.copyFileSync(path.resolve(import.meta.dirname, '../..', file), target)
+        }
         const result = spawnSync('bash', ['-c', check], { cwd: directory, encoding: 'utf8' })
         expect(result.status, result.stderr).toBe(0)
       } finally {

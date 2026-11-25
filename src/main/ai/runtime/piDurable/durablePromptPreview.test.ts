@@ -22,6 +22,7 @@ import type {
   AgentSystemPromptDraft,
   AgentSystemPromptPreview
 } from '@shared/ipc/schemas/agent'
+import { PRODUCT_NAME } from '@shared/utils/branding'
 
 import { previewAgentSystemPrompt, resolveAgentPromptInstructions } from '../agentPromptPreview'
 import { loadPiSdk } from '../pi/piSdk'
@@ -453,7 +454,7 @@ describe('previewAgentSystemPrompt', () => {
 
     const preview = await previewAgentSystemPrompt(draft({ agentId: id, instructions: '' }))
 
-    expect(preview.builtinInstructions).toContain('Cherry')
+    expect(preview.builtinInstructions).toContain(PRODUCT_NAME)
   })
 
   it('rejects an Agent that does not exist', async () => {

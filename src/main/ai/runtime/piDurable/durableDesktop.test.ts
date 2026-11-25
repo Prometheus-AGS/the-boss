@@ -48,6 +48,9 @@ describe('Pi Durable desktop tools of a user Agent', () => {
       return getPath(key, file)
     })
     MockApplicationUtils.setService('McpCatalogService', { listTools: () => [] })
+    MockApplicationUtils.setService('PrometheusIntegrationService', {
+      resolveSession: async (session: unknown, agent: unknown) => ({ session, agent })
+    })
     MockApplicationUtils.setService('ApiGatewayService', { getInternalGatewayOrigin: () => undefined })
     MockApplicationUtils.setService('AgentSessionRuntimeService', {
       getInteractionState: () => ({ currentTurn: 'interactive', userResponse: 'stream' }),
