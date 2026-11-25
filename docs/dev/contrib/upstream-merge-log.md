@@ -11,6 +11,15 @@ What each merge actually hit. Rules belong in [the playbook](./upstream-merges.m
 this page is history and carry-over. Newest entry first. The `upstream-merge` skill
 appends here as its last step.
 
+## 2026-11-24 — upstream v2.2.3 (`514d3cb0ef`)
+
+- **Taken:** 164 upstream commits after reconciling local main with the published Boss 2.2.51 tree. The local candidate is The Boss 2.2.52.
+- **Conflicts:** retained the Boss packaging and release identity, regenerated the lockfile with matching Claude SDK binaries, and combined upstream agent creation, MCP skills, task reuse, and follow-up changes with fork-specific runtime and workspace behavior. Corrected DSH callers affected by moved prompt and skill APIs. Preserved UAR model assignment in the new agent profile.
+- **Channel permissions:** restricted per-turn channel overrides to runtimes that apply them. UAR and DSH channels inherit the agent mode. Stored unsupported overrides now fail explicitly before dispatch. Withheld Agent configuration tools on UAR and DSH because their bridges cannot apply approved replacement input.
+- **Locales:** merged both catalogs by key. Korean keeps the upstream translations with English fallback for Boss-specific strings, consistent with the earlier Czech merge.
+- **Integrations:** imported the three published UAR 1.4.0-rc.6 desktop payload records from `84840af1eb`. Pinned Mini Skills 1.21.0 at `fe31b83b49` and regenerated the skill mirror. The Surreal Memory Server source and image digest already match the current published Boss pins.
+- **Gate:** `pnpm build:mac:arm64` passed, including DMG verification, the mounted application signature, and the packaged UAR integrity check. The local DMG is Developer ID signed and unnotarized. All 205 focused tests passed. Source lint reported zero errors after excluding generated and local artifacts. Documentation, translation coverage, and Mini mirror checks passed.
+
 ## 2026-11-17 — upstream v2.2.2 (`1355ed53c3`)
 
 - **Taken:** 56 upstream commits through `1355ed53c3`, following reconciliation with the published Boss 2.2.49 source.

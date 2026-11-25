@@ -4,6 +4,7 @@ import { agentSessionService } from '@data/services/AgentSessionService'
 import { mcpServerService } from '@data/services/McpServerService'
 import { prepareAgentSessionWorkspaceDirectory } from '@main/ai/runtime/agentSessionWorkspace'
 import { listBuiltinToolPolicies } from '@main/ai/toolApproval/builtinToolPolicy'
+import { getAgentConfigToolKind } from '@shared/ai/agentConfigToolKind'
 import type { Tool } from '@shared/ai/tool'
 import type { AgentSessionEntity } from '@shared/data/api/schemas/agentSessions'
 
@@ -23,14 +24,16 @@ export class UarRuntimeDriver implements AgentSessionRuntimeDriver {
   }
 
   async listAvailableTools(mcpIds: string[]): Promise<Tool[]> {
-    const builtins: Tool[] = listBuiltinToolPolicies().map((tool) => ({
-      id: toUarToolName(`mcp__${tool.serverName}__${tool.toolName}`),
-      name: tool.toolName,
-      origin: 'builtin',
-      approval: tool.approval === 'auto' ? 'auto' : 'prompt',
-      sourceId: tool.serverName,
-      sourceName: tool.serverName
-    }))
+    const builtins: Tool[] = listBuiltinToolPolicies()
+      .filter((tool) => !getAgentConfigToolKind(tool.serverName, tool.toolName))
+      .map((tool) => ({
+        id: toUarToolName(`mcp__${tool.serverName}__${tool.toolName}`),
+        name: tool.toolName,
+        origin: 'builtin',
+        approval: tool.approval === 'auto' ? 'auto' : 'prompt',
+        sourceId: tool.serverName,
+        sourceName: tool.serverName
+      }))
     const catalog = application.get('McpCatalogService')
     const mcpTools: Tool[] = mcpIds.flatMap((idOrName) => {
       const server = mcpServerService.findByIdOrName(idOrName)

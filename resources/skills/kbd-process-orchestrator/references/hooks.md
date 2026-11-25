@@ -29,7 +29,7 @@ This normalization is implemented by `normalizeEvent(event)` in `lib/kbd/hooks.m
 
 **Discovery order** (highest precedence wins on override conflicts):
 
-1. **builtin** — `<orchestratorRoot>/hooks/hooks.json`
+1. **builtin** — the installed pack’s `lib/kbd/lifecycle-hooks.json`. An explicitly configured alternate orchestrator uses its own `hooks/hooks.json`
 2. **user** — `<orchestratorRoot>/hooks/user.json` (optional)
 3. **project** — `.kbd-orchestrator/hooks-config.json` (optional)
 
@@ -38,7 +38,7 @@ This normalization is implemented by `normalizeEvent(event)` in `lib/kbd/hooks.m
 
 **Mode field** — each entry declares `mode: augment` (default) or `mode: override`. Multiple overrides on the same `(kind, edge)` resolve to the entry from the highest layer; within a layer, last-loaded wins. `resolveOverrides` (internal to `lib/kbd/hooks.mjs`) implements this precedence; dispatch never aborts on a conflict.
 
-**Default reporter** — the built-in `report-progress` hook fires on every `*:*`. This port has no implicit stderr channel from a library function — a hook's outcome is visible in the JSONL log and `hooks-status.json` this call writes (see below), and the caller decides how/whether to surface it further. A project can replace the reporter wholesale with a single `mode: "override"` entry covering `"*:*"`.
+**Built-in actions** — accepted reflections persist attributed lessons. Terminal phase events record progress and refresh method context. Use the phase's hook log and status file to diagnose an action failure, then retry the owning entry point.
 
 > **Guarantee vs. extension (read this).** A hook firing is **not** what the
 > user sees each turn. The user-facing guarantee is the **plain-text Progress

@@ -1,5 +1,9 @@
 [
   {
+    "version": "2.2.52",
+    "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.52\n- Merge Cherry Studio 2.2.3 and subsequent upstream fixes.\n- Bundle UAR 1.4.0-rc.6 and Prometheus Mini Skills 1.21.0.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.52\n- 合并 Cherry Studio 2.2.3 及后续上游修复。\n- 内置 UAR 1.4.0-rc.6 和 Prometheus Mini Skills 1.21.0。\n<!--LANG:END-->"
+  },
+  {
     "version": "2.2.51",
     "releaseNotes": "<!--LANG:en-->\nThe Boss 2.2.51\n- Includes Prometheus Mini Skills 1.18.2. Review existing project instructions without changing files, then preview and explicitly approve the exact update.\n- Keep existing project rules and managed sections. Start planning and verification from what the user needs the software to do.\n\n<!--LANG:zh-CN-->\nThe Boss 2.2.51\n- 内置 Prometheus Mini Skills 1.18.2。无需修改文件即可检查现有项目指令，之后可预览并明确批准具体更新。\n- 保留现有项目规则和受管理的区块；从用户需要软件实现的目标出发进行规划和验证。\n<!--LANG:END-->"
   },

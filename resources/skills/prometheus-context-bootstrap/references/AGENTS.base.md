@@ -36,20 +36,17 @@ summary or next-command.
   test-first workflow skills and over conflicting per-edit, unit-first or
   mock-first prose elsewhere. Report the stale prose for manual cleanup; do not
   follow both policies. Never edit generated `openspec-*` skills.
-- Adopt the phase's acceptance scenarios before generation. Write the whole agreed
-  increment without executing generated code: no tests, builds, compiler checks,
-  imports, lint, typecheck, verification hooks or probes. Editor/LSP diagnostics
-  are reading. Tasks, hours, commits, reviews and compiler problems are not
-  boundaries.
-- At the value-phase boundary (B4) the adopted boundary packet runs once:
-  one integration flow through the real production entry point and collaborators.
-  After a FAIL, only an owner-authorized repair (B5) reruns, and only the affected
-  checks. Verdicts: PASS, FAIL, BLOCKED, NOT_EXERCISED. A deviation is a signed
-  `KBD-METHOD` decision disclosed in the closure packet.
-- If the harness provides an agent team, keep reviewer, auditor, verifier, and
-  integration-checker roles dormant until B4. Unit, mock-only, filtered-function,
-  snapshot, and per-edit tests are not evidence. Report only commands and results
-  actually observed, and the boundary they ran at.
+- Before generation, adopt the smallest useful phase from the user's Origin/Before
+  story. Preflight runner, fixtures, step mapping, prerequisites and oracles
+  statically; reading editor/LSP diagnostics is not execution. Executable feedback
+  needs exact method, cadence and authority. No task, clock, tier or reviewer
+  creates authority or acceptance.
+- Run the adopted B4 packet once: one integration flow through the real production
+  entry point and collaborators, with negatives that protect the outcome. Preserve
+  required release checks. A harness defect is BLOCKED, not product FAIL; unrun
+  cases are NOT_EXERCISED. Preserve original and unaffected evidence; repair only
+  affected checks through existing owner-bound authority. No automatic rebuild,
+  replay or budget reset. Report actual evidence and limits.
 
 ### Position and authority
 

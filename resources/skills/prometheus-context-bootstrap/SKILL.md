@@ -37,10 +37,11 @@ retired, no cadence exception, execution only at B4 — the boundary packet, onc
 or B5, an owner-authorized repair rerunning only affected checks), a first-action
 recovery protocol that works without hooks, and precedence over built-in TDD,
 verify and apply workflow skills. `CLAUDE.md` imports `@AGENTS.md`, so Claude
-Code reads the same policy. When the harness provides an agent team, review,
-audit, verification, and integration-checker roles remain dormant until B4. Unit,
-mock-only, filtered-function, and per-edit test loops do not count as proof.
-Boundaries are defined in `kbd-process-orchestrator/references/boundaries.md`.
+Code reads the same policy. Static runner/fixture review is early developer
+feedback, not acceptance. Keep executable feedback within the exact admitted
+cadence, and cumulative formal review at B4. Unit, mock-only, filtered-function,
+and per-edit test loops do not count as proof. See
+`kbd-process-orchestrator/references/boundaries.md` for the controlling cadence.
 
 ## Selected method and phase authority
 
@@ -96,6 +97,12 @@ as `STALE` for manual cleanup and never rewritten.
 Use `--dry-run` to print the complete write plan without changing files. If
 `--stacks` is absent, a root `Cargo.toml` selects Rust and a root `package.json`
 selects TypeScript.
+
+Bootstrap does not install, migrate, remove or neutralize project-local hooks.
+An existing local Stop or command hook can remain effective after a refresh.
+If it loops or rejects an admitted command, identify the actual hook owner and
+reason; report the conflict and use the normal reviewed repair path. A rule
+marker, comment, or toggle is not execution authority.
 
 ## Maintain instructions in an existing project
 

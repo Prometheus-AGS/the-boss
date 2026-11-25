@@ -398,6 +398,19 @@ describe('AgentChatContextProvider', () => {
     )
   })
 
+  // Without it, a busy Enter in a Pi Durable session would steer the running turn.
+  it('forwards the follow-up intent when busy dispatch enqueues a message', async () => {
+    mocks.runtimeIsSessionBusy.mockReturnValue(true)
+
+    await provider.prepareDispatch(makeSubscriber(), openReq({ followUp: true }))
+
+    expect(mocks.runtimeEnqueueUserMessage).toHaveBeenCalledWith(
+      'session-1',
+      expect.anything(),
+      expect.objectContaining({ followUp: true })
+    )
+  })
+
   it.each([
     ['an explicit empty recipient set', [] as const, []],
     ['an explicit recipient set', [{ id: 'ch1', type: 'telegram' }] as const, [{ id: 'ch1', type: 'telegram' }]],
@@ -549,6 +562,23 @@ describe('AgentChatContextProvider', () => {
       else expect(mocks.setEditRuntimeTx).not.toHaveBeenCalled()
     }
   )
+
+  it.each(['uar', 'dsh'] as const)('rejects a stored channel override before dispatch to %s', async (type) => {
+    mocks.getAgent.mockReturnValue({
+      id: 'agent-1',
+      name: 'My Agent',
+      type,
+      model: 'anthropic::claude-sonnet',
+      configuration: { permission_mode: 'acceptEdits' }
+    })
+
+    await expect(
+      provider.prepareAgentSessionDispatch(makeSubscriber(), openReq({ headless: true }), {
+        permissionModeOverride: 'plan'
+      })
+    ).rejects.toThrow(/permission mode is not supported/)
+    expect(mocks.runtimeBeginTurn).not.toHaveBeenCalled()
+  })
 
   it('keeps headless scheduled runs on the agent default model', async () => {
     mocks.getSession.mockReturnValue({
